@@ -1,5 +1,5 @@
 from AnilistPython import Anilist
-from result import Metadata, Result
+from result import Metadata, DataResult
 
 class metadata():
     name: str = None
@@ -8,7 +8,7 @@ class metadata():
     def __init__(self, name) -> None:
         self.name = name
     
-    def lookup(self) -> Result:
+    def lookup(self) -> DataResult:
         """"""
         try:
             result = self.anilist.get_anime(self.name)
@@ -24,10 +24,10 @@ class metadata():
             else:
                 meta.type = 'serie'
             meta.genres = result.get('genres', [])
-            return Result("SUCCESS", None, meta)
+            return DataResult("SUCCESS", None, meta)
 
         except IndexError as ingore:
-            return Result(statusType="IGNORE", errorMessage=f"No result for {self.name}")
+            return DataResult(statusType="IGNORE", errorMessage=f"No result for {self.name}")
         except Exception as e:
-            return Result(statusType="ERROR", errorMessage=str(e))
+            return DataResult(statusType="ERROR", errorMessage=str(e))
             

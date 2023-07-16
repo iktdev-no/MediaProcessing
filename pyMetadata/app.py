@@ -4,7 +4,7 @@ import threading
 import json
 from kafka import KafkaConsumer, KafkaProducer
 from fuzzywuzzy import fuzz
-from sources.result import Result, Metadata
+from sources.result import DataResult, Metadata
 from sources.anii import metadata as AniiMetadata
 from sources.imdb import metadata as ImdbMetadata
 
@@ -103,7 +103,7 @@ class MessageHandlerThread(threading.Thread):
                 producer.send(kafka_topic, key="event:metadata:obtained", value=result_json)
                 producer.close()
 
-    def perform_action(self, title) -> Result:
+    def perform_action(self, title) -> DataResult:
         anii = AniiMetadata(title)
         imdb = ImdbMetadata(title)
 
@@ -132,13 +132,13 @@ class MessageHandlerThread(threading.Thread):
 
         else:
             # Begge registrene feilet, håndter etter eget behov
-            most_likely_result = Result(statusType="ERROR", errorMessage="No Result")
+            most_likely_result = DataResult(statusType="ERROR", errorMessage="No Result")
 
         # Returner det mest sannsynlige resultatet
         return most_likely_result
 
     
-    def compose_message(self, referenceId: str, result: Result) -> ProducerDataValueSchema:
+    def compose_message(self, referenceId: str, result: DataResult) -> ProducerDataValueSchema:
         """"""
         return ProducerDataValueSchema(
             referenceId=referenceId,

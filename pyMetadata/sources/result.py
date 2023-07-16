@@ -11,7 +11,7 @@ class Metadata:
     genres: List[str]
 
 @dataclass
-class Result:
+class DataResult:
     statusType: str
     errorMessage: str
     data: Metadata

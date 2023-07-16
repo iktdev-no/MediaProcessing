@@ -1,5 +1,5 @@
 import imdb
-from result import Metadata, Result
+from result import Metadata, DataResult
 
 class metadata():
     name: str = None
@@ -9,7 +9,7 @@ class metadata():
         self.name = name
 
     
-    def lookup(self) -> Result:
+    def lookup(self) -> DataResult:
         """"""
         try:
             query = self.imdb.search_movie(self.name)
@@ -29,6 +29,6 @@ class metadata():
 
             meta.genres = result.get('genres', [])
             
-            return Result("SUCCESS", None, meta)
+            return DataResult("SUCCESS", None, meta)
         except Exception as e:
-            return Result(statusType="ERROR", errorMessage=str(e))
+            return DataResult(statusType="ERROR", errorMessage=str(e))
