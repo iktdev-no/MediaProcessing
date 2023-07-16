@@ -54,6 +54,11 @@ jobs:
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
         if: (steps.build-encode.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
@@ -97,6 +102,12 @@ jobs:
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
       - name: Build and push Docker image
         if: (steps.build-reader.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
@@ -135,6 +146,12 @@ jobs:
       - name: Generate Docker image tag
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
         if: (steps.build-pymetadata.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
