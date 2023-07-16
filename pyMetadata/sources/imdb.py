@@ -1,5 +1,5 @@
 import imdb
-from result import Metadata, DataResult
+from .result import Metadata, DataResult
 
 class metadata():
     name: str = None
