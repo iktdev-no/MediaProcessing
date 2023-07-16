@@ -63,7 +63,6 @@ jobs:
           tags: |
             bskjon/media-processing--encode:latest
             bskjon/media-processing--encode:${{ github.sha }}
-            bskjon/media-processing--encode:${{ github.ref }}
             bskjon/media-processing--encode:${{ steps.docker-tag.outputs.tag }}
 
   build-reader:
@@ -106,7 +105,6 @@ jobs:
           tags: |
             bskjon/media-processing--reader:latest
             bskjon/media-processing--reader:${{ github.sha }}
-            bskjon/media-processing--reader:${{ github.ref }}
             bskjon/media-processing--reader:${{ steps.docker-tag.outputs.tag }}
 
   build-pymetadata:
@@ -146,5 +144,4 @@ jobs:
           tags: |
             bskjon/media-processing--pymetadata:latest
             bskjon/media-processing--pymetadata:${{ github.sha }}
-            bskjon/media-processing--pymetadata:${{ github.ref }}
             bskjon/media-processing--pymetadata:${{ steps.docker-tag.outputs.tag }}
