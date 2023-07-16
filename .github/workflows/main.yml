@@ -25,8 +25,9 @@ jobs:
 
   build-encode:
     needs: build-commoncode
-    if: ${{ needs.build-commoncode.result == 'success' && (needs.build-commoncode.outputs.changed != 'CommonCode' || github.event_name == 'push') }}
     runs-on: ubuntu-latest
+
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout repository
@@ -44,6 +45,7 @@ jobs:
             ./gradlew build
           else
             echo "Encode has not changed. Skipping Encode module build."
+            exit 78 # Exit with a custom exit code to indicate skip
           fi
 
       - name: Generate Docker image tag
@@ -51,7 +53,6 @@ jobs:
         run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
 
       - name: Build and push Docker image
-        if: ${{ steps.check-encode.outputs.changed == 'Encode' || github.event_name == 'push' }}
         uses: docker/build-push-action@v2
         with:
           context: ./Encode
@@ -64,8 +65,9 @@ jobs:
 
   build-reader:
     needs: build-commoncode
-    if: ${{ needs.build-commoncode.result == 'success' && (needs.build-commoncode.outputs.changed != 'CommonCode' || github.event_name == 'push') }}
     runs-on: ubuntu-latest
+
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout repository
@@ -75,12 +77,6 @@ jobs:
         id: check-reader
         run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Reader)
         
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          username: ${{ secrets.DOCKER_HUB_NAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          
       - name: Build Reader module
         run: |
           if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ]; then
@@ -89,6 +85,7 @@ jobs:
             ./gradlew build
           else
             echo "Reader has not changed. Skipping Reader module build."
+            exit 78 # Exit with a custom exit code to indicate skip
           fi
 
       - name: Generate Docker image tag
@@ -96,7 +93,6 @@ jobs:
         run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
 
       - name: Build and push Docker image
-        if: ${{ steps.check-reader.outputs.changed == 'Reader' || github.event_name == 'push' }}
         uses: docker/build-push-action@v2
         with:
           context: ./Reader
@@ -108,7 +104,7 @@ jobs:
             bskjon/media-processing--reader:${{ steps.docker-tag.outputs.tag }}
 
   build-pymetadata:
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -119,12 +115,6 @@ jobs:
         id: check-pymetadata
         run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata)
         
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          username: ${{ secrets.DOCKER_HUB_NAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          
       - name: Build pyMetadata module
         run: |
           if [ "${{ steps.check-pymetadata.outputs.changed }}" == "pyMetadata" ] || [ "${{ github.event_name }}" == "push" ]; then
@@ -132,6 +122,7 @@ jobs:
             # Add the necessary build steps for your Python module here
           else
             echo "pyMetadata has not changed. Skipping pyMetadata module build."
+            exit 78 # Exit with a custom exit code to indicate skip
           fi
 
       - name: Generate Docker image tag
@@ -139,7 +130,6 @@ jobs:
         run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
 
       - name: Build and push Docker image
-        if: ${{ steps.check-pymetadata.outputs.changed == 'pyMetadata' || github.event_name == 'push' }}
         uses: docker/build-push-action@v2
         with:
           context: ./pyMetadata
