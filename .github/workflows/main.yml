@@ -1,0 +1,148 @@
+name: Build Modules
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-commoncode:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build CommonCode
+        run: |
+          cd CommonCode 
+          chmod +x ./gradlew
+          ./gradlew build
+
+  build-encode:
+    needs: build-commoncode
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if Encode has changed
+        id: check-encode
+        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Encode)
+
+      - name: Build Encode module
+        id: build-encode
+        run: |
+          if [ "${{ steps.check-encode.outputs.changed }}" == "Encode" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            cd Encode
+            chmod +x ./gradlew
+            ./gradlew build
+            echo "Build completed"
+          else
+            echo "Encode has not changed. Skipping Encode module build."
+            echo "::set-output name=job_skipped::true"
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+
+      - name: Build and push Docker image
+        if: steps.build-encode.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v2
+        with:
+          context: ./Encode
+          push: true
+          tags: |
+            bskjon/media-processing--encode:latest
+            bskjon/media-processing--encode:${{ github.sha }}
+            bskjon/media-processing--encode:${{ steps.docker-tag.outputs.tag }}
+
+  build-reader:
+    needs: build-commoncode
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if Reader has changed
+        id: check-reader
+        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Reader)
+        
+      - name: Build Reader module
+        id: build-reader
+        run: |
+          if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            cd Reader
+            chmod +x ./gradlew
+            ./gradlew build
+            echo "Build completed"
+          else
+            echo "Reader has not changed. Skipping Reader module build."
+            echo "::set-output name=job_skipped::true"
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Build and push Docker image
+        if: steps.build-reader.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v2
+        with:
+          context: ./Reader
+          push: true
+          tags: |
+            bskjon/media-processing--reader:latest
+            bskjon/media-processing--reader:${{ github.sha }}
+            bskjon/media-processing--reader:${{ steps.docker-tag.outputs.tag }}
+
+  build-pymetadata:
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if pyMetadata has changed
+        id: check-pymetadata
+        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata)
+        
+      - name: Build pyMetadata module
+        id: build-pymetadata
+        run: |
+          if [ "${{ steps.check-pymetadata.outputs.changed }}" == "pyMetadata" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            cd pyMetadata
+            # Add the necessary build steps for your Python module here
+            echo "Build completed"
+          else
+            echo "pyMetadata has not changed. Skipping pyMetadata module build."
+            echo "::set-output name=job_skipped::true"
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Build and push Docker image
+        if: steps.build-pymetadata.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v2
+        with:
+          context: ./pyMetadata
+          push: true
+          tags: |
+            bskjon/media-processing--pymetadata:latest
+            bskjon/media-processing--pymetadata:${{ github.sha }}
+            bskjon/media-processing--pymetadata:${{ steps.docker-tag.outputs.tag }}
