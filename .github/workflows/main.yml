@@ -52,7 +52,8 @@ jobs:
 
       - name: Generate Docker image tag
         id: docker-tag
-        run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
 
       - name: Build and push Docker image
         if: steps.build-encode.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
@@ -94,7 +95,7 @@ jobs:
 
       - name: Generate Docker image tag
         id: docker-tag
-        run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Build and push Docker image
         if: steps.build-reader.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
@@ -133,7 +134,7 @@ jobs:
 
       - name: Generate Docker image tag
         id: docker-tag
-        run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Build and push Docker image
         if: steps.build-pymetadata.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
