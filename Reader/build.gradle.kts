@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
+
 plugins {
     kotlin("jvm") version "1.8.21"
     id("org.springframework.boot") version "2.5.5"
@@ -5,6 +7,7 @@ plugins {
     kotlin("plugin.spring") version "1.5.31"
 }
 
+archivesName.set("reader.jar")
 group = "no.iktdev.streamit.content"
 version = "1.0-SNAPSHOT"
 
