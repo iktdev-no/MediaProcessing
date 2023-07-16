@@ -57,7 +57,7 @@ class PreferenceReader {
 
 
     fun readPreference(): String? {
-        val prefFile = File(ReaderEnv.encodePreference)
+        val prefFile = ReaderEnv.encodePreference
         if (!prefFile.exists()) {
             LoggerFactory.getLogger(javaClass.simpleName).info("Preference file: ${prefFile.absolutePath} does not exists...")
             LoggerFactory.getLogger(javaClass.simpleName).info("Using default configuration")
