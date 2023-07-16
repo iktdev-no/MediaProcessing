@@ -18,7 +18,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build CommonCode
-        run: cd CommonCode && ./gradlew build
+        run: |
+          cd CommonCode 
+          chmod +x ./gradlew
+          ./gradlew build
 
   build-encode:
     needs: build-commoncode
@@ -37,6 +40,7 @@ jobs:
         run: |
           if [ "${{ steps.check-encode.outputs.changed }}" == "Encode" ] || [ "${{ github.event_name }}" == "push" ]; then
             cd Encode
+            chmod +x ./gradlew
             ./gradlew build
           else
             echo "Encode has not changed. Skipping Encode module build."
@@ -81,6 +85,7 @@ jobs:
         run: |
           if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ]; then
             cd Reader
+            chmod +x ./gradlew
             ./gradlew build
           else
             echo "Reader has not changed. Skipping Reader module build."
