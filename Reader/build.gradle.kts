@@ -47,3 +47,8 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.bootJar {
+    archiveFileName.set("reader.jar")
+    launchScript()
+}
