@@ -35,7 +35,7 @@ class EncodeStreamsMessageParser {
             val streamObject = streamJson.asJsonObject
 
             val codecType = streamObject.get("codec_type").asString
-            if (streamObject.get("codec_name").asString == "mjpeg") {
+            if (streamObject.has("codec_name") && streamObject.get("codec_name").asString == "mjpeg") {
                 null
             } else {
                 when (codecType) {
