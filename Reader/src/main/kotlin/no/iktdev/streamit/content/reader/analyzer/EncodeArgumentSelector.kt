@@ -11,19 +11,19 @@ import no.iktdev.streamit.content.reader.analyzer.encoding.VideoEncodeArguments
 import no.iktdev.streamit.content.reader.preference
 
 class EncodeArgumentSelector(val inputFile: String, val streams: MediaStreams, val outFileName: String) {
-    var defaultSelectedVideo: VideoStream? = getDefaultSelectedVideo()
-    var defaultSelectedAudio: AudioStream? = getDefaultSelectedAudio()
+    var defaultSelectedVideo: VideoStream? = defaultSelectedVideo()
+    var defaultSelectedAudio: AudioStream? = defaultSelectedAudio()
 
-    private fun getAudioStreams() = streams.streams.filterIsInstance<AudioStream>()
-    private fun getVideoStreams() = streams.streams.filterIsInstance<VideoStream>()
+    private fun obtainAudioStreams() = streams.streams.filterIsInstance<AudioStream>()
+    private fun obtainVideoStreams() = streams.streams.filterIsInstance<VideoStream>()
 
 
-    private fun getDefaultSelectedVideo(): VideoStream? {
-        return getVideoStreams().filter { (it.duration_ts ?: 0) > 0 }.maxByOrNull { it.duration_ts!! } ?: getVideoStreams().minByOrNull { it.index }
+    private fun defaultSelectedVideo(): VideoStream? {
+        return obtainVideoStreams().filter { (it.duration_ts ?: 0) > 0 }.maxByOrNull { it.duration_ts!! } ?: obtainVideoStreams().minByOrNull { it.index }
     }
 
-    private fun getDefaultSelectedAudio(): AudioStream? {
-        return getAudioStreams().filter { (it.duration_ts ?: 0) > 0 }.maxByOrNull { it.duration_ts!! } ?: getAudioStreams().minByOrNull { it.index }
+    private fun defaultSelectedAudio(): AudioStream? {
+        return obtainAudioStreams().filter { (it.duration_ts ?: 0) > 0 }.maxByOrNull { it.duration_ts!! } ?: obtainAudioStreams().minByOrNull { it.index }
     }
 
     /**
@@ -37,7 +37,7 @@ class EncodeArgumentSelector(val inputFile: String, val streams: MediaStreams, v
      * @return AudioStrem based on preference or defaultSelectedAudio
      */
     private fun getSelectedAudioBasedOnPreference(): AudioStream? {
-        val languageFiltered = getAudioStreams().filter { it.tags.language == preference.audio.language }
+        val languageFiltered = obtainAudioStreams().filter { it.tags.language == preference.audio.language }
         val channeledAndCodec = languageFiltered.find { it.channels >= (preference.audio.channels ?: 2) && it.codec_name == preference.audio.codec.lowercase() }
         return channeledAndCodec ?: return languageFiltered.minByOrNull { it.index } ?: defaultSelectedAudio
     }
