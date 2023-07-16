@@ -35,12 +35,17 @@ jobs:
 
       - name: Check if Encode has changed
         id: check-encode
-        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Encode)
+        run: |
+          if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Encode/) ]]; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
 
       - name: Build Encode module
         id: build-encode
         run: |
-          if [ "${{ steps.check-encode.outputs.changed }}" == "Encode" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [[ "${{ steps.check-encode.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             cd Encode
             chmod +x ./gradlew
             ./gradlew build
@@ -83,12 +88,17 @@ jobs:
 
       - name: Check if Reader has changed
         id: check-reader
-        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Reader)
-        
+        run: |
+          if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Reader/) ]]; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
+
       - name: Build Reader module
         id: build-reader
         run: |
-          if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [[ "${{ steps.check-reader.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             cd Reader
             chmod +x ./gradlew
             ./gradlew build
@@ -129,12 +139,17 @@ jobs:
 
       - name: Check if pyMetadata has changed
         id: check-pymetadata
-        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata)
-        
+        run: |
+          if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata/) ]]; then
+            echo "::set-output name=changed::true"
+          else
+            echo "::set-output name=changed::false"
+          fi
+
       - name: Build pyMetadata module
         id: build-pymetadata
         run: |
-          if [ "${{ steps.check-pymetadata.outputs.changed }}" == "pyMetadata" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [[ "${{ steps.check-pymetadata.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             cd pyMetadata
             # Add the necessary build steps for your Python module here
             echo "Build completed"

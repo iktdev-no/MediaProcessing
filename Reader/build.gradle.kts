@@ -55,3 +55,8 @@ tasks.bootJar {
     archiveFileName.set("reader.jar")
     launchScript()
 }
+
+tasks.jar {
+    archivesName.set("reader.jar")
+    archiveBaseName.set("reader")
+}
