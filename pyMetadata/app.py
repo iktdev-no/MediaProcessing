@@ -59,14 +59,15 @@ class ProducerDataValueSchema:
 
 # Kafka consumer-klasse
 class KafkaConsumerThread(threading.Thread):
-    def __init__(self, bootstrap_servers, topic):
+    def __init__(self, bootstrap_servers, topic, consumer_group):
         super().__init__()
         self.bootstrap_servers = bootstrap_servers
+        self.consumer_group = consumer_group
         self.topic = topic
         self.shutdown = threading.Event()
 
     def run(self):
-        consumer = KafkaConsumer(self.topic, bootstrap_servers=self.bootstrap_servers)
+        consumer = KafkaConsumer(self.topic, bootstrap_servers=self.bootstrap_servers, group_id=self.consumer_group)
 
         logger.info("Kafka Consumer started")
 
@@ -181,7 +182,7 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     # Opprett og start consumer-tråden
-    consumer_thread = KafkaConsumerThread(bootstrap_servers, kafka_topic)
+    consumer_thread = KafkaConsumerThread(bootstrap_servers, kafka_topic, consumer_group)
     consumer_thread.start()
 
     logger.info("App started")

@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger {}
 class StreamsReader {
 
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
-    val defaultConsumer = DefaultConsumer().apply {
+    val defaultConsumer = DefaultConsumer(subId = "0a").apply {
        // autoCommit = false
     }
     init {

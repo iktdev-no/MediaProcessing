@@ -22,7 +22,7 @@ class EncodeStreamsProducer: IPooledEvents.OnEventsReceived {
 
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
 
-    val defaultConsumer = DefaultConsumer().apply {
+    val defaultConsumer = DefaultConsumer(subId = "0m").apply {
         autoCommit = false
     }
 
