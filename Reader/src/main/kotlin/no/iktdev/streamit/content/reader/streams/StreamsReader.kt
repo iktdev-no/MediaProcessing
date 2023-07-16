@@ -21,12 +21,12 @@ private val logger = KotlinLogging.logger {}
 @Service
 class StreamsReader {
 
-    val messageProducer = DefaultProducer(CommonConfig.kafkaConsumerId)
+    val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
     val defaultConsumer = DefaultConsumer().apply {
        // autoCommit = false
     }
     init {
-        object: EventMessageListener(CommonConfig.kafkaConsumerId, defaultConsumer, listOf(EVENT_READER_RECEIVED_FILE.event)) {
+        object: EventMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(EVENT_READER_RECEIVED_FILE.event)) {
             override fun onMessage(data: ConsumerRecord<String, Message>) {
                 if (data.value().status.statusType != StatusType.SUCCESS) {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }

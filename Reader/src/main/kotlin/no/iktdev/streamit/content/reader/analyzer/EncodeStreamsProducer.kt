@@ -20,7 +20,7 @@ import java.io.File
 @Service
 class EncodeStreamsProducer: IPooledEvents.OnEventsReceived {
 
-    val messageProducer = DefaultProducer(CommonConfig.kafkaConsumerId)
+    val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
 
     val defaultConsumer = DefaultConsumer().apply {
         autoCommit = false
@@ -28,7 +28,7 @@ class EncodeStreamsProducer: IPooledEvents.OnEventsReceived {
 
     init {
         val ackListener = PooledEventMessageListener(
-            topic = CommonConfig.kafkaConsumerId, consumer = defaultConsumer,
+            topic = CommonConfig.kafkaTopic, consumer = defaultConsumer,
             mainFilter = KnownEvents.EVENT_READER_RECEIVED_FILE.event,
             subFilter = listOf(KnownEvents.EVENT_READER_RECEIVED_STREAMS.event),
             event = this
