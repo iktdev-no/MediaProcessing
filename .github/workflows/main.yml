@@ -38,14 +38,16 @@ jobs:
         run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Encode)
 
       - name: Build Encode module
+        id: build-encode
         run: |
-          if [ "${{ steps.check-encode.outputs.changed }}" == "Encode" ] || [ "${{ github.event_name }}" == "push" ]; then
+          if [ "${{ steps.check-encode.outputs.changed }}" == "Encode" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             cd Encode
             chmod +x ./gradlew
             ./gradlew build
+            echo "Build completed"
           else
             echo "Encode has not changed. Skipping Encode module build."
-            exit 78 # Exit with a custom exit code to indicate skip
+            echo "::set-output name=job_skipped::true"
           fi
 
       - name: Generate Docker image tag
@@ -53,6 +55,7 @@ jobs:
         run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
 
       - name: Build and push Docker image
+        if: steps.build-encode.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
         with:
           context: ./Encode
@@ -78,14 +81,16 @@ jobs:
         run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Reader)
         
       - name: Build Reader module
+        id: build-reader
         run: |
-          if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ]; then
+          if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             cd Reader
             chmod +x ./gradlew
             ./gradlew build
+            echo "Build completed"
           else
             echo "Reader has not changed. Skipping Reader module build."
-            exit 78 # Exit with a custom exit code to indicate skip
+            echo "::set-output name=job_skipped::true"
           fi
 
       - name: Generate Docker image tag
@@ -93,6 +98,7 @@ jobs:
         run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
 
       - name: Build and push Docker image
+        if: steps.build-reader.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
         with:
           context: ./Reader
@@ -116,13 +122,15 @@ jobs:
         run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata)
         
       - name: Build pyMetadata module
+        id: build-pymetadata
         run: |
-          if [ "${{ steps.check-pymetadata.outputs.changed }}" == "pyMetadata" ] || [ "${{ github.event_name }}" == "push" ]; then
+          if [ "${{ steps.check-pymetadata.outputs.changed }}" == "pyMetadata" ] || [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             cd pyMetadata
             # Add the necessary build steps for your Python module here
+            echo "Build completed"
           else
             echo "pyMetadata has not changed. Skipping pyMetadata module build."
-            exit 78 # Exit with a custom exit code to indicate skip
+            echo "::set-output name=job_skipped::true"
           fi
 
       - name: Generate Docker image tag
@@ -130,6 +138,7 @@ jobs:
         run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
 
       - name: Build and push Docker image
+        if: steps.build-pymetadata.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
         with:
           context: ./pyMetadata
