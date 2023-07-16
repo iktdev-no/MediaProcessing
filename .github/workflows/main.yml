@@ -1,0 +1,133 @@
+name: Build Modules
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-commoncode:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build CommonCode
+        run: cd CommonCode && ./gradlew build
+
+  build-encode:
+    needs: build-commoncode
+    if: ${{ needs.build-commoncode.result == 'success' && (needs.build-commoncode.outputs.changed != 'CommonCode' || github.event_name == 'push') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if Encode has changed
+        id: check-encode
+        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Encode)
+
+      - name: Build Encode module
+        run: |
+          if [ "${{ steps.check-encode.outputs.changed }}" == "Encode" ] || [ "${{ github.event_name }}" == "push" ]; then
+            cd Encode
+            ./gradlew build
+          else
+            echo "Encode has not changed. Skipping Encode module build."
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
+
+      - name: Build and push Docker image
+        if: ${{ steps.check-encode.outputs.changed == 'Encode' || github.event_name == 'push' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: ./Encode
+          push: true
+          tags: |
+            bskjon/media-processing--encode:latest
+            bskjon/media-processing--encode:${{ github.sha }}
+            bskjon/media-processing--encode:${{ github.ref }}
+            bskjon/media-processing--encode:${{ steps.docker-tag.outputs.tag }}
+
+  build-reader:
+    needs: build-commoncode
+    if: ${{ needs.build-commoncode.result == 'success' && (needs.build-commoncode.outputs.changed != 'CommonCode' || github.event_name == 'push') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if Reader has changed
+        id: check-reader
+        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} Reader)
+
+      - name: Build Reader module
+        run: |
+          if [ "${{ steps.check-reader.outputs.changed }}" == "Reader" ] || [ "${{ github.event_name }}" == "push" ]; then
+            cd Reader
+            ./gradlew build
+          else
+            echo "Reader has not changed. Skipping Reader module build."
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
+
+      - name: Build and push Docker image
+        if: ${{ steps.check-reader.outputs.changed == 'Reader' || github.event_name == 'push' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: ./Reader
+          push: true
+          tags: |
+            bskjon/media-processing--reader:latest
+            bskjon/media-processing--reader:${{ github.sha }}
+            bskjon/media-processing--reader:${{ github.ref }}
+            bskjon/media-processing--reader:${{ steps.docker-tag.outputs.tag }}
+
+  build-pymetadata:
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check if pyMetadata has changed
+        id: check-pymetadata
+        run: echo ::set-output name=changed::$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata)
+
+      - name: Build pyMetadata module
+        run: |
+          if [ "${{ steps.check-pymetadata.outputs.changed }}" == "pyMetadata" ] || [ "${{ github.event_name }}" == "push" ]; then
+            cd pyMetadata
+            # Add the necessary build steps for your Python module here
+          else
+            echo "pyMetadata has not changed. Skipping pyMetadata module build."
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo ::set-output name=tag::$(date -u +"%Y.%m.%d")-$(uuidgen)
+
+      - name: Build and push Docker image
+        if: ${{ steps.check-pymetadata.outputs.changed == 'pyMetadata' || github.event_name == 'push' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: ./pyMetadata
+          push: true
+          tags: |
+            bskjon/media-processing--pymetadata:latest
+            bskjon/media-processing--pymetadata:${{ github.sha }}
+            bskjon/media-processing--pymetadata:${{ github.ref }}
+            bskjon/media-processing--pymetadata:${{ steps.docker-tag.outputs.tag }}
