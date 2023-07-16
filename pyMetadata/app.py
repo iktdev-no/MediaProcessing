@@ -11,7 +11,7 @@ from sources.imdb import metadata as ImdbMetadata
 # Konfigurer Kafka-forbindelsen
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") if os.environ.get("KAFKA_BOOTSTRAP_SERVER") != None else "127.0.0.1:9092"
 consumer_group = os.environ.get("KAFKA_CONSUMER_ID") if os.environ.get("KAFKA_CONSUMER_ID") != None else f"Metadata-{uuid.uuid4()}"
-kafka_topic = os.environ.get("KAFKA_BOOTSTRAP_SERVER") if os.environ.get("KAFKA_BOOTSTRAP_SERVER") != None else "127.0.0.1:9092"
+kafka_topic = os.environ.get("KAFKA_TOPIC") if os.environ.get("KAFKA_TOPIC") != None else "127.0.0.1:9092"
 
 class ProducerDataValueSchema:
     def __init__(self, referenceId, statusType, errorMessage, data):
