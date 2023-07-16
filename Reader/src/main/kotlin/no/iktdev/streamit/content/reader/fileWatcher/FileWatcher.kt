@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service
 private val logger = KotlinLogging.logger {}
 @Service
 class FileWatcher: FileWatcherEvents {
-    val messageProducer = DefaultProducer(CommonConfig.kafkaConsumerId)
+    val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
 
     val queue = FileWatcherQueue()
 
