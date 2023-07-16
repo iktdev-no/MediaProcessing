@@ -56,7 +56,7 @@ jobs:
 
 
       - name: Build and push Docker image
-        if: steps.build-encode.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
+        if: (steps.build-encode.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
         with:
           context: ./Encode
@@ -98,7 +98,7 @@ jobs:
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Build and push Docker image
-        if: steps.build-reader.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
+        if: (steps.build-reader.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
         with:
           context: ./Reader
@@ -137,7 +137,7 @@ jobs:
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Build and push Docker image
-        if: steps.build-pymetadata.outputs.job_skipped != 'true' || github.event_name == 'workflow_dispatch'
+        if: (steps.build-pymetadata.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
         uses: docker/build-push-action@v2
         with:
           context: ./pyMetadata
