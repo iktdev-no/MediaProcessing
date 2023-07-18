@@ -30,7 +30,7 @@ class StreamsReader {
     init {
         object: EventMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(EVENT_READER_RECEIVED_FILE.event)) {
             override fun onMessage(data: ConsumerRecord<String, Message>) {
-
+                logger.info { "RECORD: ${data.key()}" }
                 if (data.value().status.statusType != StatusType.SUCCESS) {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }
                     return

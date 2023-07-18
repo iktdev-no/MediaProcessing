@@ -54,6 +54,7 @@ class FileWatcher: FileWatcherEvents {
 
         object : EventMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(KnownEvents.REQUEST_FILE_READ.event)) {
             override fun onMessage(data: ConsumerRecord<String, Message>) {
+
                 if (data.value().status.statusType == StatusType.SUCCESS) {
                     if (data.value().data is String) {
                         val file = File(CommonConfig.incomingContent, data.value().data as String)
