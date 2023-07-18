@@ -10,6 +10,9 @@ class Metadata:
     summary: str
     genres: List[str]
 
+    def to_dict(self):
+        return asdict(self)
+
 @dataclass
 class DataResult:
     statusType: str
