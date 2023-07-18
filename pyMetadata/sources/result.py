@@ -4,7 +4,7 @@ from dataclasses import dataclass, asdict
 @dataclass
 class Metadata:
     title: str
-    altTitle: str
+    altTitle: List[str]
     cover: str
     type: str  # Serie/Movie
     summary: str

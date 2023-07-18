@@ -4,3 +4,4 @@ kafka-python>=2.0.2
 fuzzywuzzy>=0.18.0
 requests>=2.31.0
 python-Levenshtein>=0.21.1
+mal-api>=0.5.3

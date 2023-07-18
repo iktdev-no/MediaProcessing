@@ -10,6 +10,7 @@ from fuzzywuzzy import fuzz
 from sources.result import DataResult, Metadata
 from sources.anii import metadata as AniiMetadata
 from sources.imdb import metadata as ImdbMetadata
+from sources.mal import metadata as MalMetadata
 
 # Konfigurer Kafka-forbindelsen
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
@@ -144,21 +145,36 @@ class MessageHandlerThread(threading.Thread):
     def perform_action(self, title) -> DataResult:
         anii = AniiMetadata(title)
         imdb = ImdbMetadata(title)
+        mal = MalMetadata(title)
 
+        mal_result = mal.lookup()
         anii_result = anii.lookup()
         imdb_result = imdb.lookup()
 
         # Sammenlign resultater basert på likheter og sammenhenger med tittelen
-        if anii_result.statusType == "SUCCESS" and imdb_result.statusType == "SUCCESS":
+        if anii_result.statusType == "SUCCESS" and imdb_result.statusType == "SUCCESS" and mal_result.statusType == "SUCCESS":
             # Begge registrene ga suksessresultater, bruk fuzzy matching for å gjøre en vurdering
             title_similarity_anii = fuzz.ratio(title.lower(), anii_result.data.title.lower())
             title_similarity_imdb = fuzz.ratio(title.lower(), imdb_result.data.title.lower())
+            title_similarity_mal = fuzz.ratio(title.lower(), mal_result.data.title.lower())
 
-            # Sammenlign likheter mellom tittel og registertitler
-            if title_similarity_anii > title_similarity_imdb:
-                most_likely_result = anii_result
-            else:
+            alt_titles_anii = anii_result.data.altTitle
+            alt_titles_imdb = imdb_result.data.altTitle
+            alt_titles_mal = mal_result.data.altTitle
+
+            # Sammenlign likheter mellom tittel og registertitler, inkludert alternative titler
+            if (
+                title_similarity_anii * 0.8 + sum(fuzz.ratio(title.lower(), alt_title.lower()) for alt_title in alt_titles_anii) * 0.2
+                < title_similarity_mal * 0.8 + sum(fuzz.ratio(title.lower(), alt_title.lower()) for alt_title in alt_titles_mal) * 0.2
+            ):
+                most_likely_result = mal_result
+            elif (
+                title_similarity_imdb * 0.8 + sum(fuzz.ratio(title.lower(), alt_title.lower()) for alt_title in alt_titles_imdb) * 0.2
+                > title_similarity_anii * 0.8 + sum(fuzz.ratio(title.lower(), alt_title.lower()) for alt_title in alt_titles_anii) * 0.2
+            ):
                 most_likely_result = imdb_result
+            else:
+                most_likely_result = anii_result
 
         elif anii_result.statusType == "SUCCESS":
             # AniList ga suksessresultat, bruk det som det mest sannsynlige
@@ -168,12 +184,18 @@ class MessageHandlerThread(threading.Thread):
             # IMDb ga suksessresultat, bruk det som det mest sannsynlige
             most_likely_result = imdb_result
 
+        elif mal_result.statusType == "SUCCESS":
+            # MAL ga suksessresultat, bruk det som det mest sannsynlige
+            most_likely_result = mal_result
+
         else:
-            # Begge registrene feilet, håndter etter eget behov
-            most_likely_result = DataResult(statusType="ERROR", errorMessage="No Result")
+            # Ingen resultater, bruk AniList hvis tilgjengelig
+            most_likely_result = anii_result
 
         # Returner det mest sannsynlige resultatet
         return most_likely_result
+
+
 
     def compose_message(self, referenceId: str, result: DataResult) -> ProducerDataValueSchema:
         return ProducerDataValueSchema(
