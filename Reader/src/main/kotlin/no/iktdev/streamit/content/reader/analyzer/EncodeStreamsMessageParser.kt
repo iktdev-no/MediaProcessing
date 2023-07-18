@@ -15,9 +15,7 @@ class EncodeStreamsMessageParser {
     fun getFileNameFromEvent(records: MutableList<ConsumerRecord<String, Message>>): FileWatcher.FileResult? {
         val file = records.find { it.key() == KnownEvents.EVENT_READER_RECEIVED_FILE.event } ?: return null
         if (file.value().status.statusType != StatusType.SUCCESS) return null
-        return if (file.value().data is String) {
-            return Gson().fromJson(file.value().data as String, FileWatcher.FileResult::class.java)
-        } else null
+        return file.value().dataAs(FileWatcher.FileResult::class.java)
     }
 
     fun getMediaStreamsFromEvent(records: MutableList<ConsumerRecord<String, Message>>): MediaStreams? {

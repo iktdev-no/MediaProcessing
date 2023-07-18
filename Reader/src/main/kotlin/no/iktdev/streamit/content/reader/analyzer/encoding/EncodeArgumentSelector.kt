@@ -1,13 +1,13 @@
-package no.iktdev.streamit.content.reader.analyzer
+package no.iktdev.streamit.content.reader.analyzer.encoding
 
 import no.iktdev.streamit.content.common.streams.AudioStream
 import no.iktdev.streamit.content.common.streams.MediaStreams
 import no.iktdev.streamit.content.common.streams.SubtitleStream
 import no.iktdev.streamit.content.common.streams.VideoStream
-import no.iktdev.streamit.content.reader.analyzer.encoding.AudioEncodeArguments
-import no.iktdev.streamit.content.reader.analyzer.encoding.EncodeInformation
-import no.iktdev.streamit.content.reader.analyzer.encoding.SubtitleEncodeArguments
-import no.iktdev.streamit.content.reader.analyzer.encoding.VideoEncodeArguments
+import no.iktdev.streamit.content.reader.analyzer.encoding.dto.AudioEncodeArguments
+import no.iktdev.streamit.content.reader.analyzer.encoding.dto.EncodeInformation
+import no.iktdev.streamit.content.reader.analyzer.encoding.dto.SubtitleEncodeArguments
+import no.iktdev.streamit.content.reader.analyzer.encoding.dto.VideoEncodeArguments
 import no.iktdev.streamit.content.reader.preference
 
 class EncodeArgumentSelector(val inputFile: String, val streams: MediaStreams, val outFileName: String) {

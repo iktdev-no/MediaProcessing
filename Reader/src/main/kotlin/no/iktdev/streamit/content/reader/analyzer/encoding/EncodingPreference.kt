@@ -1,9 +1,8 @@
-package no.iktdev.streamit.content.reader.analyzer
+package no.iktdev.streamit.content.reader.analyzer.encoding
 
 import com.google.gson.Gson
 import no.iktdev.streamit.content.reader.ReaderEnv
 import org.slf4j.LoggerFactory
-import java.io.File
 
 data class EncodingPreference(
     val video: VideoPreference,

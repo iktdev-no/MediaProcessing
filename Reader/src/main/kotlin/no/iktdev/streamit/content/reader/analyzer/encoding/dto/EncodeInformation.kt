@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.reader.analyzer.encoding
+package no.iktdev.streamit.content.reader.analyzer.encoding.dto
 
 data class EncodeInformation(
     val inputFile: String,

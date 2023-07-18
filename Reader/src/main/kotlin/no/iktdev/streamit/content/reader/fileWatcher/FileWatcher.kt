@@ -26,7 +26,7 @@ private val logger = KotlinLogging.logger {}
 @Service
 class FileWatcher: FileWatcherEvents {
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
-    val defaultConsumer = DefaultConsumer(subId = "0a")
+    val defaultConsumer = DefaultConsumer(subId = "fileWatcher")
 
     val queue = FileWatcherQueue()
 

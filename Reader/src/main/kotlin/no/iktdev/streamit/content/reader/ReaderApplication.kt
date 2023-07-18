@@ -1,6 +1,6 @@
 package no.iktdev.streamit.content.reader
 
-import no.iktdev.streamit.content.reader.analyzer.PreferenceReader
+import no.iktdev.streamit.content.reader.analyzer.encoding.PreferenceReader
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext

@@ -1,10 +1,8 @@
 package no.iktdev.streamit.content.reader.analyzer
 
-import com.google.gson.Gson
 import no.iktdev.streamit.content.common.CommonConfig
-import no.iktdev.streamit.content.common.streams.MediaStreams
-import no.iktdev.streamit.content.reader.analyzer.encoding.EncodeInformation
-import no.iktdev.streamit.content.reader.fileWatcher.FileWatcher
+import no.iktdev.streamit.content.reader.analyzer.encoding.EncodeArgumentSelector
+import no.iktdev.streamit.content.reader.analyzer.encoding.dto.EncodeInformation
 import no.iktdev.streamit.library.kafka.KnownEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
@@ -18,11 +16,11 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class EncodeStreamsProducer: IPooledEvents.OnEventsReceived {
+class EncodedStreams: IPooledEvents.OnEventsReceived {
 
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
 
-    val defaultConsumer = DefaultConsumer(subId = "0m").apply {
+    val defaultConsumer = DefaultConsumer(subId = "encodedStreams").apply {
         autoCommit = false
     }
 

@@ -1,6 +1,5 @@
-package no.iktdev.streamit.content.reader.analyzer.encoding
+package no.iktdev.streamit.content.reader.analyzer.encoding.dto
 
-import no.iktdev.streamit.content.common.streams.AudioStream
 import no.iktdev.streamit.content.common.streams.VideoStream
 import no.iktdev.streamit.content.reader.preference
 
