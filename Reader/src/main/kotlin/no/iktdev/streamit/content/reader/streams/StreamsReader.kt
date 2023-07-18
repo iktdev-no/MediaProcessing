@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.reader.streams
 
+import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
@@ -33,11 +34,16 @@ class StreamsReader {
                 if (data.value().status.statusType != StatusType.SUCCESS) {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }
                     return
-                } else if (data.value().data !is FileWatcher.FileResult) {
-                    logger.info { "Ignoring event: ${data.key()} as values is not of expected type!" }
+                } else if (data.value().data !is String) {
+                    logger.info { "Ignoring event: ${data.key()} as values is not of expected type!, ${data.value().data}" }
                     return
                 }
-                val dataValue = data.value().data as FileWatcher.FileResult
+                val dataValue = try {
+                    Gson().fromJson(data.value().data as String, FileWatcher.FileResult::class.java)
+                } catch (e: Exception) {
+                    logger.info { "Ignoring event: ${data.key()} as value failed to be converted" }
+                    return
+                }
                 logger.info { "Preparing Probe for ${dataValue.file}" }
                 val output = mutableListOf<String>()
                 val d = Daemon(executable = ReaderEnv.ffprobe, parameters =  listOf("-v", "quiet", "-print_format", "json", "-show_streams", dataValue.file), daemonInterface = object:
