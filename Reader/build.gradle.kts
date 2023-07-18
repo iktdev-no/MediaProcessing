@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha18")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha19")
     implementation("no.iktdev:exfl:0.0.4-SNAPSHOT")
 
     implementation("com.github.pgreze:kotlin-process:1.3.1")
