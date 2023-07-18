@@ -5,18 +5,17 @@ class Naming(val fileName: String) {
         private set
 
     init {
-        cleanedFileName = fileName.apply {
-            removeBracketedText(this)
-            removeParenthesizedText(this)
-            removeResolutionAndTags(this)
-            removeInBetweenCharacters(this)
+        cleanedFileName = fileName
+            .let { removeBracketedText(it) }
+            .let { removeParenthesizedText(it) }
+            .let { removeResolutionAndTags(it) }
+            .let { removeInBetweenCharacters(it) }
+            .let { removeExtraWhiteSpace(it) }
 
-            removeExtraWhiteSpace(this)
-        }
     }
 
     fun guessDesiredFileName(): String {
-        val parts = fileName.split(" - ")
+        val parts = cleanedFileName.split(" - ")
         return when {
             parts.size == 2 && parts[1].matches(Regex("\\d{4}")) -> {
                 val title = parts[0]
@@ -36,7 +35,7 @@ class Naming(val fileName: String) {
                 "$title - $seasonEpisode - $episodeTitle"
             }
 
-            else -> fileName
+            else -> cleanedFileName
         }
     }
 

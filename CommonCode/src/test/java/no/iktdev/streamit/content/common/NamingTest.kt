@@ -7,6 +7,15 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 
 class NamingTest {
+
+    @Test
+    fun checkThatBracketsGetsRemoved() {
+        val input = "[AAA] Sir fancy - 13 [1080p HEVC][000000]"
+        val name = Naming(input)
+        assertThat(name.guessDesiredTitle()).doesNotContain("[")
+
+    }
+
 /*
     @ParameterizedTest
     @MethodSource("serieOnlyTest")

@@ -76,13 +76,16 @@ class KafkaConsumerThread(threading.Thread):
                 if self.shutdown.is_set():
                     break
 
-                logger.info("Received message: key=%s, value=%s", message.key, message.value)
+                
 
                 # Sjekk om meldingen har målnøkkelen
                 if message.key == "request:metadata:obtain" or message.key == "event:reader:received-file":
+                    logger.info("Received message: key=%s, value=%s", message.key, message.value)
                     # Opprett en ny tråd for å håndtere meldingen
                     handler_thread = MessageHandlerThread(message)
                     handler_thread.start()
+                else:
+                    logger.info("Ignorert message: key=%s, value=%s", message.key, message.value)
 
         consumer.close()
         logger.info("Kafka Consumer stopped")
