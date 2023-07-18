@@ -31,6 +31,7 @@ class StreamsReader {
         object: EventMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(EVENT_READER_RECEIVED_FILE.event)) {
             override fun onMessage(data: ConsumerRecord<String, Message>) {
                 logger.info { "RECORD: ${data.key()}" }
+                logger.info { "Active filters: ${this.acceptsEvents.joinToString(",") }}" }
                 if (data.value().status.statusType != StatusType.SUCCESS) {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }
                     return
@@ -38,7 +39,7 @@ class StreamsReader {
                 val dataValue = data.value().dataAs(FileWatcher.FileResult::class.java)
 
                 if (dataValue == null) {
-                    logger.info { "Ignoring event: ${data.key()} as values is not of expected type!, ${data.value().data}" }
+                    logger.info { "Ignoring event: ${data.key()} as values is not of expected type!" }
                     return
                 }
                 logger.info { "Preparing Probe for ${dataValue.file}" }
