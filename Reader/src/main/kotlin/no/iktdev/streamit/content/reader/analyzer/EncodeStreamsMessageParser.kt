@@ -6,8 +6,8 @@ import com.google.gson.reflect.TypeToken
 import no.iktdev.streamit.content.common.streams.*
 import no.iktdev.streamit.content.reader.fileWatcher.FileWatcher
 import no.iktdev.streamit.library.kafka.KnownEvents
-import no.iktdev.streamit.library.kafka.Message
-import no.iktdev.streamit.library.kafka.StatusType
+import no.iktdev.streamit.library.kafka.dto.Message
+import no.iktdev.streamit.library.kafka.dto.StatusType
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 

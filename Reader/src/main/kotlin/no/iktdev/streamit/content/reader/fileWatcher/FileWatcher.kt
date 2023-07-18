@@ -12,9 +12,9 @@ import no.iktdev.streamit.content.common.Naming
 
 import no.iktdev.streamit.content.reader.ReaderEnv
 import no.iktdev.streamit.library.kafka.KnownEvents
-import no.iktdev.streamit.library.kafka.Message
-import no.iktdev.streamit.library.kafka.Status
-import no.iktdev.streamit.library.kafka.StatusType
+import no.iktdev.streamit.library.kafka.dto.Message
+import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import no.iktdev.streamit.library.kafka.listener.EventMessageListener
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer

@@ -10,9 +10,9 @@ import no.iktdev.streamit.content.reader.ReaderEnv
 import no.iktdev.streamit.content.reader.fileWatcher.FileWatcher
 import no.iktdev.streamit.library.kafka.KnownEvents
 import no.iktdev.streamit.library.kafka.KnownEvents.EVENT_READER_RECEIVED_FILE
-import no.iktdev.streamit.library.kafka.Message
-import no.iktdev.streamit.library.kafka.Status
-import no.iktdev.streamit.library.kafka.StatusType
+import no.iktdev.streamit.library.kafka.dto.Message
+import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import no.iktdev.streamit.library.kafka.listener.EventMessageListener
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
@@ -34,14 +34,11 @@ class StreamsReader {
                 if (data.value().status.statusType != StatusType.SUCCESS) {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }
                     return
-                } else if (data.value().data !is String) {
-                    logger.info { "Ignoring event: ${data.key()} as values is not of expected type!, ${data.value().data}" }
-                    return
                 }
-                val dataValue = try {
-                    Gson().fromJson(data.value().data as String, FileWatcher.FileResult::class.java)
-                } catch (e: Exception) {
-                    logger.info { "Ignoring event: ${data.key()} as value failed to be converted" }
+                val dataValue = data.value().dataAs(FileWatcher.FileResult::class.java)
+
+                if (dataValue == null) {
+                    logger.info { "Ignoring event: ${data.key()} as values is not of expected type!, ${data.value().data}" }
                     return
                 }
                 logger.info { "Preparing Probe for ${dataValue.file}" }

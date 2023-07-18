@@ -6,9 +6,9 @@ import no.iktdev.streamit.content.common.streams.MediaStreams
 import no.iktdev.streamit.content.reader.analyzer.encoding.EncodeInformation
 import no.iktdev.streamit.content.reader.fileWatcher.FileWatcher
 import no.iktdev.streamit.library.kafka.KnownEvents
-import no.iktdev.streamit.library.kafka.Message
-import no.iktdev.streamit.library.kafka.Status
-import no.iktdev.streamit.library.kafka.StatusType
+import no.iktdev.streamit.library.kafka.dto.Message
+import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import no.iktdev.streamit.library.kafka.listener.pooled.IPooledEvents
 import no.iktdev.streamit.library.kafka.listener.pooled.PooledEventMessageListener
@@ -43,7 +43,7 @@ class EncodeStreamsProducer: IPooledEvents.OnEventsReceived {
 
     private fun produceErrorMessage(referenceId: String, reason: String) {
         val message = Message(referenceId = referenceId,
-            Status(statusType = StatusType.ERROR, errorMessage = reason)
+            Status(statusType = StatusType.ERROR, message = reason)
         )
         messageProducer.sendMessage(KnownEvents.EVENT_READER_ENCODE_GENERATED.event, message)
     }
