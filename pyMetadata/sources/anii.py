@@ -12,18 +12,16 @@ class metadata():
         """"""
         try:
             result = self.anilist.get_anime(self.name)
-            meta = Metadata()
-            meta.title = result.get("name_english", None)
-            meta.altTitle = result.get("name_romaji", None)
-            meta.cover = result.get("cover_image", None)
-            meta.summary = result.get("desc", None)
 
-            airing_format = result.get('airing_format', '').lower()
-            if airing_format == 'movie':
-                meta.type = 'movie'
-            else:
-                meta.type = 'serie'
-            meta.genres = result.get('genres', [])
+            meta = Metadata(
+                title = result.get("name_english", None),
+                altTitle = result.get("name_romaji", None),
+                cover = result.get("cover_image", None),
+                summary = result.get("desc", None),
+                type = 'movie' if result.get('airing_format', '').lower() == 'movie' else 'serie',
+                genres = result.get('genres', [])
+            )
+
             return DataResult("SUCCESS", None, meta)
 
         except IndexError as ingore:

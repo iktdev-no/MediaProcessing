@@ -15,19 +15,14 @@ class metadata():
             query = self.imdb.search_movie(self.name)
             imdbId = query[0].movieID
             result = self.imdb.get_movie(imdbId)
-            meta = Metadata()
-            meta.title = result.get("title", None)
-            meta.altTitle = result.get("localized title", None)
-            meta.cover = result.get("cover url", None)
-            meta.summary = result.get("plot outline", None)
-
-            airing_format = result.get('kind', '').lower()
-            if airing_format == 'movie':
-                meta.type = 'movie'
-            else:
-                meta.type = 'serie'
-
-            meta.genres = result.get('genres', [])
+            meta = Metadata(
+                title = result.get("title", None),
+                altTitle = result.get("localized title", None),
+                cover = result.get("cover url", None),
+                summary = result.get("plot outline", None),
+                type = 'movie' if result.get('kind', '').lower() == 'movie' else 'serie',
+                genres = result.get('genres', [])
+            )
             
             return DataResult("SUCCESS", None, meta)
         except Exception as e:
