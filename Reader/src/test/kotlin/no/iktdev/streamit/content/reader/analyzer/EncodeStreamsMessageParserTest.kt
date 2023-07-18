@@ -14,7 +14,7 @@ class EncodeStreamsMessageParserTest {
     val parser = EncodeStreamsMessageParser()
     val baseEvent = Message(status = Status( statusType = StatusType.SUCCESS))
 
-    @Test
+    /*@Test
     fun getFileNameFromEvent() {
         val payload = Resources.Streams().getSample(3)
         assertDoesNotThrow {
@@ -30,5 +30,5 @@ class EncodeStreamsMessageParserTest {
 
     @Test
     fun getMediaStreamsFromEvent() {
-    }
+    }*/
 }

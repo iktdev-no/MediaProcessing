@@ -52,14 +52,14 @@ class FileWatcherQueue {
     fun <T> Channel<T>.findAndRemove(predicate: (T) -> Boolean): T? {
         val items = mutableListOf<T>()
         while (true) {
-            val item = poll() ?: break
+            val item = tryReceive().getOrNull() ?: break
             if (predicate(item)) {
                 return item
             }
             items.add(item)
         }
         for (item in items) {
-            offer(item)
+            trySend(item).isSuccess
         }
         return null
     }
