@@ -127,13 +127,18 @@ class MessageHandlerThread(threading.Thread):
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
 
-                # Serialiser resultatet til JSON
-                result_json = producerMessage.to_json()
+                # Serialiser resultatet til JSON som strenger
+                result_json = json.dumps(producerMessage.to_dict())
 
                 # Send resultatet tilbake ved hjelp av Kafka-producer
-                producer = KafkaProducer(bootstrap_servers=bootstrap_servers)
+                producer = KafkaProducer(
+                    bootstrap_servers=bootstrap_servers,
+                    key_serializer=lambda k: k.encode('utf-8') if isinstance(k, str) else None,
+                    value_serializer=lambda v: v.encode('utf-8') if isinstance(v, str) else None
+                )
                 producer.send(kafka_topic, key="event:metadata:obtained", value=result_json)
                 producer.close()
+
 
 
     def perform_action(self, title) -> DataResult:
