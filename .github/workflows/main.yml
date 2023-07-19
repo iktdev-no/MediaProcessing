@@ -17,9 +17,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-
+      - name: Cache CommonCode Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('CommonCode/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build CommonCode
+        if: steps.cache-gradle.outputs.cache-hit != 'true'
         run: |
           cd CommonCode 
           chmod +x ./gradlew
@@ -43,6 +49,14 @@ jobs:
           else
             echo "::set-output name=changed::false"
           fi
+
+      - name: Cache CommonCode Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('CommonCode/gradle/wrapper/gradle-wrapper.properties') }}
+
 
       - name: Build Encode module
         id: build-encode
@@ -96,6 +110,13 @@ jobs:
           else
             echo "::set-output name=changed::false"
           fi
+
+      - name: Cache CommonCode Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('CommonCode/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build Reader module
         id: build-reader

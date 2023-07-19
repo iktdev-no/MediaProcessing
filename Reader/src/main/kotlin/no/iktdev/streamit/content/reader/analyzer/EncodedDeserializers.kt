@@ -27,31 +27,36 @@ class EncodedDeserializers {
 
     val mediaStreams = object : IMessageDataDeserialization<MediaStreams> {
         override fun deserialize(incomingMessage: Message): MediaStreams? {
-            if (incomingMessage.status.statusType != StatusType.SUCCESS) {
-                return null
-            }
-            /*return gson.fromJson(streams.value().data as String, MediaStreams::class.java)*/
-            val jsonObject = gson.fromJson(incomingMessage.dataAsJson(), JsonObject::class.java)
+            return try {
+                if (incomingMessage.status.statusType != StatusType.SUCCESS) {
+                    return null
+                }
+                /*return gson.fromJson(streams.value().data as String, MediaStreams::class.java)*/
+                val jsonObject = gson.fromJson(incomingMessage.dataAsJson(), JsonObject::class.java)
 
-            val streamsJsonArray = jsonObject.getAsJsonArray("streams")
+                val streamsJsonArray = jsonObject.getAsJsonArray("streams")
 
-            val rstreams = streamsJsonArray.mapNotNull { streamJson ->
-                val streamObject = streamJson.asJsonObject
+                val rstreams = streamsJsonArray.mapNotNull { streamJson ->
+                    val streamObject = streamJson.asJsonObject
 
-                val codecType = streamObject.get("codec_type").asString
-                if (streamObject.has("codec_name") && streamObject.get("codec_name").asString == "mjpeg") {
-                    null
-                } else {
-                    when (codecType) {
-                        "video" -> gson.fromJson(streamObject, VideoStream::class.java)
-                        "audio" -> gson.fromJson(streamObject, AudioStream::class.java)
-                        "subtitle" -> gson.fromJson(streamObject, SubtitleStream::class.java)
-                        else -> null //throw IllegalArgumentException("Unknown stream type: $codecType")
+                    val codecType = streamObject.get("codec_type").asString
+                    if (streamObject.has("codec_name") && streamObject.get("codec_name").asString == "mjpeg") {
+                        null
+                    } else {
+                        when (codecType) {
+                            "video" -> gson.fromJson(streamObject, VideoStream::class.java)
+                            "audio" -> gson.fromJson(streamObject, AudioStream::class.java)
+                            "subtitle" -> gson.fromJson(streamObject, SubtitleStream::class.java)
+                            else -> null //throw IllegalArgumentException("Unknown stream type: $codecType")
+                        }
                     }
                 }
-            }
 
-            return MediaStreams(rstreams)
+                return MediaStreams(rstreams)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
         }
 
     }
