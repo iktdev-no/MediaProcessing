@@ -31,8 +31,11 @@ class EncodedDeserializers {
                 if (incomingMessage.status.statusType != StatusType.SUCCESS) {
                     return null
                 }
-                /*return gson.fromJson(streams.value().data as String, MediaStreams::class.java)*/
-                val jsonObject = gson.fromJson(incomingMessage.dataAsJson(), JsonObject::class.java)
+                val jsonObject = if (incomingMessage.data is String) {
+                    gson.fromJson(incomingMessage.data as String, JsonObject::class.java)
+                } else {
+                    gson.fromJson(incomingMessage.dataAsJson(), JsonObject::class.java)
+                }
 
                 val streamsJsonArray = jsonObject.getAsJsonArray("streams")
 
