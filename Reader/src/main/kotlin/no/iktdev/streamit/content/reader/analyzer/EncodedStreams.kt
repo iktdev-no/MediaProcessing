@@ -82,8 +82,8 @@ class EncodedStreams : ISequentialMessageEvent {
             return
         }
 
-        if (result.values.all { it?.status?.statusType == StatusType.SUCCESS }) {
-
+        if (result.values.any { it?.status?.statusType != StatusType.SUCCESS }) {
+            produceErrorMessage(Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "Failed messages found!")
             return
         }
         val fileResult = baseMessage.data as FileWatcher.FileResult?
