@@ -78,7 +78,7 @@ class EncodedStreams : ISequentialMessageEvent {
         logger.info { "All messages are received" }
         val baseMessage = result[KnownEvents.EVENT_READER_RECEIVED_FILE.event]
         if (baseMessage == null) {
-            produceErrorMessage(Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "No base message found!")
+            produceErrorMessage(Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "Initiator message not found!")
             return
         }
 
