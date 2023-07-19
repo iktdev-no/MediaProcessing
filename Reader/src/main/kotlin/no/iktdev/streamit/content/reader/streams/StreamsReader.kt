@@ -67,7 +67,7 @@ class StreamsReader {
                     d.run()
                 }
 
-                val message = Message(status = Status( statusType =  if (resultCode == 0) StatusType.SUCCESS else StatusType.ERROR), data = output.joinToString("\n"))
+                val message = Message(referenceId = data.value().referenceId, status = Status( statusType =  if (resultCode == 0) StatusType.SUCCESS else StatusType.ERROR), data = output.joinToString("\n"))
                 messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_STREAMS.event, message)
             }
 
