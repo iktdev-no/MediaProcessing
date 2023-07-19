@@ -29,10 +29,9 @@ class StreamsReader {
 
 
     init {
-        object: SimpleMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(EVENT_READER_RECEIVED_FILE.event)) {
-            override fun onMessage(data: ConsumerRecord<String, Message>) {
+        object: SimpleMessageListener(topic =  CommonConfig.kafkaTopic, consumer =  defaultConsumer, accepts =  listOf(EVENT_READER_RECEIVED_FILE.event)) {
+            override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
                 logger.info { "RECORD: ${data.key()}" }
-                logger.info { "Active filters: ${this.accepts.joinToString(",") }}" }
                 if (data.value().status.statusType != StatusType.SUCCESS) {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }
                     return
@@ -72,20 +71,6 @@ class StreamsReader {
                 messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_STREAMS.event, message)
             }
 
-            override fun filter(consumerRecord: ConsumerRecord<String, Message>): Boolean {
-                return shouldIgnoreMessageO(consumerRecord)
-            }
-
-            fun shouldIgnoreMessageO(consumerRecord: ConsumerRecord<String, Message>): Boolean {
-                logger.info { "Consumer filter validating against ${consumerRecord.key()}" }
-                if (consumerRecord.key().isNullOrBlank()) {
-                    logger.info { "Consumer event is null or blank, ignoring!" }
-                    return true
-                }
-                val isEventAccepted = accepts.any { it == consumerRecord.key() }
-                logger.info { "Consumer event is ${if (isEventAccepted) "found" else "not found"} within accepts" }
-                return !isEventAccepted
-            }
         }.listen()
     }
 

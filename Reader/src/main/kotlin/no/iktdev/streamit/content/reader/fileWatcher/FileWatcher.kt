@@ -17,6 +17,7 @@ import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import no.iktdev.streamit.library.kafka.listener.EventMessageListener
+import no.iktdev.streamit.library.kafka.listener.SimpleMessageListener
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
@@ -52,9 +53,8 @@ class FileWatcher: FileWatcherEvents {
             }
         }
 
-        object : EventMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(KnownEvents.REQUEST_FILE_READ.event)) {
-            override fun onMessage(data: ConsumerRecord<String, Message>) {
-
+        object : SimpleMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(KnownEvents.REQUEST_FILE_READ.event)) {
+            override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
                 if (data.value().status.statusType == StatusType.SUCCESS) {
                     if (data.value().data is String) {
                         val file = File(CommonConfig.incomingContent, data.value().data as String)
@@ -68,7 +68,6 @@ class FileWatcher: FileWatcherEvents {
                     }
                 }
             }
-
         }
     }
 
