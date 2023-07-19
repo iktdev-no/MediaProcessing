@@ -66,8 +66,12 @@ class EncodedStreams : ISequentialMessageEvent {
     override fun areAllMessagesPresent(currentEvents: List<String>): Boolean {
         val expected = listOf(KnownEvents.EVENT_READER_RECEIVED_FILE.event, KnownEvents.EVENT_READER_RECEIVED_STREAMS.event)
         val waitingFor = expected.filter { !currentEvents.contains(it) }
-        logger.info { "Waiting for events: \n ${waitingFor.joinToString("\n\t")}" }
-        return expected.containsAll(currentEvents)
+        return if (waitingFor.isEmpty()) {
+            true
+        } else {
+            logger.info { "Waiting for events: \n ${waitingFor.joinToString("\n\t")}" }
+            false
+        }
     }
 
     override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {
