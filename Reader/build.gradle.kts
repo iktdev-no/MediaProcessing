@@ -24,7 +24,8 @@ repositories {
 
 dependencies {
     implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha41")
-    implementation("no.iktdev:exfl:0.0.4-SNAPSHOT")
+    implementation("no.iktdev:exfl:0.0.6-SNAPSHOT")
+
 
     implementation("com.github.pgreze:kotlin-process:1.3.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
