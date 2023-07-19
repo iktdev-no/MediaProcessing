@@ -18,14 +18,10 @@ class EncodeStreamsMessageParser {
         return file.value().dataAs(FileWatcher.FileResult::class.java)
     }
 
-    fun getMediaStreamsFromEvent(records: MutableList<ConsumerRecord<String, Message>>): MediaStreams? {
-        val streams = records.find { it.key() == KnownEvents.EVENT_READER_RECEIVED_STREAMS.event } ?: return null
-        if (streams.value().status.statusType != StatusType.SUCCESS || streams.value().data !is String) return null
-        val json = streams.value().data as String
+    fun getMediaStreamsFromJsonString(streamAsJson: String): MediaStreams? {
         val gson = Gson()
         /*return gson.fromJson(streams.value().data as String, MediaStreams::class.java)*/
-
-        val jsonObject = gson.fromJson(json, JsonObject::class.java)
+        val jsonObject = gson.fromJson(streamAsJson, JsonObject::class.java)
 
         val streamsJsonArray = jsonObject.getAsJsonArray("streams")
 
