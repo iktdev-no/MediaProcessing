@@ -26,8 +26,8 @@ jobs:
   build-encode:
     needs: build-commoncode
     runs-on: ubuntu-latest
-
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    if: false
+    #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout repository

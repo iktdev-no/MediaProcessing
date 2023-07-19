@@ -12,6 +12,7 @@ import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import no.iktdev.streamit.library.kafka.dto.ActionType
+import no.iktdev.streamit.library.kafka.listener.sequential.ISequentialMessageEvent
 import no.iktdev.streamit.library.kafka.listener.sequential.SequentialMessageListener
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
 import org.springframework.stereotype.Service
@@ -20,62 +21,23 @@ import java.io.File
 private val logger = KotlinLogging.logger {}
 
 @Service
-class EncodedStreams {
+class EncodedStreams : ISequentialMessageEvent {
 
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
 
-    val defaultConsumer = DefaultConsumer(subId = "encodedStreams").apply {
+    final val defaultConsumer = DefaultConsumer(subId = "encodedStreams").apply {
         autoCommit = false
     }
 
 
-    val mainListener = object : SequentialMessageListener(
+    final val mainListener = object : SequentialMessageListener(
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
         accept = KnownEvents.EVENT_READER_RECEIVED_FILE.event,
         subAccepts = listOf(KnownEvents.EVENT_READER_RECEIVED_STREAMS.event),
         deserializers = EncodedDeserializers().getDeserializers(),
-    ) {
-        override fun areAllMessagesPresent(currentEvents: List<String>): Boolean {
-            val expected = listOf(KnownEvents.EVENT_READER_RECEIVED_FILE.event, KnownEvents.EVENT_READER_RECEIVED_STREAMS.event)
-            val waitingFor = expected.filter { !currentEvents.contains(it) }
-            logger.info { "Waiting for events: \n ${waitingFor.joinToString("\n\t")}" }
-            return expected.containsAll(currentEvents)
-        }
-
-        override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {
-            logger.info { "All messages are received" }
-            val baseMessage = result[KnownEvents.EVENT_READER_RECEIVED_FILE.event]
-            if (baseMessage == null) {
-                produceErrorMessage(Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "No base message found!")
-                return
-            }
-
-            if (result.values.all { it?.status?.statusType == StatusType.SUCCESS }) {
-
-                return
-            }
-            val fileResult = baseMessage?.data as FileWatcher.FileResult?
-            if (fileResult == null) {
-                produceErrorMessage(baseMessage, "FileResult is either null or not deserializable!")
-                return
-            }
-
-            val outFileName = fileResult.desiredNewName.ifBlank { File(fileResult.file).nameWithoutExtension }
-
-            val streams = result[KnownEvents.EVENT_READER_RECEIVED_STREAMS.event]?.data as MediaStreams?
-            if (streams == null) {
-                produceErrorMessage(baseMessage, "No streams received!")
-                return
-            }
-
-            val encodeInformation = EncodeArgumentSelector(inputFile = fileResult.file, streams = streams, outFileName = outFileName)
-            produceEncodeMessage(baseMessage, encodeInformation.getVideoAndAudioArguments())
-            encodeInformation.getSubtitleArguments().forEach { s ->
-                produceEncodeMessage(baseMessage, s)
-            }
-        }
-    }
+        this
+    ) {}
 
     init {
         mainListener.listen()
@@ -99,6 +61,46 @@ class EncodedStreams {
             data = data
         )
         messageProducer.sendMessage(KnownEvents.EVENT_READER_ENCODE_GENERATED.event, message)
+    }
+
+    override fun areAllMessagesPresent(currentEvents: List<String>): Boolean {
+        val expected = listOf(KnownEvents.EVENT_READER_RECEIVED_FILE.event, KnownEvents.EVENT_READER_RECEIVED_STREAMS.event)
+        val waitingFor = expected.filter { !currentEvents.contains(it) }
+        logger.info { "Waiting for events: \n ${waitingFor.joinToString("\n\t")}" }
+        return expected.containsAll(currentEvents)
+    }
+
+    override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {
+        logger.info { "All messages are received" }
+        val baseMessage = result[KnownEvents.EVENT_READER_RECEIVED_FILE.event]
+        if (baseMessage == null) {
+            produceErrorMessage(Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "No base message found!")
+            return
+        }
+
+        if (result.values.all { it?.status?.statusType == StatusType.SUCCESS }) {
+
+            return
+        }
+        val fileResult = baseMessage.data as FileWatcher.FileResult?
+        if (fileResult == null) {
+            produceErrorMessage(baseMessage, "FileResult is either null or not deserializable!")
+            return
+        }
+
+        val outFileName = fileResult.desiredNewName.ifBlank { File(fileResult.file).nameWithoutExtension }
+
+        val streams = result[KnownEvents.EVENT_READER_RECEIVED_STREAMS.event]?.data as MediaStreams?
+        if (streams == null) {
+            produceErrorMessage(baseMessage, "No streams received!")
+            return
+        }
+
+        val encodeInformation = EncodeArgumentSelector(inputFile = fileResult.file, streams = streams, outFileName = outFileName)
+        produceEncodeMessage(baseMessage, encodeInformation.getVideoAndAudioArguments())
+        encodeInformation.getSubtitleArguments().forEach { s ->
+            produceEncodeMessage(baseMessage, s)
+        }
     }
 
 
