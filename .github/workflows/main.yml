@@ -17,6 +17,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+
+
       - name: Build CommonCode
         run: |
           cd CommonCode 
@@ -144,6 +146,7 @@ jobs:
             echo "::set-output name=changed::true"
           else
             echo "::set-output name=changed::false"
+            exit 0 
           fi
 
       - name: Build pyMetadata module
