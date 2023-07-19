@@ -131,6 +131,8 @@ jobs:
             bskjon/mediaprocessing-reader:${{ github.sha }}
             bskjon/mediaprocessing-reader:${{ steps.docker-tag.outputs.tag }}
 
+
+
   build-pymetadata:
     if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
@@ -142,15 +144,20 @@ jobs:
       - name: Check if pyMetadata has changed
         id: check-pymetadata
         run: |
-          if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata/) ]]; then
-            echo "::set-output name=changed::true"
+          if [[ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "::set-output name=skip::false"
           else
-            echo "::set-output name=changed::false"
-            exit 0 
+              if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata/) ]]; then
+                echo "::set-output name=skip::false"
+              else
+                echo "::set-output name=skip::true"
+            fi
           fi
+
 
       - name: Build pyMetadata module
         id: build-pymetadata
+        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         run: |
           if [[ "${{ steps.check-pymetadata.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             cd pyMetadata
@@ -162,17 +169,19 @@ jobs:
           fi
 
       - name: Generate Docker image tag
+        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Docker login
+        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: (steps.build-pymetadata.outputs.job_skipped != 'true' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
+        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         uses: docker/build-push-action@v2
         with:
           context: ./pyMetadata
