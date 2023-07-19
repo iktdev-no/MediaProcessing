@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.reader.analyzer
 
+import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.streams.MediaStreams
 import no.iktdev.streamit.content.reader.analyzer.encoding.EncodeArgumentSelector
@@ -15,6 +16,8 @@ import no.iktdev.streamit.library.kafka.listener.sequential.SequentialMessageLis
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
 import org.springframework.stereotype.Service
 import java.io.File
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 class EncodedStreams {
@@ -34,12 +37,14 @@ class EncodedStreams {
         deserializers = EncodedDeserializers().getDeserializers(),
     ) {
         override fun areAllMessagesPresent(currentEvents: List<String>): Boolean {
-            val expected =
-                listOf(KnownEvents.EVENT_READER_RECEIVED_FILE.event, KnownEvents.EVENT_READER_RECEIVED_STREAMS.event)
+            val expected = listOf(KnownEvents.EVENT_READER_RECEIVED_FILE.event, KnownEvents.EVENT_READER_RECEIVED_STREAMS.event)
+            val waitingFor = expected.filter { !currentEvents.contains(it) }
+            logger.info { "Waiting for events: \n ${waitingFor.joinToString("\n\t")}" }
             return expected.containsAll(currentEvents)
         }
 
         override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {
+            logger.info { "All messages are received" }
             val baseMessage = result[KnownEvents.EVENT_READER_RECEIVED_FILE.event]
             if (baseMessage == null) {
                 produceErrorMessage(Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "No base message found!")
