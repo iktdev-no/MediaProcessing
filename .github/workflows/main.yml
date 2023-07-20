@@ -12,46 +12,29 @@ on:
 jobs:
   pre-check:
     runs-on: ubuntu-latest
+    outputs:
+      pyMetadata: ${{ steps.filter.outputs.pyMetadata }}
+      commonCode: ${{ steps.filter.outputs.commonCode }}
+      reader: ${{ steps.filter.outputs.reader }}
+      encode: ${{ steps.filter.outputs.encode }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Select jobs
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "job_run_pyMetadata=true" >> "$GITHUB_ENV"
-            echo "job_run_commonCode=true" >> "$GITHUB_ENV"
-            echo "job_run_reader=true" >> "$GITHUB_ENV"
-            echo "job_run_encode=true" >> "$GITHUB_ENV"
-          else
-            # Checks pyMetadata for changes
-            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} pyMetadata/) ]]; then
-              echo "job_run_pyMetadata=true" >> "$GITHUB_ENV"
-            else
-              echo "job_run_pyMetadata=false" >> "$GITHUB_ENV"
-            fi
-          
-            # Checks CommonCode for changes
-            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} CommonCode/) ]]; then
-              echo "job_run_commonCode=true" >> "$GITHUB_ENV"
-            else
-              echo "job_run_commonCode=false" >> "$GITHUB_ENV"
-            fi
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            pyMetadata:
+              - 'pyMetadata/**'
+            reader:
+              - 'Reader/**'
+            encode:
+              - 'Encode/**'
+            commonCode:
+              - 'CommonCode/**'
 
-            # Checks Reader for changes
-            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} Reader/) ]]; then
-              echo "job_run_reader=true" >> "$GITHUB_ENV"
-            else
-              echo "job_run_reader=false" >> "$GITHUB_ENV"
-            fi
-          
-            # Checks Encode for changes
-            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} Encode/) ]]; then
-              echo "job_run_encode=true" >> "$GITHUB_ENV"
-            else
-              echo "job_run_encode=false" >> "$GITHUB_ENV"
-            fi
-          fi
 
   build-commoncode:
     runs-on: ubuntu-latest
@@ -60,17 +43,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Check if code has changed
-        id: check-commoncode
-        run: |
-          if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} CommonCode/) ]]; then
-            echo "::set-output name=skip::false"
-          else
-            echo "::set-output name=skip::true"
-          fi
-
       - name: Cache CommonCode Gradle dependencies
-        if: steps.check-commoncode.outputs.skip == 'false'
         id: cache-gradle
         uses: actions/cache@v2
         with:
@@ -86,6 +59,7 @@ jobs:
 
   build-encode:
     needs: build-commoncode
+    if: ${{ needs.changes.outputs.encode == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
@@ -94,7 +68,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Cache CommonCode Gradle dependencies
-        if: env.job_run_encode == 'true'
         id: cache-gradle
         uses: actions/cache@v2
         with:
@@ -103,7 +76,6 @@ jobs:
 
 
       - name: Build Encode module
-        if: env.job_run_encode == 'true'
         id: build-encode
         run: |
           cd Encode
@@ -113,19 +85,16 @@ jobs:
 
 
       - name: Generate Docker image tag
-        if: env.job_run_encode == 'true'
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Docker login
-        if: env.job_run_encode == 'true'
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: env.job_run_encode == 'true'
         uses: docker/build-push-action@v2
         with:
           context: ./Encode
@@ -138,14 +107,13 @@ jobs:
   build-reader:
     needs: build-commoncode
     runs-on: ubuntu-latest
+    if: ${{ needs.changes.outputs.reader == 'true' || github.event_name == 'workflow_dispatch' }}
 
     steps:
       - name: Checkout repository
-        if: env.job_run_reader == 'true'
         uses: actions/checkout@v2
 
       - name: Cache CommonCode Gradle dependencies
-        if: env.job_run_reader == 'true'
         id: cache-gradle
         uses: actions/cache@v2
         with:
@@ -154,7 +122,6 @@ jobs:
 
       - name: Build Reader module
         id: build-reader
-        if: env.job_run_reader == 'true'
         run: |
           cd Reader
           chmod +x ./gradlew
@@ -162,19 +129,16 @@ jobs:
           echo "Build completed"
 
       - name: Generate Docker image tag
-        if: env.job_run_reader == 'true'
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Docker login
-        if: env.job_run_reader == 'true'
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: env.job_run_reader == 'true'
         uses: docker/build-push-action@v2
         with:
           context: ./Reader
@@ -188,16 +152,15 @@ jobs:
 
   build-pymetadata:
     needs: pre-check
+    if:  ${{ needs.changes.outputs.pyMetadata == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        if: env.job_run_pyMetadata == 'true'
         uses: actions/checkout@v2
 
       - name: Build pyMetadata module
         id: build-pymetadata
-        if: env.job_run_pyMetadata == 'true'
         run: |
           if [[ "${{ steps.check-pymetadata.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             cd pyMetadata
@@ -209,19 +172,16 @@ jobs:
           fi
 
       - name: Generate Docker image tag
-        if: env.job_run_pyMetadata == 'true'
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Docker login
-        if: env.job_run_pyMetadata == 'true'
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: env.job_run_pyMetadata == 'true'
         uses: docker/build-push-action@v2
         with:
           context: ./pyMetadata
