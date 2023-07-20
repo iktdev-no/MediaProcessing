@@ -131,10 +131,11 @@ class MessageHandlerThread(threading.Thread):
                     logger.info("Cache hit for %s", data_value)
                     result = cache_result
                 else:
+                    logger.info("Not in cache: %s", data_value)
                     logger.info("Searching in sources for information about %s", data_value)
                     result = self.perform_action(title=data_value)
                     if (result.statusType == "SUCCESS"):
-                        logger.info("Storing response for %s in in-memory cache")
+                        logger.info("Storing response for %s in in-memory cache", data_value)
                         ResultCache.add(data_value, result)
 
 
