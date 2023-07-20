@@ -35,7 +35,7 @@ class ContentDeterminate: DefaultKafkaReader("contentDeterminate"), ISequentialM
 
 
     override fun getRequiredMessages(): List<String> {
-        return listOf(KafkaEvents.EVENT_READER_RECEIVED_FILE.event, KafkaEvents.EVENT_METADATA_OBTAINED.event)
+        return mainListener.subAccepts + listOf(mainListener.accept)
     }
 
     override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {

@@ -46,7 +46,7 @@ class EncodedStreams : ISequentialMessageEvent {
 
 
     override fun getRequiredMessages(): List<String> {
-        return listOf(KafkaEvents.EVENT_READER_RECEIVED_FILE.event, KafkaEvents.EVENT_READER_RECEIVED_STREAMS.event)
+        return mainListener.subAccepts + listOf(mainListener.accept)
     }
 
     override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {
