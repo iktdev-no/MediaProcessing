@@ -11,6 +11,7 @@ from sources.result import DataResult, Metadata
 from sources.anii import metadata as AniiMetadata
 from sources.imdb import metadata as ImdbMetadata
 from sources.mal import metadata as MalMetadata
+from sources.cache import ResultCache
 
 # Konfigurer Kafka-forbindelsen
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
@@ -123,8 +124,19 @@ class MessageHandlerThread(threading.Thread):
             if status_type == 'SUCCESS':
                 data_value = self.message.value['data']["title"]
 
-                # Utfør handlingen basert på verdien
-                result = self.perform_action(title=data_value)
+                result = None # Will be assigned by either cache_result or sel.perform_action
+                print(f"Checking cache for offloading")
+                cache_result = ResultCache.get(data_value)
+                if cache_result:
+                    print(f"Cache hit for {data_value}")
+                    result = cache_result
+                else:
+                    print(f"Searching in sources for infomration about {data_value}")
+                    result = self.perform_action(title=data_value)
+                    if (result.statusType == "SUCCESS"):
+                        print(f"Storing response for {data_value} in-memory cache")
+                        ResultCache.add(data_value, result)
+
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
 
