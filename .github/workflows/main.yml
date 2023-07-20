@@ -152,7 +152,7 @@ jobs:
 
   build-pymetadata:
     needs: pre-check
-    if:  ${{ needs.changes.outputs.pyMetadata == 'true' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    if:  ${{ needs.changes.outputs.pyMetadata == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     steps:
