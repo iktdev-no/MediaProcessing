@@ -10,9 +10,52 @@ on:
   workflow_dispatch:
 
 jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Select jobs
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "job_run_pyMetadata=true" >> "$GITHUB_ENV"
+            echo "job_run_commonCode=true" >> "$GITHUB_ENV"
+            echo "job_run_reader=true" >> "$GITHUB_ENV"
+            echo "job_run_encode=true" >> "$GITHUB_ENV"
+          else
+            # Checks pyMetadata for changes
+            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} pyMetadata/) ]]; then
+              echo "job_run_pyMetadata=true" >> "$GITHUB_ENV"
+            else
+              echo "job_run_pyMetadata=false" >> "$GITHUB_ENV"
+            fi
+          
+            # Checks CommonCode for changes
+            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} CommonCode/) ]]; then
+              echo "job_run_commonCode=true" >> "$GITHUB_ENV"
+            else
+              echo "job_run_commonCode=false" >> "$GITHUB_ENV"
+            fi
+
+            # Checks Reader for changes
+            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} Reader/) ]]; then
+              echo "job_run_reader=true" >> "$GITHUB_ENV"
+            else
+              echo "job_run_reader=false" >> "$GITHUB_ENV"
+            fi
+          
+            # Checks Encode for changes
+            if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.sha }} Encode/) ]]; then
+              echo "job_run_encode=true" >> "$GITHUB_ENV"
+            else
+              echo "job_run_encode=false" >> "$GITHUB_ENV"
+            fi
+          fi
+
   build-commoncode:
     runs-on: ubuntu-latest
-
+    needs: pre-check
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -105,8 +148,7 @@ jobs:
   build-reader:
     needs: build-commoncode
     runs-on: ubuntu-latest
-
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    if: env.job_run_reader == 'true'
 
     steps:
       - name: Checkout repository
@@ -165,26 +207,13 @@ jobs:
 
 
   build-pymetadata:
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    needs: pre-check
+    if: env.job_run_pyMetadata == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Check if pyMetadata has changed
-        id: check-pymetadata
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "::set-output name=skip::false"
-          else
-              if [[ $(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} pyMetadata/) ]]; then
-                echo "::set-output name=skip::false"
-              else
-                echo "::set-output name=skip::true"
-            fi
-          fi
-
 
       - name: Build pyMetadata module
         id: build-pymetadata
@@ -200,19 +229,16 @@ jobs:
           fi
 
       - name: Generate Docker image tag
-        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         id: docker-tag
         run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
 
       - name: Docker login
-        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        if: steps.check-pymetadata.outputs.skip == 'false' # skip dette trinnet hvis pyMetadata ikke har endringer
         uses: docker/build-push-action@v2
         with:
           context: ./pyMetadata
