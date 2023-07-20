@@ -99,7 +99,7 @@ class KafkaConsumerThread(threading.Thread):
                     handler_thread = MessageHandlerThread(message)
                     handler_thread.start()
                 else:
-                    logger.info("Ignorert message: key=%s, value=%s", message.key, message.value)
+                    logger.info("Ignorert message: key=%s", message.key)
 
         consumer.close()
         logger.info("Kafka Consumer stopped")
@@ -125,16 +125,16 @@ class MessageHandlerThread(threading.Thread):
                 data_value = self.message.value['data']["title"]
 
                 result = None # Will be assigned by either cache_result or sel.perform_action
-                print(f"Checking cache for offloading")
+                logger.info("Checking cache for offloading")
                 cache_result = ResultCache.get(data_value)
                 if cache_result:
-                    print(f"Cache hit for {data_value}")
+                    logger.info("Cache hit for %s", data_value)
                     result = cache_result
                 else:
-                    print(f"Searching in sources for infomration about {data_value}")
+                    logger.info("Searching in sources for information about %s", data_value)
                     result = self.perform_action(title=data_value)
                     if (result.statusType == "SUCCESS"):
-                        print(f"Storing response for {data_value} in-memory cache")
+                        logger.info("Storing response for %s in in-memory cache")
                         ResultCache.add(data_value, result)
 
 
