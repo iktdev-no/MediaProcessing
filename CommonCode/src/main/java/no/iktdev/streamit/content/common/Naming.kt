@@ -36,36 +36,16 @@ class Naming(val fileName: String) {
             }
 
             else -> cleanedFileName
-        }
+        }.trim()
     }
 
     fun guessDesiredTitle(): String {
         val desiredFileName = guessDesiredFileName()
-        return if (desiredFileName.contains(" - ")) {
+        val result = if (desiredFileName.contains(" - ")) {
             return desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
         } else desiredFileName
-    }
 
-
-    /**
-     * Checks whether the filename contains the keyword movie, if so, default to movie
-     */
-    fun doesContainMovieKeywords(): Boolean {
-        return getMatch("[(](?<=\\()movie(?=\\))[)]")?.isBlank() ?: false
-    }
-
-    /**
-     * @return not null if matches "S01E01"
-     */
-    fun isSeasonEpisodeDefined(): String? {
-        return getMatch("(?i)S[0-9]+E[0-9]+(?i)")
-    }
-
-    /**
-     * @return not null if matches " 2020 " or ".2020."
-     */
-    fun isDefinedWithYear(): String? {
-        return getMatch("[ .][0-9]{4}[ .]")
+        return result.trim()
     }
 
 

@@ -1,6 +1,5 @@
 package no.iktdev.streamit.content.reader.streams
 
-import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
@@ -8,19 +7,19 @@ import no.iktdev.streamit.content.common.deamon.Daemon
 import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.reader.ReaderEnv
 import no.iktdev.streamit.content.reader.fileWatcher.FileWatcher
-import no.iktdev.streamit.library.kafka.KnownEvents
-import no.iktdev.streamit.library.kafka.KnownEvents.EVENT_READER_RECEIVED_FILE
+import no.iktdev.streamit.library.kafka.KafkaEvents
+import no.iktdev.streamit.library.kafka.KafkaEvents.EVENT_READER_RECEIVED_FILE
+import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
-import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
-import no.iktdev.streamit.library.kafka.listener.EventMessageListener
 import no.iktdev.streamit.library.kafka.listener.SimpleMessageListener
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 
 private val logger = KotlinLogging.logger {}
+
 @Service
 class StreamsReader {
 
@@ -68,7 +67,7 @@ class StreamsReader {
                 }
 
                 val message = Message(referenceId = data.value().referenceId, status = Status( statusType =  if (resultCode == 0) StatusType.SUCCESS else StatusType.ERROR), data = output.joinToString("\n"))
-                messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_STREAMS.event, message)
+                messageProducer.sendMessage(KafkaEvents.EVENT_READER_RECEIVED_STREAMS.event, message)
             }
 
         }.listen()

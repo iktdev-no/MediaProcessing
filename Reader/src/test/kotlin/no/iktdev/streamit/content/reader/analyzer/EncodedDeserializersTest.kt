@@ -1,6 +1,7 @@
 package no.iktdev.streamit.content.reader.analyzer
 
 import no.iktdev.streamit.content.common.streams.MediaStreams
+import no.iktdev.streamit.content.reader.analyzer.encoding.EncodedDeserializers
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*

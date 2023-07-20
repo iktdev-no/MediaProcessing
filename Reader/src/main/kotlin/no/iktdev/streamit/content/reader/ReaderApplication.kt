@@ -1,6 +1,6 @@
 package no.iktdev.streamit.content.reader
 
-import no.iktdev.streamit.content.reader.analyzer.encoding.PreferenceReader
+import no.iktdev.streamit.content.reader.analyzer.encoding.helpers.PreferenceReader
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
@@ -10,6 +10,8 @@ class ReaderApplication
 
 val preference = PreferenceReader().getPreference()
 private var context: ApplicationContext? = null
+
+@Suppress("unused")
 fun getContext(): ApplicationContext? {
     return context
 }

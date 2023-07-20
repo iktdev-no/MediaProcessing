@@ -10,13 +10,11 @@ import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.Naming
 
-import no.iktdev.streamit.content.reader.ReaderEnv
-import no.iktdev.streamit.library.kafka.KnownEvents
+import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
-import no.iktdev.streamit.library.kafka.listener.EventMessageListener
 import no.iktdev.streamit.library.kafka.listener.SimpleMessageListener
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -53,7 +51,7 @@ class FileWatcher: FileWatcherEvents {
             }
         }
 
-        object : SimpleMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(KnownEvents.REQUEST_FILE_READ.event)) {
+        object : SimpleMessageListener(CommonConfig.kafkaTopic, defaultConsumer, listOf(KafkaEvents.REQUEST_FILE_READ.event)) {
             override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
                 if (data.value().status.statusType == StatusType.SUCCESS) {
                     if (data.value().data is String) {
@@ -78,10 +76,10 @@ class FileWatcher: FileWatcherEvents {
         val message = Message(
             referenceId = file.id,
             status = Status(StatusType.SUCCESS),
-            data = FileResult(file = file.file.absolutePath, title = naming.guessDesiredTitle(), desiredNewName = naming.guessDesiredFileName())
+            data = FileResult(file = file.file.absolutePath, title = naming.guessDesiredTitle(), sanitizedName = naming.guessDesiredFileName())
         )
         logger.debug { "Producing message: ${Gson().toJson(message)}" }
-        messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_FILE.event, message)
+        messageProducer.sendMessage(KafkaEvents.EVENT_READER_RECEIVED_FILE.event, message)
     }
 
     override fun onFilePending(file: PendingFile) {
@@ -89,7 +87,7 @@ class FileWatcher: FileWatcherEvents {
             status = Status(StatusType.PENDING),
             data = FileResult(file = file.file.absolutePath)
         )
-        messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_FILE.event , message)
+        messageProducer.sendMessage(KafkaEvents.EVENT_READER_RECEIVED_FILE.event , message)
     }
 
     override fun onFileFailed(file: PendingFile) {
@@ -97,7 +95,7 @@ class FileWatcher: FileWatcherEvents {
             status = Status(StatusType.ERROR),
             data = file.file.absolutePath
         )
-        messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_FILE.event , message)
+        messageProducer.sendMessage(KafkaEvents.EVENT_READER_RECEIVED_FILE.event , message)
     }
 
     override fun onFileRemoved(file: PendingFile) {
@@ -105,13 +103,13 @@ class FileWatcher: FileWatcherEvents {
             status = Status(StatusType.IGNORED),
             data = file.file.absolutePath
         )
-        messageProducer.sendMessage(KnownEvents.EVENT_READER_RECEIVED_FILE.event , message)
+        messageProducer.sendMessage(KafkaEvents.EVENT_READER_RECEIVED_FILE.event , message)
     }
 
     data class FileResult(
         val file: String,
         val title: String = "",
-        val desiredNewName: String = ""
+        val sanitizedName: String = ""
     )
 
 }

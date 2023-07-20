@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.reader.analyzer.encoding
+package no.iktdev.streamit.content.reader.analyzer.encoding.helpers
 
 import no.iktdev.streamit.content.common.streams.AudioStream
 import no.iktdev.streamit.content.common.streams.MediaStreams

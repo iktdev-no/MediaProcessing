@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.reader.analyzer.encoding
+package no.iktdev.streamit.content.reader.analyzer.encoding.helpers
 
 import com.google.gson.Gson
 import no.iktdev.streamit.content.reader.ReaderEnv

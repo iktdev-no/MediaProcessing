@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha45")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha47")
     implementation("no.iktdev:exfl:0.0.8-SNAPSHOT")
 
 
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
 
     implementation(project(":CommonCode"))
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
@@ -47,6 +48,7 @@ dependencies {
 
 
 }
+
 
 tasks.test {
     useJUnitPlatform()
