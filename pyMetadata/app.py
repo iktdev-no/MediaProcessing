@@ -5,6 +5,7 @@ import os
 import uuid
 import threading
 import json
+import time
 from kafka import KafkaConsumer, KafkaProducer
 from fuzzywuzzy import fuzz
 from sources.result import DataResult, Metadata
@@ -100,6 +101,8 @@ class KafkaConsumerThread(threading.Thread):
                     handler_thread.start()
                 else:
                     logger.info("Ignorert message: key=%s", message.key)
+            # Introduce a small sleep to reduce CPU usage
+            time.sleep(1)
 
         consumer.close()
         logger.info("Kafka Consumer stopped")
