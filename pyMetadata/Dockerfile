@@ -1,5 +1,6 @@
 # Bruk en passende baseimage for Python-applikasjonen din
-FROM python:3.8-slim-buster
+FROM python:3.11
+ #FROM python:3.8-slim-buster
 
 # Sett arbeidskatalogen til /app
 WORKDIR /app
