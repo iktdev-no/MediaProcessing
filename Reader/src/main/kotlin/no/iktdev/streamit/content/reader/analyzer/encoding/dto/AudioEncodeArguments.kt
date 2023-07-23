@@ -3,7 +3,7 @@ package no.iktdev.streamit.content.reader.analyzer.encoding.dto
 import no.iktdev.streamit.content.common.streams.AudioStream
 import no.iktdev.streamit.content.reader.preference
 
-class AudioEncodeArguments(val audio: AudioStream) {
+class AudioEncodeArguments(val audio: AudioStream, val index: Int) {
 
     fun isAudioCodecEqual() = audio.codec_name.lowercase() == preference.audio.codec.lowercase()
 
@@ -18,7 +18,7 @@ class AudioEncodeArguments(val audio: AudioStream) {
         } else if (!isAudioCodecEqual()) {
             result.addAll(listOf("-c:a", preference.audio.codec))
         } else result.addAll(listOf("-acodec", "copy"))
-        result.addAll(listOf("-map", "0:a:${audio.index}"))
+        result.addAll(listOf("-map", "0:a:${index}"))
         return result
     }
 }

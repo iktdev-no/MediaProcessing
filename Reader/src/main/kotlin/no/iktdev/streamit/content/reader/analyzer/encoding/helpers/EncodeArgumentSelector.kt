@@ -50,21 +50,24 @@ class EncodeArgumentSelector(val collection: String, val inputFile: String, val 
         else {
             val outFileName = "$outFileName.mp4"
             val outFile = CommonConfig.outgoingContent.using(collection, outFileName)
+            val audioIndex = obtainAudioStreams().indexOf(selectedAudio)
+            val videoIndex = obtainVideoStreams().indexOf(selectedVideo)
             EncodeWork(
                 collection = collection,
                 inFile = inputFile,
-                arguments = VideoEncodeArguments(selectedVideo).getVideoArguments() +
-                        AudioEncodeArguments(selectedAudio).getAudioArguments(),
+                arguments = VideoEncodeArguments(selectedVideo, videoIndex).getVideoArguments() +
+                        AudioEncodeArguments(selectedAudio, audioIndex).getAudioArguments(),
                 outFile = outFile.absolutePath
             )
         }
     }
 
     fun getSubtitleArguments(): List<ExtractWork> {
-        val subtitleStreams = SubtitleStreamSelector(streams.streams.filterIsInstance<SubtitleStream>())
+        val availableSubtitleStreams = streams.streams.filterIsInstance<SubtitleStream>()
+        val subtitleStreams = SubtitleStreamSelector(availableSubtitleStreams)
 
         return subtitleStreams.getDesiredStreams().map {
-            val args = SubtitleEncodeArguments(it)
+            val args = SubtitleEncodeArguments(it, availableSubtitleStreams.indexOf(it))
             val language = it.tags.language ?: "eng"
             val outFileName = "$outFileName.${subtitleStreams.getFormatToCodec(it.codec_name)}"
             val outFile = CommonConfig.outgoingContent.using(collection, "sub", language, outFileName)

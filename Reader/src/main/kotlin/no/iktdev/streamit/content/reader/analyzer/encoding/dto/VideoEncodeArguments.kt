@@ -3,7 +3,7 @@ package no.iktdev.streamit.content.reader.analyzer.encoding.dto
 import no.iktdev.streamit.content.common.streams.VideoStream
 import no.iktdev.streamit.content.reader.preference
 
-class VideoEncodeArguments(val video: VideoStream) {
+class VideoEncodeArguments(val video: VideoStream, val index: Int) {
 
     fun isVideoCodecEqual() = video.codec_name == getCorrectCodec()
 
@@ -19,7 +19,7 @@ class VideoEncodeArguments(val video: VideoStream) {
         if (preference.video.pixelFormatPassthrough.none { it == video.pix_fmt }) {
             result.addAll(listOf("-pix_fmt", preference.video.pixelFormat))
         }
-        result.addAll(listOf("-map", "0:v:${video.index}"))
+        result.addAll(listOf("-map", "0:v:${index}"))
         return result
     }
 
