@@ -40,15 +40,20 @@ class RunnerCoordinator {
 
     fun addEncodeMessageToQueue(message: Message) {
         encodeExecutor.execute {
-            runBlocking {
-                if (message.data is EncodeWork) {
-                    val data: EncodeWork = message.data as EncodeWork
-                    val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
-                    encodeDaemon.runUsingWorkItem()
-                } else {
-                    producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork")))
+            try {
+                runBlocking {
+                    if (message.data is EncodeWork) {
+                        val data: EncodeWork = message.data as EncodeWork
+                        val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
+                        encodeDaemon.runUsingWorkItem()
+                    } else {
+                        producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork")))
+                    }
                 }
+            } catch (e: Exception) {
+                producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
             }
+
         }
         producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.PENDING)))
     }
@@ -56,12 +61,16 @@ class RunnerCoordinator {
     fun addExtractMessageToQueue(message: Message) {
         extractExecutor.execute {
             runBlocking {
-                if (message.data is ExtractWork) {
-                    val data: ExtractWork = message.data as ExtractWork
-                    val extractDaemon = ExtractDaemon(message.referenceId, data, extractListener)
-                    extractDaemon.runUsingWorkItem()
-                } else {
-                    producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of ExtractWork")))
+                try {
+                    if (message.data is ExtractWork) {
+                        val data: ExtractWork = message.data as ExtractWork
+                        val extractDaemon = ExtractDaemon(message.referenceId, data, extractListener)
+                        extractDaemon.runUsingWorkItem()
+                    } else {
+                        producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of ExtractWork")))
+                    }
+                } catch (e: Exception) {
+                    producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
                 }
             }
         }

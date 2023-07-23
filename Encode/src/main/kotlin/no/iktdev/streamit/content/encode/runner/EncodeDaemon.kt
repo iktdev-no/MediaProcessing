@@ -14,10 +14,14 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     var outputCache = observableListOf<String>()
     private val decoder = ProgressDecoder()
     private fun produceProgress(items: List<String>) {
-        val progress = decoder.parseVideoProgress(items)
-        if (progress != null) {
-            daemonInterface.onProgress(referenceId, work, progress)
-            outputCache.clear()
+        try {
+            val progress = decoder.parseVideoProgress(items)
+            if (progress != null) {
+                daemonInterface.onProgress(referenceId, work, progress)
+                outputCache.clear()
+            }
+        } catch (e: Exception) {
+            e.message
         }
     }
 

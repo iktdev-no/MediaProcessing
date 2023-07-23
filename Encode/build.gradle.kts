@@ -23,7 +23,7 @@ repositories {
 dependencies {
     implementation(project(":CommonCode"))
 
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha63")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha69")
     implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
