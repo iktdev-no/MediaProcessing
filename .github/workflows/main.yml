@@ -57,7 +57,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('CommonCode/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build CommonCode
-        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.commonCode == 'true'
+        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.commonCode == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           cd CommonCode 
           chmod +x ./gradlew
