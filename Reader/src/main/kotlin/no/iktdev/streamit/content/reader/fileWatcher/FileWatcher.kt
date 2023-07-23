@@ -9,6 +9,7 @@ import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.Naming
+import no.iktdev.streamit.content.common.dto.reader.FileResult
 
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
@@ -106,10 +107,6 @@ class FileWatcher: FileWatcherEvents {
         messageProducer.sendMessage(KafkaEvents.EVENT_READER_RECEIVED_FILE.event , message)
     }
 
-    data class FileResult(
-        val file: String,
-        val title: String = "",
-        val sanitizedName: String = ""
-    )
+
 
 }

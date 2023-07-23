@@ -8,6 +8,6 @@ interface IDaemon {
 
     fun onEnded() {}
 
-    fun onError()
+    fun onError(code: Int)
 
 }

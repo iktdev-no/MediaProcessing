@@ -7,9 +7,9 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class Daemon(open val executable: String, val parameters: List<String>, val daemonInterface: IDaemon) {
+open class Daemon(open val executable: String, val daemonInterface: IDaemon) {
     var executor: ProcessResult? = null
-    suspend fun run(): Int {
+    open suspend fun run(parameters: List<String>): Int {
         daemonInterface.onStarted()
         executor = process(executable, *parameters.toTypedArray(),
             stdout = Redirect.CAPTURE,
@@ -20,7 +20,7 @@ class Daemon(open val executable: String, val parameters: List<String>, val daem
         val resultCode = executor?.resultCode ?: -1
         if (resultCode == 0) {
             daemonInterface.onEnded()
-        } else daemonInterface.onError()
+        } else daemonInterface.onError(resultCode)
         return resultCode
     }
 }

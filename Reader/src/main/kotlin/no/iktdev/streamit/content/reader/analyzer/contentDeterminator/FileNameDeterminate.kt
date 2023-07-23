@@ -1,5 +1,9 @@
 package no.iktdev.streamit.content.reader.analyzer.contentDeterminator
 
+import no.iktdev.streamit.content.common.dto.reader.EpisodeInfo
+import no.iktdev.streamit.content.common.dto.reader.MovieInfo
+import no.iktdev.streamit.content.common.dto.reader.VideoInfo
+
 class FileNameDeterminate(val title: String, val sanitizedName: String, val ctype: ContentType = ContentType.UNDEFINED) {
 
     enum class ContentType {
@@ -8,7 +12,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         UNDEFINED
     }
 
-    fun getDeterminedFileName(): String {
+    fun getDeterminedFileName(): VideoInfo? {
         return when (ctype) {
             ContentType.MOVIE -> determineMovieFileName()
             ContentType.SERIE -> determineSerieFileName()
@@ -16,23 +20,23 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         }
     }
 
-    private fun determineMovieFileName(): String {
+    private fun determineMovieFileName(): MovieInfo? {
         val movieEx = MovieEx(title, sanitizedName)
         val result = when {
             movieEx.isDefinedWithYear() != null -> sanitizedName.replace(movieEx.isDefinedWithYear()!!, "").trim()
             movieEx.doesContainMovieKeywords() -> sanitizedName.replace(Regex("(?i)\\s*\\(\\s*movie\\s*\\)\\s*"), "").trim()
             else -> title
         }
-        return result
+        return MovieInfo(title, result)
     }
 
-    private fun determineSerieFileName(): String {
+    private fun determineSerieFileName(): EpisodeInfo? {
         val serieEx = SerieEx(title, sanitizedName)
         val (season, episode) = serieEx.findSeasonAndEpisode(sanitizedName)
         val episodeNumberSingle = serieEx.findEpisodeNumber()
 
         val seasonNumber = season ?: "1"
-        val episodeNumber = episode ?: (episodeNumberSingle ?: return sanitizedName)
+        val episodeNumber = episode ?: (episodeNumberSingle ?: return null)
         val seasonEpisodeCombined = serieEx.getSeasonEpisodeCombined(seasonNumber, episodeNumber)
         val episodeTitle = serieEx.findEpisodeTitle()
 
@@ -50,11 +54,11 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
 
             }
         } else title
-
-        return "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else "- $episodeTitle"}".trim()
+        val fullName = "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else "- $episodeTitle"}".trim()
+        return EpisodeInfo(title, episodeNumber.toInt(), seasonNumber.toInt(), episodeTitle, fullName)
     }
 
-    private fun determineUndefinedFileName(): String {
+    private fun determineUndefinedFileName(): VideoInfo? {
         val serieEx = SerieEx(title, sanitizedName)
         val (season, episode) = serieEx.findSeasonAndEpisode(sanitizedName)
         return if (sanitizedName.contains(" - ") || season != null || episode != null) {

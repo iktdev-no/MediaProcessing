@@ -106,9 +106,9 @@ jobs:
           context: ./Encode
           push: true
           tags: |
-            bskjon/media-processing--encode:latest
-            bskjon/media-processing--encode:${{ github.sha }}
-            bskjon/media-processing--encode:${{ steps.docker-tag.outputs.tag }}
+            bskjon/media-processing-encode:latest
+            bskjon/media-processing-encode:${{ github.sha }}
+            bskjon/media-processing-encode:${{ steps.docker-tag.outputs.tag }}
 
   build-reader:
     needs: build-commoncode

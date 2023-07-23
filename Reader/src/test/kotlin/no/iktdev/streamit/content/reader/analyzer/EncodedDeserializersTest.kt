@@ -1,7 +1,7 @@
 package no.iktdev.streamit.content.reader.analyzer
 
+import no.iktdev.streamit.content.common.deserializers.MediaStreamsDeserializer
 import no.iktdev.streamit.content.common.streams.MediaStreams
-import no.iktdev.streamit.content.reader.analyzer.encoding.EncodedDeserializers
 import no.iktdev.streamit.library.kafka.consumers.DefaultConsumer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
@@ -9,13 +9,12 @@ import org.junit.jupiter.api.Test
 
 class EncodedDeserializersTest {
 
-    val deserializer = EncodedDeserializers()
     val consumer = DefaultConsumer.GsonDeserializer()
 
     @Test
     fun testDeserializationOfMediaStreams() {
         val message = consumer.deserialize("demo", messageMediaStream.toByteArray())
-        val result = deserializer.mediaStreams.deserialize(message)
+        val result = MediaStreamsDeserializer().deserialize(message)
         assertInstanceOf(MediaStreams::class.java, result)
         assertThat(result?.streams).isNotNull()
         assertThat(result?.streams).isNotEmpty()

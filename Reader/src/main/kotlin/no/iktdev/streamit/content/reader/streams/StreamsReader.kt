@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.deamon.Daemon
 import no.iktdev.streamit.content.common.deamon.IDaemon
+import no.iktdev.streamit.content.common.dto.reader.FileResult
 import no.iktdev.streamit.content.reader.ReaderEnv
 import no.iktdev.streamit.content.reader.fileWatcher.FileWatcher
 import no.iktdev.streamit.library.kafka.KafkaEvents
@@ -35,7 +36,7 @@ class StreamsReader {
                     logger.info { "Ignoring event: ${data.key()} as status is not Success!" }
                     return
                 }
-                val dataValue = data.value().dataAs(FileWatcher.FileResult::class.java)
+                val dataValue = data.value().dataAs(FileResult::class.java)
 
                 if (dataValue == null) {
                     logger.info { "Ignoring event: ${data.key()} as values is not of expected type!" }
@@ -43,7 +44,7 @@ class StreamsReader {
                 }
                 logger.info { "Preparing Probe for ${dataValue.file}" }
                 val output = mutableListOf<String>()
-                val d = Daemon(executable = ReaderEnv.ffprobe, parameters =  listOf("-v", "quiet", "-print_format", "json", "-show_streams", dataValue.file), daemonInterface = object:
+                val d = Daemon(executable = ReaderEnv.ffprobe, daemonInterface = object:
                     IDaemon {
                     override fun onOutputChanged(line: String) {
                         output.add(line)
@@ -53,7 +54,7 @@ class StreamsReader {
                         logger.info { "Probe started for ${dataValue.file}" }
                     }
 
-                    override fun onError() {
+                    override fun onError(code: Int) {
                         logger.error { "An error occurred for ${dataValue.file}" }
                     }
 
@@ -63,7 +64,8 @@ class StreamsReader {
 
                 })
                 val resultCode = runBlocking {
-                    d.run()
+                    val args = listOf("-v", "quiet", "-print_format", "json", "-show_streams", dataValue.file)
+                    d.run(args)
                 }
 
                 val message = Message(referenceId = data.value().referenceId, status = Status( statusType =  if (resultCode == 0) StatusType.SUCCESS else StatusType.ERROR), data = output.joinToString("\n"))

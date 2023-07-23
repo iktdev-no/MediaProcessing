@@ -1,16 +1,16 @@
 package no.iktdev.streamit.content.reader.analyzer.encoding.helpers
 
-import no.iktdev.streamit.content.common.streams.AudioStream
-import no.iktdev.streamit.content.common.streams.MediaStreams
-import no.iktdev.streamit.content.common.streams.SubtitleStream
-import no.iktdev.streamit.content.common.streams.VideoStream
+import no.iktdev.exfl.using
+import no.iktdev.streamit.content.common.CommonConfig
+import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
+import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
+import no.iktdev.streamit.content.common.streams.*
 import no.iktdev.streamit.content.reader.analyzer.encoding.dto.AudioEncodeArguments
-import no.iktdev.streamit.content.reader.analyzer.encoding.dto.EncodeInformation
 import no.iktdev.streamit.content.reader.analyzer.encoding.dto.SubtitleEncodeArguments
 import no.iktdev.streamit.content.reader.analyzer.encoding.dto.VideoEncodeArguments
 import no.iktdev.streamit.content.reader.preference
 
-class EncodeArgumentSelector(val inputFile: String, val streams: MediaStreams, val outFileName: String) {
+class EncodeArgumentSelector(val collection: String, val inputFile: String, val streams: MediaStreams, val outFileName: String) {
     var defaultSelectedVideo: VideoStream? = defaultSelectedVideo()
     var defaultSelectedAudio: AudioStream? = defaultSelectedAudio()
 
@@ -43,30 +43,40 @@ class EncodeArgumentSelector(val inputFile: String, val streams: MediaStreams, v
     }
 
 
-    fun getVideoAndAudioArguments(): EncodeInformation? {
+    fun getVideoAndAudioArguments(): EncodeWork? {
         val selectedVideo = defaultSelectedVideo
         val selectedAudio = getSelectedAudioBasedOnPreference() ?: defaultSelectedAudio
         return if (selectedVideo == null || selectedAudio == null) return null
         else {
-            EncodeInformation(
-                inputFile = inputFile,
-                outFileName = "$outFileName.mp4",
-                language = selectedAudio.tags.language ?: "eng",
+            val outFileName = "$outFileName.mp4"
+            val outFile = CommonConfig.outgoingContent.using(collection, outFileName)
+            EncodeWork(
+                collection = collection,
+                inFile = inputFile,
                 arguments = VideoEncodeArguments(selectedVideo).getVideoArguments() +
-                        AudioEncodeArguments(selectedAudio).getAudioArguments()
+                        AudioEncodeArguments(selectedAudio).getAudioArguments(),
+                outFile = outFile.absolutePath
             )
         }
     }
 
-    fun getSubtitleArguments(): List<EncodeInformation> {
-        return streams.streams.filterIsInstance<SubtitleStream>().map {
-            val subArgs = SubtitleEncodeArguments(it)
-            EncodeInformation(
-                inputFile = inputFile,
-                outFileName = "$outFileName.${subArgs.getFormatToCodec()}",
-                language = it.tags.language ?: "eng",
-                arguments = subArgs.getSubtitleArguments()
+    fun getSubtitleArguments(): List<ExtractWork> {
+        val subtitleStreams = SubtitleStreamSelector(streams.streams.filterIsInstance<SubtitleStream>())
+
+        return subtitleStreams.getDesiredStreams().map {
+            val args = SubtitleEncodeArguments(it)
+            val language = it.tags.language ?: "eng"
+            val outFileName = "$outFileName.${subtitleStreams.getFormatToCodec(it.codec_name)}"
+            val outFile = CommonConfig.outgoingContent.using(collection, "sub", language, outFileName)
+
+            ExtractWork(
+                collection = collection,
+                language = language,
+                inFile = inputFile,
+                outFile = outFile.absolutePath,
+                arguments = args.getSubtitleArguments(),
             )
         }
+
     }
 }

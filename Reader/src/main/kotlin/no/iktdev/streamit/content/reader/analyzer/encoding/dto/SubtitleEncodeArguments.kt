@@ -11,15 +11,4 @@ class SubtitleEncodeArguments(val subtitle: SubtitleStream) {
         return result
     }
 
-    fun getFormatToCodec(): String? {
-        return when(subtitle.codec_name) {
-            "ass" -> "ass"
-            "subrip" -> "srt"
-            "webvtt", "vtt" -> "vtt"
-            "smi" -> "smi"
-            "hdmv_pgs_subtitle" -> null
-            else -> null
-        }
-    }
-
 }
