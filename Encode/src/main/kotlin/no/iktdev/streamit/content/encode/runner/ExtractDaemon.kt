@@ -15,11 +15,12 @@ class ExtractDaemon(val referenceId: String, val work: ExtractWork, val daemonIn
 
 
     suspend fun runUsingWorkItem(): Int {
-        if (!File(work.outFile).parentFile.exists()) {
-            File(work.outFile).parentFile.mkdirs()
+        val outFile = File(work.outFile)
+        if (!outFile.parentFile.exists()) {
+            outFile.parentFile.mkdirs()
         }
         val adjustedArgs = listOf(
-            "-hide_banner", "-i", "'${work.inFile}'", *work.arguments.toTypedArray(), "'${work.outFile}'",
+            "-hide_banner", "-i", File(work.inFile).absolutePath, *work.arguments.toTypedArray(), outFile.absolutePath,
             "-progress", "pipe:1"
         ) + if (EncodeEnv.allowOverwrite) listOf("-y") else emptyList()
         logger.info { "$referenceId @ ${work.workId} ${adjustedArgs.joinToString(" ")}" }
