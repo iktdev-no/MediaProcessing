@@ -2,6 +2,7 @@ package no.iktdev.streamit.content.encode.runner
 
 import no.iktdev.streamit.content.encode.EncodeEnv
 import kotlinx.coroutines.runBlocking
+import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class RunnerCoordinator {
+    private val logger = KotlinLogging.logger {}
 
     val producer = DefaultProducer(CommonConfig.kafkaTopic)
 
@@ -91,7 +93,7 @@ class RunnerCoordinator {
         }
 
         override fun onProgress(referenceId: String, work: EncodeWork, progress: Progress) {
-            // TODO: Pass to listener
+            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Progress: ${progress.speed}" }
         }
 
         override fun onEnded(referenceId: String, work: EncodeWork) {
