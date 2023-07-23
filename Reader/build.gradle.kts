@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha66")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha67")
     implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
 
     implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha7")
