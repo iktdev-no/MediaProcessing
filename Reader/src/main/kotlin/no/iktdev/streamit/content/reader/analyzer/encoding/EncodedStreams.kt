@@ -31,7 +31,8 @@ class EncodedStreams : DefaultKafkaReader("streamSelector"), ICollectedMessagesE
         consumer = defaultConsumer,
         initiatorEvent = KafkaEvents.EVENT_READER_RECEIVED_FILE,
         completionEvent = KafkaEvents.EVENT_READER_DETERMINED_FILENAME,
-        listener = this
+        listener = this,
+        eventCollectionClass = ResultCollection::class.java
     )
 
     init {
