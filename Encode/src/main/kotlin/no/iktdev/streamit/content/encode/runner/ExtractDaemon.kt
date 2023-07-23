@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.encode.runner
 
+import mu.KotlinLogging
 import no.iktdev.streamit.content.encode.EncodeEnv
 import no.iktdev.exfl.observable.observableListOf
 import no.iktdev.streamit.content.common.deamon.Daemon
@@ -7,6 +8,7 @@ import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import no.iktdev.streamit.content.encode.progress.Progress
 import java.io.File
+private val logger = KotlinLogging.logger {}
 
 class ExtractDaemon(val referenceId: String, val work: ExtractWork, val daemonInterface: IExtractListener): IDaemon {
     var outputCache = observableListOf<String>()
@@ -20,6 +22,7 @@ class ExtractDaemon(val referenceId: String, val work: ExtractWork, val daemonIn
             "-hide_banner", "-i", work.inFile, *work.arguments.toTypedArray(), work.outFile,
             "-progress", "pipe:1"
         ) + if (EncodeEnv.allowOverwrite) listOf("-y") else emptyList()
+        logger.info { "$referenceId @ ${work.workId} ${adjustedArgs.joinToString(" ")}" }
         return Daemon(EncodeEnv.ffmpeg, this).run(adjustedArgs)
     }
 
