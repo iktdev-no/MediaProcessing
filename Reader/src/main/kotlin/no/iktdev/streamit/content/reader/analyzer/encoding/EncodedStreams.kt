@@ -12,60 +12,30 @@ import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
+import no.iktdev.streamit.library.kafka.listener.collector.CollectorMessageListener
+import no.iktdev.streamit.library.kafka.listener.collector.ICollectedMessagesEvent
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
 import no.iktdev.streamit.library.kafka.listener.sequential.ISequentialMessageEvent
 import no.iktdev.streamit.library.kafka.listener.sequential.SequentialMessageListener
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
 
 @Service
-class EncodedStreams : DefaultKafkaReader("encodedStreams"), ISequentialMessageEvent {
+class EncodedStreams : DefaultKafkaReader("streamSelector"), ICollectedMessagesEvent<ResultCollection> {
 
-
-
-    final val mainListener = object : SequentialMessageListener(
+    val collectionListener = CollectorMessageListener<ResultCollection>(
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
-        accept = KafkaEvents.EVENT_READER_RECEIVED_FILE.event,
-        subAccepts = listOf(
-            KafkaEvents.EVENT_READER_RECEIVED_STREAMS.event,
-            KafkaEvents.EVENT_READER_DETERMINED_FILENAME.event
-        ),
-        deserializers = loadDeserializers(),
+        initiatorEvent = KafkaEvents.EVENT_READER_RECEIVED_FILE,
+        completionEvent = KafkaEvents.EVENT_READER_DETERMINED_FILENAME,
         listener = this
-    ) {}
+    )
 
     init {
-        mainListener.listen()
-    }
-
-
-    override fun getRequiredMessages(): List<String> {
-        return mainListener.subAccepts + listOf(mainListener.accept)
-    }
-
-    override fun onAllMessagesProcessed(referenceId: String, result: Map<String, Message?>) {
-        logger.info { "All messages are received" }
-        val fileResultEvent = result[KafkaEvents.EVENT_READER_RECEIVED_FILE.event]
-        val determinedFileNameEvent = result[KafkaEvents.EVENT_READER_DETERMINED_FILENAME.event]
-        val streamEvent = result[KafkaEvents.EVENT_READER_RECEIVED_STREAMS.event]
-
-        val fileResult = if (fileResultEvent != null && fileResultEvent.isSuccessful()) {
-            fileResultEvent.data as FileResult?
-        } else null
-
-        val outFileNameWithoutExtension = if (determinedFileNameEvent != null && determinedFileNameEvent.isSuccessful()) {
-            (determinedFileNameEvent.data as ContentOutName).baseName
-        } else fileResult?.sanitizedName
-
-        val streams = if (streamEvent != null && streamEvent.isSuccessful()) {
-            streamEvent.data as MediaStreams
-        } else null
-
-        createEncodeWork(referenceId, fileResult?.title, fileResult?.file, streams, outFileNameWithoutExtension)
-        createExtractWork(referenceId, fileResult?.title, fileResult?.file, streams, outFileNameWithoutExtension)
+        collectionListener.listen()
     }
 
     fun createEncodeWork(referenceId: String, collection: String?, inFile: String?, streams: MediaStreams?, outFileName: String?) {
@@ -129,6 +99,19 @@ class EncodedStreams : DefaultKafkaReader("encodedStreams"), ISequentialMessageE
             KafkaEvents.EVENT_READER_RECEIVED_STREAMS,
             KafkaEvents.EVENT_READER_DETERMINED_FILENAME
         )
+    }
+
+    override fun onCollectionCompleted(collection: ResultCollection?) {
+        logger.info { "Collection received" }
+        val referenceId = collection?.getRecords()?.firstOrNull()?.value()?.referenceId
+        if (referenceId == null) {
+            logger.warn { "referenceId is null, throwing collection" }
+            return
+        }
+        val outFileNameWithoutExtension: String? = collection.getFileName()?.baseName ?: collection.getFileResult()?.sanitizedName
+
+        createEncodeWork(referenceId, collection.getFileResult()?.title, collection.getFileResult()?.file, collection.getStreams(), outFileNameWithoutExtension)
+        createExtractWork(referenceId, collection.getFileResult()?.title, collection.getFileResult()?.file, collection.getStreams(), outFileNameWithoutExtension)
     }
 
 }

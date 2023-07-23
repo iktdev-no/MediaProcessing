@@ -74,14 +74,16 @@ class ContentDeterminate: DefaultKafkaReader("contentDeterminate"), ISequentialM
             return
         }
 
-        val out = ContentOutName(videoInfo.fullName)
-        produceMessage(KafkaEvents.EVENT_READER_DETERMINED_FILENAME, initMessage, out)
+
 
         if (videoInfo is EpisodeInfo) {
             produceMessage(KafkaEvents.EVENT_READER_DETERMINED_SERIE, initMessage, videoInfo)
         } else if (videoInfo is MovieInfo) {
             produceMessage(KafkaEvents.EVENT_READER_DETERMINED_MOVIE, initMessage, videoInfo)
         }
+
+        val out = ContentOutName(videoInfo.fullName)
+        produceMessage(KafkaEvents.EVENT_READER_DETERMINED_FILENAME, initMessage, out)
     }
 
     final override fun loadDeserializers(): Map<String, IMessageDataDeserialization<*>> {

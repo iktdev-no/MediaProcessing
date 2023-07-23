@@ -7,6 +7,7 @@ class DeserializerRegistry {
     companion object {
         private val _registry = mutableMapOf<KafkaEvents, IMessageDataDeserialization<*>>(
             KafkaEvents.EVENT_READER_RECEIVED_FILE to FileResultDeserializer(),
+            KafkaEvents.EVENT_READER_RECEIVED_STREAMS to MediaStreamsDeserializer(),
             KafkaEvents.EVENT_METADATA_OBTAINED to MetadataResultDeserializer(),
             KafkaEvents.EVENT_READER_DETERMINED_SERIE to EpisodeInfoDeserializer(),
             KafkaEvents.EVENT_READER_DETERMINED_MOVIE to MovieInfoDeserializer(),

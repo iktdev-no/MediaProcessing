@@ -1,6 +1,6 @@
 package no.iktdev.streamit.content.encode.runner
 
-import EncodeEnv
+import no.iktdev.streamit.content.encode.EncodeEnv
 import no.iktdev.exfl.observable.ObservableList
 import no.iktdev.exfl.observable.observableListOf
 import no.iktdev.streamit.content.common.deamon.Daemon

@@ -243,7 +243,7 @@ def main():
 
     # Vent til should_stop er satt til True for å avslutte applikasjonen
     while not should_stop:
-        pass
+        time.sleep(60)
 
     # Stopp consumer-tråden
     consumer_thread.stop()

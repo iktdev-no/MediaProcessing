@@ -1,9 +1,8 @@
 package no.iktdev.streamit.content.encode.runner
 
-import EncodeEnv
+import no.iktdev.streamit.content.encode.EncodeEnv
 import kotlinx.coroutines.runBlocking
 import no.iktdev.streamit.content.common.CommonConfig
-import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import no.iktdev.streamit.content.encode.progress.Progress
