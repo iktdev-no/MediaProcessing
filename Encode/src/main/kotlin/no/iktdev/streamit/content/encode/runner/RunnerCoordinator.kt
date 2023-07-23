@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+private val logger = KotlinLogging.logger {}
 
 @Service
 class RunnerCoordinator {
@@ -47,12 +48,14 @@ class RunnerCoordinator {
                     if (message.data is EncodeWork) {
                         val data: EncodeWork = message.data as EncodeWork
                         val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
+                        logger.info { "${message.referenceId} Starting encoding ${data.workId}" }
                         encodeDaemon.runUsingWorkItem()
                     } else {
                         producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork")))
                     }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
             }
 
@@ -67,11 +70,13 @@ class RunnerCoordinator {
                     if (message.data is ExtractWork) {
                         val data: ExtractWork = message.data as ExtractWork
                         val extractDaemon = ExtractDaemon(message.referenceId, data, extractListener)
+                        logger.info { "${message.referenceId} Starting extraction ${data.workId}" }
                         extractDaemon.runUsingWorkItem()
                     } else {
                         producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of ExtractWork")))
                     }
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
                 }
             }

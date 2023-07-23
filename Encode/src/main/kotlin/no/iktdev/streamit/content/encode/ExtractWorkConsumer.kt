@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.encode
 
+import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.DefaultKafkaReader
 import no.iktdev.streamit.content.common.deserializers.DeserializerRegistry
@@ -14,6 +15,7 @@ import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeseri
 import no.iktdev.streamit.library.kafka.listener.deserializer.deserializeIfSuccessful
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
+private val logger = KotlinLogging.logger {}
 
 @Service
 class ExtractWorkConsumer(private val runnerCoordinator: RunnerCoordinator) : DefaultKafkaReader("extractWork") {
@@ -46,6 +48,7 @@ class ExtractWorkConsumer(private val runnerCoordinator: RunnerCoordinator) : De
         accepts
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
+            logger.info { "${data.value().referenceId}: ${data.key()}" }
             val message = data.value().apply {
                 this.data = ExtractWorkDeserializer().deserializeIfSuccessful(data.value())
             }

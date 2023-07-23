@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.encode
 
+import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.DefaultKafkaReader
 import no.iktdev.streamit.content.common.deserializers.DeserializerRegistry
@@ -14,8 +15,11 @@ import no.iktdev.streamit.library.kafka.listener.deserializer.deserializeIfSucce
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.stereotype.Service
 
+private val logger = KotlinLogging.logger {}
+
 @Service
 class EncodeWorkConsumer(private val runnerCoordinator: RunnerCoordinator) : DefaultKafkaReader("encodeWork") {
+
     lateinit var encodeInstructionsListener: EncodeInformationListener
 
     init {
@@ -45,6 +49,7 @@ class EncodeWorkConsumer(private val runnerCoordinator: RunnerCoordinator) : Def
         accepts
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
+            logger.info { "${data.value().referenceId}: ${data.key()}" }
             val message = data.value().apply {
                 this.data = EncodeWorkDeserializer().deserializeIfSuccessful(data.value())
             }
