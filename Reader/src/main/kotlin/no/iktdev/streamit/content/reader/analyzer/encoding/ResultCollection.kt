@@ -8,11 +8,11 @@ import no.iktdev.streamit.content.common.dto.reader.FileResult
 import no.iktdev.streamit.content.common.streams.MediaStreams
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
-import no.iktdev.streamit.library.kafka.listener.collector.EventCollection
+import no.iktdev.streamit.library.kafka.listener.collector.DefaultEventCollection
 import no.iktdev.streamit.library.kafka.listener.deserializer.deserializeIfSuccessful
 import org.apache.kafka.clients.consumer.ConsumerRecord
 
-class ResultCollection: EventCollection() {
+class ResultCollection: DefaultEventCollection() {
 
     fun getFirstOrNull(events: KafkaEvents): ConsumerRecord<String, Message>? {
         return getRecords().firstOrNull { it.key() == events.event }
