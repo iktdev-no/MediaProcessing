@@ -11,6 +11,7 @@ open class Daemon(open val executable: String, val daemonInterface: IDaemon) {
     var executor: ProcessResult? = null
     open suspend fun run(parameters: List<String>): Int {
         daemonInterface.onStarted()
+        logger.info { "Daemon arguments: $executable ${parameters.toTypedArray()}"  }
         executor = process(executable, *parameters.toTypedArray(),
             stdout = Redirect.CAPTURE,
             stderr = Redirect.CAPTURE,
