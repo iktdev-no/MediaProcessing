@@ -22,7 +22,7 @@ class FileNameDeterminateTest {
             FileNameDeterminate("Iseleve", namedTestData.input, FileNameDeterminate.ContentType.SERIE)
         assertEquals(
             namedTestData.expected,
-            fileNameDeterminate.getDeterminedFileName(),
+            fileNameDeterminate.getDeterminedVideoInfo()?.fullName,
             "Test case: ${namedTestData.input}"
         )
     }
@@ -35,7 +35,7 @@ class FileNameDeterminateTest {
         )
         assertEquals(
             namedTestData.expected,
-            fileNameDeterminate.getDeterminedFileName(),
+            fileNameDeterminate.getDeterminedVideoInfo()?.fullName,
             "Test case: ${namedTestData.input}"
         )
     }
@@ -46,7 +46,7 @@ class FileNameDeterminateTest {
         val fileNameDeterminate = FileNameDeterminate(
             namedTestData.input, namedTestData.input, FileNameDeterminate.ContentType.UNDEFINED
         )
-        assertThat(fileNameDeterminate.getDeterminedFileName()).isEqualTo(namedTestData.expected)
+        assertThat(fileNameDeterminate.getDeterminedVideoInfo()?.fullName).isEqualTo(namedTestData.expected)
     }
 
     @Test
@@ -55,7 +55,7 @@ class FileNameDeterminateTest {
         val fileNameDeterminate = FileNameDeterminate(
             namedTestData.input, namedTestData.input, FileNameDeterminate.ContentType.UNDEFINED
         )
-        assertThat(fileNameDeterminate.getDeterminedFileName()).isEqualTo(namedTestData.expected)
+        assertThat(fileNameDeterminate.getDeterminedVideoInfo()?.fullName).isEqualTo(namedTestData.expected)
     }
 
     companion object {

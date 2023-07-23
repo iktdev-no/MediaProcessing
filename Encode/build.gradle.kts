@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
+
 plugins {
     kotlin("jvm") version "1.8.21"
     id("org.springframework.boot") version "2.5.5"
@@ -43,3 +45,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.bootJar {
+    archiveFileName.set("encoder.jar")
+    launchScript()
+}
+
+tasks.jar {
+    archivesName.set("encoder.jar")
+    archiveBaseName.set("encoder")
+}
+archivesName.set("encoder.jar")

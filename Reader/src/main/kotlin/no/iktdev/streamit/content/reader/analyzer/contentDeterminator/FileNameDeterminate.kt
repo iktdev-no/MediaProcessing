@@ -12,7 +12,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         UNDEFINED
     }
 
-    fun getDeterminedFileName(): VideoInfo? {
+    fun getDeterminedVideoInfo(): VideoInfo? {
         return when (ctype) {
             ContentType.MOVIE -> determineMovieFileName()
             ContentType.SERIE -> determineSerieFileName()
@@ -61,7 +61,8 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
     private fun determineUndefinedFileName(): VideoInfo? {
         val serieEx = SerieEx(title, sanitizedName)
         val (season, episode) = serieEx.findSeasonAndEpisode(sanitizedName)
-        return if (sanitizedName.contains(" - ") || season != null || episode != null) {
+        val episodeNumber = serieEx.findEpisodeNumber()
+        return if ((sanitizedName.contains(" - ") && episodeNumber != null) || season != null || episode != null) {
             determineSerieFileName()
         } else {
             determineMovieFileName()

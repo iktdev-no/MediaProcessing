@@ -62,11 +62,11 @@ class ContentDeterminate: DefaultKafkaReader("contentDeterminate"), ISequentialM
         val metadata = if (metadataMessage?.status?.statusType == StatusType.SUCCESS) metadataMessage.data as Metadata? else null
 
         val videoInfo = if (metadata?.type == null) {
-            FileNameDeterminate(fileResult.title, fileResult.sanitizedName).getDeterminedFileName()
+            FileNameDeterminate(fileResult.title, fileResult.sanitizedName).getDeterminedVideoInfo()
         } else if (metadata.type.lowercase() == "movie") {
-            FileNameDeterminate(fileResult.title, fileResult.sanitizedName, FileNameDeterminate.ContentType.MOVIE).getDeterminedFileName()
+            FileNameDeterminate(fileResult.title, fileResult.sanitizedName, FileNameDeterminate.ContentType.MOVIE).getDeterminedVideoInfo()
         } else {
-            FileNameDeterminate(fileResult.title, fileResult.sanitizedName, FileNameDeterminate.ContentType.SERIE).getDeterminedFileName()
+            FileNameDeterminate(fileResult.title, fileResult.sanitizedName, FileNameDeterminate.ContentType.SERIE).getDeterminedVideoInfo()
         }
 
         if (videoInfo == null) {
