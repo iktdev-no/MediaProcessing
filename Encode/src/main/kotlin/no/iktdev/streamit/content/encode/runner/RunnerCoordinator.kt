@@ -45,13 +45,13 @@ class RunnerCoordinator {
         encodeExecutor.execute {
             try {
                 runBlocking {
-                    if (message.data is EncodeWork) {
+                    if (message.data != null && message.data is EncodeWork) {
                         val data: EncodeWork = message.data as EncodeWork
                         val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
                         logger.info { "${message.referenceId} Starting encoding ${data.workId}" }
                         encodeDaemon.runUsingWorkItem()
                     } else {
-                        producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork")))
+                        producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork or null")))
                     }
                 }
             } catch (e: Exception) {
@@ -67,7 +67,7 @@ class RunnerCoordinator {
         extractExecutor.execute {
             runBlocking {
                 try {
-                    if (message.data is ExtractWork) {
+                    if (message.data != null && message.data is ExtractWork) {
                         val data: ExtractWork = message.data as ExtractWork
                         val extractDaemon = ExtractDaemon(message.referenceId, data, extractListener)
                         logger.info { "${message.referenceId} Starting extraction ${data.workId}" }

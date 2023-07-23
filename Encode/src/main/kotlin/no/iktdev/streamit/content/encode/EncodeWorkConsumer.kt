@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.encode
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.DefaultKafkaReader
@@ -49,7 +50,7 @@ class EncodeWorkConsumer(private val runnerCoordinator: RunnerCoordinator) : Def
         accepts
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
-            logger.info { "${data.value().referenceId}: ${data.key()}" }
+            logger.info { "${data.value().referenceId}: ${data.key()} ${Gson().toJson(data.value())}" }
             val message = data.value().apply {
                 this.data = EncodeWorkDeserializer().deserializeIfSuccessful(data.value())
             }
