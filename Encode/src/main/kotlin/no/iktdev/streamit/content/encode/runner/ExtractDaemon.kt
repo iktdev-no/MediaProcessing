@@ -19,7 +19,7 @@ class ExtractDaemon(val referenceId: String, val work: ExtractWork, val daemonIn
             File(work.outFile).parentFile.mkdirs()
         }
         val adjustedArgs = listOf(
-            "-hide_banner", "-i", work.inFile, *work.arguments.toTypedArray(), work.outFile,
+            "-hide_banner", "-i", "'${work.inFile}'", *work.arguments.toTypedArray(), "'${work.outFile}'",
             "-progress", "pipe:1"
         ) + if (EncodeEnv.allowOverwrite) listOf("-y") else emptyList()
         logger.info { "$referenceId @ ${work.workId} ${adjustedArgs.joinToString(" ")}" }
