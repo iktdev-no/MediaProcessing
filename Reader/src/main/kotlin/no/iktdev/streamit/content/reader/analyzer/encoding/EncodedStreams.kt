@@ -109,7 +109,12 @@ class EncodedStreams : DefaultKafkaReader("streamSelector"), ICollectedMessagesE
             logger.warn { "referenceId is null, throwing collection" }
             return
         }
-        val outFileNameWithoutExtension: String? = collection.getFileName()?.baseName ?: collection.getFileResult()?.sanitizedName
+        val outFileNameWithoutExtension: String? = if (collection.getFileName() != null) {
+            collection.getFileName()?.baseName
+        } else {
+            logger.info { "Getting filename from ${KafkaEvents.EVENT_READER_DETERMINED_FILENAME.event} resulted in null. Falling back to sanitized name" }
+            collection.getFileResult()?.sanitizedName
+        }
 
         createEncodeWork(referenceId, collection.getFileResult()?.title, collection.getFileResult()?.file, collection.getStreams(), outFileNameWithoutExtension)
         createExtractWork(referenceId, collection.getFileResult()?.title, collection.getFileResult()?.file, collection.getStreams(), outFileNameWithoutExtension)

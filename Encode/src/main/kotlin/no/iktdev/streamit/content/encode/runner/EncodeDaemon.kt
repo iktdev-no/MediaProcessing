@@ -24,7 +24,7 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
                 outputCache.clear()
             }
         } catch (e: Exception) {
-            e.message
+            logger.error { e.message }
         }
     }
 
@@ -65,7 +65,6 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     override fun onOutputChanged(line: String) {
         super.onOutputChanged(line)
         outputCache.add(line)
-        logger.info { "std -> $line" }
     }
 
 }
