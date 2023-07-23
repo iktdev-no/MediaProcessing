@@ -65,7 +65,7 @@ jobs:
 
   build-encode:
     needs: build-commoncode
-    if: ${{ needs.pre-check.outputs.encode == 'true' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ needs.pre-check.outputs.encode == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.commonCode == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
@@ -113,7 +113,7 @@ jobs:
   build-reader:
     needs: build-commoncode
     runs-on: ubuntu-latest
-    if: ${{ needs.pre-check.outputs.reader == 'true' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ needs.pre-check.outputs.reader == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.commonCode == 'true' }}
 
     steps:
       - name: Checkout repository
