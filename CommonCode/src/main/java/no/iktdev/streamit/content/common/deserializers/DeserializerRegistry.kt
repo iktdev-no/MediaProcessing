@@ -16,6 +16,7 @@ class DeserializerRegistry {
             KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE to EncodeWorkDeserializer(),
             KafkaEvents.EVENT_READER_ENCODE_GENERATED_SUBTITLE to ExtractWorkDeserializer(),
             KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE to ExtractWorkDeserializer(),
+            KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE to ConvertWorkDeserializer()
 
         )
         fun getRegistry(): Map<KafkaEvents, IMessageDataDeserialization<*>> = _registry.toMap()
