@@ -49,7 +49,7 @@ class RunnerCoordinator {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
+                producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
             }
 
         }
@@ -70,7 +70,7 @@ class RunnerCoordinator {
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
+                    producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
                 }
             }
         }
