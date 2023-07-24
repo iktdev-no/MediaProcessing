@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.pm20.util.archivesName
+
 plugins {
     kotlin("jvm") version "1.8.21"
     id("org.springframework.boot") version "2.5.5"
@@ -45,3 +47,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.bootJar {
+    archiveFileName.set("converter.jar")
+    launchScript()
+}
+
+tasks.jar {
+    archivesName.set("converter.jar")
+    archiveBaseName.set("converter")
+}
+archivesName.set("converter.jar")
