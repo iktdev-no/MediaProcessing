@@ -1,7 +1,7 @@
 package no.iktdev.streamit.content.encode.runner
 
+import kotlinx.coroutines.*
 import no.iktdev.streamit.content.encode.EncodeEnv
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
@@ -32,19 +32,19 @@ class RunnerCoordinator {
         TimeUnit.MILLISECONDS,
         LinkedBlockingQueue()
     )
+    val dispatcher: CoroutineDispatcher = executor.asCoroutineDispatcher()
+    val scope = CoroutineScope(dispatcher)
 
     fun addEncodeMessageToQueue(message: Message) {
-        executor.execute {
+        scope.launch {
             try {
-                runBlocking {
-                    if (message.data != null && message.data is EncodeWork) {
-                        val data: EncodeWork = message.data as EncodeWork
-                        val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
-                        logger.info { "${message.referenceId} Starting encoding ${data.workId}" }
-                        encodeDaemon.runUsingWorkItem()
-                    } else {
-                        producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork or null")))
-                    }
+                if (message.data != null && message.data is EncodeWork) {
+                    val data: EncodeWork = message.data as EncodeWork
+                    val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
+                    logger.info { "${message.referenceId} Starting encoding ${data.workId}" }
+                    encodeDaemon.runUsingWorkItem()
+                } else {
+                    producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, "Data is not an instance of EncodeWork or null")))
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

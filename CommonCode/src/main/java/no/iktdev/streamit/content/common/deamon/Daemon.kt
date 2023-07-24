@@ -23,6 +23,7 @@ open class Daemon(open val executable: String, val daemonInterface: IDaemon) {
         if (resultCode == 0) {
             daemonInterface.onEnded()
         } else daemonInterface.onError(resultCode)
+        logger.info { "Daemon ended: $resultCode" }
         return resultCode
     }
 }
