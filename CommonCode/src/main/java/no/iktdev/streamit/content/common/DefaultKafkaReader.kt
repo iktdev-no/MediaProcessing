@@ -13,7 +13,9 @@ abstract class DefaultKafkaReader(val subId: String) {
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
     val defaultConsumer = DefaultConsumer(subId = subId)
 
-    abstract fun loadDeserializers(): Map<String, IMessageDataDeserialization<*>>
+    open fun loadDeserializers(): Map<String, IMessageDataDeserialization<*>> {
+        return emptyMap()
+    }
 
     fun produceErrorMessage(event: KafkaEvents, baseMessage: Message, reason: String) {
         val message = Message(

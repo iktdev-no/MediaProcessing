@@ -12,12 +12,12 @@ import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeseri
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import java.io.File
 
-class ExtractedSubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle") {
+class ConvertedSubtitleConsumer : DefaultKafkaReader("collectorConsumerConvertedSubtitle") {
 
     private val listener = object: SimpleMessageListener(
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
-        accepts = listOf(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event)
+        accepts = listOf(KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE.event)
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
             val workResult = data.value().dataAs(ExtractWork::class.java)

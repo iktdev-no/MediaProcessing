@@ -5,7 +5,7 @@ import no.iktdev.streamit.content.reader.preference
 
 class VideoEncodeArguments(val video: VideoStream, val index: Int) {
 
-    fun isVideoCodecEqual() = video.codec_name == getCorrectCodec()
+    fun isVideoCodecEqual() = getCodec(video.codec_name) == getCodec(preference.video.codec.lowercase())
 
 
     fun getVideoArguments(): List<String> {
@@ -13,7 +13,7 @@ class VideoEncodeArguments(val video: VideoStream, val index: Int) {
         if (isVideoCodecEqual()) result.addAll(listOf(
             "-vcodec", "copy"
         )) else {
-            result.addAll(listOf("-c:v", getCorrectCodec()))
+            result.addAll(listOf("-c:v", getCodec(preference.video.codec.lowercase())))
             result.addAll(listOf("-crf", preference.video.threshold.toString()))
         }
         if (preference.video.pixelFormatPassthrough.none { it == video.pix_fmt }) {
@@ -24,16 +24,13 @@ class VideoEncodeArguments(val video: VideoStream, val index: Int) {
     }
 
 
-    protected fun getCorrectCodec(): String {
-        return when(preference.video.codec.lowercase()) {
-            "hevc" -> "libx265"
-            "h265" -> "libx265"
-            "h.265" -> "libx265"
-
-            "h.264" -> "libx264"
-            "h264" -> "libx264"
-
-            else -> preference.video.codec.lowercase()
+    protected fun getCodec(name: String): String {
+        return when(name) {
+            "hevc", "hevec", "h265", "h.265", "libx265"
+                -> "libx265"
+            "h.264", "h264", "libx264"
+                -> "libx264"
+            else -> name
         }
     }
 }

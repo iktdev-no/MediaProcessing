@@ -66,6 +66,8 @@ class EncodeArgumentSelector(val collection: String, val inputFile: String, val 
         val availableSubtitleStreams = streams.streams.filterIsInstance<SubtitleStream>()
         val subtitleStreams = SubtitleStreamSelector(availableSubtitleStreams)
 
+        val conversionCandidates = subtitleStreams.getCandidateForConversion()
+
         return subtitleStreams.getDesiredStreams().map {
             val args = SubtitleEncodeArguments(it, availableSubtitleStreams.indexOf(it))
             val language = it.tags.language ?: "eng"
@@ -78,6 +80,7 @@ class EncodeArgumentSelector(val collection: String, val inputFile: String, val 
                 inFile = inputFile,
                 outFile = outFile.absolutePath,
                 arguments = args.getSubtitleArguments(),
+                produceConvertEvent = conversionCandidates.contains(it)
             )
         }
 
