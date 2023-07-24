@@ -10,8 +10,10 @@ import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.listener.SimpleMessageListener
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.springframework.stereotype.Service
 import java.io.File
 
+@Service
 class ConvertedSubtitleConsumer : DefaultKafkaReader("collectorConsumerConvertedSubtitle") {
 
     private val listener = object: SimpleMessageListener(

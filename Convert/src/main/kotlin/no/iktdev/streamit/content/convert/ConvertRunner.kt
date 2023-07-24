@@ -1,5 +1,7 @@
 package no.iktdev.streamit.content.convert
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import no.iktdev.library.subtitle.Syncro
 import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
@@ -17,10 +19,15 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
         val reader = getReade(subtitleInfo.inputFile)
         val dialogs = reader?.read()
         if (dialogs.isNullOrEmpty()) {
-            listener.onError(referenceId, subtitleInfo, "Dialogs read from file is null or empty!")
+            withContext(Dispatchers.Default) {
+                listener.onError(referenceId, subtitleInfo, "Dialogs read from file is null or empty!")
+            }
             return
         }
-        listener.onStarted(referenceId, subtitleInfo)
+
+        withContext(Dispatchers.Default) {
+            listener.onStarted(referenceId, subtitleInfo)
+        }
 
         val syncedDialogs = Syncro().sync(dialogs)
 
@@ -32,7 +39,9 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
                 language = subtitleInfo.language,
                 outFile = it.absolutePath
             )
-             listener.onEnded(referenceId, subtitleInfo, work = item)
+             withContext(Dispatchers.Default) {
+                 listener.onEnded(referenceId, subtitleInfo, work = item)
+             }
         }
 
     }

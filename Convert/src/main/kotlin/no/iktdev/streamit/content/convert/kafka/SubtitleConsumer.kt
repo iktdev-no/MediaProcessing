@@ -34,11 +34,13 @@ class SubtitleConsumer: DefaultKafkaReader("convertHandlerSubtitle"), IConvertLi
             val workResult = data.value().dataAs(ExtractWork::class.java)
 
             if (workResult?.produceConvertEvent == true) {
+                logger.info { "Using ${data.value().referenceId} ${workResult.outFile} as it is a convert candidate" }
                 val convertWork = SubtitleInfo(
                     inputFile = File(workResult.outFile),
                     collection = workResult.collection,
                     language = workResult.language,
                 )
+                produceMessage(KafkaEvents.EVENT_CONVERTER_STARTED_SUBTITLE_FILE, Message(referenceId = referenceId, Status(statusType = StatusType.PENDING)), convertWork)
                 Coroutines.io().launch {
                     ConvertRunner(referenceId, this@SubtitleConsumer).readAndConvert(convertWork)
                 }
