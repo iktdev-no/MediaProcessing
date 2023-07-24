@@ -104,6 +104,9 @@ class EncodedStreams : DefaultKafkaReader("streamSelector"), ICollectedMessagesE
 
     override fun onCollectionCompleted(collection: ResultCollection?) {
         logger.info { "Collection received" }
+        val collectedEvents = collection?.getRecords()?.map { it.key() }?.toList() ?: emptyList()
+        logger.info { "\nConsumer $subId collected:\n${collectedEvents.joinToString { "\n\t" }}" }
+
         val referenceId = collection?.getRecords()?.firstOrNull()?.value()?.referenceId
         if (referenceId == null) {
             logger.warn { "referenceId is null, throwing collection" }
