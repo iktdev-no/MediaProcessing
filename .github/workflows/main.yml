@@ -242,7 +242,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./Converter
+          context: ./Convert
           push: true
           tags: |
             bskjon/mediaprocessing-converter:latest
