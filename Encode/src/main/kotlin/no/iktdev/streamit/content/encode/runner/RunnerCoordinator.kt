@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.encode.runner
 
+import com.google.gson.Gson
 import kotlinx.coroutines.*
 import no.iktdev.streamit.content.encode.EncodeEnv
 import mu.KotlinLogging
@@ -82,38 +83,38 @@ class RunnerCoordinator {
 
     val encodeListener = object: IEncodeListener {
         override fun onStarted(referenceId: String, work: EncodeWork) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Started" }
+            logger.info { "Work started for $referenceId with WorkId ${work.workId} @ ${work.outFile}" }
             producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, Message(referenceId, Status(StatusType.SUCCESS), work))
         }
 
         override fun onError(referenceId: String, work: EncodeWork, code: Int) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Error $code" }
+            logger.error { "Work failed for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Error $code" }
             producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE.event, Message(referenceId, Status(StatusType.ERROR, message = code.toString()), work))
         }
 
         override fun onProgress(referenceId: String, work: EncodeWork, progress: Progress) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Progress: ${progress.speed}" }
+            logger.info { "Work progress for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Progress: ${Gson().toJson(progress)}" }
         }
 
         override fun onEnded(referenceId: String, work: EncodeWork) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Ended" }
+            logger.info { "Work ended for $referenceId with WorkId ${work.workId} @ ${work.outFile}" }
             producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE.event, Message(referenceId, Status(StatusType.SUCCESS), work))
         }
     }
 
     val extractListener = object : IExtractListener {
         override fun onStarted(referenceId: String, work: ExtractWork) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Started" }
+            logger.info { "Work started for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Started" }
             producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, Message(referenceId, Status(StatusType.SUCCESS), work))
         }
 
         override fun onError(referenceId: String, work: ExtractWork, code: Int) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Error $code" }
+            logger.error { "Work failed for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Error $code" }
             producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event, Message(referenceId, Status(StatusType.ERROR), work))
         }
 
         override fun onEnded(referenceId: String, work: ExtractWork) {
-            logger.info { "$referenceId with WorkId ${work.workId} @ ${work.outFile}: Ended" }
+            logger.info { "Work ended for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Ended" }
             producer.sendMessage(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event, Message(referenceId, Status(StatusType.SUCCESS), work))
         }
 
