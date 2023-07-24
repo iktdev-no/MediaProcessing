@@ -108,7 +108,7 @@ class EncodedStreams : DefaultKafkaReader("streamSelector"), ICollectedMessagesE
         if (collectedEvents.isEmpty()) {
             logger.error { "\nConsumer $subId collected: is null or empty!" }
         } else {
-            logger.info { "\nConsumer $subId collected:\n${collectedEvents.joinToString { "\n\t" }}" }
+            logger.info { "\nConsumer $subId collected:\n ${collectedEvents.joinToString("\n\t")}" }
         }
 
         val referenceId = collection?.getRecords()?.firstOrNull()?.value()?.referenceId
