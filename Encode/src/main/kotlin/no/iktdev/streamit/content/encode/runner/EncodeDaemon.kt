@@ -21,7 +21,7 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
             val progress = decoder.parseVideoProgress(items)
             if (progress != null) {
                 daemonInterface.onProgress(referenceId, work, progress)
-                //outputCache.clear()
+                outputCache.clear()
             }
         } catch (e: Exception) {
             //logger.error { e.message }

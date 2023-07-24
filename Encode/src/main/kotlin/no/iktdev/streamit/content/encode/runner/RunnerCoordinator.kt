@@ -25,15 +25,7 @@ class RunnerCoordinator {
 
     val producer = DefaultProducer(CommonConfig.kafkaTopic)
 
-    val encodeExecutor: ExecutorService = ThreadPoolExecutor(
-        EncodeEnv.maxRunners,
-        EncodeEnv.maxRunners,
-        0L,
-        TimeUnit.MILLISECONDS,
-        LinkedBlockingQueue()
-    )
-
-    val extractExecutor: ExecutorService = ThreadPoolExecutor(
+    val executor: ExecutorService = ThreadPoolExecutor(
         EncodeEnv.maxRunners,
         EncodeEnv.maxRunners,
         0L,
@@ -42,7 +34,7 @@ class RunnerCoordinator {
     )
 
     fun addEncodeMessageToQueue(message: Message) {
-        encodeExecutor.execute {
+        executor.execute {
             try {
                 runBlocking {
                     if (message.data != null && message.data is EncodeWork) {
@@ -64,7 +56,7 @@ class RunnerCoordinator {
     }
 
     fun addExtractMessageToQueue(message: Message) {
-        extractExecutor.execute {
+        executor.execute {
             runBlocking {
                 try {
                     if (message.data != null && message.data is ExtractWork) {
