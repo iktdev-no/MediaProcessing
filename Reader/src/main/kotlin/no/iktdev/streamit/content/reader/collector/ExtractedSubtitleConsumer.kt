@@ -10,6 +10,7 @@ import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.listener.SimpleMessageListener
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 
 class ExtractedSubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle") {
@@ -26,12 +27,14 @@ class ExtractedSubtitleConsumer : DefaultKafkaReader("collectorConsumerExtracted
             }
 
             val of = File(workResult.outFile)
-            SubtitleQuery(
-                title = of.nameWithoutExtension,
-                language = workResult.language,
-                collection = workResult.collection,
-                format = of.extension.uppercase()
-            ).insertAndGetStatus()
+            transaction {
+                SubtitleQuery(
+                    title = of.nameWithoutExtension,
+                    language = workResult.language,
+                    collection = workResult.collection,
+                    format = of.extension.uppercase()
+                ).insertAndGetStatus()
+            }
         }
     }
 

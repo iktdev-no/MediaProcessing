@@ -34,17 +34,24 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
 
         val syncedDialogs = Syncro().sync(dialogs)
 
-        val converted = Export(inFile, syncedDialogs).write()
-         converted.forEach {
-             val item = ConvertWork(
-                inFile = inFile.absolutePath,
-                collection = subtitleInfo.collection,
-                language = subtitleInfo.language,
-                outFile = it.absolutePath
-            )
-             withContext(Dispatchers.Default) {
-                 listener.onEnded(referenceId, subtitleInfo, work = item)
-             }
+        try {
+            val converted = Export(inFile, syncedDialogs).write()
+            converted.forEach {
+                val item = ConvertWork(
+                    inFile = inFile.absolutePath,
+                    collection = subtitleInfo.collection,
+                    language = subtitleInfo.language,
+                    outFile = it.absolutePath
+                )
+                withContext(Dispatchers.Default) {
+                    listener.onEnded(referenceId, subtitleInfo, work = item)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Default) {
+                listener.onError(referenceId, subtitleInfo, "See log")
+            }
         }
 
     }

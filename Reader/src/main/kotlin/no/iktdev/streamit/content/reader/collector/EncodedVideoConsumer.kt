@@ -14,6 +14,7 @@ import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.listener.collector.CollectorMessageListener
 import no.iktdev.streamit.library.kafka.listener.collector.ICollectedMessagesEvent
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 import java.io.File
 
@@ -66,10 +67,15 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
 
 
         val contentType = metadata?.type ?: return
-        val iid = if (contentType == "movie") MovieQuery(videoFileNameWithExtension).insertAndGetId() else null
+        val iid = if (contentType == "movie") transaction {
+            MovieQuery(videoFileNameWithExtension).insertAndGetId()
+        } else null
 
         if (serieData != null) {
-            val success = SerieQuery(serieData.title, serieData.episode, serieData.season, fileData.title,  videoFileNameWithExtension).insertAndGetStatus()
+            val success = transaction {
+                SerieQuery(serieData.title, serieData.episode, serieData.season, fileData.title,  videoFileNameWithExtension)
+                    .insertAndGetStatus()
+            }
             if (!success)
                 return
         }
@@ -86,8 +92,10 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
         }
         val metaGenre = metadata.genres
         val gq = GenreQuery(*metaGenre.toTypedArray())
-        gq.insertAndGetIds()
-        val gids = gq.getIds().joinToString(",")
+        transaction {
+            gq.insertAndGetIds()
+        }
+        val gids = transaction { gq.getIds().joinToString(",") }
 
         val cq = CatalogQuery(
             title = fileData.title,
@@ -97,14 +105,16 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
             iid = iid,
             genres = gids
         )
-        val cid = cq.insertAndGetId() ?: cq.getId() ?: return
+        val cid = transaction { cq.insertAndGetId() ?: cq.getId() } ?: return
         if (!metadata.summary.isNullOrBlank()) {
             val summary = metadata.summary ?: return
-            SummaryQuery(
-                cid = cid,
-                language = "eng", // TODO: Fix later,
-                description = summary
-            )
+            transaction {
+                SummaryQuery(
+                    cid = cid,
+                    language = "eng", // TODO: Fix later,
+                    description = summary
+                )
+            }
         }
 
         val message = Message(referenceId = collection.getReferenceId() ?: "M.I.A", status = Status(StatusType.SUCCESS))
