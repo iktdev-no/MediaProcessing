@@ -22,13 +22,18 @@ repositories {
     }
 }
 
+val exposedVersion = "0.38.2"
 dependencies {
     implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha74")
     implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
 
     implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha7")
 
-
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+    implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("com.github.pgreze:kotlin-process:1.3.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
