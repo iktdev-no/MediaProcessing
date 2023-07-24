@@ -5,11 +5,11 @@ import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.DefaultKafkaReader
+import no.iktdev.streamit.content.common.dto.reader.SubtitleInfo
 import no.iktdev.streamit.content.common.dto.reader.work.ConvertWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import no.iktdev.streamit.content.convert.ConvertRunner
 import no.iktdev.streamit.content.convert.IConvertListener
-import no.iktdev.streamit.content.convert.SubtitleInfo
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
@@ -36,7 +36,7 @@ class SubtitleConsumer: DefaultKafkaReader("convertHandlerSubtitle"), IConvertLi
             if (workResult?.produceConvertEvent == true) {
                 logger.info { "Using ${data.value().referenceId} ${workResult.outFile} as it is a convert candidate" }
                 val convertWork = SubtitleInfo(
-                    inputFile = File(workResult.outFile),
+                    inputFile = workResult.outFile,
                     collection = workResult.collection,
                     language = workResult.language,
                 )

@@ -6,6 +6,7 @@ import no.iktdev.library.subtitle.Syncro
 import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
+import no.iktdev.streamit.content.common.dto.reader.SubtitleInfo
 import no.iktdev.streamit.content.common.dto.reader.work.ConvertWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import java.io.File
@@ -17,7 +18,8 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
     }
 
     suspend fun readAndConvert (subtitleInfo: SubtitleInfo) {
-        val reader = getReade(subtitleInfo.inputFile)
+        val inFile = File(subtitleInfo.inputFile)
+        val reader = getReade(inFile)
         val dialogs = reader?.read()
         if (dialogs.isNullOrEmpty()) {
             withContext(Dispatchers.Default) {
@@ -32,10 +34,10 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
 
         val syncedDialogs = Syncro().sync(dialogs)
 
-        val converted =  Export(subtitleInfo.inputFile, syncedDialogs).write()
+        val converted = Export(inFile, syncedDialogs).write()
          converted.forEach {
              val item = ConvertWork(
-                inFile = subtitleInfo.inputFile.absolutePath,
+                inFile = inFile.absolutePath,
                 collection = subtitleInfo.collection,
                 language = subtitleInfo.language,
                 outFile = it.absolutePath

@@ -64,7 +64,6 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     }
     override fun onOutputChanged(line: String) {
         super.onOutputChanged(line)
-        logger.info { line }
         outputCache.add(line)
     }
 
