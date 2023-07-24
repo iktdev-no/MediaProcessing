@@ -7,6 +7,7 @@ import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.streamit.content.common.dto.reader.work.ConvertWork
+import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import java.io.File
 
 class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
@@ -26,7 +27,7 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
         }
 
         withContext(Dispatchers.Default) {
-            listener.onStarted(referenceId, subtitleInfo)
+            listener.onStarted(referenceId)
         }
 
         val syncedDialogs = Syncro().sync(dialogs)
@@ -50,7 +51,7 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
 }
 
 interface IConvertListener {
-    fun onStarted(referenceId: String, info: SubtitleInfo)
+    fun onStarted(referenceId: String)
     fun onError(referenceId: String, info: SubtitleInfo, message: String)
     fun onEnded(referenceId: String, info: SubtitleInfo, work: ConvertWork)
 }
