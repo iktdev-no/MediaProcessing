@@ -38,8 +38,11 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
 
 
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
+    testImplementation("org.assertj:assertj-core:3.4.1")
 }
 
 tasks.test {

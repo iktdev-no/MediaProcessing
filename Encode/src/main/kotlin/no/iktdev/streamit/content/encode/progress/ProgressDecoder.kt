@@ -7,7 +7,7 @@ class ProgressDecoder {
         val metadataMap = mutableMapOf<String, String>()
 
         for (line in lines) {
-            val keyValuePairs = line.split(" ")
+            val keyValuePairs = Regex("=\\s*").replace(line, "=").split(" ").filter { it.isNotBlank() }
             for (keyValuePair in keyValuePairs) {
                 val (key, value) = keyValuePair.split("=")
                 metadataMap[key] = value

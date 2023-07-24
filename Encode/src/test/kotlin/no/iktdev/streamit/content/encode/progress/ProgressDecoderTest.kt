@@ -1,10 +1,28 @@
 package no.iktdev.streamit.content.encode.progress
 
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+
 class ProgressDecoderTest {
 
+    @Test
+    fun test() {
+        val progress = ProgressDecoder()
+        val lines = text.split("\n")
+        val cache: MutableList<String> = mutableListOf()
+        lines.forEach {
+            cache.add(it)
+            assertDoesNotThrow {
+                val progressItem =  progress.parseVideoProgress(cache)
+                progressItem?.progress
+            }
+        }
+        assertThat(lines).isNotEmpty()
+    }
 
     val text = """
-        frame=16811 fps= 88 q=40.0 size=    9984kB time=00:01:10.79 bitrate=1155.3kbits/s speed=3.71x
+        frame=16811 fps= 88 q=40.0 size=    9984kB time=00:x01:10.79 bitrate=1155.3kbits/s speed=3.71x
         fps=88.03
         stream_0_0_q=40.0
         bitrate=1155.3kbits/s
