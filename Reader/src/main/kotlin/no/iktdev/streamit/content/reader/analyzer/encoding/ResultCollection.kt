@@ -17,18 +17,5 @@ class ResultCollection: DefaultEventCollection() {
     fun getFirstOrNull(events: KafkaEvents): ConsumerRecord<String, Message>? {
         return getRecords().firstOrNull { it.key() == events.event }
     }
-    fun getFileResult(): FileResult? {
-        val record = getRecords().firstOrNull { it.key() == KafkaEvents.EVENT_READER_RECEIVED_FILE.event } ?: return null
-        return FileResultDeserializer().deserializeIfSuccessful(record.value())
-    }
 
-    fun getFileName(): ContentOutName? {
-        val record = getFirstOrNull(KafkaEvents.EVENT_READER_DETERMINED_FILENAME) ?: return null
-        return ContentOutNameDeserializer().deserializeIfSuccessful(record.value())
-    }
-
-    fun getStreams(): MediaStreams? {
-        val record = getFirstOrNull(KafkaEvents.EVENT_READER_RECEIVED_STREAMS) ?: return null
-        return MediaStreamsDeserializer().deserializeIfSuccessful(record.value())
-    }
 }
