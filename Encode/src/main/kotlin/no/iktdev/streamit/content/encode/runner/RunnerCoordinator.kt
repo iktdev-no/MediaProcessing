@@ -35,12 +35,9 @@ class RunnerCoordinator {
     val dispatcher: CoroutineDispatcher = executor.asCoroutineDispatcher()
     val scope = CoroutineScope(dispatcher)
 
-    val semaphore = Semaphore(EncodeEnv.maxRunners)
-
     fun addEncodeMessageToQueue(message: Message) {
         producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.PENDING)))
         scope.launch {
-            semaphore.acquire()
             try {
                 if (message.data != null && message.data is EncodeWork) {
                     val data: EncodeWork = message.data as EncodeWork
@@ -53,17 +50,13 @@ class RunnerCoordinator {
             } catch (e: Exception) {
                 e.printStackTrace()
                 producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_VIDEO_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
-            } finally {
-                semaphore.release()
             }
-
         }
     }
 
     fun addExtractMessageToQueue(message: Message) {
         producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.PENDING)))
         scope.launch {
-            semaphore.acquire()
             try {
                 if (message.data != null && message.data is ExtractWork) {
                     val data: ExtractWork = message.data as ExtractWork
@@ -76,8 +69,6 @@ class RunnerCoordinator {
             } catch (e: Exception) {
                 e.printStackTrace()
                 producer.sendMessage(KafkaEvents.EVENT_ENCODER_STARTED_SUBTITLE_FILE.event, message.withNewStatus(Status(StatusType.ERROR, e.message)))
-            } finally {
-                semaphore.release()
             }
         }
     }
