@@ -14,6 +14,7 @@ import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.listener.collector.CollectorMessageListener
 import no.iktdev.streamit.library.kafka.listener.collector.ICollectedMessagesEvent
+import no.iktdev.streamit.library.kafka.listener.collector.NeedyMessageListener
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
 import no.iktdev.streamit.library.kafka.listener.sequential.ISequentialMessageEvent
 import no.iktdev.streamit.library.kafka.listener.sequential.SequentialMessageListener
@@ -26,11 +27,16 @@ private val logger = KotlinLogging.logger {}
 @Service
 class EncodedStreams : DefaultKafkaReader("streamSelector"), ICollectedMessagesEvent<ResultCollection> {
 
-    val collectionListener = CollectorMessageListener<ResultCollection>(
+    val collectionListener = NeedyMessageListener<ResultCollection>(
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
         initiatorEvent = KafkaEvents.EVENT_READER_RECEIVED_FILE,
         completionEvent = KafkaEvents.EVENT_READER_DETERMINED_FILENAME,
+        needs = listOf(
+            KafkaEvents.EVENT_READER_RECEIVED_FILE,
+            KafkaEvents.EVENT_READER_RECEIVED_STREAMS,
+            KafkaEvents.EVENT_READER_DETERMINED_FILENAME
+        ),
         listener = this,
         eventCollectionClass = ResultCollection::class.java
     )
