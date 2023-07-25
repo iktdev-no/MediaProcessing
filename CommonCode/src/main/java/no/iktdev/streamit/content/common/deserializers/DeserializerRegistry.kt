@@ -11,6 +11,7 @@ class DeserializerRegistry {
             KafkaEvents.EVENT_METADATA_OBTAINED to MetadataResultDeserializer(),
             KafkaEvents.EVENT_READER_DETERMINED_SERIE to EpisodeInfoDeserializer(),
             KafkaEvents.EVENT_READER_DETERMINED_MOVIE to MovieInfoDeserializer(),
+            KafkaEvents.EVENT_READER_DETERMINED_FILENAME to ContentOutNameDeserializer(),
 
             KafkaEvents.EVENT_READER_ENCODE_GENERATED_VIDEO to EncodeWorkDeserializer(),
             KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE to EncodeWorkDeserializer(),
