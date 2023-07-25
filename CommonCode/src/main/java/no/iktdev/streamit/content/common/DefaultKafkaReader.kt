@@ -33,10 +33,10 @@ abstract class DefaultKafkaReader(val subId: String) {
         messageProducer.sendMessage(event.event, message)
     }
 
-    fun produceMessage(event: KafkaEvents, baseMessage: Message, data: Any?) {
+    fun produceMessage(event: KafkaEvents, baseMessage: Message, status: StatusType = StatusType.SUCCESS, data: Any?) {
         val message = Message(
             referenceId = baseMessage.referenceId,
-            Status(statusType = if (data != null) StatusType.SUCCESS else StatusType.IGNORED),
+            Status(statusType = status),
             data = data
         )
         messageProducer.sendMessage(event.event, message)
