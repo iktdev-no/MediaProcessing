@@ -1,5 +1,6 @@
 package no.iktdev.streamit.content.reader.collector
 
+import mu.KotlinLogging
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.DefaultKafkaReader
 import no.iktdev.streamit.content.common.deserializers.DeserializerRegistry
@@ -7,11 +8,15 @@ import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import no.iktdev.streamit.library.db.query.SubtitleQuery
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
+import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.listener.SimpleMessageListener
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+
+private val logger = KotlinLogging.logger {}
 
 class ExtractedSubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle") {
 
@@ -27,13 +32,22 @@ class ExtractedSubtitleConsumer : DefaultKafkaReader("collectorConsumerExtracted
             }
 
             val of = File(workResult.outFile)
-            transaction {
+            val status = transaction {
                 SubtitleQuery(
                     title = of.nameWithoutExtension,
                     language = workResult.language,
                     collection = workResult.collection,
                     format = of.extension.uppercase()
                 ).insertAndGetStatus()
+            }
+            val message = Message(referenceId = data.value()?.referenceId ?: "M.I.A", status = Status(statusType = StatusType.SUCCESS))
+
+            if (status) {
+                produceMessage(KafkaEvents.EVENT_COLLECTOR_VIDEO_STORED, message, null)
+                logger.info { "Stored ${File(workResult.outFile).absolutePath} subtitle" }
+            } else {
+                produceErrorMessage(KafkaEvents.EVENT_COLLECTOR_SUBTITLE_STORED, message.withNewStatus(status = Status(statusType = StatusType.ERROR)), "Unknown, see log")
+                logger.error { "Failed to store ${File(workResult.outFile).absolutePath} subtitle" }
             }
         }
     }
