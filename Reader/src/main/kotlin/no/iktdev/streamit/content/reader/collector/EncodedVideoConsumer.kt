@@ -117,8 +117,7 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
             }
         }
 
-        val message = Message(referenceId = collection.getReferenceId() ?: "M.I.A", status = Status(statusType = StatusType.SUCCESS))
-        produceMessage(KafkaEvents.EVENT_COLLECTOR_VIDEO_STORED, message, null)
+        produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_VIDEO_STORED, collection.getReferenceId() ?: "M.I.A", null)
         logger.info { "Stored ${encodeWork.outFile} video" }
     }
 }

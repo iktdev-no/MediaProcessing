@@ -68,7 +68,7 @@ class EncodedStreams : DefaultKafkaReader("streamSelector"), ISequentialMessageE
             produceErrorMessage(KafkaEvents.EVENT_READER_ENCODE_GENERATED_VIDEO, referenceId, "Failed to generate Video Arguments Bundle")
             return
         }
-        produceMessage(KafkaEvents.EVENT_READER_ENCODE_GENERATED_VIDEO, Message(referenceId, Status(StatusType.SUCCESS)), videoInstructions)
+        produceSuccessMessage(KafkaEvents.EVENT_READER_ENCODE_GENERATED_VIDEO, referenceId, videoInstructions)
 
     }
 

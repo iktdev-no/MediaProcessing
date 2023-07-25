@@ -43,7 +43,7 @@ class ExtractedSubtitleConsumer : DefaultKafkaReader("collectorConsumerExtracted
             val message = Message(referenceId = data.value()?.referenceId ?: "M.I.A", status = Status(statusType = StatusType.SUCCESS))
 
             if (status) {
-                produceMessage(KafkaEvents.EVENT_COLLECTOR_SUBTITLE_STORED, message, null)
+                produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_SUBTITLE_STORED, data.value().referenceId)
                 logger.info { "Stored ${File(workResult.outFile).absolutePath} subtitle" }
             } else {
                 produceErrorMessage(KafkaEvents.EVENT_COLLECTOR_SUBTITLE_STORED, message.withNewStatus(status = Status(statusType = StatusType.ERROR)), "Unknown, see log")
