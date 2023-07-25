@@ -56,7 +56,7 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
         val encodeWork = collection?.getEncodeWork()
         val serieData = collection?.getSerieInfo()
         val movieData = collection?.getMovieInfo()
-
+        logger.info { "Obtained collection: \n\t${collection?.getRecords()?.map { it.key() }?.joinToString("\n\t")}" }
 
         if (fileData == null || encodeWork == null || collection.getReferenceId() == null) {
             logger.error { "Required data is null, as it has either status as non successful or simply missing" }
