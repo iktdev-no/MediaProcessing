@@ -9,10 +9,12 @@ import no.iktdev.streamit.content.common.deserializers.DeserializerRegistry
 import no.iktdev.streamit.content.common.dto.Metadata
 import no.iktdev.streamit.content.common.dto.reader.EpisodeInfo
 import no.iktdev.streamit.library.db.query.*
+import no.iktdev.streamit.library.db.tables.catalog
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.listener.collector.CollectorMessageListener
 import no.iktdev.streamit.library.kafka.listener.collector.ICollectedMessagesEvent
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 import java.io.File
@@ -95,7 +97,16 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
                     iid = iid,
                     genres = genres
                 )
-                cq.insert()
+                catalog.insert {
+                    it[title] = fileData.title
+                    it[cover] =  coverFile?.name
+                    it[type] = if (serieData == null) "movie" else "serie"
+                    it[catalog.collection] = fileData.title
+                    it[catalog.iid] = iid
+                    it[catalog.genres] = genres
+                }
+
+
                 val cqId = cq.getId() ?: throw RuntimeException("No Catalog id found!")
                 metadata?.let {
                     val summary = it.summary
