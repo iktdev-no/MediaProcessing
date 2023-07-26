@@ -142,7 +142,7 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
 
     fun getSerieQueryInstance(data: EpisodeInfo?, baseName: String?): SerieQuery? {
         if (data == null || baseName == null) return null
-        return SerieQuery(data.title, data.episode, data.season, data.title,  baseName)
+        return SerieQuery(data.episodeTitle, data.episode, data.season, data.title,  baseName)
     }
 
 }

@@ -75,10 +75,11 @@ class SubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle"
         val of = File(work.outFile)
         val status = transaction {
             SubtitleQuery(
-                title = of.nameWithoutExtension,
+                associatedWithVideo = of.nameWithoutExtension,
                 language = work.language,
                 collection = work.collection,
-                format = of.extension.uppercase()
+                format = of.extension.uppercase(),
+                file = File(work.outFile).name
             )
                 .insertAndGetStatus()
         }
@@ -89,10 +90,11 @@ class SubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle"
         val of = File(work.outFile)
         val status = transaction {
             SubtitleQuery(
-                title = of.nameWithoutExtension,
+                associatedWithVideo = of.nameWithoutExtension,
                 language = work.language,
                 collection = work.collection,
-                format = of.extension.uppercase()
+                format = of.extension.uppercase(),
+                file = File(work.outFile).name
             )
                 .insertAndGetStatus()
         }
