@@ -27,7 +27,7 @@ dependencies {
     implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha75")
     implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
 
-    implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha13")
+    implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha14")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")

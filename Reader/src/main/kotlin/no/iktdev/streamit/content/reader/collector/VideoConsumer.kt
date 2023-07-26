@@ -14,8 +14,12 @@ import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.listener.collector.CollectorMessageListener
 import no.iktdev.streamit.library.kafka.listener.collector.ICollectedMessagesEvent
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.andWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Service
 import java.io.File
 import kotlin.math.log
@@ -105,21 +109,30 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
                     iid = iid,
                     genres = genres
                 )
+                val catalogType = if (serieData == null) "movie" else "serie"
                 catalog.insert {
                     it[title] = fileData.title
                     it[cover] =  coverFile?.name
-                    it[type] = if (serieData == null) "movie" else "serie"
+                    it[type] = catalogType
                     it[catalog.collection] = fileData.title
                     it[catalog.iid] = iid
                     it[catalog.genres] = genres
                 }
 
+                if (coverFile != null) {
+                    val qres = catalog.select { catalog.title eq fileData.title }.andWhere { catalog.type eq  catalogType}.firstOrNull() ?: null
+                    if (qres != null && qres[catalog.cover].isNullOrBlank()) {
+                        catalog.update({ catalog.id eq qres[catalog.id] }) {
+                            it[catalog.cover] = coverFile.name
+                        }
+                    }
+                }
 
                 val cqId = cq.getId() ?: throw RuntimeException("No Catalog id found!")
                 metadata?.let {
                     val summary = it.summary
                     if (summary != null) {
-                        SummaryQuery(cid = cqId, language = "eng", description = summary)
+                        val success = SummaryQuery(cid = cqId, language = "eng", description = summary).insertAndGetStatus()
                     }
                 }
             }
