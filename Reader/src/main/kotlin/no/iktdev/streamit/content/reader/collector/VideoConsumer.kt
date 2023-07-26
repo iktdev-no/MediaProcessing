@@ -6,11 +6,10 @@ import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.DefaultKafkaReader
 import no.iktdev.streamit.content.common.Downloader
 import no.iktdev.streamit.content.common.deserializers.DeserializerRegistry
+import no.iktdev.streamit.content.common.dto.Metadata
+import no.iktdev.streamit.content.common.dto.reader.EpisodeInfo
 import no.iktdev.streamit.library.db.query.*
 import no.iktdev.streamit.library.kafka.KafkaEvents
-import no.iktdev.streamit.library.kafka.dto.Message
-import no.iktdev.streamit.library.kafka.dto.Status
-import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.listener.collector.CollectorMessageListener
 import no.iktdev.streamit.library.kafka.listener.collector.ICollectedMessagesEvent
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
@@ -21,7 +20,7 @@ import java.io.File
 private val logger = KotlinLogging.logger {}
 
 @Service
-class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), ICollectedMessagesEvent<ResultCollection> {
+class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), ICollectedMessagesEvent<ResultCollection> {
 
     val listener = CollectorMessageListener<ResultCollection>(
         topic = CommonConfig.kafkaTopic,
@@ -43,9 +42,6 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
     }
 
 
-
-
-
     override fun loadDeserializers(): Map<String, IMessageDataDeserialization<*>> {
         return DeserializerRegistry.getEventToDeserializer(*listener.acceptsFilter.toTypedArray(), listener.initiatorEvent, listener.completionEvent)
     }
@@ -62,23 +58,17 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
             logger.error { "Required data is null, as it has either status as non successful or simply missing" }
             return
         }
-
         val videoFileNameWithExtension = File(encodeWork.outFile).name
 
-
-        val contentType = metadata?.type ?: return
-        val iid = if (contentType == "movie") transaction {
-            MovieQuery(videoFileNameWithExtension).insertAndGetId()
-        } else null
-
-        if (serieData != null) {
-            val success = transaction {
-                SerieQuery(serieData.title, serieData.episode, serieData.season, fileData.title,  videoFileNameWithExtension)
-                    .insertAndGetStatus()
-            }
-            if (!success)
-                return
+        val iid = transaction {
+            val serieStatus = if (serieData != null) {
+                getSerieQueryInstance(serieData, videoFileNameWithExtension)?.insertAndGetStatus() ?: false
+            } else true
+            if (serieData == null || metadata?.type == "movie") {
+                MovieQuery(videoFileNameWithExtension).insertAndGetId()
+            } else null
         }
+
 
         val coverFile = metadata?.cover?.let { coverUrl ->
             runBlocking {
@@ -90,34 +80,50 @@ class EncodedVideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"),
                 }
             }
         }
-        val metaGenre = metadata.genres
-        val gq = GenreQuery(*metaGenre.toTypedArray())
-        transaction {
-            gq.insertAndGetIds()
-        }
-        val gids = transaction { gq.getIds().joinToString(",") }
 
-        val cq = CatalogQuery(
-            title = fileData.title,
-            cover = coverFile?.name,
-            type = contentType,
-            collection = fileData.title,
-            iid = iid,
-            genres = gids
-        )
-        val cid = transaction { cq.insertAndGetId() ?: cq.getId() } ?: return
-        if (!metadata.summary.isNullOrBlank()) {
-            val summary = metadata.summary ?: return
+        // Serie må alltid fullføres før catalog. dette i tilfelle catalog allerede eksisterer og den thrower slik at transaskjonen blir versertert!
+
+        val status = try {
             transaction {
-                SummaryQuery(
-                    cid = cid,
-                    language = "eng", // TODO: Fix later,
-                    description = summary
+                val genres = metadata?.let { insertAndGetGenres(it)  }
+
+                val cq = CatalogQuery(
+                    title = fileData.title,
+                    cover = coverFile?.name,
+                    type = if (serieData == null) "movie" else "serie",
+                    collection = fileData.title,
+                    iid = iid,
+                    genres = genres
                 )
+                cq.insert()
+                val cqId = cq.getId() ?: throw RuntimeException("No Catalog id found!")
+                metadata?.let {
+                    val summary = it.summary
+                    if (summary != null) {
+                        SummaryQuery(cid = cqId, language = "eng", description = summary)
+                    }
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
-        produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_VIDEO_STORED, collection.getReferenceId() ?: "M.I.A", null)
+        produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_VIDEO_STORED, collection.getReferenceId() ?: "M.I.A", status)
         logger.info { "Stored ${encodeWork.outFile} video" }
     }
+
+    /**
+     * Needs to be wrapped in transaction
+     */
+    fun insertAndGetGenres(meta: Metadata): String? {
+        val gq = GenreQuery(*meta.genres.toTypedArray())
+        gq.insertAndGetIds()
+        return gq.getIds().joinToString(",")
+    }
+
+    fun getSerieQueryInstance(data: EpisodeInfo?, baseName: String?): SerieQuery? {
+        if (data == null || baseName == null) return null
+        return SerieQuery(data.title, data.episode, data.season, data.title,  baseName)
+    }
+
 }
