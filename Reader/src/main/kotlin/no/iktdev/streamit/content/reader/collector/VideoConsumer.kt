@@ -18,6 +18,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 import java.io.File
+import kotlin.math.log
 
 private val logger = KotlinLogging.logger {}
 
@@ -63,11 +64,18 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
         val videoFileNameWithExtension = File(encodeWork.outFile).name
 
         val iid = transaction {
-            val serieStatus = if (serieData != null) {
-                getSerieQueryInstance(serieData, videoFileNameWithExtension)?.insertAndGetStatus() ?: false
-            } else true
+            if (serieData != null) {
+                val serieInsertStatus = getSerieQueryInstance(serieData, videoFileNameWithExtension)?.insertAndGetStatus()
+                if (serieInsertStatus == false) {
+                    logger.warn { "Failed to insert episode $videoFileNameWithExtension" }
+                }
+            }
             if (serieData == null || metadata?.type == "movie") {
-                MovieQuery(videoFileNameWithExtension).insertAndGetId()
+                val iid = MovieQuery(videoFileNameWithExtension).insertAndGetId()
+                if (iid == null) {
+                    logger.warn { "Failed to insert movie and get id for it $videoFileNameWithExtension" }
+                }
+                iid
             } else null
         }
 
