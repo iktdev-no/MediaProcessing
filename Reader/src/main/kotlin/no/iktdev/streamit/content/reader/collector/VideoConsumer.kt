@@ -110,14 +110,7 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
                     genres = genres
                 )
                 val catalogType = if (serieData == null) "movie" else "serie"
-                catalog.insert {
-                    it[title] = fileData.title
-                    it[cover] =  coverFile?.name
-                    it[type] = catalogType
-                    it[catalog.collection] = fileData.title
-                    it[catalog.iid] = iid
-                    it[catalog.genres] = genres
-                }
+                cq.insertAndGetStatus()
 
                 if (coverFile != null) {
                     val qres = catalog.select { catalog.title eq fileData.title }.andWhere { catalog.type eq  catalogType}.firstOrNull() ?: null
