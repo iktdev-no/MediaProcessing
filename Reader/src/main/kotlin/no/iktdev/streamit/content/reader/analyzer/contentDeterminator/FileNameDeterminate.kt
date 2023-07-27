@@ -22,16 +22,18 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
 
     private fun determineMovieFileName(): MovieInfo? {
         val movieEx = MovieEx(title, sanitizedName)
-        val result = when {
+        val stripped = when {
             movieEx.isDefinedWithYear() != null -> sanitizedName.replace(movieEx.isDefinedWithYear()!!, "").trim()
             movieEx.doesContainMovieKeywords() -> sanitizedName.replace(Regex("(?i)\\s*\\(\\s*movie\\s*\\)\\s*"), "").trim()
             else -> title
         }
-        return MovieInfo(title, result)
+        val nonResolutioned = movieEx.removeResolutionAndBeyond(stripped) ?: stripped
+        return MovieInfo(cleanup(nonResolutioned), cleanup(nonResolutioned))
     }
 
     private fun determineSerieFileName(): EpisodeInfo? {
         val serieEx = SerieEx(title, sanitizedName)
+
         val (season, episode) = serieEx.findSeasonAndEpisode(sanitizedName)
         val episodeNumberSingle = serieEx.findEpisodeNumber()
 
@@ -69,9 +71,19 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         }
     }
 
+    private fun cleanup(input: String): String {
+        val cleaned = Regex("(?<=\\w)[_.](?=\\w)").replace(input, " ")
+        return Regex("\\s{2,}").replace(cleaned, " ")
+    }
+
     open internal class Base(val title: String, val sanitizedName: String) {
         fun getMatch(regex: String): String? {
             return Regex(regex, RegexOption.IGNORE_CASE).find(sanitizedName)?.value
+        }
+
+        fun removeResolutionAndBeyond(input: String): String? {
+            val removalValue = Regex("(i?)([0-9].*[pk]|[ ._-]+[UHD]+[ ._-])").find(input)?.value ?: return null
+            return input.substring(0, input.indexOf(removalValue))
         }
     }
 

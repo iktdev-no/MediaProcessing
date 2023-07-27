@@ -58,6 +58,15 @@ class FileNameDeterminateTest {
         assertThat(fileNameDeterminate.getDeterminedVideoInfo()?.fullName).isEqualTo(namedTestData.expected)
     }
 
+    @Test
+    fun testWildStuff() {
+        val namedTestData = TestData("The Potato man", "The.Potato.man.2023.1080p.L950XL.x265-WIN10")
+        val fileNameDeterminate = FileNameDeterminate(
+            namedTestData.input, namedTestData.input, FileNameDeterminate.ContentType.UNDEFINED
+        )
+        assertThat(fileNameDeterminate.getDeterminedVideoInfo()?.fullName).isEqualTo(namedTestData.expected)
+    }
+
     companion object {
         @JvmStatic
         fun serieTestCases(): List<Named<TestData>> {

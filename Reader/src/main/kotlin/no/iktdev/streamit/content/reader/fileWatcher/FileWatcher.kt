@@ -31,20 +31,19 @@ class FileWatcher: FileWatcherEvents {
     val queue = FileWatcherQueue()
 
 
-    val watcherChannel = CommonConfig.incomingContent?.asWatchChannel()
+    val watcherChannel = CommonConfig.incomingContent.asWatchChannel()
     init {
         Coroutines.io().launch {
-            if (watcherChannel == null) {
-                logger.error { "Can't start watcherChannel on null!" }
-            }
-            watcherChannel?.consumeEach {
+            watcherChannel.consumeEach {
                 when (it.kind) {
                     KWatchEvent.Kind.Deleted -> {
                         queue.removeFromQueue(it.file, this@FileWatcher::onFileRemoved)
                     }
+
                     KWatchEvent.Kind.Created, KWatchEvent.Kind.Initialized -> {
                         queue.addToQueue(it.file, this@FileWatcher::onFilePending, this@FileWatcher::onFileAvailable)
                     }
+
                     else -> {
                         logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name}" }
                     }
