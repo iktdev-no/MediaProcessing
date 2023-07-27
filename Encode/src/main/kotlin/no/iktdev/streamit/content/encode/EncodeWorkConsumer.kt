@@ -50,7 +50,7 @@ class EncodeWorkConsumer(private val runnerCoordinator: RunnerCoordinator) : Def
         accepts
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
-            logger.info { "${data.value().referenceId}: ${data.key()} ${Gson().toJson(data.value())}" }
+            logger.info { "\nreferenceId: ${data.value().referenceId} \nEvent: ${data.key()} \nData:\n${Gson().toJson(data.value())}" }
             val message = data.value().apply {
                 this.data = EncodeWorkDeserializer().deserializeIfSuccessful(data.value())
             }

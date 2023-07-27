@@ -25,6 +25,7 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
             }
         } catch (e: Exception) {
             //logger.error { e.message }
+            e.printStackTrace()
         }
     }
 
