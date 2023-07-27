@@ -64,7 +64,7 @@ class ResultCollection: DefaultEventCollection() {
     }
 
     fun getEncodeWork(): EncodeWork? {
-        return firstOrNull(KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE)?.let {
+        return firstOrNull(KafkaEvents.EVENT_ENCODER_VIDEO_FILE_ENDED)?.let {
             EncodeWorkDeserializer().deserializeIfSuccessful(it.value())
         }
     }

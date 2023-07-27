@@ -27,20 +27,20 @@ class SubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle"
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
         accepts = listOf(
-            KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event,
-            KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE.event
+            KafkaEvents.EVENT_ENCODER_SUBTITLE_FILE_ENDED.event,
+            KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED.event
         )
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
             val referenceId = data.value().referenceId
-            if (data.key() == KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event) {
+            if (data.key() == KafkaEvents.EVENT_ENCODER_SUBTITLE_FILE_ENDED.event) {
                 val work = data.value().dataAs(ExtractWork::class.java)
                 if (work == null) {
                     logger.info { "Event: ${data.key()} value is null" }
                 } else {
                     storeExtractWork(referenceId, work)
                 }
-            } else if (data.key() == KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE.event) {
+            } else if (data.key() == KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED.event) {
                 val work = data.value().dataAs(ConvertWork::class.java)
                 if (work == null) {
                     logger.info { "Event: ${data.key()} value is null" }
@@ -63,10 +63,10 @@ class SubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle"
 
     fun produceMessage(referenceId: String, outFile: String, statusType: StatusType, result: Any?) {
         if (statusType == StatusType.SUCCESS) {
-            produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_SUBTITLE_STORED, referenceId)
+            produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_STORED_SUBTITLE, referenceId)
             logger.info { "Stored ${File(outFile).absolutePath} subtitle" }
         } else {
-            produceErrorMessage(KafkaEvents.EVENT_COLLECTOR_SUBTITLE_STORED, Message(referenceId, Status(statusType), result), "See log")
+            produceErrorMessage(KafkaEvents.EVENT_COLLECTOR_STORED_SUBTITLE, Message(referenceId, Status(statusType), result), "See log")
             logger.error { "Failed to store ${File(outFile).absolutePath} subtitle" }
         }
     }
@@ -104,8 +104,8 @@ class SubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle"
 
     override fun loadDeserializers(): Map<String, IMessageDataDeserialization<*>> {
         return DeserializerRegistry.getEventToDeserializer(
-            KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE,
-            KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE
+            KafkaEvents.EVENT_ENCODER_SUBTITLE_FILE_ENDED,
+            KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED
         )
     }
 }

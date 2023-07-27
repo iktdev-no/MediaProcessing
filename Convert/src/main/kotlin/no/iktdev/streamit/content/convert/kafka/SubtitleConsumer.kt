@@ -27,7 +27,7 @@ class SubtitleConsumer: DefaultKafkaReader("convertHandlerSubtitle"), IConvertLi
     private final val listener = object : SimpleMessageListener(
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
-        accepts = listOf(KafkaEvents.EVENT_ENCODER_ENDED_SUBTITLE_FILE.event)
+        accepts = listOf(KafkaEvents.EVENT_ENCODER_SUBTITLE_FILE_ENDED.event)
     ) {
         override fun onMessageReceived(data: ConsumerRecord<String, Message>) {
             val referenceId = data.value().referenceId
@@ -40,7 +40,7 @@ class SubtitleConsumer: DefaultKafkaReader("convertHandlerSubtitle"), IConvertLi
                     collection = workResult.collection,
                     language = workResult.language,
                 )
-                produceMessage(KafkaEvents.EVENT_CONVERTER_STARTED_SUBTITLE_FILE, Message(referenceId = referenceId, Status(statusType = StatusType.PENDING)), convertWork)
+                produceMessage(KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_STARTED, Message(referenceId = referenceId, Status(statusType = StatusType.PENDING)), convertWork)
                 Coroutines.io().launch {
                     ConvertRunner(referenceId, this@SubtitleConsumer).readAndConvert(convertWork)
                 }
@@ -55,15 +55,15 @@ class SubtitleConsumer: DefaultKafkaReader("convertHandlerSubtitle"), IConvertLi
     }
 
     override fun onStarted(referenceId: String) {
-        produceMessage(KafkaEvents.EVENT_CONVERTER_STARTED_SUBTITLE_FILE, Message(referenceId = referenceId, Status(statusType = StatusType.SUCCESS)), null)
+        produceMessage(KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_STARTED, Message(referenceId = referenceId, Status(statusType = StatusType.SUCCESS)), null)
     }
 
     override fun onError(referenceId: String, info: SubtitleInfo, message: String) {
-        produceMessage(KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE, Message(referenceId = referenceId, Status(statusType = StatusType.ERROR)), null)
+        produceMessage(KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED, Message(referenceId = referenceId, Status(statusType = StatusType.ERROR)), null)
     }
 
     override fun onEnded(referenceId: String, info: SubtitleInfo, work: ConvertWork) {
-        produceMessage(KafkaEvents.EVENT_CONVERTER_ENDED_SUBTITLE_FILE, Message(referenceId = referenceId, Status(statusType = StatusType.SUCCESS)), work)
+        produceMessage(KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED, Message(referenceId = referenceId, Status(statusType = StatusType.SUCCESS)), work)
     }
 
 }

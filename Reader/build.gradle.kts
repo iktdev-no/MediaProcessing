@@ -24,7 +24,7 @@ repositories {
 
 val exposedVersion = "0.38.2"
 dependencies {
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha75")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha76")
     implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
 
     implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha14")

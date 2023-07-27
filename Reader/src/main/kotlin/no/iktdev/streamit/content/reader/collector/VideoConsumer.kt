@@ -33,7 +33,7 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
         topic = CommonConfig.kafkaTopic,
         consumer = defaultConsumer,
         initiatorEvent = KafkaEvents.EVENT_READER_RECEIVED_FILE,
-        completionEvent = KafkaEvents.EVENT_ENCODER_ENDED_VIDEO_FILE,
+        completionEvent = KafkaEvents.EVENT_ENCODER_VIDEO_FILE_ENDED,
         acceptsFilter = listOf(
             KafkaEvents.EVENT_METADATA_OBTAINED,
             KafkaEvents.EVENT_READER_DETERMINED_SERIE,
@@ -133,7 +133,7 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
             e.printStackTrace()
         }
 
-        produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_VIDEO_STORED, collection.getReferenceId() ?: "M.I.A", status)
+        produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_STORED_VIDEO, collection.getReferenceId() ?: "M.I.A", status)
         logger.info { "Stored ${encodeWork.outFile} video" }
     }
 
