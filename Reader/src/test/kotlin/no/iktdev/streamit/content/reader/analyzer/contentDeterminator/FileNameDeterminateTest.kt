@@ -184,7 +184,7 @@ class FileNameDeterminateTest {
                 )),
                 Named.of(
                     "Ghost in the Shell (S.A.C) - Solid State Society", TestData(
-                        expected = MovieInfo("Ghost in the Shell", "Ghost in the Shell - Solid State Society"),
+                        expected = MovieInfo("Ghost in the Shell", "Ghost in the Shell (S A C) - Solid State Society"),
                         DataHolder(
                             "Ghost in the Shell - Solid State Society",
                             "Ghost in the Shell (S.A.C) - Solid State Society"
