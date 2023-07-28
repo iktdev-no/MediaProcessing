@@ -2,6 +2,7 @@ import logging
 import signal
 import sys
 import os
+from typing import Optional
 import uuid
 import threading
 import json
@@ -125,22 +126,12 @@ class MessageHandlerThread(threading.Thread):
 
             # Sjekk om statusen er SUCCESS
             if status_type == 'SUCCESS':
-                data_value = self.message.value['data']["title"]
+                baseName = self.message.value["data"]["sanitizedName"]
+                title = self.message.value['data']["title"]
 
-                result = None # Will be assigned by either cache_result or sel.perform_action
-                logger.info("Checking cache for offloading")
-                cache_result = ResultCache.get(data_value)
-                if cache_result:
-                    logger.info("Cache hit for %s", data_value)
-                    result = cache_result
-                else:
-                    logger.info("Not in cache: %s", data_value)
-                    logger.info("Searching in sources for information about %s", data_value)
-                    result = self.perform_action(title=data_value)
-                    if (result.statusType == "SUCCESS"):
-                        logger.info("Storing response for %s in in-memory cache", data_value)
-                        ResultCache.add(data_value, result)
-
+                result = self.get_metadata(baseName)
+                if (result is None):
+                    result = self.get_metadata(title)
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
 
@@ -156,6 +147,19 @@ class MessageHandlerThread(threading.Thread):
                 producer.send(kafka_topic, key="event:metadata:obtained", value=result_json)
                 producer.close()
 
+    def get_metadata(self, name: str) -> Optional[DataResult]:
+        logger.info("Checking cache for offloading")
+        cache_result = ResultCache.get(name)
+        if cache_result:
+            logger.info("Cache hit for %s", name)
+            result = cache_result
+        else:
+            logger.info("Not in cache: %s", name)
+            logger.info("Searching in sources for information about %s", name)
+            result = self.perform_action(title=name)
+            if (result.statusType == "SUCCESS"):
+                logger.info("Storing response for %s in in-memory cache", name)
+                ResultCache.add(name, result)
 
 
     def perform_action(self, title) -> DataResult:

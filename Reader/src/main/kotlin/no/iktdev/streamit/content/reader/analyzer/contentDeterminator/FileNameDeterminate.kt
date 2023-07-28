@@ -23,9 +23,9 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
     private fun determineMovieFileName(): MovieInfo? {
         val movieEx = MovieEx(title, sanitizedName)
         val stripped = when {
-            movieEx.isDefinedWithYear() != null -> sanitizedName.replace(movieEx.isDefinedWithYear()!!, "").trim()
+            movieEx.isDefinedWithYear() -> sanitizedName.replace(movieEx.yearRegex(), "").trim()
             movieEx.doesContainMovieKeywords() -> sanitizedName.replace(Regex("(?i)\\s*\\(\\s*movie\\s*\\)\\s*"), "").trim()
-            else -> title
+            else -> sanitizedName
         }
         val nonResolutioned = movieEx.removeResolutionAndBeyond(stripped) ?: stripped
         return MovieInfo(cleanup(nonResolutioned), cleanup(nonResolutioned))
@@ -85,14 +85,18 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
             val removalValue = Regex("(i?)([0-9].*[pk]|[ ._-]+[UHD]+[ ._-])").find(input)?.value ?: return null
             return input.substring(0, input.indexOf(removalValue))
         }
+
+        fun yearRegex(): Regex {
+            return Regex("[ .(][0-9]{4}[ .)]")
+        }
     }
 
     internal class MovieEx(title: String, sanitizedName: String) : Base(title, sanitizedName) {
         /**
          * @return not null if matches " 2020 " or ".2020."
          */
-        fun isDefinedWithYear(): String? {
-            return getMatch("[ .][0-9]{4}[ .]")
+        fun isDefinedWithYear(): Boolean {
+            return getMatch(yearRegex().pattern)?.isNotBlank() ?: false
         }
 
         /**
