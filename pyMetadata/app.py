@@ -148,6 +148,7 @@ class MessageHandlerThread(threading.Thread):
                 producer.close()
 
     def get_metadata(self, name: str) -> Optional[DataResult]:
+        result = None
         logger.info("Checking cache for offloading")
         cache_result = ResultCache.get(name)
         if cache_result:
@@ -160,6 +161,7 @@ class MessageHandlerThread(threading.Thread):
             if (result.statusType == "SUCCESS"):
                 logger.info("Storing response for %s in in-memory cache", name)
                 ResultCache.add(name, result)
+        return result
 
 
     def perform_action(self, title) -> DataResult:

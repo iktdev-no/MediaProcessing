@@ -20,7 +20,7 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.3.1")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha76")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha77")
     implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
 
     implementation("com.google.code.gson:gson:2.8.9")
