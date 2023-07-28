@@ -23,6 +23,8 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
                 daemonInterface.onProgress(referenceId, work, progress)
                 outputCache.clear()
             }
+        } catch (e: IndexOutOfBoundsException) {
+            // Do nothing
         } catch (e: Exception) {
             //logger.error { e.message }
             e.printStackTrace()
