@@ -10,7 +10,6 @@ import no.iktdev.streamit.content.common.dto.Metadata
 import no.iktdev.streamit.content.common.dto.reader.EpisodeInfo
 import no.iktdev.streamit.content.common.dto.reader.FileResult
 import no.iktdev.streamit.content.common.dto.reader.MovieInfo
-import no.iktdev.streamit.content.common.dto.reader.VideoInfo
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
@@ -49,28 +48,53 @@ class ContentDeterminate: DefaultKafkaReader("contentDeterminate"), ISequentialM
 
         val initMessage = result[KafkaEvents.EVENT_READER_RECEIVED_FILE.event]
         if (initMessage == null || initMessage.status.statusType != StatusType.SUCCESS) {
-            produceErrorMessage(KafkaEvents.EVENT_READER_DETERMINED_FILENAME, Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)), "Initiator message not found!")
+            produceErrorMessage(
+                KafkaEvents.EVENT_READER_DETERMINED_FILENAME,
+                Message(referenceId = referenceId, status = Status(statusType = StatusType.ERROR)),
+                "Initiator message not found!"
+            )
             return
         }
         val fileResult = initMessage.data as FileResult?
         if (fileResult == null) {
-            produceErrorMessage(KafkaEvents.EVENT_READER_DETERMINED_FILENAME, initMessage, "FileResult is either null or not deserializable!")
+            produceErrorMessage(
+                KafkaEvents.EVENT_READER_DETERMINED_FILENAME,
+                initMessage,
+                "FileResult is either null or not deserializable!"
+            )
             return
         }
 
         val metadataMessage = result[KafkaEvents.EVENT_METADATA_OBTAINED.event]
-        val metadata = if (metadataMessage?.status?.statusType == StatusType.SUCCESS) metadataMessage.data as Metadata? else null
+        val metadata =
+            if (metadataMessage?.status?.statusType == StatusType.SUCCESS) metadataMessage.data as Metadata? else null
 
-        val videoInfo = if (metadata?.type == null) {
-            FileNameDeterminate(fileResult.title, fileResult.sanitizedName).getDeterminedVideoInfo()
-        } else if (metadata.type.lowercase() == "movie") {
-            FileNameDeterminate(fileResult.title, fileResult.sanitizedName, FileNameDeterminate.ContentType.MOVIE).getDeterminedVideoInfo()
-        } else {
-            FileNameDeterminate(fileResult.title, fileResult.sanitizedName, FileNameDeterminate.ContentType.SERIE).getDeterminedVideoInfo()
-        }
+
+        // Due to the fact that the sources might say serie, but it is not a serie input we will give serie a try then default to movie
+
+
+        val videoInfo = when (metadata?.type) {
+            "serie" -> {
+                FileNameDeterminate(
+                    fileResult.title,
+                    fileResult.sanitizedName,
+                    FileNameDeterminate.ContentType.SERIE
+                ).getDeterminedVideoInfo()
+            }
+
+            "movie" -> {
+                FileNameDeterminate(
+                    fileResult.title,
+                    fileResult.sanitizedName,
+                    FileNameDeterminate.ContentType.MOVIE
+                ).getDeterminedVideoInfo()
+            }
+
+            else -> null
+        } ?: FileNameDeterminate(fileResult.title, fileResult.sanitizedName).getDeterminedVideoInfo()
 
         if (videoInfo == null) {
-            produceErrorMessage(KafkaEvents.EVENT_READER_DETERMINED_FILENAME, initMessage, "VideoInfo is null." )
+            produceErrorMessage(KafkaEvents.EVENT_READER_DETERMINED_FILENAME, initMessage, "VideoInfo is null.")
             return
         }
 

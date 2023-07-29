@@ -52,11 +52,12 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
             logger.info("Worker is waiting for a work item...")
             val workItem = queue.receive() // Coroutine will wait here until a work item is available
             logger.info("Worker received a work item.")
-            if (jobsInProgress.incrementAndGet() <= maxConcurrentJobs) {
+            if (jobsInProgress.get() <= maxConcurrentJobs) {
+                jobsInProgress.incrementAndGet()
                 val job = processWorkItem(workItem)
                 job.invokeOnCompletion {
-                    jobsInProgress.decrementAndGet()
-                    logger.info { "Available workers: ${maxConcurrentJobs - jobsInProgress.get()}" }
+                    val currentJobsInProgress = jobsInProgress.decrementAndGet()
+                    logger.info { "Available workers: ${maxConcurrentJobs - currentJobsInProgress}" }
                 }
             }
             logger.info { "Available workers: ${maxConcurrentJobs - jobsInProgress.get()}" }
@@ -65,6 +66,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
     }
 
     private suspend fun processWorkItem(workItem: ExecutionBlock): Job {
+        logger.info { "Processing work: ${workItem.type}" }
         workItem.work()
         return Job()
     }
@@ -76,9 +78,9 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
         producer.sendMessage(KafkaEvents.EVENT_ENCODER_VIDEO_FILE_QUEUED.event, message.withNewStatus(Status(StatusType.PENDING)))
         try {
             if (message.data != null && message.data is EncodeWork) {
-
+                val work = message.data as EncodeWork
                 val workBlock = suspend {
-                    val data: EncodeWork = message.data as EncodeWork
+                    val data: EncodeWork = work
                     val encodeDaemon = EncodeDaemon(message.referenceId, data, encodeListener)
                     logger.info { "\nreferenceId: ${message.referenceId} \nStarting encoding. \nWorkId: ${data.workId}" }
                     encodeDaemon.runUsingWorkItem()
@@ -88,7 +90,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
                     true -> StatusType.IGNORED // Køen er lukket, jobben ble ignorert
                     false -> {
                         if (result.isSuccess) {
-                            StatusType.PENDING // Jobben ble sendt til køen
+                            StatusType.SUCCESS // Jobben ble sendt til køen
                         } else {
                             StatusType.ERROR // Feil ved sending av jobben
                         }
@@ -119,7 +121,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
                     true -> StatusType.IGNORED // Køen er lukket, jobben ble ignorert
                     false -> {
                         if (result.isSuccess) {
-                            StatusType.PENDING // Jobben ble sendt til køen
+                            StatusType.SUCCESS // Jobben ble sendt til køen
                         } else {
                             StatusType.ERROR // Feil ved sending av jobben
                         }
