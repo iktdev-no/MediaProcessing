@@ -26,7 +26,7 @@ dependencies {
     implementation("no.iktdev.library:subtitle:1.7-SNAPSHOT")
 
     implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha80")
-    implementation("no.iktdev:exfl:0.0.12-SNAPSHOT")
+    implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 

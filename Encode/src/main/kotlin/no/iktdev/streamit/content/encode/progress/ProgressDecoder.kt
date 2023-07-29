@@ -9,6 +9,20 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
 class ProgressDecoder(val workBase: WorkBase) {
+    val expectedKeys = listOf<String>(
+        "frame=",
+        "fps=",
+        "stream_0_0_q=",
+        "bitrate=",
+        "total_size=",
+        "out_time_us=",
+        "out_time_ms=",
+        "out_time=",
+        "dup_frames=",
+        "drop_frames=",
+        "speed=",
+        "progress="
+    )
     var duration: Int? = null
         set(value) {
             if (field == null || field == 0)

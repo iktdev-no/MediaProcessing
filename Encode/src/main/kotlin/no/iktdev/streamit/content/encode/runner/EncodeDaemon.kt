@@ -21,13 +21,13 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     lateinit var outLogFile: File
     var outputCache = observableListOf<String>()
     private val decoder = ProgressDecoder(work)
-    private fun produceProgress(items: List<String>) {
+    fun produceProgress(items: List<String>): Progress? {
         try {
             val decodedProgress = decoder.parseVideoProgress(items)
             if (decodedProgress != null) {
                 val progress = decoder.getProgress(decodedProgress)
-                daemonInterface.onProgress(referenceId, work, progress)
                 outputCache.clear()
+                return progress
             }
         } catch (e: IndexOutOfBoundsException) {
             // Do nothing
@@ -35,12 +35,16 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
             //logger.error { e.message }
             e.printStackTrace()
         }
+        return null
     }
 
     init {
         outputCache.addListener(object : ObservableList.Listener<String> {
             override fun onAdded(item: String) {
-                produceProgress(outputCache)
+                val progress = produceProgress(outputCache)
+                progress?.let {
+                    daemonInterface.onProgress(referenceId, work, progress)
+                }
             }
         })
         logDir.mkdirs()
@@ -73,12 +77,14 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     override fun onError(code: Int) {
         daemonInterface.onError(referenceId, work, code)
     }
+
     override fun onOutputChanged(line: String) {
         super.onOutputChanged(line)
         if (decoder.isDuration(line))
             decoder.setDuration(line)
-
-        outputCache.add(line)
+        if (decoder.expectedKeys.any { line.startsWith(it) }) {
+            outputCache.add(line)
+        }
         writeToLog(line)
     }
     private fun writeToLog(line: String) {

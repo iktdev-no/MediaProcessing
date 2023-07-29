@@ -1,6 +1,9 @@
 package no.iktdev.streamit.content.encode.progress
 
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
+import no.iktdev.streamit.content.encode.Resources
+import no.iktdev.streamit.content.encode.runner.EncodeDaemon
+import no.iktdev.streamit.content.encode.runner.IEncodeListener
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -28,6 +31,50 @@ class DecodedProgressDataDecoderTest {
         }
         assertThat(lines).isNotEmpty()
     }
+
+
+
+    @Test
+    fun testCanRead() {
+        val res = Resources()
+        val data = res.getText("Output1.txt") ?: ""
+        assertThat(data).isNotEmpty()
+        val lines = data.split("\n").map { it.trim() }
+        assertThat(lines).isNotEmpty()
+
+        val encodeWork = EncodeWork(
+            workId = UUID.randomUUID().toString(),
+            collection = "Demo",
+            inFile = "Demo.mkv",
+            outFile = "FancyDemo.mp4",
+            arguments = emptyList()
+        )
+        val decoder = ProgressDecoder(encodeWork)
+        lines.forEach { decoder.setDuration(it) }
+        assertThat(decoder.duration).isNotNull()
+        val produced = mutableListOf<Progress>()
+        val encoder = EncodeDaemon(UUID.randomUUID().toString(), encodeWork, object : IEncodeListener {
+            override fun onStarted(referenceId: String, work: EncodeWork) {
+            }
+            override fun onError(referenceId: String, work: EncodeWork, code: Int) {
+            }
+            override fun onProgress(referenceId: String, work: EncodeWork, progress: Progress) {
+                produced.add(progress)
+            }
+            override fun onEnded(referenceId: String, work: EncodeWork) {
+            }
+
+        })
+
+
+        lines.forEach {
+            encoder.onOutputChanged(it)
+        }
+        assertThat(produced).isNotEmpty()
+
+
+    }
+
 
     val text = """
         frame=16811 fps= 88 q=40.0 size=    9984kB time=00:x01:10.79 bitrate=1155.3kbits/s speed=3.71x
