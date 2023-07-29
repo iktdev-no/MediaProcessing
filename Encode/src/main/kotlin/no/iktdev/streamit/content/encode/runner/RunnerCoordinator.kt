@@ -3,23 +3,21 @@ package no.iktdev.streamit.content.encode.runner
 import com.google.gson.Gson
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.sync.Mutex
 import no.iktdev.streamit.content.encode.EncodeEnv
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.streamit.content.common.CommonConfig
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
+import no.iktdev.streamit.content.encode.progress.DecodedProgressData
 import no.iktdev.streamit.content.encode.progress.Progress
+import no.iktdev.streamit.content.encode.progressMap
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Env
 import org.springframework.stereotype.Service
-import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}
@@ -157,6 +155,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
 
         override fun onProgress(referenceId: String, work: EncodeWork, progress: Progress) {
             logger.info { "Work progress for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Progress: ${Gson().toJson(progress)}" }
+            progressMap.put(work.workId, progress)
         }
 
         override fun onEnded(referenceId: String, work: EncodeWork) {

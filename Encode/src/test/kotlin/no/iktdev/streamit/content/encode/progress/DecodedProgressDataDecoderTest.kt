@@ -1,14 +1,22 @@
 package no.iktdev.streamit.content.encode.progress
 
+import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import java.util.UUID
 
-class ProgressDecoderTest {
+class DecodedProgressDataDecoderTest {
 
     @Test
     fun test() {
-        val progress = ProgressDecoder()
+        val progress = ProgressDecoder(EncodeWork(
+            workId = UUID.randomUUID().toString(),
+            collection = "Demo",
+            inFile = "Demo.mkv",
+            outFile = "FancyDemo.mp4",
+            arguments = emptyList()
+        ))
         val lines = text.split("\n")
         val cache: MutableList<String> = mutableListOf()
         lines.forEach {

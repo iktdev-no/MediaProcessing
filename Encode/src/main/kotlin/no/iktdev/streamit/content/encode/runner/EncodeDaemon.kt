@@ -7,6 +7,7 @@ import no.iktdev.exfl.observable.observableListOf
 import no.iktdev.streamit.content.common.deamon.Daemon
 import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
+import no.iktdev.streamit.content.encode.progress.DecodedProgressData
 import no.iktdev.streamit.content.encode.progress.Progress
 import no.iktdev.streamit.content.encode.progress.ProgressDecoder
 import java.io.BufferedWriter
@@ -19,11 +20,12 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     val logDir = File("/src/logs")
     lateinit var outLogFile: File
     var outputCache = observableListOf<String>()
-    private val decoder = ProgressDecoder()
+    private val decoder = ProgressDecoder(work)
     private fun produceProgress(items: List<String>) {
         try {
-            val progress = decoder.parseVideoProgress(items)
-            if (progress != null) {
+            val decodedProgress = decoder.parseVideoProgress(items)
+            if (decodedProgress != null) {
+                val progress = decoder.getProgress(decodedProgress)
                 daemonInterface.onProgress(referenceId, work, progress)
                 outputCache.clear()
             }
@@ -73,6 +75,9 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     }
     override fun onOutputChanged(line: String) {
         super.onOutputChanged(line)
+        if (decoder.isDuration(line))
+            decoder.setDuration(line)
+
         outputCache.add(line)
         writeToLog(line)
     }

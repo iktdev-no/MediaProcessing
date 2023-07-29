@@ -6,7 +6,7 @@ import no.iktdev.exfl.observable.observableListOf
 import no.iktdev.streamit.content.common.deamon.Daemon
 import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
-import no.iktdev.streamit.content.encode.progress.Progress
+import no.iktdev.streamit.content.encode.progress.DecodedProgressData
 import java.io.File
 private val logger = KotlinLogging.logger {}
 
@@ -50,6 +50,6 @@ class ExtractDaemon(val referenceId: String, val work: ExtractWork, val daemonIn
 interface IExtractListener {
     fun onStarted(referenceId: String, work: ExtractWork)
     fun onError(referenceId: String, work: ExtractWork, code: Int)
-    fun onProgress(referenceId: String, work: ExtractWork, progress: Progress) {}
+    fun onProgress(referenceId: String, work: ExtractWork, progress: DecodedProgressData) {}
     fun onEnded(referenceId: String, work: ExtractWork)
 }

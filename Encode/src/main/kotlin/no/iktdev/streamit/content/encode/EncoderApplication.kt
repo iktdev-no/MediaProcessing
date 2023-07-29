@@ -1,5 +1,7 @@
 package no.iktdev.streamit.content.encode
 
+import no.iktdev.exfl.observable.observableMapOf
+import no.iktdev.streamit.content.encode.progress.Progress
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
@@ -8,6 +10,7 @@ import org.springframework.context.ApplicationContext
 class EncoderApplication
 
 private var context: ApplicationContext? = null
+val progressMap = observableMapOf<String, Progress>()
 
 @Suppress("unused")
 fun getContext(): ApplicationContext? {
