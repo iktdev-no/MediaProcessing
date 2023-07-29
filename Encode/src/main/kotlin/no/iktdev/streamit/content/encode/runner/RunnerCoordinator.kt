@@ -37,6 +37,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
     final val defaultScope = Coroutines.default()
 
     private val jobsInProgress = AtomicInteger(0)
+    private var inProgressJobs = mutableListOf<Job>()
     val queue = Channel<ExecutionBlock>(Channel.UNLIMITED)
 
 
@@ -55,9 +56,11 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
             if (jobsInProgress.get() <= maxConcurrentJobs) {
                 jobsInProgress.incrementAndGet()
                 val job = processWorkItem(workItem)
+                inProgressJobs.add(job)
                 job.invokeOnCompletion {
                     val currentJobsInProgress = jobsInProgress.decrementAndGet()
                     logger.info { "Available workers: ${maxConcurrentJobs - currentJobsInProgress}" }
+                    inProgressJobs.remove(job)
                 }
             }
             logger.info { "Available workers: ${maxConcurrentJobs - jobsInProgress.get()}" }

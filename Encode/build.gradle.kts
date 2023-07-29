@@ -28,6 +28,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 
+
     implementation("com.github.pgreze:kotlin-process:1.3.1")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 

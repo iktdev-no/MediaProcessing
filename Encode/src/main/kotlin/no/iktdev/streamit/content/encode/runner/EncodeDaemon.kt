@@ -9,11 +9,15 @@ import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
 import no.iktdev.streamit.content.encode.progress.Progress
 import no.iktdev.streamit.content.encode.progress.ProgressDecoder
+import java.io.BufferedWriter
 import java.io.File
+import java.io.FileWriter
 
 private val logger = KotlinLogging.logger {}
 
 class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInterface: IEncodeListener): IDaemon {
+    val logDir = File("/src/logs")
+    lateinit var outLogFile: File
     var outputCache = observableListOf<String>()
     private val decoder = ProgressDecoder()
     private fun produceProgress(items: List<String>) {
@@ -37,6 +41,8 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
                 produceProgress(outputCache)
             }
         })
+        logDir.mkdirs()
+        outLogFile = File(logDir, "${work.workId}-${work.collection}.log")
     }
 
     suspend fun runUsingWorkItem(): Int {
@@ -68,6 +74,19 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
     override fun onOutputChanged(line: String) {
         super.onOutputChanged(line)
         outputCache.add(line)
+        writeToLog(line)
+    }
+    private fun writeToLog(line: String) {
+        val fileWriter = FileWriter(outLogFile, true) // true indikerer at vi ønsker å appende til filen
+        val bufferedWriter = BufferedWriter(fileWriter)
+
+        // Skriv logglinjen til filen
+        bufferedWriter.write(line)
+        bufferedWriter.newLine() // Legg til en ny linje etter logglinjen
+
+        // Lukk BufferedWriter og FileWriter for å frigjøre ressurser
+        bufferedWriter.close()
+        fileWriter.close()
     }
 
 }
