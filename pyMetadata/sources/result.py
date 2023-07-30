@@ -17,7 +17,7 @@ class Metadata:
 class DataResult:
     statusType: str
     errorMessage: str
-    data: Metadata
+    data: Metadata = None
 
     def to_dict(self):
         return asdict(self)
