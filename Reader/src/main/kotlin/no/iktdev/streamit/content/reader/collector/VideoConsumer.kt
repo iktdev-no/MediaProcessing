@@ -87,9 +87,14 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
         val coverFile = metadata?.cover?.let { coverUrl ->
             runBlocking {
                 try {
-                    Downloader(coverUrl, CommonConfig.outgoingContent, fileData.title).download()
+                    val _file = Downloader(coverUrl, CommonConfig.outgoingContent, fileData.title).download()
+                    if (_file == null || !_file.exists()) {
+                        logger.info { "Failed to download the file" }
+                    }
+                    _file
                 } catch (e: Exception) {
                     // No cover
+                    e.printStackTrace()
                     null
                 }
             }
