@@ -2,6 +2,7 @@ package no.iktdev.streamit.content.convert
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 import no.iktdev.library.subtitle.Syncro
 import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
@@ -10,6 +11,9 @@ import no.iktdev.streamit.content.common.dto.reader.SubtitleInfo
 import no.iktdev.streamit.content.common.dto.reader.work.ConvertWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
 import java.io.File
+
+private val logger = KotlinLogging.logger {}
+
 
 class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
 
@@ -22,6 +26,7 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
         val reader = getReade(inFile)
         val dialogs = reader?.read()
         if (dialogs.isNullOrEmpty()) {
+            logger.error { "$referenceId ${subtitleInfo.inputFile}: Dialogs read from file is null or empty!" }
             withContext(Dispatchers.Default) {
                 listener.onError(referenceId, subtitleInfo, "Dialogs read from file is null or empty!")
             }

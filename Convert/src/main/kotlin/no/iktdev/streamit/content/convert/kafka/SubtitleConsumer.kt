@@ -59,7 +59,7 @@ class SubtitleConsumer: DefaultKafkaReader("convertHandlerSubtitle"), IConvertLi
     }
 
     override fun onError(referenceId: String, info: SubtitleInfo, message: String) {
-        produceMessage(KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED, Message(referenceId = referenceId, Status(statusType = StatusType.ERROR)), null)
+        produceMessage(KafkaEvents.EVENT_CONVERTER_SUBTITLE_FILE_ENDED, Message(referenceId = referenceId, Status(statusType = StatusType.ERROR, message = message)), null)
     }
 
     override fun onEnded(referenceId: String, info: SubtitleInfo, work: ConvertWork) {
