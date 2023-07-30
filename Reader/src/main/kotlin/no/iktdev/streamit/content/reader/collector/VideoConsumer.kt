@@ -66,6 +66,7 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
             return
         }
         val videoFileNameWithExtension = File(encodeWork.outFile).name
+        val outDir = File(encodeWork.outFile).parentFile
 
         val iid = transaction {
             if (serieData != null) {
@@ -88,7 +89,7 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
             logger.info { "Downloading Cover: $coverUrl" }
             runBlocking {
                 try {
-                    val _file = Downloader(coverUrl, CommonConfig.outgoingContent, fileData.title).download()
+                    val _file = Downloader(coverUrl, outDir, fileData.title).download()
                     if (_file == null || !_file.exists()) {
                         logger.info { "Failed to download the file" }
                     }
