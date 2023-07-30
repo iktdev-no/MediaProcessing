@@ -154,7 +154,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
         }
 
         override fun onProgress(referenceId: String, work: EncodeWork, progress: Progress) {
-            logger.info { "Work progress for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Progress: ${Gson().toJson(progress)}" }
+            logger.debug { "Work progress for $referenceId with WorkId ${work.workId} @ ${work.outFile}: Progress: ${Gson().toJson(progress)}" }
             progressMap.put(work.workId, progress)
         }
 
