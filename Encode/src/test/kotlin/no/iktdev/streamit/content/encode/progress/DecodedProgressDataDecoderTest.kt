@@ -86,6 +86,36 @@ class DecodedProgressDataDecoderTest {
     }
 
 
+    @Test
+    fun testThatProgressIsCalculated() {
+        val encodeWork = EncodeWork(
+            workId = UUID.randomUUID().toString(),
+            collection = "Demo",
+            inFile = "Demo.mkv",
+            outFile = "FancyDemo.mp4",
+            arguments = emptyList()
+        )
+        val decoder = ProgressDecoder(encodeWork)
+        decoder.setDuration("Duration: 01:48:54.82,")
+        assertThat(decoder.duration).isNotNull()
+        val decodedProgressData = DecodedProgressData(
+            frame = null,
+            fps = null,
+            stream_0_0_q = null,
+            bitrate = null,
+            total_size = null,
+            out_time_ms = null,
+            out_time_us = null,
+            out_time = "01:48:54.82",
+            dup_frames = null,
+            drop_frames = null,
+            speed = 1.0,
+            progress = "Continue"
+        )
+        val progress = decoder.getProgress(decodedProgressData)
+        assertThat(progress.progress).isGreaterThanOrEqualTo(99)
+    }
+
     val text = """
         frame=16811 fps= 88 q=40.0 size=    9984kB time=00:x01:10.79 bitrate=1155.3kbits/s speed=3.71x
         fps=88.03
