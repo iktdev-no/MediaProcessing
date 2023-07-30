@@ -28,6 +28,7 @@ class ProgressDecoder(val workBase: WorkBase) {
             if (field == null || field == 0)
                 field = value
         }
+    var durationTime: String = "NA"
     fun parseVideoProgress(lines: List<String>): DecodedProgressData? {
         var frame: Int? = null
         var progress: String? = null
@@ -66,6 +67,7 @@ class ProgressDecoder(val workBase: WorkBase) {
     }
     fun setDuration(value: String) {
         val results = Regex("Duration:\\s*([^,]+),").find(value)?.groupValues?.firstOrNull()
+        durationTime = Regex("[0-9]+:[0-9]+:[0-9]+.[0-9]+").find(results.toString())?.value ?: "NA"
         duration = timeSpanToSeconds(results)
     }
 
@@ -81,7 +83,7 @@ class ProgressDecoder(val workBase: WorkBase) {
 
     fun getProgress(decoded: DecodedProgressData): Progress {
         if (duration == null)
-            return Progress(workId = workBase.workId, outFileName = File(workBase.outFile).name)
+            return Progress(workId = workBase.workId, outFileName = File(workBase.outFile).name, duration = durationTime, time = "NA", speed = "NA")
         val progressTime = timeSpanToSeconds(decoded.out_time) ?: 0
         val diff = floor(progressTime.toDouble() / duration!!.toDouble())
         val progress = floor(diff*100).toInt()
@@ -91,7 +93,10 @@ class ProgressDecoder(val workBase: WorkBase) {
         return Progress(
             workId = workBase.workId, outFileName = File(workBase.outFile).name,
             progress = progress,
-            estimatedCompletion = getETA(ect)
+            estimatedCompletion = getETA(ect),
+            duration = durationTime,
+            time = decoded.out_time ?: "NA",
+            speed = decoded.speed?.toString() ?: "NA"
         )
     }
 
