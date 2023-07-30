@@ -5,8 +5,15 @@ import no.iktdev.streamit.content.encode.Resources
 import no.iktdev.streamit.content.encode.runner.EncodeDaemon
 import no.iktdev.streamit.content.encode.runner.IEncodeListener
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.BeforeClass
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito.*
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
 import java.util.UUID
 
 class DecodedProgressDataDecoderTest {
@@ -53,6 +60,9 @@ class DecodedProgressDataDecoderTest {
         lines.forEach { decoder.setDuration(it) }
         assertThat(decoder.duration).isNotNull()
         val produced = mutableListOf<Progress>()
+
+        val tempFile = File.createTempFile("test", ".log")
+
         val encoder = EncodeDaemon(UUID.randomUUID().toString(), encodeWork, object : IEncodeListener {
             override fun onStarted(referenceId: String, work: EncodeWork) {
             }
@@ -64,7 +74,7 @@ class DecodedProgressDataDecoderTest {
             override fun onEnded(referenceId: String, work: EncodeWork) {
             }
 
-        })
+        }, tempFile)
 
 
         lines.forEach {

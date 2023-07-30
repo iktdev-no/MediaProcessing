@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.streamit.content.encode.EncodeEnv
 import no.iktdev.exfl.observable.ObservableList
 import no.iktdev.exfl.observable.observableListOf
+import no.iktdev.exfl.using
 import no.iktdev.streamit.content.common.deamon.Daemon
 import no.iktdev.streamit.content.common.deamon.IDaemon
 import no.iktdev.streamit.content.common.dto.reader.work.EncodeWork
@@ -16,9 +17,7 @@ import java.io.FileWriter
 
 private val logger = KotlinLogging.logger {}
 
-class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInterface: IEncodeListener): IDaemon {
-    val logDir = File("/src/logs")
-    lateinit var outLogFile: File
+class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInterface: IEncodeListener, val outFile: File = File("src").using("logs", "${work.workId}-${work.collection}.log")): IDaemon {
     var outputCache = observableListOf<String>()
     private val decoder = ProgressDecoder(work)
     fun produceProgress(items: List<String>): Progress? {
@@ -47,8 +46,7 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
                 }
             }
         })
-        logDir.mkdirs()
-        outLogFile = File(logDir, "${work.workId}-${work.collection}.log")
+        outFile.parentFile.mkdirs()
     }
 
     suspend fun runUsingWorkItem(): Int {
@@ -87,8 +85,8 @@ class EncodeDaemon(val referenceId: String, val work: EncodeWork, val daemonInte
         }
         writeToLog(line)
     }
-    private fun writeToLog(line: String) {
-        val fileWriter = FileWriter(outLogFile, true) // true indikerer at vi ønsker å appende til filen
+    fun writeToLog(line: String) {
+        val fileWriter = FileWriter(outFile, true) // true indikerer at vi ønsker å appende til filen
         val bufferedWriter = BufferedWriter(fileWriter)
 
         // Skriv logglinjen til filen
