@@ -83,8 +83,9 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
             } else null
         }
 
-
-        val coverFile = metadata?.cover?.let { coverUrl ->
+        val coverUrl = metadata?.cover
+        val coverFile: File? = if (coverUrl != null) {
+            logger.info { "Downloading Cover: $coverUrl" }
             runBlocking {
                 try {
                     val _file = Downloader(coverUrl, CommonConfig.outgoingContent, fileData.title).download()
@@ -98,7 +99,11 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
                     null
                 }
             }
+        } else {
+            logger.info { "No cover url received" }
+            null
         }
+
 
         // Serie må alltid fullføres før catalog. dette i tilfelle catalog allerede eksisterer og den thrower slik at transaskjonen blir versertert!
 
