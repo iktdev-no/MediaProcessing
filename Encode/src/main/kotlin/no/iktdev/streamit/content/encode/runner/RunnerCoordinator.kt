@@ -71,7 +71,7 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
     private suspend fun processWorkItem(workItem: ExecutionBlock): Job {
         logger.info { "Processing work: ${workItem.type}" }
         workItem.work()
-        return Job()
+        return Job().apply { complete() }
     }
 
 
