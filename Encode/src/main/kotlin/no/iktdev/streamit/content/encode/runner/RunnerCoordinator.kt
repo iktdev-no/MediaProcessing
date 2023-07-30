@@ -51,17 +51,16 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
             logger.info("Worker is waiting for a work item...")
             val workItem = queue.receive() // Coroutine will wait here until a work item is available
             logger.info("Worker received a work item.")
-            if (jobsInProgress.get() <= maxConcurrentJobs) {
+            if (jobsInProgress.get() < maxConcurrentJobs) {
                 jobsInProgress.incrementAndGet()
                 val job = processWorkItem(workItem)
                 inProgressJobs.add(job)
                 job.invokeOnCompletion {
-                    val currentJobsInProgress = jobsInProgress.decrementAndGet()
-                    logger.info { "Available workers: ${maxConcurrentJobs - currentJobsInProgress}" }
+                    logger.info { "Available workers: ${jobsInProgress.decrementAndGet()}/${maxConcurrentJobs}" }
                     inProgressJobs.remove(job)
                 }
             }
-            logger.info { "Available workers: ${maxConcurrentJobs - jobsInProgress.get()}" }
+            logger.info { "Available workers: ${jobsInProgress.get()}/$maxConcurrentJobs" }
 
         }
     }

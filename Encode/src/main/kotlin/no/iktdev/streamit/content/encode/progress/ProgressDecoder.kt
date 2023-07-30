@@ -85,8 +85,7 @@ class ProgressDecoder(val workBase: WorkBase) {
         if (duration == null)
             return Progress(workId = workBase.workId, outFileName = File(workBase.outFile).name, duration = durationTime, time = "NA", speed = "NA")
         val progressTime = timeSpanToSeconds(decoded.out_time) ?: 0
-        val diff = floor(progressTime.toDouble() / duration!!.toDouble())
-        val progress = floor(diff*100).toInt()
+        val progress = floor((progressTime.toDouble() / duration!!.toDouble()) *100).toInt()
 
         val ect = getEstimatedTimeRemaining(decoded)
 
