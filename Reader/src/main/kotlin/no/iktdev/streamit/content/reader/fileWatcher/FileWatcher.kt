@@ -41,7 +41,14 @@ class FileWatcher: FileWatcherEvents {
                     }
 
                     KWatchEvent.Kind.Created, KWatchEvent.Kind.Initialized -> {
-                        queue.addToQueue(it.file, this@FileWatcher::onFilePending, this@FileWatcher::onFileAvailable)
+                        if (validVideoFiles().contains(it.file.extension)) {
+                            queue.addToQueue(it.file, this@FileWatcher::onFilePending, this@FileWatcher::onFileAvailable)
+                        } else if (it.file.isFile) {
+                            logger.warn { "${it.file.name} is not a valid file type" }
+                        } else if (it.file.isDirectory) {
+                            val valid = it.file.walkTopDown().filter { f -> f.isFile && f.extension in validVideoFiles() }
+                            logger.warn { "${it.file.name} ignoring directory" }
+                        }
                     }
 
                     else -> {
@@ -68,6 +75,15 @@ class FileWatcher: FileWatcherEvents {
             }
         }
     }
+
+    fun validVideoFiles(): List<String> = listOf(
+        "mkv",
+        "avi",
+        "mp4",
+        "wmv",
+        "webm",
+        "mov"
+    )
 
 
     override fun onFileAvailable(file: PendingFile) {
