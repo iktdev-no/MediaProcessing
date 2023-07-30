@@ -85,25 +85,30 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
         }
 
         val coverUrl = metadata?.cover
-        val coverFile: File? = if (coverUrl != null) {
-            logger.info { "Downloading Cover: $coverUrl" }
-            runBlocking {
-                try {
-                    val _file = Downloader(coverUrl, outDir, fileData.title).download()
-                    if (_file == null || !_file.exists()) {
-                        logger.info { "Failed to download the file" }
+        val currentCover = getExistingCover(outDir)
+        val coverFile = if (currentCover == null || !currentCover.exists()) {
+            if (coverUrl != null) {
+                logger.info { "Downloading Cover: $coverUrl" }
+                runBlocking {
+                    try {
+                        val _file = Downloader(coverUrl, outDir, fileData.title).download()
+                        if (_file == null || !_file.exists()) {
+                            logger.info { "Failed to download the file" }
+                        }
+                        _file
+                    } catch (e: Exception) {
+                        // No cover
+                        e.printStackTrace()
+                        null
                     }
-                    _file
-                } catch (e: Exception) {
-                    // No cover
-                    e.printStackTrace()
-                    null
                 }
+            } else {
+                logger.info { "No cover url received" }
+                null
             }
-        } else {
-            logger.info { "No cover url received" }
-            null
-        }
+        } else currentCover
+
+
 
 
         // Serie må alltid fullføres før catalog. dette i tilfelle catalog allerede eksisterer og den thrower slik at transaskjonen blir versertert!
@@ -160,6 +165,19 @@ class VideoConsumer: DefaultKafkaReader("collectorConsumerEncodedVideo"), IColle
     fun getSerieQueryInstance(data: EpisodeInfo?, baseName: String?): SerieQuery? {
         if (data == null || baseName == null) return null
         return SerieQuery(data.episodeTitle, data.episode, data.season, data.title,  baseName)
+    }
+
+    val validCoverFormat = listOf(
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+        "bmp",
+        "tiff"
+    )
+    fun getExistingCover(contentDir: File): File? {
+        val possibleCovers = contentDir.walkTopDown().filter { it.isFile && validCoverFormat.contains(it.extension)}
+        return possibleCovers.firstOrNull()
     }
 
 }
