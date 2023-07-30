@@ -56,7 +56,8 @@ class RunnerCoordinator(private var maxConcurrentJobs: Int = 1) {
                 val job = processWorkItem(workItem)
                 inProgressJobs.add(job)
                 job.invokeOnCompletion {
-                    logger.info { "Available workers: ${jobsInProgress.decrementAndGet()}/${maxConcurrentJobs}" }
+                    val workers = jobsInProgress.decrementAndGet()
+                    logger.info { "Available workers: ${workers}/${maxConcurrentJobs}" }
                     inProgressJobs.remove(job)
                 }
             }
