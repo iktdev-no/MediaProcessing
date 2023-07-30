@@ -24,6 +24,9 @@ class metadata():
                 type = 'movie' if anime.type.lower() == 'movie' else 'serie',
                 genres = anime.genres,
             )
+            if (meta.title is None) or (meta.type is None):
+                return DataResult("IGNORE", None, None)
+
             return DataResult("SUCCESS", None, meta)
         except Exception as e:
             return DataResult(statusType="ERROR", errorMessage=str(e))

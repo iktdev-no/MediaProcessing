@@ -21,6 +21,8 @@ class metadata():
                 type = 'movie' if result.get('airing_format', '').lower() == 'movie' else 'serie',
                 genres = result.get('genres', [])
             )
+            if (meta.title is None) or (meta.type is None):
+                return DataResult("IGNORE", None, None)
 
             return DataResult("SUCCESS", None, meta)
 
