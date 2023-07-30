@@ -53,7 +53,7 @@ class ProgressDecoder(val workBase: WorkBase) {
                 frame, metadataMap["fps"]?.toDoubleOrNull(), metadataMap["stream_0_0_q"]?.toDoubleOrNull(),
                 metadataMap["bitrate"], metadataMap["total_size"]?.toIntOrNull(), metadataMap["out_time_us"]?.toLongOrNull(),
                 metadataMap["out_time_ms"]?.toLongOrNull(), metadataMap["out_time"], metadataMap["dup_frames"]?.toIntOrNull(),
-                metadataMap["drop_frames"]?.toIntOrNull(), metadataMap["speed"]?.toDoubleOrNull(), progress
+                metadataMap["drop_frames"]?.toIntOrNull(), metadataMap["speed"]?.replace("x", "", ignoreCase = true)?.toDoubleOrNull(), progress
             )
         } else {
             null // If "progress" is not found, return null
@@ -79,13 +79,11 @@ class ProgressDecoder(val workBase: WorkBase) {
     }
 
 
-    private fun getProgressTime(time: Long?): Long {
-        if (time == null) return 0
-        return time / 1000L
-    }
     fun getProgress(decoded: DecodedProgressData): Progress {
-        if (duration == null) return Progress(workId = workBase.workId, outFileName = File(workBase.outFile).name)
-        val diff = getProgressTime(decoded.out_time_ms).toDouble() / duration!!.toDouble()
+        if (duration == null)
+            return Progress(workId = workBase.workId, outFileName = File(workBase.outFile).name)
+        val progressTime = timeSpanToSeconds(decoded.out_time) ?: 0
+        val diff = floor(progressTime.toDouble() / duration!!.toDouble())
         val progress = floor(diff*100).toInt()
 
         val ect = getEstimatedTimeRemaining(decoded)
@@ -98,7 +96,7 @@ class ProgressDecoder(val workBase: WorkBase) {
     }
 
     fun getEstimatedTimeRemaining(decoded: DecodedProgressData): Long {
-        val position = getProgressTime(decoded.out_time_ms)
+        val position = timeSpanToSeconds(decoded.out_time) ?: 0
         return if(duration == null || decoded.speed == null) -1 else
             Math.round(Math.round(duration!!.toDouble() - position.toDouble()) / decoded.speed)
     }
