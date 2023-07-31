@@ -1,14 +1,14 @@
 from typing import List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 
 @dataclass
 class Metadata:
     title: str
-    altTitle: List[str] = []
+    altTitle: List[str] = field(default_factory=list)
     cover: str
     type: str  # Serie/Movie
     summary: str
-    genres: List[str]
+    genres: List[str] = field(default_factory=list)
 
     def to_dict(self):
         return asdict(self)
