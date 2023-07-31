@@ -1,6 +1,7 @@
 package no.iktdev.streamit.content.convert
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.iktdev.library.subtitle.Syncro
@@ -20,15 +21,21 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
     private fun getReade(inputFile: File): BaseReader? {
         return Reader(inputFile).getSubtitleReader()
     }
-
+    private val maxDelay = 1000 * 5
+    private var currentDelayed = 0
     suspend fun readAndConvert (subtitleInfo: SubtitleInfo) {
         val inFile = File(subtitleInfo.inputFile)
-        if (!inFile.canRead()) {
-            logger.error { "$referenceId ${subtitleInfo.inputFile}: Cant read file!" }
-            withContext(Dispatchers.Default) {
-                listener.onError(referenceId, subtitleInfo, "Cant read file!")
+        while (!inFile.canRead()) {
+            if (currentDelayed > maxDelay) {
+                logger.error { "Could not out wait lock on file!" }
+                withContext(Dispatchers.Default) {
+                    listener.onError(referenceId, subtitleInfo, "Cant read file!")
+                }
+                return
             }
-            return
+            logger.error { "$referenceId ${subtitleInfo.inputFile}: Cant read file!" }
+            delay(500)
+            currentDelayed += 500
         }
         val reader = getReade(inFile)
         val dialogs = reader?.read()
