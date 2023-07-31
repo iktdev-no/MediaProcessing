@@ -158,7 +158,7 @@ class MessageHandlerThread(threading.Thread):
         else:
             logger.info("Not in cache: %s", name)
             logger.info("Searching in sources for information about %s", name)
-            result: Optional[DataResult] = self.perform_action(title=name)
+            result: Optional[DataResult] = UseSource(title=name).select_result()
             if (result.statusType == "SUCCESS"):
                 logger.info("Storing response for %s in in-memory cache", name)
                 ResultCache.add(name, result)
