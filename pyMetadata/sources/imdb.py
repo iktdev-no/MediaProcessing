@@ -21,7 +21,8 @@ class metadata():
                 cover = result.get("cover url", None),
                 summary = result.get("plot outline", None),
                 type = 'movie' if result.get('kind', '').lower() == 'movie' else 'serie',
-                genres = result.get('genres', [])
+                genres = result.get('genres', []),
+                source="imdb"
             )
             if (meta.title is None) or (meta.type is None):
                 return DataResult("IGNORE", None, None)

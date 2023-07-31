@@ -20,6 +20,7 @@ class metadata():
                 summary = anime.synopsis,
                 type = 'movie' if anime.type.lower() == 'movie' else 'serie',
                 genres = anime.genres,
+                source="mal"
             )
             if (meta.title is None) or (meta.type is None):
                 return DataResult("IGNORE", None, None)

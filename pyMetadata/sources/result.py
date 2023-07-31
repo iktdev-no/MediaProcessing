@@ -9,6 +9,7 @@ class Metadata:
     type: str  # Serie/Movie
     summary: str
     genres: List[str]
+    source: str
 
     def to_dict(self):
         return asdict(self)

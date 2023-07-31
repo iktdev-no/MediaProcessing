@@ -41,11 +41,18 @@ class Naming(val fileName: String) {
 
     fun guessDesiredTitle(): String {
         val desiredFileName = guessDesiredFileName()
-        val result = if (desiredFileName.contains(" - ")) {
-            return desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
-        } else desiredFileName
+        val seasonRegex = Regex("\\sS[0-9]+(\\s- [0-9]+|\\s[0-9]+)", RegexOption.IGNORE_CASE)
+        if (seasonRegex.matches(desiredFileName)) {
+            return seasonRegex.replace(desiredFileName, "").trim()
+        } else {
+            val result = if (desiredFileName.contains(" - ")) {
+                return desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
+            } else desiredFileName
 
-        return result.trim()
+
+
+            return result.trim()
+        }
     }
 
 
