@@ -23,6 +23,13 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
 
     suspend fun readAndConvert (subtitleInfo: SubtitleInfo) {
         val inFile = File(subtitleInfo.inputFile)
+        if (!inFile.canRead()) {
+            logger.error { "$referenceId ${subtitleInfo.inputFile}: Cant read file!" }
+            withContext(Dispatchers.Default) {
+                listener.onError(referenceId, subtitleInfo, "Cant read file!")
+            }
+            return
+        }
         val reader = getReade(inFile)
         val dialogs = reader?.read()
         if (dialogs.isNullOrEmpty()) {
