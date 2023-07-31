@@ -34,6 +34,7 @@ class UseSource():
             result.append(WeightedData(imdb, 1))
         if (mal is not None) and (mal.statusType == "SUCCESS"):
             result.append(WeightedData(mal, 8))
+        return result
     
     def __calculate_score(self, title: str, weightData: List[WeightedData]) -> List[DataAndScore]:
         """"""
