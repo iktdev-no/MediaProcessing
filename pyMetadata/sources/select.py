@@ -28,8 +28,8 @@ class UseSource():
         mal = MalMetadata(title).lookup()
 
         result: List[WeightedData] = []
-        if (anii is not None) and (anii.statusType == "SUCCESS"):
-            result.append(WeightedData(anii, 4))
+       # if (anii is not None) and (anii.statusType == "SUCCESS"):
+        #    result.append(WeightedData(anii, 4))
         if (imdb is not None) and (imdb.statusType == "SUCCESS"):
             result.append(WeightedData(imdb, 1))
         if (mal is not None) and (mal.statusType == "SUCCESS"):
