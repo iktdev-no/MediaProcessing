@@ -15,10 +15,7 @@ class metadata():
             anime = Anime(search.results[0].mal_id)
             meta = Metadata(
                 title = anime.title,
-                altTitle = [
-                    anime.title_english,
-                    *anime.title_synonyms
-                ],
+                altTitle = [altName for altName in [anime.title_english, *anime.title_synonyms] if altName],
                 cover = anime.image_url,
                 summary = anime.synopsis,
                 type = 'movie' if anime.type.lower() == 'movie' else 'serie',

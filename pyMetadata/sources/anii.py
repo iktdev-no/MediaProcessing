@@ -15,7 +15,7 @@ class metadata():
 
             meta = Metadata(
                 title = result.get("name_english", None),
-                altTitle = [result.get("name_romaji", None)],
+                altTitle = [result.get("name_romaji", [])],
                 cover = result.get("cover_image", None),
                 summary = result.get("desc", None),
                 type = 'movie' if result.get('airing_format', '').lower() == 'movie' else 'serie',

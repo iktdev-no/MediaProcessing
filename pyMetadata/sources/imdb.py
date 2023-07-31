@@ -17,7 +17,7 @@ class metadata():
             result = self.imdb.get_movie(imdbId)
             meta = Metadata(
                 title = result.get("title", None),
-                altTitle = [result.get("localized title", None)],
+                altTitle = [result.get("localized title", [])],
                 cover = result.get("cover url", None),
                 summary = result.get("plot outline", None),
                 type = 'movie' if result.get('kind', '').lower() == 'movie' else 'serie',
