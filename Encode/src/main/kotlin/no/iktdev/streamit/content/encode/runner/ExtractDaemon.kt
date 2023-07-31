@@ -21,7 +21,7 @@ class ExtractDaemon(val referenceId: String, val work: ExtractWork, val daemonIn
         }
         val adjustedArgs = listOf(
             "-hide_banner", "-i", File(work.inFile).absolutePath, *work.arguments.toTypedArray(), outFile.absolutePath
-        ) + if (EncodeEnv.allowOverwrite) listOf("-y") else listOf("-nostdin")
+        ) + if (EncodeEnv.allowOverwrite) listOf("-y") else listOf()
         logger.info { "$referenceId @ ${work.workId} ${adjustedArgs.joinToString(" ")}" }
         return Daemon(EncodeEnv.ffmpeg, this).run(adjustedArgs)
     }
