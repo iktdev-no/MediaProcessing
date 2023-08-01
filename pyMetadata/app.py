@@ -130,9 +130,9 @@ class MessageHandlerThread(threading.Thread):
                 baseName = self.message.value["data"]["sanitizedName"]
                 title = self.message.value['data']["title"]
 
-                result = self.get_metadata(baseName)
+                result = self.get_metadata(title)
                 if (result is None):
-                    result = self.get_metadata(title)
+                    result = self.get_metadata(baseName)
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
 
