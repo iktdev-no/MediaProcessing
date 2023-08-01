@@ -10,6 +10,7 @@ class Metadata:
     summary: str
     genres: List[str]
     source: str
+    usedTitle: str
 
     def to_dict(self):
         return asdict(self)

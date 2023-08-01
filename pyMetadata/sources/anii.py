@@ -20,7 +20,8 @@ class metadata():
                 summary = result.get("desc", None),
                 type = 'movie' if result.get('airing_format', '').lower() == 'movie' else 'serie',
                 genres = result.get('genres', []),
-                source="anii"
+                source="anii",
+                usedTitle=self.name
             )
             if (meta.title is None) or (meta.type is None):
                 return DataResult("IGNORE", None, None)
