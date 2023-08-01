@@ -1,5 +1,9 @@
 package no.iktdev.streamit.content.common
 
+import no.iktdev.streamit.content.common.dto.reader.FileResult
+import no.iktdev.streamit.library.kafka.dto.Message
+import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.streamit.library.kafka.dto.StatusType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Test
@@ -14,6 +18,14 @@ class NamingTest {
         val name = Naming(input)
         assertThat(name.guessDesiredTitle()).doesNotContain("[")
 
+    }
+
+    @Test
+    fun checkThatSeasonIsStripped() {
+        val input = "[AAA] Kafka Topic S2 - 01"
+        val naming = Naming(input)
+        val result = naming.guessDesiredTitle()
+        assertThat(result).isEqualTo("Kafka Topic")
     }
 
 /*
