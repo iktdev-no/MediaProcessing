@@ -5,12 +5,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.iktdev.library.subtitle.Syncro
+import no.iktdev.library.subtitle.classes.DialogType
 import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.streamit.content.common.dto.reader.SubtitleInfo
 import no.iktdev.streamit.content.common.dto.reader.work.ConvertWork
 import no.iktdev.streamit.content.common.dto.reader.work.ExtractWork
+import no.iktdev.streamit.content.common.streams.SubtitleType
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
@@ -50,6 +52,8 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
         withContext(Dispatchers.Default) {
             listener.onStarted(referenceId)
         }
+
+        val filtered = dialogs.filter { !it.ignore && it.type !in listOf(DialogType.SIGN_SONG, DialogType.CAPTION) }
 
         val syncedDialogs = Syncro().sync(dialogs)
 
