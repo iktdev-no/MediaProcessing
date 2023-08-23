@@ -184,22 +184,26 @@ def signal_handler(sig, frame):
 
 # Hovedprogrammet
 def main():
-    # Angi signalhåndterer for å fange opp SIGINT (Ctrl+C)
-    signal.signal(signal.SIGINT, signal_handler)
+    try:
+        # Angi signalhåndterer for å fange opp SIGINT (Ctrl+C)
+        signal.signal(signal.SIGINT, signal_handler)
 
-    # Opprett og start consumer-tråden
-    consumer_thread = KafkaConsumerThread(bootstrap_servers, kafka_topic, consumer_group)
-    consumer_thread.start()
+        # Opprett og start consumer-tråden
+        consumer_thread = KafkaConsumerThread(bootstrap_servers, kafka_topic, consumer_group)
+        consumer_thread.start()
 
-    logger.info("App started")
+        logger.info("App started")
 
-    # Vent til should_stop er satt til True for å avslutte applikasjonen
-    while not should_stop:
-        time.sleep(60)
+        # Vent til should_stop er satt til True for å avslutte applikasjonen
+        while not should_stop:
+            time.sleep(60)
 
-    # Stopp consumer-tråden
-    consumer_thread.stop()
-    consumer_thread.join()
+        # Stopp consumer-tråden
+        consumer_thread.stop()
+        consumer_thread.join()
+    except:
+        logger.info("App crashed")
+        sys.exit(1)
 
     logger.info("App stopped")
 
