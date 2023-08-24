@@ -47,7 +47,7 @@ class FileWatcher: FileWatcherEvents {
                             logger.warn { "${it.file.name} is not a valid file type" }
                         } else if (it.file.isDirectory) {
                             val valid = it.file.walkTopDown().filter { f -> f.isFile && f.extension in validVideoFiles() }
-                            logger.warn { "${it.file.name} ignoring directory" }
+                            logger.warn { "Ignoring directory: ${it.file.name}" }
                         }
                     }
 

@@ -10,6 +10,7 @@ import no.iktdev.streamit.content.common.dto.Metadata
 import no.iktdev.streamit.content.common.dto.reader.EpisodeInfo
 import no.iktdev.streamit.content.common.dto.reader.FileResult
 import no.iktdev.streamit.content.common.dto.reader.MovieInfo
+import no.iktdev.streamit.content.reader.ReaderEnv
 import no.iktdev.streamit.library.kafka.KafkaEvents
 import no.iktdev.streamit.library.kafka.dto.Message
 import no.iktdev.streamit.library.kafka.dto.Status
@@ -30,7 +31,8 @@ class ContentDeterminate: DefaultKafkaReader("contentDeterminate"), ISequentialM
         accept = KafkaEvents.EVENT_READER_RECEIVED_FILE.event,
         subAccepts = listOf(KafkaEvents.EVENT_METADATA_OBTAINED.event),
         deserializers = loadDeserializers(),
-        listener = this
+        listener = this,
+        validity = ReaderEnv.metadataTimeOut
     ) {}
 
     init {
