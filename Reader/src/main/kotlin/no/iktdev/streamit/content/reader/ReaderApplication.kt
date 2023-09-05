@@ -3,6 +3,7 @@ package no.iktdev.streamit.content.reader
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.exfl.observable.Observables
 import no.iktdev.streamit.content.reader.analyzer.encoding.helpers.PreferenceReader
 import no.iktdev.streamit.library.db.datasource.MySqlDataSource
 import no.iktdev.streamit.library.db.tables.*
@@ -28,6 +29,13 @@ fun getContext(): ApplicationContext? {
     return context
 }
 fun main(args: Array<String>) {
+    Coroutines.addListener(object : Observables.ObservableValue.ValueListener<Throwable> {
+        override fun onUpdated(value: Throwable) {
+            logger.error { "Received error: ${value.message}" }
+            value.cause?.printStackTrace()
+        }
+    })
+
 
     val ds = MySqlDataSource.fromDatabaseEnv().createDatabase()
     System.out.println(ds)
