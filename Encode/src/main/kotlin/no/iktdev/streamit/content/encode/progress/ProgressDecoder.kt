@@ -92,6 +92,7 @@ class ProgressDecoder(val workBase: WorkBase) {
         return Progress(
             workId = workBase.workId, outFileName = File(workBase.outFile).name,
             progress = progress,
+            estimatedCompletionSeconds = ect,
             estimatedCompletion = getETA(ect),
             duration = durationTime,
             time = decoded.out_time ?: "NA",
