@@ -24,6 +24,8 @@ class WebSocketConfig : WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
             //  .setAllowedOrigins("*")
             .withSockJS()
+
+        registry.addEndpoint("/")
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
