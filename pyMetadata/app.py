@@ -92,7 +92,7 @@ class KafkaConsumerThread(threading.Thread):
         except:
             logger.exception("Kafka Consumer failed to start")
             self.stop()
-            sys.exit(1)
+            #sys.exit(1)
 
 
         while not self.shutdown.is_set():
@@ -112,12 +112,14 @@ class KafkaConsumerThread(threading.Thread):
                     logger.info("Ignorert message: key=%s", message.key)
             # Introduce a small sleep to reduce CPU usage
             time.sleep(1)
-
-        consumer.close()
-        logger.info("Kafka Consumer stopped")
+        if consumer is not None:
+            consumer.close()
+            logger.info("Kafka Consumer stopped")
 
     def stop(self):
         self.shutdown.set()
+        global should_stop 
+        should_stop = True
 
 # Kafka message handler-klasse
 class MessageHandlerThread(threading.Thread):
@@ -213,6 +215,6 @@ def main():
         sys.exit(1)
 
     logger.info("App stopped")
-
+    sys.exit(0)
 if __name__ == '__main__':
     main()
