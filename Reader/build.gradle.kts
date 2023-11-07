@@ -24,7 +24,7 @@ repositories {
 
 val exposedVersion = "0.38.2"
 dependencies {
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha80")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha84")
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
 
     implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha14")
@@ -47,6 +47,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
+    implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
+
 
     implementation(project(":CommonCode"))
 

@@ -8,8 +8,9 @@ import no.iktdev.streamit.library.kafka.dto.Status
 import no.iktdev.streamit.library.kafka.dto.StatusType
 import no.iktdev.streamit.library.kafka.listener.deserializer.IMessageDataDeserialization
 import no.iktdev.streamit.library.kafka.producer.DefaultProducer
+import java.util.*
 
-abstract class DefaultKafkaReader(val subId: String) {
+abstract class DefaultKafkaReader(val subId: String = UUID.randomUUID().toString()) {
     val messageProducer = DefaultProducer(CommonConfig.kafkaTopic)
     val defaultConsumer = DefaultConsumer(subId = subId)
 

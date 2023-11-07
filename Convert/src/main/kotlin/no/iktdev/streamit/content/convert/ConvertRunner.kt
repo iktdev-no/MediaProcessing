@@ -55,20 +55,19 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
 
         val filtered = dialogs.filter { !it.ignore && it.type !in listOf(DialogType.SIGN_SONG, DialogType.CAPTION) }
 
-        val syncedDialogs = Syncro().sync(dialogs)
+        val syncedDialogs = Syncro().sync(filtered)
 
         try {
             val converted = Export(inFile, syncedDialogs, ConvertEnv.allowOverwrite).write()
-            converted.forEach {
-                val item = ConvertWork(
-                    inFile = inFile.absolutePath,
-                    collection = subtitleInfo.collection,
-                    language = subtitleInfo.language,
-                    outFile = it.absolutePath
-                )
-                withContext(Dispatchers.Default) {
-                    listener.onEnded(referenceId, subtitleInfo, work = item)
-                }
+            val item = ConvertWork(
+                inFile = inFile.absolutePath,
+                collection = subtitleInfo.collection,
+                language = subtitleInfo.language,
+                outFiles = converted.map { it.absolutePath }
+            )
+
+            withContext(Dispatchers.Default) {
+                listener.onEnded(referenceId, subtitleInfo, work = item)
             }
         } catch (e: Exception) {
             e.printStackTrace()

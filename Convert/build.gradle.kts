@@ -23,9 +23,9 @@ repositories {
 dependencies {
     implementation(project(":CommonCode"))
 
-    implementation("no.iktdev.library:subtitle:1.7.4-SNAPSHOT")
+    implementation("no.iktdev.library:subtitle:1.7.5-SNAPSHOT")
 
-    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha80")
+    implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha84")
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -38,6 +38,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
+    implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
+
 
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

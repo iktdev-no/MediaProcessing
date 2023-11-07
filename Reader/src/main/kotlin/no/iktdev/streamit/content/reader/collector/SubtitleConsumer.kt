@@ -87,18 +87,27 @@ class SubtitleConsumer : DefaultKafkaReader("collectorConsumerExtractedSubtitle"
     }
 
     fun storeConvertWork(referenceId: String, work: ConvertWork) {
-        val of = File(work.outFile)
+
         val status = transaction {
-            SubtitleQuery(
-                associatedWithVideo = of.nameWithoutExtension,
-                language = work.language,
-                collection = work.collection,
-                format = of.extension.uppercase(),
-                file = File(work.outFile).name
-            )
-                .insertAndGetStatus()
+            work.outFiles.map {
+                val of = File(it)
+                transaction {
+                    SubtitleQuery(
+                        associatedWithVideo = of.nameWithoutExtension,
+                        language = work.language,
+                        collection = work.collection,
+                        format = of.extension.uppercase(),
+                        file = of.name
+                    )
+                        .insertAndGetStatus()
+                } to it
+            }
         }
-        produceMessage(referenceId, work.outFile, if (status) StatusType.SUCCESS else StatusType.ERROR, "Store Converted: $status")
+        val failed = status.filter { !it.first }.map { it.second }
+        val success = status.filter { it.first }.map { it.second }
+
+        produceSuccessMessage(KafkaEvents.EVENT_COLLECTOR_STORED_SUBTITLE, referenceId, success)
+        produceErrorMessage(KafkaEvents.EVENT_COLLECTOR_STORED_SUBTITLE, Message(referenceId, Status(StatusType.ERROR), failed), "See log")
     }
 
 

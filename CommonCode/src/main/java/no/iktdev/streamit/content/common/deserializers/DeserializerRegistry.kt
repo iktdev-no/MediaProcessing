@@ -14,6 +14,9 @@ class DeserializerRegistry {
             KafkaEvents.EVENT_READER_DETERMINED_FILENAME to ContentOutNameDeserializer(),
 
             KafkaEvents.EVENT_READER_ENCODE_GENERATED_VIDEO to EncodeWorkDeserializer(),
+            KafkaEvents.EVENT_ENCODER_VIDEO_FILE_QUEUED to EncodeWorkDeserializer(),
+            KafkaEvents.EVENT_ENCODER_VIDEO_FILE_STARTED to EncodeWorkDeserializer(),
+
             KafkaEvents.EVENT_ENCODER_VIDEO_FILE_ENDED to EncodeWorkDeserializer(),
             KafkaEvents.EVENT_READER_ENCODE_GENERATED_SUBTITLE to ExtractWorkDeserializer(),
             KafkaEvents.EVENT_ENCODER_SUBTITLE_FILE_ENDED to ExtractWorkDeserializer(),
@@ -29,6 +32,16 @@ class DeserializerRegistry {
             }
             return getRegistry().filter { keys.contains(it.key) }.map { it.key.event to it.value }.toMap()
         }
+
+        private fun toEvent(event: String): KafkaEvents? {
+            return KafkaEvents.values().find { it.event == event }
+        }
+
+        fun getDeserializerForEvent(event: String): IMessageDataDeserialization<*>? {
+            val deszEvent = toEvent(event) ?: return null
+            return getEventToDeserializer(deszEvent).values.first()
+        }
+
         fun addDeserializer(key: KafkaEvents, deserializer: IMessageDataDeserialization<*>) {
             _registry[key] = deserializer
         }
