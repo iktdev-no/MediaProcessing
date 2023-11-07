@@ -89,6 +89,7 @@ class KafkaConsumerThread(threading.Thread):
             )
         except:
             self.stop()
+            return
 
         logger.info("Kafka Consumer started")
 
