@@ -87,11 +87,13 @@ class KafkaConsumerThread(threading.Thread):
                 key_deserializer=lambda x: decode_key(x),
                 value_deserializer=lambda x: decode_value(x)
             )
-        except:
-            self.stop()
-            return
+            logger.info("Kafka Consumer started")
 
-        logger.info("Kafka Consumer started")
+        except:
+            logger.exception("Kafka Consumer failed to start")
+            self.stop()
+            sys.exit(1)
+
 
         while not self.shutdown.is_set():
             for message in consumer:
