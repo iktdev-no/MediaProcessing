@@ -28,15 +28,6 @@ function App() {
   });
 
 
-  const testButton = () => {
-    client?.publish({
-      "destination": "/app/items",
-      "body": "Potato"
-    })
-  }
-
-      
-
   useEffect(() => {
     // Kjør din funksjon her når komponenten lastes inn for første gang
     // Sjekk om cursor er null
@@ -56,16 +47,26 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-        <Box sx={{ marginTop: "70px", minHeight: "50vh", width: "100%", display: "block", overflow: "hidden" }}>
-          <button onClick={testButton}>Click me</button>
-          <Routes>
-            <Route path='/files' element={<ExplorePage />} />
-            <Route path='/' element={<LaunchPage />} />
-          </Routes>
-        </Box>
-        <Footer />
-      </BrowserRouter>
+      <Box sx={{
+        height: 70,
+        backgroundColor: theme.palette.action.selected
+      }}>
+      </Box>
+      <Box sx={{
+        display: "block",
+        maxHeight: window.screen.height - 70,
+        height: window.screen.height - 70,
+        width: "100vw",
+        maxWidth: "100vw"
+      }}>
+        <BrowserRouter>
+            <Routes>
+              <Route path='/files' element={<ExplorePage />} />
+              <Route path='/' element={<LaunchPage />} />
+            </Routes>
+          <Footer />
+        </BrowserRouter>
+      </Box>
     </ThemeProvider>
   );
 }
