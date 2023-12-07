@@ -5,14 +5,14 @@ import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
-import no.iktdev.mediaprocessing.shared.Preference
-import no.iktdev.mediaprocessing.shared.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.Preference
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.*
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.mediaprocessing.shared.persistance.PersistentMessage
 import no.iktdev.streamit.library.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -22,7 +22,7 @@ import java.io.File
  * Is to be called or to run with the result from FileOout
  */
 @Service
-class OutNameToWorkArgumentCreator(@Autowired coordinator: Coordinator) : TaskCreator() {
+class OutNameToWorkArgumentCreator(@Autowired var coordinator: Coordinator) : TaskCreator() {
     private val log = KotlinLogging.logger {}
 
     init {

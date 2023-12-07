@@ -11,23 +11,27 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 
 open class DefaultProducer(val topic: String) {
-    private val producerFactory: ProducerFactory<String, String>
+    private var kafkaTemplate:  KafkaTemplate<String, String>? = null
 
-    init {
+
+    open fun createKafkaTemplate(): KafkaTemplate<String, String> {
+        val producerFactory: ProducerFactory<String, String>
+
         val config: MutableMap<String, Any> = HashMap()
         config[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = KafkaEnv.servers
         config[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         config[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
 
         producerFactory = DefaultKafkaProducerFactory(config)
-    }
-
-    fun createKafkaTemplate(): KafkaTemplate<String, String> {
         return KafkaTemplate(producerFactory)
     }
 
-    fun sendMessage(key: String, message: Message<MessageDataWrapper>) {
-        val kafkaTemplate = createKafkaTemplate()
+    open fun usingKafkaTemplate(): KafkaTemplate<String, String> {
+        return kafkaTemplate ?: createKafkaTemplate().also { kafkaTemplate = it }
+    }
+
+    open fun sendMessage(key: String, message: Message<MessageDataWrapper>) {
+        val kafkaTemplate = usingKafkaTemplate()
         val serializedMessage = serializeMessage(message)
         kafkaTemplate.send(ProducerRecord(topic, key, serializedMessage))
     }

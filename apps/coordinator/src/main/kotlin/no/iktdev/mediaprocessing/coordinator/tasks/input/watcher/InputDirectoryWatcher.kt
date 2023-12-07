@@ -7,9 +7,9 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.shared.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.extended.isSupportedVideoFile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

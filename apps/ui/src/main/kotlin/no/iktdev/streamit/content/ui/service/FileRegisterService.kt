@@ -5,7 +5,7 @@ import dev.vishna.watchservice.asWatchChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.streamit.content.common.CommonConfig
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.streamit.content.ui.explorer.ExplorerCore
 import no.iktdev.streamit.content.ui.fileRegister
 import org.springframework.stereotype.Service
@@ -15,7 +15,7 @@ import java.security.MessageDigest
 
 @Service
 class FileRegisterService {
-    val watcherChannel = CommonConfig.incomingContent.asWatchChannel()
+    val watcherChannel = SharedConfig.incomingContent.asWatchChannel()
     val core = ExplorerCore()
 
     fun fid(name: String): String {

@@ -1,10 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.input.watcher
 
-import isFileAvailable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.mediaprocessing.shared.common.isFileAvailable
 import java.io.File
 import java.util.UUID
 

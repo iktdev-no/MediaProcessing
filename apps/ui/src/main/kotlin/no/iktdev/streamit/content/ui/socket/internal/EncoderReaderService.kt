@@ -3,7 +3,6 @@ package no.iktdev.streamit.content.ui.socket.internal
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
-import no.iktdev.streamit.content.common.dto.WorkOrderItem
 import no.iktdev.streamit.content.ui.UIEnv
 import no.iktdev.streamit.content.ui.dto.EventDataObject
 import no.iktdev.streamit.content.ui.memActiveEventMap
@@ -22,7 +21,7 @@ class EncoderReaderService {
     private val logger = KotlinLogging.logger {}
 
 
-    fun startSubscription(session: StompSession) {
+    /*fun startSubscription(session: StompSession) {
         session.subscribe("/topic/encoder/workorder", object : StompFrameHandler {
             override fun getPayloadType(headers: StompHeaders): Type {
                 return object : TypeToken<WorkOrderItem>() {}.type
@@ -76,6 +75,6 @@ class EncoderReaderService {
 
     init {
         client.connect(UIEnv.socketEncoder, sessionHandler)
-    }
+    }*/
 
 }

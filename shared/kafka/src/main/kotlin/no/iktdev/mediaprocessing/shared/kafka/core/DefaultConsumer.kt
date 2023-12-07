@@ -22,7 +22,7 @@ open class DefaultConsumer(val subId: String = UUID.randomUUID().toString()) {
     var autoCommit: Boolean = true
     var ackModeOverride: AckMode? = null
 
-    fun consumerFactory(): DefaultKafkaConsumerFactory<String, String> {
+    open fun consumerFactory(): DefaultKafkaConsumerFactory<String, String> {
         val config: MutableMap<String, Any> = HashMap()
         config[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = KafkaEnv.servers
         config[ConsumerConfig.GROUP_ID_CONFIG] = "${KafkaEnv.consumerId}:$subId"
@@ -41,57 +41,6 @@ open class DefaultConsumer(val subId: String = UUID.randomUUID().toString()) {
         ackModeOverride?.let {
             factory.containerProperties.ackMode = it
         }
-
         return factory
     }
-
-    class GsonDeserializer : org.apache.kafka.common.serialization.Deserializer<Message<out MessageDataWrapper>> {
-        private val gson = Gson()
-        val log = KotlinLogging.logger {}
-
-
-        fun getAnnotatedClasses(): List<Pair<KafkaEvents, KClass<*>>> {
-            val classesWithAnnotation = AnnotationFinder().getClassesWithAnnotation("no.iktdev.mediaprocessing.shared.kafka.dto.events_result", KafkaBelongsToEvent::class)
-                .mapNotNull { clazz ->
-                    val annotation = clazz.findAnnotation<KafkaBelongsToEvent>()
-                    annotation?.event?.let { kafkaEvent ->
-                        kafkaEvent to clazz
-                    }
-                }
-
-            classesWithAnnotation.forEach { (event, clazz) ->
-                println("Event: $event, Class: $clazz")
-            }
-            return classesWithAnnotation
-
-        }
-
-        override fun configure(configs: MutableMap<String, *>?, isKey: Boolean) {
-            // Ingen ekstra konfigurasjon kreves
-        }
-
-        override fun deserialize(topic: String, data: ByteArray): Message<out MessageDataWrapper> {
-            val jsonString = try { String(data) } catch (e: Exception) {e.printStackTrace(); null}
-            return deserialiseJsonString(jsonString)
-        }
-
-        fun deserialiseJsonString(json: String?): Message<out MessageDataWrapper> {
-            if (json.isNullOrBlank()) {
-                log.error { "Data is null or empty" }
-            }
-            try {
-                val type = object : TypeToken<Message<out MessageDataWrapper>>() {}.type
-                return gson.fromJson<Message<MessageDataWrapper>>(json, Message::class.java)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            val type = object : TypeToken<Message<out MessageDataWrapper>>() {}.type
-            return gson.fromJson(json, type)
-        }
-
-        override fun close() {
-            // Ingen ressurser å lukke
-        }
-    }
-
 }

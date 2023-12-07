@@ -4,15 +4,15 @@ import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreatorListener
-import no.iktdev.mediaprocessing.shared.SharedConfig
-import no.iktdev.mediaprocessing.shared.datasource.toEpochSeconds
-import no.iktdev.mediaprocessing.shared.kafka.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
+import no.iktdev.mediaprocessing.shared.common.kafka.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.mediaprocessing.shared.parsing.FileNameDeterminate
-import no.iktdev.mediaprocessing.shared.persistance.PersistentMessage
 import no.iktdev.streamit.library.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
@@ -23,7 +23,7 @@ import java.time.LocalDateTime
  *
  */
 @Service
-class MetadataAndBaseInfoToFileOutAndCoverTask(@Autowired coordinator: Coordinator): TaskCreatorListener {
+class MetadataAndBaseInfoToFileOutAndCoverTask(@Autowired var coordinator: Coordinator): TaskCreatorListener {
     private val log = KotlinLogging.logger {}
     init {
         coordinator.addListener(this)

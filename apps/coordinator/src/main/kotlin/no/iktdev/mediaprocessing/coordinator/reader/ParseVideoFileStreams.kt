@@ -3,13 +3,13 @@ package no.iktdev.mediaprocessing.coordinator.reader
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
-import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.mediaprocessing.shared.SharedConfig
-import no.iktdev.mediaprocessing.shared.ffmpeg.AudioStream
-import no.iktdev.mediaprocessing.shared.ffmpeg.ParsedMediaStreams
-import no.iktdev.mediaprocessing.shared.ffmpeg.SubtitleStream
-import no.iktdev.mediaprocessing.shared.ffmpeg.VideoStream
-import no.iktdev.mediaprocessing.shared.kafka.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.common.ProcessingService
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.kafka.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
+import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
+import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoStream
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -18,28 +18,32 @@ import no.iktdev.streamit.library.kafka.dto.Status
 import org.springframework.stereotype.Service
 
 
-@Service
-class ParseVideoFileStreams {
-    val io = Coroutines.io()
-    val listener = DefaultMessageListener(SharedConfig.kafkaTopic) { event ->
-        val message = event.value()
-        if (message.data is ReaderPerformed) {
-            io.launch {
-                parseStreams(message.referenceId, message.data as ReaderPerformed)
-            }
-        }
+class ParseVideoFileStreams(producer: CoordinatorProducer = CoordinatorProducer(), listener: DefaultMessageListener = DefaultMessageListener(
+    SharedConfig.kafkaTopic)): ProcessingService(producer, listener) {
+
+    override fun onResult(referenceId: String, data: MessageDataWrapper) {
+        producer.sendMessage(referenceId, KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED, data)
     }
-    val producer = CoordinatorProducer()
 
     init {
+        listener.onMessageReceived = { event ->
+            val message = event.value
+            if (message.data is ReaderPerformed) {
+                io.launch {
+                    val result = parseStreams(message.data as ReaderPerformed)
+                    onResult(message.referenceId, result)
+                }
+            }
+        }
         io.launch {
             listener.listen()
         }
     }
 
-    suspend fun parseStreams(referenceId: String, data: ReaderPerformed) {
+
+    fun parseStreams(data: ReaderPerformed): MessageDataWrapper {
         val gson = Gson()
-        try {
+        return try {
             val jsonObject = gson.fromJson(data.output, JsonObject::class.java)
             val jStreams = jsonObject.getAsJsonArray("streams")
 
@@ -66,16 +70,11 @@ class ParseVideoFileStreams {
                 audioStream = audioStreams,
                 subtitleStream = subtitleStreams
             )
-            producer.sendMessage(referenceId, KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED,
-                MessageDataWrapper(Status.COMPLETED, gson.toJson(parsedStreams)
-                )
-            )
+            MessageDataWrapper(Status.COMPLETED, gson.toJson(parsedStreams))
 
         } catch (e: Exception) {
             e.printStackTrace()
-            producer.sendMessage(referenceId, KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED,
-                MessageDataWrapper(Status.ERROR, message = e.message)
-            )
+            MessageDataWrapper(Status.ERROR, message = e.message)
         }
 
     }

@@ -1,6 +1,6 @@
 package no.iktdev.streamit.content.ui
 
-import no.iktdev.mediaprocessing.shared.socket.SocketImplementation
+import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer

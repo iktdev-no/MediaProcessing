@@ -4,24 +4,23 @@ import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.mediaprocessing.shared.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.kafka.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.kafka.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.mediaprocessing.shared.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.persistance.PersistentDataStore
-import no.iktdev.mediaprocessing.shared.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.persistance.events
 import no.iktdev.streamit.library.kafka.dto.Status
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.UUID
 
 @Service
-class Coordinator {
+class Coordinator() {
     val producer = CoordinatorProducer()
     private val log = KotlinLogging.logger {}
 

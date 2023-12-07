@@ -24,7 +24,7 @@ open class DefaultMessageListener(
 
     protected var container: KafkaMessageListenerContainer<String, String>? = null
 
-    fun listen() {
+    open fun listen() {
         val listener = consumer.consumerFactoryListener()
         val containerProperties = ContainerProperties(topic).apply {
             messageListener = this@DefaultMessageListener

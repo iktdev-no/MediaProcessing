@@ -6,15 +6,11 @@ import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.observable.ObservableMap
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.exfl.observable.observableMapOf
-import no.iktdev.mediaprocessing.shared.SharedConfig
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.streamit.content.ui.dto.EventDataObject
 import no.iktdev.streamit.content.ui.dto.ExplorerItem
 import no.iktdev.streamit.content.ui.dto.SimpleEventDataObject
-import org.apache.kafka.clients.admin.AdminClient
-import org.apache.kafka.clients.admin.AdminClientConfig
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -47,7 +43,7 @@ fun main(args: Array<String>) {
     })
 
     try {
-        val admincli = AdminClient.create(mapOf(
+        /*val admincli = AdminClient.create(mapOf(
             AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to KafkaEnv.servers,
             AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG to "1000",
             AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG to "5000"
@@ -60,7 +56,7 @@ fun main(args: Array<String>) {
             deleteResult.all().whenComplete { result, throwable ->
                 kafkaClearedLatch.countDown()
             }
-        }
+        }*/
 
     } catch (e: Exception) {
         e.printStackTrace()
@@ -71,7 +67,7 @@ fun main(args: Array<String>) {
     kafkaClearedLatch.await(5, TimeUnit.MINUTES)
     logger.info { "Offset cleared!" }
     Thread.sleep(10000)
-    context = runApplication<UIApplication>(*args)
+
 }
 
 
