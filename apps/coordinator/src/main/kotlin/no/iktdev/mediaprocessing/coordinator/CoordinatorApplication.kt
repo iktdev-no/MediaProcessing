@@ -26,8 +26,8 @@ fun getContext(): ApplicationContext? {
 }
 
 fun main(args: Array<String>) {
-    /*val dataSource = MySqlDataSource.fromDatabaseEnv();
-    Coroutines.default().launch {
+    // val dataSource = MySqlDataSource.fromDatabaseEnv();
+    /*Coroutines.default().launch {
         dataSource.createDatabase()
         dataSource.createTables(
             events
