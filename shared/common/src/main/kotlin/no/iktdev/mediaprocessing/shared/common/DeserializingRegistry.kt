@@ -1,5 +1,10 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
+import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
+import kotlin.reflect.KClass
+
 class DeserializingRegistry {
     companion object {
         val deserializables = mutableListOf<Pair<KafkaEvents, KClass<out MessageDataWrapper>?>>(
