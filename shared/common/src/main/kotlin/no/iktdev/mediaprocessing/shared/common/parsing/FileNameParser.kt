@@ -5,12 +5,15 @@ class FileNameParser(val fileName: String) {
         private set
 
     init {
-        cleanedFileName = fileName
-            .let { removeBracketedText(it) }
-            .let { removeParenthesizedText(it) }
-            .let { removeResolutionAndTags(it) }
-            .let { removeInBetweenCharacters(it) }
-            .let { removeExtraWhiteSpace(it) }
+        cleanedFileName = removeBracketedText(fileName)
+        cleanedFileName = removeParenthesizedText(cleanedFileName)
+        cleanedFileName = removeResolutionAndTrailing(cleanedFileName)
+        cleanedFileName = removeResolutionAndTags(cleanedFileName)
+        cleanedFileName = removeParenthesizedText(cleanedFileName)
+        cleanedFileName = removeYearAndTrailing(cleanedFileName)
+        cleanedFileName = removeDot(cleanedFileName)
+        cleanedFileName = removeExtraWhiteSpace(cleanedFileName)
+        cleanedFileName = removeTrailingAndLeadingCharacters(cleanedFileName).trim()
 
     }
 
@@ -68,11 +71,32 @@ class FileNameParser(val fileName: String) {
         return Regex("\\(.*?\\)").replace(text, " ")
     }
 
+    fun removeResolutionAndTrailing(text: String): String {
+        return Regex("[0-9]+[pP].*").replace(text, "")
+    }
+
+    fun removeTrailingAndLeadingCharacters(text: String): String {
+        return Regex("^[^a-zA-Z0-9!,]+|[^a-zA-Z0-9!~,]+\$").replace(text, " ")
+    }
+
     /**
      *
      */
     fun removeResolutionAndTags(text: String): String {
         return Regex("(.*?)(?=\\d+[pk]\\b)").replace(text, " ")
+    }
+
+
+    fun removeYearAndTrailing(text: String): String {
+        val match = Regex("\\b\\d{4}\\W").find(text, 0)?.value
+        if (match == null || text.indexOf(match) > 0) {
+            return Regex("\\b\\d{4}\\b(.*)").replace(text, " ")
+        }
+        return text
+    }
+
+    fun removeDot(text: String): String {
+        return Regex("\\.(?<!(Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave)\\.)\\b").replace(text, " ")
     }
 
     fun removeInBetweenCharacters(text: String): String {
