@@ -34,8 +34,11 @@ enum class KafkaEvents(val event: String) {
     EVENT_STORE_COVER_PERFORMED("event:store-cover:performed"),
     EVENT_STORE_METADATA_PERFORMED("event:store-metadata:performed"),
 
-    EVENT_PROCESS_COMPLETED("event:process:completed"),
-}
-fun toEvent(event: String): KafkaEvents? {
-    return KafkaEvents.entries.find { it.event == event }
+    EVENT_PROCESS_COMPLETED("event:process:completed");
+
+    companion object {
+        fun toEvent(event: String): KafkaEvents? {
+            return KafkaEvents.entries.find { it.event == event }
+        }
+    }
 }

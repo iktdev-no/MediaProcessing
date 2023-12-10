@@ -44,6 +44,11 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     init {
         io.launch {
             watcherChannel.consumeEach {
+                if (it.file == SharedConfig.incomingContent) {
+                    logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
+                } else {
+                    logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
+                }
                 when (it.kind) {
                     Deleted -> queue.removeFromQueue(it.file, this@InputDirectoryWatcher::onFileRemoved)
                     else -> {
@@ -64,9 +69,9 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     }
 
     override fun onFileAvailable(file: PendingFile) {
-        logger.info { "File pending availability ${file.file.name}" }
+        logger.info { "File available ${file.file.name}" }
 
-        // This sens it to coordinator to start the process
+        // This sends it to coordinator to start the process
         coordinator.startProcess(file.file, ProcessType.FLOW)
     }
 
