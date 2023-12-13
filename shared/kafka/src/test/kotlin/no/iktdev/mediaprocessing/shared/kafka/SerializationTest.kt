@@ -1,7 +1,7 @@
-import com.fasterxml.jackson.databind.ObjectMapper
+package no.iktdev.mediaprocessing.shared.kafka
+
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.kafka.core.DefaultConsumer
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message

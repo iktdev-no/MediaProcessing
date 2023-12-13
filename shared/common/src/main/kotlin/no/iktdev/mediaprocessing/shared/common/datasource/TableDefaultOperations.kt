@@ -44,6 +44,23 @@ fun <T> insertWithSuccess(block: () -> T): Boolean {
     }
 }
 
+fun <T> executeOrException(block: () -> T): Exception? {
+    return try {
+        transaction {
+            try {
+                block()
+                null
+            } catch (e: Exception) {
+                // log the error here or handle the exception as needed
+                e
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return e
+    }
+}
+
 fun <T> executeWithStatus(block: () -> T): Boolean {
     return try {
         transaction {

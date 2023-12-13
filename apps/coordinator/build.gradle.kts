@@ -20,12 +20,13 @@ repositories {
     }
 }
 
+
 val exposedVersion = "0.44.0"
 dependencies {
 
     /*Spring boot*/
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter:2.7.0")
+    implementation("org.springframework.boot:spring-boot-starter:3.2.0")
     // implementation("org.springframework.kafka:spring-kafka:3.0.1")
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
@@ -53,18 +54,35 @@ dependencies {
 
 
 
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
     implementation(kotlin("stdlib-jdk8"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
     testImplementation("org.assertj:assertj-core:3.21.0")
-    testImplementation(project(mapOf("path" to ":shared:common")))
+
+    testImplementation("junit:junit:4.12")
+    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+    testImplementation("org.skyscreamer:jsonassert:1.5.0")
+    testImplementation("org.mockito:mockito-core:3.+")
+
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    testImplementation("org.assertj:assertj-core:3.4.1")
+    testImplementation("org.mockito:mockito-core:3.+")
+    testImplementation("org.assertj:assertj-core:3.4.1")
+
+    /*testImplementation("org.junit.vintage:junit-vintage-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testImplementation("org.mockito:mockito-core:5.8.0") // Oppdater versjonen hvis det er nyere tilgjengelig
+    testImplementation("org.mockito:mockito-junit-jupiter:5.8.0")
+    testImplementation(platform("org.junit:junit-bom:5.10.1"))
+    testImplementation("org.junit.platform:junit-platform-runner:1.10.1")*/
+
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
 }
+
 kotlin {
     jvmToolchain(17)
 }

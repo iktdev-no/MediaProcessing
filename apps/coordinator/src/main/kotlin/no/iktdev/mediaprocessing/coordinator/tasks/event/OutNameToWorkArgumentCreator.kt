@@ -31,17 +31,19 @@ class OutNameToWorkArgumentCreator(@Autowired var coordinator: Coordinator) : Ta
 
     override fun isPrerequisitesOk(events: List<PersistentMessage>): Boolean {
         val required = listOf(
-            KafkaEvents.EVENT_PROCESS_STARTED.event,
-            KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED.event,
-            KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED.event
+            KafkaEvents.EVENT_PROCESS_STARTED,
+            KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
+            KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED,
+            KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
         )
-        return events.filter { it.eventId in required }.all { it.data.isSuccess() }
+        val currentEvents = events.map { it.event }
+        val hasAllRequiredEvents = required.all { currentEvents.contains(it) }
+        val hasAllRequiredData = events.filter { e -> e.event in required }.all { it.data.isSuccess() }
+        return hasAllRequiredData && hasAllRequiredEvents
     }
 
     override fun onEventReceived(referenceId: String, event: PersistentMessage, events: List<PersistentMessage>) {
         val preference = Preference.getPreference()
-        if (event.event != KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED)
-            return
 
         if (!isPrerequisitesOk(events)) {
             return
@@ -49,8 +51,7 @@ class OutNameToWorkArgumentCreator(@Autowired var coordinator: Coordinator) : Ta
         val inputFile = events.find { it.data is ProcessStarted }?.data as ProcessStarted
         val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
         val readStreamsEvent = events.find { it.data is MediaStreamsParsePerformed }?.data as MediaStreamsParsePerformed
-        val serializedParsedStreams =
-            Gson().fromJson<ParsedMediaStreams>(readStreamsEvent.parsedAsJson, ParsedMediaStreams::class.java)
+        val serializedParsedStreams = readStreamsEvent.streams
 
         val outDir = SharedConfig.outgoingContent.using(baseInfo.title)
 

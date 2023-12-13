@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
@@ -64,7 +65,15 @@ class DeserializingRegistry {
                 e.printStackTrace()
             }
         }
-        // Fallback
+        try {
+            // Fallback
+            val type = object : TypeToken<SimpleMessageData>() {}.type
+            return gson.fromJson<SimpleMessageData>(json, type)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Default
         val type = object : TypeToken<MessageDataWrapper>() {}.type
         return gson.fromJson<MessageDataWrapper>(json, type)
     }

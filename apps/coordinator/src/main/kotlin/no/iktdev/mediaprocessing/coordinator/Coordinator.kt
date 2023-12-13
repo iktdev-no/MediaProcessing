@@ -4,24 +4,32 @@ import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.mediaprocessing.shared.common.SharedConfig
-import no.iktdev.mediaprocessing.shared.common.kafka.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.streamit.library.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.UUID
+import javax.annotation.PostConstruct
 
 @Service
 class Coordinator() {
-    val producer = CoordinatorProducer()
+
+    @Autowired
+    private lateinit var producer: CoordinatorProducer
+
+    @Autowired
+    private lateinit var listener: DefaultMessageListener
+
     private val log = KotlinLogging.logger {}
 
 
@@ -97,18 +105,12 @@ class Coordinator() {
 
 
     val io = Coroutines.io()
-    private val listener = DefaultMessageListener(SharedConfig.kafkaTopic) { event ->
-        val success = PersistentDataStore().storeMessage(event.key.event, event.value)
-        if (!success) {
-            log.error { "Unable to store message: ${event.key.event} in database!" }
-        } else
-            readAllMessagesFor(event.value.referenceId, event.value.eventId)
-    }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
+        val messages = PersistentDataReader().getMessagesFor(referenceId)
+        createTasksBasedOnEventsAndPersistance(referenceId, eventId, messages)
+
         io.launch {
-            val messages = PersistentDataReader().getMessagesFor(referenceId)
-            createTasksBasedOnEventsAndPersistance(referenceId, eventId, messages)
             buildModelBasedOnMessagesFor(referenceId, messages)
         }
     }
@@ -120,40 +122,41 @@ class Coordinator() {
     }
 
     fun createTasksBasedOnEventsAndPersistance(referenceId: String, eventId: String, messages: List<PersistentMessage>) {
-        io.launch {
-            val triggered = messages.find { it.eventId == eventId } ?: return@launch
-            listeners.forEach { it.onEventReceived(referenceId, triggered, messages) }
-            if (listOf(KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED, KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED).contains(triggered.event) && triggered.data.isSuccess()) {
-                val processStarted = messages.find { it.event == KafkaEvents.EVENT_PROCESS_STARTED }?.data as ProcessStarted
-                if (processStarted.type == ProcessType.FLOW) {
-                    log.info { "Process for $referenceId was started from flow and will be processed" }
-                    if (triggered.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED) {
-                        produceEncodeWork(triggered)
-                    } else if (triggered.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED) {
-                        produceExtractWork(triggered)
-                    }
-                } else {
-                    log.info { "Process for $referenceId was started manually and will require user input for continuation" }
+        val triggered = messages.find { it.eventId == eventId }
+        if (triggered == null) {
+            log.error { "Could not find $eventId in provided messages" }
+            return
+        }
+        listeners.forEach { it.onEventReceived(referenceId, triggered, messages) }
+
+        if (listOf(KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED, KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED).contains(triggered.event) && triggered.data.isSuccess()) {
+            val processStarted = messages.find { it.event == KafkaEvents.EVENT_PROCESS_STARTED }?.data as ProcessStarted
+
+            if (processStarted.type == ProcessType.FLOW) {
+                log.info { "Process for $referenceId was started from flow and will be processed" }
+                if (triggered.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED) {
+                    produceEncodeWork(triggered)
+                } else if (triggered.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED) {
+                    produceExtractWork(triggered)
                 }
+            } else {
+                log.info { "Process for $referenceId was started manually and will require user input for continuation" }
             }
         }
     }
 
-
-
-    init {
-        io.launch { listener.listen() }
+    @PostConstruct
+    fun onReady() {
+        io.launch {
+            listener.onMessageReceived = { event ->
+                val success = PersistentDataStore().storeMessage(event.key.event, event.value)
+                if (!success) {
+                    log.error { "Unable to store message: ${event.key.event} in database!" }
+                } else
+                    readAllMessagesFor(event.value.referenceId, event.value.eventId)
+            }
+            listener.listen(KafkaEnv.kafkaTopic) }
     }
 }
 
 
-abstract class TaskCreator: TaskCreatorListener {
-    val producer = CoordinatorProducer()
-    open fun isPrerequisitesOk(events: List<PersistentMessage>): Boolean {
-        return true
-    }
-}
-
-interface TaskCreatorListener {
-    fun onEventReceived(referenceId: String, event: PersistentMessage,  events: List<PersistentMessage>): Unit
-}

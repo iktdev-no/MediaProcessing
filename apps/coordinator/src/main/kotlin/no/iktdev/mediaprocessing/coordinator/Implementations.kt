@@ -6,7 +6,6 @@ import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaImplementation
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.stereotype.Component
 
 @Configuration
 class SocketLocalInit: SocketImplementation()

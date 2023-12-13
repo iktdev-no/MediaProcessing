@@ -29,7 +29,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
             else -> sanitizedName
         }
         val nonResolutioned = movieEx.removeResolutionAndBeyond(stripped) ?: stripped
-        return MovieInfo(cleanup(nonResolutioned), cleanup(nonResolutioned))
+        return MovieInfo(type = "movie", cleanup(nonResolutioned), cleanup(nonResolutioned))
     }
 
     private fun determineSerieFileName(): EpisodeInfo? {
@@ -58,7 +58,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
             }
         } else title
         val fullName = "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else "- $episodeTitle"}".trim()
-        return EpisodeInfo(title, episodeNumber.toInt(), seasonNumber.toInt(), episodeTitle, fullName)
+        return EpisodeInfo(type= "serie", title, episodeNumber.toInt(), seasonNumber.toInt(), episodeTitle, fullName)
     }
 
     private fun determineUndefinedFileName(): VideoInfo? {

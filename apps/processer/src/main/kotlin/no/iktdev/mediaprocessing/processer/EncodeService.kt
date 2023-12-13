@@ -5,7 +5,7 @@ import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import org.springframework.stereotype.Service
 
-//@Service
+@Service
 class EncodeService {
     /*private val log = KotlinLogging.logger {}
     val io = Coroutines.io()

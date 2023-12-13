@@ -16,11 +16,11 @@ data class PersistentMessage(
 
 fun fromRowToPersistentMessage(row: ResultRow, dez: DeserializingRegistry): PersistentMessage? {
     val kev = try {
-        KafkaEvents.valueOf(row[events.event])
+        KafkaEvents.toEvent(row[events.event])
     } catch (e: IllegalArgumentException) {
         e.printStackTrace()
         return null
-    }
+    }?: return null
     val dzdata = dez.deserializeData(kev, row[events.data])
     return PersistentMessage(
         referenceId = row[events.referenceId],

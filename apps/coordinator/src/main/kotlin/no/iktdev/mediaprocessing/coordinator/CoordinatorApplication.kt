@@ -8,6 +8,7 @@ import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.events
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
@@ -26,19 +27,19 @@ fun getContext(): ApplicationContext? {
 }
 
 fun main(args: Array<String>) {
-    // val dataSource = MySqlDataSource.fromDatabaseEnv();
-    /*Coroutines.default().launch {
+    val dataSource = MySqlDataSource.fromDatabaseEnv();
+    Coroutines.default().launch {
         dataSource.createDatabase()
         dataSource.createTables(
             events
         )
-    }*/
+    }
     context = runApplication<CoordinatorApplication>(*args)
     printSharedConfig()
 }
 
 fun printSharedConfig() {
-    log.info { "Kafka topic: ${SharedConfig.kafkaTopic}" }
+    log.info { "Kafka topic: ${KafkaEnv.kafkaTopic}" }
     log.info { "File Input: ${SharedConfig.incomingContent}" }
     log.info { "File Output: ${SharedConfig.outgoingContent}" }
     log.info { "Ffprobe: ${SharedConfig.ffprobe}" }
