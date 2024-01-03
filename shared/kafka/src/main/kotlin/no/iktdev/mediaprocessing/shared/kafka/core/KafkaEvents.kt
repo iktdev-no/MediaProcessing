@@ -8,6 +8,7 @@ enum class KafkaEvents(val event: String) {
     EVENT_MEDIA_READ_BASE_INFO_PERFORMED("event:media-read-base-info:performed"),
     EVENT_MEDIA_METADATA_SEARCH_PERFORMED("event:media-metadata-search:performed"),
     EVENT_MEDIA_READ_OUT_NAME_AND_TYPE("event:media-read-out-name-and-type:performed"),
+    EVENT_MEDIA_READ_OUT_COVER("event:media-read-out-cover:performed"),
 
     EVENT_MEDIA_ENCODE_PARAMETER_CREATED("event:media-encode-parameter:created"),
     EVENT_MEDIA_EXTRACT_PARAMETER_CREATED("event:media-extract-parameter:created"),

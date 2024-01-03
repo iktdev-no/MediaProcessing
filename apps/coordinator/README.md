@@ -1,3 +1,6 @@
+# Coordinator
+Only one instance is supported, while multiple processer's can be run at any time
+
 # FLOW:
 ### Inputs:
 - File watcher

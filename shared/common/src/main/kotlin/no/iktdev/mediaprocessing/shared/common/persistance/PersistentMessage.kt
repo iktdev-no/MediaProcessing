@@ -10,9 +10,18 @@ data class PersistentMessage(
     val referenceId: String,
     val eventId: String,
     val event: KafkaEvents,
+    //val metadata: Metadata,
     val data: MessageDataWrapper,
     val created: LocalDateTime
 )
+
+data class Metadata(
+    val createdBy: String
+)
+
+fun PersistentMessage.isOfEvent(event: KafkaEvents): Boolean {
+    return this.event == event
+}
 
 fun fromRowToPersistentMessage(row: ResultRow, dez: DeserializingRegistry): PersistentMessage? {
     val kev = try {

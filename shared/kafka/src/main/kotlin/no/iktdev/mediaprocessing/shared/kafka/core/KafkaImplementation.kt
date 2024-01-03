@@ -25,7 +25,7 @@ open class KafkaImplementation {
         config[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = KafkaEnv.servers
         config[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         config[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-        log.info { config }
+        //log.info { config }
         return DefaultKafkaProducerFactory(config)
     }
     @Bean
@@ -43,7 +43,7 @@ open class KafkaImplementation {
         config[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = KafkaEnv.loadMessages
         config[ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG] = KafkaEnv.sessionTimeOutMilliseconds
         config[ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG] = KafkaEnv.heartbeatIntervalMilliseconds
-        log.info { config }
+        //log.info { config }
         return DefaultKafkaConsumerFactory(config, StringDeserializer(), StringDeserializer())
     }
 }

@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import java.io.File
 import java.io.RandomAccessFile
@@ -18,4 +19,14 @@ fun isFileAvailable(file: File): Boolean {
         stream?.close()
     }
     return false
+}
+
+
+suspend fun limitedWhile(condition: () -> Boolean, maxDuration: Long = 500 * 60, delayed: Long = 500, block: () -> Unit) {
+    var elapsedDelay = 0L
+    do {
+        block.invoke()
+        elapsedDelay += delayed
+        delay(delayed)
+    } while (condition.invoke() && elapsedDelay < maxDuration)
 }

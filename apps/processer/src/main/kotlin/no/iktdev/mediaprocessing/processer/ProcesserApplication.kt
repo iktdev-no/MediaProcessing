@@ -1,7 +1,10 @@
 package no.iktdev.mediaprocessing.processer
 
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -13,8 +16,21 @@ class ProcesserApplication {
 }
 
 fun main(args: Array<String>) {
-    //val dataSource = MySqlDataSource.fromDatabaseEnv();
+    val dataSource = MySqlDataSource.fromDatabaseEnv()
+    Coroutines.default().launch {
+        dataSource.createDatabase()
+        dataSource.createTables(
+            processerEvents
+        )
+    }
     val context = runApplication<ProcesserApplication>(*args)
+}
+
+fun getComputername(): String {
+    return listOfNotNull(
+        System.getenv("hostname"),
+        System.getenv("computername")
+    ).first()
 }
 
 class SocketImplemented: SocketImplementation() {

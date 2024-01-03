@@ -1,18 +1,17 @@
-package no.iktdev.mediaprocessing.coordinator
+package no.iktdev.mediaprocessing.processer
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.coordination.Tasks
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import javax.annotation.PostConstruct
 
 abstract class TaskCreator: TaskCreatorListener {
-    val log = KotlinLogging.logger {}
-    abstract val producesEvent: KafkaEvents
+    private val log = KotlinLogging.logger {}
 
     @Autowired
     lateinit var producer: CoordinatorProducer
@@ -20,60 +19,54 @@ abstract class TaskCreator: TaskCreatorListener {
     @Autowired
     lateinit var coordinator: Coordinator
 
-    open val requiredEvents: List<KafkaEvents> = listOf()
-    open val listensForEvents: List<KafkaEvents> = listOf()
+    @Autowired
+    lateinit var socketMessage: SimpMessagingTemplate
 
-    open fun isPrerequisiteEventsOk(events: List<PersistentMessage>): Boolean {
+    open val requiredEvents: List<KafkaEvents> = listOf()
+
+    open fun isPrerequisiteEventsOk(events: List<PersistentProcessDataMessage>): Boolean {
         val currentEvents = events.map { it.event }
         return requiredEvents.all { currentEvents.contains(it) }
     }
-    open fun isPrerequisiteDataPresent(events: List<PersistentMessage>): Boolean {
+    open fun isPrerequisiteDataPresent(events: List<PersistentProcessDataMessage>): Boolean {
         val failed = events.filter { e -> e.event in requiredEvents }.filter { !it.data.isSuccess() }
         return failed.isEmpty()
     }
 
-    open fun isEventOfSingle(event: PersistentMessage, singleOne: KafkaEvents): Boolean {
+    open fun isEventOfSingle(event: PersistentProcessDataMessage, singleOne: KafkaEvents): Boolean {
         return event.event == singleOne
     }
 
-    fun getListener(): Tasks {
-        val eventListenerFilter = listensForEvents.ifEmpty { requiredEvents }
-        return Tasks(taskHandler = this, producesEvent = producesEvent, listensForEvents = eventListenerFilter)
-    }
+    abstract fun getListener(): Tasks
 
-
-    open fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
+    open fun prerequisitesRequired(events: List<PersistentProcessDataMessage>): List<() -> Boolean> {
         return listOf {
             isPrerequisiteEventsOk(events)
         }
     }
 
-    open fun prerequisiteRequired(event: PersistentMessage): List<() -> Boolean> {
-        return listOf()
-    }
 
 
     private val context: MutableMap<String, Any> = mutableMapOf()
     private val context_key_reference = "reference"
     private val context_key_producesEvent = "event"
-    final override fun onEventReceived(referenceId: String, event: PersistentMessage, events: List<PersistentMessage>) {
+    final override fun onEventReceived(referenceId: String, event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>) {
         context[context_key_reference] = referenceId
         getListener().producesEvent.let {
             context[context_key_producesEvent] = it
         }
 
-        if (prerequisitesRequired(events).all { it.invoke() } && prerequisiteRequired(event).all { it.invoke() }) {
+        if (prerequisitesRequired(events).all { it.invoke() }) {
             val result = onProcessEvents(event, events)
             if (result != null) {
                 onResult(result)
             }
         } else {
-            // TODO: Re-enable this
-            // log.info { "Skipping: ${event.event} as it does not fulfill the requirements for ${context[context_key_producesEvent]}" }
+            log.info { "Skipping: ${event.event} as it does not fulfill the requirements for ${context[context_key_producesEvent]}" }
         }
     }
 
-    abstract fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper?
+    abstract fun onProcessEvents(event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): MessageDataWrapper?
 
 
     private fun onResult(data: MessageDataWrapper) {
@@ -95,5 +88,5 @@ fun interface Prerequisite {
 }
 
 interface TaskCreatorListener {
-    fun onEventReceived(referenceId: String, event: PersistentMessage,  events: List<PersistentMessage>): Unit
+    fun onEventReceived(referenceId: String, event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): Unit
 }

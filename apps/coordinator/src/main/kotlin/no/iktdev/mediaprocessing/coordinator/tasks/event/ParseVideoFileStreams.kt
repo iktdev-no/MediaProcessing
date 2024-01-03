@@ -1,47 +1,40 @@
-package no.iktdev.mediaprocessing.coordinator.reader
+package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import com.google.gson.Gson
-import kotlinx.coroutines.launch
-import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.coordinator.TaskCreatorListener
-import no.iktdev.mediaprocessing.shared.common.ProcessingService
+import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoStream
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaStreamsParsePerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.streamit.library.kafka.dto.Status
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ParseVideoFileStreams(@Autowired var coordinator: Coordinator): ProcessingService() {
+class ParseVideoFileStreams() : TaskCreator() {
 
-    override fun onResult(referenceId: String, data: MessageDataWrapper) {
-        producer.sendMessage(referenceId, KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED, data)
+    override val producesEvent: KafkaEvents
+        get() = KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED
+
+    override val requiredEvents: List<KafkaEvents> = listOf(
+        KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED
+    )
+
+    override fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
+        return super.prerequisitesRequired(events) + listOf {
+            isPrerequisiteDataPresent(events)
+        }
     }
 
-    override fun onReady() {
-        coordinator.addListener(object : TaskCreatorListener {
-            override fun onEventReceived(referenceId: String, event: PersistentMessage, events: List<PersistentMessage>) {
-                if (event.event == KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED && event.data.isSuccess()) {
-                    io.launch {
-                        val result = parseStreams(event.data as ReaderPerformed)
-                        onResult(referenceId, result)
-                    }
-                }
-            }
+    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
 
-        })
+        return parseStreams(event.data as ReaderPerformed)
     }
-
 
     fun parseStreams(data: ReaderPerformed): MessageDataWrapper {
         val gson = Gson()

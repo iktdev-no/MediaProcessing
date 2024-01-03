@@ -31,6 +31,7 @@ fun <T> insertWithSuccess(block: () -> T): Boolean {
         transaction {
             try {
                 block()
+                commit()
             } catch (e: Exception) {
                 e.printStackTrace()
                 // log the error here or handle the exception as needed
@@ -49,10 +50,13 @@ fun <T> executeOrException(block: () -> T): Exception? {
         transaction {
             try {
                 block()
+                commit()
                 null
             } catch (e: Exception) {
                 // log the error here or handle the exception as needed
+                rollback()
                 e
+
             }
         }
     } catch (e: Exception) {
@@ -66,6 +70,7 @@ fun <T> executeWithStatus(block: () -> T): Boolean {
         transaction {
             try {
                 block()
+                commit()
             } catch (e: Exception) {
                 e.printStackTrace()
                 // log the error here or handle the exception as needed

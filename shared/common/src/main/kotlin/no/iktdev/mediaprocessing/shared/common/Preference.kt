@@ -8,21 +8,29 @@ private val log = KotlinLogging.logger {}
 class Preference {
 
     companion object {
+        private var prevPreference: PreferenceDto? = null
         fun getPreference(): PreferenceDto {
+            val preference = readOrDefaultPreference()
+            if (preference != prevPreference) {
+                log.info { "[Audio]: Codec = " + preference.encodePreference.audio.codec }
+                log.info { "[Audio]: Language = " + preference.encodePreference.audio.language }
+                log.info { "[Audio]: Channels = " + preference.encodePreference.audio.channels }
+                log.info { "[Audio]: Sample rate = " + preference.encodePreference.audio.sample_rate }
+                log.info { "[Audio]: Use EAC3 for surround = " + preference.encodePreference.audio.defaultToEAC3OnSurroundDetected }
+
+                log.info { "[Video]: Codec = " + preference.encodePreference.video.codec }
+                log.info { "[Video]: Pixel format = " + preference.encodePreference.video.pixelFormat }
+                log.info { "[Video]: Pixel format pass-through = " + preference.encodePreference.video.pixelFormatPassthrough.joinToString(", ")  }
+                log.info { "[Video]: Threshold = " + preference.encodePreference.video.threshold }
+            }
+            return preference.also { prevPreference = it }
+        }
+
+        private fun readOrDefaultPreference(): PreferenceDto {
             val preference = readPreferenceFromFile() ?: PreferenceDto()
-            log.info { "[Audio]: Codec = " + preference.encodePreference.audio.codec }
-            log.info { "[Audio]: Language = " + preference.encodePreference.audio.language }
-            log.info { "[Audio]: Channels = " + preference.encodePreference.audio.channels }
-            log.info { "[Audio]: Sample rate = " + preference.encodePreference.audio.sample_rate }
-            log.info { "[Audio]: Use EAC3 for surround = " + preference.encodePreference.audio.defaultToEAC3OnSurroundDetected }
-
-            log.info { "[Video]: Codec = " + preference.encodePreference.video.codec }
-            log.info { "[Video]: Pixel format = " + preference.encodePreference.video.pixelFormat }
-            log.info { "[Video]: Pixel format pass-through = " + preference.encodePreference.video.pixelFormatPassthrough.joinToString(", ")  }
-            log.info { "[Video]: Threshold = " + preference.encodePreference.video.threshold }
-
             return preference
         }
+
 
         private fun readPreferenceFromFile(): PreferenceDto? {
             val prefFile = SharedConfig.preference
