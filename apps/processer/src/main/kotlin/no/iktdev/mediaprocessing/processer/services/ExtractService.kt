@@ -17,7 +17,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
-import no.iktdev.streamit.content.encode.ProcesserEnv
+import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.streamit.library.kafka.dto.Status
 import org.springframework.stereotype.Service
 import java.io.File
@@ -27,6 +27,8 @@ import javax.annotation.PreDestroy
 @Service
 class ExtractService: TaskCreator() {
     private val log = KotlinLogging.logger {}
+    private val logDir = ProcesserEnv.extractLogDirectory
+
 
     val producesEvent = KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED
 
@@ -75,15 +77,15 @@ class ExtractService: TaskCreator() {
     fun startExtract(event: PersistentProcessDataMessage) {
         val ffwrc = event.data as FfmpegWorkRequestCreated
         File(ffwrc.outFile).parentFile.mkdirs()
-        if (!ProcesserEnv.logDirectory.exists()) {
-            ProcesserEnv.logDirectory.mkdirs()
+        if (!logDir.exists()) {
+            logDir.mkdirs()
         }
 
 
         val setClaim = PersistentDataStore().setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = extractServiceId)
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} extract" }
-            runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, listener = ffmpegWorkerEvents)
+            runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents)
 
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
                 ffmpegWorkerEvents.onError(ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")

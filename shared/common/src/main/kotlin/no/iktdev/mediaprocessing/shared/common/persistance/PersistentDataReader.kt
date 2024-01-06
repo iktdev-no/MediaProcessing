@@ -75,6 +75,16 @@ class PersistentDataReader {
         return entries.filter { it.lastCheckIn == null || it.lastCheckIn.plusMinutes(15) < deadline }
     }
 
+    fun getProcessEvent(referenceId: String, eventId: String): PersistentProcessDataMessage? {
+        val message = withTransaction {
+            processerEvents.select {
+                (processerEvents.referenceId eq referenceId) and
+                        (processerEvents.eventId eq eventId)
+            }.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }
+        }?.singleOrNull()
+        return message
+    }
+
     fun getProcessEvents(): List<PersistentProcessDataMessage> {
         return withTransaction {
             processerEvents.selectAll()

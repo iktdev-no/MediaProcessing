@@ -6,16 +6,16 @@ import com.google.gson.Gson
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
-import no.iktdev.streamit.content.encode.ProcesserEnv
+import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 
-class FfmpegWorker(val referenceId: String, val eventId: String, val info: FfmpegWorkRequestCreated, val listener: FfmpegWorkerEvents) {
+class FfmpegWorker(val referenceId: String, val eventId: String, val info: FfmpegWorkRequestCreated, val listener: FfmpegWorkerEvents, val logDir: File) {
     val scope = Coroutines.io()
     val decoder = FfmpegProgressDecoder()
     private val outputCache = mutableListOf<String>()
-    val logFile = ProcesserEnv.logDirectory.using("$eventId-${File(info.outFile).nameWithoutExtension}.log")
+    val logFile = logDir.using("$eventId-${File(info.outFile).nameWithoutExtension}.log")
 
     val getOutputCache = outputCache.toList()
 
@@ -54,7 +54,8 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
 
     private suspend fun execute(args: List<String>) {
         listener.onStarted(info)
-        val processOp = process(ProcesserEnv.ffmpeg, *args.toTypedArray(),
+        val processOp = process(
+            ProcesserEnv.ffmpeg, *args.toTypedArray(),
             stdout = Redirect.CAPTURE,
             stderr = Redirect.CAPTURE,
             consumer = {

@@ -30,3 +30,10 @@ suspend fun limitedWhile(condition: () -> Boolean, maxDuration: Long = 500 * 60,
         delay(delayed)
     } while (condition.invoke() && elapsedDelay < maxDuration)
 }
+
+fun getComputername(): String {
+    return listOfNotNull(
+        System.getenv("hostname"),
+        System.getenv("computername")
+    ).firstOrNull() ?: "UNKNOWN_SYSTEM"
+}

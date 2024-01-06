@@ -27,7 +27,7 @@ class DeserializingRegistry {
 
             KafkaEvents.EVENT_WORK_ENCODE_CREATED to FfmpegWorkRequestCreated::class.java,
             KafkaEvents.EVENT_WORK_EXTRACT_CREATED to FfmpegWorkRequestCreated::class.java,
-            KafkaEvents.EVENT_WORK_CONVERT_CREATED to null,
+            KafkaEvents.EVENT_WORK_CONVERT_CREATED to ConvertWorkerRequest::class.java,
 
             KafkaEvents.EVENT_WORK_ENCODE_PERFORMED to FfmpegWorkPerformed::class.java,
             KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED to FfmpegWorkPerformed::class.java,

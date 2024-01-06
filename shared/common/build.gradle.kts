@@ -30,6 +30,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20230227")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
+    implementation("org.springframework.kafka:spring-kafka:2.8.5")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")

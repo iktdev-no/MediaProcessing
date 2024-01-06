@@ -4,6 +4,4 @@ import java.util.*
 
 open class CollectionReference(
     @Transient open val referenceId: String = UUID.randomUUID().toString(),
-) {
-
-}
+) {}

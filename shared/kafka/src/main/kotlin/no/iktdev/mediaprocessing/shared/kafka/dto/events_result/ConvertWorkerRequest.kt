@@ -6,7 +6,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 
 @KafkaBelongsToEvent(KafkaEvents.EVENT_WORK_CONVERT_CREATED)
 data class ConvertWorkerRequest(
-    val requiresEventId: String,
+    val requiresEventId: String? = null,
     val inputFile: String,
     val allowOverwrite: Boolean,
     val outFileBaseName: String,

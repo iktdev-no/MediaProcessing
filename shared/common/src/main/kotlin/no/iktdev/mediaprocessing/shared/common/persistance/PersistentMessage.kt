@@ -6,18 +6,15 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import org.jetbrains.exposed.sql.ResultRow
 import java.time.LocalDateTime
 
+
 data class PersistentMessage(
     val referenceId: String,
     val eventId: String,
     val event: KafkaEvents,
-    //val metadata: Metadata,
     val data: MessageDataWrapper,
     val created: LocalDateTime
 )
 
-data class Metadata(
-    val createdBy: String
-)
 
 fun PersistentMessage.isOfEvent(event: KafkaEvents): Boolean {
     return this.event == event
