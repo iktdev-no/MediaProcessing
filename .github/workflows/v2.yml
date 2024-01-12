@@ -66,9 +66,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
 
       - name: Build Shared code
-        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.commonCode == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          cd CommonCode 
+          cd shared 
           chmod +x ./gradlew
           ./gradlew build          
 
