@@ -69,8 +69,8 @@ jobs:
         if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           cd shared 
-          chmod +x ./gradlew
-          ./gradlew build          
+          chmod +x ../gradlew
+          ../gradlew build          
 
 
   build-processer:
