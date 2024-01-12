@@ -14,10 +14,10 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.*
@@ -136,7 +136,8 @@ class EncodeService: TaskCreator() {
                     readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, encodeServiceId)
                 }
                 producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                    FfmpegWorkPerformed(status = Status.COMPLETED, producedBy = encodeServiceId, derivedFromEventId =  runner.eventId))
+                    ProcesserEncodeWorkPerformed(status = Status.COMPLETED, producedBy = encodeServiceId, derivedFromEventId =  runner.eventId, outFile = runner.info.outFile)
+                )
                 clearWorker()
             }
 
@@ -150,7 +151,8 @@ class EncodeService: TaskCreator() {
             }
             log.info { "Encode failed for ${runner.referenceId}" }
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                FfmpegWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = encodeServiceId, derivedFromEventId =  runner.eventId))
+                ProcesserEncodeWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = encodeServiceId, derivedFromEventId =  runner.eventId)
+            )
             sendProgress(info = info, ended = true)
             clearWorker()
         }

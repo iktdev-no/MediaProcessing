@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.shared.kafka.dto
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import no.iktdev.streamit.library.kafka.dto.Status
 import java.lang.reflect.Type
 import java.util.*
 

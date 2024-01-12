@@ -11,6 +11,7 @@ object events: IntIdTable() {
     val eventId: Column<String> = varchar("eventId", 50)
     val event: Column<String> = varchar("event",100)
     val data: Column<String> = text("data")
+    //val success: Column<Boolean> = bool("success").default(false)
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
 
     init {

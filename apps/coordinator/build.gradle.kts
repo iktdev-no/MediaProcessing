@@ -36,6 +36,8 @@ dependencies {
     implementation("org.json:json:20210307")
 
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
+    implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha22")
+
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")

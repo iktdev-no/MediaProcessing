@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.input.watcher
 
 import dev.vishna.watchservice.KWatchEvent.Kind.Deleted
+import dev.vishna.watchservice.KWatchEvent.Kind.Initialized
 import dev.vishna.watchservice.asWatchChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
@@ -51,6 +52,7 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
                 }
                 when (it.kind) {
                     Deleted -> queue.removeFromQueue(it.file, this@InputDirectoryWatcher::onFileRemoved)
+                    Initialized -> { /* Do nothing */ }
                     else -> {
                         if (it.file.isFile && it.file.isSupportedVideoFile()) {
                             queue.addToQueue(it.file, this@InputDirectoryWatcher::onFilePending, this@InputDirectoryWatcher::onFileAvailable)

@@ -1,7 +1,7 @@
-package no.iktdev.streamit.library.kafka.dto
+package no.iktdev.mediaprocessing.shared.kafka.dto
 
 enum class Status {
-    STARTED,
+    SKIPPED,
     COMPLETED,
     ERROR
 }

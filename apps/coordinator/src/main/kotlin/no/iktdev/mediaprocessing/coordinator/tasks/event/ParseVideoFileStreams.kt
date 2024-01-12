@@ -11,7 +11,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaStreamsParsePerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.stereotype.Service
 
 @Service

@@ -17,7 +17,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -41,7 +41,7 @@ class Coordinator() {
 
     public fun startProcess(file: File, type: ProcessType) {
         val processStartEvent = ProcessStarted(
-            status = Status.STARTED,
+            status = Status.COMPLETED,
             file = file.absolutePath,
             type = type
         )
@@ -184,6 +184,7 @@ class Coordinator() {
             val data = message.data as FfmpegWorkerArgumentsCreated
             data.entries.forEach {
                 FfmpegWorkRequestCreated(
+                    status = Status.COMPLETED,
                     inputFile = data.inputFile,
                     arguments = it.arguments,
                     outFile = it.outputFile
@@ -206,6 +207,7 @@ class Coordinator() {
             val data = message.data as FfmpegWorkerArgumentsCreated
             data.entries.forEach {
                 FfmpegWorkRequestCreated(
+                    status = Status.COMPLETED,
                     inputFile = data.inputFile,
                     arguments = it.arguments,
                     outFile = it.outputFile
@@ -218,6 +220,7 @@ class Coordinator() {
                 }
                 val outFile = File(it.outputFile)
                 ConvertWorkerRequest(
+                    status = Status.COMPLETED,
                     requiresEventId = message.eventId,
                     inputFile = it.outputFile,
                     true,

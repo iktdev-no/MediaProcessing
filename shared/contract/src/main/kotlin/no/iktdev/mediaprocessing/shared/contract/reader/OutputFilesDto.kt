@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.shared.contract.reader
 
-class OutputFilesDto(
-    val videoFile: String,
-    val videoArguments: List<String>,
-    val subtitleFiles: List<String>
+
+data class OutputFilesDto(
+    val video: String?, // FullName (Path + name)
+    val subtitles: List<String> = emptyList() // (Path + Name)
 )

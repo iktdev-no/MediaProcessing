@@ -1,5 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 import no.iktdev.exfl.using
 import java.io.File
 import java.io.FileOutputStream
@@ -7,6 +10,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 open class DownloadClient(val url: String, val outDir: File, val baseName: String) {
+    val log = KotlinLogging.logger {}
     protected val http: HttpURLConnection = openConnection()
     private val BUFFER_SIZE = 4096
 
@@ -27,10 +31,17 @@ open class DownloadClient(val url: String, val outDir: File, val baseName: Strin
         return ((read * 100) / total)
     }
 
-    suspend fun download(): File? {
+    suspend fun download(): File? = withContext(Dispatchers.IO) {
         val extension = getExtension()
             ?: throw UnsupportedFormatException("Provided url does not contain a supported file extension")
         val outFile = outDir.using("$baseName.$extension")
+        if (!outDir.exists())
+            return@withContext null
+        if (outFile.exists()) {
+            log.info { "${outFile.name} already exists. Download skipped!" }
+            return@withContext outFile
+        }
+
         val inputStream = http.inputStream
         val fos = FileOutputStream(outFile, false)
 
@@ -51,7 +62,7 @@ open class DownloadClient(val url: String, val outDir: File, val baseName: Strin
         }
         inputStream.close()
         fos.close()
-        return outFile
+        return@withContext outFile
     }
 
     open fun getExtension(): String? {

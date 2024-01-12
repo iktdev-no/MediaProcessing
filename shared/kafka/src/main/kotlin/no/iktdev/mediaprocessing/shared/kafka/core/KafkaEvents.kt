@@ -35,7 +35,8 @@ enum class KafkaEvents(val event: String) {
     EVENT_STORE_COVER_PERFORMED("event:store-cover:performed"),
     EVENT_STORE_METADATA_PERFORMED("event:store-metadata:performed"),
 
-    EVENT_PROCESS_COMPLETED("event:process:completed");
+    EVENT_PROCESS_COMPLETED("event:process:completed"),
+    EVENT_COLLECT_AND_STORE("event::save");
 
     companion object {
         fun toEvent(event: String): KafkaEvents? {

@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.shared.kafka.dto.events_result
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
 data class VideoInfoPerformed(
     override val status: Status,

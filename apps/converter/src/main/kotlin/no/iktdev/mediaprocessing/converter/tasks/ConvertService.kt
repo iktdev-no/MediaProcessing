@@ -16,9 +16,8 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerRequest
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -111,6 +110,8 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
     }
 
     fun skipConvertEvent(event: PersistentProcessDataMessage, requiresEventId: String) {
+        if (event.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED)
+            return
         val producesPayload = SimpleMessageData(status = Status.COMPLETED, message = "Convert event contains a payload stating that it waits for eventId: $requiresEventId with referenceId: ${event.referenceId}")
         coordinator.producer.sendMessage(
             referenceId = event.referenceId,
@@ -126,7 +127,7 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                 status = Status.COMPLETED,
                 producedBy = serviceId,
                 derivedFromEventId = converter.eventId,
-                result = result.map { it.absolutePath }
+                outFiles = result.map { it.absolutePath }
             )
         } catch (e: Converter.FileUnavailableException) {
             e.printStackTrace()
@@ -135,7 +136,7 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                 message = e.message,
                 producedBy = serviceId,
                 derivedFromEventId = converter.eventId,
-                result = emptyList()
+                outFiles = emptyList()
             )
         } catch (e : Converter.FileIsNullOrEmpty) {
             e.printStackTrace()
@@ -144,16 +145,8 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                 message = e.message,
                 producedBy = serviceId,
                 derivedFromEventId = converter.eventId,
-                result = emptyList()
+                outFiles = emptyList()
             )
         }
     }
-
-
-
-    data class PendingWorkerCache(
-        val referenceId: String,
-        val eventId: String,
-        val requiresEventId: String
-    )
 }

@@ -1,0 +1,14 @@
+package no.iktdev.mediaprocessing.shared.contract.reader
+
+data class VideoDetails(
+    val serieInfo: SerieInfo? = null,
+    val type: String,
+    val fullName: String
+)
+
+data class SerieInfo(
+    val episodeTitle: String? = null,
+    val episodeNumber: Int,
+    val seasonNumber: Int,
+    val title: String
+)

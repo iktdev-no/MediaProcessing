@@ -8,7 +8,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerforme
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.CoverInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.stereotype.Service
 
 @Service

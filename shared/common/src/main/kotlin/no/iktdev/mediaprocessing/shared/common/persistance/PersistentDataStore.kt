@@ -5,7 +5,6 @@ import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
@@ -24,6 +23,7 @@ open class PersistentDataStore {
         }
         return if (exception == null) true else {
             if (exception.cause is SQLIntegrityConstraintViolationException) {
+                exception.printStackTrace()
                 (exception as ExposedSQLException).errorCode == 1062
             }
             else {

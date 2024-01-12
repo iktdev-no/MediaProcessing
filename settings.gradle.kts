@@ -3,20 +3,21 @@ plugins {
 }
 rootProject.name = "MediaProcessing"
 include("apps")
+include("apps:ui")
+include("apps:coordinator")
+include("apps:converter")
+include("apps:processer")
+
 include("shared")
 include("shared:kafka")
-findProject(":shared:kafka")?.name = "kafka"
-include("apps:coordinator")
-findProject(":apps:coordinator")?.name = "coordinator"
-include("apps:ui")
-findProject(":apps:ui")?.name = "ui"
-include("apps:encoder")
-findProject(":apps:encoder")?.name = "encoder"
-include("apps:converter")
-findProject(":apps:converter")?.name = "converter"
 include("shared:contract")
-findProject(":shared:contract")?.name = "contract"
 include("shared:common")
-findProject(":shared:common")?.name = "common"
-include("apps:processer")
+
+findProject(":apps:ui")?.name = "ui"
+findProject(":apps:coordinator")?.name = "coordinator"
+findProject(":apps:converter")?.name = "converter"
 findProject(":apps:processer")?.name = "processer"
+
+findProject(":shared:kafka")?.name = "kafka"
+findProject(":shared:contract")?.name = "contract"
+findProject(":shared:common")?.name = "common"

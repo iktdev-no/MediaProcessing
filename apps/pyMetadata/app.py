@@ -7,6 +7,7 @@ import uuid
 import threading
 import json
 import time
+
 from kafka import KafkaConsumer, KafkaProducer
 from fuzzywuzzy import fuzz
 from sources.result import DataResult, Metadata
@@ -18,8 +19,8 @@ from sources.select import UseSource
 
 # Konfigurer Kafka-forbindelsen
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
-consumer_group = os.environ.get("KAFKA_CONSUMER_ID") or f"Metadata-{uuid.uuid4()}"
-kafka_topic = os.environ.get("KAFKA_TOPIC") or "127.0.0.1:9092"
+consumer_group = os.environ.get("KAFKA_CONSUMER_ID") or f"MetadataConsumer"
+kafka_topic = os.environ.get("KAFKA_TOPIC") or "mediaEvents"
 
 # Konfigurer logging
 logging.basicConfig(
@@ -154,7 +155,7 @@ class MessageHandlerThread(threading.Thread):
             logger.info("Not in cache: %s", name)
             logger.info("Searching in sources for information about %s", name)
             result: Optional[DataResult] = UseSource(title=name).select_result()
-            if (result.status == "SUCCESS"):
+            if (result.status == "COMPLETED"):
                 logger.info("Storing response for %s in in-memory cache", name)
                 ResultCache.add(name, result)
         return result

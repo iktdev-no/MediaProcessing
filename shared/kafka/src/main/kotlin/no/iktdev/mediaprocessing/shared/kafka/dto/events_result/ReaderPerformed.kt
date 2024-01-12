@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaBelongsToEvent
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
 @KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED)
 data class ReaderPerformed(

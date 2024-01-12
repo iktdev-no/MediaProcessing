@@ -1,7 +1,5 @@
 package no.iktdev.mediaprocessing.shared.kafka.dto
 
-import no.iktdev.streamit.library.kafka.dto.Status
-
 
 open class MessageDataWrapper(
     @Transient open val status: Status = Status.ERROR,

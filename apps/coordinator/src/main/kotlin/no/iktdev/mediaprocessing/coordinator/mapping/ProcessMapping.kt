@@ -10,12 +10,15 @@ class ProcessMapping(val events: List<PersistentMessage>) {
     fun map(): MediaProcessedDto? {
         val referenceId = events.firstOrNull()?.referenceId ?: return null
         val processStarted = getProcessStarted()
+        val meta = MetadataMapping(events)
         return MediaProcessedDto(
             referenceId = referenceId,
             process = processStarted?.type,
             inputFile = processStarted?.file,
-            metadata = MetadataMapping(events).map(),
-            outputFiles = null
+            collection = meta.getCollection(),
+            metadata = meta.map(),
+            videoDetails = VideoDetailsMapper(events).mapTo(),
+            outputFiles = OutputFilesMapping(events).mapTo()
         )
     }
 
@@ -23,29 +26,37 @@ class ProcessMapping(val events: List<PersistentMessage>) {
         return events.lastOrNull { it.data is ProcessStarted }?.data as ProcessStarted?
     }
 
+
     fun waitsForEncode(): Boolean {
-        val arguments = events.find { it.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED } != null
-        val performed = events.find { it.event == KafkaEvents.EVENT_WORK_ENCODE_PERFORMED } != null
-        val isSkipped = events.find { it.event == KafkaEvents.EVENT_WORK_ENCODE_SKIPPED } != null
-        return !(isSkipped || (arguments && performed))
+        val arguments = events.filter { it.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED }
+        val created = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_CREATED}
+
+        val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_PERFORMED }
+        val isSkipped = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_SKIPPED }
+
+        return (arguments.isNotEmpty() && created.isEmpty()) || created.size > performed.size + isSkipped.size
     }
 
     fun waitsForExtract(): Boolean {
-        val arguments = events.find { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED } != null
-        val performed = events.find { it.event == KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED } != null
-        val isSkipped = events.find { it.event == KafkaEvents.EVENT_WORK_EXTRACT_SKIPPED } != null
-        return !(isSkipped || (arguments && performed))
+        val arguments = events.filter { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED }
+        val created = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED }
+
+        val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED }
+        val isSkipped = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_SKIPPED }
+
+        return (arguments.isNotEmpty() && created.isEmpty()) || created.size > performed.size + isSkipped.size
     }
 
     fun waitsForConvert(): Boolean {
-        val arguments = events.find { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED } != null
-        val performed = events.find { it.event == KafkaEvents.EVENT_WORK_CONVERT_PERFORMED } != null
-        val isSkipped = events.find { it.event == KafkaEvents.EVENT_WORK_CONVERT_SKIPPED } != null
-        return !(isSkipped || (arguments && performed))
+        val created = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED }
+        val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_PERFORMED }
+        val isSkipped = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_SKIPPED }
+
+        return created.size > performed.size + isSkipped.size
     }
 
     fun canCollect(): Boolean {
-        return waitsForEncode() && waitsForExtract() && waitsForConvert()
+        return (!waitsForEncode() && !waitsForExtract() && !waitsForConvert())
     }
 
 }

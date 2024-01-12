@@ -7,6 +7,8 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
 
 class DeserializingRegistry {
     private val log = KotlinLogging.logger {}
@@ -29,14 +31,16 @@ class DeserializingRegistry {
             KafkaEvents.EVENT_WORK_EXTRACT_CREATED to FfmpegWorkRequestCreated::class.java,
             KafkaEvents.EVENT_WORK_CONVERT_CREATED to ConvertWorkerRequest::class.java,
 
-            KafkaEvents.EVENT_WORK_ENCODE_PERFORMED to FfmpegWorkPerformed::class.java,
-            KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED to FfmpegWorkPerformed::class.java,
-            KafkaEvents.EVENT_WORK_CONVERT_PERFORMED to null,
-            KafkaEvents.EVENT_WORK_DOWNLOAD_COVER_PERFORMED to null,
+            KafkaEvents.EVENT_WORK_ENCODE_PERFORMED to ProcesserEncodeWorkPerformed::class.java,
+            KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED to ProcesserExtractWorkPerformed::class.java,
+            KafkaEvents.EVENT_WORK_CONVERT_PERFORMED to ConvertWorkPerformed::class.java,
+            KafkaEvents.EVENT_WORK_DOWNLOAD_COVER_PERFORMED to CoverDownloadWorkPerformed::class.java,
 
             KafkaEvents.EVENT_WORK_ENCODE_SKIPPED to null,
             KafkaEvents.EVENT_WORK_EXTRACT_SKIPPED to null,
             KafkaEvents.EVENT_WORK_CONVERT_SKIPPED to null,
+
+            KafkaEvents.EVENT_PROCESS_COMPLETED to ProcessCompleted::class.java
             )
     }
 
@@ -55,7 +59,7 @@ class DeserializingRegistry {
             }
         }
         // Fallback
-        val type = object : TypeToken<Message<out MessageDataWrapper>>() {}.type
+        val type = object : TypeToken<Message<out SimpleMessageData>>() {}.type
         return gson.fromJson<Message<SimpleMessageData>>(json, type)
     }
 

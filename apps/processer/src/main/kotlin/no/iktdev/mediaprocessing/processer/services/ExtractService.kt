@@ -15,10 +15,10 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.*
@@ -141,7 +141,11 @@ class ExtractService: TaskCreator() {
 
 
                 producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                    FfmpegWorkPerformed(status = Status.COMPLETED, producedBy = extractServiceId, derivedFromEventId =  runner.eventId)
+                    ProcesserExtractWorkPerformed(
+                        status = Status.COMPLETED,
+                        producedBy = extractServiceId,
+                        derivedFromEventId =  runner.eventId,
+                        outFile = runner.info.outFile)
                 )
                 log.info { "Extract is releasing worker" }
                 clearWorker()
@@ -156,7 +160,7 @@ class ExtractService: TaskCreator() {
             }
             log.info { "Extract failed for ${runner.referenceId}" }
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                FfmpegWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = extractServiceId, derivedFromEventId =  runner.eventId)
+                ProcesserExtractWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = extractServiceId, derivedFromEventId =  runner.eventId)
             )
             sendState(info, ended= true)
             clearWorker()

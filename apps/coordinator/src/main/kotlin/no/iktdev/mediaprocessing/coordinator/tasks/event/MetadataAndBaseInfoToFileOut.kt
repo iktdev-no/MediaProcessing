@@ -14,7 +14,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerforme
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.hasValidData
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.streamit.library.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service

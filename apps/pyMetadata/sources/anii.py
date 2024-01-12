@@ -1,5 +1,5 @@
 from AnilistPython import Anilist
-from .result import Metadata, DataResult
+from .result import Metadata, DataResult, Summary
 
 class metadata():
     name: str = None
@@ -17,19 +17,24 @@ class metadata():
                 title = result.get("name_english", None),
                 altTitle = [result.get("name_romaji", [])],
                 cover = result.get("cover_image", None),
-                summary = result.get("desc", None),
+                summary = [
+                    Summary(
+                        language = "eng",
+                        summary = result.get("desc", None)
+                    )
+                ],
                 type = 'movie' if result.get('airing_format', '').lower() == 'movie' else 'serie',
                 genres = result.get('genres', []),
                 source="anii",
                 usedTitle=self.name
             )
             if (meta.title is None) or (meta.type is None):
-                return DataResult("SUCCESS", None, None)
+                return DataResult("COMPLETED", None, None)
 
-            return DataResult("SUCCESS", None, meta)
+            return DataResult("COMPLETED", None, meta)
 
         except IndexError as ingore:
-            return DataResult(statusType="SUCCESS", message=f"No result for {self.name}")
+            return DataResult(statusType="COMPLETED", message=f"No result for {self.name}")
         except Exception as e:
             return DataResult(statusType="ERROR", message=str(e))
             

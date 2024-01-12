@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.Table
 
 import org.jetbrains.exposed.sql.transactions.transaction
 
-open class TableDefaultOperations<T: Table> {
+open class TableDefaultOperations<T : Table> {
 
 }
 
@@ -45,7 +45,7 @@ fun <T> insertWithSuccess(block: () -> T): Boolean {
     }
 }
 
-fun <T> executeOrException(block: () -> T): Exception? {
+fun <T> executeOrException(rollbackOnFailure: Boolean = false, block: () -> T): Exception? {
     return try {
         transaction {
             try {
@@ -54,7 +54,8 @@ fun <T> executeOrException(block: () -> T): Exception? {
                 null
             } catch (e: Exception) {
                 // log the error here or handle the exception as needed
-                rollback()
+                if (rollbackOnFailure)
+                    rollback()
                 e
 
             }
@@ -62,6 +63,25 @@ fun <T> executeOrException(block: () -> T): Exception? {
     } catch (e: Exception) {
         e.printStackTrace()
         return e
+    }
+}
+
+fun <T> executeWithResult(block: () -> T): Pair<T?, Exception?> {
+    return try {
+        transaction {
+            try {
+                val res = block()
+                commit()
+                res to null
+            } catch (e: Exception) {
+                // log the error here or handle the exception as needed
+                rollback()
+                null to e
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return null to e
     }
 }
 
