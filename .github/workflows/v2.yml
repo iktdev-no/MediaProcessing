@@ -253,6 +253,6 @@ jobs:
           context: ./apps/pyMetadata
           push: true
           tags: |
-            bskjon/mediaprocessing-pymetadata:v2-latest
+            bskjon/mediaprocessing-pymetadata:v2
             bskjon/mediaprocessing-pymetadata:v2-${{ github.sha }}
             bskjon/mediaprocessing-pymetadata:v2-${{ steps.docker-tag.outputs.tag }}
