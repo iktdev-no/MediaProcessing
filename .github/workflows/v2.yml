@@ -113,7 +113,7 @@ jobs:
           context: .
           dockerfile: ./Dockerfile
           build-args:
-            --build-arg MODULE_NAME=processer
+            MODULE_NAME=processer
           push: true
           tags: |
             bskjon/mediaprocessing-processer:v2-latest
@@ -160,8 +160,8 @@ jobs:
         with:
           context: .
           dockerfile: ./Dockerfile
-          args:
-            --build-arg MODULE_NAME=converter
+          build-args:
+            MODULE_NAME=converter
           push: true
           tags: |
             bskjon/mediaprocessing-converter:v2-latest
@@ -208,8 +208,8 @@ jobs:
         with:
           context: .
           dockerfile: ./Dockerfile
-          args:
-            --build-arg MODULE_NAME=coordinator
+          build-args:
+            MODULE_NAME=coordinator
           push: true
           tags: |
             bskjon/mediaprocessing-coordinator:v2-latest
