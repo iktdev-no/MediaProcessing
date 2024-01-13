@@ -68,9 +68,8 @@ jobs:
       - name: Build Shared code
         if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          cd shared 
-          chmod +x ../gradlew
-          ../gradlew build
+          chmod +x ./gradlew
+          ./gradlew :shared:build --stacktrace --info
 
 
   build-processer:
@@ -93,9 +92,8 @@ jobs:
       - name: Build Processer module
         id: build-processer
         run: |
-          cd apps/processer
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew :apps:processer:build --stacktrace --info
           echo "Build completed"
 
 
