@@ -112,7 +112,7 @@ jobs:
         with:
           context: .
           dockerfile: ./Dockerfile
-          args:
+          build-args:
             --build-arg MODULE_NAME=processer
           push: true
           tags: |
