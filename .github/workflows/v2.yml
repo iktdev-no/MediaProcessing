@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       pyMetadata: ${{ steps.filter.outputs.pyMetadata }}
-      commonCode: ${{ steps.filter.outputs.commonCode }}
-      reader: ${{ steps.filter.outputs.reader }}
-      encode: ${{ steps.filter.outputs.encode }}
-      convert: ${{ steps.filter.outputs.convert }}
+      coordinator: ${{ steps.filter.outputs.coordinator }}
+      processer: ${{ steps.filter.outputs.processer }}
+      converter: ${{ steps.filter.outputs.converter }}
+      shared: ${{ steps.filter.outputs.shared }}
 
     steps:
       - name: Checkout repository
