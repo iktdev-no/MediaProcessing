@@ -42,8 +42,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
+    //implementation(project(mapOf("path" to ":shared")))
     implementation(project(mapOf("path" to ":shared:kafka")))
-    implementation(project(mapOf("path" to ":shared")))
 
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
