@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    kotlin("jvm")
+    kotlin("jvm") version "1.9.20"
 }
 
 group = "no.iktdev.mediaprocessing"
