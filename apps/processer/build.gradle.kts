@@ -64,3 +64,13 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.bootJar {
+    archiveFileName.set("app.jar")
+    launchScript()
+}
+
+tasks.jar {
+    archiveFileName.set("app.jar")
+    archiveBaseName.set("app")
+}

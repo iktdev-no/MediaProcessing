@@ -110,7 +110,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./apps/processer
+          context: .
+          dockerfile: ./Dockerfile
+          args:
+            --build-arg MODULE_NAME=processer
           push: true
           tags: |
             bskjon/mediaprocessing-processer:v2-latest
@@ -155,7 +158,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./apps/converter
+          context: .
+          dockerfile: ./Dockerfile
+          args:
+            --build-arg MODULE_NAME=converter
           push: true
           tags: |
             bskjon/mediaprocessing-converter:v2-latest
@@ -200,7 +206,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./apps/coordinator
+          context: .
+          dockerfile: ./Dockerfile
+          args:
+            --build-arg MODULE_NAME=coordinator
           push: true
           tags: |
             bskjon/mediaprocessing-coordinator:v2-latest
