@@ -93,7 +93,7 @@ jobs:
         id: build-processer
         run: |
           chmod +x ./gradlew
-          ./gradlew :apps:processer:build --stacktrace --info
+          ./gradlew :apps:processer:build --info
           echo "Build completed"
 
 
@@ -137,9 +137,8 @@ jobs:
       - name: Build Converter module
         id: build-converter
         run: |
-          cd apps/converter
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew :apps:converter:build --info
           echo "Build completed"
 
 
@@ -183,9 +182,8 @@ jobs:
       - name: Build Coordinator module
         id: build-coordinator
         run: |
-          cd apps/coordinator
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew :apps:coordinator:build
           echo "Build completed"
 
 

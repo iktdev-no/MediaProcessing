@@ -39,7 +39,6 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
-    implementation(project(mapOf("path" to ":shared")))
 
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
 
@@ -47,7 +46,8 @@ dependencies {
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
-    //implementation(project(mapOf("path" to ":shared:kafka")))
+    //implementation(project(mapOf("path" to ":shared")))
+    implementation(project(mapOf("path" to ":shared:kafka")))
 
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
