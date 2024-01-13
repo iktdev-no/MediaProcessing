@@ -116,7 +116,7 @@ jobs:
             --build-arg MODULE_NAME=processer
           push: true
           tags: |
-            bskjon/mediaprocessing-processer:v2-latest
+            bskjon/mediaprocessing-processer:v2
             bskjon/mediaprocessing-processer:v2-${{ github.sha }}
             bskjon/mediaprocessing-processer:v2-${{ steps.docker-tag.outputs.tag }}
 
@@ -164,7 +164,7 @@ jobs:
             --build-arg MODULE_NAME=converter
           push: true
           tags: |
-            bskjon/mediaprocessing-converter:v2-latest
+            bskjon/mediaprocessing-converter:v2
             bskjon/mediaprocessing-converter:v2-${{ github.sha }}
             bskjon/mediaprocessing-converter:v2-${{ steps.docker-tag.outputs.tag }}
             
@@ -212,7 +212,7 @@ jobs:
             --build-arg MODULE_NAME=coordinator
           push: true
           tags: |
-            bskjon/mediaprocessing-coordinator:v2-latest
+            bskjon/mediaprocessing-coordinator:v2
             bskjon/mediaprocessing-coordinator:v2-${{ github.sha }}
             bskjon/mediaprocessing-coordinator:v2-${{ steps.docker-tag.outputs.tag }}
             
