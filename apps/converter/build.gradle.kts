@@ -40,7 +40,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
-    implementation(project(mapOf("path" to ":shared")))
+    //implementation(project(mapOf("path" to ":shared")))
 
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
     implementation("no.iktdev.library:subtitle:1.7.7-SNAPSHOT")
