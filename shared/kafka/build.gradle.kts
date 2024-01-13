@@ -15,9 +15,12 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
+    implementation(project(mapOf("path" to ":shared:contract")))
+
+
+
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
-    implementation(project(mapOf("path" to ":shared:contract")))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
