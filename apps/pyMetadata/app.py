@@ -40,7 +40,7 @@ class ProducerDataValueSchema:
     def to_dict(self):
         return {
             'referenceId': self.referenceId,
-            'eventId': uuid.uuid4(),
+            'eventId': str(uuid.uuid4()),
             'data': self.data.to_dict() if self.data else None
         }
 
