@@ -8,7 +8,6 @@ import no.iktdev.mediaprocessing.processer.Tasks
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorkerEvents
-import no.iktdev.mediaprocessing.processer.getComputername
 import no.iktdev.mediaprocessing.shared.common.limitedWhile
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
@@ -17,6 +16,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
+import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
 import org.springframework.stereotype.Service
@@ -37,9 +37,9 @@ class ExtractService: TaskCreator() {
     private var runner: FfmpegWorker? = null
     private var runnerJob: Job? = null
 
-    val extractServiceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
+    val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
     init {
-        log.info { "Starting extract service with id: $extractServiceId" }
+        log.info { "Starting with id: $serviceId" }
     }
     override fun getListener(): Tasks {
         return Tasks(producesEvent, this)
@@ -82,7 +82,7 @@ class ExtractService: TaskCreator() {
         }
 
 
-        val setClaim = PersistentDataStore().setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = extractServiceId)
+        val setClaim = PersistentDataStore().setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} extract" }
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents)
@@ -108,7 +108,7 @@ class ExtractService: TaskCreator() {
                 return
             }
             log.info { "Extract started for ${runner.referenceId}" }
-            PersistentDataStore().setProcessEventClaim(runner.referenceId, runner.eventId, extractServiceId)
+            PersistentDataStore().setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
             sendState(info, false)
         }
 
@@ -119,12 +119,12 @@ class ExtractService: TaskCreator() {
                 return
             }
             log.info { "Extract completed for ${runner.referenceId}" }
-            var consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(runner.referenceId, runner.eventId, extractServiceId)
+            var consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
             runBlocking {
 
                 delay(1000)
                 limitedWhile({!consumedIsSuccessful}, 1000 * 10, 1000) {
-                    consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(runner.referenceId, runner.eventId, extractServiceId)
+                    consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
                 }
 
                 log.info { "Database is reporting extract on ${runner.referenceId} as ${if (consumedIsSuccessful) "CONSUMED" else "NOT CONSUMED"}" }
@@ -132,9 +132,9 @@ class ExtractService: TaskCreator() {
 
 
 
-                var readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, extractServiceId)
+                var readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
                 limitedWhile({!readbackIsSuccess}, 1000 * 30, 1000) {
-                    readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, extractServiceId)
+                    readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
                     log.info { readbackIsSuccess }
                 }
                 log.info { "Database is reporting readback for extract on ${runner.referenceId} as ${if (readbackIsSuccess) "CONSUMED" else "NOT CONSUMED"}" }
@@ -143,7 +143,7 @@ class ExtractService: TaskCreator() {
                 producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                     ProcesserExtractWorkPerformed(
                         status = Status.COMPLETED,
-                        producedBy = extractServiceId,
+                        producedBy = serviceId,
                         derivedFromEventId =  runner.eventId,
                         outFile = runner.info.outFile)
                 )
@@ -160,7 +160,7 @@ class ExtractService: TaskCreator() {
             }
             log.info { "Extract failed for ${runner.referenceId}" }
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                ProcesserExtractWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = extractServiceId, derivedFromEventId =  runner.eventId)
+                ProcesserExtractWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
             )
             sendState(info, ended= true)
             clearWorker()

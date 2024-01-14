@@ -26,13 +26,6 @@ fun main(args: Array<String>) {
     val context = runApplication<ProcesserApplication>(*args)
 }
 
-fun getComputername(): String {
-    return listOfNotNull(
-        System.getenv("hostname"),
-        System.getenv("computername")
-    ).first()
-}
-
 class SocketImplemented: SocketImplementation() {
 
 }

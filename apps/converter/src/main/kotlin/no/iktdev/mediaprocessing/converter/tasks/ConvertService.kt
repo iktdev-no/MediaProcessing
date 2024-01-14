@@ -27,6 +27,10 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
     private val log = KotlinLogging.logger {}
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
 
+    init {
+        log.info { "Starting with id: $serviceId" }
+    }
+
     override val listensForEvents: List<KafkaEvents>
         get() = listOf(
             KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED,
