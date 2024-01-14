@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import java.io.File
 import java.io.RandomAccessFile
+import java.net.InetAddress
 
 private val logger = KotlinLogging.logger {}
 
@@ -32,8 +33,17 @@ suspend fun limitedWhile(condition: () -> Boolean, maxDuration: Long = 500 * 60,
 }
 
 fun getComputername(): String {
-    return listOfNotNull(
+    val netHostname = try {
+        val host = InetAddress.getLocalHost()
+        listOf(host.hostName, host.canonicalHostName)
+    } catch (e: Exception) {
+        emptyList<String>()
+    }.filterNot { it.isNullOrBlank() }
+
+    val envs = listOfNotNull(
         System.getenv("hostname"),
         System.getenv("computername")
-    ).firstOrNull() ?: "UNKNOWN_SYSTEM"
+    )
+
+    return (envs + netHostname).firstOrNull() ?: "UNKNOWN_SYSTEM"
 }
