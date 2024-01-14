@@ -14,3 +14,4 @@ COPY . .
 
 # Start applikasjonen
 CMD ["python3", "-u", "app.py"]
+
