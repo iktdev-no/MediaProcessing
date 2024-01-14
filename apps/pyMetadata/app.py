@@ -116,15 +116,17 @@ class MessageHandlerThread(threading.Thread):
 
     def run(self):
         logger.info("Handling message: key=%s, value=%s", self.message.key, self.message.value)
-
+        if 'data' not in self.message.value:
+            logger.error("data is not present in message!")
+        messageData = self.message.value["data"]
         # Sjekk om meldingen har en Status
-        if 'status' in self.message.value:
-            status_type = self.message.value['data']['status']
+        if 'status' in messageData:
+            status_type = messageData['status']
 
             # Sjekk om statusen er COMPLETED
             if status_type == 'COMPLETED':
-                baseName = self.message.value["data"]["sanitizedName"]
-                title = self.message.value['data']["title"]
+                baseName = messageData["sanitizedName"]
+                title = messageData["title"]
 
                 logger.info("Searching for %s", title)
                 result = self.get_metadata(title)
@@ -148,6 +150,8 @@ class MessageHandlerThread(threading.Thread):
                 producer.close()
             else:
                 logger.info("Message status is not of 'COMPLETED', %s", self.message.value)
+        else:
+            logger.warn("No status present for %s", self.message.value)
 
     def get_metadata(self, name: str) -> Optional[DataResult]:
         result = None
