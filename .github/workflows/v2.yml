@@ -110,8 +110,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          dockerfile: ./dockerfile/DebianJavaFfmpeg
+          context: ./dockerfile
+          file: DebianJavaFfmpeg
           build-args:
             MODULE_NAME=processer
           push: true
@@ -158,8 +158,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          dockerfile: ./dockerfile/DebianJava
+          context: ./dockerfile
+          file: DebianJava
           build-args:
             MODULE_NAME=converter
           push: true
@@ -206,8 +206,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          dockerfile: ./dockerfile/DebianJavaFfmpeg
+          context: ./dockerfile
+          file: DebianJavaFfmpeg
           build-args:
             MODULE_NAME=coordinator
           push: true
@@ -250,8 +250,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: ./apps/pyMetadata
-          dockerfile: ./dockerfile/Python
+          context: ./dockerfile
+          file: Python
           push: true
           tags: |
             bskjon/mediaprocessing-pymetadata:v2
