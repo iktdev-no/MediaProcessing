@@ -42,7 +42,7 @@ jobs:
       # Step to print the outputs from "pre-check" job
       - name: Print Outputs from pre-check job
         run: |
-          echo "Apps"
+          echo "Apps\n"
           echo "app:pyMetadata: ${{ needs.pre-check.outputs.pyMetadata }}"
           echo "app:coordinator: ${{ needs.pre-check.outputs.coordinator }}"
           echo "app:processer: ${{ needs.pre-check.outputs.processer }}"
