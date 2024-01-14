@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaStreamsParsePerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,8 +33,9 @@ class ParseVideoFileStreams() : TaskCreator() {
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
+        val desiredEvent = events.find { it.data is ReaderPerformed } ?: return null
 
-        return parseStreams(event.data as ReaderPerformed)
+        return parseStreams(desiredEvent.data as ReaderPerformed)
     }
 
     fun parseStreams(data: ReaderPerformed): MessageDataWrapper {

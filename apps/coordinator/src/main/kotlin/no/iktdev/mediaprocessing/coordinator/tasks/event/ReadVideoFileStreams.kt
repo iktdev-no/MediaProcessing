@@ -41,8 +41,8 @@ class ReadVideoFileStreams(): TaskCreator() {
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
-
-        return runBlocking { fileReadStreams(event.data as ProcessStarted) }
+        val desiredEvent = events.find { it.data is ProcessStarted } ?: return null
+        return runBlocking { fileReadStreams(desiredEvent.data as ProcessStarted) }
     }
 
     suspend fun fileReadStreams(started: ProcessStarted): MessageDataWrapper {

@@ -29,8 +29,9 @@ class EventBasedMessageListener {
      */
     fun forwardEventMessageToListeners(newEvent: PersistentMessage, events: List<PersistentMessage>) {
         val waitingListeners = waitingListeners(events)
-        val availableListeners = listenerWantingEvent(event = newEvent, waitingListeners = waitingListeners)
-        availableListeners.forEach {
+        //val availableListeners = listenerWantingEvent(event = newEvent, waitingListeners = waitingListeners)
+        //availableListeners.forEach {
+        waitingListeners.forEach {
             try {
                 it.taskHandler.onEventReceived(newEvent.referenceId, newEvent, events)
             } catch (e: Exception) {

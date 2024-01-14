@@ -126,8 +126,11 @@ class MessageHandlerThread(threading.Thread):
                 baseName = self.message.value["data"]["sanitizedName"]
                 title = self.message.value['data']["title"]
 
+                logger.info("Searching for %s", title)
                 result = self.get_metadata(title)
                 if (result is None):
+                    logger.info("No result for %s", title)
+                    logger.info("Searching for %s", baseName)
                     result = self.get_metadata(baseName)
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
@@ -143,6 +146,8 @@ class MessageHandlerThread(threading.Thread):
                 )
                 producer.send(kafka_topic, key="event:media-metadata-search:performed", value=result_json)
                 producer.close()
+            else:
+                logger.info("Message status is not of 'COMPLETED', %s", self.message.value)
 
     def get_metadata(self, name: str) -> Optional[DataResult]:
         result = None
