@@ -28,14 +28,14 @@ jobs:
         id: filter
         with:
           filters: |
-            apps/pyMetadata:
-              - 'pyMetadata/**'
+            pyMetadata:
+              - 'apps/pyMetadata/**'
             apps/coordinator:
-              - 'coordinator/**'
+              - 'apps/coordinator/**'
             apps/processer:
-              - 'processer/**'
+              - 'apps/processer/**'
             apps/converter:
-              - 'converter/**'
+              - 'apps/converter/**'
             
             shared:
               - 'shared/**'
