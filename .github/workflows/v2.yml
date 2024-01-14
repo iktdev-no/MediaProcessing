@@ -252,6 +252,8 @@ jobs:
         with:
           context: .
           file: ./dockerfiles/Python
+          build-args:
+            MODULE_NAME=pyMetadata
           push: true
           tags: |
             bskjon/mediaprocessing-pymetadata:v2

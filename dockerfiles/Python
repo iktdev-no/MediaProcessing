@@ -6,11 +6,11 @@ FROM python:3.11
 WORKDIR /app
 
 # Kopier requirements.txt-filen og installer avhengigheter
-COPY requirements.txt requirements.txt
+COPY ./apps/${MODULE_NAME}/requirements.txt requirements.txt
 RUN pip3 install -r ./requirements.txt
 
 # Kopier resten av prosjektfilene
-COPY . .
+COPY ./apps/${MODULE_NAME}/ .
 
 # Start applikasjonen
 CMD ["python3", "-u", "app.py"]
