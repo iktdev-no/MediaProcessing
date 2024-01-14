@@ -248,12 +248,13 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5.1.0
         with:
-          context: ./dockerfile
-          file: Python
+          context: .
+          file: ./dockerfile/Python
           push: true
           tags: |
             bskjon/mediaprocessing-pymetadata:v2
             bskjon/mediaprocessing-pymetadata:v2-${{ github.sha }}
             bskjon/mediaprocessing-pymetadata:v2-${{ steps.docker-tag.outputs.tag }}
+            - name: Build and push Docker images
