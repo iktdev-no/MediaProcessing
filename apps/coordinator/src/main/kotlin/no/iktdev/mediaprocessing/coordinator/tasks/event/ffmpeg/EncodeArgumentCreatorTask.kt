@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 
 import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.Preference
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
@@ -10,11 +11,12 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class EncodeArgumentCreatorTask : TaskCreator() {
+class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val preference = Preference.getPreference()
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED

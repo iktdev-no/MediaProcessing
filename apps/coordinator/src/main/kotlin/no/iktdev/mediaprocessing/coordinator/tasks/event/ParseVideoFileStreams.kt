@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import com.google.gson.Gson
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
@@ -13,10 +14,11 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaStreamsPars
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ParseVideoFileStreams() : TaskCreator() {
+class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED

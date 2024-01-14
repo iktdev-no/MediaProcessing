@@ -16,7 +16,6 @@ import javax.annotation.PostConstruct
 abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
     abstract val listeners: L
 
-    val io = Coroutines.io()
 
     @Autowired
     lateinit var producer: CoordinatorProducer

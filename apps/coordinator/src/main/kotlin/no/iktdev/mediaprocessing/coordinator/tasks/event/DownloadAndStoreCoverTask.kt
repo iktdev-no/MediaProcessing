@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import kotlinx.coroutines.runBlocking
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
 import no.iktdev.mediaprocessing.shared.common.getComputername
@@ -11,12 +12,13 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.CoverDownloadWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.CoverInfoPerformed
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.*
 
 @Service
-class DownloadAndStoreCoverTask: TaskCreator() {
+class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_WORK_DOWNLOAD_COVER_PERFORMED

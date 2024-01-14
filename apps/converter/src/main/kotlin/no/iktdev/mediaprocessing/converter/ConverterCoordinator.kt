@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.converter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.converter.flow.EventBasedProcessMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, EventBasedProcessMessageListener>() {
+    val io = Coroutines.io()
 
     private val log = KotlinLogging.logger {}
 

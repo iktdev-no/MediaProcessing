@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
+import no.iktdev.mediaprocessing.shared.common.lastOrSuccess
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameParser
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -8,11 +10,12 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class BaseInfoFromFile() : TaskCreator() {
+class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED
@@ -26,9 +29,10 @@ class BaseInfoFromFile() : TaskCreator() {
         }
     }
 
-    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper {
+    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
-        return readFileInfo(event.data as ProcessStarted)
+        val selected = events.filter { it.event == KafkaEvents.EVENT_PROCESS_STARTED }.lastOrSuccess() ?: return null
+        return readFileInfo(selected.data as ProcessStarted)
     }
 
     fun readFileInfo(started: ProcessStarted): MessageDataWrapper {

@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
@@ -16,12 +17,13 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.streamit.library.db.query.*
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.sql.SQLIntegrityConstraintViolationException
 
 @Service
-class CollectAndStoreTask() : TaskCreator() {
+class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_COLLECT_AND_STORE
 
     override val requiredEvents: List<KafkaEvents> = listOf(

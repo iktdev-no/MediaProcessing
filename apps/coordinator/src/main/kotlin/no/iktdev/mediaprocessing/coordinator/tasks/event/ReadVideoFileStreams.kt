@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.runBlocking
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
@@ -13,11 +14,12 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class ReadVideoFileStreams(): TaskCreator() {
+class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED

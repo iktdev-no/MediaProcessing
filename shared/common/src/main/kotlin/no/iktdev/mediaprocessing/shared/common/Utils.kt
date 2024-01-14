@@ -2,6 +2,9 @@ package no.iktdev.mediaprocessing.shared.common
 
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
+import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import java.io.File
 import java.io.RandomAccessFile
 import java.net.InetAddress
@@ -20,6 +23,10 @@ fun isFileAvailable(file: File): Boolean {
         stream?.close()
     }
     return false
+}
+
+fun List<PersistentMessage>.lastOrSuccess(): PersistentMessage? {
+    return this.lastOrNull { it.data.isSuccess() } ?: this.lastOrNull()
 }
 
 

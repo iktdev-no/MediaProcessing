@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -9,10 +10,11 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.CoverInfoPerform
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class MetadataAndBaseInfoToCoverTask : TaskCreator() {
+class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_OUT_COVER

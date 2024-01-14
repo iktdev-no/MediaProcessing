@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 
 import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg.ExtractArgumentCreatorTask.SubtitleArguments.SubtitleType.*
 import no.iktdev.mediaprocessing.shared.common.Preference
@@ -13,11 +14,12 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class ExtractArgumentCreatorTask : TaskCreator() {
+class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
 
     val preference = Preference.getPreference()
 

@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
@@ -9,10 +10,11 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessCompleted
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class CompleteTask() : TaskCreator() {
+class CompleteTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_PROCESS_COMPLETED
 
     override val requiredEvents: List<KafkaEvents> = listOf(

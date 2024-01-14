@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
@@ -15,6 +16,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerform
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.hasValidData
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -25,7 +27,7 @@ import java.time.LocalDateTime
  */
 @Service
 @EnableScheduling
-class MetadataAndBaseInfoToFileOut(): TaskCreator() {
+class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
 
