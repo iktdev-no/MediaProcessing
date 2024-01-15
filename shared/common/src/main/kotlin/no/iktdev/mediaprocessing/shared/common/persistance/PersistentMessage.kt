@@ -15,7 +15,6 @@ data class PersistentMessage(
     val created: LocalDateTime
 )
 
-
 fun PersistentMessage.isOfEvent(event: KafkaEvents): Boolean {
     return this.event == event
 }

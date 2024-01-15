@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
+
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_OUT_COVER

@@ -1,11 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
+import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.reader.MetadataDto
 import no.iktdev.mediaprocessing.shared.contract.reader.VideoDetails
@@ -24,6 +26,9 @@ import java.sql.SQLIntegrityConstraintViolationException
 
 @Service
 class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
+
+
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_COLLECT_AND_STORE
 
     override val requiredEvents: List<KafkaEvents> = listOf(
@@ -35,8 +40,8 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.find { it.event == EVENT_PROCESS_STARTED } ?: return null
-        val completed = events.find { it.event == EVENT_PROCESS_COMPLETED } ?: return null
+        val started = events.lastOrSuccessOf(EVENT_PROCESS_STARTED) ?: return null
+        val completed = events.lastOrSuccessOf(EVENT_PROCESS_COMPLETED) ?: return null
         if (!started.data.isSuccess() || !completed.data.isSuccess() && completed.data.status != Status.SKIPPED) {
             return null
         }

@@ -29,8 +29,8 @@ class metadata():
                 usedTitle=self.name
             )
             if (meta.title is None) or (meta.type is None):
-                return DataResult("COMPLETED", None, None)
+                return DataResult(status="COMPLETED", message = None, data = None)
 
-            return DataResult("COMPLETED", None, meta)
+            return DataResult(status = "COMPLETED", message = None, data = meta)
         except Exception as e:
             return DataResult(status="ERROR", message=str(e))

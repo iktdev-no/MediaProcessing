@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import kotlinx.coroutines.runBlocking
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
@@ -19,6 +20,8 @@ import java.util.*
 
 @Service
 class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
+
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_WORK_DOWNLOAD_COVER_PERFORMED

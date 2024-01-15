@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 
+import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
@@ -17,6 +18,8 @@ import java.io.File
 
 @Service
 class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
+
     val preference = Preference.getPreference()
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED

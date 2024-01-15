@@ -6,6 +6,8 @@ open class MessageDataWrapper(
     @Transient open val message: String? = null
 )
 
+
+
 data class SimpleMessageData(
     override val status: Status,
     override val message: String? = null

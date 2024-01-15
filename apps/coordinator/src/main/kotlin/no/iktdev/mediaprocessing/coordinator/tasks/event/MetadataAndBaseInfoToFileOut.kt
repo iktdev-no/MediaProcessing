@@ -1,10 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
+import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
@@ -28,6 +30,8 @@ import java.time.LocalDateTime
 @Service
 @EnableScheduling
 class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
+
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
 
@@ -41,15 +45,15 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
 
-        val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
-        val meta = events.findLast { it.data is MetadataPerformed }?.data as MetadataPerformed?
+        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
+        val meta = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED) { it.data is MetadataPerformed }?.data as MetadataPerformed?
 
         // Only Return here as both baseInfo events are required to continue
         if (!baseInfo.isSuccess() || !baseInfo.hasValidData() || events.any { it.event == KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE }) {
             return null
         }
         if (baseInfo.isSuccess() && meta == null) {
-            log.info { "Sending ${baseInfo?.title} to waiting queue" }
+            log.info { "Sending ${baseInfo.title} to waiting queue" }
             if (!waitingProcessesForMeta.containsKey(event.referenceId)) {
                 waitingProcessesForMeta[event.referenceId] = LocalDateTime.now()
             }

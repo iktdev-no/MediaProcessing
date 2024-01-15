@@ -1,8 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
+import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents.*
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class CompleteTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
+
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_PROCESS_COMPLETED
 
     override val requiredEvents: List<KafkaEvents> = listOf(
@@ -27,18 +31,19 @@ class CompleteTask(@Autowired override var coordinator: Coordinator) : TaskCreat
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.find { it.event == KafkaEvents.EVENT_PROCESS_STARTED } ?: return null
+        val started = events.lastOrSuccessOf(EVENT_PROCESS_STARTED) ?: return null
         if (!started.data.isSuccess()) {
             return null
         }
 
         val receivedEvents = events.map { it.event }
 
+        // TODO: Add filter in case a metadata request was performed or a cover download was performed. for now, for base functionality, it requires a performed event.
+
         val requiresOneOf = listOf(
-            EVENT_MEDIA_EXTRACT_PARAMETER_CREATED,
-            EVENT_MEDIA_ENCODE_PARAMETER_CREATED,
-            EVENT_MEDIA_DOWNLOAD_COVER_PARAMETER_CREATED,
-            EVENT_WORK_CONVERT_CREATED
+            EVENT_WORK_CONVERT_PERFORMED,
+            EVENT_WORK_EXTRACT_PERFORMED,
+            EVENT_WORK_ENCODE_PERFORMED
         )
 
         if (!requiresOneOf.any { it in receivedEvents }) {

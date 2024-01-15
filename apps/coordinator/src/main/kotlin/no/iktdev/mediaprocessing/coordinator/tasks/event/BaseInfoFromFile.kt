@@ -1,8 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccess
+import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameParser
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -16,6 +18,7 @@ import java.io.File
 
 @Service
 class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED
@@ -31,7 +34,7 @@ class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskC
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
-        val selected = events.filter { it.event == KafkaEvents.EVENT_PROCESS_STARTED }.lastOrSuccess() ?: return null
+        val selected = events.lastOrSuccessOf(KafkaEvents.EVENT_PROCESS_STARTED) ?: return null
         return readFileInfo(selected.data as ProcessStarted)
     }
 

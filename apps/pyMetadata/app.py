@@ -33,7 +33,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class ProducerDataValueSchema:
-    def __init__(self, referenceId, data):
+    def __init__(self, referenceId, data: DataResult):
         self.referenceId = referenceId
         self.data = data
 
@@ -173,7 +173,7 @@ class MessageHandlerThread(threading.Thread):
     def compose_message(self, referenceId: str, result: DataResult) -> ProducerDataValueSchema:
         return ProducerDataValueSchema(
             referenceId=referenceId,
-            data=result.data
+            data=result
         )
 
 

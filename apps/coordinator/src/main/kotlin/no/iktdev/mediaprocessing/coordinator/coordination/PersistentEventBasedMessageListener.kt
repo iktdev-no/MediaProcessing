@@ -26,7 +26,7 @@ class PersistentEventBasedMessageListener: EventBasedMessageListener<PersistentM
     }
 
     override fun waitingListeners(events: List<PersistentMessage>): List<Tasks<PersistentMessage>> {
-        val nonCreators = listeners.filter { !events.filter { event -> !event.data.isSuccess() }.map { e -> e.event }.contains(it.producesEvent) }
+        val nonCreators = listeners.filter { !events.map { e -> e.event }.contains(it.producesEvent) }
         return nonCreators
     }
 

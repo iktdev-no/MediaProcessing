@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.coordinator
 
-import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
@@ -9,7 +8,6 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
 abstract class TaskCreator(coordinator: Coordinator):
     TaskCreatorImpl<Coordinator, PersistentMessage, PersistentEventBasedMessageListener>(coordinator) {
-    val log = KotlinLogging.logger {}
 
 
     override fun isPrerequisiteEventsOk(events: List<PersistentMessage>): Boolean {

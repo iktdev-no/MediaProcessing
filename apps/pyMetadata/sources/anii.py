@@ -29,12 +29,12 @@ class metadata():
                 usedTitle=self.name
             )
             if (meta.title is None) or (meta.type is None):
-                return DataResult("COMPLETED", None, None)
+                return DataResult(status="COMPLETED", message= None, data= None)
 
-            return DataResult("COMPLETED", None, meta)
+            return DataResult(status="COMPLETED", message= None, data=meta)
 
         except IndexError as ingore:
-            return DataResult(statusType="COMPLETED", message=f"No result for {self.name}")
+            return DataResult(status="COMPLETED", message=f"No result for {self.name}")
         except Exception as e:
-            return DataResult(statusType="ERROR", message=str(e))
+            return DataResult(status="ERROR", message=str(e))
             
