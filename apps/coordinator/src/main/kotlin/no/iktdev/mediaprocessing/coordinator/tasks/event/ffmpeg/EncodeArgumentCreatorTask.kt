@@ -135,7 +135,13 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
             if (preference.pixelFormatPassthrough.none { it == videoStream.pix_fmt }) {
                 optionalParams.addAll(listOf("-pix_fmt", preference.pixelFormat))
             }
-            val codecParams = if (isVideoCodecEqual()) listOf("-vcodec", "copy")
+            val codecParams = if (isVideoCodecEqual()) {
+                val default = mutableListOf("-c:v", "copy")
+                if (getCodec(videoStream.codec_name) == "libx265") {
+                    default.addAll(listOf("-vbsf", "hevc_mp4toannexb"))
+                }
+                default
+            }
             else {
                 optionalParams.addAll(listOf("-crf", preference.threshold.toString()))
                 listOf("-c:v", getCodec(preference.codec.lowercase()))
