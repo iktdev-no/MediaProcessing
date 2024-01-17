@@ -65,6 +65,7 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
 
         val result = processOp
         println(Gson().toJson(result))
+        onOutputChanged("Received exit code: ${result.resultCode}")
         if (result.resultCode != 0) {
             listener.onError(info, result.output.joinToString("\n"))
         } else {
@@ -80,16 +81,9 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
     }
 
     fun writeToLog(line: String) {
-        val fileWriter = FileWriter(logFile, true) // true indikerer at vi ønsker å appende til filen
-        val bufferedWriter = BufferedWriter(fileWriter)
-
-        // Skriv logglinjen til filen
-        bufferedWriter.write(line)
-        bufferedWriter.newLine() // Legg til en ny linje etter logglinjen
-
-        // Lukk BufferedWriter og FileWriter for å frigjøre ressurser
-        bufferedWriter.close()
-        fileWriter.close()
+        logFile.printWriter().use {
+            it.println(line)
+        }
     }
 
 
