@@ -37,6 +37,9 @@ class Preference {
             if (!prefFile.exists()) {
                 log.info("Preference file: ${prefFile.absolutePath} does not exists...")
                 log.info("Using default configuration")
+                SharedConfig.preference.printWriter().use { out ->
+                    out.print(Gson().toJson(PreferenceDto()))
+                }
                 return null
             }
             else {
