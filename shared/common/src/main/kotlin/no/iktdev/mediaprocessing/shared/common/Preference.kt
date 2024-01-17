@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.PreferenceDto
 
@@ -37,8 +38,9 @@ class Preference {
             if (!prefFile.exists()) {
                 log.info("Preference file: ${prefFile.absolutePath} does not exists...")
                 log.info("Using default configuration")
+                val gson = GsonBuilder().setPrettyPrinting().create()
                 SharedConfig.preference.printWriter().use { out ->
-                    out.print(Gson().toJson(PreferenceDto()))
+                    out.print(gson.toJson(PreferenceDto()))
                 }
                 return null
             }
