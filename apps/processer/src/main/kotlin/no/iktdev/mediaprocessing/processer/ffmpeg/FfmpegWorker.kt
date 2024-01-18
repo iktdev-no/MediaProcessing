@@ -5,6 +5,7 @@ import com.github.pgreze.process.process
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
@@ -15,6 +16,8 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
     val scope = Coroutines.io()
     val decoder = FfmpegProgressDecoder()
     private val outputCache = mutableListOf<String>()
+    private val log = KotlinLogging.logger {}
+
     val logFile = logDir.using("$eventId-=-${File(info.outFile).nameWithoutExtension}.log")
 
     val getOutputCache = outputCache.toList()
@@ -62,17 +65,12 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
             stdout = Redirect.CAPTURE,
             stderr = Redirect.CAPTURE,
             consumer = {
+                //log.info { it }
                 onOutputChanged(it)
             },
             destroyForcibly = true)
 
         val result = processOp
-        println(Gson().toJson(result))
-        if (outputCache.isEmpty()) {
-            result.output.forEach {
-                onOutputChanged(it)
-            }
-        }
         onOutputChanged("Received exit code: ${result.resultCode}")
         if (result.resultCode != 0) {
             listener.onError(info, result.output.joinToString("\n"))
@@ -90,7 +88,7 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
 
     fun writeToLog(line: String) {
         logFile.printWriter().use {
-            it.println(line)
+            it.appendLine(line)
         }
     }
 

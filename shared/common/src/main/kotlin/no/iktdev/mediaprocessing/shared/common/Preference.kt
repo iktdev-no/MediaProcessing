@@ -38,9 +38,11 @@ class Preference {
             if (!prefFile.exists()) {
                 log.info("Preference file: ${prefFile.absolutePath} does not exists...")
                 log.info("Using default configuration")
-                val gson = GsonBuilder().setPrettyPrinting().create()
-                SharedConfig.preference.printWriter().use { out ->
-                    out.print(gson.toJson(PreferenceDto()))
+                silentTry {
+                    val gson = GsonBuilder().setPrettyPrinting().create()
+                    SharedConfig.preference.printWriter().use { out ->
+                        out.print(gson.toJson(PreferenceDto()))
+                    }
                 }
                 return null
             }

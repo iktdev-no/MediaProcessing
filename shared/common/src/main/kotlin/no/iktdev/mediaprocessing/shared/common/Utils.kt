@@ -65,3 +65,9 @@ fun getComputername(): String {
 
     return (envs + netHostname).firstOrNull() ?: "UNKNOWN_SYSTEM"
 }
+
+fun silentTry(code: () -> Unit) {
+    try {
+        code.invoke()
+    } catch (_: Exception) {}
+}
