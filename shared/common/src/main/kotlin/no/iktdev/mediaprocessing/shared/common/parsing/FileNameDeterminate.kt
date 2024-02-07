@@ -137,8 +137,13 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
 
         fun findEpisodeNumber(): String? {
             val regex = Regex("\\b(\\d+)\\b")
-            val matchResult = regex.find(sanitizedName)
-            return matchResult?.value?.trim()
+            val matchResult = regex.findAll(sanitizedName)
+            val usabeNumber = if (matchResult.toList().size > 1) {
+                Regex("[-_] \\b(\\d+)\\b").find(sanitizedName)?.groups?.lastOrNull()?.value
+            } else {
+                matchResult.lastOrNull()?.value
+            }
+            return usabeNumber?.trim()
         }
 
         fun findEpisodeTitle(): String? {

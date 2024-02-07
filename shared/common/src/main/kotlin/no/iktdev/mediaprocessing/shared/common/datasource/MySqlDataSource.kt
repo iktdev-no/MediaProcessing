@@ -11,6 +11,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 open class MySqlDataSource(databaseName: String, address: String, port: String = "", username: String, password: String): DataSource(databaseName =  databaseName, address =  address, port = port, username = username, password = password) {
     val log = KotlinLogging.logger {}
+    var database: Database? = null
+        private set
+
     companion object {
         fun fromDatabaseEnv(): MySqlDataSource {
             if (DatabaseConfig.database.isNullOrBlank()) throw RuntimeException("Database name is not defined in 'DATABASE_NAME'")
@@ -50,7 +53,10 @@ open class MySqlDataSource(databaseName: String, address: String, port: String =
             }
         }
 
-        return if (ok) toDatabase() else null
+        return if (ok) toDatabase() else {
+            log.error { "No database to create or connect to" }
+            null
+        }
     }
 
     override fun createTables(vararg tables: Table) {
@@ -65,19 +71,21 @@ open class MySqlDataSource(databaseName: String, address: String, port: String =
     }
 
     protected fun toDatabaseServerConnection(): Database {
-        return Database.connect(
+        database = Database.connect(
             toConnectionUrl(),
             user = username,
             password = password
         )
+        return database!!
     }
 
     fun toDatabase(): Database {
-        return Database.connect(
+        database = Database.connect(
             "${toConnectionUrl()}/$databaseName",
             user = username,
             password = password
         )
+        return database!!
     }
 
     override fun toConnectionUrl(): String {
