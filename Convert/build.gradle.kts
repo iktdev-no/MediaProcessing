@@ -23,7 +23,7 @@ repositories {
 dependencies {
     implementation(project(":CommonCode"))
 
-    implementation("no.iktdev.library:subtitle:1.7.5-SNAPSHOT")
+    implementation("no.iktdev.library:subtitle:1.7.8-SNAPSHOT")
 
     implementation("no.iktdev.streamit.library:streamit-library-kafka:0.0.2-alpha84")
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
