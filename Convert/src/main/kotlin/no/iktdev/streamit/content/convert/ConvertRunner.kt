@@ -58,7 +58,7 @@ class ConvertRunner(val referenceId: String, val listener: IConvertListener) {
         val syncedDialogs = Syncro().sync(filtered)
 
         try {
-            val converted = Export(inFile, syncedDialogs, ConvertEnv.allowOverwrite).write()
+            val converted = Export(inFile,inFile.parentFile, inFile.nameWithoutExtension).write(syncedDialogs)
             val item = ConvertWork(
                 inFile = inFile.absolutePath,
                 collection = subtitleInfo.collection,
