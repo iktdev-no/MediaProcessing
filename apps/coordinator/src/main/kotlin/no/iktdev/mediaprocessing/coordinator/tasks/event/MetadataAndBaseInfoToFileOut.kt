@@ -45,7 +45,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
 
-        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
+        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
         val meta = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED) { it.data is MetadataPerformed }?.data as MetadataPerformed?
 
         // Only Return here as both baseInfo events are required to continue
@@ -53,7 +53,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             return null
         }
         if (baseInfo.isSuccess() && meta == null) {
-            log.info { "Sending ${baseInfo.title} to waiting queue" }
+            log.info { "Sending ${baseInfo?.title} to waiting queue" }
             if (!waitingProcessesForMeta.containsKey(event.referenceId)) {
                 waitingProcessesForMeta[event.referenceId] = LocalDateTime.now()
             }
