@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
+import no.iktdev.mediaprocessing.shared.common.datasource.withDirtyRead
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -26,7 +27,7 @@ class PersistentDataReader {
     }
 
     fun getUncompletedMessages(): List<List<PersistentMessage>> {
-        val result = withTransaction {
+        val result = withDirtyRead {
             events.selectAll()
                 .andWhere { events.event neq KafkaEvents.EVENT_PROCESS_COMPLETED.event }
                 .groupBy { it[events.referenceId] }
@@ -36,7 +37,7 @@ class PersistentDataReader {
     }
 
     fun isProcessEventAlreadyClaimed(referenceId: String, eventId: String): Boolean {
-        val result = withTransaction {
+        val result = withDirtyRead {
             processerEvents.select {
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId)
@@ -46,7 +47,7 @@ class PersistentDataReader {
     }
 
     fun isProcessEventDefinedAsConsumed(referenceId: String, eventId: String, claimedBy: String): Boolean {
-        return withTransaction {
+        return withDirtyRead {
             processerEvents.select {
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId) and
@@ -56,7 +57,7 @@ class PersistentDataReader {
     }
 
     fun getAvailableProcessEvents(): List<PersistentProcessDataMessage> {
-        return withTransaction {
+        return withDirtyRead {
             processerEvents.select {
                 (processerEvents.claimed eq false) and
                         (processerEvents.consumed eq false)
@@ -76,7 +77,7 @@ class PersistentDataReader {
     }
 
     fun getProcessEvent(referenceId: String, eventId: String): PersistentProcessDataMessage? {
-        val message = withTransaction {
+        val message = withDirtyRead {
             processerEvents.select {
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId)

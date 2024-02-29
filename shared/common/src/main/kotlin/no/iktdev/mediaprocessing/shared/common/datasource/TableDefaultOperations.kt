@@ -3,10 +3,30 @@ package no.iktdev.mediaprocessing.shared.common.datasource
 import org.jetbrains.exposed.sql.Table
 
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.Connection
 
 open class TableDefaultOperations<T : Table> {
 
 }
+
+fun <T> withDirtyRead(block: () -> T): T? {
+    return try {
+        transaction(transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED) {
+            try {
+                block()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // log the error here or handle the exception as needed
+                throw e // Optionally, you can rethrow the exception if needed
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        // log the error here or handle the exception as needed
+        null
+    }
+}
+
 
 fun <T> withTransaction(block: () -> T): T? {
     return try {
