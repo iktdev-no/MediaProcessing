@@ -46,8 +46,9 @@ class CompleteTask(@Autowired override var coordinator: Coordinator) : TaskCreat
             EVENT_WORK_ENCODE_PERFORMED
         )
 
-        if (!requiresOneOf.any { it in receivedEvents }) {
-            log.info { "Can't complete at this moment. Missing required event" }
+        if (requiresOneOf.none { it in receivedEvents }) {
+            val missing = requiresOneOf.filter { !receivedEvents.contains(it) }
+            log.info { "Can't complete at this moment. Missing required event(s)" + missing.joinToString("\n\t") }
             return null //SimpleMessageData(Status.SKIPPED, "Can't collect at this moment. Missing required event")
         }
 
