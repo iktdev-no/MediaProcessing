@@ -49,14 +49,28 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
             return SimpleMessageData(Status.ERROR, "Check for output directory for cover storage failed for $serviceId")
 
         val client = DownloadClient(coverData.url, File(coverData.outDir), coverData.outFileBaseName)
-        val result = runBlocking {
-            client.download()
+
+        val outFile = runBlocking {
+            client.getOutFile()
         }
+
+        var message: String? = null
+        val result = if (outFile?.exists() == true) {
+            message = "${outFile.name} already exists"
+            outFile
+        } else if (outFile != null) {
+            runBlocking {
+                client.download(outFile)
+            }
+        } else {
+            null
+        }
+
         return if (result == null) {
             SimpleMessageData(Status.ERROR, "Could not download cover, check logs")
         } else {
             val status = if (result.exists() && result.canRead()) Status.COMPLETED else Status.ERROR
-            CoverDownloadWorkPerformed(status = status, coverFile = result.absolutePath)
+            CoverDownloadWorkPerformed(status = status, message = message, coverFile = result.absolutePath)
         }
     }
 }

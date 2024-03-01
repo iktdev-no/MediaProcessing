@@ -31,15 +31,21 @@ open class DownloadClient(val url: String, val outDir: File, val baseName: Strin
         return ((read * 100) / total)
     }
 
-    suspend fun download(): File? = withContext(Dispatchers.IO) {
+    suspend fun getOutFile(): File? = withContext(Dispatchers.IO) {
         val extension = getExtension()
             ?: throw UnsupportedFormatException("Provided url does not contain a supported file extension")
         val outFile = outDir.using("$baseName.$extension")
-        if (!outDir.exists())
+        if (!outDir.exists()) {
+            log.error { "Unable to create parent folder for ${outFile.name}. Download skipped!" }
             return@withContext null
+        }
+        return@withContext outFile
+    }
+
+    suspend fun download(outFile: File): File? = withContext(Dispatchers.IO) {
         if (outFile.exists()) {
             log.info { "${outFile.name} already exists. Download skipped!" }
-            return@withContext outFile
+            return@withContext null
         }
 
         val inputStream = http.inputStream
