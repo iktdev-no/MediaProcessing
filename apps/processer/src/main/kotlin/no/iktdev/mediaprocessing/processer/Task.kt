@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
@@ -59,6 +60,7 @@ abstract class TaskCreator: TaskCreatorListener {
         if (prerequisitesRequired(events).all { it.invoke() }) {
             val result = onProcessEvents(event, events)
             if (result != null) {
+                log.info { "Event handled on ${this::class.simpleName} ${event.eventId} is: \nSOM\n${Gson().toJson(result)}\nEOM" }
                 onResult(result)
             }
         } else {

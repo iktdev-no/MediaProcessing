@@ -136,7 +136,7 @@ class EncodeService: TaskCreator() {
                     readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
                 }
                 producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                    ProcesserEncodeWorkPerformed(status = Status.COMPLETED, producedBy = serviceId, derivedFromEventId =  runner.eventId, outFile = runner.info.outFile)
+                    data = ProcesserEncodeWorkPerformed(status = Status.COMPLETED, producedBy = serviceId, derivedFromEventId =  runner.eventId, outFile = runner.info.outFile)
                 )
                 clearWorker()
             }
@@ -151,7 +151,7 @@ class EncodeService: TaskCreator() {
             }
             log.info { "Encode failed for ${runner.referenceId}" }
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
-                ProcesserEncodeWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
+                data = ProcesserEncodeWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
             )
             sendProgress(info = info, ended = true)
             clearWorker()
