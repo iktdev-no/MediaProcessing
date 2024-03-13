@@ -2,7 +2,10 @@ package no.iktdev.mediaprocessing.processer
 
 import com.google.gson.Gson
 import mu.KotlinLogging
+import no.iktdev.mediaprocessing.processer.coordination.PersistentEventProcessBasedMessageListener
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
+import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -11,84 +14,35 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import javax.annotation.PostConstruct
 
-abstract class TaskCreator: TaskCreatorListener {
-    private val log = KotlinLogging.logger {}
+abstract class TaskCreator(coordinator: Coordinator) :
+    TaskCreatorImpl<Coordinator, PersistentProcessDataMessage, PersistentEventProcessBasedMessageListener>(coordinator) {
 
-    @Autowired
-    lateinit var producer: CoordinatorProducer
-
-    @Autowired
-    lateinit var coordinator: Coordinator
-
-    @Autowired
-    lateinit var socketMessage: SimpMessagingTemplate
-
-    open val requiredEvents: List<KafkaEvents> = listOf()
-
-    open fun isPrerequisiteEventsOk(events: List<PersistentProcessDataMessage>): Boolean {
+    override fun isPrerequisiteEventsOk(events: List<PersistentProcessDataMessage>): Boolean {
         val currentEvents = events.map { it.event }
         return requiredEvents.all { currentEvents.contains(it) }
     }
-    open fun isPrerequisiteDataPresent(events: List<PersistentProcessDataMessage>): Boolean {
+    override fun isPrerequisiteDataPresent(events: List<PersistentProcessDataMessage>): Boolean {
         val failed = events.filter { e -> e.event in requiredEvents }.filter { !it.data.isSuccess() }
         return failed.isEmpty()
     }
 
-    open fun isEventOfSingle(event: PersistentProcessDataMessage, singleOne: KafkaEvents): Boolean {
+    override fun isEventOfSingle(event: PersistentProcessDataMessage, singleOne: KafkaEvents): Boolean {
         return event.event == singleOne
     }
 
-    abstract fun getListener(): Tasks
+    /*override fun getListener(): Tasks {
+        val eventListenerFilter = listensForEvents.ifEmpty { requiredEvents }
+        return Tasks(taskHandler = this, producesEvent = producesEvent, listensForEvents = eventListenerFilter)
+    }*/
 
-    open fun prerequisitesRequired(events: List<PersistentProcessDataMessage>): List<() -> Boolean> {
+
+    override fun prerequisitesRequired(events: List<PersistentProcessDataMessage>): List<() -> Boolean> {
         return listOf {
             isPrerequisiteEventsOk(events)
         }
     }
 
-
-
-    private val context: MutableMap<String, Any> = mutableMapOf()
-    private val context_key_reference = "reference"
-    private val context_key_producesEvent = "event"
-    final override fun onEventReceived(referenceId: String, event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>) {
-        context[context_key_reference] = referenceId
-        getListener().producesEvent.let {
-            context[context_key_producesEvent] = it
-        }
-
-        if (prerequisitesRequired(events).all { it.invoke() }) {
-            val result = onProcessEvents(event, events)
-            if (result != null) {
-                log.info { "Event handled on ${this::class.simpleName} ${event.eventId} is: \nSOM\n${Gson().toJson(result)}\nEOM" }
-                onResult(result)
-            }
-        } else {
-            log.info { "Skipping: ${event.event} as it does not fulfill the requirements for ${context[context_key_producesEvent]}" }
-        }
+    override fun prerequisiteRequired(event: PersistentProcessDataMessage): List<() -> Boolean> {
+        return listOf()
     }
-
-    abstract fun onProcessEvents(event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): MessageDataWrapper?
-
-
-    private fun onResult(data: MessageDataWrapper) {
-        producer.sendMessage(
-            referenceId = context[context_key_reference] as String,
-            event = context[context_key_producesEvent] as KafkaEvents,
-            data = data
-        )
-    }
-
-    @PostConstruct
-    fun postConstruct() {
-        coordinator.listeners.add(getListener())
-    }
-}
-
-fun interface Prerequisite {
-    fun execute(value: Any): Boolean
-}
-
-interface TaskCreatorListener {
-    fun onEventReceived(referenceId: String, event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): Unit
 }

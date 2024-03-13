@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.processer.services
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.mediaprocessing.processer.Tasks
+import no.iktdev.mediaprocessing.processer.Coordinator
 import no.iktdev.mediaprocessing.processer.TaskCreator
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker
@@ -19,17 +19,18 @@ import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.*
 import javax.annotation.PreDestroy
 
 @Service
-class EncodeService: TaskCreator() {
+class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreator(coordinator) {
     private val log = KotlinLogging.logger {}
     private val logDir = ProcesserEnv.encodeLogDirectory
 
-    val producesEvent = KafkaEvents.EVENT_WORK_ENCODE_PERFORMED
+    override val producesEvent = KafkaEvents.EVENT_WORK_ENCODE_PERFORMED
 
     val scope = Coroutines.io()
     private var runner: FfmpegWorker? = null
@@ -41,10 +42,6 @@ class EncodeService: TaskCreator() {
 
     override val requiredEvents: List<KafkaEvents>
         get() = listOf(KafkaEvents.EVENT_WORK_ENCODE_CREATED)
-
-    override fun getListener(): Tasks {
-        return Tasks(producesEvent, this)
-    }
 
 
     override fun prerequisitesRequired(events: List<PersistentProcessDataMessage>): List<() -> Boolean> {
