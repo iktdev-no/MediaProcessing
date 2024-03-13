@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.parsing.FileNameParser
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
@@ -49,7 +50,7 @@ class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskC
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            MessageDataWrapper(Status.ERROR, e.message ?: "Unable to obtain proper info from file")
+            SimpleMessageData(Status.ERROR, e.message ?: "Unable to obtain proper info from file")
         }
         return result
     }

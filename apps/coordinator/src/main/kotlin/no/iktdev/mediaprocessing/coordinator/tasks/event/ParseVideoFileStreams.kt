@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoStream
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaStreamsParsePerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
@@ -76,7 +77,7 @@ class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : 
 
         } catch (e: Exception) {
             e.printStackTrace()
-            MessageDataWrapper(Status.ERROR, message = e.message)
+            SimpleMessageData(Status.ERROR, message = e.message)
         }
 
     }

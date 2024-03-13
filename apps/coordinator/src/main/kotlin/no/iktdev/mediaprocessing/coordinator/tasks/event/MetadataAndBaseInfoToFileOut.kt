@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
@@ -84,7 +85,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
         return if (vi != null) {
             VideoInfoPerformed(Status.COMPLETED, vi, outDirectory = outputDirectory.absolutePath)
         } else {
-            MessageDataWrapper(Status.ERROR, "No VideoInfo found...")
+            SimpleMessageData(Status.ERROR, "No VideoInfo found...")
         }
     }
 

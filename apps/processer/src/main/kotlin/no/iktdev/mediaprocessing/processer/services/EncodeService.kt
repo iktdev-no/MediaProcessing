@@ -54,6 +54,9 @@ class EncodeService: TaskCreator() {
     }
 
     override fun onProcessEvents(event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): MessageDataWrapper? {
+        if (requiredEvents.contains(event.event)) {
+            return null
+        }
         if (event.data !is FfmpegWorkRequestCreated) {
             return SimpleMessageData(status = Status.ERROR, message = "Invalid data (${event.data.javaClass.name}) passed for ${event.event.event}")
         }

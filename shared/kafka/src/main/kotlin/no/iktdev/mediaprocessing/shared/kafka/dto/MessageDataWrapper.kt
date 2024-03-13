@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.shared.kafka.dto
 
 
-open class MessageDataWrapper(
+abstract class MessageDataWrapper(
     @Transient open val status: Status = Status.ERROR,
     @Transient open val message: String? = null
 )
