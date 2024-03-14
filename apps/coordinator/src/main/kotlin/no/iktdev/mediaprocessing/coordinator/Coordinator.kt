@@ -60,8 +60,6 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             if (getProcessStarted(messages)?.type == ProcessType.FLOW) {
                 forwarder.produceAllMissingProcesserEvents(
                     producer = producer,
-                    referenceId = referenceId,
-                    eventId = eventId,
                     messages = messages
                 )
             } else {
@@ -91,6 +89,14 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             messages.forEach {
                 delay(1000)
                 listeners.forwardBatchEventMessagesToListeners(it)
+                if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(it)) {
+                    if (getProcessStarted(it)?.type == ProcessType.FLOW) {
+                        forwarder.produceAllMissingProcesserEvents(
+                            producer = producer,
+                            messages = it
+                        )
+                    }
+                }
             }
         }
     }
@@ -145,40 +151,34 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
                 .isNotEmpty()
         }
 
-        fun isMissingEncodeWorkCreated(messages: List<PersistentMessage>): Boolean {
+        fun isMissingEncodeWorkCreated(messages: List<PersistentMessage>): PersistentMessage? {
             val existingWorkEncodeCreated = messages.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_CREATED }
-            return existingWorkEncodeCreated.isEmpty() && existingWorkEncodeCreated.none { it.data.isSuccess() }
+            return if (existingWorkEncodeCreated.isEmpty() && existingWorkEncodeCreated.none { it.data.isSuccess() }) {
+                messages.lastOrNull { it.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED }
+            } else null
         }
 
-        fun isMissingExtractWorkCreated(messages: List<PersistentMessage>): Boolean {
+        fun isMissingExtractWorkCreated(messages: List<PersistentMessage>): PersistentMessage? {
             val existingWorkCreated = messages.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED }
-            return existingWorkCreated.isEmpty() && existingWorkCreated.none { it.data.isSuccess() }
+            return if (existingWorkCreated.isEmpty() && existingWorkCreated.none { it.data.isSuccess() }) {
+                messages.lastOrNull { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED }
+            } else  null
         }
+
 
         fun produceAllMissingProcesserEvents(
             producer: CoordinatorProducer,
-            referenceId: String,
-            eventId: String,
             messages: List<PersistentMessage>
         ) {
-            val currentMessage = messages.find { it.eventId == eventId }
-            if (!currentMessage?.data.isSuccess()) {
-                return
+            val missingEncode = isMissingEncodeWorkCreated(messages)
+            val missingExtract = isMissingExtractWorkCreated(messages)
+
+            if (missingEncode != null && missingEncode.data.isSuccess()) {
+                produceEncodeWork(producer, missingEncode)
             }
-            when (currentMessage?.event) {
-                KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED -> {
-                    if (isMissingEncodeWorkCreated(messages)) {
-                        produceEncodeWork(producer, currentMessage)
-                    }
-                }
+            if (missingExtract != null && missingExtract.data.isSuccess()) {
+                produceExtractWork(producer, missingExtract)
 
-                KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED -> {
-                    if (isMissingExtractWorkCreated(messages)) {
-                        produceExtractWork(producer, currentMessage)
-                    }
-                }
-
-                else -> {}
             }
         }
 
