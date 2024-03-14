@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.runner.CodeToOutput
 import no.iktdev.mediaprocessing.shared.common.runner.getOutputUsing
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
@@ -53,7 +54,7 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
             val jsoned = Gson().fromJson(joined, JsonObject::class.java)
             ReaderPerformed(Status.COMPLETED, file = started.file, output = jsoned)
         } else {
-            MessageDataWrapper(Status.ERROR, "File in data is not a file or does not exist")
+            SimpleMessageData(Status.ERROR, "File in data is not a file or does not exist")
         }
     }
 

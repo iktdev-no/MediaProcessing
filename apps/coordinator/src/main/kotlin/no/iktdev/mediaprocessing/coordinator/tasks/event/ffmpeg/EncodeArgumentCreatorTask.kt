@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.*
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
@@ -75,7 +76,7 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
 
         val vaArgs = toFfmpegWorkerArguments(vArg, aArg)
         return if (vaArgs.isEmpty()) {
-            MessageDataWrapper(Status.ERROR, message = "Unable to produce arguments")
+            SimpleMessageData(Status.ERROR, message = "Unable to produce arguments")
         } else {
             FfmpegWorkerArgumentsCreated(
                 status = Status.COMPLETED,
