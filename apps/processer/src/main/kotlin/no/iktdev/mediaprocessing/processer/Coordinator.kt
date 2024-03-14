@@ -48,6 +48,10 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
+        if (!processKafkaEvents.contains(event.key)) {
+            return
+        }
+
         val success = PersistentDataStore().storeProcessDataMessage(event.key.event, event.value)
         if (!success) {
             log.error { "Unable to store message: ${event.key.event} in database ${DatabaseConfig.database}" }
