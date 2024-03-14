@@ -54,7 +54,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
     }
 
     override fun onProcessEvents(event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): MessageDataWrapper? {
-        if (requiredEvents.contains(event.event)) {
+        if (!requiredEvents.contains(event.event)) {
             return null
         }
         if (event.data !is FfmpegWorkRequestCreated) {

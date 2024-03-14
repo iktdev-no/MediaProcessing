@@ -31,6 +31,9 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
     private val logDir = ProcesserEnv.encodeLogDirectory
 
     override val producesEvent = KafkaEvents.EVENT_WORK_ENCODE_PERFORMED
+    override val requiredEvents: List<KafkaEvents> = listOf(
+        KafkaEvents.EVENT_WORK_ENCODE_CREATED
+    )
 
     val scope = Coroutines.io()
     private var runner: FfmpegWorker? = null
@@ -40,9 +43,6 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
         log.info { "Starting with id: $serviceId" }
     }
 
-    override val requiredEvents: List<KafkaEvents>
-        get() = listOf(KafkaEvents.EVENT_WORK_ENCODE_CREATED)
-
 
     override fun prerequisitesRequired(events: List<PersistentProcessDataMessage>): List<() -> Boolean> {
         return super.prerequisitesRequired(events) + listOf {
@@ -51,7 +51,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
     }
 
     override fun onProcessEvents(event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): MessageDataWrapper? {
-        if (requiredEvents.contains(event.event)) {
+        if (!requiredEvents.contains(event.event)) {
             return null
         }
         if (event.data !is FfmpegWorkRequestCreated) {
