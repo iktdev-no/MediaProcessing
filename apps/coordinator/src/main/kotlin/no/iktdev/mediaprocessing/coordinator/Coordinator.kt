@@ -88,7 +88,11 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         io.launch {
             messages.forEach {
                 delay(1000)
-                listeners.forwardBatchEventMessagesToListeners(it)
+                try {
+                    listeners.forwardBatchEventMessagesToListeners(it)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
                 if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(it)) {
                     if (getProcessStarted(it)?.type == ProcessType.FLOW) {
                         forwarder.produceAllMissingProcesserEvents(
@@ -122,7 +126,11 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     }
 
     fun operationToRunOnMessages(referenceId: String, eventId: String, messages: List<PersistentMessage>) {
-        createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
+        try {
+            createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         io.launch {
             buildModelBasedOnMessagesFor(referenceId, messages)
