@@ -53,12 +53,18 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
         val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
         val readStreamsEvent = events.find { it.data is MediaStreamsParsePerformed }?.data as MediaStreamsParsePerformed
         val serializedParsedStreams = readStreamsEvent.streams
+        val videoInfoWrapper: VideoInfoPerformed? = events.findLast { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
+        val videoInfo = videoInfoWrapper?.toValueObject()
 
-        val outDir = SharedConfig.outgoingContent.using(baseInfo.title)
+        if (videoInfoWrapper == null || videoInfo == null) {
+            log.error { "${KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE} result is read as null" }
+            return null
+        }
 
         return getFfmpegSubtitleArguments(
             inputFile = inputFile.file,
-            outDir = outDir,
+            outFullName = videoInfo.fullName,
+            outDir = File(videoInfoWrapper.outDirectory),
             baseInfo = baseInfo,
             serializedParsedStreams = serializedParsedStreams
         )
@@ -66,6 +72,7 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
 
     private fun getFfmpegSubtitleArguments(
         inputFile: String,
+        outFullName: String,
         outDir: File,
         baseInfo: BaseInfoPerformed,
         serializedParsedStreams: ParsedMediaStreams
@@ -76,7 +83,7 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
         val entries = sArg.map {
             FfmpegWorkerArgument(
                 arguments = it.codecParameters + it.optionalParameters + listOf("-map", "0:s:${it.index}"),
-                outputFile = subRootDir.using(it.language, "${baseInfo.sanitizedName}.${it.format}").absolutePath
+                outputFile = subRootDir.using(it.language, "${outFullName}.${it.format}").absolutePath
             )
         }
         return FfmpegWorkerArgumentsCreated(

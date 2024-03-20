@@ -46,12 +46,21 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
         val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
         val readStreamsEvent = events.find { it.data is MediaStreamsParsePerformed }?.data as MediaStreamsParsePerformed
         val serializedParsedStreams = readStreamsEvent.streams
+        val videoInfoWrapper: VideoInfoPerformed? = events.findLast { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
+        val videoInfo = videoInfoWrapper?.toValueObject()
 
-        val outDir = SharedConfig.outgoingContent.using(baseInfo.title)
+        if (videoInfoWrapper == null || videoInfo == null) {
+            log.error { "${KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE} result is read as null" }
+            return null
+        }
+
+
+        //val outDir = SharedConfig.outgoingContent.using(baseInfo.title)
 
         return getFfmpegVideoArguments(
             inputFile = inputFile.file,
-            outDir = outDir,
+            outFullName = videoInfo.fullName,
+            outDir = File(videoInfoWrapper.outDirectory),
             preference = preference.encodePreference,
             baseInfo = baseInfo,
             serializedParsedStreams = serializedParsedStreams
@@ -60,12 +69,13 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
 
     private fun getFfmpegVideoArguments(
         inputFile: String,
+        outFullName: String,
         outDir: File,
         preference: EncodingPreference,
         baseInfo: BaseInfoPerformed,
         serializedParsedStreams: ParsedMediaStreams
     ): MessageDataWrapper {
-        val outVideoFile = outDir.using("${baseInfo.sanitizedName}.mp4").absolutePath
+        val outVideoFile = outDir.using("${outFullName}.mp4").absolutePath
 
         val vaas = VideoAndAudioSelector(serializedParsedStreams, preference)
 

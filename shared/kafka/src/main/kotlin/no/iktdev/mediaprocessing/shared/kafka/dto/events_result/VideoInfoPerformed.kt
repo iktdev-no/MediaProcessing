@@ -2,9 +2,12 @@ package no.iktdev.mediaprocessing.shared.kafka.dto.events_result
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaBelongsToEvent
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
+@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE)
 data class VideoInfoPerformed(
     override val status: Status,
     val info: JsonObject,
@@ -43,6 +46,7 @@ data class SubtitleInfo(
     val language: String
 )
 
+@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE)
 open class VideoInfo(
     @Transient open val type: String,
     @Transient open val fullName: String
