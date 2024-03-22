@@ -31,7 +31,10 @@ class UseSource():
         if (anii is not None) and (anii.status == "COMPLETED" and anii.data is not None):
             result.append(WeightedData(anii, 4))
         if (imdb is not None) and (imdb.status == "COMPLETED" and imdb.data is not None):
-            result.append(WeightedData(imdb, 1))
+            imdb_weight = 1
+            if (imdb.data.title == title):
+                imdb_weight = 6
+            result.append(WeightedData(imdb, imdb_weight))
         if (mal is not None) and (mal.status == "COMPLETED" and mal.data is not None):
             result.append(WeightedData(mal, 8))
         return result
