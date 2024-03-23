@@ -44,7 +44,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     )
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
+        log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
 
         val baseInfo = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
         val meta = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED) { it.data is MetadataPerformed }?.data as MetadataPerformed?

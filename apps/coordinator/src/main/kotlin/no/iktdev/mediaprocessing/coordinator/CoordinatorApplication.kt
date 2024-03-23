@@ -75,7 +75,7 @@ fun printSharedConfig() {
     log.info { "Ffprobe: ${SharedConfig.ffprobe}" }
     log.info { "Ffmpeg: ${SharedConfig.ffmpeg}" }
 
-    log.info { "Database: ${DatabaseConfig.database}@${DatabaseConfig.address}:${DatabaseConfig.port}" }
+    log.info { "Database: ${DatabaseConfig.database} @ ${DatabaseConfig.address}:${DatabaseConfig.port}" }
     log.info { "Username: ${DatabaseConfig.username}" }
     log.info { "Password: ${if (DatabaseConfig.password.isNullOrBlank()) "Is not set" else "Is set"}" }
 }

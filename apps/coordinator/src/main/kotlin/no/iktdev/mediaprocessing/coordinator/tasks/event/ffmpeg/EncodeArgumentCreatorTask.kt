@@ -40,14 +40,19 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        log.info { "${this.javaClass.simpleName} triggered by ${event.event}" }
+        log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
 
         val inputFile = events.find { it.data is ProcessStarted }?.data as ProcessStarted
         val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
-        val readStreamsEvent = events.find { it.data is MediaStreamsParsePerformed }?.data as MediaStreamsParsePerformed
-        val serializedParsedStreams = readStreamsEvent.streams
+        val readStreamsEvent = events.find { it.data is MediaStreamsParsePerformed }?.data as MediaStreamsParsePerformed?
+        val serializedParsedStreams = readStreamsEvent?.streams
         val videoInfoWrapper: VideoInfoPerformed? = events.findLast { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
         val videoInfo = videoInfoWrapper?.toValueObject()
+
+        if (serializedParsedStreams == null) {
+            log.error { "Cant create encode arguments on a file without streams" }
+            return null
+        }
 
         if (videoInfoWrapper == null || videoInfo == null) {
             log.error { "${KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE} result is read as null" }
