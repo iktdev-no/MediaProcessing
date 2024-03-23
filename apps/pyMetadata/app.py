@@ -111,7 +111,7 @@ class KafkaConsumerThread(threading.Thread):
 
                 # Sjekk om meldingen har målnøkkelen
                 if message.key == "request:metadata:obtain" or message.key == "event:media-read-base-info:performed":
-                    logger.info("Received message: key=%s, value=%s", message.key, message.value)
+                    logger.info("==> Incoming message: %s \n%s", message.key, message.value)
                     # Opprett en ny tråd for å håndtere meldingen
                     handler_thread = MessageHandlerThread(message)
                     handler_thread.start()
