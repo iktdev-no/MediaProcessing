@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleArgumentsDto
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
@@ -76,7 +77,7 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
         outDir: File,
         baseInfo: BaseInfoPerformed,
         serializedParsedStreams: ParsedMediaStreams
-    ): MessageDataWrapper {
+    ): MessageDataWrapper? {
         val subRootDir = outDir.using("sub")
         val sArg = SubtitleArguments(serializedParsedStreams.subtitleStream).getSubtitleArguments()
 
@@ -85,6 +86,9 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
                 arguments = it.codecParameters + it.optionalParameters + listOf("-map", "0:s:${it.index}"),
                 outputFile = subRootDir.using(it.language, "${outFullName}.${it.format}").absolutePath
             )
+        }
+        if (entries.isEmpty()) {
+            return SimpleMessageData(status = Status.SKIPPED, "No entries found!")
         }
         return FfmpegWorkerArgumentsCreated(
             status = Status.COMPLETED,
