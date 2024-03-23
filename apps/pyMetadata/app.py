@@ -2,7 +2,7 @@ import logging
 import signal
 import sys
 import os
-from typing import Optional
+from typing import List, Optional
 import uuid
 import threading
 import json
@@ -21,6 +21,22 @@ from sources.select import UseSource
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
 consumer_group = os.environ.get("KAFKA_CONSUMER_ID") or f"MetadataConsumer"
 kafka_topic = os.environ.get("KAFKA_TOPIC") or "mediaEvents"
+
+
+suppress_ignore: List[str] = [
+    "event:process:started",
+    "event::save",
+    "event:process:completed",
+    "event:work-encode:created",
+    "event:work-extract:created",
+    "event:work-convert:created",
+    "event:media-read-out-cover:performed",
+    "event:media-read-out-name-and-type:performed",
+    "event:media-parse-stream:performed",
+    "event:media-extract-parameter:created",
+    "event:media-encode-parameter:created",
+    "event:media-metadata-search:performed"
+]
 
 # Konfigurer logging
 logging.basicConfig(
@@ -96,7 +112,8 @@ class KafkaConsumerThread(threading.Thread):
                     handler_thread = MessageHandlerThread(message)
                     handler_thread.start()
                 else:
-                    logger.info("Ignorert message: key=%s", message.key)
+                    if (message.key not in suppress_ignore):
+                        logger.info("Ignored message: key=%s", message.key)
             # Introduce a small sleep to reduce CPU usage
             time.sleep(1)
         if consumer is not None:
