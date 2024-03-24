@@ -91,6 +91,8 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
 
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
                 ffmpegWorkerEvents.onError(ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
+                // Setting consumed to prevent spamming
+                PersistentDataStore().setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
                 return
             }
             runnerJob = scope.launch {

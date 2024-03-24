@@ -86,6 +86,8 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents )
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
                 ffmpegWorkerEvents.onError(ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
+                // Setting consumed to prevent spamming
+                PersistentDataStore().setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
                 return
             }
             runnerJob = scope.launch {
