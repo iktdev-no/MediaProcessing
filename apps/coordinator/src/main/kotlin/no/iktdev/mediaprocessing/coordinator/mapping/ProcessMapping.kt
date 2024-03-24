@@ -4,6 +4,7 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.contract.reader.MediaProcessedDto
+import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
 class ProcessMapping(val events: List<PersistentMessage>) {
 
@@ -38,7 +39,8 @@ class ProcessMapping(val events: List<PersistentMessage>) {
     }
 
     fun waitsForExtract(): Boolean {
-        val arguments = events.filter { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED }
+        // Check if message is declared as skipped with statis
+        val arguments = events.filter { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED }.filter { it.data.isSuccess() }
         val created = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED }
 
         val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED }

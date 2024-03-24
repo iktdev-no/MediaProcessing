@@ -17,3 +17,7 @@ data class SimpleMessageData(
 fun MessageDataWrapper?.isSuccess(): Boolean {
     return this != null && this.status != Status.ERROR
 }
+
+fun MessageDataWrapper?.isSkipped(): Boolean {
+    return this != null && this.status != Status.SKIPPED
+}
