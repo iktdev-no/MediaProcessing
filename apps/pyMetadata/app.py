@@ -24,9 +24,10 @@ kafka_topic = os.environ.get("KAFKA_TOPIC") or "mediaEvents"
 
 
 suppress_ignore: List[str] = [
-    "event:process:started",
+    "event:media-process:started",
+    "event:request-process:started",
     "event::save",
-    "event:process:completed",
+    "event:media-process:completed",
     "event:work-encode:created",
     "event:work-extract:created",
     "event:work-convert:created",

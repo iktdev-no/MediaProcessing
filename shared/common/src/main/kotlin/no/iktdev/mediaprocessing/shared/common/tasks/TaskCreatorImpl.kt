@@ -20,8 +20,9 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
     @Autowired
     lateinit var producer: CoordinatorProducer
     fun getListener(): Tasks<V> {
-        val eventListenerFilter = listensForEvents.ifEmpty { requiredEvents }
-        return Tasks(taskHandler = this, producesEvent = producesEvent, listensForEvents = eventListenerFilter)
+        val reactableEvents: Set<KafkaEvents> = requiredEvents.toSet() + listensForEvents.toSet()
+        //val eventListenerFilter = listensForEvents.ifEmpty { requiredEvents }
+        return Tasks(taskHandler = this, producesEvent = producesEvent, listensForEvents = reactableEvents.toList())
     }
     @PostConstruct
     fun attachListener() {

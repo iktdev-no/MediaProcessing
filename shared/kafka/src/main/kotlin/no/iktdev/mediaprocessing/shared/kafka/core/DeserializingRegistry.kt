@@ -15,7 +15,7 @@ class DeserializingRegistry {
 
     companion object {
         val deserializables = mutableMapOf(
-            KafkaEvents.EVENT_PROCESS_STARTED to ProcessStarted::class.java,
+            KafkaEvents.EVENT_MEDIA_PROCESS_STARTED to MediaProcessStarted::class.java,
             KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED to ReaderPerformed::class.java,
             KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED to MediaStreamsParsePerformed::class.java,
             KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED to BaseInfoPerformed::class.java,
@@ -40,7 +40,7 @@ class DeserializingRegistry {
             KafkaEvents.EVENT_WORK_EXTRACT_SKIPPED to null,
             KafkaEvents.EVENT_WORK_CONVERT_SKIPPED to null,
 
-            KafkaEvents.EVENT_PROCESS_COMPLETED to ProcessCompleted::class.java
+            KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED to ProcessCompleted::class.java
             )
     }
 

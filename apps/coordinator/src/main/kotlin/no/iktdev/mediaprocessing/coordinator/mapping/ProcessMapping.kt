@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.mapping
 
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import no.iktdev.mediaprocessing.shared.contract.reader.MediaProcessedDto
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
@@ -23,8 +23,8 @@ class ProcessMapping(val events: List<PersistentMessage>) {
         )
     }
 
-    fun getProcessStarted(): ProcessStarted? {
-        return events.lastOrNull { it.data is ProcessStarted }?.data as ProcessStarted?
+    fun getProcessStarted(): MediaProcessStarted? {
+        return events.lastOrNull { it.data is MediaProcessStarted }?.data as MediaProcessStarted?
     }
 
 

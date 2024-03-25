@@ -8,8 +8,8 @@ import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.mediaprocessing.converter.ConverterEnv
+import no.iktdev.mediaprocessing.shared.contract.dto.SubtitleFormats
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerRequest
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.SubtitleFormats
 import java.io.File
 import kotlin.jvm.Throws
 

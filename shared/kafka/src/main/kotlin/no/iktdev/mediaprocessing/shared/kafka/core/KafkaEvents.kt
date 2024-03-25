@@ -1,7 +1,8 @@
 package no.iktdev.mediaprocessing.shared.kafka.core
 
 enum class KafkaEvents(val event: String) {
-    EVENT_PROCESS_STARTED("event:process:started"),
+    EVENT_MEDIA_PROCESS_STARTED("event:media-process:started"),
+    EVENT_REQUEST_PROCESS_STARTED("event:request-process:started"),
 
     EVENT_MEDIA_READ_STREAM_PERFORMED("event:media-read-stream:performed"),
     EVENT_MEDIA_PARSE_STREAM_PERFORMED("event:media-parse-stream:performed"),
@@ -35,7 +36,8 @@ enum class KafkaEvents(val event: String) {
     EVENT_STORE_COVER_PERFORMED("event:store-cover:performed"),
     EVENT_STORE_METADATA_PERFORMED("event:store-metadata:performed"),
 
-    EVENT_PROCESS_COMPLETED("event:process:completed"),
+    EVENT_MEDIA_PROCESS_COMPLETED("event:media-process:completed"),
+    EVENT_REQUEST_PROCESS_COMPLETED("event:request-process:completed"),
     EVENT_COLLECT_AND_STORE("event::save");
 
     companion object {

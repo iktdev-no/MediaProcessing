@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
-import no.iktdev.mediaprocessing.shared.common.lastOrSuccess
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
@@ -17,7 +16,6 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaStreamsParsePerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

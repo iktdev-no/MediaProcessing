@@ -13,7 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.runner.getOutputUsing
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ReaderPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +29,7 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
         get() = KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_PROCESS_STARTED
+        KafkaEvents.EVENT_MEDIA_PROCESS_STARTED
     )
 
 
@@ -42,11 +42,11 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
-        val desiredEvent = events.find { it.data is ProcessStarted } ?: return null
-        return runBlocking { fileReadStreams(desiredEvent.data as ProcessStarted) }
+        val desiredEvent = events.find { it.data is MediaProcessStarted } ?: return null
+        return runBlocking { fileReadStreams(desiredEvent.data as MediaProcessStarted) }
     }
 
-    suspend fun fileReadStreams(started: ProcessStarted): MessageDataWrapper {
+    suspend fun fileReadStreams(started: MediaProcessStarted): MessageDataWrapper {
         val file = File(started.file)
         return if (file.exists() && file.isFile) {
             val result = readStreams(file)

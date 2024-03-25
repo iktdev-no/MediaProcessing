@@ -29,7 +29,7 @@ class PersistentDataReader {
     fun getUncompletedMessages(): List<List<PersistentMessage>> {
         val result = withDirtyRead {
             events.selectAll()
-                .andWhere { events.event neq KafkaEvents.EVENT_PROCESS_COMPLETED.event }
+                .andWhere { events.event neq KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED.event }
                 .groupBy { it[events.referenceId] }
                 .mapNotNull { it.value.mapNotNull { v -> fromRowToPersistentMessage(v, dzz) } }
         } ?: emptyList()

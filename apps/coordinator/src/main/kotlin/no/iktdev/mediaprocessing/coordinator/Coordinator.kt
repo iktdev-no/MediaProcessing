@@ -12,17 +12,14 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.contract.dto.RequestStartOperationEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.dto.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.UUID
-import javax.annotation.PostConstruct
 
 @Service
 class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
@@ -75,12 +72,23 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     private val forwarder = Forwarder()
 
     public fun startProcess(file: File, type: ProcessType) {
-        val processStartEvent = ProcessStarted(
+        val processStartEvent = MediaProcessStarted(
             status = Status.COMPLETED,
             file = file.absolutePath,
             type = type
         )
-        producer.sendMessage(UUID.randomUUID().toString(), KafkaEvents.EVENT_PROCESS_STARTED, processStartEvent)
+        producer.sendMessage(UUID.randomUUID().toString(), KafkaEvents.EVENT_MEDIA_PROCESS_STARTED, processStartEvent)
+    }
+
+    public fun startRequestProcess(file: File, operations: List<RequestStartOperationEvents>): UUID {
+        val referenceId: UUID = UUID.randomUUID()
+        val start = RequestProcessStarted(
+            status = Status.COMPLETED,
+            file = file.absolutePath,
+            operations = operations
+        )
+        producer.sendMessage(referenceId = referenceId.toString(), KafkaEvents.EVENT_REQUEST_PROCESS_STARTED, start)
+        return referenceId
     }
 
     fun readAllUncompletedMessagesInQueue() {
@@ -137,8 +145,8 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         }
     }
 
-    fun getProcessStarted(messages: List<PersistentMessage>): ProcessStarted? {
-        return messages.find { it.event == KafkaEvents.EVENT_PROCESS_STARTED }?.data as ProcessStarted
+    fun getProcessStarted(messages: List<PersistentMessage>): MediaProcessStarted? {
+        return messages.find { it.event == KafkaEvents.EVENT_MEDIA_PROCESS_STARTED }?.data as MediaProcessStarted
     }
 
     suspend fun buildModelBasedOnMessagesFor(referenceId: String, messages: List<PersistentMessage>) {

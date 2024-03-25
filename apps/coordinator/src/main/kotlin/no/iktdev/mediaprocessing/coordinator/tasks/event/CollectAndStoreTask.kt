@@ -32,16 +32,16 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_COLLECT_AND_STORE
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        EVENT_PROCESS_STARTED,
-        EVENT_PROCESS_COMPLETED
+        EVENT_MEDIA_PROCESS_STARTED,
+        EVENT_MEDIA_PROCESS_COMPLETED
     )
     override val listensForEvents: List<KafkaEvents> = KafkaEvents.entries
 
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.lastOrSuccessOf(EVENT_PROCESS_STARTED) ?: return null
-        val completed = events.lastOrSuccessOf(EVENT_PROCESS_COMPLETED) ?: return null
+        val started = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_STARTED) ?: return null
+        val completed = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_COMPLETED) ?: return null
         if (!started.data.isSuccess() || !completed.data.isSuccess() && completed.data.status != Status.SKIPPED) {
             return null
         }

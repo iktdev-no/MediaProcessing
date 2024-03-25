@@ -1,13 +1,14 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg.ExtractArgumentCreatorTask.SubtitleArguments.SubtitleType.*
 import no.iktdev.mediaprocessing.shared.common.Preference
-import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.contract.dto.ProcessStartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleArgumentsDto
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
@@ -30,7 +31,7 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
         get() = KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_PROCESS_STARTED,
+        KafkaEvents.EVENT_MEDIA_PROCESS_STARTED,
         KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
         KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED,
         KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
@@ -49,8 +50,13 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
             log.info { "${this.javaClass.simpleName} ignores ${event.event} @ ${event.eventId}" }
             return null
         }
+        val started = events.find { it.data is MediaProcessStarted }?.data as MediaProcessStarted
+        if (!started.operations.contains(ProcessStartOperationEvents.EXTRACT)) {
+            log.info { "Couldn't find operation event ${ProcessStartOperationEvents.EXTRACT} in ${Gson().toJson(started.operations)}\n\tExtract Arguments will not be created" }
+            return null
+        }
 
-        val inputFile = events.find { it.data is ProcessStarted }?.data as ProcessStarted
+        val inputFile = events.find { it.data is MediaProcessStarted }?.data as MediaProcessStarted
         val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
         val readStreamsEvent = events.find { it.data is MediaStreamsParsePerformed }?.data as MediaStreamsParsePerformed
         val serializedParsedStreams = readStreamsEvent.streams

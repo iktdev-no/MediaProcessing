@@ -16,13 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class CompleteTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
-    override val producesEvent: KafkaEvents = KafkaEvents.EVENT_PROCESS_COMPLETED
+    override val producesEvent: KafkaEvents = KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        EVENT_PROCESS_STARTED,
+        EVENT_MEDIA_PROCESS_STARTED,
         EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
         EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
     )
@@ -31,7 +31,7 @@ class CompleteTask(@Autowired override var coordinator: Coordinator) : TaskCreat
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.lastOrSuccessOf(EVENT_PROCESS_STARTED) ?: return null
+        val started = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_STARTED) ?: return null
         if (!started.data.isSuccess()) {
             return null
         }
