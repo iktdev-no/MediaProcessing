@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 )
 data class FfmpegWorkRequestCreated(
     override val status: Status,
+    val derivedFromEventId: String,
     val inputFile: String,
     val arguments: List<String>,
     val outFile: String

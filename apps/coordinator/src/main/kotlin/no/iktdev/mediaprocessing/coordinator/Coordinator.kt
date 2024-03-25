@@ -53,7 +53,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         }
         listeners.forwardEventMessageToListeners(triggered, messages)
 
-        if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(messages)) {
+        /*if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(messages)) {
             if (getProcessStarted(messages)?.type == ProcessType.FLOW) {
                 forwarder.produceAllMissingProcesserEvents(
                     producer = producer,
@@ -62,14 +62,14 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             } else {
                 log.info { "Process for $referenceId was started manually and will require user input for continuation" }
             }
-        }
+        }*/
     }
 
     private val log = KotlinLogging.logger {}
 
     override val listeners = PersistentEventBasedMessageListener()
 
-    private val forwarder = Forwarder()
+    //private val forwarder = Forwarder()
 
     public fun startProcess(file: File, type: ProcessType) {
         val processStartEvent = MediaProcessStarted(
@@ -101,14 +101,14 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(it)) {
+                /*if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(it)) {
                     if (getProcessStarted(it)?.type == ProcessType.FLOW) {
                         forwarder.produceAllMissingProcesserEvents(
                             producer = producer,
                             messages = it
                         )
                     }
-                }
+                }*/
             }
         }
     }
@@ -157,7 +157,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
 
 
 
-    class Forwarder() {
+    /*class Forwarder() {
         val forwardOnEventReceived = listOf(
             KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED, KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED
         )
@@ -262,7 +262,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
                 }
             }
         }
-    }
+    }*/
 }
 
 

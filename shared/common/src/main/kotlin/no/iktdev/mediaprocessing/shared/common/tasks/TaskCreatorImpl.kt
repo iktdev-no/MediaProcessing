@@ -92,7 +92,7 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
         }
     }
 
-    private fun onResult(data: MessageDataWrapper) {
+    protected fun onResult(data: MessageDataWrapper) {
         producer.sendMessage(
             referenceId = context[context_key_reference] as String,
             event = context[context_key_producesEvent] as KafkaEvents,

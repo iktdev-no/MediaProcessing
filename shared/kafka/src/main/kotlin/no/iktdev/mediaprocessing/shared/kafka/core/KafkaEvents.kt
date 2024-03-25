@@ -16,6 +16,8 @@ enum class KafkaEvents(val event: String) {
     EVENT_MEDIA_CONVERT_PARAMETER_CREATED("event:media-convert-parameter:created"),
     EVENT_MEDIA_DOWNLOAD_COVER_PARAMETER_CREATED("event:media-download-cover-parameter:created"),
 
+    EVENT_MEDIA_WORK_PROCEED_PERMITTED("event:media-work-proceed:permitted"),
+
     EVENT_WORK_ENCODE_CREATED("event:work-encode:created"),
     EVENT_WORK_EXTRACT_CREATED("event:work-extract:created"),
     EVENT_WORK_CONVERT_CREATED("event:work-convert:created"),
