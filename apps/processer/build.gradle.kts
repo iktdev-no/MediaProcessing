@@ -22,6 +22,7 @@ repositories {
 
 val exposedVersion = "0.44.0"
 dependencies {
+
     /*Spring boot*/
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
@@ -47,8 +48,6 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
     //implementation(project(mapOf("path" to ":shared")))
-    implementation(project(mapOf("path" to ":shared:kafka")))
-
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
     implementation(project(mapOf("path" to ":shared:kafka")))

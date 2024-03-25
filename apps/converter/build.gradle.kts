@@ -6,7 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
-group = "no.iktdev.mediaprocessing"
+group = "no.iktdev.mediaprocessing.apps"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -53,6 +53,8 @@ dependencies {
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
     implementation(project(mapOf("path" to ":shared:kafka")))
+
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.test {
