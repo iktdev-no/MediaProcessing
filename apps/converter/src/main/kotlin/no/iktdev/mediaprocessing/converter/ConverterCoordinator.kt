@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.mediaprocessing.converter.coordination.PersistentEventProcessBasedMessageListener
 import no.iktdev.mediaprocessing.converter.flow.EventBasedProcessMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
@@ -17,12 +18,12 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import org.springframework.stereotype.Service
 
 @Service
-class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, EventBasedProcessMessageListener>() {
+class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, PersistentEventProcessBasedMessageListener>() {
     val io = Coroutines.io()
 
     private val log = KotlinLogging.logger {}
 
-    override val listeners: EventBasedProcessMessageListener = EventBasedProcessMessageListener()
+    override val listeners = PersistentEventProcessBasedMessageListener()
     override fun createTasksBasedOnEventsAndPersistence(
         referenceId: String,
         eventId: String,
@@ -36,25 +37,11 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Eve
         listeners.forwardEventMessageToListeners(triggeredMessage, messages)
     }
 
-    fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = PersistentDataReader().getAvailableProcessEvents()
-        createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
-    }
-
-    fun readAllInQueue() {
-        val messages = PersistentDataReader().getAvailableProcessEvents()
-        io.launch {
-            messages.forEach {
-                delay(1000)
-                createTasksBasedOnEventsAndPersistence(referenceId = it.referenceId, eventId = it.eventId, messages)
-            }
-        }
-    }
-
     override fun onCoordinatorReady() {
         log.info { "Converter Coordinator is ready" }
         readAllInQueue()
     }
+
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
         if (event.key == KafkaEvents.EVENT_WORK_CONVERT_CREATED) {
@@ -69,7 +56,21 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Eve
         } else {
             log.debug { "Skipping ${event.key}" }
         }
-        //log.info { Gson().toJson(event.value) }
-
     }
+
+    fun readAllInQueue() {
+        val messages = PersistentDataReader().getAvailableProcessEvents()
+        io.launch {
+            messages.forEach {
+                delay(1000)
+                createTasksBasedOnEventsAndPersistence(referenceId = it.referenceId, eventId = it.eventId, messages)
+            }
+        }
+    }
+
+    fun readAllMessagesFor(referenceId: String, eventId: String) {
+        val messages = PersistentDataReader().getAvailableProcessEvents()
+        createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
+    }
+
 }

@@ -1,13 +1,15 @@
-package no.iktdev.mediaprocessing.processer
+package no.iktdev.mediaprocessing.converter
 
-import no.iktdev.mediaprocessing.processer.coordination.PersistentEventProcessBasedMessageListener
+import com.google.gson.Gson
+import mu.KotlinLogging
+import no.iktdev.mediaprocessing.converter.coordination.PersistentEventProcessBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
-abstract class TaskCreator(coordinator: Coordinator) :
-    TaskCreatorImpl<Coordinator, PersistentProcessDataMessage, PersistentEventProcessBasedMessageListener>(coordinator) {
+abstract class TaskCreator(coordinator: ConverterCoordinator) :
+    TaskCreatorImpl<ConverterCoordinator, PersistentProcessDataMessage, PersistentEventProcessBasedMessageListener>(coordinator) {
 
     override fun isPrerequisiteEventsOk(events: List<PersistentProcessDataMessage>): Boolean {
         val currentEvents = events.map { it.event }

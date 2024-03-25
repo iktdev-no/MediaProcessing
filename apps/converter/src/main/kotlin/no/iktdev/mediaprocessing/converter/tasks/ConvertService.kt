@@ -5,8 +5,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.converter.ConverterCoordinator
+import no.iktdev.mediaprocessing.converter.TaskCreator
 import no.iktdev.mediaprocessing.converter.convert.Converter
-import no.iktdev.mediaprocessing.converter.flow.ProcesserTaskCreator
 import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
@@ -22,9 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
 
+private val log = KotlinLogging.logger {}
+
 @Service
-class ConvertService(@Autowired override var coordinator: ConverterCoordinator) : ProcesserTaskCreator(coordinator) {
-    private val log = KotlinLogging.logger {}
+class ConvertService(@Autowired override var coordinator: ConverterCoordinator) : TaskCreator(coordinator) {
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
 
     init {
