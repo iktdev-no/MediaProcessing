@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
@@ -11,6 +12,7 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.update
 import java.sql.SQLIntegrityConstraintViolationException
 
+private val log = KotlinLogging.logger {}
 open class PersistentDataStore {
     fun storeEventDataMessage(event: String, message: Message<*>): Boolean {
         val exception = executeOrException {
@@ -23,7 +25,13 @@ open class PersistentDataStore {
         }
         return if (exception == null) true else {
             if (exception.cause is SQLIntegrityConstraintViolationException) {
-                exception.printStackTrace()
+                log.info { "Error is of SQLIntegrityConstraintViolationException" }
+                try {
+                    log.info { "Error code is: ${ (exception as ExposedSQLException).errorCode}" }
+                } catch (e: Exception) {
+
+                }
+                //exception.printStackTrace()
                 (exception as ExposedSQLException).errorCode == 1062
             }
             else {
