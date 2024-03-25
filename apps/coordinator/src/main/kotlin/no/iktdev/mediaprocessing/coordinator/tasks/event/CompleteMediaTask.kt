@@ -48,7 +48,7 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
 
         if (requiresOneOf.none { it in receivedEvents }) {
             val missing = requiresOneOf.filter { !receivedEvents.contains(it) }
-            log.info { "Can't complete at this moment. Missing required event(s)" + missing.joinToString("\n\t") }
+            log.info { "Can't complete at this moment. Missing required event(s)\n\t" + missing.joinToString("\n\t") }
             return null //SimpleMessageData(Status.SKIPPED, "Can't collect at this moment. Missing required event")
         }
 
