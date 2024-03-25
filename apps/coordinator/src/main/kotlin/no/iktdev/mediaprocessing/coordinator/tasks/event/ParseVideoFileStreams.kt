@@ -38,7 +38,7 @@ class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : 
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
+        log.info { "${event.referenceId} triggered by ${event.event}" }
         val desiredEvent = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED) ?: return null
         return parseStreams(desiredEvent.data as ReaderPerformed)
     }

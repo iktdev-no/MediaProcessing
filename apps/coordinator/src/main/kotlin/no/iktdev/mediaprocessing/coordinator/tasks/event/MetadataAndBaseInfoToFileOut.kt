@@ -13,17 +13,21 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.hasValidData
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.*
+
 
 /**
  *
@@ -32,6 +36,7 @@ import java.time.LocalDateTime
 @EnableScheduling
 class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
+    val metadataTimeout = KafkaEnv.metadataTimeoutMinutes * 60
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
@@ -44,7 +49,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     )
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
+        log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val baseInfo = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
         val meta = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED) { it.data is MetadataPerformed }?.data as MetadataPerformed?
@@ -54,7 +59,11 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             return null
         }
         if (baseInfo.isSuccess() && meta == null) {
-            log.info { "Sending ${baseInfo?.title} to waiting queue" }
+            val estimatedTimeout = LocalDateTime.now().toEpochSeconds() + metadataTimeout
+            val dateTime = LocalDateTime.ofEpochSecond(estimatedTimeout, 0, ZoneOffset.UTC)
+
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH)
+            log.info { "Sending ${baseInfo?.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
             if (!waitingProcessesForMeta.containsKey(event.referenceId)) {
                 waitingProcessesForMeta[event.referenceId] = LocalDateTime.now()
             }
@@ -94,7 +103,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     @Scheduled(fixedDelay = (1_000))
     fun sendErrorMessageForMetadata() {
         val expired = waitingProcessesForMeta.filter {
-            LocalDateTime.now().toEpochSeconds() > (it.value.toEpochSeconds() + KafkaEnv.metadataTimeoutMinutes * 60)
+            LocalDateTime.now().toEpochSeconds() > (it.value.toEpochSeconds() + metadataTimeout)
         }
         expired.forEach {
             log.info { "Producing timeout for ${it.key} ${LocalDateTime.now()}" }

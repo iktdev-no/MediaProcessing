@@ -41,7 +41,7 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
+        log.info { "${event.referenceId} triggered by ${event.event}" }
         val started = events.find { it.data is MediaProcessStarted }?.data as MediaProcessStarted
         if (!started.operations.contains(ProcessStartOperationEvents.ENCODE)) {
             log.info { "Couldn't find operation event ${ProcessStartOperationEvents.ENCODE} in ${Gson().toJson(started.operations)}\n\tEncode Arguments will not be created" }

@@ -33,7 +33,7 @@ class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskC
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        log.info { "${this.javaClass.simpleName} @ ${event.referenceId} triggered by ${event.event}" }
+        log.info { "${event.referenceId} triggered by ${event.event}" }
         val selected = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_PROCESS_STARTED) ?: return null
         return readFileInfo(selected.data as MediaProcessStarted)
     }
