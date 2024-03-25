@@ -12,5 +12,13 @@ data class ConvertWorkerRequest(
     val inputFile: String,
     val allowOverwrite: Boolean,
     val outFileBaseName: String,
-    val outDirectory: String
+    val outDirectory: String,
+    val outFormats: List<SubtitleFormats> = listOf()
 ): MessageDataWrapper(status)
+
+enum class SubtitleFormats {
+    ASS,
+    SRT,
+    VTT,
+    SMI
+}

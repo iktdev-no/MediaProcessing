@@ -9,6 +9,7 @@ import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.mediaprocessing.converter.ConverterEnv
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerRequest
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.SubtitleFormats
 import java.io.File
 import kotlin.jvm.Throws
 
@@ -46,7 +47,22 @@ class Converter(val referenceId: String, val eventId: String, val data: ConvertW
         val syncOrNotSync = syncDialogs(filtered)
 
         val exporter = Export(file, File(data.outDirectory), data.outFileBaseName)
-        return exporter.write(syncOrNotSync)
+
+        return if (data.outFormats.isEmpty()) {
+            exporter.write(syncOrNotSync)
+        } else {
+            val exported = mutableListOf<File>()
+            if (data.outFormats.contains(SubtitleFormats.SRT)) {
+                exported.add(exporter.writeSrt(syncOrNotSync))
+            }
+            if (data.outFormats.contains(SubtitleFormats.SMI)) {
+                exported.add(exporter.writeSmi(syncOrNotSync))
+            }
+            if (data.outFormats.contains(SubtitleFormats.VTT)) {
+                exported.add(exporter.writeVtt(syncOrNotSync))
+            }
+            exported
+        }
     }
 
 
