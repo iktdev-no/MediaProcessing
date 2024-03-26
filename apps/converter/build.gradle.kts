@@ -26,7 +26,7 @@ dependencies {
     /*Spring boot*/
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
-    // implementation("org.springframework.kafka:spring-kafka:3.0.1")
+   // implementation("org.springframework.kafka:spring-kafka:3.0.1")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
     implementation("org.springframework.kafka:spring-kafka:2.8.5")
 
@@ -40,7 +40,6 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
-    //implementation(project(mapOf("path" to ":shared")))
 
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
     implementation("no.iktdev.library:subtitle:1.7.8-SNAPSHOT")
