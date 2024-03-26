@@ -22,10 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
 
-private val log = KotlinLogging.logger {}
 
 @Service
 class ConvertService(@Autowired override var coordinator: ConverterCoordinator) : TaskCreator(coordinator) {
+    private val log = KotlinLogging.logger {}
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
 
     init {
