@@ -14,7 +14,7 @@ class OutputFilesMapping(val events: List<PersistentMessage>) {
         val videoResult = events.filter { it.data is ProcesserEncodeWorkPerformed }
             .map { it.data as ProcesserEncodeWorkPerformed }
 
-        val subtitleResult = events.filter { it.data is ProcesserExtractWorkPerformed && it.data.isSuccess() }.map { it.data as ProcesserExtractWorkPerformed }
+        val subtitleResult = events.filter { it.data is ProcesserExtractWorkPerformed && it.data.isSuccess() }.map { it.data as ProcesserExtractWorkPerformed }.filter { !it.outFile.isNullOrBlank() }
         val convertedSubtitleResult = events.filter { it.data is ConvertWorkPerformed && it.data.isSuccess() }.map { it.data as ConvertWorkPerformed }
 
 
