@@ -21,9 +21,11 @@ abstract class DataSource(val config: DatabaseConnectionConfig) {
     abstract fun toConnectionUrl(): String
 
     fun toPortedAddress(): String {
-        return if (!config.address.contains(":") && config.port?.isBlank() != true) {
-            "$config.address:$config.port"
-        } else config.address
+        var baseAddress = config.address
+        if (!config.port.isNullOrBlank()) {
+            baseAddress += ":${config.port}"
+        }
+        return baseAddress
     }
 
     abstract fun toDatabase(): Database
