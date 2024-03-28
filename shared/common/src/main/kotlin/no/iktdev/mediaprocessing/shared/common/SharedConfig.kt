@@ -9,7 +9,7 @@ object SharedConfig {
     val outgoingContent: File = if (!System.getenv("DIRECTORY_CONTENT_OUTGOING").isNullOrBlank()) File(System.getenv("DIRECTORY_CONTENT_OUTGOING")) else File("/src/output")
 
     val ffprobe: String = System.getenv("SUPPORTING_EXECUTABLE_FFPROBE") ?: "ffprobe"
-    val ffmpeg: String = System.getenv("SUPPORTING_EXECUTABLE_FFMPEG") ?: "no/iktdev/mediaprocessing/shared/contract/ffmpeg"
+    val ffmpeg: String = System.getenv("SUPPORTING_EXECUTABLE_FFMPEG") ?: "ffmpeg"
 
     val preference: File = File("/data/config/preference.json")
 }
