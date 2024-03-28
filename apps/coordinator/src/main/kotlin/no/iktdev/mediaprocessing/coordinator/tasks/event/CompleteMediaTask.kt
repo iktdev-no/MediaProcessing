@@ -37,7 +37,6 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
         }
 
         val receivedEvents = events.map { it.event }
-
         // TODO: Add filter in case a metadata request was performed or a cover download was performed. for now, for base functionality, it requires a performed event.
 
         val requiresOneOf = listOf(
@@ -47,9 +46,9 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
         )
 
         if (requiresOneOf.none { it in receivedEvents }) {
-            val missing = requiresOneOf.filter { !receivedEvents.contains(it) }
+            val missing = requiresOneOf.subtract(receivedEvents.toSet())
             log.info { "Can't complete at this moment. Missing required event(s)\n\t" + missing.joinToString("\n\t") }
-            return null //SimpleMessageData(Status.SKIPPED, "Can't collect at this moment. Missing required event")
+            return null
         }
 
 

@@ -1,9 +1,11 @@
 package no.iktdev.mediaprocessing.converter
 
-import kotlinx.coroutines.launch
-import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
+import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
@@ -16,14 +18,24 @@ private var context: ApplicationContext? = null
 fun getContext(): ApplicationContext? {
     return context
 }
+
+
+lateinit var persistentReader: PersistentDataReader
+lateinit var persistentWriter: PersistentDataStore
+
+private lateinit var eventsDatabase: MySqlDataSource
+fun getEventsDatabase(): MySqlDataSource {
+    return eventsDatabase
+}
+
 fun main(args: Array<String>) {
-    val dataSource = MySqlDataSource.fromDatabaseEnv()
-    Coroutines.default().launch {
-        dataSource.createDatabase()
-        dataSource.createTables(
-            processerEvents
-        )
-    }
+    eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
+    eventsDatabase.createDatabase()
+    eventsDatabase.createTables(processerEvents)
+
+    persistentReader = PersistentDataReader(eventsDatabase)
+    persistentWriter = PersistentDataStore(eventsDatabase)
+
     context = runApplication<ConvertApplication>(*args)
 }
 //private val logger = KotlinLogging.logger {}

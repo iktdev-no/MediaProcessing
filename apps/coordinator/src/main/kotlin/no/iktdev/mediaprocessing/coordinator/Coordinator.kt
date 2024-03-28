@@ -7,11 +7,11 @@ import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
-import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.contract.dto.ProcessStartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.dto.RequestStartOperationEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -30,9 +30,9 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     }
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
-        val success = PersistentDataStore().storeEventDataMessage(event.key.event, event.value)
+        val success = persistentWriter.storeEventDataMessage(event.key.event, event.value)
         if (!success) {
-            log.error { "Unable to store message: ${event.key.event} in database ${DatabaseConfig.database}" }
+            log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().config.databaseName}" }
         } else {
             io.launch {
                 delay(500) // Give the database a few sec to update
@@ -52,17 +52,6 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             return
         }
         listeners.forwardEventMessageToListeners(triggered, messages)
-
-        /*if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(messages)) {
-            if (getProcessStarted(messages)?.type == ProcessType.FLOW) {
-                forwarder.produceAllMissingProcesserEvents(
-                    producer = producer,
-                    messages = messages
-                )
-            } else {
-                log.info { "Process for $referenceId was started manually and will require user input for continuation" }
-            }
-        }*/
     }
 
     private val log = KotlinLogging.logger {}
@@ -72,12 +61,22 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     //private val forwarder = Forwarder()
 
     public fun startProcess(file: File, type: ProcessType) {
+        val operations: List<ProcessStartOperationEvents> = listOf(
+            ProcessStartOperationEvents.ENCODE,
+            ProcessStartOperationEvents.EXTRACT,
+            ProcessStartOperationEvents.CONVERT
+        )
+        startProcess(file, type, operations)
+    }
+
+    fun startProcess(file: File, type: ProcessType, operations: List<ProcessStartOperationEvents>) {
         val processStartEvent = MediaProcessStarted(
             status = Status.COMPLETED,
             file = file.absolutePath,
             type = type
         )
         producer.sendMessage(UUID.randomUUID().toString(), KafkaEvents.EVENT_MEDIA_PROCESS_STARTED, processStartEvent)
+
     }
 
     public fun startRequestProcess(file: File, operations: List<RequestStartOperationEvents>): UUID {
@@ -91,8 +90,13 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         return referenceId
     }
 
+    fun permitWorkToProceedOn(referenceId: String, message: String) {
+        producer.sendMessage(referenceId = referenceId, KafkaEvents.EVENT_MEDIA_WORK_PROCEED_PERMITTED, SimpleMessageData(Status.COMPLETED, message))
+    }
+
+
     fun readAllUncompletedMessagesInQueue() {
-        val messages = PersistentDataReader().getUncompletedMessages()
+        val messages = persistentReader.getUncompletedMessages()
         io.launch {
             messages.forEach {
                 delay(1000)
@@ -101,30 +105,22 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-                /*if (forwarder.hasAnyRequiredEventToCreateProcesserEvents(it)) {
-                    if (getProcessStarted(it)?.type == ProcessType.FLOW) {
-                        forwarder.produceAllMissingProcesserEvents(
-                            producer = producer,
-                            messages = it
-                        )
-                    }
-                }*/
             }
         }
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = PersistentDataReader().getMessagesFor(referenceId)
+        val messages = persistentReader.getMessagesFor(referenceId)
         if (messages.find { it.eventId == eventId && it.referenceId == referenceId } == null) {
             log.warn { "EventId ($eventId) for ReferenceId ($referenceId) has not been made available in the database yet." }
             io.launch {
                 val fixedDelay = 1000L
                 delay(fixedDelay)
                 var delayed = 0L
-                var msc = PersistentDataReader().getMessagesFor(referenceId)
+                var msc = persistentReader.getMessagesFor(referenceId)
                 while (msc.find { it.eventId == eventId } != null || delayed < 1000 * 60) {
                     delayed += fixedDelay
-                    msc = PersistentDataReader().getMessagesFor(referenceId)
+                    msc = persistentReader.getMessagesFor(referenceId)
                 }
                 operationToRunOnMessages(referenceId, eventId, msc)
             }
@@ -154,115 +150,6 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             // TODO: Build and insert into database
         }
     }
-
-
-
-    /*class Forwarder() {
-        val forwardOnEventReceived = listOf(
-            KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED, KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED
-        )
-
-        fun hasAnyRequiredEventToCreateProcesserEvents(messages: List<PersistentMessage>): Boolean {
-            return messages.filter { forwardOnEventReceived.contains(it.event) && it.data.isSuccess() }.map { it.event }
-                .isNotEmpty()
-        }
-
-        fun isMissingEncodeWorkCreated(messages: List<PersistentMessage>): PersistentMessage? {
-            val existingWorkEncodeCreated = messages.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_CREATED }
-            return if (existingWorkEncodeCreated.isEmpty() && existingWorkEncodeCreated.none { it.data.isSuccess() }) {
-                messages.lastOrNull { it.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED }
-            } else null
-        }
-
-        fun isMissingExtractWorkCreated(messages: List<PersistentMessage>): PersistentMessage? {
-            val existingWorkCreated = messages.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED }
-            return if (existingWorkCreated.isEmpty() && existingWorkCreated.none { it.data.isSuccess() }) {
-                messages.lastOrNull { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED }
-            } else  null
-        }
-
-
-        fun produceAllMissingProcesserEvents(
-            producer: CoordinatorProducer,
-            messages: List<PersistentMessage>
-        ) {
-            val missingEncode = isMissingEncodeWorkCreated(messages)
-            val missingExtract = isMissingExtractWorkCreated(messages)
-
-            if (missingEncode != null && missingEncode.data.isSuccess()) {
-                produceEncodeWork(producer, missingEncode)
-            }
-            if (missingExtract != null && missingExtract.data.isSuccess()) {
-                produceExtractWork(producer, missingExtract)
-
-            }
-        }
-
-
-        fun produceEncodeWork(producer: CoordinatorProducer, message: PersistentMessage) {
-            if (message.event != KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED) {
-                throw RuntimeException("Incorrect event passed ${message.event}")
-            }
-            if (message.data !is FfmpegWorkerArgumentsCreated) {
-                throw RuntimeException("Invalid data passed:\n${Gson().toJson(message)}")
-            }
-            val data = message.data as FfmpegWorkerArgumentsCreated
-            data.entries.forEach {
-                FfmpegWorkRequestCreated(
-                    status = Status.COMPLETED,
-                    inputFile = data.inputFile,
-                    arguments = it.arguments,
-                    outFile = it.outputFile
-                ).let { createdRequest ->
-                    producer.sendMessage(
-                        message.referenceId,
-                        KafkaEvents.EVENT_WORK_ENCODE_CREATED,
-                        eventId = message.eventId,
-                        createdRequest
-                    )
-                }
-            }
-        }
-
-        fun produceExtractWork(producer: CoordinatorProducer, message: PersistentMessage) {
-            if (message.event != KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED) {
-                throw RuntimeException("Incorrect event passed ${message.event}")
-            }
-            if (message.data !is FfmpegWorkerArgumentsCreated) {
-                throw RuntimeException("Invalid data passed:\n${Gson().toJson(message)}")
-            }
-            val data = message.data as FfmpegWorkerArgumentsCreated
-            data.entries.forEach {
-                FfmpegWorkRequestCreated(
-                    status = Status.COMPLETED,
-                    inputFile = data.inputFile,
-                    arguments = it.arguments,
-                    outFile = it.outputFile
-                ).let { createdRequest ->
-                    producer.sendMessage(
-                        message.referenceId,
-                        KafkaEvents.EVENT_WORK_EXTRACT_CREATED,
-                        eventId = message.eventId,
-                        createdRequest
-                    )
-                }
-                val outFile = File(it.outputFile)
-                ConvertWorkerRequest(
-                    status = Status.COMPLETED,
-                    requiresEventId = message.eventId,
-                    inputFile = it.outputFile,
-                    true,
-                    outFileBaseName = outFile.nameWithoutExtension,
-                    outDirectory = outFile.parentFile.absolutePath
-                ).let { createdRequest ->
-                    producer.sendMessage(
-                        message.referenceId, KafkaEvents.EVENT_WORK_CONVERT_CREATED,
-                        createdRequest
-                    )
-                }
-            }
-        }
-    }*/
 }
 
 

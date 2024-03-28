@@ -18,11 +18,11 @@ class ClaimsService() {
 
     @Scheduled(fixedDelay = (300_000))
     fun validateClaims() {
-        val expiredClaims = PersistentDataReader().getExpiredClaimsProcessEvents()
+        val expiredClaims = persistentReader.getExpiredClaimsProcessEvents()
         expiredClaims.forEach {
             log.info { "Found event with expired claim: ${it.referenceId}::${it.eventId}::${it.event}" }
         }
-        val store = PersistentDataStore()
+        val store = persistentWriter
         expiredClaims.forEach {
             val result = store.releaseProcessEventClaim(referenceId = it.referenceId, eventId = it.eventId)
             if (result) {

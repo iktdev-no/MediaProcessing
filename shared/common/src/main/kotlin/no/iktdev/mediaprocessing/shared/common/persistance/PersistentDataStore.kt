@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
 import mu.KotlinLogging
+import no.iktdev.mediaprocessing.shared.common.datasource.DataSource
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
@@ -13,9 +14,9 @@ import org.jetbrains.exposed.sql.update
 import java.sql.SQLIntegrityConstraintViolationException
 
 private val log = KotlinLogging.logger {}
-open class PersistentDataStore {
+open class PersistentDataStore(var dataSource: DataSource) {
     fun storeEventDataMessage(event: String, message: Message<*>): Boolean {
-        val exception = executeOrException {
+        val exception = executeOrException(dataSource.database) {
             events.insert {
                 it[events.referenceId] = message.referenceId
                 it[events.eventId] = message.eventId
@@ -42,7 +43,7 @@ open class PersistentDataStore {
     }
 
     fun storeProcessDataMessage(event: String, message: Message<*>): Boolean {
-        val exception = executeOrException {
+        val exception = executeOrException(dataSource.database) {
             processerEvents.insert {
                 it[processerEvents.referenceId] = message.referenceId
                 it[processerEvents.eventId] = message.eventId
@@ -62,7 +63,7 @@ open class PersistentDataStore {
     }
 
     fun setProcessEventClaim(referenceId: String, eventId: String, claimedBy: String): Boolean {
-        return withTransaction {
+        return withTransaction(dataSource.database) {
             processerEvents.update({
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId) and
@@ -76,7 +77,7 @@ open class PersistentDataStore {
     }
 
     fun setProcessEventCompleted(referenceId: String, eventId: String, claimedBy: String): Boolean {
-        return withTransaction {
+        return withTransaction(dataSource.database) {
             processerEvents.update({
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId) and
@@ -89,7 +90,7 @@ open class PersistentDataStore {
     }
 
     fun updateCurrentProcessEventClaim(referenceId: String, eventId: String, claimedBy: String): Boolean {
-        return executeWithStatus {
+        return executeWithStatus(dataSource.database) {
             processerEvents.update({
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId) and
@@ -102,7 +103,7 @@ open class PersistentDataStore {
     }
 
     fun releaseProcessEventClaim(referenceId: String, eventId: String): Boolean {
-        val exception = executeOrException {
+        val exception = executeOrException(dataSource.database) {
             processerEvents.update({
                 (processerEvents.referenceId eq referenceId) and
                         (processerEvents.eventId eq eventId)

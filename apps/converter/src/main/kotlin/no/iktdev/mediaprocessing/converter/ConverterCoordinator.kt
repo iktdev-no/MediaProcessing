@@ -5,11 +5,7 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.converter.coordination.PersistentEventProcessBasedMessageListener
-import no.iktdev.mediaprocessing.converter.flow.EventBasedProcessMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
-import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
@@ -45,9 +41,9 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
         if (event.key == KafkaEvents.EVENT_WORK_CONVERT_CREATED) {
-            val success = PersistentDataStore().storeProcessDataMessage(event.key.event, event.value)
+            val success = persistentWriter.storeProcessDataMessage(event.key.event, event.value)
             if (!success) {
-                log.error { "Unable to store message: ${event.key.event} in database ${DatabaseConfig.database}!" }
+                log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().database}!" }
             } else {
                 readAllMessagesFor(event.value.referenceId, event.value.eventId)
             }
@@ -59,7 +55,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
     }
 
     fun readAllInQueue() {
-        val messages = PersistentDataReader().getAvailableProcessEvents()
+        val messages = persistentReader.getAvailableProcessEvents()
         io.launch {
             messages.forEach {
                 delay(1000)
@@ -69,7 +65,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = PersistentDataReader().getAvailableProcessEvents()
+        val messages = persistentReader.getAvailableProcessEvents()
         createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
     }
 

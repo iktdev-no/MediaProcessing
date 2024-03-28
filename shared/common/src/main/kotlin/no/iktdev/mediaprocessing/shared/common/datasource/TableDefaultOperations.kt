@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.datasource
 
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Table
 
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -9,9 +10,9 @@ open class TableDefaultOperations<T : Table> {
 
 }
 
-fun <T> withDirtyRead(block: () -> T): T? {
+fun <T> withDirtyRead(db: Database? = null, block: () -> T): T? {
     return try {
-        transaction(transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED) {
+        transaction(db = db, transactionIsolation = Connection.TRANSACTION_READ_UNCOMMITTED) {
             try {
                 block()
             } catch (e: Exception) {
@@ -28,9 +29,9 @@ fun <T> withDirtyRead(block: () -> T): T? {
 }
 
 
-fun <T> withTransaction(block: () -> T): T? {
+fun <T> withTransaction(db: Database? = null, block: () -> T): T? {
     return try {
-        transaction {
+        transaction(db) {
             try {
                 block()
             } catch (e: Exception) {
@@ -46,9 +47,9 @@ fun <T> withTransaction(block: () -> T): T? {
     }
 }
 
-fun <T> insertWithSuccess(block: () -> T): Boolean {
+fun <T> insertWithSuccess(db: Database? = null, block: () -> T): Boolean {
     return try {
-        transaction {
+        transaction(db) {
             try {
                 block()
                 commit()
@@ -65,9 +66,9 @@ fun <T> insertWithSuccess(block: () -> T): Boolean {
     }
 }
 
-fun <T> executeOrException(rollbackOnFailure: Boolean = false, block: () -> T): Exception? {
+fun <T> executeOrException(db: Database? = null, rollbackOnFailure: Boolean = false, block: () -> T): Exception? {
     return try {
-        transaction {
+        transaction(db) {
             try {
                 block()
                 commit()
@@ -86,9 +87,9 @@ fun <T> executeOrException(rollbackOnFailure: Boolean = false, block: () -> T): 
     }
 }
 
-fun <T> executeWithResult(block: () -> T): Pair<T?, Exception?> {
+fun <T> executeWithResult(db: Database? = null, block: () -> T): Pair<T?, Exception?> {
     return try {
-        transaction {
+        transaction(db) {
             try {
                 val res = block()
                 commit()
@@ -105,9 +106,9 @@ fun <T> executeWithResult(block: () -> T): Pair<T?, Exception?> {
     }
 }
 
-fun <T> executeWithStatus(block: () -> T): Boolean {
+fun <T> executeWithStatus(db: Database? = null, block: () -> T): Boolean {
     return try {
-        transaction {
+        transaction(db) {
             try {
                 block()
                 commit()

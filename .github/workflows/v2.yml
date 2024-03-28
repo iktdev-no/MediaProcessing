@@ -50,7 +50,10 @@ jobs:
           
           echo "Shared"
           echo "shared: ${{ needs.pre-check.outputs.shared }}"
-          
+          echo "\n"
+          echo "${{ needs.pre-check.outputs }}"
+          echo "${{ needs.pre-check }}"
+
   build-shared:
     runs-on: ubuntu-latest
     needs: pre-check

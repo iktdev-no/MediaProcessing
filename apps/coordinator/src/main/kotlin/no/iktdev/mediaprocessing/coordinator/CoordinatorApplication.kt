@@ -4,10 +4,14 @@ package no.iktdev.mediaprocessing.coordinator
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.observable.Observables
-import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
+import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.events
+import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
+import no.iktdev.mediaprocessing.shared.common.toStoredDatabase
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.streamit.library.db.tables.*
 import no.iktdev.streamit.library.db.tables.helper.cast_errors
@@ -26,11 +30,24 @@ class CoordinatorApplication {
 }
 
 private var context: ApplicationContext? = null
+private lateinit var storeDatabase: MySqlDataSource
 
 @Suppress("unused")
 fun getContext(): ApplicationContext? {
     return context
 }
+
+fun getStoreDatabase(): MySqlDataSource {
+    return storeDatabase
+}
+
+private lateinit var eventsDatabase: MySqlDataSource
+fun getEventsDatabase(): MySqlDataSource {
+    return eventsDatabase
+}
+
+lateinit var persistentReader: PersistentDataReader
+lateinit var persistentWriter: PersistentDataStore
 
 fun main(args: Array<String>) {
     Coroutines.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
@@ -38,14 +55,18 @@ fun main(args: Array<String>) {
             value.printStackTrace()
         }
     })
-    val dataSource = MySqlDataSource.fromDatabaseEnv();
-    dataSource.createDatabase()
+
+    eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
+    storeDatabase = DatabaseEnvConfig.toStoredDatabase()
+
+    eventsDatabase.createDatabase()
+    storeDatabase.createDatabase()
 
     val kafkaTables = listOf(
         events, // For kafka
     )
 
-    dataSource.createTables(*kafkaTables.toTypedArray())
+    eventsDatabase.createTables(*kafkaTables.toTypedArray())
 
     val tables = arrayOf(
         catalog,
@@ -60,9 +81,10 @@ fun main(args: Array<String>) {
         data_video,
         cast_errors
     )
-    transaction {
-        SchemaUtils.createMissingTablesAndColumns(*tables)
-    }
+    storeDatabase.createTables(*tables)
+
+    persistentReader = PersistentDataReader(eventsDatabase)
+    persistentWriter = PersistentDataStore(eventsDatabase)
 
     context = runApplication<CoordinatorApplication>(*args)
     printSharedConfig()
@@ -75,7 +97,7 @@ fun printSharedConfig() {
     log.info { "Ffprobe: ${SharedConfig.ffprobe}" }
     log.info { "Ffmpeg: ${SharedConfig.ffmpeg}" }
 
-    log.info { "Database: ${DatabaseConfig.database} @ ${DatabaseConfig.address}:${DatabaseConfig.port}" }
+    /*log.info { "Database: ${DatabaseConfig.database} @ ${DatabaseConfig.address}:${DatabaseConfig.port}" }
     log.info { "Username: ${DatabaseConfig.username}" }
-    log.info { "Password: ${if (DatabaseConfig.password.isNullOrBlank()) "Is not set" else "Is set"}" }
+    log.info { "Password: ${if (DatabaseConfig.password.isNullOrBlank()) "Is not set" else "Is set"}" }*/
 }

@@ -6,22 +6,13 @@ import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.processer.coordination.PersistentEventProcessBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
-import no.iktdev.mediaprocessing.shared.common.DatabaseConfig
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
-import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
-import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
-import javax.annotation.PostConstruct
 
 @Service
 @EnableScheduling
@@ -52,9 +43,9 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
             return
         }
 
-        val success = PersistentDataStore().storeProcessDataMessage(event.key.event, event.value)
+        val success = persistentWriter.storeProcessDataMessage(event.key.event, event.value)
         if (!success) {
-            log.error { "Unable to store message: ${event.key.event} in database ${DatabaseConfig.database}" }
+            log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().database}" }
         } else {
             io.launch {
                 delay(500)
@@ -67,7 +58,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
 
 
     fun readAllAvailableInQueue() {
-        val messages = PersistentDataReader().getAvailableProcessEvents()
+        val messages = persistentReader.getAvailableProcessEvents()
         io.launch {
             messages.forEach {
                 delay(1000)
@@ -77,7 +68,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = PersistentDataReader().getAvailableProcessEvents()
+        val messages = persistentReader.getAvailableProcessEvents()
         createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
     }
 

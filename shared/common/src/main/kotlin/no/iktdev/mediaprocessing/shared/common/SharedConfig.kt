@@ -1,5 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import no.iktdev.mediaprocessing.shared.common.datasource.DatabaseConnectionConfig
+import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import java.io.File
 
 object SharedConfig {
@@ -12,10 +14,31 @@ object SharedConfig {
     val preference: File = File("/data/config/preference.json")
 }
 
-object DatabaseConfig {
+object DatabaseEnvConfig {
     val address: String? = System.getenv("DATABASE_ADDRESS")
     val port: String? = System.getenv("DATABASE_PORT")
     val username: String? = System.getenv("DATABASE_USERNAME")
     val password: String? = System.getenv("DATABASE_PASSWORD")
-    val database: String? = System.getenv("DATABASE_NAME")
+    val eventBasedDatabase: String? = System.getenv("DATABASE_NAME_E")
+    val storedDatabase: String? = System.getenv("DATABASE_NAME_S")
+}
+
+fun DatabaseEnvConfig.toStoredDatabase(): MySqlDataSource {
+    return MySqlDataSource(DatabaseConnectionConfig(
+        databaseName = this.storedDatabase ?: "streamit",
+        address = this.address ?: "localhost",
+        port = this.port,
+        username = this.username ?: "root",
+        password = this.password ?: ""
+    ))
+}
+
+fun DatabaseEnvConfig.toEventsDatabase(): MySqlDataSource {
+    return MySqlDataSource(DatabaseConnectionConfig(
+        databaseName = this.eventBasedDatabase ?: "persistentEvents",
+        address = this.address ?: "localhost",
+        port = this.port,
+        username = this.username ?: "root",
+        password = this.password ?: ""
+    ))
 }

@@ -15,5 +15,6 @@ enum class ProcessStartOperationEvents {
 }
 
 enum class RequestStartOperationEvents {
-    CONVERT
+    CONVERT,
+    EXTRACT,
 }

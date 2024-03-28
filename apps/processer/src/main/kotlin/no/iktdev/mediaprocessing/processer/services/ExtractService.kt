@@ -3,8 +3,7 @@ package no.iktdev.mediaprocessing.processer.services
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.mediaprocessing.processer.Coordinator
-import no.iktdev.mediaprocessing.processer.TaskCreator
+import no.iktdev.mediaprocessing.processer.*
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorkerEvents
@@ -15,7 +14,6 @@ import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessData
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
-import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
@@ -61,7 +59,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
             return SimpleMessageData(status = Status.ERROR, message = "Invalid data (${event.data.javaClass.name}) passed for ${event.event.event}")
         }
 
-        val isAlreadyClaimed = PersistentDataReader().isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
+        val isAlreadyClaimed = persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
         if (isAlreadyClaimed) {
             log.warn {  "Process is already claimed!" }
             return null
@@ -84,7 +82,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
         }
 
 
-        val setClaim = PersistentDataStore().setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
+        val setClaim = persistentWriter.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} extract" }
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents)
@@ -92,7 +90,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
                 ffmpegWorkerEvents.onError(ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
                 // Setting consumed to prevent spamming
-                PersistentDataStore().setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+                persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
                 return
             }
             runnerJob = scope.launch {
@@ -112,7 +110,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
                 return
             }
             log.info { "Extract started for ${runner.referenceId}" }
-            PersistentDataStore().setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
+            persistentWriter.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
             sendState(info, false)
         }
 
@@ -123,12 +121,12 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
                 return
             }
             log.info { "Extract completed for ${runner.referenceId}" }
-            var consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
+            var consumedIsSuccessful = persistentWriter.setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
             runBlocking {
 
                 delay(1000)
                 limitedWhile({!consumedIsSuccessful}, 1000 * 10, 1000) {
-                    consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
+                    consumedIsSuccessful = persistentWriter.setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
                 }
 
                 log.info { "Database is reporting extract on ${runner.referenceId} as ${if (consumedIsSuccessful) "CONSUMED" else "NOT CONSUMED"}" }
@@ -136,9 +134,9 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
 
 
 
-                var readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
+                var readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
                 limitedWhile({!readbackIsSuccess}, 1000 * 30, 1000) {
-                    readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
+                    readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
                     log.info { readbackIsSuccess }
                 }
                 log.info { "Database is reporting readback for extract on ${runner.referenceId} as ${if (readbackIsSuccess) "CONSUMED" else "NOT CONSUMED"}" }

@@ -7,7 +7,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 
-abstract class DataSource(val databaseName: String, val address: String, val port: String?, val username: String, val password: String) {
+abstract class DataSource(val config: DatabaseConnectionConfig) {
+    open var database: Database? = null
+
+    abstract fun connect()
 
     abstract fun createDatabase(): Database?
 
@@ -18,10 +21,12 @@ abstract class DataSource(val databaseName: String, val address: String, val por
     abstract fun toConnectionUrl(): String
 
     fun toPortedAddress(): String {
-        return if (!address.contains(":") && port?.isBlank() != true) {
-            "$address:$port"
-        } else address
+        return if (!config.address.contains(":") && config.port?.isBlank() != true) {
+            "$config.address:$config.port"
+        } else config.address
     }
+
+    abstract fun toDatabase(): Database
 
 }
 

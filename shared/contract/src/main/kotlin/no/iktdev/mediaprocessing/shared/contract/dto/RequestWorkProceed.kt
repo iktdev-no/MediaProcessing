@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.shared.contract.dto
 
-data class ConvertRequest(
-    val file: String, // FullPath
+data class RequestWorkProceed(
+    val referenceId: String,
     override val source: String
 ): Requester()

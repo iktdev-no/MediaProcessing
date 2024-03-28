@@ -6,6 +6,8 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.converter.ConverterCoordinator
 import no.iktdev.mediaprocessing.converter.TaskCreator
 import no.iktdev.mediaprocessing.converter.convert.Converter
+import no.iktdev.mediaprocessing.converter.persistentReader
+import no.iktdev.mediaprocessing.converter.persistentWriter
 import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
@@ -41,7 +43,7 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
 
 
     fun getRequiredExtractProcessForContinuation(referenceId: String, requiresEventId: String): PersistentProcessDataMessage? {
-        return PersistentDataReader().getProcessEvent(referenceId, requiresEventId)
+        return persistentReader.getProcessEvent(referenceId, requiresEventId)
     }
     fun canConvert(extract: PersistentProcessDataMessage?): Boolean {
         return extract?.consumed == true && extract.data.isSuccess()
@@ -70,13 +72,13 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
             }
         }
 
-        val isAlreadyClaimed = PersistentDataReader().isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
+        val isAlreadyClaimed = persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
         if (isAlreadyClaimed) {
             log.warn {  "Process is already claimed!" }
             return null
         }
 
-        val setClaim = PersistentDataStore().setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
+        val setClaim = persistentWriter.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
         if (!setClaim) {
             return null
         }
@@ -94,18 +96,18 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
             SimpleMessageData(status = Status.ERROR, message = e.message)
         }
 
-        val consumedIsSuccessful = PersistentDataStore().setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+        val consumedIsSuccessful = persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
         runBlocking {
             delay(1000)
             if (!consumedIsSuccessful) {
-                PersistentDataStore().setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+                persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
             }
             delay(1000)
-            var readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
+            var readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
 
             while (!readbackIsSuccess) {
                 delay(1000)
-                readbackIsSuccess = PersistentDataReader().isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
+                readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
             }
         }
         return result

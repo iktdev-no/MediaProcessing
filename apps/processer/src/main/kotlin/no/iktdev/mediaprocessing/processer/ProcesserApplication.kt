@@ -1,11 +1,13 @@
 package no.iktdev.mediaprocessing.processer
 
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
+import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -17,13 +19,23 @@ private val logger = KotlinLogging.logger {}
 @SpringBootApplication
 class ProcesserApplication {
 }
-lateinit var dataSource: MySqlDataSource
+
+private lateinit var eventsDatabase: MySqlDataSource
+fun getEventsDatabase(): MySqlDataSource {
+    return eventsDatabase
+}
+
+lateinit var persistentReader: PersistentDataReader
+lateinit var persistentWriter: PersistentDataStore
+
 fun main(args: Array<String>) {
-    dataSource = MySqlDataSource.fromDatabaseEnv()
-    dataSource.createDatabase()
-    dataSource.createTables(
-        processerEvents
-    )
+    eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
+    eventsDatabase.createDatabase()
+    eventsDatabase.createTables(processerEvents)
+
+    persistentReader = PersistentDataReader(eventsDatabase)
+    persistentWriter = PersistentDataStore(eventsDatabase)
+
     val context = runApplication<ProcesserApplication>(*args)
 }
 
@@ -37,7 +49,7 @@ class DatabaseReconnect() {
     fun checkIfConnected() {
         if (TransactionManager.currentOrNull() == null) {
             lostConnectionCount++
-            dataSource.toDatabase()
+            eventsDatabase.toDatabase()
         }
     }
 }
