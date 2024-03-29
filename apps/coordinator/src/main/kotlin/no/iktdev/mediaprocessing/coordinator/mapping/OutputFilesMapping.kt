@@ -17,11 +17,19 @@ class OutputFilesMapping(val events: List<PersistentMessage>) {
         val subtitleResult = events.filter { it.data is ProcesserExtractWorkPerformed && it.data.isSuccess() }.map { it.data as ProcesserExtractWorkPerformed }.filter { !it.outFile.isNullOrBlank() }
         val convertedSubtitleResult = events.filter { it.data is ConvertWorkPerformed && it.data.isSuccess() }.map { it.data as ConvertWorkPerformed }
 
-
+        val referenceId = events.first().referenceId
+        val subtitles = try {
+            toSubtitleList(subtitleResult, convertedSubtitleResult)
+        } catch (e: Exception) {
+            System.err.println("Exception of $referenceId")
+            System.err.print("EventIds:\n" + events.joinToString("\n") { it.eventId })
+            e.printStackTrace()
+            throw e
+        }
 
         return OutputFilesDto(
             video = videoResult.lastOrNull { it.isSuccess() }?.outFile,
-            subtitles = toSubtitleList(subtitleResult, convertedSubtitleResult)
+            subtitles = subtitles
         )
     }
 
