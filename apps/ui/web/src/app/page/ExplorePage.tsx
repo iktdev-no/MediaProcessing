@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { UnixTimestamp } from '../features/UxTc';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,10 +7,13 @@ import SimpleTable, { TableCellCustomizer, TablePropetyConfig, TableRowActionEve
 import { useStompClient } from 'react-stomp-hooks';
 import { useWsSubscription } from '../ws/subscriptions';
 import { updateItems } from '../store/explorer-slice';
+import { setContextMenuPosition, setContextMenuVisible } from '../store/context-menu-slice';
 import FolderIcon from '@mui/icons-material/Folder';
 import IconForward from '@mui/icons-material/ArrowForwardIosRounded';
 import IconHome from '@mui/icons-material/Home';
 import { ExplorerItem, ExplorerCursor, ExplorerItemType } from '../../types';
+import ContextMenu, { ContextMenuActionEvent, ContextMenuItem } from '../features/ContextMenu';
+import { canConvert, canEncode, canExtract } from '../../fileUtil';
 
 
 const createTableCell: TableCellCustomizer<ExplorerItem> = (accessor, data) => {
@@ -80,12 +83,52 @@ function getSegmentedNaviagatablePath(navigateTo: (path: string | null) => void,
   )
 }
 
+function getContextMenuFileActionMenuItems(row: ExplorerItem | null): ContextMenuItem[] {
+  const ext = row?.extension;
+  const items: Array<ContextMenuItem> = [];
+  if (!ext) {return items;}
+  if (canEncode(ext) && canExtract(ext)) {
+    items.push({
+      actionIndex: 0,
+      icon: null,
+      text: "All available"
+    } as ContextMenuItem)
+  }
+  if (canEncode(ext)) {
+    items.push({
+      actionIndex: 1,
+      icon: null,
+      text: "Encode"
+    } as ContextMenuItem)
+  }
+
+  if (canExtract(ext)) {
+    items.push({
+      actionIndex: 2,
+      icon: null,
+      text: "Extract"
+    } as ContextMenuItem)
+  }
+
+  if (canConvert(ext)) {
+    items.push({
+      actionIndex: 3,
+      icon: null,
+      text: "Convert"
+    } as ContextMenuItem)
+  }
+  console.log(items);
+  return items;
+}
 
 export default function ExplorePage() {
   const muiTheme = useTheme();
   const dispatch = useDispatch();
   const client = useStompClient();
   const cursor = useSelector((state: RootState) => state.explorer)
+  const [selectedRow, setSelectedRow] = useState<ExplorerItem|null>(null);
+  const [actionableItems, setActionableItems] = useState<Array<ContextMenuItem>>([]);
+
 
   const navigateTo = (path: string | null) => {
     console.log(path)
@@ -98,14 +141,52 @@ export default function ExplorePage() {
   }
 
   const onItemSelectedEvent: TableRowActionEvents<ExplorerItem> = {
-    click: (row: ExplorerItem) => null,
+    click: (row: ExplorerItem) => {
+      setSelectedRow(row)
+    },
     doubleClick: (row: ExplorerItem) => {
       console.log(row);
       if (row.type === "FOLDER") {
         navigateTo(row.path);
       }
     },
-    contextMenu: (row: ExplorerItem) => null
+    contextMenu: (row: ExplorerItem, x: number, y: number) => {
+      if (row.type === "FOLDER") {
+        return;
+      }
+      dispatch(setContextMenuVisible(true))
+      dispatch(setContextMenuPosition({x: x, y: y}))
+      setActionableItems(getContextMenuFileActionMenuItems(row))
+    }
+  }
+
+  const onContextMenuItemClickedEvent: ContextMenuActionEvent<ExplorerItem> = {
+    selected:(actionIndex: number | null, value: ExplorerItem | null) => {
+      switch(actionIndex) {
+        case 0: {
+          console.log("All");
+          break;
+        }
+        case 1: {
+          console.log("Encode")
+          break;
+
+        }
+        case 2: {
+          console.log("Extract")
+          break;
+
+        }
+        case 3: {
+          console.log("Convert")
+          break;
+
+        }
+        default: {
+          
+        }
+      }
+    }
   }
 
   const onHomeClick = () => {
@@ -139,42 +220,47 @@ export default function ExplorePage() {
 
 
   return (
-    <Box display="block">
-      <Box sx={{
-        height: 50,
-        width: "100%",
-        maxHeight: "100%",
-        overflow: "hidden",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        backgroundColor: muiTheme.palette.background.paper
-      }}>
+    <>
+      <Box display="block">
         <Box sx={{
+          height: 50,
+          width: "100%",
+          maxHeight: "100%",
+          overflow: "hidden",
           display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          backgroundColor: muiTheme.palette.background.paper
         }}>
-          <Button onClick={onHomeClick} sx={{
-            borderRadius: 5
-          }}>
-            <IconHome />
-          </Button>
           <Box sx={{
-            borderRadius: 5,
-            backgroundColor: muiTheme.palette.divider
+            display: "flex",
           }}>
-            {getSegmentedNaviagatablePath(navigateTo, cursor?.path)}
+            <Button onClick={onHomeClick} sx={{
+              borderRadius: 5
+            }}>
+              <IconHome />
+            </Button>
+            <Box sx={{
+              borderRadius: 5,
+              backgroundColor: muiTheme.palette.divider
+            }}>
+              {getSegmentedNaviagatablePath(navigateTo, cursor?.path)}
+            </Box>
           </Box>
         </Box>
+        <Box sx={{
+          display: "block",
+          height: "calc(100% - 120px)",
+          overflow: "hidden",
+          position: "absolute",
+          width: "100%"
+        }}>
+          <SimpleTable items={cursor?.items ?? []} columns={columns} customizer={createTableCell} onRowClickedEvent={onItemSelectedEvent} />
+        </Box>
       </Box>
-      <Box sx={{
-        display: "block",
-        height: "calc(100% - 120px)",
-        overflow: "hidden",
-        position: "absolute",
-        width: "100%"
-      }}>
-        <SimpleTable items={cursor?.items ?? []} columns={columns} customizer={createTableCell} onRowClickedEvent={onItemSelectedEvent} />
-      </Box>
-    </Box>
+
+      <ContextMenu row={selectedRow} actionItems={actionableItems} onContextMenuItemClicked={onContextMenuItemClickedEvent} />
+    </>
   )
 }
+

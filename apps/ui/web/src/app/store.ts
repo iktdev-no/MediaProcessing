@@ -2,13 +2,15 @@ import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import composedSlice from './store/composed-slice';
 import explorerSlice from './store/explorer-slice';
 import kafkaItemsFlatSlice from './store/kafka-items-flat-slice';
+import contextMenuSlice from './store/context-menu-slice';
 
 
 export const store = configureStore({
   reducer: {
     composed: composedSlice,
     explorer: explorerSlice,
-    kafkaComposedFlat: kafkaItemsFlatSlice
+    kafkaComposedFlat: kafkaItemsFlatSlice,
+    contextMenu: contextMenuSlice
   },
 });
 

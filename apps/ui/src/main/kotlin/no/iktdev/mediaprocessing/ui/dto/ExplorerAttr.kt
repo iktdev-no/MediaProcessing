@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.ui.dto
+package no.iktdev.mediaprocessing.ui.dto
 
 interface ExplorerAttr {
     val created: Long

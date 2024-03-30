@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.ui
+package no.iktdev.mediaprocessing.ui
 
 
 import mu.KotlinLogging
@@ -6,11 +6,17 @@ import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.observable.ObservableMap
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.exfl.observable.observableMapOf
+import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
-import no.iktdev.streamit.content.ui.dto.EventDataObject
-import no.iktdev.streamit.content.ui.dto.ExplorerItem
-import no.iktdev.streamit.content.ui.dto.SimpleEventDataObject
+import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
+import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
+import no.iktdev.mediaprocessing.ui.dto.EventDataObject
+import no.iktdev.mediaprocessing.ui.dto.ExplorerItem
+import no.iktdev.mediaprocessing.ui.dto.SimpleEventDataObject
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -21,6 +27,14 @@ private val logger = KotlinLogging.logger {}
 @SpringBootApplication
 class UIApplication {
 }
+
+private lateinit var eventsDatabase: MySqlDataSource
+fun getEventsDatabase(): MySqlDataSource {
+    return eventsDatabase
+}
+
+lateinit var persistentReader: PersistentDataReader
+lateinit var persistentWriter: PersistentDataStore
 
 private var context: ApplicationContext? = null
 private val kafkaClearedLatch = CountDownLatch(1)
@@ -35,6 +49,14 @@ val memActiveEventMap: ObservableMap<String, EventDataObject> = observableMapOf(
 val fileRegister: ObservableMap<String, ExplorerItem> = observableMapOf()
 
 fun main(args: Array<String>) {
+
+    eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
+    eventsDatabase.connect()
+
+    persistentReader = PersistentDataReader(eventsDatabase)
+    persistentWriter = PersistentDataStore(eventsDatabase)
+
+
     Coroutines.addListener(object : Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
             logger.error { "Received error: ${value.message}" }
@@ -60,13 +82,14 @@ fun main(args: Array<String>) {
 
     } catch (e: Exception) {
         e.printStackTrace()
-        kafkaClearedLatch.countDown()
+      //  kafkaClearedLatch.countDown()
     }
 
-    logger.info { "Waiting for kafka to clear offset!" }
-    kafkaClearedLatch.await(5, TimeUnit.MINUTES)
-    logger.info { "Offset cleared!" }
-    Thread.sleep(10000)
+ //   logger.info { "Waiting for kafka to clear offset!" }
+   // kafkaClearedLatch.await(5, TimeUnit.MINUTES)
+ //   logger.info { "Offset cleared!" }
+  //  Thread.sleep(10000)
+    context = runApplication<UIApplication>(*args)
 
 }
 

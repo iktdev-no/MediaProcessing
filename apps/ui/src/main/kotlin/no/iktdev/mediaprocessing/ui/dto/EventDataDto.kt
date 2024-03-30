@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.ui.dto
+package no.iktdev.mediaprocessing.ui.dto
 
 enum class SimpleEventDataState {
     NA,

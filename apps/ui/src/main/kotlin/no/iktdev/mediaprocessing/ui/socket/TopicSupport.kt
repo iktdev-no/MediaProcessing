@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.ui.socket
+package no.iktdev.mediaprocessing.ui.socket
 
 import com.google.gson.Gson
 

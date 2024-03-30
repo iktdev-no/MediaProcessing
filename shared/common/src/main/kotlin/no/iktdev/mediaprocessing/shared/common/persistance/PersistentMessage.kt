@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.shared.common.persistance
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.jetbrains.exposed.sql.ResultRow
 import java.time.LocalDateTime
 
@@ -18,6 +19,15 @@ data class PersistentMessage(
 fun PersistentMessage.isOfEvent(event: KafkaEvents): Boolean {
     return this.event == event
 }
+
+fun PersistentMessage.isSuccess(): Boolean {
+    return try {
+        this.data.isSuccess()
+    } catch (e: Exception) {
+        false
+    }
+}
+
 
 fun fromRowToPersistentMessage(row: ResultRow, dez: DeserializingRegistry): PersistentMessage? {
     val kev = try {

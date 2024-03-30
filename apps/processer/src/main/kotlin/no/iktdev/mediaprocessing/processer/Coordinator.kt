@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
@@ -77,5 +78,11 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         KafkaEvents.EVENT_WORK_EXTRACT_CREATED,
     )
 
+
+    @Scheduled(fixedDelay = (5_000))
+    fun checkForWork() {
+        log.info { "Checking if there is any work to do.." }
+        readAllAvailableInQueue()
+    }
 
 }

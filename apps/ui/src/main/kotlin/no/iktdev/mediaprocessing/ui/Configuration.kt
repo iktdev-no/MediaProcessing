@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.ui
+package no.iktdev.mediaprocessing.ui
 
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
 import org.springframework.beans.factory.annotation.Value
@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.method.HandlerTypePredicate
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer
@@ -22,7 +23,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 class WebConfig: WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-            .allowedOrigins("*")
+            .allowedOrigins("localhost", "*://localhost:3000", "localhost:80")
             .allowCredentials(false)
     }
 
@@ -48,7 +49,17 @@ class WebConfig: WebMvcConfigurer {
     }
 }
 
-class SocketImplemented: SocketImplementation() {
+@Configuration
+class ApiCommunicationConfig {
 
+    @Bean
+    fun coordinatorTemplate(): RestTemplate {
+        val restTemplate = RestTemplate()
+        return restTemplate
+    }
 }
 
+
+@Configuration
+class SocketImplemented: SocketImplementation() {
+}

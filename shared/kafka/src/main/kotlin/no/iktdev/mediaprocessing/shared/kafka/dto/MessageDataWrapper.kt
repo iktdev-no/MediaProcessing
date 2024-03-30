@@ -15,7 +15,11 @@ data class SimpleMessageData(
 
 
 fun MessageDataWrapper?.isSuccess(): Boolean {
-    return this != null && this.status != Status.ERROR
+    return this != null && this.status == Status.COMPLETED
+}
+
+fun MessageDataWrapper?.isFailed(): Boolean {
+    return if (this == null) true else this.status != Status.COMPLETED
 }
 
 fun MessageDataWrapper?.isSkipped(): Boolean {

@@ -1,7 +1,11 @@
-package no.iktdev.streamit.content.ui.explorer
+package no.iktdev.mediaprocessing.ui.explorer
 
-import no.iktdev.streamit.content.ui.UIEnv
-import no.iktdev.streamit.content.ui.dto.*
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.ui.UIEnv
+import no.iktdev.mediaprocessing.ui.dto.ExplorerAttributes
+import no.iktdev.mediaprocessing.ui.dto.ExplorerCursor
+import no.iktdev.mediaprocessing.ui.dto.ExplorerItem
+import no.iktdev.mediaprocessing.ui.dto.ExplorerItemType
 import java.io.File
 import java.io.FileFilter
 import java.nio.file.Files
@@ -67,7 +71,7 @@ class ExplorerCore {
     }
 
     fun getHomeCursor(): ExplorerCursor? {
-        return getCursor(UIEnv.incomingContent.absolutePath)
+        return getCursor(SharedConfig.incomingContent.absolutePath)
     }
 
 }

@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.mapping
 
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.persistance.isSuccess
 import no.iktdev.mediaprocessing.shared.contract.reader.OutputFilesDto
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
@@ -14,15 +15,15 @@ class OutputFilesMapping(val events: List<PersistentMessage>) {
         val videoResult = events.filter { it.data is ProcesserEncodeWorkPerformed }
             .map { it.data as ProcesserEncodeWorkPerformed }
 
-        val subtitleResult = events.filter { it.data is ProcesserExtractWorkPerformed && it.data.isSuccess() }.map { it.data as ProcesserExtractWorkPerformed }.filter { !it.outFile.isNullOrBlank() }
-        val convertedSubtitleResult = events.filter { it.data is ConvertWorkPerformed && it.data.isSuccess() }.map { it.data as ConvertWorkPerformed }
+        val subtitleResult = events.filter { it.data is ProcesserExtractWorkPerformed && it.isSuccess() }.map { it.data as ProcesserExtractWorkPerformed }.filter { !it.outFile.isNullOrBlank() }
+        val convertedSubtitleResult = events.filter { it.data is ConvertWorkPerformed && it.isSuccess() }.map { it.data as ConvertWorkPerformed }
 
-        val referenceId = events.first().referenceId
+        val referenceId = events.firstOrNull()?.referenceId ?: throw RuntimeException("No Id")
         val subtitles = try {
             toSubtitleList(subtitleResult, convertedSubtitleResult)
         } catch (e: Exception) {
             System.err.println("Exception of $referenceId")
-            System.err.print("EventIds:\n" + events.joinToString("\n") { it.eventId })
+            System.err.print("EventIds:\n" + events.joinToString("\n") { it.eventId } + "\n")
             e.printStackTrace()
             throw e
         }

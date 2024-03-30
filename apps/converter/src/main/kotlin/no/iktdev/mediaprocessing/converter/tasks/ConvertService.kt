@@ -9,10 +9,9 @@ import no.iktdev.mediaprocessing.converter.convert.Converter
 import no.iktdev.mediaprocessing.converter.persistentReader
 import no.iktdev.mediaprocessing.converter.persistentWriter
 import no.iktdev.mediaprocessing.shared.common.getComputername
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
+import no.iktdev.mediaprocessing.shared.common.helper.DerivedProcessIterationHolder
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkPerformed
@@ -20,10 +19,13 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerReq
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.*
 
 
+@EnableScheduling
 @Service
 class ConvertService(@Autowired override var coordinator: ConverterCoordinator) : TaskCreator(coordinator) {
     private val log = KotlinLogging.logger {}
@@ -42,9 +44,13 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
         get() = KafkaEvents.EVENT_WORK_CONVERT_PERFORMED
 
 
-    fun getRequiredExtractProcessForContinuation(referenceId: String, requiresEventId: String): PersistentProcessDataMessage? {
+    fun getRequiredExtractProcessForContinuation(
+        referenceId: String,
+        requiresEventId: String
+    ): PersistentProcessDataMessage? {
         return persistentReader.getProcessEvent(referenceId, requiresEventId)
     }
+
     fun canConvert(extract: PersistentProcessDataMessage?): Boolean {
         return extract?.consumed == true && extract.data.isSuccess()
     }
@@ -54,7 +60,8 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
         event: PersistentProcessDataMessage,
         events: List<PersistentProcessDataMessage>
     ): MessageDataWrapper? {
-        val convertEvent = events.find { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED && it.data is ConvertWorkerRequest }
+        val convertEvent =
+            events.find { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED && it.data is ConvertWorkerRequest }
         if (convertEvent == null) {
             // No convert here..
             return null
@@ -63,22 +70,42 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
         val requiredEventId = convertRequest.requiresEventId
         if (requiredEventId != null) {
             // Requires the eventId to be defined as consumed
-            val requiredEventToBeCompleted =
-                getRequiredExtractProcessForContinuation(referenceId = event.referenceId, requiresEventId = requiredEventId)
-                    ?: return SimpleMessageData(Status.SKIPPED, "Required event: $requiredEventId is not found. Skipping convert work for referenceId: ${event.referenceId}")
+            val requiredEventToBeCompleted = getRequiredExtractProcessForContinuation(
+                referenceId = event.referenceId,
+                requiresEventId = requiredEventId
+            )
+            if (requiredEventToBeCompleted == null) {
+                log.warn { "$requiredEventId extract event with eventId: $requiredEventId was not found" }
+                log.info { "Sending ${event.eventId} @ ${event.referenceId} to deferred check" }
+                val existing = scheduled_deferred_events[event.referenceId]
+                val newList = (existing ?: listOf()) + listOf(
+                    DerivedProcessIterationHolder(
+                        eventId = event.eventId,
+                        event = convertEvent
+                    )
+                )
+                scheduled_deferred_events[event.referenceId] = newList
+
+                return null
+            }
             if (!canConvert(requiredEventToBeCompleted)) {
                 // Waiting for required event to be completed
                 return null
             }
         }
 
-        val isAlreadyClaimed = persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
+        val isAlreadyClaimed =
+            persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
         if (isAlreadyClaimed) {
-            log.warn {  "Process is already claimed!" }
+            log.warn { "Process is already claimed!" }
             return null
         }
 
-        val setClaim = persistentWriter.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
+        val setClaim = persistentWriter.setProcessEventClaim(
+            referenceId = event.referenceId,
+            eventId = event.eventId,
+            claimedBy = serviceId
+        )
         if (!setClaim) {
             return null
         }
@@ -87,27 +114,39 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
         val converter = Converter(referenceId = event.referenceId, eventId = event.eventId, data = payload)
         if (!converter.canRead()) {
             // Make claim regardless but push to schedule
-            return SimpleMessageData(Status.ERROR, "Can't read the file..")
+            return ConvertWorkPerformed(
+                status = Status.ERROR,
+                message = "Can't read the file..",
+                derivedFromEventId = converter.eventId,
+                producedBy = serviceId
+            )
         }
 
         val result = try {
             performConvert(converter)
         } catch (e: Exception) {
-            SimpleMessageData(status = Status.ERROR, message = e.message)
+            ConvertWorkPerformed(
+                status = Status.ERROR, message = e.message,
+                derivedFromEventId = converter.eventId,
+                producedBy = serviceId
+            )
         }
 
-        val consumedIsSuccessful = persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+        val consumedIsSuccessful =
+            persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
         runBlocking {
             delay(1000)
             if (!consumedIsSuccessful) {
                 persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
             }
             delay(1000)
-            var readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
+            var readbackIsSuccess =
+                persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
 
             while (!readbackIsSuccess) {
                 delay(1000)
-                readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
+                readbackIsSuccess =
+                    persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
             }
         }
         return result
@@ -132,7 +171,7 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                 derivedFromEventId = converter.eventId,
                 outFiles = emptyList()
             )
-        } catch (e : Converter.FileIsNullOrEmpty) {
+        } catch (e: Converter.FileIsNullOrEmpty) {
             e.printStackTrace()
             ConvertWorkPerformed(
                 status = Status.ERROR,
@@ -143,4 +182,51 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
             )
         }
     }
+
+
+    val scheduled_deferred_events: MutableMap<String, List<DerivedProcessIterationHolder>> = mutableMapOf()
+    @Scheduled(fixedDelay = (300_000))
+    fun validatePresenceOfRequiredEvent() {
+        val removal = mutableMapOf<String, List<DerivedProcessIterationHolder>>()
+
+
+        for ((referenceId, eventList) in scheduled_deferred_events) {
+            val failed = mutableListOf<DerivedProcessIterationHolder>()
+
+            for (event in eventList) {
+                val ce = if (event.event.data is ConvertWorkerRequest) event.event.data as ConvertWorkerRequest else null
+                try {
+                    val requiredEventToBeCompleted = getRequiredExtractProcessForContinuation(
+                        referenceId = referenceId,
+                        requiresEventId = ce?.requiresEventId!!
+                    )
+                    if (requiredEventToBeCompleted == null && event.iterated > 4) {
+                        throw RuntimeException("Iterated overshot")
+                    } else {
+                        event.iterated++
+                        "Iteration ${event.iterated} for event ${event.eventId} in deferred check"
+                    }
+
+                } catch (e: Exception) {
+                    persistentWriter.setProcessEventCompleted(referenceId, event.eventId, serviceId)
+                    failed.add(event)
+                    log.error { "Canceling event ${event.eventId}\n\t by declaring it as consumed." }
+                    producer.sendMessage(
+                        referenceId = referenceId,
+                        event = producesEvent,
+                        data = SimpleMessageData(Status.SKIPPED, "Required event: ${ce?.requiresEventId} is not found. Skipping convert work for referenceId: ${referenceId}")
+                    )
+                }
+            }
+            removal[referenceId] = failed
+        }
+
+        for ((referenceId, events) in removal) {
+            val list = scheduled_deferred_events[referenceId] ?: continue
+            list.toMutableList().removeAll(events)
+            scheduled_deferred_events[referenceId] = list
+        }
+
+    }
+
 }

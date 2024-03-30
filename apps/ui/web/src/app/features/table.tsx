@@ -18,16 +18,13 @@ type NullableTableRowActionEvents<T> = TableRowActionEvents<T> | null;
 export interface TableRowActionEvents<T> {
     click: (row: T) => void;
     doubleClick: (row: T) => void;
-    contextMenu: (row: T) => void;
+    contextMenu?: (row: T, x: number, y: number) => void;
 }
 
 
 export default function SimpleTable<T>({ items, columns, customizer, onRowClickedEvent }: { items: Array<T>, columns: Array<TablePropetyConfig>, customizer?: TableCellCustomizer<T>, onRowClickedEvent?: TableRowActionEvents<T> }) {
     const muiTheme = useTheme();
-
-    const [contextMenuVisible, setContextMenuVisible] = useState(false);
-    const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-
+    
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
     const [orderBy, setOrderBy] = useState<string>('');
     const [selectedRow, setSelectedRow] = useState<T | null>(null);
@@ -42,6 +39,13 @@ export default function SimpleTable<T>({ items, columns, customizer, onRowClicke
         setSelectedRow(row);
         if (row && onRowClickedEvent) {
             onRowClickedEvent.doubleClick(row);
+        }
+    }
+
+    const tableRowContextMenu = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent> , row: T | null) => {
+        if (row && onRowClickedEvent && onRowClickedEvent.contextMenu) {
+            e.preventDefault()
+            onRowClickedEvent.contextMenu(row, e.pageX, e.pageY)
         }
     }
 
@@ -114,6 +118,10 @@ export default function SimpleTable<T>({ items, columns, customizer, onRowClicke
                             <TableRow key={rowIndex}
                                 onClick={() => tableRowSingleClicked(row)}
                                 onDoubleClick={() => tableRowDoubleClicked(row)}
+                                onContextMenu={(e) => {
+                                    tableRowContextMenu(e, row);
+                                    tableRowSingleClicked(row);
+                                }}
                                 style={{ cursor: "pointer", backgroundColor: selectedRow === row ? muiTheme.palette.action.selected : '' }}
                             >
                                 {columns.map((column) => (

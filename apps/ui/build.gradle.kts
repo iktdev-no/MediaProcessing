@@ -39,6 +39,9 @@ dependencies {
     implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
     implementation(project(mapOf("path" to ":shared")))
     implementation(project(mapOf("path" to ":shared:common")))
+    implementation(project(mapOf("path" to ":shared:contract")))
+    implementation(project(mapOf("path" to ":shared:kafka")))
+
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

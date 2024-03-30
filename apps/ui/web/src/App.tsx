@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { Box, CssBaseline } from '@mui/material';
@@ -18,7 +18,7 @@ import { EventDataObject, SimpleEventDataObject } from './types';
 function App() {
   const client = useStompClient();
   const dispatch = useDispatch();
-
+  
   useWsSubscription<Array<EventDataObject>>("/topic/event/items", (response) => {
     dispatch(updateItems(response))
   });

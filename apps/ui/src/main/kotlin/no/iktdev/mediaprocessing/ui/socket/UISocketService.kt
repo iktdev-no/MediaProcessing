@@ -1,11 +1,11 @@
-package no.iktdev.streamit.content.ui.socket
+package no.iktdev.mediaprocessing.ui.socket
 
 import mu.KotlinLogging
 import no.iktdev.exfl.observable.ObservableMap
-import no.iktdev.streamit.content.ui.dto.EventDataObject
-import no.iktdev.streamit.content.ui.dto.SimpleEventDataObject
-import no.iktdev.streamit.content.ui.memActiveEventMap
-import no.iktdev.streamit.content.ui.memSimpleConvertedEventsMap
+import no.iktdev.mediaprocessing.ui.dto.EventDataObject
+import no.iktdev.mediaprocessing.ui.dto.SimpleEventDataObject
+import no.iktdev.mediaprocessing.ui.memActiveEventMap
+import no.iktdev.mediaprocessing.ui.memSimpleConvertedEventsMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.simp.SimpMessagingTemplate

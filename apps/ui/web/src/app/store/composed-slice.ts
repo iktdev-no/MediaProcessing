@@ -1,4 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
+import { EventDataObject } from "../../types"
 
 interface ComposedState {
     items: Array<EventDataObject>

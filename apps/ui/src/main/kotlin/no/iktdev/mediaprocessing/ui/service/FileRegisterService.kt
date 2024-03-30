@@ -1,4 +1,4 @@
-package no.iktdev.streamit.content.ui.service
+package no.iktdev.mediaprocessing.ui.service
 
 import dev.vishna.watchservice.KWatchEvent
 import dev.vishna.watchservice.asWatchChannel
@@ -6,8 +6,8 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
-import no.iktdev.streamit.content.ui.explorer.ExplorerCore
-import no.iktdev.streamit.content.ui.fileRegister
+import no.iktdev.mediaprocessing.ui.explorer.ExplorerCore
+import no.iktdev.mediaprocessing.ui.fileRegister
 import org.springframework.stereotype.Service
 import java.io.File
 import java.math.BigInteger

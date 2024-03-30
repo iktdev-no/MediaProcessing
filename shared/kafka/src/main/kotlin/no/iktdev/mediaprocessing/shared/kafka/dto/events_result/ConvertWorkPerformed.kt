@@ -11,5 +11,5 @@ data class ConvertWorkPerformed(
     override val message: String? = null,
     val producedBy: String,
     val derivedFromEventId: String,
-    val outFiles: List<String>
+    val outFiles: List<String> = listOf()
 ): MessageDataWrapper(status, message)

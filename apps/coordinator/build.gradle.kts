@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.spring") version "1.5.31"
     id("org.springframework.boot") version "2.5.5"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.0" // Legg til Kotlin Serialization-plugin
 }
 
 group = "no.iktdev.mediaprocessing"
@@ -84,7 +85,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:3.+")
     testImplementation("org.assertj:assertj-core:3.4.1")
-
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
 }
 
 tasks.withType<Test> {

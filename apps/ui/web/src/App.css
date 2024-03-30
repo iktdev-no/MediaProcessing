@@ -1,0 +1,21 @@
+
+.contextmenu {
+    display: block;
+    border: black 1px solid;
+    border-radius: 5px;
+
+    position: absolute;
+
+}
+
+.contextMenuItem {
+    cursor: pointer;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+.contextMenuItem:hover {
+    background-color: black;
+}

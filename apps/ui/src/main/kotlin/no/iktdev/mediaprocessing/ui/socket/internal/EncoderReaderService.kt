@@ -1,12 +1,12 @@
-package no.iktdev.streamit.content.ui.socket.internal
+package no.iktdev.mediaprocessing.ui.socket.internal
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
-import no.iktdev.streamit.content.ui.UIEnv
-import no.iktdev.streamit.content.ui.dto.EventDataObject
-import no.iktdev.streamit.content.ui.memActiveEventMap
-import no.iktdev.streamit.content.ui.memSimpleConvertedEventsMap
+import no.iktdev.mediaprocessing.ui.UIEnv
+import no.iktdev.mediaprocessing.ui.dto.EventDataObject
+import no.iktdev.mediaprocessing.ui.memActiveEventMap
+import no.iktdev.mediaprocessing.ui.memSimpleConvertedEventsMap
 import org.springframework.messaging.simp.stomp.StompFrameHandler
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
