@@ -28,11 +28,6 @@ enum class KafkaEvents(val event: String) {
     EVENT_WORK_DOWNLOAD_COVER_PERFORMED("event:work-download-cover:performed"),
 
 
-    EVENT_WORK_ENCODE_SKIPPED("event:work-encode:skipped"),
-    EVENT_WORK_EXTRACT_SKIPPED("event:work-extract:skipped"),
-    EVENT_WORK_CONVERT_SKIPPED("event:work-convert:skipped"),
-
-
     EVENT_STORE_VIDEO_PERFORMED("event:store-video:performed"),
     EVENT_STORE_SUBTITLE_PERFORMED("event:store-subtitle:performed"),
     EVENT_STORE_COVER_PERFORMED("event:store-cover:performed"),
@@ -45,6 +40,19 @@ enum class KafkaEvents(val event: String) {
     companion object {
         fun toEvent(event: String): KafkaEvents? {
             return KafkaEvents.entries.find { it.event == event }
+        }
+
+        fun isOfWork(event: KafkaEvents): Boolean {
+            return event in listOf(
+
+                EVENT_WORK_CONVERT_CREATED,
+                EVENT_WORK_EXTRACT_CREATED,
+                EVENT_WORK_ENCODE_CREATED,
+
+                EVENT_WORK_ENCODE_PERFORMED,
+                EVENT_WORK_CONVERT_PERFORMED,
+                EVENT_WORK_EXTRACT_PERFORMED
+            )
         }
     }
 }

@@ -48,6 +48,8 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         if (!success) {
             log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().database}" }
         } else {
+            deleteOlderEventsIfSuperseded(event.key, event.value)
+
             io.launch {
                 delay(500)
                 readAllMessagesFor(event.value.referenceId, event.value.eventId)
@@ -55,6 +57,24 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         }
     }
 
+    fun deleteOlderEventsIfSuperseded(event: KafkaEvents, value: Message<out MessageDataWrapper>) {
+        val existingMessages = persistentReader.getMessagesFor(value.referenceId)
+
+        val workItems = existingMessages.filter { KafkaEvents.isOfWork(it.event) }
+
+
+        if (KafkaEvents.isOfWork(event)) {
+            // Here i would need to list all of the work events, then proceed to check which one of the derivedId does not correspond to a entry
+            // Nonmatching has been superseded
+
+
+
+            val superseded = existingMessages.filter { it.event == event && it.eventId != value.eventId }
+            superseded.forEach {
+                persistentWriter.deleteStoredEventDataMessage(referenceId = it.referenceId, eventId = it.eventId, event= it.event )
+            }
+        }
+    }
 
 
 

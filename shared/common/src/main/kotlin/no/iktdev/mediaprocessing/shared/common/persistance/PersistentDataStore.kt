@@ -5,9 +5,12 @@ import no.iktdev.mediaprocessing.shared.common.datasource.DataSource
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.update
@@ -38,6 +41,16 @@ open class PersistentDataStore(var dataSource: DataSource) {
             else {
                 exception.printStackTrace()
                 false
+            }
+        }
+    }
+
+    fun deleteStoredEventDataMessage(referenceId: String, eventId: String, event: KafkaEvents): Boolean {
+        return executeWithStatus(dataSource.database) {
+            events.deleteWhere {
+                (events.referenceId eq referenceId) and
+                        (events.eventId eq eventId) and
+                        (events.event eq event.event)
             }
         }
     }

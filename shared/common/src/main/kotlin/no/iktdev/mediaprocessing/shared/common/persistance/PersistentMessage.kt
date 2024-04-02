@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.shared.common.persistance
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.isSkipped
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.jetbrains.exposed.sql.ResultRow
 import java.time.LocalDateTime
@@ -28,6 +29,15 @@ fun PersistentMessage.isSuccess(): Boolean {
         false
     }
 }
+
+fun PersistentMessage.isSkipped(): Boolean {
+    return try {
+        this.data.isSkipped()
+    } catch (e: Exception) {
+        false
+    }
+}
+
 
 
 fun fromRowToPersistentMessage(row: ResultRow, dez: DeserializingRegistry): PersistentMessage? {

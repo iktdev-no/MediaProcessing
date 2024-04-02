@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.mapping
 
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.persistance.isSkipped
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import no.iktdev.mediaprocessing.shared.contract.reader.MediaProcessedDto
@@ -33,7 +34,7 @@ class ProcessMapping(val events: List<PersistentMessage>) {
         val created = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_CREATED}
 
         val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_PERFORMED }
-        val isSkipped = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_SKIPPED }
+        val isSkipped = events.filter { it.isSkipped() }
 
         return (arguments.isNotEmpty() && created.isEmpty()) || created.size > performed.size + isSkipped.size
     }
@@ -44,7 +45,7 @@ class ProcessMapping(val events: List<PersistentMessage>) {
         val created = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED }
 
         val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED }
-        val isSkipped = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_SKIPPED }
+        val isSkipped = events.filter { it.isSkipped() }
 
         return (arguments.isNotEmpty() && created.isEmpty()) || created.size > performed.size + isSkipped.size
     }
@@ -52,7 +53,7 @@ class ProcessMapping(val events: List<PersistentMessage>) {
     fun waitsForConvert(): Boolean {
         val created = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED }
         val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_PERFORMED }
-        val isSkipped = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_SKIPPED }
+        val isSkipped = events.filter { it.isSkipped() }
 
         return created.size > performed.size + isSkipped.size
     }
