@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.ui
 
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
@@ -9,22 +8,24 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.mediaprocessing.ui.coordinator.PersistentEventBasedMessageListener
+import no.iktdev.mediaprocessing.ui.dto.EventSummary
 import no.iktdev.mediaprocessing.ui.dto.EventSummarySubItem
 import no.iktdev.mediaprocessing.ui.dto.SummaryState
+import no.iktdev.mediaprocessing.ui.socket.EventbasedTopic
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
 @EnableScheduling
-class Coordinator(@Autowired private val template: SimpMessagingTemplate?) : CoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
+class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : CoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
     override val listeners = PersistentEventBasedMessageListener()
-    val dbReader = PersistentDataReader(getEventsDatabase())
 
     override fun onCoordinatorReady() {
 
@@ -39,14 +40,6 @@ class Coordinator(@Autowired private val template: SimpMessagingTemplate?) : Coo
         eventId: String,
         messages: List<PersistentMessage>
     ) {
-    }
-
-    fun readAllEvents() {
-        val messages = persistentReader.getAllMessages()
-    }
-
-    fun readAllProcesserEvents() {
-        val messages = persistentReader.getProcessEvents()
     }
 
 
@@ -106,14 +99,61 @@ class Coordinator(@Autowired private val template: SimpMessagingTemplate?) : Coo
             return SummaryState.Preparing
         }
 
-        // EVENT_MEDIA_METADATA_SEARCH_PERFORMED
+        val analyzed2 = events.findLast { it.event in listOf(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE) }
+        if (analyzed2 != null) {
+            return SummaryState.Analyzing
+        }
 
+        val waitingForMeta = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED }
+        if (waitingForMeta != null) {
+            return SummaryState.Metadata
+        }
+
+        val analyzed = events.findLast { it.event in listOf(KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED, KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED, KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE) }
+        if (analyzed != null) {
+            return SummaryState.Analyzing
+        }
+
+        val readEvent = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED }
+        if (readEvent != null) {
+            return SummaryState.Read
+        }
 
         return SummaryState.Started
     }
 
     fun buildSummaries() {
+        val processerMessages = persistentReader.getProcessEvents().groupBy { it.referenceId }
         val messages = persistentReader.getAllMessages()
+
+        val mapped = messages.mapNotNull { it ->
+            val referenceId = it.firstOrNull()?.referenceId
+            if (referenceId != null) {
+                val procM = processerMessages.getOrDefault(referenceId, emptyList())
+                val processesStatuses = getCurrentStateFromProcesserEvents(procM)
+                val messageStatus = getCurrentState(it, processesStatuses)
+
+                val baseNameEvent = it.lastOrNull {ke -> ke.event == KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED }?.data.let { data ->
+                    if (data is BaseInfoPerformed) data else null
+                }
+                val mediaNameEvent = it.lastOrNull { ke -> ke.event == KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE }?.data.let { data ->
+                    if (data is VideoInfoPerformed) data else null
+                }
+
+                val baseName = if (mediaNameEvent == null) baseNameEvent?.sanitizedName else mediaNameEvent.toValueObject()?.fullName
+
+                EventSummary(
+                    referenceId = referenceId,
+                    baseName = baseName,
+                    collection = mediaNameEvent?.toValueObject()?.title,
+                    events = it.map { ke -> ke.event },
+                    status = messageStatus,
+                    activeEvens = processesStatuses
+                )
+
+            } else null
+        }
+
 
     }
 

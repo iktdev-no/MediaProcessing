@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.processer.ffmpeg
 
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
@@ -59,7 +58,7 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
         withContext(Dispatchers.IO) {
             logFile.createNewFile()
         }
-        listener.onStarted(info)
+        listener.onStarted(referenceId, eventId, info)
         val processOp = process(
             ProcesserEnv.ffmpeg, *args.toTypedArray(),
             stdout = Redirect.CAPTURE,
@@ -73,17 +72,29 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
         val result = processOp
         onOutputChanged("Received exit code: ${result.resultCode}")
         if (result.resultCode != 0) {
-            listener.onError(info, result.output.joinToString("\n"))
+            listener.onError(referenceId, eventId, info, result.output.joinToString("\n"))
         } else {
-            listener.onCompleted(info)
+            listener.onCompleted(referenceId, eventId, info)
         }
     }
 
+    private var progress: FfmpegDecodedProgress? = null
     fun onOutputChanged(line: String) {
         outputCache.add(line)
         writeToLog(line)
         // toList is needed to prevent mutability.
-        val progress = decoder.parseVideoProgress(outputCache.toList())
+        decoder.parseVideoProgress(outputCache.toList())?.let { decoded ->
+            try {
+                val _progress = decoder.getProgress(decoded)
+                if (progress == null || _progress.progress > (progress?.progress ?: -1) ) {
+                    progress = _progress
+                    listener.onProgressChanged(referenceId, eventId, info, _progress)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
     }
 
     fun writeToLog(line: String) {
@@ -96,8 +107,8 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
 }
 
 interface FfmpegWorkerEvents {
-    fun onStarted(info: FfmpegWorkRequestCreated,)
-    fun onCompleted(info: FfmpegWorkRequestCreated)
-    fun onError(info: FfmpegWorkRequestCreated, errorMessage: String)
-    fun onProgressChanged(info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress)
+    fun onStarted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated,)
+    fun onCompleted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated)
+    fun onError(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, errorMessage: String)
+    fun onProgressChanged(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress)
 }

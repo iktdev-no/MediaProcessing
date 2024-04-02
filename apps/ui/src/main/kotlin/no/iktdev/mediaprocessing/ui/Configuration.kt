@@ -1,12 +1,16 @@
 package no.iktdev.mediaprocessing.ui
 
+import no.iktdev.mediaprocessing.shared.common.Defaults
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
+import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
+import no.iktdev.mediaprocessing.shared.kafka.core.KafkaImplementation
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.messaging.simp.config.MessageBrokerRegistry
+import org.springframework.context.annotation.Import
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.method.HandlerTypePredicate
@@ -14,9 +18,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
 
 
 @Configuration
@@ -62,4 +63,12 @@ class ApiCommunicationConfig {
 
 @Configuration
 class SocketImplemented: SocketImplementation() {
+}
+
+@Configuration
+class DefaultConfiguration: Defaults()
+
+@Configuration
+@Import(CoordinatorProducer::class, DefaultMessageListener::class)
+class KafkaLocalInit: KafkaImplementation() {
 }

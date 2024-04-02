@@ -1,21 +1,26 @@
 package no.iktdev.mediaprocessing.ui.socket
 
 import mu.KotlinLogging
+import no.iktdev.exfl.observable.ObservableList
 import no.iktdev.exfl.observable.ObservableMap
+import no.iktdev.exfl.observable.observableListOf
+import no.iktdev.exfl.observable.observableMapOf
 import no.iktdev.mediaprocessing.ui.dto.EventDataObject
+import no.iktdev.mediaprocessing.ui.dto.EventSummary
 import no.iktdev.mediaprocessing.ui.dto.SimpleEventDataObject
-import no.iktdev.mediaprocessing.ui.memActiveEventMap
-import no.iktdev.mediaprocessing.ui.memSimpleConvertedEventsMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 
 @Controller
-class UISocketService(
+class EventbasedTopic(
     @Autowired private val template: SimpMessagingTemplate?
 ) {
     private val log = KotlinLogging.logger {}
+    val summaryList: ObservableList<EventSummary> = observableListOf()
+    val memSimpleConvertedEventsMap: ObservableMap<String, SimpleEventDataObject> = observableMapOf()
+    val memActiveEventMap: ObservableMap<String, EventDataObject> = observableMapOf()
 
     init {
         memActiveEventMap.addListener(object : ObservableMap.Listener<String, EventDataObject> {
@@ -36,6 +41,12 @@ class UISocketService(
                 if (template == null) {
                     log.error { "Template is null!" }
                 }
+            }
+        })
+        summaryList.addListener(object: ObservableList.Listener<EventSummary> {
+            override fun onListChanged(items: List<EventSummary>) {
+                super.onListChanged(items)
+                template?.convertAndSend("/topic/summary", items)
             }
         })
     }

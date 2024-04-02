@@ -4,10 +4,10 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 
 data class EventSummary(
     val referenceId: String,
-    val baseName: String,
-    val collection: String,
-    val events: List<KafkaEvents>,
-    val status: SummaryState,
+    val baseName: String? = null,
+    val collection: String? = null,
+    val events: List<KafkaEvents> = emptyList(),
+    val status: SummaryState = SummaryState.Started,
     val activeEvens: Map<String, EventSummarySubItem>
 )
 
@@ -26,7 +26,7 @@ enum class SummaryState {
     Preparing,
     Metadata,
     Analyzing,
-    Reading,
+    Read,
     Started
 
 }

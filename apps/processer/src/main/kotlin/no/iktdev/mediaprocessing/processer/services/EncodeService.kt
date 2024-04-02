@@ -7,13 +7,13 @@ import no.iktdev.mediaprocessing.processer.*
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorkerEvents
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.shared.common.getComputername
+import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserEventInfo
+import no.iktdev.mediaprocessing.shared.contract.dto.WorkStatus
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
@@ -24,7 +24,7 @@ import java.util.*
 import javax.annotation.PreDestroy
 
 @Service
-class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreator(coordinator) {
+class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired private val reporter: Reporter): TaskCreator(coordinator) {
     private val log = KotlinLogging.logger {}
     private val logDir = ProcesserEnv.encodeLogDirectory
 
@@ -83,7 +83,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
             log.info { "Claim successful for ${event.referenceId} encode" }
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents )
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
-                ffmpegWorkerEvents.onError(ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
+                ffmpegWorkerEvents.onError(event.referenceId, event.eventId, ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
                 // Setting consumed to prevent spamming
                 persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
                 return
@@ -98,7 +98,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
     }
 
     val ffmpegWorkerEvents = object : FfmpegWorkerEvents {
-        override fun onStarted(info: FfmpegWorkRequestCreated) {
+        override fun onStarted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated) {
             val runner = this@EncodeService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce start message when the referenceId is not present" }
@@ -106,7 +106,13 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
             }
             log.info { "Encode started for ${runner.referenceId}" }
             persistentWriter.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
-            sendProgress(info, null, false)
+            sendProgress(referenceId, eventId, status = WorkStatus.Started, info, FfmpegDecodedProgress(
+                progress = 0,
+                time = "Unkown",
+                duration = "Unknown",
+                speed = "0",
+            )
+            )
 
             scope.launch {
                 while (runnerJob?.isActive == true) {
@@ -116,7 +122,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
             }
         }
 
-        override fun onCompleted(info: FfmpegWorkRequestCreated) {
+        override fun onCompleted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated) {
             val runner = this@EncodeService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce completion message when the referenceId is not present" }
@@ -139,12 +145,18 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
                 producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                     data = ProcesserEncodeWorkPerformed(status = Status.COMPLETED, producedBy = serviceId, derivedFromEventId =  runner.eventId, outFile = runner.info.outFile)
                 )
+                sendProgress(referenceId, eventId, status = WorkStatus.Completed, info, FfmpegDecodedProgress(
+                    progress = 100,
+                    time = "",
+                    duration = "",
+                    speed = "0",
+                ))
                 clearWorker()
             }
 
         }
 
-        override fun onError(info: FfmpegWorkRequestCreated, errorMessage: String) {
+        override fun onError(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, errorMessage: String) {
             val runner = this@EncodeService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce error message when the referenceId is not present" }
@@ -154,18 +166,31 @@ class EncodeService(@Autowired override var coordinator: Coordinator): TaskCreat
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                 data = ProcesserEncodeWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
             )
-            sendProgress(info = info, ended = true)
+            sendProgress(referenceId, eventId, status = WorkStatus.Failed, info = info, progress = FfmpegDecodedProgress(
+                progress = 0,
+                time = "",
+                duration = "",
+                speed = "0",
+            ))
             clearWorker()
         }
 
-        override fun onProgressChanged(info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress) {
-            sendProgress(info, progress, false)
+        override fun onProgressChanged(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress) {
+            sendProgress(referenceId, eventId, WorkStatus.Working, info, progress)
         }
 
     }
 
-    fun sendProgress(info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress? = null, ended: Boolean) {
-        // TODO: Implementation
+    fun sendProgress(referenceId: String, eventId: String, status: WorkStatus, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress? = null) {
+        val processerEventInfo = ProcesserEventInfo(
+            referenceId = referenceId,
+            eventId = eventId,
+            status = status,
+            inputFile = info.inputFile,
+            outputFiles = listOf(info.outFile),
+            progress = progress?.toProcessProgress()
+        )
+        reporter.sendEncodeProgress(processerEventInfo)
     }
 
 

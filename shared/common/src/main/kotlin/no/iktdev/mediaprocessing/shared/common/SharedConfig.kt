@@ -10,6 +10,7 @@ object SharedConfig {
 
     val ffprobe: String = System.getenv("SUPPORTING_EXECUTABLE_FFPROBE") ?: "ffprobe"
     val ffmpeg: String = System.getenv("SUPPORTING_EXECUTABLE_FFMPEG") ?: "ffmpeg"
+    val uiUrl: String = System.getenv("APP_URL_UI") ?: "http://ui:8080"
 
     val preference: File = File("/data/config/preference.json")
 }

@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import no.iktdev.mediaprocessing.shared.common.datasource.DatabaseConnectionConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import org.h2.jdbcx.JdbcDataSource 
 import java.io.PrintWriter
@@ -8,16 +9,11 @@ import java.sql.SQLFeatureNotSupportedException
 import java.util.logging.Logger
 import javax.sql.DataSource
 
-class H2DataSource(private val jdbcDataSource: JdbcDataSource, databaseName: String) : DataSource, MySqlDataSource(databaseName = databaseName, address = jdbcDataSource.getUrl(), username = jdbcDataSource.user, password = jdbcDataSource.password) {
-    companion object {
-        fun fromDatabaseEnv(): H2DataSource {
-            if (DatabaseConfig.database.isNullOrBlank()) throw RuntimeException("Database name is not defined in 'DATABASE_NAME'")
-            return H2DataSource(
-                JdbcDataSource(),
-                databaseName = DatabaseConfig.database!!,
-            )
-        }
-    }
+class H2DataSource(private val jdbcDataSource: JdbcDataSource, databaseName: String) : DataSource, MySqlDataSource(
+    DatabaseConnectionConfig(
+        databaseName = databaseName, address = jdbcDataSource.getUrl(), username = jdbcDataSource.user, password = jdbcDataSource.password, port = null
+    )
+) {
     override fun getConnection(): Connection {
         return jdbcDataSource.connection
     }
@@ -61,7 +57,7 @@ class H2DataSource(private val jdbcDataSource: JdbcDataSource, databaseName: Str
     }
 
     override fun createDatabaseStatement(): String {
-        return "CREATE SCHEMA $databaseName"
+        return "CREATE SCHEMA ${config.databaseName}"
     }
 
     override fun toConnectionUrl(): String {

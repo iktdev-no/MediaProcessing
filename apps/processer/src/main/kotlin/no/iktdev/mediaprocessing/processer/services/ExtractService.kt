@@ -8,13 +8,13 @@ import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorkerEvents
 import no.iktdev.mediaprocessing.shared.common.limitedWhile
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.shared.common.getComputername
+import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserEventInfo
+import no.iktdev.mediaprocessing.shared.contract.dto.WorkStatus
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
@@ -25,7 +25,7 @@ import java.util.*
 import javax.annotation.PreDestroy
 
 @Service
-class ExtractService(@Autowired override var coordinator: Coordinator): TaskCreator(coordinator) {
+class ExtractService(@Autowired override var coordinator: Coordinator, @Autowired private val reporter: Reporter): TaskCreator(coordinator) {
     private val log = KotlinLogging.logger {}
     private val logDir = ProcesserEnv.extractLogDirectory
 
@@ -88,7 +88,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents)
 
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
-                ffmpegWorkerEvents.onError(ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
+                ffmpegWorkerEvents.onError(event.referenceId, event.eventId, ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
                 // Setting consumed to prevent spamming
                 persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
                 return
@@ -103,7 +103,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
     }
 
     val ffmpegWorkerEvents = object : FfmpegWorkerEvents {
-        override fun onStarted(info: FfmpegWorkRequestCreated) {
+        override fun onStarted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated) {
             val runner = this@ExtractService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce start message when the referenceId is not present" }
@@ -111,10 +111,10 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
             }
             log.info { "Extract started for ${runner.referenceId}" }
             persistentWriter.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
-            sendState(info, false)
+            sendProgress(referenceId, eventId, WorkStatus.Started, info)
         }
 
-        override fun onCompleted(info: FfmpegWorkRequestCreated) {
+        override fun onCompleted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated) {
             val runner = this@ExtractService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce completion message when the referenceId is not present" }
@@ -149,12 +149,13 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
                         derivedFromEventId =  runner.eventId,
                         outFile = runner.info.outFile)
                 )
+                sendProgress(referenceId, eventId, WorkStatus.Completed, info)
                 log.info { "Extract is releasing worker" }
                 clearWorker()
             }
         }
 
-        override fun onError(info: FfmpegWorkRequestCreated, errorMessage: String) {
+        override fun onError(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, errorMessage: String) {
             val runner = this@ExtractService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce error message when the referenceId is not present" }
@@ -164,18 +165,26 @@ class ExtractService(@Autowired override var coordinator: Coordinator): TaskCrea
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                 ProcesserExtractWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
             )
-            sendState(info, ended= true)
+            sendProgress(referenceId, eventId, WorkStatus.Failed, info)
             clearWorker()
         }
 
-        override fun onProgressChanged(info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress) {
-            // None as this will not be running with progress
+        override fun onProgressChanged(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress) {
+            sendProgress(referenceId, eventId, WorkStatus.Working, info, progress)
         }
 
     }
 
-    fun sendState(info: FfmpegWorkRequestCreated, ended: Boolean) {
-
+    fun sendProgress(referenceId: String, eventId: String, status: WorkStatus, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress? = null) {
+        val processerEventInfo = ProcesserEventInfo(
+            referenceId = referenceId,
+            eventId = eventId,
+            status = status,
+            inputFile = info.inputFile,
+            outputFiles = listOf(info.outFile),
+            progress = progress?.toProcessProgress()
+        )
+        reporter.sendExtractProgress(processerEventInfo)
     }
 
 

@@ -27,18 +27,18 @@ data class VideoInfoPerformed(
 
 data class EpisodeInfo(
     override val type: String = "serie",
-    val title: String,
+    override val title: String,
     val episode: Int,
     val season: Int,
     val episodeTitle: String?,
     override val fullName: String
-): VideoInfo(type, fullName)
+): VideoInfo(type, title, fullName)
 
 data class MovieInfo(
     override val type: String = "movie",
-    val title: String,
+    override val title: String,
     override val fullName: String
-) : VideoInfo(type, fullName)
+) : VideoInfo(type, title, fullName)
 
 data class SubtitleInfo(
     val inputFile: String,
@@ -49,6 +49,7 @@ data class SubtitleInfo(
 @KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE)
 open class VideoInfo(
     @Transient open val type: String,
+    @Transient open val title: String,
     @Transient open val fullName: String
 ) {
     fun toJsonObject(): JsonObject {
