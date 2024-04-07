@@ -7,7 +7,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
-@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_PROCESS_STARTED)
+@KafkaBelongsToEvent(KafkaEvents.EventMediaProcessStarted)
 data class MediaProcessStarted(
     override val status: Status,
     val type: ProcessType = ProcessType.FLOW,

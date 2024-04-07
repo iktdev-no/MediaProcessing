@@ -3,15 +3,17 @@ package no.iktdev.mediaprocessing.shared.kafka.dto
 
 abstract class MessageDataWrapper(
     @Transient open val status: Status = Status.ERROR,
-    @Transient open val message: String? = null
+    @Transient open val message: String? = null,
+    @Transient open val derivedFromEventId: String? = null
 )
 
 
 
 data class SimpleMessageData(
     override val status: Status,
-    override val message: String? = null
-) : MessageDataWrapper(status, message)
+    override val message: String? = null,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, message, derivedFromEventId)
 
 
 fun MessageDataWrapper?.isSuccess(): Boolean {

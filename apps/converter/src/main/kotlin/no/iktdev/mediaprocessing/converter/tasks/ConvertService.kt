@@ -3,11 +3,8 @@ package no.iktdev.mediaprocessing.converter.tasks
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.converter.ConverterCoordinator
-import no.iktdev.mediaprocessing.converter.TaskCreator
+import no.iktdev.mediaprocessing.converter.*
 import no.iktdev.mediaprocessing.converter.convert.Converter
-import no.iktdev.mediaprocessing.converter.persistentReader
-import no.iktdev.mediaprocessing.converter.persistentWriter
 import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -37,18 +34,18 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
 
     override val listensForEvents: List<KafkaEvents>
         get() = listOf(
-            KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED,
-            KafkaEvents.EVENT_WORK_CONVERT_CREATED
+            KafkaEvents.EventWorkExtractPerformed,
+            KafkaEvents.EventWorkConvertCreated
         )
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_WORK_CONVERT_PERFORMED
+        get() = KafkaEvents.EventWorkConvertPerformed
 
 
     fun getRequiredExtractProcessForContinuation(
         referenceId: String,
         requiresEventId: String
     ): PersistentProcessDataMessage? {
-        return persistentReader.getProcessEvent(referenceId, requiresEventId)
+        return eventManager.getProcessEventWith(referenceId, requiresEventId)
     }
 
     fun canConvert(extract: PersistentProcessDataMessage?): Boolean {
@@ -61,7 +58,7 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
         events: List<PersistentProcessDataMessage>
     ): MessageDataWrapper? {
         val convertEvent =
-            events.find { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED && it.data is ConvertWorkerRequest }
+            events.find { it.event == KafkaEvents.EventWorkConvertCreated && it.data is ConvertWorkerRequest }
         if (convertEvent == null) {
             // No convert here..
             return null
@@ -94,17 +91,16 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
             }
         }
 
-        val isAlreadyClaimed =
-            persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
+        val isAlreadyClaimed = eventManager.isProcessEventClaimed(referenceId = event.referenceId, eventId = event.eventId)
         if (isAlreadyClaimed) {
             log.warn { "Process is already claimed!" }
             return null
         }
 
-        val setClaim = persistentWriter.setProcessEventClaim(
+        val setClaim = eventManager.setProcessEventClaim(
             referenceId = event.referenceId,
             eventId = event.eventId,
-            claimedBy = serviceId
+            claimer = serviceId
         )
         if (!setClaim) {
             return null
@@ -133,20 +129,19 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
         }
 
         val consumedIsSuccessful =
-            persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+            eventManager.setProcessEventCompleted(event.referenceId, event.eventId)
         runBlocking {
             delay(1000)
             if (!consumedIsSuccessful) {
-                persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+                eventManager.setProcessEventCompleted(event.referenceId, event.eventId)
             }
             delay(1000)
-            var readbackIsSuccess =
-                persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
+            var readbackIsSuccess = eventManager.isProcessEventCompleted(event.referenceId, event.eventId)
 
             while (!readbackIsSuccess) {
                 delay(1000)
                 readbackIsSuccess =
-                    persistentReader.isProcessEventDefinedAsConsumed(event.referenceId, event.eventId, serviceId)
+                    eventManager.isProcessEventCompleted(event.referenceId, event.eventId)
             }
         }
         return result
@@ -208,13 +203,13 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                     }
 
                 } catch (e: Exception) {
-                    persistentWriter.setProcessEventCompleted(referenceId, event.eventId, serviceId)
+                    eventManager.setProcessEventCompleted(referenceId, event.eventId)
                     failed.add(event)
                     log.error { "Canceling event ${event.eventId}\n\t by declaring it as consumed." }
                     producer.sendMessage(
                         referenceId = referenceId,
                         event = producesEvent,
-                        data = SimpleMessageData(Status.SKIPPED, "Required event: ${ce?.requiresEventId} is not found. Skipping convert work for referenceId: ${referenceId}")
+                        data = SimpleMessageData(Status.SKIPPED, "Required event: ${ce?.requiresEventId} is not found. Skipping convert work for referenceId: ${referenceId}", derivedFromEventId = event.eventId)
                     )
                 }
             }

@@ -20,12 +20,12 @@ class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordi
 
 
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_READ_OUT_COVER
+        get() = KafkaEvents.EventMediaReadOutCover
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
-        KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE,
-        KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED
+        KafkaEvents.EventMediaReadBaseInfoPerformed,
+        KafkaEvents.EventMediaReadOutNameAndType,
+        KafkaEvents.EventMediaMetadataSearchPerformed
     )
 
     override fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
@@ -50,7 +50,8 @@ class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordi
                 status = Status.COMPLETED,
                 url = coverUrl,
                 outFileBaseName = baseInfo.title,
-                outDir = fileOut.outDirectory
+                outDir = fileOut.outDirectory,
+                derivedFromEventId = event.eventId
             )
         }
     }

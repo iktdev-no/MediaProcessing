@@ -5,10 +5,11 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
-@KafkaBelongsToEvent(KafkaEvents.EventWorkDownloadCoverPerformed)
-data class CoverDownloadWorkPerformed(
-    override val status: Status,
+@KafkaBelongsToEvent(KafkaEvents.EventNotificationOfWorkItemRemoval)
+data class NotificationOfDeletionPerformed(
+    override val status: Status = Status.COMPLETED,
     override val message: String? = null,
-    val coverFile: String,
-    override val derivedFromEventId: String?
-): MessageDataWrapper(status, message, derivedFromEventId = derivedFromEventId)
+    override val derivedFromEventId: String? = null, // Skal aldri settes derived
+    val deletedEventId: String,
+    val deletedEvent: KafkaEvents
+): MessageDataWrapper()

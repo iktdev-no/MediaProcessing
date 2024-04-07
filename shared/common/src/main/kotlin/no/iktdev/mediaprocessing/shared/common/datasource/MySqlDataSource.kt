@@ -17,7 +17,7 @@ open class MySqlDataSource(conf: DatabaseConnectionConfig): DataSource(conf) {
     override fun createDatabase(): Database? {
         val ok = transaction(toDatabaseServerConnection()) {
             val tmc = TransactionManager.current().connection
-            val query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${config.databaseName}'"
+            val query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${config.databaseName}';"
             val stmt = tmc.prepareStatement(query, true)
 
             val resultSet = stmt.executeQuery()
@@ -52,7 +52,7 @@ open class MySqlDataSource(conf: DatabaseConnectionConfig): DataSource(conf) {
     }
 
     override fun createDatabaseStatement(): String {
-        return "CREATE DATABASE ${config.databaseName}"
+        return "CREATE DATABASE ${config.databaseName};"
     }
 
     protected fun toDatabaseServerConnection(): Database {
@@ -66,12 +66,16 @@ open class MySqlDataSource(conf: DatabaseConnectionConfig): DataSource(conf) {
 
     override fun toDatabase(): Database {
         val database =  Database.connect(
-            "${toConnectionUrl()}/${config.databaseName}",
+            toDatabaseConnectionUrl(config.databaseName),
             user = config.username,
             password = config.password
         )
         this.database = database
         return database
+    }
+
+    override fun toDatabaseConnectionUrl(database: String): String {
+        return toConnectionUrl() + "/$database"
     }
 
     override fun toConnectionUrl(): String {

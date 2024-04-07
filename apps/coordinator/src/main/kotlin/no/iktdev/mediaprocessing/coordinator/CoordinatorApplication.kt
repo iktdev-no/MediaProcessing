@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.events
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import no.iktdev.mediaprocessing.shared.common.toStoredDatabase
@@ -46,8 +47,7 @@ fun getEventsDatabase(): MySqlDataSource {
     return eventsDatabase
 }
 
-lateinit var persistentReader: PersistentDataReader
-lateinit var persistentWriter: PersistentDataStore
+lateinit var eventManager: PersistentEventManager
 
 fun main(args: Array<String>) {
     Coroutines.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
@@ -57,16 +57,19 @@ fun main(args: Array<String>) {
     })
 
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
-    storeDatabase = DatabaseEnvConfig.toStoredDatabase()
-
     eventsDatabase.createDatabase()
+
+    storeDatabase = DatabaseEnvConfig.toStoredDatabase()
     storeDatabase.createDatabase()
+
+
+    eventManager = PersistentEventManager(eventsDatabase)
+
 
     val kafkaTables = listOf(
         events, // For kafka
     )
 
-    eventsDatabase.createTables(*kafkaTables.toTypedArray())
 
     val tables = arrayOf(
         catalog,
@@ -83,9 +86,8 @@ fun main(args: Array<String>) {
     )
     storeDatabase.createTables(*tables)
 
-    persistentReader = PersistentDataReader(eventsDatabase)
-    persistentWriter = PersistentDataStore(eventsDatabase)
 
+    eventsDatabase.createTables(*kafkaTables.toTypedArray())
     context = runApplication<CoordinatorApplication>(*args)
     printSharedConfig()
 }

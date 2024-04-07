@@ -2,8 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.coordinator.persistentReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
+import no.iktdev.mediaprocessing.coordinator.eventManager
 import no.iktdev.mediaprocessing.shared.contract.dto.RequestWorkProceed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -20,7 +19,7 @@ class ActionEventController(@Autowired var coordinator: Coordinator) {
     @RequestMapping("/flow/proceed")
     fun permitRunOnSequence(@RequestBody data: RequestWorkProceed): ResponseEntity<String> {
 
-        val set = persistentReader.getMessagesFor(data.referenceId)
+        val set = eventManager.getEventsWith(data.referenceId)
         if (set.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Gson().toJson(data))
         }

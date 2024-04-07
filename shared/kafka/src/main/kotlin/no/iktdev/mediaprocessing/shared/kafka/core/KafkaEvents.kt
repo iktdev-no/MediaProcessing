@@ -1,31 +1,34 @@
 package no.iktdev.mediaprocessing.shared.kafka.core
 
 enum class KafkaEvents(val event: String) {
-    EVENT_MEDIA_PROCESS_STARTED("event:media-process:started"),
+    EventMediaProcessStarted("event:media-process:started"),
     EVENT_REQUEST_PROCESS_STARTED("event:request-process:started"),
 
-    EVENT_MEDIA_READ_STREAM_PERFORMED("event:media-read-stream:performed"),
-    EVENT_MEDIA_PARSE_STREAM_PERFORMED("event:media-parse-stream:performed"),
-    EVENT_MEDIA_READ_BASE_INFO_PERFORMED("event:media-read-base-info:performed"),
-    EVENT_MEDIA_METADATA_SEARCH_PERFORMED("event:media-metadata-search:performed"),
-    EVENT_MEDIA_READ_OUT_NAME_AND_TYPE("event:media-read-out-name-and-type:performed"),
-    EVENT_MEDIA_READ_OUT_COVER("event:media-read-out-cover:performed"),
+    EventMediaReadStreamPerformed("event:media-read-stream:performed"),
+    EventMediaParseStreamPerformed("event:media-parse-stream:performed"),
+    EventMediaReadBaseInfoPerformed("event:media-read-base-info:performed"),
+    EventMediaMetadataSearchPerformed("event:media-metadata-search:performed"),
+    EventMediaReadOutNameAndType("event:media-read-out-name-and-type:performed"),
+    EventMediaReadOutCover("event:media-read-out-cover:performed"),
 
-    EVENT_MEDIA_ENCODE_PARAMETER_CREATED("event:media-encode-parameter:created"),
-    EVENT_MEDIA_EXTRACT_PARAMETER_CREATED("event:media-extract-parameter:created"),
-    EVENT_MEDIA_CONVERT_PARAMETER_CREATED("event:media-convert-parameter:created"),
-    EVENT_MEDIA_DOWNLOAD_COVER_PARAMETER_CREATED("event:media-download-cover-parameter:created"),
+    EventMediaParameterEncodeCreated("event:media-encode-parameter:created"),
+    EventMediaParameterExtractCreated("event:media-extract-parameter:created"),
+    EventMediaParameterConvertCreated("event:media-convert-parameter:created"),
+    EventMediaParameterDownloadCoverCreated("event:media-download-cover-parameter:created"),
 
-    EVENT_MEDIA_WORK_PROCEED_PERMITTED("event:media-work-proceed:permitted"),
+    EventMediaWorkProceedPermitted("event:media-work-proceed:permitted"),
 
-    EVENT_WORK_ENCODE_CREATED("event:work-encode:created"),
-    EVENT_WORK_EXTRACT_CREATED("event:work-extract:created"),
-    EVENT_WORK_CONVERT_CREATED("event:work-convert:created"),
+    // This event is to be used for commuincating across all appss taht an event has ben removed and to rterminate existint events
+    EventNotificationOfWorkItemRemoval("event:notification-work-item-removal"),
 
-    EVENT_WORK_ENCODE_PERFORMED("event:work-encode:performed"),
-    EVENT_WORK_EXTRACT_PERFORMED("event:work-extract:performed"),
-    EVENT_WORK_CONVERT_PERFORMED("event:work-convert:performed"),
-    EVENT_WORK_DOWNLOAD_COVER_PERFORMED("event:work-download-cover:performed"),
+    EventWorkEncodeCreated("event:work-encode:created"),
+    EventWorkExtractCreated("event:work-extract:created"),
+    EventWorkConvertCreated("event:work-convert:created"),
+
+    EventWorkEncodePerformed("event:work-encode:performed"),
+    EventWorkExtractPerformed("event:work-extract:performed"),
+    EventWorkConvertPerformed("event:work-convert:performed"),
+    EventWorkDownloadCoverPerformed("event:work-download-cover:performed"),
 
 
     EVENT_STORE_VIDEO_PERFORMED("event:store-video:performed"),
@@ -45,13 +48,13 @@ enum class KafkaEvents(val event: String) {
         fun isOfWork(event: KafkaEvents): Boolean {
             return event in listOf(
 
-                EVENT_WORK_CONVERT_CREATED,
-                EVENT_WORK_EXTRACT_CREATED,
-                EVENT_WORK_ENCODE_CREATED,
+                EventWorkConvertCreated,
+                EventWorkExtractCreated,
+                EventWorkEncodeCreated,
 
-                EVENT_WORK_ENCODE_PERFORMED,
-                EVENT_WORK_CONVERT_PERFORMED,
-                EVENT_WORK_EXTRACT_PERFORMED
+                EventWorkEncodePerformed,
+                EventWorkConvertPerformed,
+                EventWorkExtractPerformed
             )
         }
     }

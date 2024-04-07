@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service
 @Service
 class CreateEncodeWorkTask(@Autowired override var coordinator: Coordinator) : CreateProcesserWorkTask(coordinator) {
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_WORK_ENCODE_CREATED
+        get() = KafkaEvents.EventWorkEncodeCreated
 
     override val requiredEvents: List<KafkaEvents>
-        get() = listOf(KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED)
+        get() = listOf(KafkaEvents.EventMediaParameterEncodeCreated)
 
 }

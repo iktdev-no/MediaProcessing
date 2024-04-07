@@ -30,12 +30,11 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
     private val logDir = ProcesserEnv.extractLogDirectory
 
 
-    override val producesEvent = KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED
+    override val producesEvent = KafkaEvents.EventWorkExtractPerformed
 
     val scope = Coroutines.io()
 
     private var runner: FfmpegWorker? = null
-    private var runnerJob: Job? = null
 
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
     init {
@@ -43,7 +42,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
     }
 
     override val requiredEvents: List<KafkaEvents>
-        get() = listOf(KafkaEvents.EVENT_WORK_EXTRACT_CREATED)
+        get() = listOf(KafkaEvents.EventWorkExtractCreated)
 
     override fun prerequisitesRequired(events: List<PersistentProcessDataMessage>): List<() -> Boolean> {
         return super.prerequisitesRequired(events) + listOf {
@@ -56,16 +55,16 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
             return null
         }
         if (event.data !is FfmpegWorkRequestCreated) {
-            return SimpleMessageData(status = Status.ERROR, message = "Invalid data (${event.data.javaClass.name}) passed for ${event.event.event}")
+            return SimpleMessageData(status = Status.ERROR, message = "Invalid data (${event.data.javaClass.name}) passed for ${event.event.event}", event.eventId)
         }
 
-        val isAlreadyClaimed = persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
+        val isAlreadyClaimed = eventManager.isProcessEventClaimed(referenceId = event.referenceId, eventId = event.eventId)
         if (isAlreadyClaimed) {
             log.warn {  "Process is already claimed!" }
             return null
         }
 
-        if (runnerJob?.isActive != true) {
+        if (runner?.isWorking() != true) {
             startExtract(event)
         } else {
             log.warn { "Worker is already running.." }
@@ -82,7 +81,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
         }
 
 
-        val setClaim = persistentWriter.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
+        val setClaim = eventManager.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimer = serviceId)
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} extract" }
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents)
@@ -90,12 +89,10 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
                 ffmpegWorkerEvents.onError(event.referenceId, event.eventId, ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
                 // Setting consumed to prevent spamming
-                persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+                eventManager.setProcessEventCompleted(event.referenceId, event.eventId)
                 return
             }
-            runnerJob = scope.launch {
-                runner!!.run()
-            }
+            runner!!.run()
         } else {
             log.error { "Failed to set claim on referenceId: ${event.referenceId} on event ${event.event}" }
         }
@@ -110,7 +107,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
                 return
             }
             log.info { "Extract started for ${runner.referenceId}" }
-            persistentWriter.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
+            eventManager.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
             sendProgress(referenceId, eventId, WorkStatus.Started, info)
         }
 
@@ -121,12 +118,12 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
                 return
             }
             log.info { "Extract completed for ${runner.referenceId}" }
-            var consumedIsSuccessful = persistentWriter.setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
+            var consumedIsSuccessful = eventManager.setProcessEventCompleted(runner.referenceId, runner.eventId)
             runBlocking {
 
                 delay(1000)
                 limitedWhile({!consumedIsSuccessful}, 1000 * 10, 1000) {
-                    consumedIsSuccessful = persistentWriter.setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
+                    consumedIsSuccessful = eventManager.setProcessEventCompleted(runner.referenceId, runner.eventId)
                 }
 
                 log.info { "Database is reporting extract on ${runner.referenceId} as ${if (consumedIsSuccessful) "CONSUMED" else "NOT CONSUMED"}" }
@@ -134,9 +131,9 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
 
 
 
-                var readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
+                var readbackIsSuccess = eventManager.isProcessEventCompleted(runner.referenceId, runner.eventId)
                 limitedWhile({!readbackIsSuccess}, 1000 * 30, 1000) {
-                    readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
+                    readbackIsSuccess = eventManager.isProcessEventCompleted(runner.referenceId, runner.eventId)
                     log.info { readbackIsSuccess }
                 }
                 log.info { "Database is reporting readback for extract on ${runner.referenceId} as ${if (readbackIsSuccess) "CONSUMED" else "NOT CONSUMED"}" }
@@ -189,13 +186,12 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
 
 
     fun clearWorker() {
-        this.runner?.scope?.cancel()
         this.runner = null
     }
 
     @PreDestroy
     fun shutdown() {
         scope.cancel()
-        runner?.scope?.cancel("Stopping application")
+        runner?.cancel("Stopping application")
     }
 }

@@ -7,12 +7,12 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
 // Derived from ffmpeg work
 @KafkaBelongsToEvent(
-    KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED
+    KafkaEvents.EventWorkExtractPerformed
 )
 data class ProcesserExtractWorkPerformed(
     override val status: Status,
     override val message: String? = null,
     val producedBy: String,
-    val derivedFromEventId: String,
-    val outFile: String? = null
-): MessageDataWrapper(status, message)
+    val outFile: String? = null,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, derivedFromEventId)

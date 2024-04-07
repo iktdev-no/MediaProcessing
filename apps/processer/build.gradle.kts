@@ -53,10 +53,17 @@ dependencies {
     implementation(project(mapOf("path" to ":shared:kafka")))
 
 
-
-
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+
+    testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("com.h2database:h2:1.4.200")
+    testImplementation("org.assertj:assertj-core:3.4.1")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("io.kotlintest:kotlintest-assertions:3.3.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 

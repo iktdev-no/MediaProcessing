@@ -26,10 +26,10 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
 
 
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED
+        get() = KafkaEvents.EventMediaReadStreamPerformed
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_MEDIA_PROCESS_STARTED
+        KafkaEvents.EventMediaProcessStarted
     )
 
 
@@ -43,18 +43,18 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
         val desiredEvent = events.find { it.data is MediaProcessStarted } ?: return null
-        return runBlocking { fileReadStreams(desiredEvent.data as MediaProcessStarted) }
+        return runBlocking { fileReadStreams(desiredEvent.data as MediaProcessStarted, desiredEvent.eventId) }
     }
 
-    suspend fun fileReadStreams(started: MediaProcessStarted): MessageDataWrapper {
+    suspend fun fileReadStreams(started: MediaProcessStarted, eventId: String): MessageDataWrapper {
         val file = File(started.file)
         return if (file.exists() && file.isFile) {
             val result = readStreams(file)
             val joined = result.output.joinToString(" ")
             val jsoned = Gson().fromJson(joined, JsonObject::class.java)
-            ReaderPerformed(Status.COMPLETED, file = started.file, output = jsoned)
+            ReaderPerformed(Status.COMPLETED, file = started.file, output = jsoned, derivedFromEventId = eventId)
         } else {
-            SimpleMessageData(Status.ERROR, "File in data is not a file or does not exist")
+            SimpleMessageData(Status.ERROR, "File in data is not a file or does not exist", eventId)
         }
     }
 

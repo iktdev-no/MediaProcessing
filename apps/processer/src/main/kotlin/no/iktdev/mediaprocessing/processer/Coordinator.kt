@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.NotificationOfDeletionPerformed
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -21,6 +22,15 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     private val log = KotlinLogging.logger {}
     val io = Coroutines.io()
     override val listeners = PersistentEventProcessBasedMessageListener()
+
+    private val coordinatorEventListeners: MutableList<CoordinatorEvents> = mutableListOf()
+    fun getRegisteredEventListeners() = coordinatorEventListeners.toList()
+    fun addCoordinatorEventListener(listener: CoordinatorEvents) {
+        coordinatorEventListeners.add(listener)
+    }
+    fun removeCoordinatorEventListener(listener: CoordinatorEvents) {
+        coordinatorEventListeners.remove(listener)
+    }
 
     override fun createTasksBasedOnEventsAndPersistence(
         referenceId: String,
@@ -40,16 +50,18 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
-        if (!processKafkaEvents.contains(event.key)) {
+        if (!acceptEvents.contains(event.key)) {
+            return
+        }
+        if (event.key == KafkaEvents.EventNotificationOfWorkItemRemoval) {
+            handleDeletionOfEvents(event)
             return
         }
 
-        val success = persistentWriter.storeProcessDataMessage(event.key.event, event.value)
+        val success = eventManager.setProcessEvent(event.key, event.value)
         if (!success) {
             log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().database}" }
         } else {
-            deleteOlderEventsIfSuperseded(event.key, event.value)
-
             io.launch {
                 delay(500)
                 readAllMessagesFor(event.value.referenceId, event.value.eventId)
@@ -57,29 +69,20 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         }
     }
 
-    fun deleteOlderEventsIfSuperseded(event: KafkaEvents, value: Message<out MessageDataWrapper>) {
-        val existingMessages = persistentReader.getMessagesFor(value.referenceId)
-
-        val workItems = existingMessages.filter { KafkaEvents.isOfWork(it.event) }
-
-
-        if (KafkaEvents.isOfWork(event)) {
-            // Here i would need to list all of the work events, then proceed to check which one of the derivedId does not correspond to a entry
-            // Nonmatching has been superseded
-
-
-
-            val superseded = existingMessages.filter { it.event == event && it.eventId != value.eventId }
-            superseded.forEach {
-                persistentWriter.deleteStoredEventDataMessage(referenceId = it.referenceId, eventId = it.eventId, event= it.event )
+    private fun handleDeletionOfEvents(kafkaPayload: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
+        if (kafkaPayload.value.data is NotificationOfDeletionPerformed) {
+            val data = kafkaPayload.value.data as NotificationOfDeletionPerformed
+            if (data.deletedEvent in processKafkaEvents) {
+                coordinatorEventListeners.forEach { it.onCancelOrStopProcess(data.deletedEventId) }
+                eventManager.deleteProcessEvent(kafkaPayload.value.referenceId, data.deletedEventId)
             }
+        } else {
+            log.warn { "Deletion handling was triggered with wrong data" }
         }
     }
 
-
-
     fun readAllAvailableInQueue() {
-        val messages = persistentReader.getAvailableProcessEvents()
+        val messages = eventManager.getProcessEventsClaimable()
         io.launch {
             messages.forEach {
                 delay(1000)
@@ -89,20 +92,28 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = persistentReader.getAvailableProcessEvents()
+        val messages = eventManager.getProcessEventsClaimable()
         createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
     }
 
-    val processKafkaEvents = listOf(
-        KafkaEvents.EVENT_WORK_ENCODE_CREATED,
-        KafkaEvents.EVENT_WORK_EXTRACT_CREATED,
+    private final val processKafkaEvents = listOf(
+        KafkaEvents.EventWorkEncodeCreated,
+        KafkaEvents.EventWorkExtractCreated,
     )
+
+    private final val acceptEvents = listOf(
+        KafkaEvents.EventNotificationOfWorkItemRemoval
+    ) + processKafkaEvents
 
 
     @Scheduled(fixedDelay = (5_000))
     fun checkForWork() {
         log.info { "Checking if there is any work to do.." }
         readAllAvailableInQueue()
+    }
+
+    interface CoordinatorEvents {
+        fun onCancelOrStopProcess(eventId: String)
     }
 
 }

@@ -22,16 +22,16 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        EVENT_MEDIA_PROCESS_STARTED,
-        EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
-        EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
+        EventMediaProcessStarted,
+        EventMediaReadBaseInfoPerformed,
+        EventMediaReadOutNameAndType
     )
     override val listensForEvents: List<KafkaEvents> = KafkaEvents.entries
 
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_STARTED) ?: return null
+        val started = events.lastOrSuccessOf(EventMediaProcessStarted) ?: return null
         if (!started.data.isSuccess()) {
             return null
         }
@@ -40,9 +40,9 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
         // TODO: Add filter in case a metadata request was performed or a cover download was performed. for now, for base functionality, it requires a performed event.
 
         val requiresOneOf = listOf(
-            EVENT_WORK_CONVERT_PERFORMED,
-            EVENT_WORK_EXTRACT_PERFORMED,
-            EVENT_WORK_ENCODE_PERFORMED
+            EventWorkConvertPerformed,
+            EventWorkExtractPerformed,
+            EventWorkEncodePerformed
         )
 
         if (requiresOneOf.none { it in receivedEvents }) {
@@ -56,7 +56,7 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
 
         val mapper = ProcessMapping(events)
         if (mapper.canCollect()) {
-            return ProcessCompleted(Status.COMPLETED)
+            return ProcessCompleted(Status.COMPLETED, event.eventId)
         }
         return null
     }

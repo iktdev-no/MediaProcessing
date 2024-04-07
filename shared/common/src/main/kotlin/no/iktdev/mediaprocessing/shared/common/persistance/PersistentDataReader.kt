@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 class PersistentDataReader(var dataSource: DataSource) {
     val dzz = DeserializingRegistry()
 
+    @Deprecated("Use PersistentEventManager.getAllEventsGrouped")
     fun getAllMessages(): List<List<PersistentMessage>> {
         val events = withTransaction(dataSource.database) {
             events.selectAll()
@@ -19,6 +20,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         return events?.mapNotNull { it.value.mapNotNull { v -> fromRowToPersistentMessage(v, dzz) } } ?: emptyList()
     }
 
+    @Deprecated("Use PersistentEventManager.getEvetnsWith")
     fun getMessagesFor(referenceId: String): List<PersistentMessage> {
         return withTransaction(dataSource.database) {
             events.select { events.referenceId eq referenceId }
@@ -27,6 +29,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         } ?: emptyList()
     }
 
+    @Deprecated("Use PersistentEventManager.getEventsUncompleted")
     fun getUncompletedMessages(): List<List<PersistentMessage>> {
         val result = withDirtyRead(dataSource.database) {
             events.selectAll()
@@ -37,6 +40,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         return result
     }
 
+    @Deprecated(message = "Use PersistentEventManager.isProcessEventCompleted")
     fun isProcessEventAlreadyClaimed(referenceId: String, eventId: String): Boolean {
         val result = withDirtyRead(dataSource.database) {
             processerEvents.select {
@@ -47,6 +51,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         return result?.claimed ?: true
     }
 
+    @Deprecated(message = "Use PersistentEventManager.isProcessEventCompleted")
     fun isProcessEventDefinedAsConsumed(referenceId: String, eventId: String, claimedBy: String): Boolean {
         return withDirtyRead(dataSource.database) {
             processerEvents.select {
@@ -57,6 +62,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         }?.singleOrNull()?.consumed ?: false
     }
 
+    @Deprecated(message = "Use PersistentEventManager.getProcessEventsClaimable")
     fun getAvailableProcessEvents(): List<PersistentProcessDataMessage> {
         return withDirtyRead(dataSource.database) {
             processerEvents.select {
@@ -66,6 +72,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         } ?: emptyList()
     }
 
+    @Deprecated("Use PersistentEventManager.getProcessEventsWithExpiredClaim")
     fun getExpiredClaimsProcessEvents(): List<PersistentProcessDataMessage> {
         val deadline = LocalDateTime.now()
         val entries = withTransaction(dataSource.database) {
@@ -77,6 +84,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         return entries.filter { it.lastCheckIn == null || it.lastCheckIn.plusMinutes(15) < deadline }
     }
 
+    @Deprecated("Use PersistentEventManager.getProcessEventWith")
     fun getProcessEvent(referenceId: String, eventId: String): PersistentProcessDataMessage? {
         val message = withDirtyRead(dataSource.database) {
             processerEvents.select {
@@ -87,6 +95,7 @@ class PersistentDataReader(var dataSource: DataSource) {
         return message
     }
 
+    @Deprecated("Use PersistentEventManager.getAllEventsProcesser")
     fun getProcessEvents(): List<PersistentProcessDataMessage> {
         return withTransaction(dataSource.database) {
             processerEvents.selectAll()

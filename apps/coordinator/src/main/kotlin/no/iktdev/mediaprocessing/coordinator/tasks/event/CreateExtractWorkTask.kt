@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service
 @Service
 class CreateExtractWorkTask(@Autowired override var coordinator: Coordinator) : CreateProcesserWorkTask(coordinator) {
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_WORK_EXTRACT_CREATED
+        get() = KafkaEvents.EventWorkExtractCreated
 
     override val requiredEvents: List<KafkaEvents>
-        get() = listOf(KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED)
+        get() = listOf(KafkaEvents.EventMediaParameterExtractCreated)
 }

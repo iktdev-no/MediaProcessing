@@ -7,13 +7,13 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
-@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE)
+@KafkaBelongsToEvent(KafkaEvents.EventMediaReadOutNameAndType)
 data class VideoInfoPerformed(
     override val status: Status,
     val info: JsonObject,
-    val outDirectory: String
-)
-    : MessageDataWrapper(status) {
+    val outDirectory: String,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, derivedFromEventId) {
         fun toValueObject(): VideoInfo? {
             val type = info.get("type").asString
             return when (type) {
@@ -46,7 +46,7 @@ data class SubtitleInfo(
     val language: String
 )
 
-@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE)
+@KafkaBelongsToEvent(KafkaEvents.EventMediaReadOutNameAndType)
 open class VideoInfo(
     @Transient open val type: String,
     @Transient open val title: String,

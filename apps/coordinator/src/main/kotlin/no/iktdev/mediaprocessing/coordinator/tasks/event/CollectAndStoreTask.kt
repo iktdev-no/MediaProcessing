@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
+import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
@@ -32,7 +33,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
     override val producesEvent: KafkaEvents = KafkaEvents.EVENT_COLLECT_AND_STORE
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        EVENT_MEDIA_PROCESS_STARTED,
+        EventMediaProcessStarted,
         EVENT_MEDIA_PROCESS_COMPLETED
     )
     override val listensForEvents: List<KafkaEvents> = KafkaEvents.entries
@@ -40,7 +41,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_STARTED) ?: return null
+        val started = events.lastOrSuccessOf(EventMediaProcessStarted) ?: return null
         val completed = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_COMPLETED) ?: return null
         if (!started.data.isSuccess() || !completed.data.isSuccess() && completed.data.status != Status.SKIPPED) {
             return null
@@ -65,20 +66,20 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
                 null
             else
                 storeCatalog(metadata = meta,genres = genres, videoFile = videoFile, videoDetails = videoInfo)
-        } ?: return SimpleMessageData(Status.ERROR, "Unable to store catalog when metadata is null")
+        } ?: return SimpleMessageData(Status.ERROR, "Unable to store catalog when metadata is null", event.eventId)
 
         mapped.metadata?.let {
             storeMetadata(catalogId = catalogId, metadata = it)
         }
 
-        return SimpleMessageData(Status.COMPLETED)
+        return SimpleMessageData(Status.COMPLETED, derivedFromEventId = event.eventId)
     }
 
     private fun storeSubtitles(collection: String, subtitles: List<String>): Boolean {
         val result = subtitles.map { subtitle ->
             val subtitleFile = File(subtitle)
             val language = subtitleFile.parentFile.name
-            subtitle to executeWithStatus {
+            subtitle to executeWithStatus(getStoreDatabase()) {
                 SubtitleQuery(
                     collection = collection,
                     associatedWithVideo = subtitleFile.nameWithoutExtension,
@@ -93,7 +94,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
     private fun storeMetadata(catalogId: Int, metadata: MetadataDto) {
         metadata.summary.forEach {
-            withTransaction {
+            withTransaction(getStoreDatabase()) {
                 SummaryQuery(
                     cid = catalogId,
                     language = it.language,
@@ -104,7 +105,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
     }
 
     private fun storeAndGetGenres(genres: List<String>): String? {
-        return withTransaction {
+        return withTransaction(getStoreDatabase()) {
             val gq = GenreQuery( *genres.toTypedArray() )
             gq.insertAndGetIds()
             gq.getIds().joinToString(",")
@@ -141,7 +142,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
         }
         val ignoreException = result?.cause is SQLIntegrityConstraintViolationException && (result as ExposedSQLException).errorCode == 1062
         return if (result == null || ignoreException ) {
-            return withTransaction {
+            return withTransaction(getStoreDatabase()) {
                 precreatedCatalogQuery.getId()
             }
         } else null

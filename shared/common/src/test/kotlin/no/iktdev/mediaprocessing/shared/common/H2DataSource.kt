@@ -11,9 +11,21 @@ import javax.sql.DataSource
 
 class H2DataSource(private val jdbcDataSource: JdbcDataSource, databaseName: String) : DataSource, MySqlDataSource(
     DatabaseConnectionConfig(
-        databaseName = databaseName, address = jdbcDataSource.getUrl(), username = jdbcDataSource.user, password = jdbcDataSource.password, port = null
+        databaseName = databaseName, address = jdbcDataSource.getUrl(), username = jdbcDataSource.user, password = "", port = null
     )
 ) {
+
+    companion object {
+        val connectionUrl = "jdbc:h2:test;MODE=MySQL" //"jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1;"
+        fun getDatasource(): JdbcDataSource  {
+            val ds = JdbcDataSource()
+            ds.setUrl(connectionUrl)
+            ds.user = "test"
+            ds.password = ""
+            return ds
+        }
+    }
+
     override fun getConnection(): Connection {
         return jdbcDataSource.connection
     }
@@ -61,6 +73,6 @@ class H2DataSource(private val jdbcDataSource: JdbcDataSource, databaseName: Str
     }
 
     override fun toConnectionUrl(): String {
-        return "jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1;"
+        return connectionUrl // "jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1;"
     }
 }

@@ -59,7 +59,7 @@ class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : Coo
 
     private fun getCurrentState(events: List<PersistentMessage>, processes: Map<String, EventSummarySubItem>): SummaryState {
         val stored = events.findLast { it.event == KafkaEvents.EVENT_COLLECT_AND_STORE }
-        val started = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_PROCESS_STARTED }
+        val started = events.findLast { it.event == KafkaEvents.EventMediaProcessStarted }
         val completedMediaEvent = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED }
         val completedRequestEvent = events.findLast { it.event == KafkaEvents.EVENT_REQUEST_PROCESS_COMPLETED }
 
@@ -79,9 +79,9 @@ class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : Coo
         }
 
         val workPrepared = events.filter { it.event in listOf(
-            KafkaEvents.EVENT_WORK_EXTRACT_CREATED,
-            KafkaEvents.EVENT_WORK_CONVERT_CREATED,
-            KafkaEvents.EVENT_WORK_ENCODE_CREATED
+            KafkaEvents.EventWorkExtractCreated,
+            KafkaEvents.EventWorkConvertCreated,
+            KafkaEvents.EventWorkEncodeCreated
         ) }
         if (workPrepared.isNotEmpty()) {
             return SummaryState.Pending
@@ -92,29 +92,29 @@ class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : Coo
         }
 
         val perparation = events.filter { it.event in listOf(
-            KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED,
-            KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED,
+            KafkaEvents.EventMediaParameterExtractCreated,
+            KafkaEvents.EventMediaParameterEncodeCreated,
         ) }
         if (perparation.isNotEmpty()) {
             return SummaryState.Preparing
         }
 
-        val analyzed2 = events.findLast { it.event in listOf(KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE) }
+        val analyzed2 = events.findLast { it.event in listOf(KafkaEvents.EventMediaReadOutNameAndType) }
         if (analyzed2 != null) {
             return SummaryState.Analyzing
         }
 
-        val waitingForMeta = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED }
+        val waitingForMeta = events.findLast { it.event == KafkaEvents.EventMediaMetadataSearchPerformed }
         if (waitingForMeta != null) {
             return SummaryState.Metadata
         }
 
-        val analyzed = events.findLast { it.event in listOf(KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED, KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED, KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE) }
+        val analyzed = events.findLast { it.event in listOf(KafkaEvents.EventMediaParseStreamPerformed, KafkaEvents.EventMediaReadBaseInfoPerformed, KafkaEvents.EventMediaReadOutNameAndType) }
         if (analyzed != null) {
             return SummaryState.Analyzing
         }
 
-        val readEvent = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED }
+        val readEvent = events.findLast { it.event == KafkaEvents.EventMediaReadStreamPerformed }
         if (readEvent != null) {
             return SummaryState.Read
         }
@@ -133,10 +133,10 @@ class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : Coo
                 val processesStatuses = getCurrentStateFromProcesserEvents(procM)
                 val messageStatus = getCurrentState(it, processesStatuses)
 
-                val baseNameEvent = it.lastOrNull {ke -> ke.event == KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED }?.data.let { data ->
+                val baseNameEvent = it.lastOrNull {ke -> ke.event == KafkaEvents.EventMediaReadBaseInfoPerformed }?.data.let { data ->
                     if (data is BaseInfoPerformed) data else null
                 }
-                val mediaNameEvent = it.lastOrNull { ke -> ke.event == KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE }?.data.let { data ->
+                val mediaNameEvent = it.lastOrNull { ke -> ke.event == KafkaEvents.EventMediaReadOutNameAndType }?.data.let { data ->
                     if (data is VideoInfoPerformed) data else null
                 }
 

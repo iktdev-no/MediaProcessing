@@ -30,10 +30,10 @@ class ProcessMapping(val events: List<PersistentMessage>) {
 
 
     fun waitsForEncode(): Boolean {
-        val arguments = events.filter { it.event == KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED }
-        val created = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_CREATED}
+        val arguments = events.filter { it.event == KafkaEvents.EventMediaParameterEncodeCreated }
+        val created = events.filter { it.event == KafkaEvents.EventWorkEncodeCreated}
 
-        val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_ENCODE_PERFORMED }
+        val performed = events.filter { it.event == KafkaEvents.EventWorkEncodePerformed }
         val isSkipped = events.filter { it.isSkipped() }
 
         return (arguments.isNotEmpty() && created.isEmpty()) || created.size > performed.size + isSkipped.size
@@ -41,18 +41,18 @@ class ProcessMapping(val events: List<PersistentMessage>) {
 
     fun waitsForExtract(): Boolean {
         // Check if message is declared as skipped with statis
-        val arguments = events.filter { it.event == KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED }.filter { it.data.isSuccess() }
-        val created = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED }
+        val arguments = events.filter { it.event == KafkaEvents.EventMediaParameterExtractCreated }.filter { it.data.isSuccess() }
+        val created = events.filter { it.event == KafkaEvents.EventWorkExtractCreated }
 
-        val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED }
+        val performed = events.filter { it.event == KafkaEvents.EventWorkExtractPerformed }
         val isSkipped = events.filter { it.isSkipped() }
 
         return (arguments.isNotEmpty() && created.isEmpty()) || created.size > performed.size + isSkipped.size
     }
 
     fun waitsForConvert(): Boolean {
-        val created = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_CREATED }
-        val performed = events.filter { it.event == KafkaEvents.EVENT_WORK_CONVERT_PERFORMED }
+        val created = events.filter { it.event == KafkaEvents.EventWorkConvertCreated }
+        val performed = events.filter { it.event == KafkaEvents.EventWorkConvertPerformed }
         val isSkipped = events.filter { it.isSkipped() }
 
         return created.size > performed.size + isSkipped.size

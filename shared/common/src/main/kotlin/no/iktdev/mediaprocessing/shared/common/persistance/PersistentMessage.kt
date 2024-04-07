@@ -38,7 +38,40 @@ fun PersistentMessage.isSkipped(): Boolean {
     }
 }
 
+class PersistentMessageHelper(val messages: List<PersistentMessage>) {
 
+    fun findOrphanedEvents(): List<PersistentMessage> {
+        val withDerivedId = messages.filter { it.data.derivedFromEventId != null }
+        val idsFlat = messages.map { it.eventId }
+        return withDerivedId.filter { it.data.derivedFromEventId !in idsFlat }
+    }
+
+    fun getCascadingFrom(eventId: String): List<PersistentMessage> {
+        val triggered = messages.firstOrNull { it.eventId == eventId } ?: return emptyList()
+        val usableEvents = messages.filter { it.eventId != eventId && it.data.derivedFromEventId != null }
+
+        val derivedEventsMap = mutableMapOf<String, MutableList<String>>()
+        for (event in usableEvents) {
+            derivedEventsMap.getOrPut(event.data.derivedFromEventId!!) { mutableListOf() }.add(event.eventId)
+        }
+        val eventsToDelete = mutableSetOf<String>()
+
+        // Utfør DFS for å finne alle avledede hendelser som skal slettes
+        dfs(triggered.eventId, derivedEventsMap, eventsToDelete)
+
+        return messages.filter { it.eventId in eventsToDelete }
+    }
+
+    /**
+     * @param eventId Initial eventId
+     */
+    fun dfs(eventId: String, derivedEventsMap: Map<String, List<String>>, eventsToDelete: MutableSet<String>) {
+        eventsToDelete.add(eventId)
+        derivedEventsMap[eventId]?.forEach { derivedEventId ->
+            dfs(derivedEventId, derivedEventsMap, eventsToDelete)
+        }
+    }
+}
 
 fun fromRowToPersistentMessage(row: ResultRow, dez: DeserializingRegistry): PersistentMessage? {
     val kev = try {

@@ -21,9 +21,9 @@ class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskC
     val log = KotlinLogging.logger {}
 
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED
+        get() = KafkaEvents.EventMediaReadBaseInfoPerformed
 
-    override val requiredEvents: List<KafkaEvents> = listOf(KafkaEvents.EVENT_MEDIA_PROCESS_STARTED)
+    override val requiredEvents: List<KafkaEvents> = listOf(KafkaEvents.EventMediaProcessStarted)
 
 
     override fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
@@ -34,22 +34,23 @@ class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskC
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
-        val selected = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_PROCESS_STARTED) ?: return null
-        return readFileInfo(selected.data as MediaProcessStarted)
+        val selected = events.lastOrSuccessOf(KafkaEvents.EventMediaProcessStarted) ?: return null
+        return readFileInfo(selected.data as MediaProcessStarted, event.eventId)
     }
 
-    fun readFileInfo(started: MediaProcessStarted): MessageDataWrapper {
+    fun readFileInfo(started: MediaProcessStarted, eventId: String): MessageDataWrapper {
         val result = try {
             val fileName = File(started.file).nameWithoutExtension
             val fileNameParser = FileNameParser(fileName)
             BaseInfoPerformed(
                 Status.COMPLETED,
                 title = fileNameParser.guessDesiredTitle(),
-                sanitizedName = fileNameParser.guessDesiredFileName()
+                sanitizedName = fileNameParser.guessDesiredFileName(),
+                derivedFromEventId = eventId
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            SimpleMessageData(Status.ERROR, e.message ?: "Unable to obtain proper info from file")
+            SimpleMessageData(Status.ERROR, e.message ?: "Unable to obtain proper info from file", eventId)
         }
         return result
     }

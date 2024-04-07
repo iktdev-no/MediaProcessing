@@ -28,7 +28,7 @@ class SerializationTest {
 
         val json = gson.toJson(message)
         val deserializer = DeserializingRegistry()
-        val result = deserializer.deserialize(KafkaEvents.EVENT_MEDIA_PROCESS_STARTED, json)
+        val result = deserializer.deserialize(KafkaEvents.EventMediaProcessStarted, json)
         assertThat(result.data).isInstanceOf(MediaProcessStarted::class.java)
 
 

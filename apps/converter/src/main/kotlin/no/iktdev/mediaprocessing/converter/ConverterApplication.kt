@@ -4,6 +4,7 @@ import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -20,8 +21,7 @@ fun getContext(): ApplicationContext? {
 }
 
 
-lateinit var persistentReader: PersistentDataReader
-lateinit var persistentWriter: PersistentDataStore
+lateinit var eventManager: PersistentEventManager
 
 private lateinit var eventsDatabase: MySqlDataSource
 fun getEventsDatabase(): MySqlDataSource {
@@ -33,8 +33,7 @@ fun main(args: Array<String>) {
     eventsDatabase.createDatabase()
     eventsDatabase.createTables(processerEvents)
 
-    persistentReader = PersistentDataReader(eventsDatabase)
-    persistentWriter = PersistentDataStore(eventsDatabase)
+    eventManager = PersistentEventManager(eventsDatabase)
 
     context = runApplication<ConvertApplication>(*args)
 }

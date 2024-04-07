@@ -15,30 +15,29 @@ class DeserializingRegistry {
 
     companion object {
         val deserializables = mutableMapOf(
-            KafkaEvents.EVENT_MEDIA_PROCESS_STARTED to MediaProcessStarted::class.java,
-            KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED to ReaderPerformed::class.java,
-            KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED to MediaStreamsParsePerformed::class.java,
-            KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED to BaseInfoPerformed::class.java,
-            KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED to MetadataPerformed::class.java,
-            KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE to VideoInfoPerformed::class.java,
-            KafkaEvents.EVENT_MEDIA_READ_OUT_COVER to CoverInfoPerformed::class.java,
-            KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED to FfmpegWorkerArgumentsCreated::class.java,
-            KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED to FfmpegWorkerArgumentsCreated::class.java,
-            KafkaEvents.EVENT_MEDIA_CONVERT_PARAMETER_CREATED to null,
-            KafkaEvents.EVENT_MEDIA_DOWNLOAD_COVER_PARAMETER_CREATED to null,
+            KafkaEvents.EventMediaProcessStarted to MediaProcessStarted::class.java,
+            KafkaEvents.EventMediaReadStreamPerformed to ReaderPerformed::class.java,
+            KafkaEvents.EventMediaParseStreamPerformed to MediaStreamsParsePerformed::class.java,
+            KafkaEvents.EventMediaReadBaseInfoPerformed to BaseInfoPerformed::class.java,
+            KafkaEvents.EventMediaMetadataSearchPerformed to MetadataPerformed::class.java,
+            KafkaEvents.EventMediaReadOutNameAndType to VideoInfoPerformed::class.java,
+            KafkaEvents.EventMediaReadOutCover to CoverInfoPerformed::class.java,
+            KafkaEvents.EventMediaParameterEncodeCreated to FfmpegWorkerArgumentsCreated::class.java,
+            KafkaEvents.EventMediaParameterExtractCreated to FfmpegWorkerArgumentsCreated::class.java,
+            KafkaEvents.EventMediaParameterConvertCreated to null,
+            KafkaEvents.EventMediaParameterDownloadCoverCreated to null,
 
-            KafkaEvents.EVENT_WORK_ENCODE_CREATED to FfmpegWorkRequestCreated::class.java,
-            KafkaEvents.EVENT_WORK_EXTRACT_CREATED to FfmpegWorkRequestCreated::class.java,
-            KafkaEvents.EVENT_WORK_CONVERT_CREATED to ConvertWorkerRequest::class.java,
+            KafkaEvents.EventNotificationOfWorkItemRemoval to NotificationOfDeletionPerformed::class.java,
 
-            KafkaEvents.EVENT_WORK_ENCODE_PERFORMED to ProcesserEncodeWorkPerformed::class.java,
-            KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED to ProcesserExtractWorkPerformed::class.java,
-            KafkaEvents.EVENT_WORK_CONVERT_PERFORMED to ConvertWorkPerformed::class.java,
-            KafkaEvents.EVENT_WORK_DOWNLOAD_COVER_PERFORMED to CoverDownloadWorkPerformed::class.java,
+            KafkaEvents.EventWorkEncodeCreated to FfmpegWorkRequestCreated::class.java,
+            KafkaEvents.EventWorkExtractCreated to FfmpegWorkRequestCreated::class.java,
+            KafkaEvents.EventWorkConvertCreated to ConvertWorkerRequest::class.java,
 
-            KafkaEvents.EVENT_WORK_ENCODE_SKIPPED to null,
-            KafkaEvents.EVENT_WORK_EXTRACT_SKIPPED to null,
-            KafkaEvents.EVENT_WORK_CONVERT_SKIPPED to null,
+            KafkaEvents.EventWorkEncodePerformed to ProcesserEncodeWorkPerformed::class.java,
+            KafkaEvents.EventWorkExtractPerformed to ProcesserExtractWorkPerformed::class.java,
+            KafkaEvents.EventWorkConvertPerformed to ConvertWorkPerformed::class.java,
+            KafkaEvents.EventWorkDownloadCoverPerformed to CoverDownloadWorkPerformed::class.java,
+
 
             KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED to ProcessCompleted::class.java
             )

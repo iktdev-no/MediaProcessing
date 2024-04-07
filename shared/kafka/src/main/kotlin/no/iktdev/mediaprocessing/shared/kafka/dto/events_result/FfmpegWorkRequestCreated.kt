@@ -6,13 +6,13 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
 @KafkaBelongsToEvent(
-    KafkaEvents.EVENT_WORK_ENCODE_CREATED,
-    KafkaEvents.EVENT_WORK_EXTRACT_CREATED
+    KafkaEvents.EventWorkEncodeCreated,
+    KafkaEvents.EventWorkExtractCreated
 )
 data class FfmpegWorkRequestCreated(
     override val status: Status,
-    val derivedFromEventId: String,
     val inputFile: String,
     val arguments: List<String>,
-    val outFile: String
-): MessageDataWrapper(status)
+    val outFile: String,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, derivedFromEventId)

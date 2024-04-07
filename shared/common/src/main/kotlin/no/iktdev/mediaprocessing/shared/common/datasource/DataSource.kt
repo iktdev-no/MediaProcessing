@@ -20,6 +20,8 @@ abstract class DataSource(val config: DatabaseConnectionConfig) {
 
     abstract fun toConnectionUrl(): String
 
+    abstract fun toDatabaseConnectionUrl(database: String): String
+
     fun toPortedAddress(): String {
         var baseAddress = config.address
         if (!config.port.isNullOrBlank()) {

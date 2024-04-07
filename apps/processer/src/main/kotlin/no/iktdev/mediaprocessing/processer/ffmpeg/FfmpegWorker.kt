@@ -2,17 +2,30 @@ package no.iktdev.mediaprocessing.processer.ffmpeg
 
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
+import no.iktdev.mediaprocessing.processer.eventManager
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import java.io.File
+import java.time.Duration
 
-class FfmpegWorker(val referenceId: String, val eventId: String, val info: FfmpegWorkRequestCreated, val listener: FfmpegWorkerEvents, val logDir: File) {
-    val scope = Coroutines.io()
+class FfmpegWorker(
+    val referenceId: String,
+    val eventId: String,
+    val info: FfmpegWorkRequestCreated,
+    val listener: FfmpegWorkerEvents,
+    val logDir: File
+) {
+    private val scope = Coroutines.io()
+    private var job: Job? = null
+
+    fun isWorking(): Boolean {
+        return job != null && (job?.isCompleted != true) && scope.isActive
+    }
+
     val decoder = FfmpegProgressDecoder()
     private val outputCache = mutableListOf<String>()
     private val log = KotlinLogging.logger {}
@@ -44,20 +57,41 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
         }
     }
 
-    suspend fun run() {
+    fun run() {
         val args = FfmpegWorkerArgumentsBuilder().using(info).build()
-        execute(args)
+        job = scope.launch {
+            execute(args)
+        }
     }
 
-    suspend fun runWithProgress() {
+    fun runWithProgress() {
         val args = FfmpegWorkerArgumentsBuilder().using(info).buildWithProgress()
-        execute(args)
+        job = scope.launch {
+            execute(args)
+        }
     }
+
+    private suspend fun startIAmAlive() {
+        scope.launch {
+            while (scope.isActive && job?.isCompleted != true) {
+                delay(Duration.ofMinutes(5).toMillis())
+                listener.onIAmAlive(referenceId, eventId)
+            }
+        }
+    }
+
+    fun cancel(message: String = "Work was interrupted as requested") {
+        job?.cancel()
+        scope.cancel(message)
+        listener.onError(referenceId, eventId, info, message)
+    }
+
 
     private suspend fun execute(args: List<String>) {
         withContext(Dispatchers.IO) {
             logFile.createNewFile()
         }
+        startIAmAlive()
         listener.onStarted(referenceId, eventId, info)
         val processOp = process(
             ProcesserEnv.ffmpeg, *args.toTypedArray(),
@@ -67,7 +101,8 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
                 //log.info { it }
                 onOutputChanged(it)
             },
-            destroyForcibly = true)
+            destroyForcibly = true
+        )
 
         val result = processOp
         onOutputChanged("Received exit code: ${result.resultCode}")
@@ -86,7 +121,7 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
         decoder.parseVideoProgress(outputCache.toList())?.let { decoded ->
             try {
                 val _progress = decoder.getProgress(decoded)
-                if (progress == null || _progress.progress > (progress?.progress ?: -1) ) {
+                if (progress == null || _progress.progress > (progress?.progress ?: -1)) {
                     progress = _progress
                     listener.onProgressChanged(referenceId, eventId, info, _progress)
                 }
@@ -107,8 +142,14 @@ class FfmpegWorker(val referenceId: String, val eventId: String, val info: Ffmpe
 }
 
 interface FfmpegWorkerEvents {
-    fun onStarted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated,)
+    fun onStarted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated)
     fun onCompleted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated)
     fun onError(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, errorMessage: String)
-    fun onProgressChanged(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress)
+    fun onProgressChanged(
+        referenceId: String,
+        eventId: String,
+        info: FfmpegWorkRequestCreated,
+        progress: FfmpegDecodedProgress
+    )
+    fun onIAmAlive(referenceId: String, eventId: String) {}
 }

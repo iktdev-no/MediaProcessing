@@ -5,12 +5,13 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
-@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED)
+@KafkaBelongsToEvent(KafkaEvents.EventMediaMetadataSearchPerformed)
 data class MetadataPerformed(
     override val status: Status,
     override val message: String? = null,
-    val data: pyMetadata? = null
-    ) : MessageDataWrapper(status, message)
+    val data: pyMetadata? = null,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, derivedFromEventId)
 
 data class pyMetadata(
     val title: String,

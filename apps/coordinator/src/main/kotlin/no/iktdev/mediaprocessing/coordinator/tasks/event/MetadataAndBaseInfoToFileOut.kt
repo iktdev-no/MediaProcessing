@@ -39,23 +39,23 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     val metadataTimeout = KafkaEnv.metadataTimeoutMinutes * 60
 
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
+        get() = KafkaEvents.EventMediaReadOutNameAndType
 
-    val waitingProcessesForMeta: MutableMap<String, LocalDateTime> = mutableMapOf()
+    val waitingProcessesForMeta: MutableMap<String, MetadataTriggerData> = mutableMapOf()
 
     override val listensForEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
-        KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED
+        KafkaEvents.EventMediaReadBaseInfoPerformed,
+        KafkaEvents.EventMediaMetadataSearchPerformed
     )
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
-        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
-        val meta = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED) { it.data is MetadataPerformed }?.data as MetadataPerformed?
+        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EventMediaReadBaseInfoPerformed) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
+        val meta = events.lastOrSuccessOf(KafkaEvents.EventMediaMetadataSearchPerformed) { it.data is MetadataPerformed }?.data as MetadataPerformed?
 
         // Only Return here as both baseInfo events are required to continue
-        if (!baseInfo.isSuccess() || !baseInfo.hasValidData() || events.any { it.event == KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE }) {
+        if (!baseInfo.isSuccess() || !baseInfo.hasValidData() || events.any { it.event == KafkaEvents.EventMediaReadOutNameAndType }) {
             return null
         }
         if (baseInfo.isSuccess() && meta == null) {
@@ -65,7 +65,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH)
             log.info { "Sending ${baseInfo?.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
             if (!waitingProcessesForMeta.containsKey(event.referenceId)) {
-                waitingProcessesForMeta[event.referenceId] = LocalDateTime.now()
+                waitingProcessesForMeta[event.referenceId] = MetadataTriggerData(event.eventId, LocalDateTime.now())
             }
             return null
         }
@@ -92,9 +92,9 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
 
         val vi = fileDeterminate.getDeterminedVideoInfo()?.toJsonObject()
         return if (vi != null) {
-            VideoInfoPerformed(Status.COMPLETED, vi, outDirectory = outputDirectory.absolutePath)
+            VideoInfoPerformed(Status.COMPLETED, vi, outDirectory = outputDirectory.absolutePath, event.eventId)
         } else {
-            SimpleMessageData(Status.ERROR, "No VideoInfo found...")
+            SimpleMessageData(Status.ERROR, "No VideoInfo found...", event.eventId)
         }
     }
 
@@ -103,13 +103,15 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     @Scheduled(fixedDelay = (1_000))
     fun sendErrorMessageForMetadata() {
         val expired = waitingProcessesForMeta.filter {
-            LocalDateTime.now().toEpochSeconds() > (it.value.toEpochSeconds() + metadataTimeout)
+            LocalDateTime.now().toEpochSeconds() > (it.value.executed.toEpochSeconds() + metadataTimeout)
         }
         expired.forEach {
             log.info { "Producing timeout for ${it.key} ${LocalDateTime.now()}" }
-            producer.sendMessage(it.key, KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED, MetadataPerformed(status = Status.ERROR, "Timed Out by: ${this@MetadataAndBaseInfoToFileOut::class.simpleName}"))
+            producer.sendMessage(it.key, KafkaEvents.EventMediaMetadataSearchPerformed, MetadataPerformed(status = Status.ERROR, "Timed Out by: ${this@MetadataAndBaseInfoToFileOut::class.simpleName}", derivedFromEventId = it.value.eventId))
             waitingProcessesForMeta.remove(it.key)
         }
     }
+
+    data class MetadataTriggerData(val eventId: String, val executed: LocalDateTime)
 
 }

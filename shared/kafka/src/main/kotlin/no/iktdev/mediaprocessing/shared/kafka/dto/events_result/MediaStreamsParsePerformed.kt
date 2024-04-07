@@ -6,9 +6,9 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
-@KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED)
+@KafkaBelongsToEvent(KafkaEvents.EventMediaParseStreamPerformed)
 data class MediaStreamsParsePerformed(
     override val status: Status,
-    val streams: ParsedMediaStreams
-
-): MessageDataWrapper(status)
+    val streams: ParsedMediaStreams,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, derivedFromEventId)

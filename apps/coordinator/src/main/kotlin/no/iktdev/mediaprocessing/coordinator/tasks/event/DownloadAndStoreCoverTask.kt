@@ -24,13 +24,13 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
 
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_WORK_DOWNLOAD_COVER_PERFORMED
+        get() = KafkaEvents.EventWorkDownloadCoverPerformed
 
     override val requiredEvents: List<KafkaEvents>
         get() = listOf(
-            KafkaEvents.EVENT_MEDIA_METADATA_SEARCH_PERFORMED,
-            KafkaEvents.EVENT_MEDIA_READ_OUT_COVER,
-            KafkaEvents.EVENT_WORK_ENCODE_PERFORMED
+            KafkaEvents.EventMediaMetadataSearchPerformed,
+            KafkaEvents.EventMediaReadOutCover,
+            KafkaEvents.EventWorkEncodePerformed
         )
     override fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
         return super.prerequisitesRequired(events) + listOf {
@@ -39,14 +39,14 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val cover = events.find { it.event == KafkaEvents.EVENT_MEDIA_READ_OUT_COVER }
+        val cover = events.find { it.event == KafkaEvents.EventMediaReadOutCover }
         if (cover == null || cover.data !is CoverInfoPerformed) {
-            return SimpleMessageData(Status.ERROR, "Wrong type triggered and caused an execution for $serviceId")
+            return SimpleMessageData(Status.ERROR, "Wrong type triggered and caused an execution for $serviceId", event.eventId)
         }
         val coverData = cover.data as CoverInfoPerformed
         val outDir = File(coverData.outDir)
         if (!outDir.exists())
-            return SimpleMessageData(Status.ERROR, "Check for output directory for cover storage failed for $serviceId")
+            return SimpleMessageData(Status.ERROR, "Check for output directory for cover storage failed for $serviceId", event.eventId)
 
         val client = DownloadClient(coverData.url, File(coverData.outDir), coverData.outFileBaseName)
 
@@ -67,10 +67,10 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
         }
 
         return if (result == null) {
-            SimpleMessageData(Status.ERROR, "Could not download cover, check logs")
+            SimpleMessageData(Status.ERROR, "Could not download cover, check logs", event.eventId)
         } else {
             val status = if (result.exists() && result.canRead()) Status.COMPLETED else Status.ERROR
-            CoverDownloadWorkPerformed(status = status, message = message, coverFile = result.absolutePath)
+            CoverDownloadWorkPerformed(status = status, message = message, coverFile = result.absolutePath, event.eventId)
         }
     }
 }

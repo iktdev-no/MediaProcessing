@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
@@ -25,16 +26,17 @@ fun getEventsDatabase(): MySqlDataSource {
     return eventsDatabase
 }
 
-lateinit var persistentReader: PersistentDataReader
-lateinit var persistentWriter: PersistentDataStore
+lateinit var eventManager: PersistentEventManager
+
 
 fun main(args: Array<String>) {
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
     eventsDatabase.createDatabase()
     eventsDatabase.createTables(processerEvents)
 
-    persistentReader = PersistentDataReader(eventsDatabase)
-    persistentWriter = PersistentDataStore(eventsDatabase)
+
+    eventManager = PersistentEventManager(eventsDatabase)
+
 
     val context = runApplication<ProcesserApplication>(*args)
 }

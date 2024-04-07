@@ -16,11 +16,11 @@ import java.io.File
 @Service
 class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_WORK_CONVERT_CREATED
+        get() = KafkaEvents.EventWorkConvertCreated
 
     override val requiredEvents: List<KafkaEvents>
         get() = listOf(
-            KafkaEvents.EVENT_WORK_EXTRACT_CREATED
+            KafkaEvents.EventWorkExtractCreated
             // TODO: Add event for request as well
         )
 
@@ -30,7 +30,7 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
         }
         val eventData = event.data as FfmpegWorkRequestCreated? ?: return null
 
-        val requiredEventId = if (event.event == KafkaEvents.EVENT_WORK_EXTRACT_CREATED) {
+        val requiredEventId = if (event.event == KafkaEvents.EventWorkExtractCreated) {
             event.eventId
         } else null;
 
@@ -41,7 +41,8 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
             inputFile = eventData.outFile,
             allowOverwrite = true,
             outFileBaseName = outFile.nameWithoutExtension,
-            outDirectory = outFile.parentFile.absolutePath
+            outDirectory = outFile.parentFile.absolutePath,
+            derivedFromEventId = event.eventId
         )
 
     }

@@ -12,12 +12,11 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkReques
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkerArgumentsCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import org.springframework.beans.factory.annotation.Autowired
 
 abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : TaskCreator(coordinator) {
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        val started = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_PROCESS_STARTED }?.data as MediaProcessStarted?
+        val started = events.findLast { it.event == KafkaEvents.EventMediaProcessStarted }?.data as MediaProcessStarted?
         if (started == null) {
             return null
         }
@@ -26,7 +25,7 @@ abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : 
             return null
         }
 
-        val proceed = events.find { it.event == KafkaEvents.EVENT_MEDIA_WORK_PROCEED_PERMITTED }
+        val proceed = events.find { it.event == KafkaEvents.EventMediaWorkProceedPermitted }
         if (proceed == null && started.type == ProcessType.MANUAL) {
             log.warn { "${event.referenceId} waiting for Proceed event due to Manual process" }
             return null

@@ -40,14 +40,14 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
 
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
-        if (event.key == KafkaEvents.EVENT_WORK_CONVERT_CREATED) {
-            val success = persistentWriter.storeProcessDataMessage(event.key.event, event.value)
+        if (event.key == KafkaEvents.EventWorkConvertCreated) {
+            val success = eventManager.setProcessEvent(event.key, event.value)
             if (!success) {
                 log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().database}!" }
             } else {
                 readAllMessagesFor(event.value.referenceId, event.value.eventId)
             }
-        } else if (event.key == KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED) {
+        } else if (event.key == KafkaEvents.EventWorkExtractPerformed) {
             readAllInQueue()
         } else {
             log.debug { "Skipping ${event.key}" }
@@ -55,7 +55,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
     }
 
     fun readAllInQueue() {
-        val messages = persistentReader.getAvailableProcessEvents()
+        val messages = eventManager.getProcessEventsClaimable()// persistentReader.getAvailableProcessEvents()
         io.launch {
             messages.forEach {
                 delay(1000)
@@ -65,7 +65,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = persistentReader.getAvailableProcessEvents()
+        val messages = eventManager.getProcessEventsClaimable() // persistentReader.getAvailableProcessEvents()
         createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
     }
 

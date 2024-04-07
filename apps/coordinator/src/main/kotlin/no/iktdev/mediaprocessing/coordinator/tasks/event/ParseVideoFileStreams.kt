@@ -25,10 +25,10 @@ class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : 
 
 
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED
+        get() = KafkaEvents.EventMediaParseStreamPerformed
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED
+        KafkaEvents.EventMediaReadStreamPerformed
     )
 
     override fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
@@ -39,11 +39,11 @@ class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
-        val desiredEvent = events.lastOrSuccessOf(KafkaEvents.EVENT_MEDIA_READ_STREAM_PERFORMED) ?: return null
-        return parseStreams(desiredEvent.data as ReaderPerformed)
+        val desiredEvent = events.lastOrSuccessOf(KafkaEvents.EventMediaReadStreamPerformed) ?: return null
+        return parseStreams(desiredEvent.data as ReaderPerformed, desiredEvent.eventId)
     }
 
-    fun parseStreams(data: ReaderPerformed): MessageDataWrapper {
+    fun parseStreams(data: ReaderPerformed, eventId: String): MessageDataWrapper {
         val gson = Gson()
         return try {
             val jStreams = data.output.getAsJsonArray("streams")
@@ -71,11 +71,11 @@ class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : 
                 audioStream = audioStreams,
                 subtitleStream = subtitleStreams
             )
-            MediaStreamsParsePerformed(Status.COMPLETED, parsedStreams)
+            MediaStreamsParsePerformed(Status.COMPLETED, parsedStreams, eventId)
 
         } catch (e: Exception) {
             e.printStackTrace()
-            SimpleMessageData(Status.ERROR, message = e.message)
+            SimpleMessageData(Status.ERROR, message = e.message, eventId)
         }
 
     }

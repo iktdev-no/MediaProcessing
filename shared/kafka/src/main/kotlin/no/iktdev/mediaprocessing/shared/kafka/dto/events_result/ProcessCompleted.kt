@@ -7,6 +7,6 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 
 @KafkaBelongsToEvent(KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED)
 data class ProcessCompleted(
-    override val status: Status
-) : MessageDataWrapper(status) {
-}
+    override val status: Status,
+    override val derivedFromEventId: String?
+) : MessageDataWrapper(status, derivedFromEventId)

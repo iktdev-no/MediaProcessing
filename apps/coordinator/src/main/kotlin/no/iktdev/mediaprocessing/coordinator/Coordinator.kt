@@ -7,16 +7,12 @@ import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.common.persistance.isOfEvent
-import no.iktdev.mediaprocessing.shared.common.persistance.isSuccess
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.contract.dto.ProcessStartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.dto.RequestStartOperationEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.UUID
@@ -30,13 +26,10 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     }
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
-        val success = persistentWriter.storeEventDataMessage(event.key.event, event.value)
+        val success = eventManager.setEvent(event.key, event.value)
         if (!success) {
             log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().config.databaseName}" }
         } else {
-            deleteOlderEventsIfSuperseded(event.key, event.value)
-
-
             io.launch {
                 delay(1000) // Give the database a few sec to update
                 readAllMessagesFor(event.value.referenceId, event.value.eventId)
@@ -78,7 +71,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             file = file.absolutePath,
             type = type
         )
-        producer.sendMessage(UUID.randomUUID().toString(), KafkaEvents.EVENT_MEDIA_PROCESS_STARTED, processStartEvent)
+        producer.sendMessage(UUID.randomUUID().toString(), KafkaEvents.EventMediaProcessStarted, processStartEvent)
 
     }
 
@@ -96,14 +89,14 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     fun permitWorkToProceedOn(referenceId: String, message: String) {
         producer.sendMessage(
             referenceId = referenceId,
-            KafkaEvents.EVENT_MEDIA_WORK_PROCEED_PERMITTED,
-            SimpleMessageData(Status.COMPLETED, message)
+            KafkaEvents.EventMediaWorkProceedPermitted,
+            SimpleMessageData(Status.COMPLETED, message, null)
         )
     }
 
 
     fun readAllUncompletedMessagesInQueue() {
-        val messages = persistentReader.getUncompletedMessages()
+        val messages = eventManager.getEventsUncompleted()
         io.launch {
             messages.forEach {
                 delay(1000)
@@ -117,17 +110,17 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
-        val messages = persistentReader.getMessagesFor(referenceId)
+        val messages = eventManager.getEventsWith(referenceId)
         if (messages.find { it.eventId == eventId && it.referenceId == referenceId } == null) {
             log.warn { "EventId ($eventId) for ReferenceId ($referenceId) has not been made available in the database yet." }
             io.launch {
                 val fixedDelay = 1000L
                 delay(fixedDelay)
                 var delayed = 0L
-                var msc = persistentReader.getMessagesFor(referenceId)
+                var msc = eventManager.getEventsWith(referenceId)
                 while (msc.find { it.eventId == eventId } != null || delayed < 1000 * 60) {
                     delayed += fixedDelay
-                    msc = persistentReader.getMessagesFor(referenceId)
+                    msc = eventManager.getEventsWith(referenceId)
                 }
                 operationToRunOnMessages(referenceId, eventId, msc)
             }
@@ -145,63 +138,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     }
 
     fun getProcessStarted(messages: List<PersistentMessage>): MediaProcessStarted? {
-        return messages.find { it.event == KafkaEvents.EVENT_MEDIA_PROCESS_STARTED }?.data as MediaProcessStarted
-    }
-
-
-    fun deleteOlderEventsIfSuperseded(event: KafkaEvents, value: Message<out MessageDataWrapper>) {
-        var existingMessages = persistentReader.getMessagesFor(value.referenceId)
-
-        if (!KafkaEvents.isOfWork(event)) {
-            val superseded = existingMessages.filter { it.event == event && it.eventId != value.eventId }
-            superseded.forEach {
-                persistentWriter.deleteStoredEventDataMessage(
-                    referenceId = it.referenceId,
-                    eventId = it.eventId,
-                    event = it.event
-                )
-            }
-        }
-
-        existingMessages = persistentReader.getMessagesFor(value.referenceId)
-        val workItems = existingMessages.filter { KafkaEvents.isOfWork(it.event) }
-        for (item: PersistentMessage in workItems) {
-            val originatorId = if (item.isOfEvent(KafkaEvents.EVENT_WORK_ENCODE_CREATED) ||
-                item.isOfEvent(KafkaEvents.EVENT_WORK_EXTRACT_CREATED)
-            ) {
-                val ec = item.data as FfmpegWorkRequestCreated
-                ec.derivedFromEventId
-            } else if (item.isOfEvent(KafkaEvents.EVENT_WORK_ENCODE_PERFORMED)) {
-                try {
-                    (item.data as ProcesserEncodeWorkPerformed).derivedFromEventId
-                } catch (e: Exception) {
-                    null
-                }
-            } else if (item.isOfEvent(KafkaEvents.EVENT_WORK_EXTRACT_PERFORMED)) {
-                try {
-                    (item.data as ProcesserExtractWorkPerformed).derivedFromEventId
-                } catch (e: Exception) {
-                    null
-                }
-            } else null
-
-            originatorId?.let { originator ->
-                deleteEventsIfNoOriginator(item.referenceId, item.eventId, item.event, originator, existingMessages)
-            }
-        }
-    }
-
-    private fun deleteEventsIfNoOriginator(
-        referenceId: String,
-        eventId: String,
-        event: KafkaEvents,
-        originatorId: String,
-        existingMessages: List<PersistentMessage>
-    ) {
-        val originator = existingMessages.find { it.eventId == originatorId }
-        if (originator == null) {
-            persistentWriter.deleteStoredEventDataMessage(referenceId, eventId, event)
-        }
+        return messages.find { it.event == KafkaEvents.EventMediaProcessStarted }?.data as MediaProcessStarted
     }
 
 }

@@ -28,13 +28,13 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
     val preference = Preference.getPreference()
 
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_EXTRACT_PARAMETER_CREATED
+        get() = KafkaEvents.EventMediaParameterExtractCreated
 
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_MEDIA_PROCESS_STARTED,
-        KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
-        KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED,
-        KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
+        KafkaEvents.EventMediaProcessStarted,
+        KafkaEvents.EventMediaReadBaseInfoPerformed,
+        KafkaEvents.EventMediaParseStreamPerformed,
+        KafkaEvents.EventMediaReadOutNameAndType
     )
 
 
@@ -64,7 +64,7 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
         val videoInfo = videoInfoWrapper?.toValueObject()
 
         if (videoInfoWrapper == null || videoInfo == null) {
-            log.error { "${KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE} result is read as null" }
+            log.error { "${KafkaEvents.EventMediaReadOutNameAndType} result is read as null" }
             return null
         }
 
@@ -73,7 +73,8 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
             outFullName = videoInfo.fullName,
             outDir = File(videoInfoWrapper.outDirectory),
             baseInfo = baseInfo,
-            serializedParsedStreams = serializedParsedStreams
+            serializedParsedStreams = serializedParsedStreams,
+            eventId = event.eventId
         )
     }
 
@@ -82,7 +83,8 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
         outFullName: String,
         outDir: File,
         baseInfo: BaseInfoPerformed,
-        serializedParsedStreams: ParsedMediaStreams
+        serializedParsedStreams: ParsedMediaStreams,
+        eventId: String
     ): MessageDataWrapper? {
         val subRootDir = outDir.using("sub")
         val sArg = SubtitleArguments(serializedParsedStreams.subtitleStream).getSubtitleArguments()
@@ -94,12 +96,13 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
             )
         }
         if (entries.isEmpty()) {
-            return SimpleMessageData(status = Status.SKIPPED, "No entries found!")
+            return SimpleMessageData(status = Status.SKIPPED, "No entries found!", derivedFromEventId = eventId)
         }
         return FfmpegWorkerArgumentsCreated(
             status = Status.COMPLETED,
             inputFile = inputFile,
-            entries = entries
+            entries = entries,
+            derivedFromEventId = eventId
         )
     }
 

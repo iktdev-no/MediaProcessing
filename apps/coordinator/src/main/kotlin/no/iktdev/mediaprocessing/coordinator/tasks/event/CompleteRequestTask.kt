@@ -39,9 +39,9 @@ class CompleteRequestTask(@Autowired override var coordinator: Coordinator) : Ta
         // TODO: Add filter in case a metadata request was performed or a cover download was performed. for now, for base functionality, it requires a performed event.
 
         val requiresOneOf = listOf(
-            EVENT_WORK_CONVERT_PERFORMED,
-            EVENT_WORK_EXTRACT_PERFORMED,
-            EVENT_WORK_ENCODE_PERFORMED
+            EventWorkConvertPerformed,
+            EventWorkExtractPerformed,
+            EventWorkEncodePerformed
         )
 
         if (requiresOneOf.none { it in receivedEvents }) {
@@ -55,7 +55,7 @@ class CompleteRequestTask(@Autowired override var coordinator: Coordinator) : Ta
 
         val mapper = ProcessMapping(events)
         if (mapper.canCollect()) {
-            return ProcessCompleted(Status.COMPLETED)
+            return ProcessCompleted(Status.COMPLETED, event.eventId)
         }
         return null
     }

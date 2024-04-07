@@ -28,17 +28,27 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
     private val log = KotlinLogging.logger {}
     private val logDir = ProcesserEnv.encodeLogDirectory
 
-    override val producesEvent = KafkaEvents.EVENT_WORK_ENCODE_PERFORMED
+    override val producesEvent = KafkaEvents.EventWorkEncodePerformed
     override val requiredEvents: List<KafkaEvents> = listOf(
-        KafkaEvents.EVENT_WORK_ENCODE_CREATED
+        KafkaEvents.EventWorkEncodeCreated
     )
 
-    val scope = Coroutines.io()
     private var runner: FfmpegWorker? = null
-    private var runnerJob: Job? = null
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"
+
+    private final val coordinatorEvents = object: Coordinator.CoordinatorEvents {
+        override fun onCancelOrStopProcess(eventId: String) {
+            cancelWorkIfRunning(eventId)
+        }
+    }
+
     init {
         log.info { "Starting with id: $serviceId" }
+    }
+
+    override fun attachListener() {
+        super.attachListener()
+        coordinator.addCoordinatorEventListener(listener = coordinatorEvents)
     }
 
 
@@ -53,16 +63,16 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
             return null
         }
         if (event.data !is FfmpegWorkRequestCreated) {
-            return SimpleMessageData(status = Status.ERROR, message = "Invalid data (${event.data.javaClass.name}) passed for ${event.event.event}")
+            return SimpleMessageData(status = Status.ERROR, message = "Invalid data (${event.data.javaClass.name}) passed for ${event.event.event}", event.eventId)
         }
 
-        val isAlreadyClaimed = persistentReader.isProcessEventAlreadyClaimed(referenceId = event.referenceId, eventId = event.eventId)
+        val isAlreadyClaimed = eventManager.isProcessEventClaimed(referenceId = event.referenceId, eventId = event.eventId)
         if (isAlreadyClaimed) {
             log.warn {  "Process is already claimed!" }
             return null
         }
 
-        if (runnerJob?.isActive != true) {
+        if (runner?.isWorking() != true) {
             startEncode(event)
         } else {
             log.warn { "Worker is already running.." }
@@ -78,19 +88,17 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
             logDir.mkdirs()
         }
 
-        val setClaim = persistentWriter.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimedBy = serviceId)
+        val setClaim = eventManager.setProcessEventClaim(referenceId = event.referenceId, eventId = event.eventId, claimer = serviceId)
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} encode" }
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents )
             if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
                 ffmpegWorkerEvents.onError(event.referenceId, event.eventId, ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
                 // Setting consumed to prevent spamming
-                persistentWriter.setProcessEventCompleted(event.referenceId, event.eventId, serviceId)
+                eventManager.setProcessEventCompleted(event.referenceId, event.eventId)
                 return
             }
-            runnerJob = scope.launch {
-                runner!!.runWithProgress()
-            }
+            runner?.runWithProgress()
 
         } else {
             log.error { "Failed to set claim on referenceId: ${event.referenceId} on event ${event.event}" }
@@ -105,7 +113,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
                 return
             }
             log.info { "Encode started for ${runner.referenceId}" }
-            persistentWriter.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
+            eventManager.setProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
             sendProgress(referenceId, eventId, status = WorkStatus.Started, info, FfmpegDecodedProgress(
                 progress = 0,
                 time = "Unkown",
@@ -113,13 +121,6 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
                 speed = "0",
             )
             )
-
-            scope.launch {
-                while (runnerJob?.isActive == true) {
-                    delay(java.time.Duration.ofMinutes(5).toMillis())
-                    persistentWriter.updateCurrentProcessEventClaim(runner.referenceId, runner.eventId, serviceId)
-                }
-            }
         }
 
         override fun onCompleted(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated) {
@@ -129,18 +130,18 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
                 return
             }
             log.info { "Encode completed for ${runner.referenceId}" }
-            val consumedIsSuccessful = persistentWriter.setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
+            val consumedIsSuccessful = eventManager.setProcessEventCompleted(runner.referenceId, runner.eventId)
             runBlocking {
                 delay(1000)
                 if (!consumedIsSuccessful) {
-                    persistentWriter.setProcessEventCompleted(runner.referenceId, runner.eventId, serviceId)
+                    eventManager.setProcessEventCompleted(runner.referenceId, runner.eventId)
                 }
                 delay(1000)
-                var readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
+                var readbackIsSuccess = eventManager.isProcessEventCompleted(runner.referenceId, runner.eventId)
 
                 while (!readbackIsSuccess) {
                     delay(1000)
-                    readbackIsSuccess = persistentReader.isProcessEventDefinedAsConsumed(runner.referenceId, runner.eventId, serviceId)
+                    readbackIsSuccess = eventManager.isProcessEventCompleted(runner.referenceId, runner.eventId)
                 }
                 producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                     data = ProcesserEncodeWorkPerformed(status = Status.COMPLETED, producedBy = serviceId, derivedFromEventId =  runner.eventId, outFile = runner.info.outFile)
@@ -179,6 +180,10 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
             sendProgress(referenceId, eventId, WorkStatus.Working, info, progress)
         }
 
+        override fun onIAmAlive(referenceId: String, eventId: String) {
+            super.onIAmAlive(referenceId, eventId)
+            eventManager.setProcessEventClaimRefresh(referenceId, eventId, serviceId)
+        }
     }
 
     fun sendProgress(referenceId: String, eventId: String, status: WorkStatus, info: FfmpegWorkRequestCreated, progress: FfmpegDecodedProgress? = null) {
@@ -195,13 +200,20 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
 
 
     fun clearWorker() {
-        this.runner?.scope?.cancel()
         this.runner = null
     }
 
     @PreDestroy
     fun shutdown() {
-        scope.cancel()
-        runner?.scope?.cancel("Stopping application")
+        runner?.cancel("Stopping application")
     }
+
+    fun cancelWorkIfRunning(eventId: String) {
+        if (runner?.eventId == eventId) {
+            runner?.cancel()
+        }
+    }
+
+
+
 }

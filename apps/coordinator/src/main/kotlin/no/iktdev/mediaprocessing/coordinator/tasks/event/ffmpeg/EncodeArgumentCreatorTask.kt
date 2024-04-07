@@ -24,14 +24,14 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
 
     val preference = Preference.getPreference()
     override val producesEvent: KafkaEvents
-        get() = KafkaEvents.EVENT_MEDIA_ENCODE_PARAMETER_CREATED
+        get() = KafkaEvents.EventMediaParameterEncodeCreated
 
     override val requiredEvents: List<KafkaEvents> =
         listOf(
-            KafkaEvents.EVENT_MEDIA_PROCESS_STARTED,
-            KafkaEvents.EVENT_MEDIA_READ_BASE_INFO_PERFORMED,
-            KafkaEvents.EVENT_MEDIA_PARSE_STREAM_PERFORMED,
-            KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE
+            KafkaEvents.EventMediaProcessStarted,
+            KafkaEvents.EventMediaReadBaseInfoPerformed,
+            KafkaEvents.EventMediaParseStreamPerformed,
+            KafkaEvents.EventMediaReadOutNameAndType
         )
 
     override fun prerequisitesRequired(events: List<PersistentMessage>): List<() -> Boolean> {
@@ -61,7 +61,7 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
         }
 
         if (videoInfoWrapper == null || videoInfo == null) {
-            log.error { "${KafkaEvents.EVENT_MEDIA_READ_OUT_NAME_AND_TYPE} result is read as null" }
+            log.error { "${KafkaEvents.EventMediaReadOutNameAndType} result is read as null" }
             return null
         }
 
@@ -74,7 +74,8 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
             outDir = File(videoInfoWrapper.outDirectory),
             preference = preference.encodePreference,
             baseInfo = baseInfo,
-            serializedParsedStreams = serializedParsedStreams
+            serializedParsedStreams = serializedParsedStreams,
+            eventId = event.eventId
         )
     }
 
@@ -84,7 +85,8 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
         outDir: File,
         preference: EncodingPreference,
         baseInfo: BaseInfoPerformed,
-        serializedParsedStreams: ParsedMediaStreams
+        serializedParsedStreams: ParsedMediaStreams,
+        eventId: String
     ): MessageDataWrapper {
         val outVideoFile = outDir.using("${outFullName}.mp4").absolutePath
 
@@ -97,7 +99,7 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
 
         val vaArgs = toFfmpegWorkerArguments(vArg, aArg)
         return if (vaArgs.isEmpty()) {
-            SimpleMessageData(Status.ERROR, message = "Unable to produce arguments")
+            SimpleMessageData(Status.ERROR, message = "Unable to produce arguments", derivedFromEventId = eventId)
         } else {
             FfmpegWorkerArgumentsCreated(
                 status = Status.COMPLETED,
@@ -107,7 +109,8 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
                         outputFile = outVideoFile,
                         arguments = vaArgs
                     )
-                )
+                ),
+                derivedFromEventId = eventId
             )
         }
     }

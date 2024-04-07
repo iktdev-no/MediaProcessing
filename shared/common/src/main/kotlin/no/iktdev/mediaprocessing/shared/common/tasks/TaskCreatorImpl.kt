@@ -25,7 +25,7 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
         return Tasks(taskHandler = this, producesEvent = producesEvent, listensForEvents = reactableEvents)
     }
     @PostConstruct
-    fun attachListener() {
+    open fun attachListener() {
         coordinator.listeners.add(getListener())
     }
 
