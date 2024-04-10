@@ -57,5 +57,13 @@ enum class KafkaEvents(val event: String) {
                 EventWorkExtractPerformed
             )
         }
+
+        fun isOfFinalize(event: KafkaEvents): Boolean {
+            return event in listOf(
+                EVENT_MEDIA_PROCESS_COMPLETED,
+                EVENT_REQUEST_PROCESS_COMPLETED,
+                EVENT_COLLECT_AND_STORE
+            )
+        }
     }
 }

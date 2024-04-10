@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
 @Service
-class Reporter(@Autowired private val restTemplate: RestTemplate) {
-
+class Reporter() {
+    @Autowired
+    lateinit var restTemplate: RestTemplate
     fun sendEncodeProgress(progress: ProcesserEventInfo) {
         try {
             restTemplate.postForEntity(SharedConfig.uiUrl + "/encode/progress", progress, String::class.java)

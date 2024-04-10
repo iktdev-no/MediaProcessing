@@ -4,8 +4,10 @@ import no.iktdev.mediaprocessing.shared.common.Defaults
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaImplementation
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.web.client.RestTemplate
 
 //@Configuration
 //class SocketLocalInit: SocketImplementation()
@@ -16,4 +18,5 @@ class KafkaLocalInit: KafkaImplementation() {
 }
 
 @Configuration
-class DefaultConfiguration: Defaults()
+public class DefaultProcesserConfiguration: Defaults() {
+}

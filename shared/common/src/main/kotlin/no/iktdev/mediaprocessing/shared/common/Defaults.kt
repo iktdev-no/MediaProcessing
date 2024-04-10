@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate
 open class Defaults {
 
     @Bean
-    fun restTemplate(): RestTemplate {
+    open fun restTemplate(): RestTemplate {
         val restTemplate = RestTemplate()
         return restTemplate
     }

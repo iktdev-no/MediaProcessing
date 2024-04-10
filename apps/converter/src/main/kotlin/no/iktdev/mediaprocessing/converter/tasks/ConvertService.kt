@@ -182,12 +182,10 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
     val scheduled_deferred_events: MutableMap<String, List<DerivedProcessIterationHolder>> = mutableMapOf()
     @Scheduled(fixedDelay = (300_000))
     fun validatePresenceOfRequiredEvent() {
-        val removal = mutableMapOf<String, List<DerivedProcessIterationHolder>>()
-
+        val continueDeferral: MutableMap<String, List<DerivedProcessIterationHolder>> = mutableMapOf()
 
         for ((referenceId, eventList) in scheduled_deferred_events) {
-            val failed = mutableListOf<DerivedProcessIterationHolder>()
-
+            val keepable = mutableListOf<DerivedProcessIterationHolder>()
             for (event in eventList) {
                 val ce = if (event.event.data is ConvertWorkerRequest) event.event.data as ConvertWorkerRequest else null
                 try {
@@ -199,12 +197,12 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                         throw RuntimeException("Iterated overshot")
                     } else {
                         event.iterated++
+                        keepable.add(event)
                         "Iteration ${event.iterated} for event ${event.eventId} in deferred check"
                     }
 
                 } catch (e: Exception) {
                     eventManager.setProcessEventCompleted(referenceId, event.eventId)
-                    failed.add(event)
                     log.error { "Canceling event ${event.eventId}\n\t by declaring it as consumed." }
                     producer.sendMessage(
                         referenceId = referenceId,
@@ -213,14 +211,11 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                     )
                 }
             }
-            removal[referenceId] = failed
+            continueDeferral[referenceId] = keepable
         }
 
-        for ((referenceId, events) in removal) {
-            val list = scheduled_deferred_events[referenceId] ?: continue
-            list.toMutableList().removeAll(events)
-            scheduled_deferred_events[referenceId] = list
-        }
+        scheduled_deferred_events.clear()
+        scheduled_deferred_events.putAll(continueDeferral)
 
     }
 
