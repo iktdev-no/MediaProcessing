@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
-    override val producesEvent: KafkaEvents = KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED
+    override val producesEvent: KafkaEvents = KafkaEvents.EventMediaProcessCompleted
 
     override val requiredEvents: List<KafkaEvents> = listOf(
         EventMediaProcessStarted,

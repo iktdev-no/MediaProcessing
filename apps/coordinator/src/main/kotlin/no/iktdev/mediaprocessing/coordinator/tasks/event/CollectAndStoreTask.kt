@@ -30,11 +30,11 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
     val log = KotlinLogging.logger {}
 
 
-    override val producesEvent: KafkaEvents = KafkaEvents.EVENT_COLLECT_AND_STORE
+    override val producesEvent: KafkaEvents = KafkaEvents.EventCollectAndStore
 
     override val requiredEvents: List<KafkaEvents> = listOf(
         EventMediaProcessStarted,
-        EVENT_MEDIA_PROCESS_COMPLETED
+        EventMediaProcessCompleted
     )
     override val listensForEvents: List<KafkaEvents> = KafkaEvents.entries
 
@@ -42,8 +42,8 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         val started = events.lastOrSuccessOf(EventMediaProcessStarted) ?: return null
-        val completed = events.lastOrSuccessOf(EVENT_MEDIA_PROCESS_COMPLETED) ?: return null
-        if (!started.data.isSuccess() || !completed.data.isSuccess() && completed.data.status != Status.SKIPPED) {
+        val completed = events.lastOrSuccessOf(EventMediaProcessCompleted) ?: return null
+        if (!started.data.isSuccess() || !completed.data.isSuccess()) {
             return null
         }
         val mapped = ProcessMapping(events).map() ?: return null

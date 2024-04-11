@@ -58,10 +58,10 @@ class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : Coo
     }
 
     private fun getCurrentState(events: List<PersistentMessage>, processes: Map<String, EventSummarySubItem>): SummaryState {
-        val stored = events.findLast { it.event == KafkaEvents.EVENT_COLLECT_AND_STORE }
+        val stored = events.findLast { it.event == KafkaEvents.EventCollectAndStore }
         val started = events.findLast { it.event == KafkaEvents.EventMediaProcessStarted }
-        val completedMediaEvent = events.findLast { it.event == KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED }
-        val completedRequestEvent = events.findLast { it.event == KafkaEvents.EVENT_REQUEST_PROCESS_COMPLETED }
+        val completedMediaEvent = events.findLast { it.event == KafkaEvents.EventMediaProcessCompleted }
+        val completedRequestEvent = events.findLast { it.event == KafkaEvents.EventRequestProcessCompleted }
 
         if (stored != null && stored.data.isSuccess()) {
             return SummaryState.Completed

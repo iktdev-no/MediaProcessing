@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 class CompleteRequestTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
-    override val producesEvent: KafkaEvents = KafkaEvents.EVENT_REQUEST_PROCESS_COMPLETED
+    override val producesEvent: KafkaEvents = KafkaEvents.EventRequestProcessCompleted
 
     override val requiredEvents: List<KafkaEvents> = listOf(
         EVENT_REQUEST_PROCESS_STARTED,

@@ -39,7 +39,7 @@ class DeserializingRegistry {
             KafkaEvents.EventWorkDownloadCoverPerformed to CoverDownloadWorkPerformed::class.java,
 
 
-            KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED to ProcessCompleted::class.java
+            KafkaEvents.EventMediaProcessCompleted to ProcessCompleted::class.java
             )
     }
 

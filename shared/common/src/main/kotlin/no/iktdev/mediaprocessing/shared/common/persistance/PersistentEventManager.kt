@@ -1,8 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.common.datasource.*
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -11,10 +9,7 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
-import java.sql.SQLIntegrityConstraintViolationException
 import java.time.LocalDateTime
-import javax.xml.crypto.Data
-import kotlin.coroutines.coroutineContext
 
 private val log = KotlinLogging.logger {}
 
@@ -97,9 +92,9 @@ class PersistentEventManager(private val dataSource: DataSource) {
 
     fun getEventsUncompleted(): List<List<PersistentMessage>> {
         val identifiesAsCompleted = listOf(
-            KafkaEvents.EVENT_REQUEST_PROCESS_COMPLETED,
-            KafkaEvents.EVENT_MEDIA_PROCESS_COMPLETED,
-            KafkaEvents.EVENT_COLLECT_AND_STORE
+            KafkaEvents.EventRequestProcessCompleted,
+            KafkaEvents.EventMediaProcessCompleted,
+            KafkaEvents.EventCollectAndStore
         )
         val all = getAllEventsGrouped()
         return all.filter { entry -> entry.none { it.event in identifiesAsCompleted } }

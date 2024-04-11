@@ -58,11 +58,14 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
 
 
         var message: String? = null
+        var status = Status.COMPLETED
         val result = if (outFile?.exists() == true) {
             message = "${outFile.name} already exists"
+            status = Status.SKIPPED
             outFile
         } else if (coversInDifferentFormats.isNotEmpty()) {
-          coversInDifferentFormats.random()
+            status = Status.SKIPPED
+            coversInDifferentFormats.random()
         } else if (outFile != null) {
             runBlocking {
                 client.download(outFile)
@@ -74,7 +77,9 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
         return if (result == null) {
             SimpleMessageData(Status.ERROR, "Could not download cover, check logs", event.eventId)
         } else {
-            val status = if (result.exists() && result.canRead()) Status.COMPLETED else Status.ERROR
+            if (!result.exists() || !result.canRead()) {
+                status = Status.ERROR
+            }
             CoverDownloadWorkPerformed(status = status, message = message, coverFile = result.absolutePath, event.eventId)
         }
     }

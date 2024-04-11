@@ -36,9 +36,9 @@ enum class KafkaEvents(val event: String) {
     EVENT_STORE_COVER_PERFORMED("event:store-cover:performed"),
     EVENT_STORE_METADATA_PERFORMED("event:store-metadata:performed"),
 
-    EVENT_MEDIA_PROCESS_COMPLETED("event:media-process:completed"),
-    EVENT_REQUEST_PROCESS_COMPLETED("event:request-process:completed"),
-    EVENT_COLLECT_AND_STORE("event::save");
+    EventMediaProcessCompleted("event:media-process:completed"),
+    EventRequestProcessCompleted("event:request-process:completed"),
+    EventCollectAndStore("event::save");
 
     companion object {
         fun toEvent(event: String): KafkaEvents? {
@@ -60,9 +60,9 @@ enum class KafkaEvents(val event: String) {
 
         fun isOfFinalize(event: KafkaEvents): Boolean {
             return event in listOf(
-                EVENT_MEDIA_PROCESS_COMPLETED,
-                EVENT_REQUEST_PROCESS_COMPLETED,
-                EVENT_COLLECT_AND_STORE
+                EventMediaProcessCompleted,
+                EventRequestProcessCompleted,
+                EventCollectAndStore
             )
         }
     }
