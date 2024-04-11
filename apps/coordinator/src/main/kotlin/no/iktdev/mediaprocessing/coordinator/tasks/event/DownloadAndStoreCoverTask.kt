@@ -54,10 +54,15 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
             client.getOutFile()
         }
 
+        val coversInDifferentFormats = outDir.listFiles { it -> it.isFile && it.extension.lowercase() in client.contentTypeToExtension().values } ?: emptyArray()
+
+
         var message: String? = null
         val result = if (outFile?.exists() == true) {
             message = "${outFile.name} already exists"
             outFile
+        } else if (coversInDifferentFormats.isNotEmpty()) {
+          coversInDifferentFormats.random()
         } else if (outFile != null) {
             runBlocking {
                 client.download(outFile)
