@@ -83,7 +83,26 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             else -> FileNameDeterminate.ContentType.UNDEFINED
         }
 
-        val fileDeterminate = FileNameDeterminate(baseInfo.title, baseInfo.sanitizedName, contentType)
+        val fileDeterminate = if (contentType != FileNameDeterminate.ContentType.UNDEFINED) {
+
+            val usableTitles: MutableList<String> = mutableListOf()
+            meta?.data.let { mdt ->
+                mdt?.title?.let { title -> usableTitles.add(title) }
+                mdt?.altTitle?.let { alts -> usableTitles.addAll(alts) }
+            }
+
+            val collections = SharedConfig.outgoingContent.listFiles { it -> it.isDirectory }?.map { it.name } ?: emptyList()
+            val usableCollectionAsTitle = usableTitles.mapNotNull { findNearestValue(collections, it) }
+
+            val title = if ( usableCollectionAsTitle.isNotEmpty()) {
+                val using = usableCollectionAsTitle.first()
+                log.info { "Found matches in collection using: ${usableTitles.joinToString("\n")}" }
+                log.info { "Using $using out of these: ${usableCollectionAsTitle.joinToString("\n")}" }
+                using
+            } else meta?.data?.title
+
+            FileNameDeterminate(title ?: baseInfo.title, baseInfo.sanitizedName, contentType)
+        } else FileNameDeterminate(baseInfo.title, baseInfo.sanitizedName, contentType)
         if (waitingProcessesForMeta.containsKey(event.referenceId)) {
             waitingProcessesForMeta.remove(event.referenceId)
         }
@@ -98,6 +117,31 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
         }
     }
 
+
+
+    fun findNearestValue(list: List<String>, target: String): String? {
+        return list.minByOrNull { it.distanceTo(target) }
+    }
+
+    fun String.distanceTo(other: String): Int {
+        val distance = Array(length + 1) { IntArray(other.length + 1) }
+        for (i in 0..length) {
+            distance[i][0] = i
+        }
+        for (j in 0..other.length) {
+            distance[0][j] = j
+        }
+        for (i in 1..length) {
+            for (j in 1..other.length) {
+                distance[i][j] = minOf(
+                    distance[i - 1][j] + 1,
+                    distance[i][j - 1] + 1,
+                    distance[i - 1][j - 1] + if (this[i - 1] == other[j - 1]) 0 else 1
+                )
+            }
+        }
+        return distance[length][other.length]
+    }
 
     //@Scheduled(fixedDelay = (60_000))
     @Scheduled(fixedDelay = (1_000))
