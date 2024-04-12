@@ -15,11 +15,9 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.hasValidData
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
+import no.iktdev.streamit.library.db.tables.movie
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -121,8 +119,16 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             return getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
         }
 
-        fun getVideoPayload() =
-            FileNameDeterminate(getTitle(), baseInfo.sanitizedName, metadataDeterminedContentType).getDeterminedVideoInfo()?.toJsonObject()
+        fun getVideoPayload(): JsonObject? {
+            val defaultFnd = FileNameDeterminate(getTitle(), baseInfo.sanitizedName, FileNameDeterminate.ContentType.UNDEFINED)
+
+            val determinedContentType = defaultFnd.getDeterminedVideoInfo().let { if (it is EpisodeInfo) FileNameDeterminate.ContentType.SERIE else if (it is MovieInfo) FileNameDeterminate.ContentType.MOVIE else FileNameDeterminate.ContentType.UNDEFINED }
+            return if (determinedContentType == metadataDeterminedContentType && determinedContentType == FileNameDeterminate.ContentType.MOVIE) {
+                FileNameDeterminate(getTitle(), getTitle(), FileNameDeterminate.ContentType.MOVIE).getDeterminedVideoInfo()?.toJsonObject()
+            } else {
+                FileNameDeterminate(getTitle(), baseInfo.sanitizedName, metadataDeterminedContentType).getDeterminedVideoInfo()?.toJsonObject()
+            }
+        }
 
         fun getOutputDirectory() = SharedConfig.outgoingContent.using(getTitle())
 
