@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import com.google.gson.JsonObject
 import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.io.FileFilter
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -51,7 +53,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
-        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EventMediaReadBaseInfoPerformed) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
+        val baseInfo = events.lastOrSuccessOf(KafkaEvents.EventMediaReadBaseInfoPerformed) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
         val meta = events.lastOrSuccessOf(KafkaEvents.EventMediaMetadataSearchPerformed) { it.data is MetadataPerformed }?.data as MetadataPerformed?
 
         // Only Return here as both baseInfo events are required to continue
@@ -74,49 +76,59 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             return null
         }
 
-        baseInfo ?: return null // Return if baseInfo is null
-
-        val metaContentType: String? = if (meta.isSuccess()) meta?.data?.type else null
-        val contentType = when (metaContentType) {
-            "serie", "tv" -> FileNameDeterminate.ContentType.SERIE
-            "movie" -> FileNameDeterminate.ContentType.MOVIE
-            else -> FileNameDeterminate.ContentType.UNDEFINED
-        }
-
-        val fileDeterminate = if (contentType != FileNameDeterminate.ContentType.UNDEFINED) {
-
-            val usableTitles: MutableList<String> = mutableListOf()
-            meta?.data.let { mdt ->
-                mdt?.title?.let { title -> usableTitles.add(title) }
-                mdt?.altTitle?.let { alts -> usableTitles.addAll(alts) }
-            }
-
-            val collections = SharedConfig.outgoingContent.listFiles { it -> it.isDirectory }?.map { it.name } ?: emptyList()
-            val usableCollectionAsTitle = usableTitles.mapNotNull { findNearestValue(collections, it) }
-
-            val title = if ( usableCollectionAsTitle.isNotEmpty()) {
-                val using = usableCollectionAsTitle.first()
-                log.info { "Found matches in collection using: ${usableTitles.joinToString("\n")}" }
-                log.info { "Using $using out of these: ${usableCollectionAsTitle.joinToString("\n")}" }
-                using
-            } else meta?.data?.title
-
-            FileNameDeterminate(title ?: baseInfo.title, baseInfo.sanitizedName, contentType)
-        } else FileNameDeterminate(baseInfo.title, baseInfo.sanitizedName, contentType)
         if (waitingProcessesForMeta.containsKey(event.referenceId)) {
             waitingProcessesForMeta.remove(event.referenceId)
         }
 
-        val outputDirectory = SharedConfig.outgoingContent.using(baseInfo.title)
+        val pm = ProcessMediaInfoAndMetadata(baseInfo, meta)
 
-        val vi = fileDeterminate.getDeterminedVideoInfo()?.toJsonObject()
+
+        val vi = pm.getVideoPayload()
         return if (vi != null) {
-            VideoInfoPerformed(Status.COMPLETED, vi, outDirectory = outputDirectory.absolutePath, event.eventId)
+            VideoInfoPerformed(Status.COMPLETED, vi, outDirectory = pm.getOutputDirectory().absolutePath, event.eventId)
         } else {
             SimpleMessageData(Status.ERROR, "No VideoInfo found...", event.eventId)
         }
     }
 
+
+    class ProcessMediaInfoAndMetadata(val baseInfo: BaseInfoPerformed, val metadata: MetadataPerformed? = null) {
+        var metadataDeterminedContentType: FileNameDeterminate.ContentType = metadata?.data?.type?.let { contentType ->
+            when (contentType) {
+                "serie", "tv" -> FileNameDeterminate.ContentType.SERIE
+                "movie" -> FileNameDeterminate.ContentType.MOVIE
+                else -> FileNameDeterminate.ContentType.UNDEFINED
+            }
+        } ?: FileNameDeterminate.ContentType.UNDEFINED
+
+        fun getTitlesFromMetadata(): List<String> {
+            val titles: MutableList<String> = mutableListOf()
+            metadata?.data?.let { md -> {
+                titles.add(md.title)
+                titles.addAll(md.altTitle)
+            } }
+            return titles
+        }
+        fun getExistingCollections() =
+            SharedConfig.outgoingContent.listFiles(FileFilter { it.isDirectory })?.map { it.name } ?: emptyList()
+
+        fun getAlreadyUsedForCollectionOrTitle(): String? {
+            val exisiting = getExistingCollections()
+            return getTitlesFromMetadata().firstOrNull { it in exisiting }
+        }
+
+        fun getTitle(): String {
+            return getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
+        }
+
+        fun getVideoPayload() =
+            FileNameDeterminate(getTitle(), baseInfo.sanitizedName, metadataDeterminedContentType).getDeterminedVideoInfo()?.toJsonObject()
+
+        fun getOutputDirectory() = SharedConfig.outgoingContent.using(getTitle())
+
+
+
+    }
 
 
     fun findNearestValue(list: List<String>, target: String): String? {
