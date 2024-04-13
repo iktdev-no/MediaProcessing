@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.datasource.*
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
+import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -219,7 +220,7 @@ class PersistentEventManager(private val dataSource: DataSource) {
         }
     }
 
-    fun setProcessEventCompleted(referenceId: String, eventId: String): Boolean {
+    fun setProcessEventCompleted(referenceId: String, eventId: String, status: Status = Status.COMPLETED): Boolean {
         return executeWithStatus(dataSource) {
             processerEvents.update({
                 (processerEvents.referenceId eq referenceId) and
@@ -227,6 +228,7 @@ class PersistentEventManager(private val dataSource: DataSource) {
             }) {
                 it[consumed] = true
                 it[claimed] = true
+                it[processerEvents.status] = status.name
             }
         }
     }

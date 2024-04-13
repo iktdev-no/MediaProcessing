@@ -158,6 +158,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
         }
 
         override fun onError(referenceId: String, eventId: String, info: FfmpegWorkRequestCreated, errorMessage: String) {
+            eventManager.setProcessEventCompleted(referenceId, eventId, Status.ERROR)
             val runner = this@EncodeService.runner
             if (runner == null || runner.referenceId.isBlank()) {
                 log.error { "Can't produce error message when the referenceId is not present" }
