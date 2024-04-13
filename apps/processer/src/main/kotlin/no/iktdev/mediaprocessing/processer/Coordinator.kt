@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.JsonDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.NotificationOfDeletionPerformed
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -46,6 +47,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     override fun onCoordinatorReady() {
+        generateMissingEvents()
         readAllAvailableInQueue()
     }
 
@@ -88,6 +90,25 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
                 delay(1000)
                 createTasksBasedOnEventsAndPersistence(referenceId = it.referenceId, eventId = it.eventId, messages)
             }
+        }
+    }
+
+    private fun generateMissingEvents() {
+        val existing = eventManager.getAllProcessEvents().map { it.eventId }
+        val messages = eventManager.getEventsUncompleted()
+
+        val validMessages = messages.filter { list -> list.any { it.event in processKafkaEvents } }
+            .filter { list ->
+                list.any { it.event == KafkaEvents.EventMediaProcessStarted } ||
+                        (list.any { it.event == KafkaEvents.EventMediaWorkProceedPermitted } && list.any { it.event == KafkaEvents.EVENT_REQUEST_PROCESS_STARTED })
+            }.flatten().filter { it.event in processKafkaEvents }
+
+        validMessages.filter { it.eventId !in existing }.forEach {
+            eventManager.setProcessEvent(it.event, Message(
+                referenceId = it.referenceId,
+                eventId = it.eventId,
+                data = it.data
+            ))
         }
     }
 
