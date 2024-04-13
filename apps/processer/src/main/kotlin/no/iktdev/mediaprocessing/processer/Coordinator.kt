@@ -106,7 +106,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     ) + processKafkaEvents
 
 
-    @Scheduled(fixedDelay = (5_000))
+    @Scheduled(fixedDelay = (5*6_0000))
     fun checkForWork() {
         log.info { "Checking if there is any work to do.." }
         readAllAvailableInQueue()

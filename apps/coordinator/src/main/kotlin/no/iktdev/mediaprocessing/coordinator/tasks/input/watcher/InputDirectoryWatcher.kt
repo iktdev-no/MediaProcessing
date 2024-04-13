@@ -8,12 +8,13 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.log
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-
+import java.io.File
 
 
 interface FileWatcherEvents {
@@ -50,24 +51,42 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
                 } else {
                     logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
                 }
-                when (it.kind) {
-                    Deleted -> queue.removeFromQueue(it.file, this@InputDirectoryWatcher::onFileRemoved)
-                    Initialized -> { /* Do nothing */ }
-                    else -> {
-                        if (it.file.isFile && it.file.isSupportedVideoFile()) {
-                            queue.addToQueue(it.file, this@InputDirectoryWatcher::onFilePending, this@InputDirectoryWatcher::onFileAvailable)
-                        } else if (it.file.isDirectory) {
-                            val supportedFiles = it.file.walkTopDown().filter { f -> f.isFile && f.isSupportedVideoFile() }
-                            supportedFiles.forEach { sf ->
-                                queue.addToQueue(sf, this@InputDirectoryWatcher::onFilePending, this@InputDirectoryWatcher::onFileAvailable)
+                try {
+                    when (it.kind) {
+                        Deleted -> removeFile(it.file)
+                        Initialized -> { /* Do nothing */ }
+                        else -> {
+                            val added = addFile(it.file)
+                            if (!added) {
+                                logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
                             }
-                        } else {
-                            logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }
+    }
+
+    private fun addFile(file: File): Boolean {
+        return if (file.isFile && file.isSupportedVideoFile()) {
+            log.info { "Adding ${file.name} to queue" }
+            queue.addToQueue(file, this@InputDirectoryWatcher::onFilePending, this@InputDirectoryWatcher::onFileAvailable)
+            true
+        } else if (file.isDirectory) {
+            log.info { "Searching for files in ${file.name}" }
+            val supportedFiles = file.walkTopDown().filter { f -> f.isFile && f.isSupportedVideoFile() }
+            supportedFiles.forEach { sf ->
+                log.info { "Adding ${sf.name} to queue from folder" }
+                queue.addToQueue(sf, this@InputDirectoryWatcher::onFilePending, this@InputDirectoryWatcher::onFileAvailable)
+            }
+            true
+        } else false
+    }
+
+    private fun removeFile(file: File) {
+        queue.removeFromQueue(file, this@InputDirectoryWatcher::onFileRemoved)
     }
 
     override fun onFileAvailable(file: PendingFile) {

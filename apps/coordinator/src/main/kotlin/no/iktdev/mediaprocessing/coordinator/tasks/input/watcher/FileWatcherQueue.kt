@@ -42,26 +42,36 @@ class FileWatcherQueue {
     }
 
     fun removeFromQueue(file: File, onFileRemoved: (PendingFile) -> Unit) {
-        val removedFile = fileChannel.findAndRemove { it.file == file }
-        removedFile?.let {
-            onFileRemoved(it)
+        if (file.isFile) {
+            val removedFile = fileChannel.findAndRemove { it.file == file }
+            removedFile.let {
+                it.forEach { file -> onFileRemoved(file) }
+            }
+        } else {
+            val removeFiles = fileChannel.findAndRemove { it.file.parentFile == file }
+            removeFiles.let {
+                it.forEach { file -> onFileRemoved(file) }
+            }
         }
     }
 
+
     // Extension function to find and remove an element from the channel
-    fun <T> Channel<T>.findAndRemove(predicate: (T) -> Boolean): T? {
+    fun <T> Channel<T>.findAndRemove(predicate: (T) -> Boolean): List<T> {
+        val forRemoved = mutableListOf<T>()
         val items = mutableListOf<T>()
         while (true) {
             val item = tryReceive().getOrNull() ?: break
             if (predicate(item)) {
-                return item
+                forRemoved.add(item)
             }
             items.add(item)
         }
         for (item in items) {
             trySend(item).isSuccess
         }
-        return null
+        return forRemoved
     }
+
 
 }
