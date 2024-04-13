@@ -43,7 +43,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
         if (event.key == KafkaEvents.EventWorkConvertCreated) {
             val success = eventManager.setProcessEvent(event.key, event.value)
             if (!success) {
-                log.error { "Unable to store message: ${event.key.event} in database ${getEventsDatabase().database}!" }
+                log.error { "Unable to store message event: ${event.key.event} with eventId ${event.value.eventId} with referenceId ${event.value.referenceId} in database ${getEventsDatabase().database}!" }
             } else {
                 readAllMessagesFor(event.value.referenceId, event.value.eventId)
             }
