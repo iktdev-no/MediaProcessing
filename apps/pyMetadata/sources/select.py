@@ -6,6 +6,8 @@ from .anii import metadata as AniiMetadata
 from .imdb import metadata as ImdbMetadata
 from .mal import metadata as MalMetadata
 from fuzzywuzzy import fuzz
+from unidecode import unidecode
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +33,14 @@ class UseSource():
 
         result: List[WeightedData] = []
         if (anii is not None) and (anii.status == "COMPLETED" and anii.data is not None):
-            result.append(WeightedData(anii, 4))
+            result.append(WeightedData(anii, 2))
         if (imdb is not None) and (imdb.status == "COMPLETED" and imdb.data is not None):
             imdb_weight = 1
-            if (imdb.data.title == title):
-                imdb_weight = 7
+            if (imdb.data.title == title or unidecode(imdb.data.title) == unidecode(title)):
+                imdb_weight = 10
             result.append(WeightedData(imdb, imdb_weight))
         if (mal is not None) and (mal.status == "COMPLETED" and mal.data is not None):
-            result.append(WeightedData(mal, 8))
+            result.append(WeightedData(mal, 4))
         return result
     
     def __calculate_score(self, title: str, weightData: List[WeightedData]) -> List[DataAndScore]:
