@@ -77,11 +77,12 @@ class UseSource():
 
         jsr = ""
         try:
-            jsr = json.dumps(scored, indent=4)
+            jsr = json.dumps([obj.to_dict() for obj in scored], indent=4)
             with open(f"./logs/{self.evnetId}.json", "w", encoding="utf-8") as f:
                 f.write(jsr)
-        except:
+        except Exception as e:
             logger.info("Couldn't dump log..")
+            logger.error(e)
             logger.info(jsr)
 
         try:
@@ -91,7 +92,8 @@ class UseSource():
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
             logger.info(f"[Title]: {self.title} gave the result: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
-        except:
+        except Exception as e:
+            logger.error(e)
             pass
 
         # Return the result with the highest score (most likely result)
