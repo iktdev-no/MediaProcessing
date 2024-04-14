@@ -66,7 +66,8 @@ class UseSource():
             for wd in weightResult:
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
-            logger.info(f"Title {self.title} gave the result: {"\n\t".join(titles)} \nWith used: {scored[0].result.data.title}\n")
+            joinedTitles = "\n\t".join(titles)
+            logger.info(f"Title {self.title} gave the result: {joinedTitles} \nWith used: {scored[0].result.data.title}\n")
         except:
             pass
 
