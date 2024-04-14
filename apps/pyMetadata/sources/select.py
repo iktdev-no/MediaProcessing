@@ -7,6 +7,7 @@ from .imdb import metadata as ImdbMetadata
 from .mal import metadata as MalMetadata
 from fuzzywuzzy import fuzz
 from unidecode import unidecode
+import json
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ class DataAndScore:
 
 class UseSource():
     title: str
-    def __init__(self, title) -> None:
+    evnetId: str
+    def __init__(self, title, eventId) -> None:
         self.title = title
 
     def __perform_search(self, title)-> List[WeightedData]:
@@ -64,12 +66,20 @@ class UseSource():
         scored.sort(key=lambda x: x.score, reverse=True)
 
         try:
+            jsr = json.dumps(scored, indent=4)
+            with open(f"./logs/{self.evnetId}.json", "w", encoding="utf-8") as f:
+                f.write(jsr)
+        except:
+            logger.info("Couldn't dump log..")
+
+
+        try:
             titles: List[str] = []
             for wd in weightResult:
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
-            joinedTitles = "\n\t".join(titles)
-            logger.info(f"Title {self.title} gave the result: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
+            joinedTitles = "\n\t" + "\n\t".join(titles)
+            logger.info(f"[Title]: {self.title} gave the result: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
         except:
             pass
 

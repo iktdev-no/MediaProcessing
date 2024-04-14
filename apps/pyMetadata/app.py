@@ -150,12 +150,14 @@ class MessageHandlerThread(threading.Thread):
                 baseName = messageData["sanitizedName"]
                 title = messageData["title"]
 
+                eventId = self.message.value["eventId"]
+
                 logger.info("Searching for %s", title)
-                result = self.get_metadata(title)
+                result = self.get_metadata(title, eventId)
                 if (result is None):
                     logger.info("No result for %s", title)
                     logger.info("Searching for %s", baseName)
-                    result = self.get_metadata(baseName)
+                    result = self.get_metadata(baseName, eventId)
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
 
@@ -175,7 +177,7 @@ class MessageHandlerThread(threading.Thread):
         else:
             logger.warn("No status present for %s", self.message.value)
 
-    def get_metadata(self, name: str) -> Optional[DataResult]:
+    def get_metadata(self, name: str, evnetId: str) -> Optional[DataResult]:
         result = None
         logger.info("Checking cache for offloading")
         cache_result = ResultCache.get(name)
@@ -185,7 +187,7 @@ class MessageHandlerThread(threading.Thread):
         else:
             logger.info("Not in cache: %s", name)
             logger.info("Searching in sources for information about %s", name)
-            result: Optional[DataResult] = UseSource(title=name).select_result()
+            result: Optional[DataResult] = UseSource(title=name, eventId=evnetId).select_result()
             if (result.status == "COMPLETED"):
                 logger.info("Storing response for %s in in-memory cache", name)
                 ResultCache.add(name, result)

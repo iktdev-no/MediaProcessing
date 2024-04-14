@@ -81,8 +81,10 @@ class FileNameParser(val fileName: String) {
     /**
      *
      */
-    fun removeResolutionAndTags(text: String): String {
-        return Regex("(.*?)(?=\\d+[pk]\\b)").replace(text, " ")
+    fun removeResolutionAndTags(input: String): String {
+        var text = Regex("(?i)(\\d+[pk]\\b|(hd|uhd))", RegexOption.IGNORE_CASE).replace(input, " ")
+        text = Regex("(?i)(\\s(bluray|laserdisc|dvd|web))", RegexOption.IGNORE_CASE).replace(text, " ")
+        return text
     }
 
 
