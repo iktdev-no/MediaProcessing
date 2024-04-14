@@ -36,7 +36,8 @@ class UseSource():
         self.eventId = eventId
 
     def stripped(self, input_string) -> str:
-        return re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
+        unitext = unidecode(input_string)
+        return re.sub(r'[^a-zA-Z0-9\s]', '', unitext)
 
     def __perform_search(self, title)-> List[WeightedData]:
         anii = AniiMetadata(title).lookup()
@@ -48,8 +49,7 @@ class UseSource():
             result.append(WeightedData(anii, 1.2))
         if (imdb is not None) and (imdb.status == "COMPLETED" and imdb.data is not None):
             imdb_weight = 1
-            #if (imdb.data.title == title or unidecode(self.stripped(imdb.data.title)) == unidecode(self.stripped(title))): To use after test
-            if (imdb.data.title == title or unidecode(imdb.data.title) == unidecode(title)):
+            if (imdb.data.title == title or self.stripped(imdb.data.title) == self.stripped(title)):
                 imdb_weight = 100
             result.append(WeightedData(imdb, imdb_weight))
         if (mal is not None) and (mal.status == "COMPLETED" and mal.data is not None):
