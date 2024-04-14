@@ -11,7 +11,6 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.JsonDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.NotificationOfDeletionPerformed
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
