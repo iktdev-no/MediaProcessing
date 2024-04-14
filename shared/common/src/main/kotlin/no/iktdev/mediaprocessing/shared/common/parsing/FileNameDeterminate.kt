@@ -57,7 +57,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
 
             }
         } else title
-        val fullName = "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else "- $episodeTitle"}".trim()
+        val fullName = "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else " - $episodeTitle"}".trim()
         return EpisodeInfo(title = title, episode = episodeNumber.toInt(), season =  seasonNumber.toInt(), episodeTitle =  episodeTitle, fullName =  cleanup(fullName))
     }
 

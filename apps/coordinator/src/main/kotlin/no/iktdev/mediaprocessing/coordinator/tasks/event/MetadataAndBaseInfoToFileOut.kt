@@ -118,7 +118,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
 
         fun getTitle(): String {
             val title = getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
-            return Regexes.illegalCharacters.replace(title, "-")
+            return Regexes.illegalCharacters.replace(title, " - ")
         }
 
         fun getVideoPayload(): JsonObject? {
