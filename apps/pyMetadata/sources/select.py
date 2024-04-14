@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import List, Optional
 from .result import Metadata, DataResult
 from .anii import metadata as AniiMetadata
@@ -17,10 +17,16 @@ class WeightedData:
     result: DataResult
     weight: int = 1
 
+    def to_dict(self):
+        return asdict(self)    
+
 @dataclass
 class DataAndScore:
     result: DataResult = None
     score: int = 0
+    def to_dict(self):
+
+        return asdict(self)    
 
 class UseSource():
     title: str
@@ -69,6 +75,7 @@ class UseSource():
         scored = self.__calculate_score(title=self.title, weightData=weightResult)
         scored.sort(key=lambda x: x.score, reverse=True)
 
+        jsr = ""
         try:
             jsr = json.dumps(scored, indent=4)
             with open(f"./logs/{self.evnetId}.json", "w", encoding="utf-8") as f:
