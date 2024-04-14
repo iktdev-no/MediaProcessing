@@ -132,7 +132,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
 
         fun getTitle(): String {
             val metaTitles = getTitlesFromMetadata()
-            val title = metaTitles.firstOrNull {it.contains(baseInfo.title)} ?:
+            val title = metaTitles.firstOrNull { it.contains(baseInfo.title) || NameHelper.normalize(it).contains(baseInfo.title) } ?:
                 metaTitles.firstOrNull()  ?: baseInfo.title
             var cleaned = Regexes.illegalCharacters.replace(title, " - ")
             cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
