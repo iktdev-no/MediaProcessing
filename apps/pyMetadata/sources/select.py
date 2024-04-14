@@ -28,7 +28,7 @@ class UseSource():
     def __init__(self, title, eventId) -> None:
         self.title = title
 
-    def stripped(input_string):
+    def stripped(self, input_string) -> str:
         return re.sub(r'[^a-zA-Z0-9]', '', input_string)
 
     def __perform_search(self, title)-> List[WeightedData]:
