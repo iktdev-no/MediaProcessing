@@ -36,7 +36,7 @@ class UseSource():
         self.eventId = eventId
 
     def stripped(self, input_string) -> str:
-        return re.sub(r'[^a-zA-Z0-9]', '', input_string)
+        return re.sub(r'[^a-zA-Z0-9\s]', '', input_string)
 
     def __perform_search(self, title)-> List[WeightedData]:
         anii = AniiMetadata(title).lookup()
