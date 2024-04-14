@@ -23,6 +23,17 @@ class FileNameParserTest {
         assertThat(parser.guessDesiredFileName()).isEqualTo("Fancy Name Test 99 - 01")
     }
 
+    @Test
+    fun serieName() {
+        val inName = "Nihon.2024.S01E01.Gaijin.1080p.YT.HEVC"
+        val parser = FileNameParser(inName)
 
+        val title = parser.guessDesiredTitle()
+        val result = parser.guessDesiredFileName()
+
+        assertThat(title).isEqualTo("Nihon")
+        assertThat(result).isEqualTo("Nihon S01E01 Gaijin")
+
+    }
 
 }

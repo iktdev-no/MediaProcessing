@@ -10,7 +10,7 @@ class FileNameParser(val fileName: String) {
         cleanedFileName = removeResolutionAndTrailing(cleanedFileName)
         cleanedFileName = removeResolutionAndTags(cleanedFileName)
         cleanedFileName = removeParenthesizedText(cleanedFileName)
-        cleanedFileName = removeYearAndTrailing(cleanedFileName)
+        cleanedFileName = removeYear(cleanedFileName)
         cleanedFileName = removeDot(cleanedFileName)
         cleanedFileName = removeExtraWhiteSpace(cleanedFileName)
         cleanedFileName = removeTrailingAndLeadingCharacters(cleanedFileName).trim()
@@ -44,14 +44,14 @@ class FileNameParser(val fileName: String) {
 
     fun guessDesiredTitle(): String {
         val desiredFileName = guessDesiredFileName()
-        if (Regexes.season.containsMatchIn(desiredFileName)) {
-            return Regexes.season.split(desiredFileName).firstOrNull()?.trim() ?: desiredFileName
+        return if (Regexes.season.containsMatchIn(desiredFileName)) {
+            Regexes.season.split(desiredFileName).firstOrNull()?.trim() ?: desiredFileName
         } else {
             val result = if (desiredFileName.contains(" - ")) {
-                return desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
+                desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
             } else desiredFileName
-            return result.trim()
-        }
+            result.trim()
+        }.trim('.', '-')
     }
 
 
@@ -86,16 +86,19 @@ class FileNameParser(val fileName: String) {
     }
 
 
-    fun removeYearAndTrailing(text: String): String {
+    fun removeYear(text: String): String {
         val match = Regex("\\b\\d{4}\\W").find(text, 0)?.value
         if (match == null || text.indexOf(match) > 0) {
-            return Regex("\\b\\d{4}\\b(.*)").replace(text, " ")
+            //return Regex("\\b\\d{4}\\b(.*)").replace(text, " ")
+            return Regex("\\b\\d{4}\\b").replace(text, "")
         }
         return text
     }
 
-    fun removeDot(text: String): String {
-        return Regex("\\.(?<!(Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave)\\.)\\b").replace(text, " ")
+    fun removeDot(input: String): String {
+        //var text = Regex("(?<=\\s)\\.|\\.(?=\\s)").replace(input, "")
+        //return Regex("\\.(?<!(Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave)\\.)\\b").replace(text, " ")
+        return Regex("(?<!\\b(?:Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave))\\.+(?=\\s|\\w)").replace(input, " ")
     }
 
     fun removeInBetweenCharacters(text: String): String {
