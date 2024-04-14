@@ -19,7 +19,6 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
-import no.iktdev.streamit.library.db.tables.movie
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -65,7 +64,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             val dateTime = LocalDateTime.ofEpochSecond(estimatedTimeout, 0, ZoneOffset.UTC)
 
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH)
-            log.info { "Sending ${baseInfo?.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
+            log.info { "Sending ${baseInfo.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
             if (!waitingProcessesForMeta.containsKey(event.referenceId)) {
                 waitingProcessesForMeta[event.referenceId] = MetadataTriggerData(event.eventId, LocalDateTime.now())
             }
@@ -112,13 +111,29 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
         fun getExistingCollections() =
             SharedConfig.outgoingContent.listFiles(FileFilter { it.isDirectory })?.map { it.name } ?: emptyList()
 
-        fun getAlreadyUsedForCollectionOrTitle(): String? {
+        fun getAlreadyUsedForCollectionOrTitle(): String {
             val exisiting = getExistingCollections()
-            return getTitlesFromMetadata().firstOrNull { it in exisiting }
+            val existingMatch = exisiting.find { it.contains(baseInfo.title) }
+            if (existingMatch != null) {
+                return existingMatch
+            }
+            val metaTitles = getTitlesFromMetadata()
+            return metaTitles.firstOrNull { it.contains(baseInfo.title) }
+                ?: (getTitlesFromMetadata().firstOrNull { it in exisiting } ?: getTitlesFromMetadata().firstOrNull()
+                ?: baseInfo.title)
+        }
+
+        fun getCollection(): String {
+            val title = getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
+            var cleaned = Regexes.illegalCharacters.replace(title, " - ")
+            cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
+            return cleaned
         }
 
         fun getTitle(): String {
-            val title = getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
+            val metaTitles = getTitlesFromMetadata()
+            val title = metaTitles.firstOrNull {it.contains(baseInfo.title)} ?:
+                metaTitles.firstOrNull()  ?: baseInfo.title
             var cleaned = Regexes.illegalCharacters.replace(title, " - ")
             cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
             return cleaned
@@ -135,7 +150,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             }
         }
 
-        fun getOutputDirectory() = SharedConfig.outgoingContent.using(NameHelper.normalize(getTitle()))
+        fun getOutputDirectory() = SharedConfig.outgoingContent.using(NameHelper.normalize(getCollection()))
 
 
 
