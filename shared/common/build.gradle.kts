@@ -39,6 +39,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation ("mysql:mysql-connector-java:8.0.29")
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+
 
     implementation(project(mapOf("path" to ":shared:kafka")))
     implementation(project(mapOf("path" to ":shared:contract")))

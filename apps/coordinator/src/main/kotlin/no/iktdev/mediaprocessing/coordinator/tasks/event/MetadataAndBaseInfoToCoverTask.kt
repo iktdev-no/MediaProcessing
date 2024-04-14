@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
+import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -51,7 +52,7 @@ class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordi
             CoverInfoPerformed(
                 status = Status.COMPLETED,
                 url = coverUrl,
-                outFileBaseName = coverTitle,
+                outFileBaseName = NameHelper.normalize(coverTitle),
                 outDir = fileOut.outDirectory,
                 derivedFromEventId = event.eventId
             )

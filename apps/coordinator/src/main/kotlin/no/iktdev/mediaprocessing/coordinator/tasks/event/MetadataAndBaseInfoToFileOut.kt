@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
+import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
@@ -134,7 +135,7 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
             }
         }
 
-        fun getOutputDirectory() = SharedConfig.outgoingContent.using(getTitle())
+        fun getOutputDirectory() = SharedConfig.outgoingContent.using(NameHelper.normalize(getTitle()))
 
 
 

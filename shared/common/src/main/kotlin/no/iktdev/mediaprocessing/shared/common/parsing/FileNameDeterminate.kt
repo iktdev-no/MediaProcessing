@@ -76,7 +76,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         var cleaned = Regex("(?<=\\w)[_.](?=\\w)").replace(input, " ")
         cleaned = Regexes.illegalCharacters.replace(cleaned, " - ")
         cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
-        return cleaned
+        return NameHelper.normalize(cleaned)
     }
 
     open internal class Base(val title: String, val sanitizedName: String) {
@@ -130,8 +130,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
          *      Cool - S1 13
          */
         fun findSeasonAndEpisode(inputText: String): Pair<String?, String?> {
-            val regex = Regex("""(?i)\b(?:S|Season)\s*(\d+).*?(?:E|Episode)?\s*(\d+)\b""")
-            val matchResult = regex.find(inputText)
+            val matchResult = Regexes.SeasonEpisodeBlock.find(inputText)
             val season = matchResult?.groups?.get(1)?.value
             val episode = matchResult?.groups?.get(2)?.value
             return season to episode
@@ -149,10 +148,15 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         }
 
         fun findEpisodeTitle(): String? {
+            var startPosition: Int = 0
+            startPosition = Regexes.SeasonEpisodeBlock.find(sanitizedName)?.value?.let { block ->
+                sanitizedName.indexOf(block) + block.length
+            } ?: 0
+
             val seCombo = findSeasonAndEpisode(sanitizedName)
             val episodeNumber = findEpisodeNumber()
 
-            val startPosition = if (seCombo.second != null) sanitizedName.indexOf(seCombo.second!!)+ seCombo.second!!.length
+            startPosition = if (startPosition != 0) startPosition else if (seCombo.second != null) sanitizedName.indexOf(seCombo.second!!)+ seCombo.second!!.length
             else if (episodeNumber != null) sanitizedName.indexOf(episodeNumber) + episodeNumber.length else 0
             val availableText = sanitizedName.substring(startPosition)
 
