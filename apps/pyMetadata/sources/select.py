@@ -95,7 +95,7 @@ class UseSource():
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
-            logger.info(f"[Title]: {self.title} gave the result: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
+            logger.info(f"[Title]: {self.title} \nFound: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
         except Exception as e:
             logger.error(e)
             pass
