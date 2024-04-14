@@ -14,7 +14,7 @@ RUN pip3 install -r ./requirements.txt
 # Kopier resten av prosjektfilene
 COPY ./apps/${MODULE_NAME}/ .
 
-RUN mkdir -p /apps/logs
+RUN mkdir -p /app/logs
 
 # Start applikasjonen
 CMD ["python3", "-u", "app.py"]

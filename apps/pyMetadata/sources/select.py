@@ -8,7 +8,7 @@ from .mal import metadata as MalMetadata
 from fuzzywuzzy import fuzz
 from unidecode import unidecode
 import json
-
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,9 @@ class UseSource():
     def __init__(self, title, eventId) -> None:
         self.title = title
 
+    def stripped(input_string):
+        return re.sub(r'[^a-zA-Z0-9]', '', input_string)
+
     def __perform_search(self, title)-> List[WeightedData]:
         anii = AniiMetadata(title).lookup()
         imdb = ImdbMetadata(title).lookup()
@@ -38,6 +41,7 @@ class UseSource():
             result.append(WeightedData(anii, 2))
         if (imdb is not None) and (imdb.status == "COMPLETED" and imdb.data is not None):
             imdb_weight = 1
+            #if (imdb.data.title == title or unidecode(self.stripped(imdb.data.title)) == unidecode(self.stripped(title))): To use after test
             if (imdb.data.title == title or unidecode(imdb.data.title) == unidecode(title)):
                 imdb_weight = 10
             result.append(WeightedData(imdb, imdb_weight))
@@ -49,9 +53,9 @@ class UseSource():
         """"""
         result: List[WeightedData] = []
         for wd in weightData:
-            highScore = fuzz.ratio(title.lower(), wd.result.data.title.lower())
+            highScore = fuzz.ratio(self.stripped(title.lower()), self.stripped(wd.result.data.title.lower()))
             for name in wd.result.data.altTitle:
-                altScore = fuzz.ratio(title.lower(), name.lower())
+                altScore = fuzz.ratio(self.stripped(title.lower()), self.stripped(name.lower()))
                 if (altScore > highScore):
                     highScore = altScore
             givenScore = highScore * (wd.weight / 10)
@@ -71,7 +75,7 @@ class UseSource():
                 f.write(jsr)
         except:
             logger.info("Couldn't dump log..")
-
+            logger.info(jsr)
 
         try:
             titles: List[str] = []
