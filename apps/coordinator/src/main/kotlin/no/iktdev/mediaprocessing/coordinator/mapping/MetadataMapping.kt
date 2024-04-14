@@ -25,6 +25,8 @@ class MetadataMapping(val events: List<PersistentMessage>) {
         }
 
         val videoInfo = mediaReadOut?.toValueObject()
+        val collection = mediaReadOut?.outDirectory?.let { File(it).name } ?: baseInfo?.title
+
 
         val mediaCover = if (coverDownloadTask != null || cover != null) {
             val coverFile = cover?.coverFile?.let { File(it) }
@@ -36,13 +38,15 @@ class MetadataMapping(val events: List<PersistentMessage>) {
         } else null
 
         return if (meta != null || videoInfo != null) {
+
             MetadataDto(
-                title = meta?.data?.title ?: videoInfo?.fullName ?: return null,
-                collection = baseInfo?.title ?: return null,
+                title = videoInfo?.title ?: meta?.data?.title ?: baseInfo?.title ?: return null,
+                collection = collection ?: return null,
                 cover = mediaCover,
                 type = meta?.data?.type ?: videoInfo?.type ?: return null,
                 summary = meta?.data?.summary?.filter {it.summary != null }?.map { SummaryInfo(language = it.language, summary = it.summary!! ) } ?: emptyList(),
                 genres = meta?.data?.genres ?: emptyList(),
+                titles = meta?.data?.altTitle ?: emptyList()
             )
         } else null
     }

@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MovieInfo
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfo
 
 
-class FileNameDeterminate(val title: String, val sanitizedName: String, val ctype: ContentType = ContentType.UNDEFINED) {
+class FileNameDeterminate(val title: String, val sanitizedName: String, val ctype: ContentType = ContentType.UNDEFINED, val metaTitle: String? = null)  {
 
     enum class ContentType {
         MOVIE,
@@ -29,7 +29,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
             else -> sanitizedName
         }
         val nonResolutioned = movieEx.removeResolutionAndBeyond(stripped) ?: stripped
-        return MovieInfo(title =  cleanup(nonResolutioned), fullName =  cleanup(nonResolutioned))
+        return MovieInfo(title = metaTitle ?: cleanup(nonResolutioned), fullName =  cleanup(nonResolutioned))
     }
 
     private fun determineSerieFileName(): EpisodeInfo? {
@@ -58,7 +58,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
             }
         } else title
         val fullName = "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else " - $episodeTitle"}".trim()
-        return EpisodeInfo(title = title, episode = episodeNumber.toInt(), season =  seasonNumber.toInt(), episodeTitle =  episodeTitle, fullName =  cleanup(fullName))
+        return EpisodeInfo(title = metaTitle ?: title, episode = episodeNumber.toInt(), season =  seasonNumber.toInt(), episodeTitle =  episodeTitle, fullName =  cleanup(fullName))
     }
 
     private fun determineUndefinedFileName(): VideoInfo? {

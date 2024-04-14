@@ -7,6 +7,7 @@ data class MetadataDto(
     val cover: MetadataCoverDto?,
     val summary: List<SummaryInfo> = emptyList(),
     val genres: List<String>,
+    val titles: List<String> = emptyList()
 )
 
 data class SummaryInfo(

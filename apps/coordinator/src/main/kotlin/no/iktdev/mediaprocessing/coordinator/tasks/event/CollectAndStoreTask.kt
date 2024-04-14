@@ -19,7 +19,9 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.streamit.library.db.query.*
+import no.iktdev.streamit.library.db.tables.titles
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.jetbrains.exposed.sql.insertIgnore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -70,6 +72,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
         mapped.metadata?.let {
             storeMetadata(catalogId = catalogId, metadata = it)
+            storeTitles(collection = it.collection, it.title, contentTitles = it.titles)
         }
 
         return SimpleMessageData(Status.COMPLETED, derivedFromEventId = event.eventId)
@@ -100,6 +103,21 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
                     language = it.language,
                     description = it.summary
                 ).insert()
+            }
+        }
+    }
+
+    private fun storeTitles(collection: String, usedTitle: String, contentTitles: List<String>) {
+        withTransaction(getStoreDatabase()) {
+            titles.insertIgnore {
+                it[titles.collection] = collection
+                it[titles.title] = usedTitle
+            }
+            contentTitles.forEach { title ->
+                titles.insertIgnore {
+                    it[titles.collection] = collection
+                    it[titles.title] = title
+                }
             }
         }
     }
