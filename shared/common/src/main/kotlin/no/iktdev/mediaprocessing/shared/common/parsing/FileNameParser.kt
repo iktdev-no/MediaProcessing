@@ -44,9 +44,8 @@ class FileNameParser(val fileName: String) {
 
     fun guessDesiredTitle(): String {
         val desiredFileName = guessDesiredFileName()
-        val seasonRegex = Regex("\\sS[0-9]+(\\s- [0-9]+|\\s[0-9]+)", RegexOption.IGNORE_CASE)
-        if (seasonRegex.containsMatchIn(desiredFileName)) {
-            return seasonRegex.replace(desiredFileName, "").trim()
+        if (Regexes.season.containsMatchIn(desiredFileName)) {
+            return Regexes.season.split(desiredFileName).firstOrNull()?.trim() ?: desiredFileName
         } else {
             val result = if (desiredFileName.contains(" - ")) {
                 return desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
