@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.EpisodeInfo
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -21,4 +20,14 @@ class FileNameDeterminateTest {
         assertThat(ei.episode).isEqualTo(1)
     }
 
+    @Test
+    fun serieWithTitleFroMMetadata() {
+        val given = "Fancy Name Test 99: Watashi wa Testo desu ga deta"
+
+        val fnd = FileNameDeterminate(given, "Fancy Name Test 99 - 01", FileNameDeterminate.ContentType.SERIE)
+        val data = fnd.getDeterminedVideoInfo()
+
+        assertThat(data?.title).isEqualTo(given)
+        assertThat(data?.fullName).isEqualTo("Fancy Name Test 99 - Watashi wa Testo desu ga deta - S01E01")
+    }
 }

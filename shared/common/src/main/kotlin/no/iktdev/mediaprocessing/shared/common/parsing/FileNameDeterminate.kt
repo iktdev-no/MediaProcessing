@@ -58,7 +58,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
             }
         } else title
         val fullName = "${useTitle.trim()} - $seasonEpisodeCombined ${if (episodeTitle.isNullOrEmpty()) "" else "- $episodeTitle"}".trim()
-        return EpisodeInfo(title = title, episode = episodeNumber.toInt(), season =  seasonNumber.toInt(), episodeTitle =  episodeTitle, fullName =  fullName)
+        return EpisodeInfo(title = title, episode = episodeNumber.toInt(), season =  seasonNumber.toInt(), episodeTitle =  episodeTitle, fullName =  cleanup(fullName))
     }
 
     private fun determineUndefinedFileName(): VideoInfo? {
@@ -73,8 +73,10 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
     }
 
     private fun cleanup(input: String): String {
-        val cleaned = Regex("(?<=\\w)[_.](?=\\w)").replace(input, " ")
-        return Regex("\\s{2,}").replace(cleaned, " ")
+        var cleaned = Regex("(?<=\\w)[_.](?=\\w)").replace(input, " ")
+        cleaned = Regexes.illegalCharacters.replace(cleaned, " - ")
+        cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
+        return cleaned
     }
 
     open internal class Base(val title: String, val sanitizedName: String) {

@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
+import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -116,7 +117,8 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
         }
 
         fun getTitle(): String {
-            return getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
+            val title = getAlreadyUsedForCollectionOrTitle()?: metadata?.data?.title ?: baseInfo.title
+            return Regexes.illegalCharacters.replace(title, "-")
         }
 
         fun getVideoPayload(): JsonObject? {

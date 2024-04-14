@@ -23,4 +23,6 @@ class FileNameParserTest {
         assertThat(parser.guessDesiredFileName()).isEqualTo("Fancy Name Test 99 - 01")
     }
 
+
+
 }
