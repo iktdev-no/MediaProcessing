@@ -30,9 +30,10 @@ class DataAndScore:
 
 class UseSource():
     title: str
-    evnetId: str
+    eventId: str
     def __init__(self, title, eventId) -> None:
         self.title = title
+        self.eventId = eventId
 
     def stripped(self, input_string) -> str:
         return re.sub(r'[^a-zA-Z0-9]', '', input_string)
@@ -44,15 +45,15 @@ class UseSource():
 
         result: List[WeightedData] = []
         if (anii is not None) and (anii.status == "COMPLETED" and anii.data is not None):
-            result.append(WeightedData(anii, 2))
+            result.append(WeightedData(anii, 1.2))
         if (imdb is not None) and (imdb.status == "COMPLETED" and imdb.data is not None):
             imdb_weight = 1
             #if (imdb.data.title == title or unidecode(self.stripped(imdb.data.title)) == unidecode(self.stripped(title))): To use after test
             if (imdb.data.title == title or unidecode(imdb.data.title) == unidecode(title)):
-                imdb_weight = 10
+                imdb_weight = 100
             result.append(WeightedData(imdb, imdb_weight))
         if (mal is not None) and (mal.status == "COMPLETED" and mal.data is not None):
-            result.append(WeightedData(mal, 4))
+            result.append(WeightedData(mal, 1.8))
         return result
     
     def __calculate_score(self, title: str, weightData: List[WeightedData]) -> List[DataAndScore]:
@@ -60,11 +61,14 @@ class UseSource():
         result: List[WeightedData] = []
         for wd in weightData:
             highScore = fuzz.ratio(self.stripped(title.lower()), self.stripped(wd.result.data.title.lower()))
+            logger.info(f"[H:{highScore}]\t{self.stripped(wd.result.data.title.lower())} => {self.stripped(title.lower())}")
             for name in wd.result.data.altTitle:
                 altScore = fuzz.ratio(self.stripped(title.lower()), self.stripped(name.lower()))
                 if (altScore > highScore):
                     highScore = altScore
+                logger.info(f"[A:{highScore}]\t{self.stripped(wd.result.data.title.lower())} => {self.stripped(title.lower())}")
             givenScore = highScore * (wd.weight / 10)
+            logger.info(f"[G:{givenScore}]\t{self.stripped(wd.result.data.title.lower())} => {self.stripped(title.lower())} Weight:{wd.weight}")
             result.append(DataAndScore(wd.result, givenScore))
         return result
 
@@ -78,7 +82,7 @@ class UseSource():
         jsr = ""
         try:
             jsr = json.dumps([obj.to_dict() for obj in scored], indent=4)
-            with open(f"./logs/{self.evnetId}.json", "w", encoding="utf-8") as f:
+            with open(f"./logs/{self.eventId}.json", "w", encoding="utf-8") as f:
                 f.write(jsr)
         except Exception as e:
             logger.info("Couldn't dump log..")
