@@ -77,11 +77,16 @@ class UseSource():
 
     def select_result(self) -> Optional[DataResult]:
         """""" 
-        weightResult = self.__perform_search(title=self.title)
+        scored: List[DataAndScore] = []
+        titleResult = self.__perform_search(title=self.title)
         baseNameResult = self.__perform_search(title=self.baseName)
-        weightResult.extend(baseNameResult)
-        
-        scored = self.__calculate_score(title=self.title, weightData=weightResult)
+
+        titleScoreResult = self.__calculate_score(title=self.title, weightData=titleResult)
+        baseNameScoreResult = self.__calculate_score(title=self.baseName, weightData=baseNameResult)
+
+        scored.extend(titleScoreResult)
+        scored.extend(baseNameScoreResult)
+
         scored.sort(key=lambda x: x.score, reverse=True)
 
         jsr = ""
@@ -95,12 +100,15 @@ class UseSource():
             logger.info(jsr)
 
         try:
+            titledResult = titleResult
+            titledResult.extend(baseNameResult)
+
             titles: List[str] = []
-            for wd in weightResult:
+            for wd in titledResult:
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
-            logger.info(f"[Title]: {self.title} \nFound: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
+            logger.info(f"\nTitle: {self.title} \nBaseName: {self.baseName} \nFound: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
         except Exception as e:
             logger.error(e)
             pass
