@@ -39,8 +39,8 @@ class UseSource():
 
     def stripped(self, input_string) -> str:
         unitext = unidecode(input_string)
-        unitext = re.sub(r'[^a-zA-Z0-9\s]', '', unitext)
-        unitext = re.sub(r'\s{2,}', '', unitext)
+        unitext = re.sub(r'[^a-zA-Z0-9\s]', ' ', unitext)
+        unitext = re.sub(r'\s{2,}', ' ', unitext)
         return unitext
 
     def __perform_search(self, title)-> List[WeightedData]:
@@ -97,14 +97,14 @@ class UseSource():
         bt = baseNameScoreResult[0]
         if (bt is not None and ht is not None):
             if (bt.score >= ht.score):
-                selected = NamedDataResult(self.baseName, bt)
+                selected = NamedDataResult(self.baseName, bt.result)
             else:
-                selected = NamedDataResult(self.title, ht)
+                selected = NamedDataResult(self.title, ht.result)
         else:
             if len(titleScoreResult) > 0:
-                selected = NamedDataResult(self.title, titleScoreResult[0])
+                selected = NamedDataResult(self.title, titleScoreResult[0].result)
             elif len(baseNameScoreResult) > 0:
-                selected = NamedDataResult(self.baseName, baseNameScoreResult[0])
+                selected = NamedDataResult(self.baseName, baseNameScoreResult[0].result)
             else:
                 selected = None
         
