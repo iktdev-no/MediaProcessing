@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, asdict
 from typing import List, Optional
-from .result import Metadata, DataResult, NamedDataResult
+from .result import Metadata, DataResult
 from .anii import metadata as AniiMetadata
 from .imdb import metadata as ImdbMetadata
 from .mal import metadata as MalMetadata
@@ -102,7 +102,7 @@ class UseSource():
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
-            logger.info(f"\Name: {self.title} \n \nFound: {joinedTitles} \nTitle selected: \n\t{selected.data.title}\n")
+            logger.info(f"\nName: {self.title} \n \nFound: {joinedTitles} \nTitle selected: \n\t{selected.data.title} \n")
         except Exception as e:
             logger.error(e)
             pass
