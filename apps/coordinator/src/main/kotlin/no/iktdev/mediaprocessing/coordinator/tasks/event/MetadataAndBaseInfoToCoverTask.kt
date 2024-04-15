@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
+import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -43,7 +44,10 @@ class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordi
         val fileOut = events.findLast { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed? ?: return null
         val videoInfo = fileOut.toValueObject()
 
-        val coverTitle = meta.data?.title ?: videoInfo?.title ?: baseInfo.title
+        var coverTitle = meta.data?.title ?: videoInfo?.title ?: baseInfo.title
+        coverTitle = Regexes.illegalCharacters.replace(coverTitle, " - ")
+        coverTitle = Regexes.trimWhiteSpaces.replace(coverTitle, " ")
+
         val coverUrl = meta.data?.cover
         return if (coverUrl.isNullOrBlank()) {
             log.warn { "No cover available for ${baseInfo.title}" }
