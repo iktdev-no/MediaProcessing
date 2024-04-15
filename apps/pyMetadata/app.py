@@ -177,24 +177,35 @@ class MessageHandlerThread(threading.Thread):
 
     def get_metadata(self, name: str, baseName: str, evnetId: str) -> Optional[DataResult]:
         result = None
-        logger.info("Checking cache for offloading")
-        cache_result = ResultCache.get(name)
-        if cache_result is None:
-            cache_result = ResultCache.get(baseName)
-            if cache_result:
-                logger.info("Cache hit for %s", name)
-                result = cache_result
-        else:
-            logger.info("Cache hit for %s", name)
-            result = cache_result
-
-        if result is None:
-            logger.info("Not in cache: %s or %s", name, baseName)
-            logger.info("Searching in sources for information about %s", name)
-            result: Optional[NamedDataResult] = UseSource(title=name, baseName=baseName, eventId=evnetId).select_result()
-            if (result.data.status == "COMPLETED"):
+        logger.info("Checking cache")
+        titleCache = ResultCache.get(name)
+        if (titleCache is None):
+            titleCache = UseSource(title=name, eventId=evnetId).select_result()
+            if titleCache is not None:
                 logger.info("Storing response for %s in in-memory cache", name)
-                ResultCache.add(title=result.name, result=result.data)
+                ResultCache.add(title=name, result=titleCache)
+        else:
+            logger.info("Cache hit for %s", name)                
+
+        baseNameCache = ResultCache.get(baseName)
+        if (baseNameCache is None):
+            baseNameCache = UseSource(title=baseName, eventId=evnetId).select_result()
+            if baseNameCache is not None:
+                logger.info("Storing response for %s in in-memory cache", baseName)
+                ResultCache.add(title=baseName, result=baseNameCache)
+        else:
+            logger.info("Cache hit for %s", baseName) 
+
+        if titleCache is not None and baseNameCache is not None:
+            if (titleCache.data.type.lower() == "movie" or baseNameCache.data.type.lower() == "movie"):
+                result = baseNameCache
+            else:
+                result = titleCache
+        elif titleCache is not None:
+            result = titleCache
+        elif baseNameCache is not None:
+            result = baseNameCache
+
         return result
 
 

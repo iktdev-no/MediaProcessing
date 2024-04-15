@@ -30,11 +30,9 @@ class DataAndScore:
 
 class UseSource():
     title: str
-    baseName: str
     eventId: str
-    def __init__(self, title, baseName, eventId) -> None:
+    def __init__(self, title, eventId) -> None:
         self.title = title
-        self.baseName = baseName
         self.eventId = eventId
 
     def stripped(self, input_string) -> str:
@@ -71,47 +69,26 @@ class UseSource():
                 if (altScore > highScore):
                     highScore = altScore
                 logger.info(f"[A:{highScore}]\t{self.stripped(wd.result.data.title.lower())} => {self.stripped(title.lower())}")
-            givenScore = highScore * (wd.weight / 10)
+            givenScore = highScore * wd.weight
             logger.info(f"[G:{givenScore}]\t{self.stripped(wd.result.data.title.lower())} => {self.stripped(title.lower())} Weight:{wd.weight}")
             result.append(DataAndScore(wd.result, givenScore))
         return result
 
 
-    def select_result(self) -> Optional[NamedDataResult]:
+    def select_result(self) -> Optional[DataResult]:
         """""" 
-        scored: List[DataAndScore] = []
-        titleResult = self.__perform_search(title=self.title)
-        baseNameResult = self.__perform_search(title=self.baseName)
+        result = self.__perform_search(title=self.title)
 
-        titleScoreResult = self.__calculate_score(title=self.title, weightData=titleResult)
-        baseNameScoreResult = self.__calculate_score(title=self.baseName, weightData=baseNameResult)
+        scoredResult = self.__calculate_score(title=self.title, weightData=result)
         
-        titleScoreResult.sort(key=lambda x: x.score, reverse=True)
-        baseNameScoreResult.sort(key=lambda x: x.score, reverse=True)
+        scoredResult.sort(key=lambda x: x.score, reverse=True)
 
-        scored.extend(titleScoreResult)
-        scored.extend(baseNameScoreResult)
-
-        selected: NamedDataResult|None = None
-        ht = titleScoreResult[0]
-        bt = baseNameScoreResult[0]
-        if (bt is not None and ht is not None):
-            if (bt.score >= ht.score):
-                selected = NamedDataResult(self.baseName, bt.result)
-            else:
-                selected = NamedDataResult(self.title, ht.result)
-        else:
-            if len(titleScoreResult) > 0:
-                selected = NamedDataResult(self.title, titleScoreResult[0].result)
-            elif len(baseNameScoreResult) > 0:
-                selected = NamedDataResult(self.baseName, baseNameScoreResult[0].result)
-            else:
-                selected = None
+        selected: DataResult|None = scoredResult[0].result if len(scoredResult) > 0 else None
         
         jsr = ""
         try:
-            jsr = json.dumps([obj.to_dict() for obj in scored], indent=4)
-            with open(f"./logs/{self.eventId}.json", "w", encoding="utf-8") as f:
+            jsr = json.dumps([obj.to_dict() for obj in scoredResult], indent=4)
+            with open(f"./logs/{self.eventId}-{self.title}.json", "w", encoding="utf-8") as f:
                 f.write(jsr)
         except Exception as e:
             logger.info("Couldn't dump log..")
@@ -119,15 +96,13 @@ class UseSource():
             logger.info(jsr)
 
         try:
-            titledResult = titleResult
-            titledResult.extend(baseNameResult)
 
             titles: List[str] = []
-            for wd in titledResult:
+            for wd in scoredResult:
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
-            logger.info(f"\nTitle: {self.title} \nBaseName: {self.baseName} \nFound: {joinedTitles} \nTitle selected: \n\t{selected.data.data.title}\n")
+            logger.info(f"\Name: {self.title} \n \nFound: {joinedTitles} \nTitle selected: \n\t{selected.data.title}\n")
         except Exception as e:
             logger.error(e)
             pass

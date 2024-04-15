@@ -31,11 +31,3 @@ class DataResult:
 
     def to_dict(self):
         return asdict(self)
-
-@dataclass
-class NamedDataResult:
-    name: str
-    data: DataResult
-    
-    def to_dict(self):
-        return asdict(self)
