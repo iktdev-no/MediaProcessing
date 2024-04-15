@@ -102,10 +102,8 @@ class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordina
 
         fun getTitlesFromMetadata(): List<String> {
             val titles: MutableList<String> = mutableListOf()
-            metadata?.data?.let { md -> {
-                titles.add(md.title)
-                titles.addAll(md.altTitle)
-            } }
+            metadata?.data?.title?.let { titles.add(it) }
+            metadata?.data?.altTitle?.let { titles.addAll(it) }
             return titles
         }
         fun getExistingCollections() =

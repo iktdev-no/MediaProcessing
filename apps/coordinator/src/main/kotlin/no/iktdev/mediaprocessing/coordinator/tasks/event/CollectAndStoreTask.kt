@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
+import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.reader.MetadataDto
 import no.iktdev.mediaprocessing.shared.contract.reader.VideoDetails
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.sql.SQLIntegrityConstraintViolationException
+import java.text.Normalizer
 
 @Service
 class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
@@ -72,7 +74,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
         mapped.metadata?.let {
             storeMetadata(catalogId = catalogId, metadata = it)
-            storeTitles(collection = it.collection, it.title, contentTitles = it.titles)
+            storeTitles(it.title, contentTitles = it.titles)
         }
 
         return SimpleMessageData(Status.COMPLETED, derivedFromEventId = event.eventId)
@@ -107,15 +109,16 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
         }
     }
 
-    private fun storeTitles(collection: String, usedTitle: String, contentTitles: List<String>) {
+    private fun storeTitles(usedTitle: String, contentTitles: List<String>) {
         withTransaction(getStoreDatabase()) {
             titles.insertIgnore {
-                it[titles.collection] = collection
-                it[titles.title] = usedTitle
+                it[titles.masterTitle] = usedTitle
+                it[titles.title] = NameHelper.normalize(usedTitle)
+                it[titles.type] = 1
             }
             contentTitles.forEach { title ->
                 titles.insertIgnore {
-                    it[titles.collection] = collection
+                    it[titles.masterTitle] = usedTitle
                     it[titles.title] = title
                 }
             }
@@ -132,7 +135,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
     private fun storeCatalog(metadata: MetadataDto, videoDetails: VideoDetails, videoFile: String, genres: String?): Int? {
         val precreatedCatalogQuery = CatalogQuery(
-                title = metadata.title,
+                title = NameHelper.normalize(metadata.title),
                 cover = metadata.cover?.cover,
                 type = metadata.type,
                 collection = metadata.collection,

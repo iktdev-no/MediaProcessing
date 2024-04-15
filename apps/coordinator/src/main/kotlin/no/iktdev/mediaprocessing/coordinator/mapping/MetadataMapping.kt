@@ -40,13 +40,13 @@ class MetadataMapping(val events: List<PersistentMessage>) {
         return if (meta != null || videoInfo != null) {
 
             MetadataDto(
-                title = videoInfo?.title ?: meta?.data?.title ?: baseInfo?.title ?: return null,
+                title = videoInfo?.title ?: baseInfo?.title ?: meta?.data?.title ?: return null,
                 collection = collection ?: return null,
                 cover = mediaCover,
                 type = meta?.data?.type ?: videoInfo?.type ?: return null,
                 summary = meta?.data?.summary?.filter {it.summary != null }?.map { SummaryInfo(language = it.language, summary = it.summary!! ) } ?: emptyList(),
                 genres = meta?.data?.genres ?: emptyList(),
-                titles = meta?.data?.altTitle ?: emptyList()
+                titles = (meta?.data?.altTitle ?: emptyList()) + listOfNotNull(videoInfo?.title, baseInfo?.title)
             )
         } else null
     }

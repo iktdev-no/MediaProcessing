@@ -43,7 +43,7 @@ class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordi
         val fileOut = events.findLast { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed? ?: return null
         val videoInfo = fileOut.toValueObject()
 
-        val coverTitle = videoInfo?.title ?: meta.data?.title ?: baseInfo.title
+        val coverTitle = meta.data?.title ?: videoInfo?.title ?: baseInfo.title
         val coverUrl = meta.data?.cover
         return if (coverUrl.isNullOrBlank()) {
             log.warn { "No cover available for ${baseInfo.title}" }
