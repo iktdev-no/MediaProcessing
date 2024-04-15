@@ -10,7 +10,7 @@ import time
 
 from kafka import KafkaConsumer, KafkaProducer
 from fuzzywuzzy import fuzz
-from sources.result import DataResult, Metadata
+from sources.result import DataResult, Metadata, NamedDataResult
 from sources.anii import metadata as AniiMetadata
 from sources.imdb import metadata as ImdbMetadata
 from sources.mal import metadata as MalMetadata
@@ -191,10 +191,10 @@ class MessageHandlerThread(threading.Thread):
         if result is None:
             logger.info("Not in cache: %s or %s", name, baseName)
             logger.info("Searching in sources for information about %s", name)
-            result: Optional[DataResult] = UseSource(title=name, baseName=baseName, eventId=evnetId).select_result()
-            if (result.status == "COMPLETED"):
+            result: Optional[NamedDataResult] = UseSource(title=name, baseName=baseName, eventId=evnetId).select_result()
+            if (result.data.status == "COMPLETED"):
                 logger.info("Storing response for %s in in-memory cache", name)
-                ResultCache.add(name, result)
+                ResultCache.add(title=result.name, result=result.data)
         return result
 
 

@@ -23,12 +23,19 @@ class Metadata:
     def to_dict(self):
         return asdict(self)
 
-
 @dataclass
 class DataResult:
     status: str # COMPLETED / ERROR
     message: str | None = None
     data: Metadata = None
 
+    def to_dict(self):
+        return asdict(self)
+
+@dataclass
+class NamedDataResult:
+    name: str
+    data: DataResult
+    
     def to_dict(self):
         return asdict(self)

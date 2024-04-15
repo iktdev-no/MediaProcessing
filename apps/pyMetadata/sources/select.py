@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, asdict
 from typing import List, Optional
-from .result import Metadata, DataResult
+from .result import Metadata, DataResult, NamedDataResult
 from .anii import metadata as AniiMetadata
 from .imdb import metadata as ImdbMetadata
 from .mal import metadata as MalMetadata
@@ -39,7 +39,9 @@ class UseSource():
 
     def stripped(self, input_string) -> str:
         unitext = unidecode(input_string)
-        return re.sub(r'[^a-zA-Z0-9\s]', '', unitext)
+        unitext = re.sub(r'[^a-zA-Z0-9\s]', '', unitext)
+        unitext = re.sub(r'\s{2,}', '', unitext)
+        return unitext
 
     def __perform_search(self, title)-> List[WeightedData]:
         anii = AniiMetadata(title).lookup()
@@ -75,7 +77,7 @@ class UseSource():
         return result
 
 
-    def select_result(self) -> Optional[DataResult]:
+    def select_result(self) -> Optional[NamedDataResult]:
         """""" 
         scored: List[DataAndScore] = []
         titleResult = self.__perform_search(title=self.title)
@@ -83,12 +85,29 @@ class UseSource():
 
         titleScoreResult = self.__calculate_score(title=self.title, weightData=titleResult)
         baseNameScoreResult = self.__calculate_score(title=self.baseName, weightData=baseNameResult)
+        
+        titleScoreResult.sort(key=lambda x: x.score, reverse=True)
+        baseNameScoreResult.sort(key=lambda x: x.score, reverse=True)
 
         scored.extend(titleScoreResult)
         scored.extend(baseNameScoreResult)
 
-        scored.sort(key=lambda x: x.score, reverse=True)
-
+        selected: NamedDataResult|None = None
+        ht = titleScoreResult[0]
+        bt = baseNameScoreResult[0]
+        if (bt is not None and ht is not None):
+            if (bt.score >= ht.score):
+                selected = NamedDataResult(self.baseName, bt)
+            else:
+                selected = NamedDataResult(self.title, ht)
+        else:
+            if len(titleScoreResult) > 0:
+                selected = NamedDataResult(self.title, titleScoreResult[0])
+            elif len(baseNameScoreResult) > 0:
+                selected = NamedDataResult(self.baseName, baseNameScoreResult[0])
+            else:
+                selected = None
+        
         jsr = ""
         try:
             jsr = json.dumps([obj.to_dict() for obj in scored], indent=4)
@@ -108,11 +127,11 @@ class UseSource():
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
-            logger.info(f"\nTitle: {self.title} \nBaseName: {self.baseName} \nFound: {joinedTitles} \nTitle selected: \n\t{scored[0].result.data.title}\n")
+            logger.info(f"\nTitle: {self.title} \nBaseName: {self.baseName} \nFound: {joinedTitles} \nTitle selected: \n\t{selected.result.data.title}\n")
         except Exception as e:
             logger.error(e)
             pass
 
         # Return the result with the highest score (most likely result)
-        return scored[0].result if scored else None
+        return selected
 
