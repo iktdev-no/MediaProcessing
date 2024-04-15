@@ -10,7 +10,7 @@ import time
 
 from kafka import KafkaConsumer, KafkaProducer
 from fuzzywuzzy import fuzz
-from sources.result import DataResult, Metadata, NamedDataResult
+from sources.result import DataResult, Metadata
 from sources.anii import metadata as AniiMetadata
 from sources.imdb import metadata as ImdbMetadata
 from sources.mal import metadata as MalMetadata
