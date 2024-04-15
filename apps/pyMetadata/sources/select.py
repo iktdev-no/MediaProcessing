@@ -30,9 +30,11 @@ class DataAndScore:
 
 class UseSource():
     title: str
+    baseName: str
     eventId: str
-    def __init__(self, title, eventId) -> None:
+    def __init__(self, title, baseName, eventId) -> None:
         self.title = title
+        self.baseName = baseName
         self.eventId = eventId
 
     def stripped(self, input_string) -> str:
@@ -76,6 +78,9 @@ class UseSource():
     def select_result(self) -> Optional[DataResult]:
         """""" 
         weightResult = self.__perform_search(title=self.title)
+        baseNameResult = self.__perform_search(title=self.baseName)
+        weightResult.extend(baseNameResult)
+        
         scored = self.__calculate_score(title=self.title, weightData=weightResult)
         scored.sort(key=lambda x: x.score, reverse=True)
 

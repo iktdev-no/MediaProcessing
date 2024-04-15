@@ -153,11 +153,9 @@ class MessageHandlerThread(threading.Thread):
                 eventId = self.message.value["eventId"]
 
                 logger.info("Searching for %s", title)
-                result = self.get_metadata(title, eventId)
+                result = self.get_metadata(title, baseName, eventId)
                 if (result is None):
-                    logger.info("No result for %s", title)
-                    logger.info("Searching for %s", baseName)
-                    result = self.get_metadata(baseName, eventId)
+                    logger.info("No result for %s or %s", title, baseName)
 
                 producerMessage = self.compose_message(referenceId=self.message.value["referenceId"], result=result)
 
@@ -177,17 +175,23 @@ class MessageHandlerThread(threading.Thread):
         else:
             logger.warn("No status present for %s", self.message.value)
 
-    def get_metadata(self, name: str, evnetId: str) -> Optional[DataResult]:
+    def get_metadata(self, name: str, baseName: str, evnetId: str) -> Optional[DataResult]:
         result = None
         logger.info("Checking cache for offloading")
         cache_result = ResultCache.get(name)
-        if cache_result:
+        if cache_result is None:
+            cache_result = ResultCache.get(baseName)
+            if cache_result:
+                logger.info("Cache hit for %s", name)
+                result = cache_result
+        else:
             logger.info("Cache hit for %s", name)
             result = cache_result
-        else:
-            logger.info("Not in cache: %s", name)
+
+        if result is None:
+            logger.info("Not in cache: %s or %s", name, baseName)
             logger.info("Searching in sources for information about %s", name)
-            result: Optional[DataResult] = UseSource(title=name, eventId=evnetId).select_result()
+            result: Optional[DataResult] = UseSource(title=name, baseName=baseName, eventId=evnetId).select_result()
             if (result.status == "COMPLETED"):
                 logger.info("Storing response for %s in in-memory cache", name)
                 ResultCache.add(name, result)
