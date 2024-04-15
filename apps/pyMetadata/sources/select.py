@@ -127,7 +127,7 @@ class UseSource():
                 titles.append(wd.result.data.title)
                 titles.extend(wd.result.data.altTitle)
             joinedTitles = "\n\t" + "\n\t".join(titles)
-            logger.info(f"\nTitle: {self.title} \nBaseName: {self.baseName} \nFound: {joinedTitles} \nTitle selected: \n\t{selected.result.data.title}\n")
+            logger.info(f"\nTitle: {self.title} \nBaseName: {self.baseName} \nFound: {joinedTitles} \nTitle selected: \n\t{selected.data.data.title}\n")
         except Exception as e:
             logger.error(e)
             pass
