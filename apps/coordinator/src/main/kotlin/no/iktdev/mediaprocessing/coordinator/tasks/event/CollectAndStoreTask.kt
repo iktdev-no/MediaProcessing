@@ -74,7 +74,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
         mapped.metadata?.let {
             storeMetadata(catalogId = catalogId, metadata = it)
-            storeTitles(it.title, contentTitles = it.titles)
+            storeTitles(it.collection, it.title, contentTitles = it.titles)
         }
 
         return SimpleMessageData(Status.COMPLETED, derivedFromEventId = event.eventId)
@@ -109,19 +109,28 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
         }
     }
 
-    private fun storeTitles(usedTitle: String, contentTitles: List<String>) {
-        withTransaction(getStoreDatabase()) {
-            titles.insertIgnore {
-                it[titles.masterTitle] = usedTitle
-                it[titles.title] = NameHelper.normalize(usedTitle)
-                it[titles.type] = 1
-            }
-            contentTitles.forEach { title ->
+    private fun storeTitles(collection: String, usedTitle: String, contentTitles: List<String>) {
+        try {
+            withTransaction(getStoreDatabase()) {
+                titles.insertIgnore {
+                    it[titles.masterTitle] = collection
+                    it[titles.title] = NameHelper.normalize(usedTitle)
+                    it[titles.type] = 1
+                }
                 titles.insertIgnore {
                     it[titles.masterTitle] = usedTitle
-                    it[titles.title] = title
+                    it[titles.title] = NameHelper.normalize(usedTitle)
+                    it[titles.type] = 2
+                }
+                contentTitles.forEach { title ->
+                    titles.insertIgnore {
+                        it[titles.masterTitle] = usedTitle
+                        it[titles.title] = title
+                    }
                 }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

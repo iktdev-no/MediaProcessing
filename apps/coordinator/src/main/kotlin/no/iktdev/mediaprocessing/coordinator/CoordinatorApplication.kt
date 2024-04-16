@@ -82,7 +82,8 @@ fun main(args: Array<String>) {
         progress,
         data_audio,
         data_video,
-        cast_errors
+        cast_errors,
+        titles
     )
     storeDatabase.createTables(*tables)
 
