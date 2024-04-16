@@ -11,6 +11,13 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
     open var coordinator: C
 ) : ITaskCreatorListener<V> {
 
+    companion object {
+        fun <T> isInstanceOfTaskCreatorImpl(clazz: Class<T>): Boolean {
+            val superClass = TaskCreatorImpl::class.java
+            return superClass.isAssignableFrom(clazz)
+        }
+    }
+
     // Event that the implementer sets
     abstract val producesEvent: KafkaEvents
 
