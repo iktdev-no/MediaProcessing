@@ -12,7 +12,7 @@ import java.io.File
 class MetadataMapping(val events: List<PersistentMessage>) {
     var collection: String?
     init {
-        collection = getCollection()
+        collection = findCollection()
     }
 
 
@@ -54,7 +54,7 @@ class MetadataMapping(val events: List<PersistentMessage>) {
         } else null
     }
 
-    private fun getCollection(): String? {
+    private fun findCollection(): String? {
         val mediaReadOut = events.find { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
         val baseInfo = events.find { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
         if (!baseInfo.isSuccess()) {
