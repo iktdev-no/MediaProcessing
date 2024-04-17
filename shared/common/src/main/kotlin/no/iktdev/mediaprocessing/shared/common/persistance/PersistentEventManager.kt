@@ -93,8 +93,8 @@ class PersistentEventManager(private val dataSource: DataSource) {
 
     fun getEventsUncompleted(): List<List<PersistentMessage>> {
         val identifiesAsCompleted = listOf(
-            KafkaEvents.EventRequestProcessCompleted,
-            KafkaEvents.EventMediaProcessCompleted,
+            /*KafkaEvents.EventRequestProcessCompleted,
+            KafkaEvents.EventMediaProcessCompleted,*/
             KafkaEvents.EventCollectAndStore
         )
         val all = getAllEventsGrouped()
