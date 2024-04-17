@@ -53,7 +53,7 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
             return null
         }
         val mapped = ProcessMapping(events).map() ?: return null
-        val collection = mapped.collection ?: return null
+        val collection = mapped.metadata?.collection ?: mapped.collection ?: return null
 
         val subtitlesStored = mapped.outputFiles?.subtitles?.let {
             storeSubtitles(collection = collection, subtitles = it)

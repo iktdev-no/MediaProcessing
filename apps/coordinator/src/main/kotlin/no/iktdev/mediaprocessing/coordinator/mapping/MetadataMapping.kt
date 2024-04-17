@@ -10,6 +10,10 @@ import java.io.File
 
 
 class MetadataMapping(val events: List<PersistentMessage>) {
+    var collection: String?
+    init {
+        collection = getCollection()
+    }
 
 
     fun map(): MetadataDto? {
@@ -25,7 +29,6 @@ class MetadataMapping(val events: List<PersistentMessage>) {
         }
 
         val videoInfo = mediaReadOut?.toValueObject()
-        val collection = mediaReadOut?.outDirectory?.let { File(it).name } ?: baseInfo?.title
 
 
         val mediaCover = if (coverDownloadTask != null || cover != null) {
@@ -51,12 +54,13 @@ class MetadataMapping(val events: List<PersistentMessage>) {
         } else null
     }
 
-    fun getCollection(): String? {
+    private fun getCollection(): String? {
+        val mediaReadOut = events.find { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
         val baseInfo = events.find { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
         if (!baseInfo.isSuccess()) {
             return null
         }
-        return baseInfo?.title
+        return mediaReadOut?.outDirectory?.let { File(it).name } ?: baseInfo?.title
     }
 
 }

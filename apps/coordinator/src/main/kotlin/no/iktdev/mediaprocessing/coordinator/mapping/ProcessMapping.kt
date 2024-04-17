@@ -18,7 +18,7 @@ class ProcessMapping(val events: List<PersistentMessage>) {
             referenceId = referenceId,
             process = processStarted?.type,
             inputFile = processStarted?.file,
-            collection = meta.getCollection(),
+            collection = meta.collection,
             metadata = meta.map(),
             videoDetails = VideoDetailsMapper(events).mapTo(),
             outputFiles = OutputFilesMapping(events).mapTo()
