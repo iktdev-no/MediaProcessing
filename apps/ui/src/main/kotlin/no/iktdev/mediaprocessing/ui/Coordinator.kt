@@ -28,7 +28,7 @@ class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : Coo
     override val listeners = PersistentEventBasedMessageListener()
 
     override fun onCoordinatorReady() {
-
+        super.onCoordinatorReady()
     }
 
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {

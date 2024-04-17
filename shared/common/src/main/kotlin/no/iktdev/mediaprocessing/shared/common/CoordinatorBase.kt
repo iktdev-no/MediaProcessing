@@ -1,9 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
@@ -37,6 +34,7 @@ abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
     abstract fun createTasksBasedOnEventsAndPersistence(referenceId: String, eventId: String, messages: List<V>)
 
     open fun onCoordinatorReady() {
+        log.info { "Attaching listeners to Coordinator" }
         listener.onMessageReceived = { event -> onMessageReceived(event)}
         listener.listen(KafkaEnv.kafkaTopic)
     }
@@ -46,20 +44,24 @@ abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
         val services = context.getBeansWithAnnotation(Service::class.java).values.map { it.javaClass }.filter { TaskCreatorImpl.isInstanceOfTaskCreatorImpl(it) }
         val loadedServices = listeners.listeners.map { it.taskHandler.javaClass as Class<Any> }
         val notPresent = services.filter { it !in loadedServices }
+
+        notPresent.forEach {
+            log.warn { "Waiting for ${it.simpleName} to attach.." }
+        }
+
         return notPresent.isEmpty()
     }
 
     @PostConstruct
     fun onInitializationCompleted() {
-        Coroutines.io().launch {
+        Coroutines.default().launch {
             while (!isAllServicesRegistered()) {
                 log.info { "Waiting for mandatory services to start" }
                 delay(1000)
             }
-            withContext(Dispatchers.Default) {
-                log.info { "Coordinator is Ready!" }
-                onCoordinatorReady()
-            }
+        }.invokeOnCompletion {
+            onCoordinatorReady()
+            log.info { "Coordinator is Ready!" }
         }
     }
 }

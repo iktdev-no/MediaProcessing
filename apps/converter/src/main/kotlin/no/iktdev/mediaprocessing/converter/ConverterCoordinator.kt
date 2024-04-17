@@ -34,6 +34,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
     }
 
     override fun onCoordinatorReady() {
+        super.onCoordinatorReady()
         log.info { "Converter Coordinator is ready" }
         readAllInQueue()
     }

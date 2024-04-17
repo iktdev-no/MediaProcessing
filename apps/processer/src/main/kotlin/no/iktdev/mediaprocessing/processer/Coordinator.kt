@@ -46,6 +46,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     override fun onCoordinatorReady() {
+        super.onCoordinatorReady()
         generateMissingEvents()
         readAllAvailableInQueue()
     }

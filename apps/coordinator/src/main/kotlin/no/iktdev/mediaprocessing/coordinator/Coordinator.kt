@@ -22,6 +22,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     val io = Coroutines.io()
 
     override fun onCoordinatorReady() {
+        super.onCoordinatorReady()
         readAllUncompletedMessagesInQueue()
     }
 
