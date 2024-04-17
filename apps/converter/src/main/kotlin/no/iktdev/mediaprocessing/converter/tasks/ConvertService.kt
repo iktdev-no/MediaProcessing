@@ -202,7 +202,7 @@ class ConvertService(@Autowired override var coordinator: ConverterCoordinator) 
                     }
 
                 } catch (e: Exception) {
-                    eventManager.setProcessEventCompleted(referenceId, event.eventId)
+                    eventManager.setProcessEventCompleted(referenceId, event.eventId, Status.SKIPPED)
                     log.error { "Canceling event ${event.eventId}\n\t by declaring it as consumed." }
                     producer.sendMessage(
                         referenceId = referenceId,
