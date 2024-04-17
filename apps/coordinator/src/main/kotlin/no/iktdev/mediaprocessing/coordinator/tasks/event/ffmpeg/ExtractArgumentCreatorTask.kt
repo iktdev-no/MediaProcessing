@@ -46,6 +46,7 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
+
         if (!requiredEvents.contains(event.event)) {
             log.info { "Ignored ${event.event} @ ${event.eventId}" }
             return null

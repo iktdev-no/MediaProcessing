@@ -45,6 +45,8 @@ class CollectAndStoreTask(@Autowired override var coordinator: Coordinator) : Ta
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        log.info { "${event.referenceId} triggered by ${event.event}" }
+
         val started = events.lastOrSuccessOf(EventMediaProcessStarted) ?: return null
         val completed = events.lastOrSuccessOf(EventMediaProcessCompleted) ?: return null
         if (!started.data.isSuccess() || !completed.data.isSuccess()) {

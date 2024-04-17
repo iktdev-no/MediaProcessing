@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
@@ -15,6 +16,7 @@ import java.io.File
 
 @Service
 class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+    val log = KotlinLogging.logger {}
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EventWorkConvertCreated
 
@@ -25,6 +27,8 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
         )
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        log.info { "${event.referenceId} triggered by ${event.event}" }
+
         if (!event.data.isSuccess()) {
             return null
         }

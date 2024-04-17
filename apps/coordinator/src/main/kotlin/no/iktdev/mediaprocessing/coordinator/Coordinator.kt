@@ -98,6 +98,14 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
 
     fun readAllUncompletedMessagesInQueue() {
         val messages = eventManager.getEventsUncompleted()
+        if (messages.isNotEmpty()) {
+            log.info { "Found ${messages.size} uncompleted items" }
+        }
+        messages.onEach {
+            it.firstOrNull()?.let {
+                log.info { "Found uncompleted: ${it.referenceId}" }
+            }
+        }
         io.launch {
             messages.forEach {
                 delay(1000)

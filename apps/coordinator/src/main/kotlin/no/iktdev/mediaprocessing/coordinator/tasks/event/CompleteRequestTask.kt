@@ -29,6 +29,8 @@ class CompleteRequestTask(@Autowired override var coordinator: Coordinator) : Ta
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        log.info { "${event.referenceId} triggered by ${event.event}" }
+
         val started = events.lastOrSuccessOf(EVENT_REQUEST_PROCESS_STARTED) ?: return null
         if (!started.data.isSuccess()) {
             return null
