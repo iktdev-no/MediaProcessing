@@ -13,6 +13,7 @@ object SharedConfig {
     val uiUrl: String = System.getenv("APP_URL_UI") ?: "http://ui:8080"
 
     val preference: File = File("/data/config/preference.json")
+    val verbose: Boolean = System.getenv("VERBOSE")?.let { it.toBoolean() } ?: false
 }
 
 object DatabaseEnvConfig {

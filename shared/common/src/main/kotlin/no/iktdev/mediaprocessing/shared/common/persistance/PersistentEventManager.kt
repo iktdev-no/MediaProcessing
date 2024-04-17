@@ -34,18 +34,31 @@ class PersistentEventManager(private val dataSource: DataSource) {
     }
 
 
+    private val duplicatable = listOf(
+        KafkaEvents.EventWorkConvertCreated,
+        KafkaEvents.EventWorkExtractCreated,
+        KafkaEvents.EventWorkConvertPerformed,
+        KafkaEvents.EventWorkExtractPerformed
+    )
+
     /**
      * @param referenceId Reference
      * @param eventId Current eventId for the message, required to prevent deletion of itself
      * @param event Current event for the message
      */
-    private fun deleteSupersededEvents(referenceId: String, eventId: String, event: KafkaEvents) {
+    private fun deleteSupersededEvents(referenceId: String, eventId: String, event: KafkaEvents, derivedFromId: String?) {
         val present = getEventsWith(referenceId).filter { it.eventId != eventId }
 
-        val superseded = present.filter { it.event == event && it.eventId != eventId }
         val availableForRemoval = mutableListOf<PersistentMessage>()
         val helper = PersistentMessageHelper(present)
-        superseded.forEach { availableForRemoval.addAll(helper.getCascadingFrom(it.eventId)) }
+
+        val superseded = present.filter { it.event == event && it.eventId != eventId }
+
+        val notSuperseded = if (derivedFromId != null && event in duplicatable) {
+            present.filter { it.event == event && (it.data.derivedFromEventId == derivedFromId) }
+        } else emptyList()
+
+        superseded.filter { !notSuperseded.contains(it) }.forEach { availableForRemoval.addAll(helper.getCascadingFrom(it.eventId)) }
 
         deleteSupersededEvents(availableForRemoval)
 
@@ -176,7 +189,7 @@ class PersistentEventManager(private val dataSource: DataSource) {
             true
         }
         if (success) {
-            deleteSupersededEvents(referenceId = message.referenceId, eventId = message.eventId, event = event)
+            deleteSupersededEvents(referenceId = message.referenceId, eventId = message.eventId, event = event, derivedFromId = message.data?.derivedFromEventId)
         }
         return success
     }

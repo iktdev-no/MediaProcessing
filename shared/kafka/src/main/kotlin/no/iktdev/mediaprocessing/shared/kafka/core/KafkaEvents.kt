@@ -38,7 +38,9 @@ enum class KafkaEvents(val event: String) {
 
     EventMediaProcessCompleted("event:media-process:completed"),
     EventRequestProcessCompleted("event:request-process:completed"),
-    EventCollectAndStore("event::save");
+    EventCollectAndStore("event::save"),
+
+    ;
 
     companion object {
         fun toEvent(event: String): KafkaEvents? {

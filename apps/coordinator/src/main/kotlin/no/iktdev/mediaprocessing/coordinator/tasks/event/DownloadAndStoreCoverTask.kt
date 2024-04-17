@@ -39,6 +39,8 @@ class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        log.info { "${event.referenceId} triggered by ${event.event}" }
+
         val cover = events.find { it.event == KafkaEvents.EventMediaReadOutCover }
         if (cover == null || cover.data !is CoverInfoPerformed) {
             return SimpleMessageData(Status.ERROR, "Wrong type triggered and caused an execution for $serviceId", event.eventId)
