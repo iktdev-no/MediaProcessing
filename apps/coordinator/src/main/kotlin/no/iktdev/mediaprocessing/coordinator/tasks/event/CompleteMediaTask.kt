@@ -40,7 +40,10 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
 
         val receivedEvents = events.map { it.event }
         // TODO: Add filter in case a metadata request was performed or a cover download was performed. for now, for base functionality, it requires a performed event.
-
+        val ffmpegEvents = listOf(KafkaEvents.EventMediaParameterEncodeCreated, EventMediaParameterExtractCreated)
+        if (ffmpegEvents.any { receivedEvents.contains(it) } && events.none { e -> KafkaEvents.isOfWork(e.event) }) {
+            return null
+        }
 
 
 
