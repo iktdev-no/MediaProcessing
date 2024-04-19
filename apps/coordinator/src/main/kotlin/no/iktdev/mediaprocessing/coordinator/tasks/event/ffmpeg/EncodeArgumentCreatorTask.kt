@@ -7,7 +7,7 @@ import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.Preference
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.contract.dto.ProcessStartOperationEvents
+import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.*
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -44,8 +44,8 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val started = events.find { it.data is MediaProcessStarted }?.data as MediaProcessStarted
-        if (!started.operations.contains(ProcessStartOperationEvents.ENCODE)) {
-            log.info { "Couldn't find operation event ${ProcessStartOperationEvents.ENCODE} in ${Gson().toJson(started.operations)}\n\tEncode Arguments will not be created" }
+        if (!started.operations.contains(StartOperationEvents.ENCODE)) {
+            log.info { "Couldn't find operation event ${StartOperationEvents.ENCODE} in ${Gson().toJson(started.operations)}\n\tEncode Arguments will not be created" }
             return null
         }
 

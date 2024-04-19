@@ -16,13 +16,8 @@ enum class SubtitleFormats {
     SMI
 }
 
-enum class ProcessStartOperationEvents {
+enum class StartOperationEvents {
     ENCODE,
     EXTRACT,
     CONVERT
-}
-
-enum class RequestStartOperationEvents {
-    CONVERT,
-    EXTRACT,
 }

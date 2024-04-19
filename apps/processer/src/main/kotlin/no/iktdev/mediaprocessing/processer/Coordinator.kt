@@ -7,10 +7,12 @@ import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.processer.coordination.PersistentEventProcessBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
+import no.iktdev.mediaprocessing.shared.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.DeserializedConsumerRecord
 import no.iktdev.mediaprocessing.shared.kafka.dto.Message
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.NotificationOfDeletionPerformed
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -101,9 +103,13 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         val usableMessages = messages.filter { lists -> lists.any { it.event in processKafkaEvents } }
 
 
-        val validMessages = usableMessages.filter { lists -> lists.any { it.event == KafkaEvents.EventMediaProcessStarted } ||
-                (lists.any { it.event == KafkaEvents.EVENT_REQUEST_PROCESS_STARTED } && lists.any { it.event == KafkaEvents.EventMediaWorkProceedPermitted } )
-        }.flatten().filter { it.event in processKafkaEvents }
+        val validMessages = usableMessages.filter { lists ->
+            lists.any { it.event == KafkaEvents.EventMediaProcessStarted && (it.data as MediaProcessStarted).type == ProcessType.FLOW } ||
+                 lists.any { it.event == KafkaEvents.EventMediaWorkProceedPermitted }
+        }
+            .flatten()
+            .filter { it.event in processKafkaEvents }
+
 
         validMessages.filter { it.eventId !in existing }.forEach {
             eventManager.setProcessEvent(it.event, Message(

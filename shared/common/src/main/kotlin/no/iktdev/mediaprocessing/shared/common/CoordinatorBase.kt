@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
+    private var ready: Boolean = false
+    fun isReady() = ready
     private val log = KotlinLogging.logger {}
     abstract val listeners: L
 
@@ -37,6 +39,7 @@ abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
         log.info { "Attaching listeners to Coordinator" }
         listener.onMessageReceived = { event -> onMessageReceived(event)}
         listener.listen(KafkaEnv.kafkaTopic)
+        ready = true
     }
     abstract fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>)
 

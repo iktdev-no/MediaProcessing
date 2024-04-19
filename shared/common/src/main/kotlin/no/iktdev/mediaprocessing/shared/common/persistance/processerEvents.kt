@@ -19,6 +19,6 @@ object processerEvents: IntIdTable() {
     val lastCheckIn: Column<LocalDateTime?> = datetime("lastCheckIn").nullable()
 
     init {
-        uniqueIndex(referenceId, event)
+        uniqueIndex(referenceId, eventId, event)
     }
 }

@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.shared.kafka.core
 
 enum class KafkaEvents(val event: String) {
     EventMediaProcessStarted("event:media-process:started"),
-    EVENT_REQUEST_PROCESS_STARTED("event:request-process:started"),
 
     EventMediaReadStreamPerformed("event:media-read-stream:performed"),
     EventMediaParseStreamPerformed("event:media-parse-stream:performed"),
@@ -18,7 +17,6 @@ enum class KafkaEvents(val event: String) {
 
     EventMediaWorkProceedPermitted("event:media-work-proceed:permitted"),
 
-    // This event is to be used for commuincating across all appss taht an event has ben removed and to rterminate existint events
     EventNotificationOfWorkItemRemoval("event:notification-work-item-removal"),
 
     EventWorkEncodeCreated("event:work-encode:created"),
@@ -37,7 +35,6 @@ enum class KafkaEvents(val event: String) {
     EVENT_STORE_METADATA_PERFORMED("event:store-metadata:performed"),
 
     EventMediaProcessCompleted("event:media-process:completed"),
-    EventRequestProcessCompleted("event:request-process:completed"),
     EventCollectAndStore("event::save"),
 
     ;
@@ -63,7 +60,6 @@ enum class KafkaEvents(val event: String) {
         fun isOfFinalize(event: KafkaEvents): Boolean {
             return event in listOf(
                 EventMediaProcessCompleted,
-                EventRequestProcessCompleted,
                 EventCollectAndStore
             )
         }

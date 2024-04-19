@@ -8,7 +8,7 @@ import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg.ExtractArgumentCreatorTask.SubtitleArguments.SubtitleType.*
 import no.iktdev.mediaprocessing.shared.common.Preference
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.contract.dto.ProcessStartOperationEvents
+import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleArgumentsDto
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
@@ -52,8 +52,8 @@ class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinato
             return null
         }
         val started = events.find { it.data is MediaProcessStarted }?.data as MediaProcessStarted
-        if (!started.operations.contains(ProcessStartOperationEvents.EXTRACT)) {
-            log.info { "Couldn't find operation event ${ProcessStartOperationEvents.EXTRACT} in ${Gson().toJson(started.operations)}\n\tExtract Arguments will not be created" }
+        if (!started.operations.contains(StartOperationEvents.EXTRACT)) {
+            log.info { "Couldn't find operation event ${StartOperationEvents.EXTRACT} in ${Gson().toJson(started.operations)}\n\tExtract Arguments will not be created" }
             return null
         }
 

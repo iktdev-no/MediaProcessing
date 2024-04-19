@@ -6,7 +6,7 @@ import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.contract.dto.ProcessStartOperationEvents
+import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents.*
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -58,22 +58,22 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
         }
 
 
-        val hasEncodeAndIsRequired = if (startedData.operations.contains(ProcessStartOperationEvents.ENCODE)) {
+        val hasEncodeAndIsRequired = if (startedData.operations.contains(StartOperationEvents.ENCODE)) {
             events.any { it.event == EventWorkEncodePerformed }
         } else true
 
-        val hasExtractAndIsRequired = if (startedData.operations.contains(ProcessStartOperationEvents.EXTRACT)) {
+        val hasExtractAndIsRequired = if (startedData.operations.contains(StartOperationEvents.EXTRACT)) {
             events.any { it.event == EventWorkExtractPerformed}
         } else true
 
-        val hasConvertAndIsRequired = if (startedData.operations.contains(ProcessStartOperationEvents.CONVERT)) {
+        val hasConvertAndIsRequired = if (startedData.operations.contains(StartOperationEvents.CONVERT)) {
             events.any { it.event == EventWorkConvertPerformed }
         } else true
 
-        val missingRequired: MutableMap<ProcessStartOperationEvents, Boolean> = mutableMapOf(
-            ProcessStartOperationEvents.ENCODE to hasEncodeAndIsRequired,
-            ProcessStartOperationEvents.EXTRACT to hasExtractAndIsRequired,
-            ProcessStartOperationEvents.CONVERT to hasConvertAndIsRequired
+        val missingRequired: MutableMap<StartOperationEvents, Boolean> = mutableMapOf(
+            StartOperationEvents.ENCODE to hasEncodeAndIsRequired,
+            StartOperationEvents.EXTRACT to hasExtractAndIsRequired,
+            StartOperationEvents.CONVERT to hasConvertAndIsRequired
         )
 
 
