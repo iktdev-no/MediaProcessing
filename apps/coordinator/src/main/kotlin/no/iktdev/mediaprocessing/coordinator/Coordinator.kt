@@ -35,7 +35,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         } else {
             io.launch {
                 delay(1000) // Give the database a few sec to update
-                readAllMessagesFor(event.value.referenceId, event.value.eventId)
+                readAllMessagesFor(event.value.referenceId, event.value.eventId, event.key.event)
             }
         }
     }
@@ -110,10 +110,10 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         }
     }
 
-    fun readAllMessagesFor(referenceId: String, eventId: String) {
+    fun readAllMessagesFor(referenceId: String, eventId: String, event: String) {
         val messages = eventManager.getEventsWith(referenceId)
         if (messages.find { it.eventId == eventId && it.referenceId == referenceId } == null) {
-            log.warn { "EventId ($eventId) for ReferenceId ($referenceId) has not been made available in the database yet." }
+            log.warn { "EventId ($eventId) for ReferenceId ($referenceId) with event $event has not been made available in the database yet." }
             io.launch {
                 val fixedDelay = 1000L
                 delay(fixedDelay)
