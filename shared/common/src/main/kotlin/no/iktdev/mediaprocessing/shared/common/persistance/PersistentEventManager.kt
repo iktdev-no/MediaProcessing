@@ -34,12 +34,17 @@ class PersistentEventManager(private val dataSource: DataSource) {
     }
 
 
-    private val duplicatable = listOf(
+    private val exemptedFromSingleEvent = listOf(
         KafkaEvents.EventWorkConvertCreated,
         KafkaEvents.EventWorkExtractCreated,
         KafkaEvents.EventWorkConvertPerformed,
         KafkaEvents.EventWorkExtractPerformed
     )
+
+    private fun isExempted(event: KafkaEvents): Boolean {
+        return event in exemptedFromSingleEvent
+    }
+
 
     /**
      * @param referenceId Reference
@@ -47,20 +52,19 @@ class PersistentEventManager(private val dataSource: DataSource) {
      * @param event Current event for the message
      */
     private fun deleteSupersededEvents(referenceId: String, eventId: String, event: KafkaEvents, derivedFromId: String?) {
-        val present = getEventsWith(referenceId).filter { it.eventId != eventId }
+        val forRemoval = mutableListOf<PersistentMessage>()
 
-        val availableForRemoval = mutableListOf<PersistentMessage>()
+        val present = getEventsWith(referenceId).filter { it.data.derivedFromEventId != null }
         val helper = PersistentMessageHelper(present)
 
-        val superseded = present.filter { it.event == event && it.eventId != eventId }
+        val replaced = if (!isExempted(event)) present.find { it.eventId != eventId && it.event == event } else null
+        val orphaned = replaced?.let { helper.getEventsRelatedTo(it.eventId) } ?: emptyList()
 
-        val notSuperseded = if (derivedFromId != null && event in duplicatable) {
-            present.filter { it.event == event && (it.data.derivedFromEventId == derivedFromId) }
-        } else emptyList()
+        forRemoval.addAll(orphaned)
 
-        superseded.filter { !notSuperseded.contains(it) }.forEach { availableForRemoval.addAll(helper.getCascadingFrom(it.eventId)) }
+        //superseded.filter { !notSuperseded.contains(it) }.forEach { availableForRemoval.addAll(helper.getEventsRelatedTo(it.eventId)) }
 
-        deleteSupersededEvents(availableForRemoval)
+        deleteSupersededEvents(forRemoval)
 
     }
 

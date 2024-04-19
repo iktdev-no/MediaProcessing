@@ -46,7 +46,7 @@ class PersistentMessageHelper(val messages: List<PersistentMessage>) {
         return withDerivedId.filter { it.data.derivedFromEventId !in idsFlat }
     }
 
-    fun getCascadingFrom(eventId: String): List<PersistentMessage> {
+    fun getEventsRelatedTo(eventId: String): List<PersistentMessage> {
         val triggered = messages.firstOrNull { it.eventId == eventId } ?: return emptyList()
         val usableEvents = messages.filter { it.eventId != eventId && it.data.derivedFromEventId != null }
 
@@ -65,7 +65,7 @@ class PersistentMessageHelper(val messages: List<PersistentMessage>) {
     /**
      * @param eventId Initial eventId
      */
-    fun dfs(eventId: String, derivedEventsMap: Map<String, List<String>>, eventsToDelete: MutableSet<String>) {
+    private fun dfs(eventId: String, derivedEventsMap: Map<String, List<String>>, eventsToDelete: MutableSet<String>) {
         eventsToDelete.add(eventId)
         derivedEventsMap[eventId]?.forEach { derivedEventId ->
             dfs(derivedEventId, derivedEventsMap, eventsToDelete)
