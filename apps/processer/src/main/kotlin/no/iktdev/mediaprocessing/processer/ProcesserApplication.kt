@@ -41,9 +41,6 @@ fun main(args: Array<String>) {
     val context = runApplication<ProcesserApplication>(*args)
 }
 
-class SocketImplemented: SocketImplementation() {
-
-}
 @EnableScheduling
 class DatabaseReconnect() {
     var lostConnectionCount = 0
