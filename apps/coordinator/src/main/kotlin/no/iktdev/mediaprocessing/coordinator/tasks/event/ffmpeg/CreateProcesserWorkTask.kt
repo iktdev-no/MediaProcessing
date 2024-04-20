@@ -18,6 +18,7 @@ abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         val started = events.findLast { it.event == KafkaEvents.EventMediaProcessStarted }?.data as MediaProcessStarted?
         if (started == null) {
+            log.info { "${event.referenceId} couldn't find start event" }
             return null
         }
 
@@ -34,6 +35,7 @@ abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : 
 
         val earg = if (event.data is FfmpegWorkerArgumentsCreated) event.data as FfmpegWorkerArgumentsCreated? else return null
         if (earg == null || earg.entries.isEmpty()) {
+            log.info { "${event.referenceId} ffargument is empty" }
             return null
         }
 
@@ -47,6 +49,7 @@ abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : 
             )
         }
         requestEvents.forEach {
+            log.info { "${event.referenceId} creating work request based on ${it.derivedFromEventId}" }
             super.onResult(it)
         }
         return null
