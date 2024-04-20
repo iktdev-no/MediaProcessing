@@ -21,6 +21,10 @@ class CreateExtractWorkTask(@Autowired override var coordinator: Coordinator) : 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
-        return super.onProcessEvents(event, events)
+        val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterExtractCreated) {
+            events.findLast { it.event == KafkaEvents.EventMediaParameterExtractCreated } ?: event
+        } else event
+
+        return super.onProcessEvents(forwardEvent, events)
     }
 }
