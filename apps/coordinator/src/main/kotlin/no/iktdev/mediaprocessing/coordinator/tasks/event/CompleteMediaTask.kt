@@ -76,14 +76,17 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
             StartOperationEvents.CONVERT to hasConvertAndIsRequired
         )
 
-
-
         if (missingRequired.values.any { !it }) {
             log.info { "Waiting for ${missingRequired.entries.filter { !it.value }.map { it.key.name }}" }
             return null
         }
 
-
+        val ch = CompleteHandler(events)
+        val chEvents = ch.getMissingCompletions()
+        if (chEvents.isNotEmpty()) {
+            log.info { "Waiting for ${chEvents.joinToString { "," }}" }
+            return null
+        }
 
 
 
@@ -92,5 +95,36 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
             return ProcessCompleted(Status.COMPLETED, event.eventId)
         }
         return null
+    }
+
+    class CompleteHandler(val events: List<PersistentMessage>) {
+        var report: Map<KafkaEvents, Int> = listOf(
+            EventReport.fromEvents(EventWorkEncodeCreated, events),
+            EventReport.fromEvents(EventWorkExtractCreated, events),
+            EventReport.fromEvents(EventWorkConvertCreated, events),
+
+            EventReport.fromEvents(EventWorkEncodePerformed, events),
+            EventReport.fromEvents(EventWorkExtractPerformed, events),
+            EventReport.fromEvents(EventWorkConvertPerformed, events)
+        ).associate { it.event to it.count }
+
+        fun getMissingCompletions(): List<StartOperationEvents> {
+            val missings = mutableListOf<StartOperationEvents>()
+            if (report[EventWorkEncodeCreated] != report[EventWorkEncodePerformed])
+                missings.add(StartOperationEvents.ENCODE)
+            if (report[EventWorkExtractCreated] != report[EventWorkExtractPerformed])
+                missings.add(StartOperationEvents.EXTRACT)
+            if (report[EventWorkConvertCreated] == report[EventWorkConvertPerformed])
+                missings.add(StartOperationEvents.CONVERT)
+            return missings
+        }
+
+        data class EventReport(val event: KafkaEvents, val count: Int) {
+            companion object {
+                fun fromEvents(event: KafkaEvents, events: List<PersistentMessage>): EventReport {
+                    return EventReport(event = event, count = events.filter { it.event == event }.size)
+                }
+            }
+        }
     }
 }

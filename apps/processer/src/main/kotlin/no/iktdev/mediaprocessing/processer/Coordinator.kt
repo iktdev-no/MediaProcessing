@@ -96,28 +96,23 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     }
 
     private fun generateMissingEvents() {
-        val existing = eventManager.getAllProcessEvents().map { it.eventId }
+        val existing = eventManager.getAllProcessEvents().filter { it.event in processKafkaEvents }.map { it.eventId }
         val messages = eventManager.getEventsUncompleted()
 
 
-        val usableMessages = messages.filter { lists -> lists.any { it.event in processKafkaEvents } }
-
-
-        val validMessages = usableMessages.filter { lists ->
-            lists.any { it.event == KafkaEvents.EventMediaProcessStarted && (it.data as MediaProcessStarted).type == ProcessType.FLOW } ||
-                 lists.any { it.event == KafkaEvents.EventMediaWorkProceedPermitted }
-        }
-            .flatten()
+        val myEvents = messages.flatten()
             .filter { it.event in processKafkaEvents }
+            .filter { existing.none { en -> en == it.eventId } }
 
 
-        validMessages.filter { it.eventId !in existing }.forEach {
+        myEvents.forEach {
             eventManager.setProcessEvent(it.event, Message(
                 referenceId = it.referenceId,
                 eventId = it.eventId,
                 data = it.data
             ))
         }
+
     }
 
     fun readAllMessagesFor(referenceId: String, eventId: String) {
@@ -139,6 +134,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
     fun checkForWork() {
         log.info { "Checking if there is any work to do.." }
         readAllAvailableInQueue()
+        generateMissingEvents()
     }
 
     interface CoordinatorEvents {
