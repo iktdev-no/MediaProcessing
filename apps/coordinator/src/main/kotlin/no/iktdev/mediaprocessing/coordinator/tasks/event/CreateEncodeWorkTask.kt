@@ -22,7 +22,13 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: Coordinator) : C
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterEncodeCreated) {
-            events.findLast { it.event == KafkaEvents.EventMediaParameterEncodeCreated } ?: event
+            val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterEncodeCreated }
+            if (sevent != null) {
+                log.info { "${event.referenceId} ${event.event} is not of ${KafkaEvents.EventMediaParameterEncodeCreated}, swapping to found event" }
+            } else {
+                log.info { "${event.referenceId} ${event.event} is not of ${KafkaEvents.EventMediaParameterEncodeCreated}, could not find required event.." }
+            }
+            sevent ?: event
         } else event
 
 

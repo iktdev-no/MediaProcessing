@@ -22,7 +22,13 @@ class CreateExtractWorkTask(@Autowired override var coordinator: Coordinator) : 
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterExtractCreated) {
-            events.findLast { it.event == KafkaEvents.EventMediaParameterExtractCreated } ?: event
+            val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterExtractCreated }
+            if (sevent != null) {
+                log.info { "${event.referenceId} ${event.event} is not of ${KafkaEvents.EventMediaParameterExtractCreated}, swapping to found event" }
+            } else {
+                log.info { "${event.referenceId} ${event.event} is not of ${KafkaEvents.EventMediaParameterExtractCreated}, could not find required event.." }
+            }
+            sevent ?: event
         } else event
 
         return super.onProcessEvents(forwardEvent, events)
