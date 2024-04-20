@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
@@ -84,7 +85,8 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
         val ch = CompleteHandler(events)
         val chEvents = ch.getMissingCompletions()
         if (chEvents.isNotEmpty()) {
-            log.info { "Waiting for ${chEvents.joinToString { "," }}" }
+            log.info { "Waiting for ${chEvents.joinToString(",")}" }
+            log.warn { "Waiting report: ${Gson().toJson(chEvents)}" }
             return null
         }
 
@@ -110,11 +112,11 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
 
         fun getMissingCompletions(): List<StartOperationEvents> {
             val missings = mutableListOf<StartOperationEvents>()
-            if (report[EventWorkEncodeCreated] != report[EventWorkEncodePerformed])
+            if ((report[EventWorkEncodeCreated]?: 0) > (report[EventWorkEncodePerformed] ?: 0))
                 missings.add(StartOperationEvents.ENCODE)
-            if (report[EventWorkExtractCreated] != report[EventWorkExtractPerformed])
+            if ((report[EventWorkExtractCreated] ?: 0) > (report[EventWorkExtractPerformed] ?: 0))
                 missings.add(StartOperationEvents.EXTRACT)
-            if (report[EventWorkConvertCreated] == report[EventWorkConvertPerformed])
+            if ((report[EventWorkConvertCreated] ?: 0) > (report[EventWorkConvertPerformed] ?: 0))
                 missings.add(StartOperationEvents.CONVERT)
             return missings
         }

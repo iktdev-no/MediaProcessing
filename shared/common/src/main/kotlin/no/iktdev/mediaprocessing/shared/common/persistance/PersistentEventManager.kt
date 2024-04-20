@@ -215,6 +215,8 @@ class PersistentEventManager(private val dataSource: DataSource) {
                     log.info { "Error code is: ${exception.errorCode}" }
                     exception.printStackTrace()
                 }
+            } else {
+                exception.printStackTrace()
             }
             false
         } else {

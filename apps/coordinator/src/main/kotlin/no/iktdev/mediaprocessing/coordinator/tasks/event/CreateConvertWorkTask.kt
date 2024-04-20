@@ -29,25 +29,49 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         log.info { "${event.referenceId} @ ${event.eventId} triggered by ${event.event}" }
 
-        if (!event.data.isSuccess()) {
-            return null
-        }
-        val eventData = event.data as FfmpegWorkRequestCreated? ?: return null
+        // Check what it is and create based on it
+
+        val derivedInfoObject = if (event.event in requiredEvents) {
+            DerivedInfoObject.fromExtractWorkCreated(event)
+        } else {
+            val extractEvent = events.findLast { it.event == KafkaEvents.EventWorkExtractCreated }
+            extractEvent?.let { it -> DerivedInfoObject.fromExtractWorkCreated(it) }
+        } ?: return null
+
 
         val requiredEventId = if (event.event == KafkaEvents.EventWorkExtractCreated) {
             event.eventId
         } else null;
 
-        val outFile = File(eventData.outFile)
+        val outFile = File(derivedInfoObject.outputFile)
         return ConvertWorkerRequest(
             status = Status.COMPLETED,
             requiresEventId = requiredEventId,
-            inputFile = eventData.outFile,
+            inputFile = derivedInfoObject.outputFile,
             allowOverwrite = true,
             outFileBaseName = outFile.nameWithoutExtension,
             outDirectory = outFile.parentFile.absolutePath,
             derivedFromEventId = event.eventId
         )
 
+    }
+
+    private data class DerivedInfoObject(
+        val outputFile: String,
+        val derivedFromEventId: String,
+        val requiresEventId: String
+    ) {
+        companion object {
+            fun fromExtractWorkCreated(event: PersistentMessage): DerivedInfoObject? {
+                return if (event.event != KafkaEvents.EventWorkExtractCreated) null else {
+                    val data: FfmpegWorkRequestCreated = event.data as FfmpegWorkRequestCreated
+                    DerivedInfoObject(
+                        outputFile = data.outFile,
+                        derivedFromEventId = event.eventId,
+                        requiresEventId = event.eventId
+                    )
+                }
+            }
+        }
     }
 }
