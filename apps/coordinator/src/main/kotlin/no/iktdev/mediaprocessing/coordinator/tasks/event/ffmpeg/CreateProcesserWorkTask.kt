@@ -22,10 +22,6 @@ abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : 
             return null
         }
 
-        if (!event.data.isSuccess()) {
-            return null
-        }
-
         val proceed = events.find { it.event == KafkaEvents.EventMediaWorkProceedPermitted }
         if (proceed == null && started.type == ProcessType.MANUAL) {
             log.warn { "${event.referenceId} waiting for Proceed event due to Manual process" }
