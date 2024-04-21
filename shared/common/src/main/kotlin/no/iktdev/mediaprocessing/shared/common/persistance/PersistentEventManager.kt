@@ -177,16 +177,18 @@ class PersistentEventManager(private val dataSource: DataSource) {
             }
         }
 
-        val exception = executeOrException(dataSource.database) {
-            events.insert {
+        withTransaction(dataSource.database) {
+            allEvents.insert {
                 it[referenceId] = message.referenceId
                 it[eventId] = message.eventId
                 it[events.event] = event.event
                 it[integrity] = getIntegrityOfData(message.dataAsJson())
                 it[data] = message.dataAsJson()
             }
+        }
 
-            allEvents.insert {
+        val exception = executeOrException(dataSource.database) {
+            events.insert {
                 it[referenceId] = message.referenceId
                 it[eventId] = message.eventId
                 it[events.event] = event.event
