@@ -37,6 +37,8 @@ class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordi
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        super.onProcessEvents(event, events)
+
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val baseInfo = events.findLast { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed

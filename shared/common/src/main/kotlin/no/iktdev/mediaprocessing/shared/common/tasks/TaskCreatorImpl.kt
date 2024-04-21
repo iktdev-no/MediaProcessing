@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common.tasks
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
+import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -10,6 +12,9 @@ import javax.annotation.PostConstruct
 abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessageListener<V>>(
     open var coordinator: C
 ) : ITaskCreatorListener<V> {
+    private val log = KotlinLogging.logger {}
+
+    protected open val processedEvents: MutableMap<String, Set<String>> = mutableMapOf()
 
     companion object {
         fun <T> isInstanceOfTaskCreatorImpl(clazz: Class<T>): Boolean {
@@ -82,6 +87,7 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
     private val context: MutableMap<String, Any> = mutableMapOf()
     private val context_key_reference = "reference"
     private val context_key_producesEvent = "event"
+
     final override fun onEventReceived(referenceId: String, event: V, events: List<V>) {
         context[context_key_reference] = referenceId
         getListener().producesEvent.let {
@@ -89,6 +95,12 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
         }
 
         if (prerequisitesRequired(events).all { it.invoke() } && prerequisiteRequired(event).all { it.invoke() }) {
+
+            if (!containsUnprocessedEvents(events)) {
+                log.warn { "Event register blocked proceeding" }
+                return
+            }
+
             val result = onProcessEvents(event, events)
             if (result != null) {
                 onResult(result)
@@ -99,7 +111,15 @@ abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessa
         }
     }
 
+    /**
+     * This function is intended to cache the referenceId and its eventid's
+     * This is to prevent dupliation
+     * */
+    abstract fun containsUnprocessedEvents(events: List<V>): Boolean
+
+
     protected fun onResult(data: MessageDataWrapper) {
+
         producer.sendMessage(
             referenceId = context[context_key_reference] as String,
             event = context[context_key_producesEvent] as KafkaEvents,

@@ -34,7 +34,6 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
             log.error { "Unable to store message event: ${event.key.event} with eventId ${event.value.eventId} with referenceId ${event.value.referenceId} in database ${getEventsDatabase().database}!" }
         } else {
             io.launch {
-                delay(1000) // Give the database a few sec to update
                 readAllMessagesFor(event.value.referenceId, event.value.eventId, event.key.event)
             }
         }

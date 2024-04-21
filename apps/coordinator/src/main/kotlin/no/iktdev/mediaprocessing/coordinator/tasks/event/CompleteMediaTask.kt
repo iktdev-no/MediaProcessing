@@ -34,6 +34,8 @@ class CompleteMediaTask(@Autowired override var coordinator: Coordinator) : Task
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        super.onProcessEvents(event, events)
+
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val started = events.lastOrSuccessOf(EventMediaProcessStarted) ?: return null

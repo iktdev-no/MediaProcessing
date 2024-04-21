@@ -41,6 +41,8 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
 
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        super.onProcessEvents(event, events)
+
         log.info { "${event.referenceId} triggered by ${event.event}" }
         val desiredEvent = events.find { it.data is MediaProcessStarted } ?: return null
         return runBlocking { fileReadStreams(desiredEvent.data as MediaProcessStarted, desiredEvent.eventId) }

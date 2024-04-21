@@ -19,6 +19,8 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: Coordinator) : C
         get() = listOf(KafkaEvents.EventMediaParameterEncodeCreated)
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        super.onProcessEvents(event, events)
+
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterEncodeCreated) {

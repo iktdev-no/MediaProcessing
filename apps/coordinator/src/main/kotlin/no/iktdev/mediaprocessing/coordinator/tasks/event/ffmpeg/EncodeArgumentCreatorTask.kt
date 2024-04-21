@@ -41,6 +41,8 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
     }
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        super.onProcessEvents(event, events)
+
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val started = events.find { it.data is MediaProcessStarted }?.data as MediaProcessStarted
@@ -68,7 +70,6 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
 
 
         //val outDir = SharedConfig.outgoingContent.using(baseInfo.title)
-
         return getFfmpegVideoArguments(
             inputFile = inputFile.file,
             outFullName = videoInfo.fullName,

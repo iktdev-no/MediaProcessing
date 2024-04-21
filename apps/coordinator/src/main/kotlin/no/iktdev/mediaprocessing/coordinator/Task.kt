@@ -4,10 +4,12 @@ import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMe
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
+import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
 abstract class TaskCreator(coordinator: Coordinator):
     TaskCreatorImpl<Coordinator, PersistentMessage, PersistentEventBasedMessageListener>(coordinator) {
+
 
 
     override fun isPrerequisiteEventsOk(events: List<PersistentMessage>): Boolean {
@@ -37,6 +39,30 @@ abstract class TaskCreator(coordinator: Coordinator):
 
     override fun prerequisiteRequired(event: PersistentMessage): List<() -> Boolean> {
         return listOf()
+    }
+
+    /**
+     * Will always return null
+     */
+    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+        val referenceId = event.referenceId
+        val eventIds = events.filter { it.event in requiredEvents }.map { it.eventId }
+
+        val current = processedEvents[referenceId] ?: setOf()
+        current.toMutableSet().addAll(eventIds)
+        processedEvents[referenceId] = current
+
+        return null
+    }
+
+    override fun containsUnprocessedEvents(events: List<PersistentMessage>): Boolean {
+        val referenceId = events.firstOrNull()?.referenceId ?:return false
+        val preExistingEvents = processedEvents[referenceId]?: setOf()
+
+        val forwardedEvents = events.filter { it.event in requiredEvents }.map { it.eventId }
+        val newEvents = forwardedEvents.filter { it !in preExistingEvents }
+        return newEvents.isNotEmpty()
+
     }
 
 }
