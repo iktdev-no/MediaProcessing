@@ -46,7 +46,7 @@ abstract class TaskCreator(coordinator: Coordinator):
      */
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         val referenceId = event.referenceId
-        val eventIds = events.filter { it.event in requiredEvents }.map { it.eventId }
+        val eventIds = events.filter { it.event in requiredEvents + listensForEvents }.map { it.eventId }
 
         val current = processedEvents[referenceId] ?: setOf()
         current.toMutableSet().addAll(eventIds)
@@ -59,7 +59,7 @@ abstract class TaskCreator(coordinator: Coordinator):
         val referenceId = events.firstOrNull()?.referenceId ?:return false
         val preExistingEvents = processedEvents[referenceId]?: setOf()
 
-        val forwardedEvents = events.filter { it.event in requiredEvents }.map { it.eventId }
+        val forwardedEvents = events.filter { it.event in (requiredEvents + listensForEvents) }.map { it.eventId }
         val newEvents = forwardedEvents.filter { it !in preExistingEvents }
         return newEvents.isNotEmpty()
 
