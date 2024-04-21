@@ -181,14 +181,14 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
         }
     }
 
-    private class AudioArguments(
+    class AudioArguments(
         val audioStream: AudioStream,
         val allStreams: ParsedMediaStreams,
         val preference: AudioPreference
     ) {
         fun isAudioCodecEqual() = audioStream.codec_name.lowercase() == preference.codec.lowercase()
         private fun shouldUseEAC3(): Boolean {
-            return (preference.defaultToEAC3OnSurroundDetected && audioStream.channels > 2 && audioStream.codec_name.lowercase() != "eac3")
+            return (preference.defaultToEAC3OnSurroundDetected && audioStream.channels > 2 && audioStream.codec_name.lowercase() == "eac3")
         }
 
         fun getAudioArguments(): AudioArgumentsDto {
@@ -196,7 +196,11 @@ class EncodeArgumentCreatorTask(@Autowired override var coordinator: Coordinator
             val codecParams = if (shouldUseEAC3())
                 listOf("-c:a", "eac3")
             else if (!isAudioCodecEqual()) {
-                listOf("-c:a", preference.codec)
+                val codecSwap = mutableListOf("-c:a", preference.codec)
+                if (audioStream.channels > 2 && !preference.preserveChannels) {
+                    codecSwap.addAll(listOf("-ac", "2"))
+                }
+                codecSwap
             } else
                 listOf("-acodec", "copy")
             return AudioArgumentsDto(
