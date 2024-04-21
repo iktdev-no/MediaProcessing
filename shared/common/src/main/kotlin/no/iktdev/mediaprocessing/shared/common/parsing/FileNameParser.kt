@@ -1,5 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
+import org.apache.kafka.common.protocol.types.Field.Str
+
 class FileNameParser(val fileName: String) {
     var cleanedFileName: String
         private set
@@ -14,7 +16,6 @@ class FileNameParser(val fileName: String) {
         cleanedFileName = removeDot(cleanedFileName)
         cleanedFileName = removeExtraWhiteSpace(cleanedFileName)
         cleanedFileName = removeTrailingAndLeadingCharacters(cleanedFileName).trim()
-
     }
 
     fun guessDesiredFileName(): String {
@@ -54,6 +55,22 @@ class FileNameParser(val fileName: String) {
         }.trim('.', '-')
     }
 
+    fun guessSearchableTitle(): MutableList<String> {
+        var cleaned = removeBracketedText(fileName)
+        cleaned = keepParanthesesWithYear(cleaned)
+        cleaned = removeResolutionAndTrailing(cleaned)
+        cleaned = removeResolutionAndTags(cleaned)
+        cleaned = removeDot(cleaned)
+
+        val titles = mutableListOf<String>()
+        var ch = cleaned.split('-').firstOrNull() ?: cleaned
+        ch = removeExtraWhiteSpace(ch)
+        ch = ch.trim('.', ',', ' ')
+        titles.add(ch)
+
+        return titles
+    }
+
 
     /**
      * Modifies the input value and removes "[Text]"
@@ -87,6 +104,11 @@ class FileNameParser(val fileName: String) {
         return text
     }
 
+
+    fun keepParanthesesWithYear(text: String): String {
+        val regex = "\\((?!\\d{4}\\))(?>[^()]+|\\b)\\)"
+        return Regex(regex).replace(text, "")
+    }
 
     fun removeYear(text: String): String {
         val match = Regex("\\b\\d{4}\\W").find(text, 0)?.value
