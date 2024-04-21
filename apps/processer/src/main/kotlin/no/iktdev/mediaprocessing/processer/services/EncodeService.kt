@@ -164,7 +164,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
                 log.error { "Can't produce error message when the referenceId is not present" }
                 return
             }
-            log.info { "Encode failed for ${runner.referenceId}" }
+            log.info { "Encode failed for ${runner.referenceId}\n$errorMessage" }
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                 data = ProcesserEncodeWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
             )

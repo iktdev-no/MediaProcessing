@@ -10,7 +10,9 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import java.security.MessageDigest
 import java.time.LocalDateTime
+import kotlin.text.Charsets.UTF_8
 
 private val log = KotlinLogging.logger {}
 
@@ -110,8 +112,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
 
     fun getEventsUncompleted(): List<List<PersistentMessage>> {
         val identifiesAsCompleted = listOf(
-            /*KafkaEvents.EventRequestProcessCompleted,
-            KafkaEvents.EventMediaProcessCompleted,*/
             KafkaEvents.EventCollectAndStore
         )
         val all = getAllEventsGrouped()
@@ -153,6 +153,13 @@ class PersistentEventManager(private val dataSource: DataSource) {
 
     //region Database write
 
+    val digest = MessageDigest.getInstance("MD5")
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun getIntegrityOfData(data : String) : String {
+        return digest.digest(data.toByteArray(kotlin.text.Charsets.UTF_8))
+            .toHexString()
+    }
+
     /**
      * Stores the kafka event and its data in the database as PersistentMessage
      * @param event KafkaEvents
@@ -174,6 +181,7 @@ class PersistentEventManager(private val dataSource: DataSource) {
                 it[referenceId] = message.referenceId
                 it[eventId] = message.eventId
                 it[events.event] = event.event
+                it[integrity] = getIntegrityOfData(message.dataAsJson())
                 it[data] = message.dataAsJson()
             }
         }

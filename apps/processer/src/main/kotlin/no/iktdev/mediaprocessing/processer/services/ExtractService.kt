@@ -159,7 +159,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
                 log.error { "Can't produce error message when the referenceId is not present" }
                 return
             }
-            log.info { "Extract failed for ${runner.referenceId}" }
+            log.info { "Extract failed for ${runner.referenceId}\n$errorMessage" }
             producer.sendMessage(referenceId = runner.referenceId, event = producesEvent,
                 ProcesserExtractWorkPerformed(status = Status.ERROR, message = errorMessage, producedBy = serviceId, derivedFromEventId =  runner.eventId)
             )
