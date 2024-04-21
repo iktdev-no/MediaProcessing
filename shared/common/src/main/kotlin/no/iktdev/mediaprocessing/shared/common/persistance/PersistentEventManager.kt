@@ -142,7 +142,8 @@ class PersistentEventManager(private val dataSource: DataSource) {
     }
 
     fun isProcessEventClaimed(referenceId: String, eventId: String): Boolean {
-        return getProcessEventWith(referenceId, eventId)?.claimed ?: false
+        val info = getProcessEventWith(referenceId, eventId)
+        return info?.claimed ?: true && info?.consumed ?: true
     }
 
     fun isProcessEventCompleted(referenceId: String, eventId: String): Boolean {

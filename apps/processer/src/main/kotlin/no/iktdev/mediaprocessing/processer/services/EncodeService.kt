@@ -83,7 +83,8 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
 
     fun startEncode(event: PersistentProcessDataMessage) {
         val ffwrc = event.data as FfmpegWorkRequestCreated
-        File(ffwrc.outFile).parentFile.mkdirs()
+        val outFile = File(ffwrc.outFile)
+        outFile.parentFile.mkdirs()
         if (!logDir.exists()) {
             logDir.mkdirs()
         }
@@ -92,11 +93,13 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} encode" }
             runner = FfmpegWorker(event.referenceId, event.eventId, info = ffwrc, logDir = logDir, listener = ffmpegWorkerEvents )
-            if (File(ffwrc.outFile).exists() && ffwrc.arguments.firstOrNull() != "-y") {
-                ffmpegWorkerEvents.onError(event.referenceId, event.eventId, ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
-                // Setting consumed to prevent spamming
-                eventManager.setProcessEventCompleted(event.referenceId, event.eventId)
-                return
+            if (outFile.exists()) {
+                if (ffwrc.arguments.firstOrNull() != "-y") {
+                    ffmpegWorkerEvents.onError(event.referenceId, event.eventId, ffwrc, "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}")
+                    // Setting consumed to prevent spamming
+                    eventManager.setProcessEventCompleted(event.referenceId, event.eventId, Status.ERROR)
+                    return
+                }
             }
             runner?.runWithProgress()
 
@@ -196,7 +199,11 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
             outputFiles = listOf(info.outFile),
             progress = progress?.toProcessProgress()
         )
-        reporter.sendEncodeProgress(processerEventInfo)
+        try {
+            reporter.sendEncodeProgress(processerEventInfo)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 
