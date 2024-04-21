@@ -167,15 +167,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
      * @param message Kafka message object
      */
     fun setEvent(event: KafkaEvents, message: Message<*>): Boolean {
-        val existing = getEventsWith(message.referenceId)
-        val derivedId = message.data?.derivedFromEventId
-        if (derivedId != null) {
-            val isNewEventOrphan = existing.none { it.eventId == derivedId }
-            if (isNewEventOrphan) {
-                log.warn { "Message not saved! ${message.referenceId} with eventId(${message.eventId}) has derivedEventId($derivedId) which does not exist!" }
-                return false
-            }
-        }
 
         withTransaction(dataSource.database) {
             allEvents.insert {
@@ -186,6 +177,18 @@ class PersistentEventManager(private val dataSource: DataSource) {
                 it[data] = message.dataAsJson()
             }
         }
+
+        val existing = getEventsWith(message.referenceId)
+
+        val derivedId = message.data?.derivedFromEventId
+        if (derivedId != null) {
+            val isNewEventOrphan = existing.none { it.eventId == derivedId }
+            if (isNewEventOrphan) {
+                log.warn { "Message not saved! ${message.referenceId} with eventId(${message.eventId}) has derivedEventId($derivedId) which does not exist!" }
+                return false
+            }
+        }
+
 
         val exception = executeOrException(dataSource.database) {
             events.insert {
