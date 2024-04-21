@@ -65,6 +65,7 @@ class FfmpegWorker(
     }
 
     fun runWithProgress() {
+        log.info { "Starting ffmpeg ReferenceId: $referenceId, eventId $eventId for file ${info.outFile}" }
         val args = FfmpegWorkerArgumentsBuilder().using(info).buildWithProgress()
         job = scope.launch {
             execute(args)
