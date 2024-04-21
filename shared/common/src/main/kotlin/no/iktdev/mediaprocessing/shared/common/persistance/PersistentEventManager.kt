@@ -184,7 +184,7 @@ class PersistentEventManager(private val dataSource: DataSource) {
         if (derivedId != null) {
             val isNewEventOrphan = existing.none { it.eventId == derivedId }
             if (isNewEventOrphan) {
-                log.warn { "Message not saved! ${message.referenceId} with eventId(${message.eventId}) has derivedEventId($derivedId) which does not exist!" }
+                log.warn { "Message not saved! ${message.referenceId} with eventId(${message.eventId}) for event ${event.event} has derivedEventId($derivedId) which does not exist!" }
                 return false
             }
         }

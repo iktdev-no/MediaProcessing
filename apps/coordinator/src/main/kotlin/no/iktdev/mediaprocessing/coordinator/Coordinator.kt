@@ -145,7 +145,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     @Scheduled(fixedDelay = (5*6_0000))
     fun checkForWork() {
         if (isReady()) {
-            log.info { "Checking if there is any uncompleted event sets" }
+            log.info { "\n\nChecking if there is any uncompleted event sets\n\n" }
             readAllUncompletedMessagesInQueue()
         }
     }
