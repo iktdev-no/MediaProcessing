@@ -7,10 +7,7 @@ import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
-import no.iktdev.mediaprocessing.shared.common.persistance.events
+import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import no.iktdev.mediaprocessing.shared.common.toStoredDatabase
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
@@ -68,6 +65,7 @@ fun main(args: Array<String>) {
 
     val kafkaTables = listOf(
         events, // For kafka
+        allEvents
     )
 
 

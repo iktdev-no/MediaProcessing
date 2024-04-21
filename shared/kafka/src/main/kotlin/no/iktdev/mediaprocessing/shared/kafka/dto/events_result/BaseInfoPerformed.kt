@@ -10,6 +10,7 @@ data class BaseInfoPerformed(
     override val status: Status,
     val title: String,
     val sanitizedName: String,
+    val searchTitles: List<String> = emptyList<String>(),
     override val derivedFromEventId: String
 ) : MessageDataWrapper(status = status, derivedFromEventId = derivedFromEventId)
 

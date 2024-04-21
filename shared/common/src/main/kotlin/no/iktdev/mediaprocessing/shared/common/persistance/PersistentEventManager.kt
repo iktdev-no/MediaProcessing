@@ -184,6 +184,14 @@ class PersistentEventManager(private val dataSource: DataSource) {
                 it[integrity] = getIntegrityOfData(message.dataAsJson())
                 it[data] = message.dataAsJson()
             }
+
+            allEvents.insert {
+                it[referenceId] = message.referenceId
+                it[eventId] = message.eventId
+                it[events.event] = event.event
+                it[integrity] = getIntegrityOfData(message.dataAsJson())
+                it[data] = message.dataAsJson()
+            }
         }
         val success = if (exception != null) {
             if (exception.isExposedSqlException()) {

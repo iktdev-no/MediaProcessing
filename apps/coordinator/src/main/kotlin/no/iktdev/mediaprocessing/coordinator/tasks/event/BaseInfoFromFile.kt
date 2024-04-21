@@ -46,6 +46,7 @@ class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskC
                 Status.COMPLETED,
                 title = fileNameParser.guessDesiredTitle(),
                 sanitizedName = fileNameParser.guessDesiredFileName(),
+                searchTitles = fileNameParser.guessSearchableTitle(),
                 derivedFromEventId = eventId
             )
         } catch (e: Exception) {
