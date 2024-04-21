@@ -37,4 +37,8 @@ abstract class TaskCreator(coordinator: Coordinator) :
     override fun prerequisiteRequired(event: PersistentProcessDataMessage): List<() -> Boolean> {
         return listOf()
     }
+
+    override fun containsUnprocessedEvents(events: List<PersistentProcessDataMessage>): Boolean {
+        return true
+    }
 }
