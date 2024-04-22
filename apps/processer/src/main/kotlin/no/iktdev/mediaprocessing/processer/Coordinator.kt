@@ -89,8 +89,9 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         val messages = eventManager.getProcessEventsClaimable()
         io.launch {
             messages.forEach {
-                delay(1000)
-                createTasksBasedOnEventsAndPersistence(referenceId = it.referenceId, eventId = it.eventId, messages)
+                delay(500)
+                listeners.forwardBatchEventMessagesToListeners(listOf(it))
+                //createTasksBasedOnEventsAndPersistence(referenceId = it.referenceId, eventId = it.eventId, messages)
             }
         }
     }
