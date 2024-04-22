@@ -44,7 +44,7 @@ abstract class TaskCreator(coordinator: Coordinator):
     /**
      * Will always return null
      */
-    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+    open fun onProcessEventsAccepted(event: PersistentMessage, events: List<PersistentMessage>) {
         val referenceId = event.referenceId
         val eventIds = events.filter { it.event in requiredEvents + listensForEvents }.map { it.eventId }
 
@@ -52,7 +52,9 @@ abstract class TaskCreator(coordinator: Coordinator):
         current.toMutableSet().addAll(eventIds)
         processedEvents[referenceId] = current
 
-        return null
+        if (event.event == KafkaEvents.EventCollectAndStore) {
+            processedEvents.remove(referenceId)
+        }
     }
 
     override fun containsUnprocessedEvents(events: List<PersistentMessage>): Boolean {

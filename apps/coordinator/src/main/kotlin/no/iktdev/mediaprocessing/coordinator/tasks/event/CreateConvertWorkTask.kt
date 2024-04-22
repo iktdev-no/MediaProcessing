@@ -27,7 +27,7 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
         )
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        super.onProcessEvents(event, events)
+        super.onProcessEventsAccepted(event, events)
 
         log.info { "${event.referenceId} @ ${event.eventId} triggered by ${event.event}" }
 
