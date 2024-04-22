@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.processer.eventManager
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import java.io.File
 import java.time.Duration
+import java.util.UUID
 
 class FfmpegWorker(
     val referenceId: String,
@@ -65,7 +66,7 @@ class FfmpegWorker(
     }
 
     fun runWithProgress() {
-        log.info { "Starting ffmpeg ReferenceId: $referenceId, eventId $eventId for file ${info.outFile}" }
+        log.info { "Starting ffmpeg ReferenceId: $referenceId, eventId $eventId for file ${info.outFile}, debugId: ${UUID.randomUUID().toString()}" }
         val args = FfmpegWorkerArgumentsBuilder().using(info).buildWithProgress()
         job = scope.launch {
             execute(args)
