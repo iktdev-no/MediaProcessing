@@ -106,6 +106,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
 
 
         myEvents.forEach {
+            log.info { "Generating missing process event (${it.event.event}) for referenceId ${it.referenceId}," }
             eventManager.setProcessEvent(it.event, Message(
                 referenceId = it.referenceId,
                 eventId = it.eventId,

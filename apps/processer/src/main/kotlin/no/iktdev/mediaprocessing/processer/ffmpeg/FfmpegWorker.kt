@@ -59,6 +59,7 @@ class FfmpegWorker(
     }
 
     fun run() {
+        log.info { "Starting ffmpeg ReferenceId: $referenceId, eventId $eventId for file ${info.outFile}, debugId: ${UUID.randomUUID().toString()}" }
         val args = FfmpegWorkerArgumentsBuilder().using(info).build()
         job = scope.launch {
             execute(args)
