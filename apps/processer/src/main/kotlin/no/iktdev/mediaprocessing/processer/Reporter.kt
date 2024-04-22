@@ -22,7 +22,7 @@ class Reporter() {
             restTemplate.postForEntity(SharedConfig.uiUrl + "/encode/progress", progress, String::class.java)
             messageTemplate.convertAndSend("/topic/encode/progress", progress)
         } catch (e: Exception) {
-            log.error { e.message }
+            //log.error { e.message }
         }
     }
 
@@ -31,7 +31,7 @@ class Reporter() {
             restTemplate.postForEntity(SharedConfig.uiUrl + "/extract/progress", progress, String::class.java)
             messageTemplate.convertAndSend("/topic/extract/progress", progress)
         } catch (e: Exception) {
-            log.error { e.message }
+            //log.error { e.message }
         }
     }
 

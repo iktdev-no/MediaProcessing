@@ -59,7 +59,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
     }
 
     override fun onProcessEvents(event: PersistentProcessDataMessage, events: List<PersistentProcessDataMessage>): MessageDataWrapper? {
-        if (!requiredEvents.contains(event.event)) {
+        if (event.event !in requiredEvents) {
             return null
         }
         if (event.data !is FfmpegWorkRequestCreated) {

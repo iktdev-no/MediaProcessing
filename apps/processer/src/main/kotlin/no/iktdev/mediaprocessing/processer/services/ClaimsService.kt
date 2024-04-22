@@ -22,14 +22,18 @@ class ClaimsService() {
         expiredClaims.forEach {
             log.info { "Found event with expired claim: ${it.referenceId}::${it.eventId}::${it.event}" }
         }
-        expiredClaims.forEach {
+        val released = expiredClaims.mapNotNull {
             val result = eventManager.deleteProcessEventClaim(referenceId = it.referenceId, eventId = it.eventId)
             if (result) {
                 log.info { "Released claim on ${it.referenceId}::${it.eventId}::${it.event}" }
             } else {
                 log.error { "Failed to release claim on ${it.referenceId}::${it.eventId}::${it.event}" }
             }
+            it
         }
-        coordinator.readAllAvailableInQueue()
+        released.forEach {
+            log.info { "Sending released ${it.referenceId} ${it.event} into queue" }
+            coordinator.readAllMessagesFor(it.referenceId, it.eventId)
+        }
     }
 }
