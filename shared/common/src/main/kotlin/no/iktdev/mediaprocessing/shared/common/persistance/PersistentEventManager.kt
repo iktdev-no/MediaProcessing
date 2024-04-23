@@ -202,12 +202,16 @@ class PersistentEventManager(private val dataSource: DataSource) {
         val success = if (exception != null) {
             if (exception.isExposedSqlException()) {
                 if ((exception as ExposedSQLException).isCausedByDuplicateError()) {
-                    log.info { "Error is of SQLIntegrityConstraintViolationException" }
+                    log.debug { "Error is of SQLIntegrityConstraintViolationException" }
+                    log.error { exception.message }
+                    exception.printStackTrace()
                 } else {
-                    log.info { "Error code is: ${exception.errorCode}" }
+                    log.debug { "Error code is: ${exception.errorCode}" }
+                    log.error { exception.message }
                     exception.printStackTrace()
                 }
             } else {
+                log.error { exception.message }
                 exception.printStackTrace()
             }
             false

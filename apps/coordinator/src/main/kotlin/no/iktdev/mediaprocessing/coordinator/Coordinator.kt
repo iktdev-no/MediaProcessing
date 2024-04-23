@@ -31,7 +31,7 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
     override fun onMessageReceived(event: DeserializedConsumerRecord<KafkaEvents, Message<out MessageDataWrapper>>) {
         val success = eventManager.setEvent(event.key, event.value)
         if (!success) {
-            log.error { "Unable to store message event: ${event.key.event} with eventId ${event.value.eventId} with referenceId ${event.value.referenceId} in database ${getEventsDatabase().database}!" }
+            log.error { "Failed to store message event\nReferenceId: ${event.value.referenceId}\n\tEventId: ${event.value.eventId}\n\tEvent: ${event.key.event}\n\nData:\n${event.value.data}" }
         } else {
             io.launch {
                 readAllMessagesFor(event.value.referenceId, event.value.eventId, event.key.event)
