@@ -41,32 +41,41 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     private val logger = KotlinLogging.logger {}
     val watcherChannel = SharedConfig.incomingContent.asWatchChannel()
     val queue = FileWatcherQueue()
-    val io = Coroutines.io()
+    final val io = Coroutines.io()
 
-    init {
-        io.launch {
-            watcherChannel.consumeEach {
-                if (it.file == SharedConfig.incomingContent) {
-                    logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
-                } else {
-                    logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
-                }
-                try {
-                    when (it.kind) {
-                        Deleted -> removeFile(it.file)
-                        Initialized -> { /* Do nothing */ }
-                        else -> {
-                            val added = addFile(it.file)
-                            if (!added) {
-                                logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
-                            }
+    suspend fun startWatcher() {
+        log.info { "Starting Watcher" }
+        watcherChannel.consumeEach {
+            if (it.file == SharedConfig.incomingContent) {
+                logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
+            } else {
+                logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
+            }
+            try {
+                when (it.kind) {
+                    Deleted -> removeFile(it.file)
+                    Initialized -> { /* Do nothing */ }
+                    else -> {
+                        val added = addFile(it.file)
+                        if (!added) {
+                            logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
                         }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
+        log.info { "Reached end of watcherChannel" }
+    }
+
+    final fun runCoroutine() {
+        io.launch { startWatcher() }
+            .invokeOnCompletion { runCoroutine() }
+    }
+
+    init {
+        runCoroutine()
     }
 
     private fun addFile(file: File): Boolean {

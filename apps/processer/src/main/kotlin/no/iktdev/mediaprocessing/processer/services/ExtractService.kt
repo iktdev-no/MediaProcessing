@@ -188,6 +188,7 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
 
     fun clearWorker() {
         this.runner = null
+        coordinator.readNextAvailableMessageWithEvent(KafkaEvents.EventWorkExtractCreated)
     }
 
     @PreDestroy

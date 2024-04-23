@@ -16,6 +16,10 @@ class ClaimsService() {
     @Autowired
     lateinit var coordinator: Coordinator
 
+
+    /**
+     * If this serivce calls for readback all on the coordinator, it will cause a full on crash, as it
+     */
     @Scheduled(fixedDelay = (300_000))
     fun validateClaims() {
         val expiredClaims = eventManager.getProcessEventsWithExpiredClaim()
@@ -31,9 +35,9 @@ class ClaimsService() {
             }
             it
         }
-        released.forEach {
+        /*released.forEach {
             log.info { "Sending released ${it.referenceId} ${it.event} into queue" }
             coordinator.readAllMessagesFor(it.referenceId, it.eventId)
-        }
+        }*/
     }
 }

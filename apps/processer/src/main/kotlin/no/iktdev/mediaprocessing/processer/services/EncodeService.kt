@@ -209,6 +209,7 @@ class EncodeService(@Autowired override var coordinator: Coordinator, @Autowired
 
     fun clearWorker() {
         this.runner = null
+        coordinator.readNextAvailableMessageWithEvent(KafkaEvents.EventWorkEncodeCreated)
     }
 
     @PreDestroy

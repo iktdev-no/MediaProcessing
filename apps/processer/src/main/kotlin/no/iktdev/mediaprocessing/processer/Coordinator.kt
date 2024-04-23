@@ -85,7 +85,7 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
         }
     }
 
-    fun readAllAvailableInQueue() {
+    private fun readAllAvailableInQueue() {
         val messages = eventManager.getProcessEventsClaimable()
         io.launch {
             messages.forEach {
@@ -117,7 +117,16 @@ class Coordinator(): CoordinatorBase<PersistentProcessDataMessage, PersistentEve
 
     }
 
-    fun readAllMessagesFor(referenceId: String, eventId: String) {
+    /**
+     * If we get double events at the same time, this would be the case
+     */
+    fun readNextAvailableMessageWithEvent(kafkaEvents: KafkaEvents) {
+        val messages = eventManager.getProcessEventsClaimable().firstOrNull { it.event == kafkaEvents }?.let {
+            readAllMessagesFor(referenceId = it.referenceId, eventId = it.eventId)
+        }
+    }
+
+    private fun readAllMessagesFor(referenceId: String, eventId: String) {
         val messages = eventManager.getProcessEventsClaimable()
         createTasksBasedOnEventsAndPersistence(referenceId, eventId, messages)
     }
