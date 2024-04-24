@@ -16,7 +16,6 @@ object events: IntIdTable() {
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
 
     init {
-        uniqueIndex(referenceId, event, integrity)
-        uniqueIndex(referenceId, eventId, event)
+        uniqueIndex(referenceId, eventId, event, integrity)
     }
 }
