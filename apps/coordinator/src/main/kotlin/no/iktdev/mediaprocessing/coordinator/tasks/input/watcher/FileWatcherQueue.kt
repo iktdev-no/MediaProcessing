@@ -4,6 +4,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.mediaprocessing.coordinator.defaultCoroutine
 import no.iktdev.mediaprocessing.shared.common.isFileAvailable
 import java.io.File
 import java.util.UUID
@@ -24,7 +25,7 @@ class FileWatcherQueue {
         fileChannel.trySend(PendingFile(file = file))
 
         // Coroutine to process the file and remove it from the queue when accessible
-        Coroutines.default().launch {
+        defaultCoroutine.launch {
             while (true) {
                 delay(500)
                 val currentFile = fileChannel.receive()
@@ -42,16 +43,13 @@ class FileWatcherQueue {
     }
 
     fun removeFromQueue(file: File, onFileRemoved: (PendingFile) -> Unit) {
-        if (file.isFile) {
-            val removedFile = fileChannel.findAndRemove { it.file == file }
-            removedFile.let {
-                it.forEach { file -> onFileRemoved(file) }
-            }
-        } else {
-            val removeFiles = fileChannel.findAndRemove { it.file.parentFile == file }
-            removeFiles.let {
-                it.forEach { file -> onFileRemoved(file) }
-            }
+        val currentItems = fileChannel.list()
+        val toRemove = currentItems.filter {
+            if (it.file.isDirectory) it.file.name == file.name else it.file.name == file.name && it.file.parent == file.parent
+        }
+
+        toRemove.let {
+            it.forEach { file -> onFileRemoved(file) }
         }
     }
 
@@ -71,6 +69,16 @@ class FileWatcherQueue {
             trySend(item).isSuccess
         }
         return forRemoved
+    }
+
+    fun <T> Channel<T>.list(): List<T> {
+        val items = mutableListOf<T>()
+        while (true) {
+            val item = tryReceive().getOrNull() ?: break
+            items.add(item)
+            trySend(item).isSuccess
+        }
+        return items
     }
 
 

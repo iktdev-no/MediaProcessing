@@ -3,6 +3,8 @@ package no.iktdev.mediaprocessing.coordinator
 
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.exfl.coroutines.CoroutinesDefault
+import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
@@ -29,6 +31,8 @@ class CoordinatorApplication {
 
 private var context: ApplicationContext? = null
 private lateinit var storeDatabase: MySqlDataSource
+val ioCoroutine = CoroutinesIO()
+val defaultCoroutine = CoroutinesDefault()
 
 @Suppress("unused")
 fun getContext(): ApplicationContext? {
@@ -47,7 +51,12 @@ fun getEventsDatabase(): MySqlDataSource {
 lateinit var eventManager: PersistentEventManager
 
 fun main(args: Array<String>) {
-    Coroutines.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
+    ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
+        override fun onUpdated(value: Throwable) {
+            value.printStackTrace()
+        }
+    })
+    defaultCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
             value.printStackTrace()
         }

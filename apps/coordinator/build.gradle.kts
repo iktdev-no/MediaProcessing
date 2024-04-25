@@ -36,7 +36,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
 
-    implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
+    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha27")
 
 

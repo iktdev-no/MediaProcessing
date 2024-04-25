@@ -7,8 +7,8 @@ import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.coordinator.log
+import no.iktdev.exfl.coroutines.CoroutinesIO
+import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
@@ -41,41 +41,34 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     private val logger = KotlinLogging.logger {}
     val watcherChannel = SharedConfig.incomingContent.asWatchChannel()
     val queue = FileWatcherQueue()
-    final val io = Coroutines.io()
 
-    suspend fun startWatcher() {
-        log.info { "Starting Watcher" }
-        watcherChannel.consumeEach {
-            if (it.file == SharedConfig.incomingContent) {
-                logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
-            } else {
-                logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
-            }
-            try {
-                when (it.kind) {
-                    Deleted -> removeFile(it.file)
-                    Initialized -> { /* Do nothing */ }
-                    else -> {
-                        val added = addFile(it.file)
-                        if (!added) {
-                            logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        log.info { "Reached end of watcherChannel" }
-    }
-
-    final fun runCoroutine() {
-        io.launch { startWatcher() }
-            .invokeOnCompletion { runCoroutine() }
-    }
 
     init {
-        runCoroutine()
+        ioCoroutine.launch {
+            log.info { "Starting Watcher" }
+            watcherChannel.consumeEach {
+                if (it.file == SharedConfig.incomingContent) {
+                    logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
+                } else {
+                    logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
+                }
+                try {
+                    when (it.kind) {
+                        Deleted -> removeFile(it.file)
+                        Initialized -> { /* Do nothing */ }
+                        else -> {
+                            val added = addFile(it.file)
+                            if (!added) {
+                                logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            log.info { "Reached end of watcherChannel" }
+        }
     }
 
     private fun addFile(file: File): Boolean {
@@ -95,6 +88,7 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     }
 
     private fun removeFile(file: File) {
+        log.info { "Removing file from Queue ${file.name}" }
         queue.removeFromQueue(file, this@InputDirectoryWatcher::onFileRemoved)
     }
 
