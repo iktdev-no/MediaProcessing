@@ -4,7 +4,7 @@ import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.eventManager
@@ -20,7 +20,7 @@ class FfmpegWorker(
     val listener: FfmpegWorkerEvents,
     val logDir: File
 ) {
-    private val scope = Coroutines.io()
+    private val scope = CoroutineScope(Dispatchers.IO + Job())
     private var job: Job? = null
 
     fun isWorking(): Boolean {

@@ -1,16 +1,12 @@
 package no.iktdev.mediaprocessing.shared.common.runner
 
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 
 open class Runner(open val executable: String, val daemonInterface: IRunner) {
     private val logger = KotlinLogging.logger {}
 
-    val scope = Coroutines.io()
+    val scope = CoroutineScope(Dispatchers.IO + Job())
     var job: Job? = null
     var executor: com.github.pgreze.process.ProcessResult? = null
     open suspend fun run(parameters: List<String>): Int {

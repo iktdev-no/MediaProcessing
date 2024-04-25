@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.coordinator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage

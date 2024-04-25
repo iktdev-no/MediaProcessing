@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.processer.services
 
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.processer.*
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker
@@ -31,8 +30,6 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
 
 
     override val producesEvent = KafkaEvents.EventWorkExtractPerformed
-
-    val scope = Coroutines.io()
 
     private var runner: FfmpegWorker? = null
 
@@ -193,7 +190,6 @@ class ExtractService(@Autowired override var coordinator: Coordinator, @Autowire
 
     @PreDestroy
     fun shutdown() {
-        scope.cancel()
         runner?.cancel("Stopping application")
     }
 }

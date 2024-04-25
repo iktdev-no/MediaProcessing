@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.converter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.converter.coordination.PersistentEventProcessBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service
 @EnableScheduling
 @Service
 class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, PersistentEventProcessBasedMessageListener>() {
-    val io = Coroutines.io()
 
     private val log = KotlinLogging.logger {}
 
@@ -51,7 +49,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
             if (!success) {
                 log.error { "Unable to store message event: ${event.key.event} with eventId ${event.value.eventId} with referenceId ${event.value.referenceId} in database ${getEventsDatabase().database}!" }
             } else {
-                io.launch {
+                ioCoroutine.launch {
                     delay(500)
                     readAllMessagesFor(event.value.referenceId, event.value.eventId)
                 }
@@ -65,7 +63,7 @@ class ConverterCoordinator() : CoordinatorBase<PersistentProcessDataMessage, Per
 
     fun readAllInQueue() {
         val messages = eventManager.getProcessEventsClaimable()// persistentReader.getAvailableProcessEvents()
-        io.launch {
+        ioCoroutine.launch {
             messages.forEach {
                 delay(1000)
                 createTasksBasedOnEventsAndPersistence(referenceId = it.referenceId, eventId = it.eventId, messages)

@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.processer.services
 
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.processer.*
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegWorker

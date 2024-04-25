@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
@@ -12,7 +11,6 @@ import javax.annotation.PostConstruct
 @Service
 @Import(DefaultMessageListener::class)
 abstract class ProcessingService() {
-    val io = Coroutines.io()
 
     @Autowired
     lateinit var producer: CoordinatorProducer

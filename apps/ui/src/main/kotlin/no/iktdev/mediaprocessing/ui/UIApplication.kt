@@ -2,7 +2,8 @@ package no.iktdev.mediaprocessing.ui
 
 
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.exfl.coroutines.CoroutinesDefault
+import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.ObservableMap
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.exfl.observable.observableMapOf
@@ -19,6 +20,8 @@ import java.util.concurrent.CountDownLatch
 
 
 private val logger = KotlinLogging.logger {}
+val ioCoroutine = CoroutinesIO()
+val defaultCoroutine = CoroutinesDefault()
 
 @SpringBootApplication
 class UIApplication {
@@ -51,10 +54,14 @@ fun main(args: Array<String>) {
     persistentWriter = PersistentDataStore(eventsDatabase)
 
 
-    Coroutines.addListener(object : Observables.ObservableValue.ValueListener<Throwable> {
+    ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
-            logger.error { "Received error: ${value.message}" }
-            value.cause?.printStackTrace()
+            value.printStackTrace()
+        }
+    })
+    defaultCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
+        override fun onUpdated(value: Throwable) {
+            value.printStackTrace()
         }
     })
 

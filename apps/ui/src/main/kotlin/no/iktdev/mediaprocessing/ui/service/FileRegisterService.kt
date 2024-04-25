@@ -4,10 +4,10 @@ import dev.vishna.watchservice.KWatchEvent
 import dev.vishna.watchservice.asWatchChannel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.launch
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.ui.explorer.ExplorerCore
 import no.iktdev.mediaprocessing.ui.fileRegister
+import no.iktdev.mediaprocessing.ui.ioCoroutine
 import org.springframework.stereotype.Service
 import java.io.File
 import java.math.BigInteger
@@ -38,10 +38,7 @@ class FileRegisterService {
     }
 
     init {
-        Coroutines.io().launch {
-
-        }
-        Coroutines.io().launch {
+        ioCoroutine.launch {
             watcherChannel.consumeEach {
                 when (it.kind) {
                     KWatchEvent.Kind.Created, KWatchEvent.Kind.Modified, KWatchEvent.Kind.Initialized  -> {

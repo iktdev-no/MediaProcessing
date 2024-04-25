@@ -4,10 +4,7 @@ import dev.vishna.watchservice.KWatchEvent.Kind.Deleted
 import dev.vishna.watchservice.KWatchEvent.Kind.Initialized
 import dev.vishna.watchservice.asWatchChannel
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
-import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile

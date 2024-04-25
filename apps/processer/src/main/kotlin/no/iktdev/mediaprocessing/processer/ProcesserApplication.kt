@@ -1,6 +1,9 @@
 package no.iktdev.mediaprocessing.processer
 
 import mu.KotlinLogging
+import no.iktdev.exfl.coroutines.CoroutinesDefault
+import no.iktdev.exfl.coroutines.CoroutinesIO
+import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
@@ -16,7 +19,8 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 
 private val logger = KotlinLogging.logger {}
-
+val ioCoroutine = CoroutinesIO()
+val defaultCoroutine = CoroutinesDefault()
 @SpringBootApplication
 class ProcesserApplication {
 }
@@ -30,6 +34,18 @@ lateinit var eventManager: PersistentEventManager
 
 
 fun main(args: Array<String>) {
+
+    ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
+        override fun onUpdated(value: Throwable) {
+            value.printStackTrace()
+        }
+    })
+    defaultCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
+        override fun onUpdated(value: Throwable) {
+            value.printStackTrace()
+        }
+    })
+
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
     eventsDatabase.createDatabase()
     eventsDatabase.createTables(processerEvents)

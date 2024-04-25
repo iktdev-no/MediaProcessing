@@ -36,7 +36,7 @@ dependencies {
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
 
-    implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
+    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation(project(mapOf("path" to ":shared")))
     implementation(project(mapOf("path" to ":shared:common")))
     implementation(project(mapOf("path" to ":shared:contract")))

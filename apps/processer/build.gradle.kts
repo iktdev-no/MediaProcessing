@@ -41,7 +41,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
 
-    implementation("no.iktdev:exfl:0.0.13-SNAPSHOT")
+    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")

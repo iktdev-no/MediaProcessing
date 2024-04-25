@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.shared.common
 
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
+import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.common.tasks.EventBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
 abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
+    val defaultCoroutine = CoroutinesDefault()
     private var ready: Boolean = false
     fun isReady() = ready
     private val log = KotlinLogging.logger {}
@@ -57,7 +58,7 @@ abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
 
     @PostConstruct
     fun onInitializationCompleted() {
-        Coroutines.default().launch {
+        defaultCoroutine.launch {
             while (!isAllServicesRegistered()) {
                 log.info { "Waiting for mandatory services to start" }
                 delay(1000)

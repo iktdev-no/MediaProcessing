@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.coordinator
 
 
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.Coroutines
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
