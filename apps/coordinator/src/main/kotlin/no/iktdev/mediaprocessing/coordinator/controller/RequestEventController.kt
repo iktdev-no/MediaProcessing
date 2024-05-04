@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.controller
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.contract.dto.ConvertRequest
+import no.iktdev.mediaprocessing.shared.contract.dto.EventRequest
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -21,49 +21,58 @@ class RequestEventController(@Autowired var coordinator: Coordinator) {
 
     @PostMapping("/convert")
     @ResponseStatus(HttpStatus.OK)
-    fun requestConvert(@RequestBody convert: ConvertRequest): ResponseEntity<String> {
+    fun requestConvert(@RequestBody payload: String): ResponseEntity<String> {
+        var convert: EventRequest? = null
+        var referenceId: String?
         try {
+            convert = Gson().fromJson(payload, EventRequest::class.java)
             val file = File(convert.file)
             if (!file.exists()) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(convert.file)
             }
-            val referenceId = coordinator.startProcess(file, ProcessType.MANUAL, listOf(StartOperationEvents.CONVERT))
+            referenceId = coordinator.startProcess(file, ProcessType.FLOW, listOf(StartOperationEvents.CONVERT)).toString()
 
         } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Gson().toJson(convert))
         }
-        return ResponseEntity.ok(null)
+        return ResponseEntity.ok(referenceId)
     }
 
     @PostMapping("/extract")
     @ResponseStatus(HttpStatus.OK)
-    fun requestExtract(@RequestBody selectedFile: String): ResponseEntity<String> {
+    fun requestExtract(@RequestBody payload: String): ResponseEntity<String> {
+        var request: EventRequest? = null
+        var referenceId: String?
         try {
-            val file = File(selectedFile)
+            request = Gson().fromJson(payload, EventRequest::class.java)
+            val file = File(request.file)
             if (!file.exists()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(selectedFile)
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(payload)
             }
-            coordinator.startProcess(file, ProcessType.MANUAL, listOf(StartOperationEvents.EXTRACT))
+            referenceId = coordinator.startProcess(file, ProcessType.MANUAL, listOf(StartOperationEvents.EXTRACT)).toString()
 
         } catch (e: Exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(selectedFile)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(payload)
         }
-        return ResponseEntity.ok(null)
+        return ResponseEntity.ok(referenceId)
     }
 
     @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    fun requestAll(@RequestBody selectedFile: String): ResponseEntity<String> {
+    fun requestAll(@RequestBody payload: String): ResponseEntity<String> {
+        var request: EventRequest? = null
+        var referenceId: String?
         try {
-            val file = File(selectedFile)
+            request = Gson().fromJson(payload, EventRequest::class.java)
+            val file = File(request.file)
             if (!file.exists()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(selectedFile)
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(payload)
             }
-            coordinator.startProcess(file, type = ProcessType.MANUAL)
+            referenceId = coordinator.startProcess(file, type = ProcessType.MANUAL).toString()
 
         } catch (e: Exception) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(selectedFile)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(payload)
         }
-        return ResponseEntity.ok(null)
+        return ResponseEntity.ok(referenceId)
     }
 }
