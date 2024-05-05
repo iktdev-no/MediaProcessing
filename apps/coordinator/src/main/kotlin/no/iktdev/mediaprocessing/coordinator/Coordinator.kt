@@ -70,7 +70,8 @@ class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMes
         val processStartEvent = MediaProcessStarted(
             status = Status.COMPLETED,
             file = file.absolutePath,
-            type = type
+            type = type,
+            operations = operations
         )
         producer.sendMessage(UUID.randomUUID().toString(), KafkaEvents.EventMediaProcessStarted, processStartEvent)
         return referenceId
