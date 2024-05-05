@@ -24,12 +24,8 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EventWorkConvertCreated
 
-    override val requiredEvents: List<KafkaEvents>
-        get() = listOf(
-            KafkaEvents.EventWorkExtractCreated
-        )
     override val listensForEvents: List<KafkaEvents>
-        get() = listOf(KafkaEvents.EventMediaProcessStarted)
+        get() = listOf(KafkaEvents.EventMediaProcessStarted, KafkaEvents.EventWorkExtractCreated)
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         super.onProcessEventsAccepted(event, events)
