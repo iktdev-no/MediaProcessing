@@ -17,6 +17,10 @@ data class PersistentMessage(
     val created: LocalDateTime
 )
 
+fun List<PersistentMessage>.lastOf(event: KafkaEvents): PersistentMessage? {
+    return this.lastOrNull { it.event == event && it.isSuccess() }
+}
+
 
 fun PersistentMessage.isOfEvent(event: KafkaEvents): Boolean {
     return this.event == event

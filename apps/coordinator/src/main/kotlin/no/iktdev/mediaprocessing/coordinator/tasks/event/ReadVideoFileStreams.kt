@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.runner.CodeToOutput
 import no.iktdev.mediaprocessing.shared.common.runner.getOutputUsing
+import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
@@ -23,7 +24,7 @@ import java.io.File
 @Service
 class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
-
+    val requiredOperations = listOf(StartOperationEvents.ENCODE, StartOperationEvents.EXTRACT)
 
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EventMediaReadStreamPerformed
@@ -42,10 +43,14 @@ class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : T
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         super.onProcessEventsAccepted(event, events)
-
         log.info { "${event.referenceId} triggered by ${event.event}" }
         val desiredEvent = events.find { it.data is MediaProcessStarted } ?: return null
-        return runBlocking { fileReadStreams(desiredEvent.data as MediaProcessStarted, desiredEvent.eventId) }
+        val data = desiredEvent.data as MediaProcessStarted
+        if (!data.operations.any { it in requiredOperations }) {
+            log.info { "${event.referenceId} does not contain a operation in ${requiredOperations.joinToString(",") { it.name }}" }
+            return null
+        }
+        return runBlocking { fileReadStreams(data, desiredEvent.eventId) }
     }
 
     suspend fun fileReadStreams(started: MediaProcessStarted, eventId: String): MessageDataWrapper {

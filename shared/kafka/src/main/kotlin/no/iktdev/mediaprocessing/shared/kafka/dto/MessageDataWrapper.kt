@@ -7,6 +7,15 @@ abstract class MessageDataWrapper(
     @Transient open val derivedFromEventId: String? = null
 )
 
+@Suppress("UNCHECKED_CAST")
+fun <T> MessageDataWrapper.az(): T? {
+    return try {
+        this as T
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
 
 
 data class SimpleMessageData(

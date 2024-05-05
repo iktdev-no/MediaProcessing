@@ -21,3 +21,7 @@ enum class StartOperationEvents {
     EXTRACT,
     CONVERT
 }
+
+fun List<StartOperationEvents>.isOnly(expected: StartOperationEvents): Boolean {
+    return this.size == 1 && this.firstOrNull { it == expected } != null
+}

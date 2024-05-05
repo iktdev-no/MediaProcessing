@@ -6,6 +6,7 @@ import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.persistance.isOfEvent
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
@@ -42,7 +43,8 @@ class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : 
 
         log.info { "${event.referenceId} triggered by ${event.event}" }
         val desiredEvent = events.lastOrSuccessOf(KafkaEvents.EventMediaReadStreamPerformed) ?: return null
-        return parseStreams(desiredEvent.data as ReaderPerformed, desiredEvent.eventId)
+        val data = desiredEvent.data as ReaderPerformed
+        return parseStreams(data, desiredEvent.eventId)
     }
 
     fun parseStreams(data: ReaderPerformed, eventId: String): MessageDataWrapper {

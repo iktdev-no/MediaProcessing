@@ -20,6 +20,8 @@ repositories {
     }
 }
 
+val exposedVersion = "0.44.0"
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
@@ -35,6 +37,11 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+    implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation(project(mapOf("path" to ":shared")))
