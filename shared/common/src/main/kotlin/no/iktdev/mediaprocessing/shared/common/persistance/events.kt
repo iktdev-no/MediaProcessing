@@ -11,11 +11,10 @@ object events: IntIdTable() {
     val eventId: Column<String> = varchar("eventId", 50)
     val event: Column<String> = varchar("event",100)
     val data: Column<String> = text("data")
-    val integrity: Column<String> = varchar("integrity", 100)
     //val success: Column<Boolean> = bool("success").default(false)
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
 
     init {
-        uniqueIndex(referenceId, eventId, event, integrity)
+        uniqueIndex(referenceId, eventId, event)
     }
 }
