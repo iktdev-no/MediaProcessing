@@ -173,7 +173,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
                 it[referenceId] = message.referenceId
                 it[eventId] = message.eventId
                 it[events.event] = event.event
-                it[integrity] = getIntegrityOfData(message.dataAsJson())
                 it[data] = message.dataAsJson()
             }
         }
@@ -195,7 +194,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
                 it[referenceId] = message.referenceId
                 it[eventId] = message.eventId
                 it[events.event] = event.event
-                it[integrity] = getIntegrityOfData(message.dataAsJson())
                 it[data] = message.dataAsJson()
             }
         }

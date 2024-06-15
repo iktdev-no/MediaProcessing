@@ -36,4 +36,51 @@ class FileNameParserTest {
 
     }
 
+    @Test
+    fun movieName() {
+        val inName = "Wicket.Wicker.Potato.4.2023.UHD.BluRay.2160p"
+        val parser = FileNameParser(inName)
+
+        val title = parser.guessDesiredTitle()
+        val result = parser.guessDesiredFileName()
+
+        assertThat(title).isEqualTo("Wicket Wicker Potato 4")
+        assertThat(result).isEqualTo("Wicket Wicker Potato 4")
+
+    }
+
+    @Test
+    fun movieName2() {
+        val inName = "Potato-Pass Movie - Skinke"
+        val parser = FileNameParser(inName)
+
+        val title = parser.guessDesiredTitle()
+        val result = parser.guessDesiredFileName()
+
+        assertThat(title).isEqualTo("Potato-Pass Movie")
+        assertThat(result).isEqualTo("Potato-Pass Movie - Skinke")
+
+    }
+
+    @Test
+    fun findTitleWithYear() {
+        val input = "Dette er (en) tekst med (flere) paranteser som (potet) inneholder (år) som (2024) (2025).";
+        val result = FileNameParser(input).guessSearchableTitle()
+        assertThat(result).isEqualTo("Dette er tekst med paranteser som inneholder som (2024) (2025)")
+    }
+
+    @Test
+    fun findSearchableTitle() {
+        val input = "[FANCY] Urusei Yatsura (2022) - 36 [1080p HEVC]"
+        val result = FileNameParser(input).guessSearchableTitle()
+        assertThat(result.first()).isEqualTo("Urusei Yatsura (2022)")
+    }
+
+    @Test
+    fun findSearchableTitle2() {
+        val input = "[FANCY] Urusei Yatsura - 36 [1080p HEVC]"
+        val result = FileNameParser(input).guessSearchableTitle()
+        assertThat(result.first()).isEqualTo("Urusei Yatsura")
+    }
+
 }
