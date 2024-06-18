@@ -114,6 +114,12 @@ class MessageHandlerThread(threading.Thread):
 
 
         searchableTitles: List[str] = mediaEvent.data["searchTitles"]
+        searchableTitles.extend([
+            mediaEvent.data["title"],
+            mediaEvent.data["sanitizedName"]
+        ])
+
+
         joinedTitles = ", ".join(searchableTitles)
         logger.info("Searching for %s", joinedTitles)
         result: Metadata | None = self.__getMetadata(searchableTitles)
