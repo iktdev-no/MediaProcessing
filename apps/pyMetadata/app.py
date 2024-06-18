@@ -7,19 +7,19 @@ import uuid
 import threading
 import json
 import time
-from clazz.shared import ConsumerRecord, MediaEvent, decode_key, decode_value, suppress_ignore, consume_on_key
+from .clazz.shared import ConsumerRecord, MediaEvent, decode_key, decode_value, suppress_ignore, consume_on_key
 from fuzzywuzzy import fuzz
 
-from algo.AdvancedMatcher import AdvancedMatcher
-from algo.SimpleMatcher import SimpleMatcher
-from algo.PrefixMatcher import PrefixMatcher
-from clazz.KafkaMessageSchema import KafkaMessage, MessageDataWrapper
-from clazz.Metadata import Metadata
+from .algo.AdvancedMatcher import AdvancedMatcher
+from .algo.SimpleMatcher import SimpleMatcher
+from .algo.PrefixMatcher import PrefixMatcher
+from .clazz.KafkaMessageSchema import KafkaMessage, MessageDataWrapper
+from .clazz.Metadata import Metadata
 from kafka import KafkaConsumer, KafkaProducer
 
-from sources.anii import Anii
-from sources.imdb import Imdb
-from sources.mal import Mal
+from .sources.anii import Anii
+from .sources.imdb import Imdb
+from .sources.mal import Mal
 
 # Konfigurer Kafka-forbindelsen
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
