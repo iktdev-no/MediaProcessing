@@ -7,7 +7,7 @@ import uuid
 import threading
 import json
 import time
-from shared import ConsumerRecord, MediaEvent, decode_key, decode_value, suppress_ignore, consume_on_key
+from clazz.shared import ConsumerRecord, MediaEvent, decode_key, decode_value, suppress_ignore, consume_on_key
 from fuzzywuzzy import fuzz
 
 from algo.AdvancedMatcher import AdvancedMatcher
