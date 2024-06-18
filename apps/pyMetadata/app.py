@@ -138,10 +138,7 @@ class MessageHandlerThread(threading.Thread):
 
         producerMessage = KafkaMessage(referenceId=mediaEvent.referenceId, data=messageData).to_json()
 
-        # Serialiser resultatet til JSON som strenger
-        result_json = json.dumps(producerMessage)
-
-        logger.info("<== Outgoing message: %s \n%s", self.producerMessageKey, result_json)
+        logger.info("<== Outgoing message: %s \n%s", self.producerMessageKey, producerMessage)
 
         # Send resultatet tilbake ved hjelp av Kafka-producer
         producer = KafkaProducer(
@@ -149,7 +146,7 @@ class MessageHandlerThread(threading.Thread):
             key_serializer=lambda k: k.encode('utf-8') if isinstance(k, str) else None,
             value_serializer=lambda v: v.encode('utf-8') if isinstance(v, str) else None
         )
-        producer.send(kafka_topic, key=self.producerMessageKey, value=result_json)
+        producer.send(kafka_topic, key=self.producerMessageKey, value=producerMessage)
         producer.close()
 
 
