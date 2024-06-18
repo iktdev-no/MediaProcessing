@@ -1,40 +1,83 @@
+import logging, sys
+import hashlib
+from typing import List
+
+from clazz.Metadata import Metadata, Summary
+from .source import SourceBase
+
 from AnilistPython import Anilist
-from .result import Metadata, DataResult, Summary
 
-class metadata():
-    name: str = None
-    anilist = Anilist()
+log = logging.getLogger(__name__)
 
-    def __init__(self, name) -> None:
-        self.name = name
-    
-    def lookup(self) -> DataResult:
-        """"""
+class Anii(SourceBase):
+
+    def __init__(self, titles: List[str]) -> None:
+        super().__init__(titles)
+
+    def search(self) -> Metadata | None:
+        idToTitle: dict[str, str] = {}
+        results: dict[str, str] = {}
         try:
-            result = self.anilist.get_anime(self.name)
+            for title in self.titles:
+                try:
+                    result = Anilist().get_anime(title)
+                    if result:
+                        _title = result.get("name_english", None)
+                        givenId = self.generate_id(_title)
+                        idToTitle[givenId] = _title
+                        results[givenId] = result
+                except IndexError as notFound:
+                    pass
+                except Exception as e:
+                    log.exception(e)
+        except IndexError as notFound:
+            self.logNoMatch("Anii", titles=self.titles)
+            pass
+        except Exception as e:
+            log.exception(e)
 
-            meta = Metadata(
+
+        if not idToTitle or not results:
+            self.logNoMatch("Anii", titles=self.titles)
+            return None
+        
+        best_match_id, best_match_title = self.findBestMatchAcrossTitles(idToTitle, self.titles)
+
+        return self.__getMetadata(results[best_match_id])
+    
+    def queryIds(self, title: str) -> dict[str, str]:
+        return super().queryIds(title)
+
+
+    def __getMetadata(self, result: dict) -> Metadata:
+        try:
+            summary = result.get("desc", None)
+            return Metadata(
                 title = result.get("name_english", None),
                 altTitle = [result.get("name_romaji", [])],
                 cover = result.get("cover_image", None),
-                summary = [
+                banner = None,
+                summary = [] if summary is None else [
                     Summary(
                         language = "eng",
-                        summary = result.get("desc", None)
+                        summary = summary
                     )
                 ],
-                type = 'movie' if result.get('airing_format', '').lower() == 'movie' else 'serie',
+                type = self.getMediaType(result.get('airing_format', '')),
                 genres = result.get('genres', []),
                 source="anii",
-                usedTitle=self.name
             )
-            if (meta.title is None) or (meta.type is None):
-                return DataResult(status="COMPLETED", message= None, data= None)
-
-            return DataResult(status="COMPLETED", message= None, data=meta)
-
-        except IndexError as ingore:
-            return DataResult(status="COMPLETED", message=f"No result for {self.name}")
         except Exception as e:
-            return DataResult(status="ERROR", message=str(e))
-            
+            log.exception(e)
+            return None
+
+
+    def generate_id(self, text: str):
+        return hashlib.md5(text.encode()).hexdigest()            
+    
+    def getMediaType(self, type: str) -> str:
+        return 'movie' if type.lower() == 'movie' else 'serie'
+        
+
+
+

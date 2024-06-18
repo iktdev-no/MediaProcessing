@@ -1,38 +1,70 @@
-import imdb
-from .result import Metadata, DataResult, Summary
+import logging
+from imdb import Cinemagoer
+from imdb.Movie import Movie
 
-class metadata():
-    name: str = None
-    imdb = imdb.Cinemagoer()
+from typing import List
 
-    def __init__(self, name) -> None:
-        self.name = name
+from clazz.Metadata import Metadata, Summary
+from .source import SourceBase
 
+
+log = logging.getLogger(__name__)
+
+class Imdb(SourceBase):
+
+    def __init__(self, titles: List[str]) -> None:
+        super().__init__(titles)
+
+    def search(self) -> Metadata | None:
+        idToTitle: dict[str, str] = {}
+        for title in self.titles:
+            receivedIds = self.queryIds(title)
+            for id, title in receivedIds.items():
+                idToTitle[id] = title
+
+        if not idToTitle:
+            self.logNoMatch("Imdb", titles=self.titles)
+            return None
+
+        best_match_id, best_match_title = self.findBestMatchAcrossTitles(idToTitle, self.titles)
+
+        return self.__getMetadata(best_match_id)
     
-    def lookup(self) -> DataResult:
-        """"""
+    def queryIds(self, title: str) -> dict[str, str]:
+        idToTitle: dict[str, str] = {}
+
         try:
-            query = self.imdb.search_movie(self.name)
-            imdbId = query[0].movieID
-            result = self.imdb.get_movie(imdbId)
-            meta = Metadata(
+            search = Cinemagoer().search_movie(title)
+            cappedResult: List[Movie] = search[:5]
+            usable: List[Movie] = [found for found in cappedResult if self.isMatchOrPartial("Imdb", title, found._getitem("title"))]
+            for item in usable:
+                idToTitle[item.movieID] = item._getitem("title")
+        except Exception as e:
+            log.exception(e)
+        return idToTitle    
+
+    def __getMetadata(self, id: str) -> Metadata | None:
+        try:
+            result = Cinemagoer().get_movie(id)
+            summary = result.get("plot outline", None)
+            return Metadata(
                 title = result.get("title", None),
                 altTitle = [result.get("localized title", [])],
                 cover = result.get("cover url", None),
-                summary = [
+                banner = None,
+                summary = [] if summary is None else [
                     Summary(
                         language = "eng",
-                        summary = result.get("plot outline", None)
+                        summary = summary
                     )
                 ],
-                type = 'movie' if result.get('kind', '').lower() == 'movie' else 'serie',
+                type = self.getMediaType(result.get('kind', '')),
                 genres = result.get('genres', []),
                 source="imdb",
-                usedTitle=self.name
             )
-            if (meta.title is None) or (meta.type is None):
-                return DataResult(status="COMPLETED", message= None, data= None)
-            
-            return DataResult(status="COMPLETED", message= None, data= meta)
         except Exception as e:
-            return DataResult(status="ERROR", data=None, message=str(e))
+            log.exception(e)
+        return None
+    
+    def getMediaType(self, type: str) -> str:
+        return 'movie' if type.lower() == 'movie' else 'serie'
