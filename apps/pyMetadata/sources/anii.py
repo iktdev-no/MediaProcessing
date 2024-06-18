@@ -24,8 +24,9 @@ class Anii(SourceBase):
                     if result:
                         _title = result.get("name_english", None)
                         givenId = self.generate_id(_title)
-                        idToTitle[givenId] = _title
-                        results[givenId] = result
+                        if givenId:
+                            idToTitle[givenId] = _title
+                            results[givenId] = result
                 except IndexError as notFound:
                     pass
                 except Exception as e:
@@ -72,8 +73,10 @@ class Anii(SourceBase):
             return None
 
 
-    def generate_id(self, text: str):
-        return hashlib.md5(text.encode()).hexdigest()            
+    def generate_id(self, text: str) -> str | None:
+        if text:
+            return hashlib.md5(text.encode()).hexdigest()            
+        return None
     
     def getMediaType(self, type: str) -> str:
         return 'movie' if type.lower() == 'movie' else 'serie'
