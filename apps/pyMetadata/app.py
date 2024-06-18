@@ -9,9 +9,9 @@ import json
 import time
 from fuzzywuzzy import fuzz
 
-from algo.AdvancedMatcher import AdvancedMatcher
-from algo.SimpleMatcher import SimpleMatcher
-from algo.PrefixMatcher import PrefixMatcher
+from .algo.AdvancedMatcher import AdvancedMatcher
+from .algo.SimpleMatcher import SimpleMatcher
+from .algo.PrefixMatcher import PrefixMatcher
 from clazz.shared import ConsumerRecord, MediaEvent, decode_key, decode_value, suppress_ignore, consume_on_key
 from clazz.KafkaMessageSchema import KafkaMessage, MessageDataWrapper
 from clazz.Metadata import Metadata
