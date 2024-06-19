@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.ui.socket
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.contract.dto.ConvertRequest
+import no.iktdev.mediaprocessing.shared.contract.dto.EventRequest
 import no.iktdev.mediaprocessing.ui.UIEnv
 import no.iktdev.mediaprocessing.ui.explorer.ExplorerCore
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,7 +35,7 @@ class ExplorerTopic(
     }
 
     @MessageMapping("/request/convert")
-    fun requestConvert(@Payload data: ConvertRequest) {
+    fun requestConvert(@Payload data: EventRequest) {
         val req = coordinatorTemplate.postForEntity(UIEnv.coordinatorUrl, data, String.javaClass)
         log.info { req }
     }
