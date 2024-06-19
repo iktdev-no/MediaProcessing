@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.persistance.isOfEvent
 import no.iktdev.mediaprocessing.shared.common.persistance.lastOf
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.dto.isOnly
@@ -31,11 +32,10 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
         super.onProcessEventsAccepted(event, events)
 
         log.info { "${event.referenceId} @ ${event.eventId} triggered by ${event.event}" }
-        val startedEvent = events.lastOf(KafkaEvents.EventMediaProcessStarted)
         val startedEventData = events.lastOf(KafkaEvents.EventMediaProcessStarted)?.data?.az<MediaProcessStarted>()
-        if (startedEventData?.operations?.isOnly(StartOperationEvents.CONVERT) == true) {
+        if (event.isOfEvent(KafkaEvents.EventMediaProcessStarted) && startedEventData?.operations?.isOnly(StartOperationEvents.CONVERT) == true) {
             val subtitleFile = File(startedEventData.file)
-            return produceConvertWorkRequest(subtitleFile, null, startedEvent?.eventId)
+            return produceConvertWorkRequest(subtitleFile, null, event.eventId)
         } else {
             val derivedInfoObject = if (event.event in requiredEvents) {
                 DerivedInfoObject.fromExtractWorkCreated(event)

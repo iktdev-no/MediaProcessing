@@ -57,7 +57,7 @@ enum SimpleEventDataState {
     FAILED,
   }
   
-  interface SimpleEventDataObject {
+interface SimpleEventDataObject {
     id: string;
     name?: string | null;
     path?: string | null;
@@ -71,4 +71,22 @@ enum SimpleEventDataState {
     eventCollected: SimpleEventDataState;
     encodingProgress?: number | null;
     encodingTimeLeft?: number | null;
-  }
+}
+
+interface EventObject {
+    referenceId: string;
+    eventId: string;
+    event: string;
+    data: string;
+    created: string;
+}
+
+interface EventsObjectList {
+    referenceId: string;
+    events: Array<EventObject>;
+}
+
+interface EventsObjectListResponse {
+    lastPull: string;
+    items: Array<EventsObjectList>;
+}

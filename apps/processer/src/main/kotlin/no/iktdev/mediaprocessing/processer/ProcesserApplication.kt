@@ -6,11 +6,8 @@ import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataReader
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentDataStore
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
-import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.springframework.boot.autoconfigure.SpringBootApplication

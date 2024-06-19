@@ -201,9 +201,6 @@ export default function ExplorePage() {
 
 
   useEffect(() => {
-    if (cursor)
-
-
     // Kjør din funksjon her når komponenten lastes inn for første gang
     // Sjekk om cursor er null
     if (cursor.path === null && client !== null) {

@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.shared.common
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import java.io.File

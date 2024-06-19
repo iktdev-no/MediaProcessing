@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.shared.common
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.CoroutinesDefault
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.common.tasks.EventBasedMessageListener
 import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
