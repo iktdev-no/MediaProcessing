@@ -30,6 +30,10 @@ fun <T> withDirtyRead(db: Database? = null, block: () -> T): T? {
     }
 }
 
+fun <T> withDirtyRead(db: DataSource? = null, block: () -> T): T? {
+    return withDirtyRead(db?.database, block)
+}
+
 
 fun <T> withTransaction(db: Database? = null, block: () -> T): T? {
     return try {

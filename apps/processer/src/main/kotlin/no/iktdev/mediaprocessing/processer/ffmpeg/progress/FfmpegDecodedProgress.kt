@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.processer.ffmpeg
+package no.iktdev.mediaprocessing.processer.ffmpeg.progress
 
 import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserProgress
 

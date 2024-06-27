@@ -48,6 +48,7 @@ fun getEventsDatabase(): MySqlDataSource {
 }
 
 lateinit var eventManager: PersistentEventManager
+lateinit var taskManager: TasksManager
 
 fun main(args: Array<String>) {
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
@@ -69,11 +70,13 @@ fun main(args: Array<String>) {
 
 
     eventManager = PersistentEventManager(eventsDatabase)
+    taskManager = TasksManager(eventsDatabase)
 
 
     val kafkaTables = listOf(
         events, // For kafka
-        allEvents
+        allEvents,
+        tasks
     )
 
 

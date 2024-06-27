@@ -1,10 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMessageListener
-import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
+import no.iktdev.mediaprocessing.shared.common.EventCoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
@@ -19,7 +18,7 @@ import java.util.UUID
 
 @EnableScheduling
 @Service
-class Coordinator() : CoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
+class EventCoordinator() : EventCoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
 
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()

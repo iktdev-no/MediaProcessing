@@ -83,4 +83,11 @@ class FileNameParserTest {
         assertThat(result.first()).isEqualTo("Urusei Yatsura")
     }
 
+    @Test
+    fun testName() {
+        val input = "The.Boys.S04E02.Life.Among.the.Septics.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb"
+        val result = FileNameParser(input).guessSearchableTitle()
+        assertThat(result.first()).isEqualTo("Urusei Yatsura (2022)")
+    }
+
 }

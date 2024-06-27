@@ -4,10 +4,10 @@ import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
-import no.iktdev.mediaprocessing.processer.eventManager
+import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegDecodedProgress
+import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegProgressDecoder
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import java.io.File
 import java.time.Duration

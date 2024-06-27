@@ -1,15 +1,14 @@
 package no.iktdev.mediaprocessing.shared.common.tasks
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.EventCoordinatorBase
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import javax.annotation.PostConstruct
 
-abstract class TaskCreatorImpl<C : CoordinatorBase<V, L>, V, L : EventBasedMessageListener<V>>(
+abstract class TaskCreatorImpl<C : EventCoordinatorBase<V, L>, V, L : EventBasedMessageListener<V>>(
     open var coordinator: C
 ) : ITaskCreatorListener<V> {
     private val log = KotlinLogging.logger {}

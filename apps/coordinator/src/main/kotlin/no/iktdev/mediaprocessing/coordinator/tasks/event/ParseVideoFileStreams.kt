@@ -2,11 +2,10 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import com.google.gson.Gson
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.common.persistance.isOfEvent
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
@@ -21,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class ParseVideoFileStreams(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class ParseVideoFileStreams(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
 

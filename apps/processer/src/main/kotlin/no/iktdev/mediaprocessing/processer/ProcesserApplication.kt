@@ -6,8 +6,7 @@ import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
+import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -15,9 +14,15 @@ import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 
+
+
 private val logger = KotlinLogging.logger {}
 val ioCoroutine = CoroutinesIO()
 val defaultCoroutine = CoroutinesDefault()
+
+var taskMode: ActiveMode = ActiveMode.Active
+
+
 @SpringBootApplication
 class ProcesserApplication {
 }
@@ -27,7 +32,7 @@ fun getEventsDatabase(): MySqlDataSource {
     return eventsDatabase
 }
 
-lateinit var eventManager: PersistentEventManager
+lateinit var taskManager: TasksManager
 
 
 fun main(args: Array<String>) {
@@ -45,10 +50,9 @@ fun main(args: Array<String>) {
 
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
     eventsDatabase.createDatabase()
-    eventsDatabase.createTables(processerEvents)
+    eventsDatabase.createTables(tasks)
 
-
-    eventManager = PersistentEventManager(eventsDatabase)
+    taskManager = TasksManager(eventsDatabase)
 
 
     val context = runApplication<ProcesserApplication>(*args)

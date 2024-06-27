@@ -1,11 +1,16 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
+import com.google.gson.Gson
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
+import no.iktdev.mediaprocessing.coordinator.taskManager
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.isOfEvent
+import no.iktdev.mediaprocessing.shared.common.persistance.isSuccess
 import no.iktdev.mediaprocessing.shared.common.persistance.lastOf
+import no.iktdev.mediaprocessing.shared.common.task.ConvertTaskData
+import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.dto.isOnly
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -15,46 +20,71 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.az
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerRequest
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class CreateConvertWorkTask(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
     override val producesEvent: KafkaEvents
         get() = KafkaEvents.EventWorkConvertCreated
 
     override val listensForEvents: List<KafkaEvents>
-        get() = listOf(KafkaEvents.EventMediaProcessStarted, KafkaEvents.EventWorkExtractCreated)
+        get() = listOf(KafkaEvents.EventMediaProcessStarted, KafkaEvents.EventWorkExtractPerformed)
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         super.onProcessEventsAccepted(event, events)
-
-        log.info { "${event.referenceId} @ ${event.eventId} triggered by ${event.event}" }
         val startedEventData = events.lastOf(KafkaEvents.EventMediaProcessStarted)?.data?.az<MediaProcessStarted>()
-        if (event.isOfEvent(KafkaEvents.EventMediaProcessStarted) && startedEventData?.operations?.isOnly(StartOperationEvents.CONVERT) == true) {
-            val subtitleFile = File(startedEventData.file)
-            return produceConvertWorkRequest(subtitleFile, null, event.eventId)
-        } else {
-            val derivedInfoObject = if (event.event in requiredEvents) {
-                DerivedInfoObject.fromExtractWorkCreated(event)
-            } else {
-                val extractEvent = events.lastOf(KafkaEvents.EventWorkExtractCreated)
-                extractEvent?.let { it -> DerivedInfoObject.fromExtractWorkCreated(it) }
-            } ?: return null
 
+        val result = if (event.isOfEvent(KafkaEvents.EventMediaProcessStarted) &&
+            event.data.az<MediaProcessStarted>()?.operations?.isOnly(StartOperationEvents.CONVERT) == true
+        ) {
+            startedEventData?.file
+        } else if (event.isOfEvent(KafkaEvents.EventWorkExtractPerformed) && startedEventData?.operations?.contains(
+                StartOperationEvents.CONVERT
+            ) == true
+        ) {
+            val innerData = event.data.az<ProcesserExtractWorkPerformed>()
+            innerData?.outFile
+        } else null
 
-            val requiredEventId = if (event.event == KafkaEvents.EventWorkExtractCreated) {
-                event.eventId
-            } else null;
+        val convertFile = result?.let { File(it) } ?: return null
 
-            val outFile = File(derivedInfoObject.outputFile)
-            return produceConvertWorkRequest(outFile, requiredEventId, event.eventId)
-        }
+        val taskData = ConvertTaskData(
+            allowOverwrite = true,
+            inputFile = convertFile.absolutePath,
+            outFileBaseName = convertFile.nameWithoutExtension,
+            outDirectory = convertFile.parentFile.absolutePath,
+            outFormats = emptyList()
+        )
+
+        taskManager.createTask(
+            referenceId = event.referenceId,
+            eventId = event.eventId,
+            task = TaskType.Convert,
+            data = Gson().toJson(taskData)
+        )
+
+        return if (event.isOfEvent(KafkaEvents.EventMediaProcessStarted) &&
+            event.data.az<MediaProcessStarted>()?.operations?.isOnly(StartOperationEvents.CONVERT) == true
+        ) {
+            produceConvertWorkRequest(convertFile, null, event.eventId)
+        } else if (event.isOfEvent(KafkaEvents.EventWorkExtractPerformed) && startedEventData?.operations?.contains(
+                StartOperationEvents.CONVERT
+            ) == true
+        ) {
+            return produceConvertWorkRequest(convertFile, event.referenceId, event.eventId)
+
+        } else null
     }
 
-    private fun produceConvertWorkRequest(file: File, requiresEventId: String?, derivedFromEventId: String?): ConvertWorkerRequest {
+    private fun produceConvertWorkRequest(
+        file: File,
+        requiresEventId: String?,
+        derivedFromEventId: String?
+    ): ConvertWorkerRequest {
         return ConvertWorkerRequest(
             status = Status.COMPLETED,
             requiresEventId = requiresEventId,
@@ -65,7 +95,6 @@ class CreateConvertWorkTask(@Autowired override var coordinator: Coordinator) : 
             derivedFromEventId = derivedFromEventId
         )
     }
-
 
 
     private data class DerivedInfoObject(

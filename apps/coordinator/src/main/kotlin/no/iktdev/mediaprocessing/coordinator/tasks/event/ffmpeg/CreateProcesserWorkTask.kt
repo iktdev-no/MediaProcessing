@@ -1,9 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
-import no.iktdev.mediaprocessing.coordinator.log
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -12,9 +11,8 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkerArgumentsCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
-import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
-abstract class CreateProcesserWorkTask(override var coordinator: Coordinator) : TaskCreator(coordinator) {
+abstract class CreateProcesserWorkTask(override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     private val log = KotlinLogging.logger {}
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         val started = events.findLast { it.event == KafkaEvents.EventMediaProcessStarted }?.data as MediaProcessStarted?

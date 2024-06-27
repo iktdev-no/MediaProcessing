@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.ui
 
-import no.iktdev.mediaprocessing.shared.common.CoordinatorBase
+import no.iktdev.mediaprocessing.shared.common.EventCoordinatorBase
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentProcessDataMessage
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @EnableScheduling
-class Coordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : CoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
+class EventCoordinator(@Autowired private val eventbasedTopic: EventbasedTopic) : EventCoordinatorBase<PersistentMessage, PersistentEventBasedMessageListener>() {
     override val listeners = PersistentEventBasedMessageListener()
 
     override fun onCoordinatorReady() {

@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
 import no.iktdev.mediaprocessing.shared.common.getComputername
@@ -19,7 +19,7 @@ import java.io.File
 import java.util.*
 
 @Service
-class DownloadAndStoreCoverTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class DownloadAndStoreCoverTask(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
     val serviceId = "${getComputername()}::${this.javaClass.simpleName}::${UUID.randomUUID()}"

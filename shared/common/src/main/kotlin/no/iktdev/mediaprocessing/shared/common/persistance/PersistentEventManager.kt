@@ -83,15 +83,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
         } ?: emptyList()
     }
 
-    fun getProcessEventWith(referenceId: String, eventId: String): PersistentProcessDataMessage? {
-        return withDirtyRead(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId)
-            }.toPersistentProcesserMessage(dzz)
-        }?.singleOrNull()
-    }
-
     fun getAllEvents(): List<PersistentMessage> {
         return withDirtyRead(dataSource.database) {
             events.selectAll()
@@ -103,51 +94,12 @@ class PersistentEventManager(private val dataSource: DataSource) {
         return getAllEvents().toGrouped()
     }
 
-    fun getAllProcessEvents(): List<PersistentProcessDataMessage> {
-        return withDirtyRead(dataSource.database) {
-            processerEvents.selectAll()
-                .toPersistentProcesserMessage(dzz)
-        } ?: emptyList()
-    }
-
     fun getEventsUncompleted(): List<List<PersistentMessage>> {
         val identifiesAsCompleted = listOf(
             KafkaEvents.EventCollectAndStore
         )
         val all = getAllEventsGrouped()
         return all.filter { entry -> entry.none { it.event in identifiesAsCompleted } }
-    }
-
-    fun getProcessEventsUncompleted(): List<PersistentProcessDataMessage> {
-        return withTransaction(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.consumed eq false)
-            }.toPersistentProcesserMessage(dzz)
-        } ?: emptyList()
-    }
-
-    fun getProcessEventsClaimable(): List<PersistentProcessDataMessage> {
-        return withTransaction(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.consumed eq false) and
-                        (processerEvents.claimed eq false)
-            }.toPersistentProcesserMessage(dzz)
-        } ?: emptyList()
-    }
-
-    fun getProcessEventsWithExpiredClaim(): List<PersistentProcessDataMessage> {
-        val deadline = LocalDateTime.now()
-        return getProcessEventsUncompleted()
-            .filter { it.claimed && if (it.lastCheckIn != null) it.lastCheckIn.plusMinutes(15) < deadline else true }
-    }
-
-    fun isProcessEventClaimed(referenceId: String, eventId: String): Boolean {
-        val info = getProcessEventWith(referenceId, eventId)
-        return info?.claimed ?: true && info?.consumed ?: true
-    }
-
-    fun isProcessEventCompleted(referenceId: String, eventId: String): Boolean {
-        return getProcessEventWith(referenceId, eventId)?.consumed ?: false
     }
 
     //endregion
@@ -222,97 +174,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
         return success
     }
 
-    fun setProcessEvent(event: KafkaEvents, message: Message<*>): Boolean {
-        val exception = executeOrException(dataSource.database) {
-            processerEvents.insert {
-                it[processerEvents.referenceId] = message.referenceId
-                it[processerEvents.eventId] = message.eventId
-                it[processerEvents.event] = event.event
-                it[processerEvents.data] = message.dataAsJson()
-            }
-        }
-        return if (exception != null) {
-            if (exception.isExposedSqlException()) {
-                if ((exception as ExposedSQLException).isCausedByDuplicateError()) {
-                    log.info { "Error is of SQLIntegrityConstraintViolationException" }
-                } else {
-                    log.info { "Error code is: ${exception.errorCode}" }
-                    exception.printStackTrace()
-                }
-            } else {
-                exception.printStackTrace()
-            }
-            false
-        } else {
-            true
-        }
-    }
-
-    fun setProcessEventClaim(referenceId: String, eventId: String, claimer: String): Boolean {
-        return executeWithStatus(dataSource.database) {
-            processerEvents.update({
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId) and
-                        (processerEvents.claimed eq false) and
-                        (processerEvents.consumed eq false)
-            }) {
-                it[claimedBy] = claimer
-                it[lastCheckIn] = CurrentDateTime
-                it[claimed] = true
-            }
-        }
-    }
-
-    fun setProcessEventCompleted(referenceId: String, eventId: String, status: Status = Status.COMPLETED): Boolean {
-        return executeWithStatus(dataSource) {
-            processerEvents.update({
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId)
-            }) {
-                it[consumed] = true
-                it[claimed] = true
-                it[processerEvents.status] = status.name
-            }
-        }
-    }
-
-    fun setProcessEventClaimRefresh(referenceId: String, eventId: String, claimer: String): Boolean {
-        return executeWithStatus(dataSource) {
-            processerEvents.update({
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId) and
-                        (processerEvents.claimed eq true) and
-                        (processerEvents.claimedBy eq claimer)
-            }) {
-                it[lastCheckIn] = CurrentDateTime
-            }
-        }
-    }
-
-    /**
-     * Removes the claim set on the process event
-     */
-    fun deleteProcessEventClaim(referenceId: String, eventId: String): Boolean {
-        return executeWithStatus(dataSource) {
-            processerEvents.update({
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId)
-            }) {
-                it[claimed] = false
-                it[claimedBy] = null
-                it[lastCheckIn] = null
-            }
-        }
-    }
-
-    fun deleteProcessEvent(referenceId: String, eventId: String): Boolean {
-        return executeWithStatus (dataSource) {
-            processerEvents.deleteWhere {
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId)
-            }
-        }
-    }
 
     //endregion
 

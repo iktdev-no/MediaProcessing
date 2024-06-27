@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 import com.google.gson.JsonObject
 import mu.KotlinLogging
 import no.iktdev.exfl.using
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
@@ -35,7 +35,7 @@ import java.util.*
  */
 @Service
 @EnableScheduling
-class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class MetadataAndBaseInfoToFileOut(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
     val metadataTimeout = KafkaEnv.metadataTimeoutMinutes * 60
 

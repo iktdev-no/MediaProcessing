@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class MetadataAndBaseInfoToCoverTask(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
 

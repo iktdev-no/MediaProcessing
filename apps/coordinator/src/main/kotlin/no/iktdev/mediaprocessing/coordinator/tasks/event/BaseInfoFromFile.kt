@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameParser
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class BaseInfoFromFile(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class BaseInfoFromFile(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
     override val producesEvent: KafkaEvents

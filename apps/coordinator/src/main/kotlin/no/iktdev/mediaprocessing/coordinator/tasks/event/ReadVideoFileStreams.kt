@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class ReadVideoFileStreams(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class ReadVideoFileStreams(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
     val requiredOperations = listOf(StartOperationEvents.ENCODE, StartOperationEvents.EXTRACT)
 

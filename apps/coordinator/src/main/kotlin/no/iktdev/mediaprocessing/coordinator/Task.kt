@@ -4,11 +4,10 @@ import no.iktdev.mediaprocessing.coordinator.coordination.PersistentEventBasedMe
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.tasks.TaskCreatorImpl
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
-abstract class TaskCreator(coordinator: Coordinator):
-    TaskCreatorImpl<Coordinator, PersistentMessage, PersistentEventBasedMessageListener>(coordinator) {
+abstract class TaskCreator(coordinator: EventCoordinator):
+    TaskCreatorImpl<EventCoordinator, PersistentMessage, PersistentEventBasedMessageListener>(coordinator) {
 
 
 

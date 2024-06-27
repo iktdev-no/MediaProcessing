@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
-abstract class CoordinatorBase<V, L: EventBasedMessageListener<V>> {
+abstract class EventCoordinatorBase<V, L: EventBasedMessageListener<V>> {
     val defaultCoroutine = CoroutinesDefault()
     private var ready: Boolean = false
     fun isReady() = ready

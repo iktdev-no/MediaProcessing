@@ -6,7 +6,8 @@ import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents
+import no.iktdev.mediaprocessing.shared.common.persistance.TasksManager
+import no.iktdev.mediaprocessing.shared.common.persistance.tasks
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -23,8 +24,7 @@ fun getContext(): ApplicationContext? {
     return context
 }
 
-
-lateinit var eventManager: PersistentEventManager
+lateinit var taskManager: TasksManager
 
 private lateinit var eventsDatabase: MySqlDataSource
 fun getEventsDatabase(): MySqlDataSource {
@@ -46,9 +46,8 @@ fun main(args: Array<String>) {
 
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
     eventsDatabase.createDatabase()
-    eventsDatabase.createTables(processerEvents)
-
-    eventManager = PersistentEventManager(eventsDatabase)
+    eventsDatabase.createTables(tasks)
+    taskManager = TasksManager(eventsDatabase)
 
     context = runApplication<ConvertApplication>(*args)
 }

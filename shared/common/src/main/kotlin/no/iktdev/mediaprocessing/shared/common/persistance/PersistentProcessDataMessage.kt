@@ -1,14 +1,5 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.claimed
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.claimedBy
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.consumed
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.created
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.data
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.event
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.eventId
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.lastCheckIn
-import no.iktdev.mediaprocessing.shared.common.persistance.processerEvents.referenceId
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper

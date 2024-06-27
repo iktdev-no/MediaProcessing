@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.exfl.using
-import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg.ExtractArgumentCreatorTask.SubtitleArguments.SubtitleType.*
 import no.iktdev.mediaprocessing.shared.common.Preference
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class ExtractArgumentCreatorTask(@Autowired override var coordinator: Coordinator) : TaskCreator(coordinator) {
+class ExtractArgumentCreatorTask(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     val log = KotlinLogging.logger {}
 
     val preference = Preference.getPreference()
