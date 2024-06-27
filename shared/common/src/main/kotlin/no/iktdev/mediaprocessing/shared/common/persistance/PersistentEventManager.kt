@@ -187,7 +187,3 @@ fun List<PersistentMessage>?.toGrouped(): List<List<PersistentMessage>> {
 fun Query?.toPersistentMessage(dzz: DeserializingRegistry): List<PersistentMessage> {
     return this?.mapNotNull { fromRowToPersistentMessage(it, dzz) } ?: emptyList()
 }
-
-fun Query?.toPersistentProcesserMessage(dzz: DeserializingRegistry): List<PersistentProcessDataMessage> {
-    return this?.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) } ?: emptyList()
-}

@@ -40,68 +40,8 @@ class PersistentDataReader(var dataSource: DataSource) {
         return result
     }
 
-    @Deprecated(message = "Use PersistentEventManager.isProcessEventCompleted")
-    fun isProcessEventAlreadyClaimed(referenceId: String, eventId: String): Boolean {
-        val result = withDirtyRead(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId)
-            }.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }.singleOrNull()
-        }
-        return result?.claimed ?: true
-    }
 
-    @Deprecated(message = "Use PersistentEventManager.isProcessEventCompleted")
-    fun isProcessEventDefinedAsConsumed(referenceId: String, eventId: String, claimedBy: String): Boolean {
-        return withDirtyRead(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId) and
-                        (processerEvents.claimedBy eq claimedBy)
-            }.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }
-        }?.singleOrNull()?.consumed ?: false
-    }
 
-    @Deprecated(message = "Use PersistentEventManager.getProcessEventsClaimable")
-    fun getAvailableProcessEvents(): List<PersistentProcessDataMessage> {
-        return withDirtyRead(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.claimed eq false) and
-                        (processerEvents.consumed eq false)
-            }.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }
-        } ?: emptyList()
-    }
-
-    @Deprecated("Use PersistentEventManager.getProcessEventsWithExpiredClaim")
-    fun getExpiredClaimsProcessEvents(): List<PersistentProcessDataMessage> {
-        val deadline = LocalDateTime.now()
-        val entries = withTransaction(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.claimed eq true) and
-                        (processerEvents.consumed neq true)
-            }.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }
-        } ?: emptyList()
-        return entries.filter { it.lastCheckIn == null || it.lastCheckIn.plusMinutes(15) < deadline }
-    }
-
-    @Deprecated("Use PersistentEventManager.getProcessEventWith")
-    fun getProcessEvent(referenceId: String, eventId: String): PersistentProcessDataMessage? {
-        val message = withDirtyRead(dataSource.database) {
-            processerEvents.select {
-                (processerEvents.referenceId eq referenceId) and
-                        (processerEvents.eventId eq eventId)
-            }.mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }
-        }?.singleOrNull()
-        return message
-    }
-
-    @Deprecated("Use PersistentEventManager.getAllEventsProcesser")
-    fun getProcessEvents(): List<PersistentProcessDataMessage> {
-        return withTransaction(dataSource.database) {
-            processerEvents.selectAll()
-                .mapNotNull { fromRowToPersistentProcessDataMessage(it, dzz) }
-        } ?: emptyList()
-    }
 
 
 }
