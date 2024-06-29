@@ -223,7 +223,7 @@ jobs:
       - name: Extract version from build.gradle.kts
         id: extract_version
         run: |
-          VERSION=$(grep '^version\s*=\s*\".*\"' .\\apps\\coordinator\\build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/coordinator/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
           echo "::set-output name=version::$VERSION
 
       - name: Build and push Docker image
