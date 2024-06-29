@@ -210,7 +210,7 @@ jobs:
           echo $(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"')
           echo $(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
           VERSION=$(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
-          echo "::set-output name=version::$VERSION
+          echo "::set-output name=version::$VERSION"
 
       - name: Build Coordinator module
         id: build-coordinator
