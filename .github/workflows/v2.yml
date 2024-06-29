@@ -207,8 +207,8 @@ jobs:
       - name: Extract version from build.gradle.kts
         id: extract_version
         run: |
-          echo ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"'
-          echo ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/'
+          echo $(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"')
+          echo $(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
           VERSION=$(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
           echo "::set-output name=version::$VERSION
 
