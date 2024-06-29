@@ -125,7 +125,7 @@ jobs:
           file: ./dockerfiles/DebianJavaFfmpeg
           build-args:
             MODULE_NAME=processer
-            APP_VERSION=${{ env.VERSION }}
+            PASS_APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
             bskjon/mediaprocessing-processer:v2
@@ -183,7 +183,7 @@ jobs:
           file: ./dockerfiles/DebianJava
           build-args:
             MODULE_NAME=converter
-            APP_VERSION=${{ env.VERSION }}
+            PASS_APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
             bskjon/mediaprocessing-converter:v2
@@ -243,7 +243,7 @@ jobs:
           file: ./dockerfiles/DebianJavaFfmpeg
           build-args:
             MODULE_NAME=coordinator
-            APP_VERSION=${{ env.VERSION }}
+            PASS_APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
             bskjon/mediaprocessing-coordinator:v2
