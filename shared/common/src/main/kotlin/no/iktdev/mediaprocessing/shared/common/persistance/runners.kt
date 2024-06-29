@@ -10,6 +10,6 @@ import java.time.LocalDateTime
 object runners: IntIdTable() {
     val startId: Column<String> = varchar("startId", 50)
     val application: Column<String> = varchar("application", 50)
-    val version: Column<String> = varchar("version", 8)
+    val version: Column<Int> = integer("version")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
 }

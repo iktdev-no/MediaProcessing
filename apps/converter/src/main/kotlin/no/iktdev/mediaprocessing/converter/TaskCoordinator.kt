@@ -15,12 +15,9 @@ class TaskCoordinator(): TaskCoordinatorBase() {
     private val log = KotlinLogging.logger {}
     lateinit var runnerManager: RunnerManager
 
-    @Value("\${appVersion}")
-    private lateinit var version: String
-
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()
-        runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName, version = version)
+        runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
         runnerManager.assignRunner()
     }
 

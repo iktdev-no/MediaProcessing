@@ -1,10 +1,12 @@
 package no.iktdev.mediaprocessing.converter
 
+import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.TasksManager
 import no.iktdev.mediaprocessing.shared.common.persistance.tasks
@@ -27,6 +29,8 @@ fun getContext(): ApplicationContext? {
 lateinit var taskManager: TasksManager
 
 private lateinit var eventsDatabase: MySqlDataSource
+private val log = KotlinLogging.logger {}
+
 fun getEventsDatabase(): MySqlDataSource {
     return eventsDatabase
 }
@@ -50,5 +54,6 @@ fun main(args: Array<String>) {
     taskManager = TasksManager(eventsDatabase)
 
     context = runApplication<ConvertApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
 }
 //private val logger = KotlinLogging.logger {}

@@ -9,12 +9,6 @@ plugins {
 group = "no.iktdev.mediaprocessing.apps"
 version = "1.0-SNAPSHOT"
 
-val appVersion= "1.0.0"
-
-tasks.processResources {
-    expand(mapOf("appVersion" to appVersion))
-}
-
 
 repositories {
     mavenCentral()

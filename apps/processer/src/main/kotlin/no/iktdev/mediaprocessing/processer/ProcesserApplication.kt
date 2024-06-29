@@ -6,6 +6,7 @@ import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -20,8 +21,6 @@ private val logger = KotlinLogging.logger {}
 val ioCoroutine = CoroutinesIO()
 val defaultCoroutine = CoroutinesDefault()
 
-var taskMode: ActiveMode = ActiveMode.Active
-
 
 @SpringBootApplication
 class ProcesserApplication {
@@ -33,6 +32,7 @@ fun getEventsDatabase(): MySqlDataSource {
 }
 
 lateinit var taskManager: TasksManager
+private val log = KotlinLogging.logger {}
 
 
 fun main(args: Array<String>) {
@@ -54,8 +54,9 @@ fun main(args: Array<String>) {
 
     taskManager = TasksManager(eventsDatabase)
 
-
     val context = runApplication<ProcesserApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
+
 }
 
 @EnableScheduling

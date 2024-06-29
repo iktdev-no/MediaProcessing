@@ -110,6 +110,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version\s*=\s*\".*\"' .\apps\processer\build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "::set-output name=version::$VERSION
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -117,6 +123,7 @@ jobs:
           file: ./dockerfiles/DebianJavaFfmpeg
           build-args:
             MODULE_NAME=processer
+            APP_VERSION=${{ steps.extract_version.outputs.version }}
           push: true
           tags: |
             bskjon/mediaprocessing-processer:v2
@@ -158,6 +165,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version\s*=\s*\".*\"' .\apps\converter\build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "::set-output name=version::$VERSION
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -165,6 +178,7 @@ jobs:
           file: ./dockerfiles/DebianJava
           build-args:
             MODULE_NAME=converter
+            APP_VERSION=${{ steps.extract_version.outputs.version }}
           push: true
           tags: |
             bskjon/mediaprocessing-converter:v2
@@ -206,6 +220,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version\s*=\s*\".*\"' .\apps\coordinator\build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "::set-output name=version::$VERSION
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -213,6 +233,7 @@ jobs:
           file: ./dockerfiles/DebianJavaFfmpeg
           build-args:
             MODULE_NAME=coordinator
+            APP_VERSION=${{ steps.extract_version.outputs.version }}
           push: true
           tags: |
             bskjon/mediaprocessing-coordinator:v2

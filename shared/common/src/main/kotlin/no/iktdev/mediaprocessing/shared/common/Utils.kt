@@ -25,6 +25,13 @@ fun isFileAvailable(file: File): Boolean {
     return false
 }
 
+fun getAppVersion(): Int {
+    val parsed = System.getenv("APP_VERSION")?.let {
+        Regex("\\d+").replace(it, "")
+    } ?: "100"
+    return Integer.parseInt(parsed)
+}
+
 fun List<PersistentMessage>.lastOrSuccess(): PersistentMessage? {
     return this.lastOrNull { it.data.isSuccess() } ?: this.lastOrNull()
 }

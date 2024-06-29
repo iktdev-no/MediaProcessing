@@ -5,12 +5,9 @@ import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
-import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
-import no.iktdev.mediaprocessing.shared.common.SharedConfig
+import no.iktdev.mediaprocessing.shared.common.*
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.*
-import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
-import no.iktdev.mediaprocessing.shared.common.toStoredDatabase
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.streamit.library.db.tables.*
 import no.iktdev.streamit.library.db.tables.helper.cast_errors
@@ -99,6 +96,8 @@ fun main(args: Array<String>) {
 
     eventsDatabase.createTables(*kafkaTables.toTypedArray())
     context = runApplication<CoordinatorApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
+
     printSharedConfig()
 }
 
