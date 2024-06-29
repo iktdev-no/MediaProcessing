@@ -208,7 +208,7 @@ jobs:
         id: extract_version
         run: |
           cat ./apps/coordinator/build.gradle.kts
-          VERSION=$(grep '^version\\s*=\\s*".*"' ./apps/coordinator/build.gradle.kts | sed 's/^version\\s*=\\s*"\(.*\)"/\1/')
+          VERSION=$(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
           echo "::set-output name=version::$VERSION
 
       - name: Build Coordinator module
