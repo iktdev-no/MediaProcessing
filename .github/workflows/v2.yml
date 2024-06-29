@@ -92,6 +92,12 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
 
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/processer/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "::set-output name=version::$VERSION          
+
       - name: Build Processer module
         id: build-processer
         run: |
@@ -109,12 +115,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Extract version from build.gradle.kts
-        id: extract_version
-        run: |
-          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/processer/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
-          echo "::set-output name=version::$VERSION
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -147,6 +147,13 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
 
+
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/converter/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "::set-output name=version::$VERSION
+
       - name: Build Converter module
         id: build-converter
         run: |
@@ -165,11 +172,6 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Extract version from build.gradle.kts
-        id: extract_version
-        run: |
-          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/converter/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
-          echo "::set-output name=version::$VERSION
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -202,6 +204,13 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
 
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          cat ./apps/coordinator/build.gradle.kts
+          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/coordinator/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "::set-output name=version::$VERSION
+
       - name: Build Coordinator module
         id: build-coordinator
         run: |
@@ -220,11 +229,6 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Extract version from build.gradle.kts
-        id: extract_version
-        run: |
-          VERSION=$(grep '^version\s*=\s*\".*\"' ./apps/coordinator/build.gradle.kts | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
-          echo "::set-output name=version::$VERSION
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
