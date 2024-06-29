@@ -207,10 +207,9 @@ jobs:
       - name: Extract version from build.gradle.kts
         id: extract_version
         run: |
-          echo $(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"')
-          echo $(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
           VERSION=$(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
-          echo "::set-output name=version::$VERSION"
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build Coordinator module
         id: build-coordinator
@@ -238,7 +237,7 @@ jobs:
           file: ./dockerfiles/DebianJavaFfmpeg
           build-args:
             MODULE_NAME=coordinator
-            APP_VERSION=${{ steps.extract_version.outputs.version }}
+            APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
             bskjon/mediaprocessing-coordinator:v2
