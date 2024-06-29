@@ -95,8 +95,10 @@ jobs:
       - name: Extract version from build.gradle.kts
         id: extract_version
         run: |
-          VERSION=$(grep '^version\\s*=\\s*".*"' ./apps/processer/build.gradle.kts | sed 's/^version\\s*=\\s*"\(.*\)"/\1/')
-          echo "::set-output name=version::$VERSION          
+          VERSION=$(cat ./apps/processer/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+ 
 
       - name: Build Processer module
         id: build-processer
@@ -123,7 +125,7 @@ jobs:
           file: ./dockerfiles/DebianJavaFfmpeg
           build-args:
             MODULE_NAME=processer
-            APP_VERSION=${{ steps.extract_version.outputs.version }}
+            APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
             bskjon/mediaprocessing-processer:v2
@@ -147,12 +149,13 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
 
-
       - name: Extract version from build.gradle.kts
         id: extract_version
         run: |
-          VERSION=$(grep '^version\\s*=\\s*".*"' ./apps/converter/build.gradle.kts | sed 's/^version\\s*=\\s*"\(.*\)"/\1/')
-          echo "::set-output name=version::$VERSION
+          VERSION=$(cat ./apps/converter/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
 
       - name: Build Converter module
         id: build-converter
@@ -180,7 +183,7 @@ jobs:
           file: ./dockerfiles/DebianJava
           build-args:
             MODULE_NAME=converter
-            APP_VERSION=${{ steps.extract_version.outputs.version }}
+            APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
             bskjon/mediaprocessing-converter:v2
