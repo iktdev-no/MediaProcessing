@@ -229,6 +229,9 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Debug Check extracted version
+        run: | 
+          echo "Extracted version: ${{ env.VERSION }}"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
