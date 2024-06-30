@@ -7,6 +7,8 @@ import no.iktdev.mediaprocessing.coordinator.taskManager
 import no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg.CreateProcesserWorkTask
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.TasksManager
+import no.iktdev.mediaprocessing.shared.common.persistance.isOfEvent
+import no.iktdev.mediaprocessing.shared.common.persistance.isSuccess
 import no.iktdev.mediaprocessing.shared.common.task.FfmpegTaskData
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
@@ -29,6 +31,10 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: EventCoordinator
         super.onProcessEventsAccepted(event, events)
 
         log.info { "${event.referenceId} triggered by ${event.event}" }
+
+        if (events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterEncodeCreated) }?.isSuccess() != true) {
+            return null
+        }
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterEncodeCreated) {
             val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterEncodeCreated }
