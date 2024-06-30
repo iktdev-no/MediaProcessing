@@ -64,29 +64,6 @@ class CompleteMediaTask(@Autowired override var coordinator: EventCoordinator) :
         }
 
 
-        val hasEncodeAndIsRequired = if (startedData.operations.contains(StartOperationEvents.ENCODE)) {
-            events.any { it.event == EventWorkEncodePerformed }
-        } else true
-
-        val hasExtractAndIsRequired = if (startedData.operations.contains(StartOperationEvents.EXTRACT)) {
-            events.any { it.event == EventWorkExtractPerformed}
-        } else true
-
-        val hasConvertAndIsRequired = if (startedData.operations.contains(StartOperationEvents.CONVERT)) {
-            events.any { it.event == EventWorkConvertPerformed }
-        } else true
-
-        val missingRequired: MutableMap<StartOperationEvents, Boolean> = mutableMapOf(
-            StartOperationEvents.ENCODE to hasEncodeAndIsRequired,
-            StartOperationEvents.EXTRACT to hasExtractAndIsRequired,
-            StartOperationEvents.CONVERT to hasConvertAndIsRequired
-        )
-
-        if (missingRequired.values.any { !it }) {
-            log.info { "Waiting for ${missingRequired.entries.filter { !it.value }.map { it.key.name }}" }
-            return null
-        }
-
         val ch = CompleteHandler(events)
         val chEvents = ch.getMissingCompletions()
         if (chEvents.isNotEmpty()) {
