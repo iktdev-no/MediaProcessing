@@ -58,6 +58,7 @@ abstract class TaskService: TaskQueueListener {
 
     @PostConstruct
     private fun onCreated() {
+        serviceId = getServiceId()
         log.info { "Starting with id: $serviceId" }
         onAttachListener()
     }
