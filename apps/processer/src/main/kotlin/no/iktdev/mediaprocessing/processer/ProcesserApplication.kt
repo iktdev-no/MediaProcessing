@@ -32,6 +32,8 @@ fun getEventsDatabase(): MySqlDataSource {
 }
 
 lateinit var taskManager: TasksManager
+lateinit var runnerManager: RunnerManager
+
 private val log = KotlinLogging.logger {}
 
 
@@ -53,6 +55,9 @@ fun main(args: Array<String>) {
     eventsDatabase.createTables(tasks, runners)
 
     taskManager = TasksManager(eventsDatabase)
+
+    runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ProcesserApplication::class.java.simpleName)
+    runnerManager.assignRunner()
 
     val context = runApplication<ProcesserApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }

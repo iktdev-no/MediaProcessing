@@ -7,10 +7,7 @@ import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
-import no.iktdev.mediaprocessing.shared.common.persistance.TasksManager
-import no.iktdev.mediaprocessing.shared.common.persistance.runners
-import no.iktdev.mediaprocessing.shared.common.persistance.tasks
+import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -28,6 +25,8 @@ fun getContext(): ApplicationContext? {
 }
 
 lateinit var taskManager: TasksManager
+lateinit var runnerManager: RunnerManager
+
 
 private lateinit var eventsDatabase: MySqlDataSource
 private val log = KotlinLogging.logger {}
@@ -54,7 +53,11 @@ fun main(args: Array<String>) {
     eventsDatabase.createTables(tasks, runners)
     taskManager = TasksManager(eventsDatabase)
 
+    runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
+    runnerManager.assignRunner()
+
     context = runApplication<ConvertApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }
+
 }
 //private val logger = KotlinLogging.logger {}

@@ -13,12 +13,8 @@ import org.springframework.stereotype.Service
 @EnableScheduling
 class TaskCoordinator(): TaskCoordinatorBase() {
     private val log = KotlinLogging.logger {}
-    lateinit var runnerManager: RunnerManager
-
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()
-        runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
-        runnerManager.assignRunner()
     }
 
 
