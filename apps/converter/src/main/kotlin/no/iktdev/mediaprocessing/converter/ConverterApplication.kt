@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.TasksManager
+import no.iktdev.mediaprocessing.shared.common.persistance.runners
 import no.iktdev.mediaprocessing.shared.common.persistance.tasks
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -50,7 +51,7 @@ fun main(args: Array<String>) {
 
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
     eventsDatabase.createDatabase()
-    eventsDatabase.createTables(tasks)
+    eventsDatabase.createTables(tasks, runners)
     taskManager = TasksManager(eventsDatabase)
 
     context = runApplication<ConvertApplication>(*args)

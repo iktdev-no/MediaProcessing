@@ -73,7 +73,8 @@ fun main(args: Array<String>) {
     val kafkaTables = listOf(
         events, // For kafka
         allEvents,
-        tasks
+        tasks,
+        runners
     )
 
 

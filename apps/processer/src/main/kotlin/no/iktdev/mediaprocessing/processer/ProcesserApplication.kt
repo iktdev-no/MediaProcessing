@@ -50,7 +50,7 @@ fun main(args: Array<String>) {
 
     eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
     eventsDatabase.createDatabase()
-    eventsDatabase.createTables(tasks)
+    eventsDatabase.createTables(tasks, runners)
 
     taskManager = TasksManager(eventsDatabase)
 
