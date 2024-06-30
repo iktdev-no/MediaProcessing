@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
+import no.iktdev.mediaprocessing.coordinator.utils.isAwaitingPrecondition
 import no.iktdev.mediaprocessing.coordinator.utils.isAwaitingTask
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
@@ -80,10 +81,18 @@ class CompleteMediaTask(@Autowired override var coordinator: EventCoordinator) :
             }
         }
 
+        val isWaitingForPrecondition = isAwaitingPrecondition(taskEvents, events)
+        if (isWaitingForPrecondition) {
+            log.info { "Waiting for preconditions" }
+            return null
+        }
+
 
         val isWaiting = taskEvents.map {
             isAwaitingTask(it, events)
         }.any { it }
+
+
 
 
         //val mapper = ProcessMapping(events)

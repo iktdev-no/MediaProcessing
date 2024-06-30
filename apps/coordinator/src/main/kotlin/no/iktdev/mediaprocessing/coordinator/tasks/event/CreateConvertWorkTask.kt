@@ -15,6 +15,7 @@ import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.contract.dto.isOnly
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
+import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import no.iktdev.mediaprocessing.shared.kafka.dto.az
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerRequest
@@ -37,6 +38,10 @@ class CreateConvertWorkTask(@Autowired override var coordinator: EventCoordinato
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         super.onProcessEventsAccepted(event, events)
         val startedEventData = events.lastOf(KafkaEvents.EventMediaProcessStarted)?.data?.az<MediaProcessStarted>()
+
+        if (event.event == KafkaEvents.EventWorkExtractPerformed && !event.isSuccess()) {
+            return SimpleMessageData(status = Status.SKIPPED, "Extract failed, skipping..", derivedFromEventId = event.eventId)
+        }
 
         val result = if (event.isOfEvent(KafkaEvents.EventMediaProcessStarted) &&
             event.data.az<MediaProcessStarted>()?.operations?.isOnly(StartOperationEvents.CONVERT) == true
