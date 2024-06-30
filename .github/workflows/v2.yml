@@ -123,8 +123,8 @@ jobs:
         with:
           context: .
           file: ./dockerfiles/DebianJavaFfmpeg
-          build-args:
-            MODULE_NAME=${{ "processer" }}
+          build-args: |
+            MODULE_NAME=processer
             PASS_APP_VERSION=${{ env.VERSION }}
           push: true
           tags: |
