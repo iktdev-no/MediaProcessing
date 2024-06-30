@@ -181,7 +181,7 @@ jobs:
         with:
           context: .
           file: ./dockerfiles/DebianJava
-          build-args:
+          build-args: |
             MODULE_NAME=converter
             PASS_APP_VERSION=${{ env.VERSION }}
           push: true
@@ -241,7 +241,7 @@ jobs:
         with:
           context: .
           file: ./dockerfiles/DebianJavaFfmpeg
-          build-args:
+          build-args: |
             MODULE_NAME=coordinator
             PASS_APP_VERSION=${{ env.VERSION }}
           push: true
