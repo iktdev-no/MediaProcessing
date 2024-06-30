@@ -27,7 +27,7 @@ fun isFileAvailable(file: File): Boolean {
 
 fun getAppVersion(): Int {
     val parsed = System.getenv("APP_VERSION")?.let {
-        Regex("\\d+").replace(it, "")
+        Regex("[^0-9]").replace(it, "")
     } ?: "100"
     return Integer.parseInt(parsed)
 }
