@@ -58,21 +58,21 @@ class PersistentMessageHelper(val messages: List<PersistentMessage>) {
         for (event in usableEvents) {
             derivedEventsMap.getOrPut(event.data.derivedFromEventId!!) { mutableListOf() }.add(event.eventId)
         }
-        val eventsToDelete = mutableSetOf<String>()
+        val eventsToFind = mutableSetOf<String>()
 
         // Utfør DFS for å finne alle avledede hendelser som skal slettes
-        dfs(triggered.eventId, derivedEventsMap, eventsToDelete)
+        dfs(triggered.eventId, derivedEventsMap, eventsToFind)
 
-        return messages.filter { it.eventId in eventsToDelete }
+        return messages.filter { it.eventId in eventsToFind }
     }
 
     /**
      * @param eventId Initial eventId
      */
-    private fun dfs(eventId: String, derivedEventsMap: Map<String, List<String>>, eventsToDelete: MutableSet<String>) {
-        eventsToDelete.add(eventId)
+    private fun dfs(eventId: String, derivedEventsMap: Map<String, List<String>>, eventsToFind: MutableSet<String>) {
+        eventsToFind.add(eventId)
         derivedEventsMap[eventId]?.forEach { derivedEventId ->
-            dfs(derivedEventId, derivedEventsMap, eventsToDelete)
+            dfs(derivedEventId, derivedEventsMap, eventsToFind)
         }
     }
 }

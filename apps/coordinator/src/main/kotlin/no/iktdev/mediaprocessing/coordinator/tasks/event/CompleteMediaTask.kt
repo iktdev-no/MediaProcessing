@@ -5,8 +5,10 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
+import no.iktdev.mediaprocessing.coordinator.utils.isAwaitingTask
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents.*
@@ -16,6 +18,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStar
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessCompleted
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.support.TaskUtils
 import org.springframework.stereotype.Service
 
 @Service
@@ -92,10 +95,26 @@ class CompleteMediaTask(@Autowired override var coordinator: EventCoordinator) :
             return null
         }
 
+        val taskEvents = startedData.operations.map {
+            when(it) {
+                StartOperationEvents.ENCODE -> TaskType.Encode
+                StartOperationEvents.EXTRACT -> TaskType.Extract
+                StartOperationEvents.CONVERT -> TaskType.Convert
+            }
+        }
 
 
-        val mapper = ProcessMapping(events)
-        if (mapper.canCollect()) {
+        val isWaiting = taskEvents.map {
+            isAwaitingTask(it, events)
+        }.any { it }
+
+
+        //val mapper = ProcessMapping(events)
+
+
+
+        //if (mapper.canCollect()) {
+        if (isWaiting) {
             return ProcessCompleted(Status.COMPLETED, event.eventId)
         }
         return null

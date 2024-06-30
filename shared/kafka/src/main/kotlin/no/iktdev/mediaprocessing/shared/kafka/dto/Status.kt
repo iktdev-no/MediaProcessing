@@ -5,3 +5,7 @@ enum class Status {
     COMPLETED,
     ERROR
 }
+
+fun Status.isCompleted(): Boolean {
+    return this == Status.COMPLETED
+}

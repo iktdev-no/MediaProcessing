@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.az
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkerArgumentsCreated
+import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -39,7 +40,7 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
             sevent ?: event
         } else event
 
-        forwardEvent.data.az<FfmpegWorkerArgumentsCreated>()?.let {
+        forwardEvent.data.az<FfmpegWorkerArgumentsCreated>()?.takeIf { it.isSuccess() }?.let {
             it.entries.forEach { argsGroup ->
                 val ffmpegTask = FfmpegTaskData(
                     inputFile = it.inputFile,
