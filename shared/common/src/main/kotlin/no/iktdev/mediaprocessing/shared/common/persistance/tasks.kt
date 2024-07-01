@@ -17,8 +17,9 @@ object tasks: IntIdTable() {
     val data: Column<String> = text("data")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
     val lastCheckIn: Column<LocalDateTime?> = datetime("lastCheckIn").nullable()
+    val integrity: Column<String> = varchar("integrity", 100)
 
     init {
-        uniqueIndex(referenceId, eventId, task)
+        uniqueIndex(referenceId, task, integrity)
     }
 }

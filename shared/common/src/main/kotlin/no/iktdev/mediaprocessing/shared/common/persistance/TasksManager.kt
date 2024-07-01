@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.Status
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import java.security.MessageDigest
 import java.time.LocalDateTime
 
 class TasksManager(private val dataSource: DataSource) {
@@ -128,10 +129,18 @@ class TasksManager(private val dataSource: DataSource) {
                 it[tasks.eventId] = eventId
                 it[tasks.task] = task.name
                 it[tasks.data] = data
+                it[tasks.integrity] = getIntegrityOfData(data)
             }
         }
     }
 
+}
+
+val digest = MessageDigest.getInstance("MD5")
+@OptIn(ExperimentalStdlibApi::class)
+private fun getIntegrityOfData(data : String) : String {
+    return digest.digest(data.toByteArray(kotlin.text.Charsets.UTF_8))
+        .toHexString()
 }
 
 fun Query?.toTaskTypeGroup(): Map<TaskType, List<Task>> {

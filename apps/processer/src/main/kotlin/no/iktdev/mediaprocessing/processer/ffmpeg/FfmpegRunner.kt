@@ -39,7 +39,6 @@ class FfmpegRunner(
     }
 
     fun run(progress: Boolean = false) {
-        log.info { "Starting ffmpeg on file $inputFile" }
         val args = FfmpegArgumentsBuilder()
             .inputFile(inputFile)
             .outputFile(outputFile)
@@ -47,6 +46,8 @@ class FfmpegRunner(
             .allowOverwrite(ProcesserEnv.allowOverwrite)
             .withProgress(progress)
             .build()
+        log.info { "Starting ffmpeg on file $inputFile with arguments:\n\t ${args.joinToString(" ")}" }
+
         job = scope.launch {
             execute(args)
         }

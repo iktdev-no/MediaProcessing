@@ -106,12 +106,6 @@ class PersistentEventManager(private val dataSource: DataSource) {
 
     //region Database write
 
-    val digest = MessageDigest.getInstance("MD5")
-    @OptIn(ExperimentalStdlibApi::class)
-    private fun getIntegrityOfData(data : String) : String {
-        return digest.digest(data.toByteArray(kotlin.text.Charsets.UTF_8))
-            .toHexString()
-    }
 
     /**
      * Stores the kafka event and its data in the database as PersistentMessage
