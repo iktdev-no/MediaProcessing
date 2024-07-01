@@ -20,15 +20,15 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
         }
     }
 
-    val convertEvent = events.lastOrNull { it.isOfEvent(KafkaEvents.EventWorkConvertCreated) } == null
-    if (tasks.any { it == TaskType.Convert } && tasks.none {it == TaskType.Extract}) {
-        if (convertEvent) {
+    val convertEvent = events.lastOrNull { it.isOfEvent(KafkaEvents.EventWorkConvertCreated) }
+    if (tasks.any { it == TaskType.Convert } && tasks.none { it == TaskType.Extract }) {
+        if (convertEvent == null) {
             response[TaskType.Convert] = true
             log.info { "Waiting for ${KafkaEvents.EventWorkConvertCreated}" }
         }
     } else if (tasks.any { it == TaskType.Convert }) {
         val extractEvent =  events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }
-        if (extractEvent == null || extractEvent.isSuccess() && !convertEvent) {
+        if (extractEvent == null || extractEvent.isSuccess() && convertEvent == null) {
             response[TaskType.Convert] = true
             log.info { "Waiting for ${KafkaEvents.EventMediaParameterExtractCreated}" }
         }
