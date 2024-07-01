@@ -92,16 +92,15 @@ class CompleteMediaTask(@Autowired override var coordinator: EventCoordinator) :
             isAwaitingTask(it, events)
         }.any { it }
 
-
-
-
         //val mapper = ProcessMapping(events)
 
 
 
         //if (mapper.canCollect()) {
-        if (isWaiting) {
+        if (!isWaiting) {
             return ProcessCompleted(Status.COMPLETED, event.eventId)
+        } else {
+            log.info { "Is waiting for task.." }
         }
         return null
     }
