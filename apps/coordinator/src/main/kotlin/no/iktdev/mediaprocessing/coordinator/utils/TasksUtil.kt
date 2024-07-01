@@ -1,10 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.utils
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 
+val log = KotlinLogging.logger {}
 
 fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage>): Map<TaskType, Boolean> {
     val response = mutableMapOf<TaskType, Boolean>()
@@ -13,20 +15,22 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
                 KafkaEvents.EventMediaParameterEncodeCreated
             ) } == null) {
             response[TaskType.Encode] = true
+            log.info { "Waiting for ${KafkaEvents.EventMediaParameterEncodeCreated}" }
+
         }
     }
 
-
+    val convertEvent = events.lastOrNull { it.isOfEvent(KafkaEvents.EventWorkConvertCreated) } == null
     if (tasks.any { it == TaskType.Convert } && tasks.none {it == TaskType.Extract}) {
-        if (events.lastOrNull { it.isOfEvent(
-                KafkaEvents.EventWorkConvertCreated
-            ) } == null) {
+        if (convertEvent) {
             response[TaskType.Convert] = true
+            log.info { "Waiting for ${KafkaEvents.EventWorkConvertCreated}" }
         }
     } else if (tasks.any { it == TaskType.Convert }) {
         val extractEvent =  events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }
-        if (extractEvent == null || extractEvent.isSuccess()) {
+        if (extractEvent == null || extractEvent.isSuccess() && !convertEvent) {
             response[TaskType.Convert] = true
+            log.info { "Waiting for ${KafkaEvents.EventMediaParameterExtractCreated}" }
         }
     }
 
@@ -35,6 +39,8 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
                 KafkaEvents.EventMediaParameterExtractCreated
             ) } == null) {
             response[TaskType.Extract] = true
+            log.info { "Waiting for ${KafkaEvents.EventMediaParameterExtractCreated}" }
+
         }
     }
 
