@@ -6,12 +6,13 @@ import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 
 
-fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage>): Boolean {
+fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage>): Map<TaskType, Boolean> {
+    val response = mutableMapOf<TaskType, Boolean>()
     if (tasks.any { it == TaskType.Encode }) {
         if (events.lastOrNull { it.isOfEvent(
                 KafkaEvents.EventMediaParameterEncodeCreated
             ) } == null) {
-            return true
+            response[TaskType.Encode] = true
         }
     }
 
@@ -20,12 +21,12 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
         if (events.lastOrNull { it.isOfEvent(
                 KafkaEvents.EventWorkConvertCreated
             ) } == null) {
-            return true
+            response[TaskType.Convert] = true
         }
     } else if (tasks.any { it == TaskType.Convert }) {
         val extractEvent =  events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }
         if (extractEvent == null || extractEvent.isSuccess()) {
-            return true
+            response[TaskType.Convert] = true
         }
     }
 
@@ -33,12 +34,12 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
         if (events.lastOrNull { it.isOfEvent(
                 KafkaEvents.EventMediaParameterExtractCreated
             ) } == null) {
-            return true
+            response[TaskType.Extract] = true
         }
     }
 
 
-    return false
+    return response
 }
 
 

@@ -82,8 +82,8 @@ class CompleteMediaTask(@Autowired override var coordinator: EventCoordinator) :
         }
 
         val isWaitingForPrecondition = isAwaitingPrecondition(taskEvents, events)
-        if (isWaitingForPrecondition) {
-            log.info { "Waiting for preconditions" }
+        if (isWaitingForPrecondition.isNotEmpty()) {
+            log.info { "Waiting for preconditions: ${isWaitingForPrecondition.keys.joinToString(",") }}" }
             return null
         }
 
