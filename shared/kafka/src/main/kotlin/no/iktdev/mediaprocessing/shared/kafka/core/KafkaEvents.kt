@@ -28,7 +28,6 @@ enum class KafkaEvents(val event: String) {
     EventWorkConvertPerformed               ("event:work-convert:performed"),
     EventWorkDownloadCoverPerformed         ("event:work-download-cover:performed"),
 
-
     EVENT_STORE_VIDEO_PERFORMED             ("event:store-video:performed"),
     EVENT_STORE_SUBTITLE_PERFORMED          ("event:store-subtitle:performed"),
     EVENT_STORE_COVER_PERFORMED             ("event:store-cover:performed"),

@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.tasks.input.watcher
+package no.iktdev.mediaprocessing.coordinator.watcher
 
 import dev.vishna.watchservice.KWatchEvent.Kind.Deleted
 import dev.vishna.watchservice.KWatchEvent.Kind.Initialized

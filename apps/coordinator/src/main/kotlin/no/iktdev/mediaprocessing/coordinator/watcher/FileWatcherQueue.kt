@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.tasks.input.watcher
+package no.iktdev.mediaprocessing.coordinator.watcher
 
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
