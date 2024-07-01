@@ -50,7 +50,7 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
 
 
 fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
-    return when (task) {
+    val taskStatus = when (task) {
         TaskType.Encode -> {
             val argumentEvent = KafkaEvents.EventMediaParameterEncodeCreated
             val taskCreatedEvent = KafkaEvents.EventWorkEncodeCreated
@@ -67,9 +67,8 @@ fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
                 )
             }
 
-            trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size != trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size
-
-
+            val waiting = trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size != trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size
+            waiting
         }
         TaskType.Extract -> {
             val argumentEvent = KafkaEvents.EventMediaParameterExtractCreated
@@ -85,7 +84,8 @@ fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
                     taskCompletedEvent
                 )
             }
-            trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size != trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size
+            val waiting = trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size != trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size
+            waiting
         }
         TaskType.Convert -> {
 
@@ -105,8 +105,13 @@ fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
                         taskCompletedEvent
                     )
                 }
-                trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size != trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size
+                val waiting = trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size != trailingEvents.filter { it.isOfEvent(taskCreatedEvent) }.size
+                waiting
             }
         }
     }
+    if (taskStatus) {
+        log.info { "isAwaiting for $task" }
+    }
+    return taskStatus
 }
