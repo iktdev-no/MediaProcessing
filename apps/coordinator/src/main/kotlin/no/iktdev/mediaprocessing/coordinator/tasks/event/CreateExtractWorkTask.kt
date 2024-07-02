@@ -60,7 +60,7 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
                     outFile = e.outFile,
                     arguments = e.arguments
                 ).let { task ->
-                    val status = taskManager.createTask(referenceId = event.referenceId, task=  TaskType.Encode, data = Gson().toJson(task))
+                    val status = taskManager.createTask(referenceId = event.referenceId, derivedFromEventId = event.eventId, task= TaskType.Encode, data = Gson().toJson(task))
                     if (!status) {
                         log.error { "Failed to create Extract task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
                     }

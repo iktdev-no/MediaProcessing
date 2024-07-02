@@ -14,6 +14,7 @@ object tasks: IntIdTable() {
     val consumed: Column<Boolean> = bool("consumed").default(false)
     val task: Column<String> = varchar("task",50)
     val eventId: Column<String> = varchar("eventId", 50)
+    val derivedFromEventId: Column<String?> = varchar("derivedFromEventId", 50).nullable()
     val data: Column<String> = text("data")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
     val lastCheckIn: Column<LocalDateTime?> = datetime("lastCheckIn").nullable()
