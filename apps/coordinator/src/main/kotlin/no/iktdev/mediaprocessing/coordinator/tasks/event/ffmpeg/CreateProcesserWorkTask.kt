@@ -14,26 +14,34 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStar
 
 abstract class CreateProcesserWorkTask(override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
     private val log = KotlinLogging.logger {}
-    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+
+    open fun isPermittedToCreateTasks(events: List<PersistentMessage>): Boolean {
+        val event = events.firstOrNull() ?: return false
         val started = events.findLast { it.event == KafkaEvents.EventMediaProcessStarted }?.data as MediaProcessStarted?
         if (started == null) {
             log.info { "${event.referenceId} couldn't find start event" }
-            return null
+            return false
         } else if (started.type == ProcessType.MANUAL) {
             val proceed = events.find { it.event == KafkaEvents.EventMediaWorkProceedPermitted }
             if (proceed == null) {
                 log.warn { "${event.referenceId} waiting for Proceed event due to Manual process" }
-                return null
+                return false
             } else {
                 log.warn { "${event.referenceId} registered proceed permitted" }
             }
         }
+        return true
+    }
 
 
-        val earg = if (event.data is FfmpegWorkerArgumentsCreated) event.data as FfmpegWorkerArgumentsCreated? else return null
+
+
+    fun createMessagesByArgs(event: PersistentMessage): List<MessageDataWrapper> {
+        val events: MutableList<MessageDataWrapper> = mutableListOf()
+        val earg = if (event.data is FfmpegWorkerArgumentsCreated) event.data as FfmpegWorkerArgumentsCreated? else return events
         if (earg == null || earg.entries.isEmpty()) {
             log.info { "${event.referenceId} ffargument is empty" }
-            return null
+            return events
         }
 
         val requestEvents = earg.entries.map {
@@ -47,8 +55,9 @@ abstract class CreateProcesserWorkTask(override var coordinator: EventCoordinato
         }
         requestEvents.forEach {
             log.info { "${event.referenceId} creating work request based on ${it.derivedFromEventId}" }
-            super.onResult(it)
+            events.add(it)
         }
-        return null
+        return events
     }
+
 }

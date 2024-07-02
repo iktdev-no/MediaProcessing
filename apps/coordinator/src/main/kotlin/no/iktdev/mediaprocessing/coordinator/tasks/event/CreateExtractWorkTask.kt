@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.az
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkerArgumentsCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,9 +32,16 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
         super.onProcessEventsAccepted(event, events)
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
+
         if (events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }?.isSuccess() != true) {
             return null
         }
+
+        if (!isPermittedToCreateTasks(events)) {
+            log.warn { "Cannot continue until permitted event is present" }
+        }
+
+        val batchEvents = createMessagesByArgs(event)
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterExtractCreated) {
             val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterExtractCreated }
@@ -45,20 +53,23 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
             sevent ?: event
         } else event
 
-        forwardEvent.data.az<FfmpegWorkerArgumentsCreated>()?.takeIf { it.isSuccess() }?.let {
-            it.entries.forEach { argsGroup ->
-                val ffmpegTask = FfmpegTaskData(
-                    inputFile = it.inputFile,
-                    outFile = argsGroup.outputFile,
-                    arguments = argsGroup.arguments
-                )
-                val status = taskManager.createTask(event.referenceId, forwardEvent.eventId, TaskType.Extract, Gson().toJson(ffmpegTask))
-                if (!status) {
-                    log.error { "Failed to create Extract task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
+        batchEvents.forEach { e ->
+            val createdTask = if (e is FfmpegWorkRequestCreated) {
+                FfmpegTaskData(
+                    inputFile = e.inputFile,
+                    outFile = e.outFile,
+                    arguments = e.arguments
+                ).let { task ->
+                    val status = taskManager.createTask(referenceId = event.referenceId, task=  TaskType.Encode, data = Gson().toJson(task))
+                    if (!status) {
+                        log.error { "Failed to create Extract task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
+                    }
+                    status
                 }
-            }
+            } else false
+            if (createdTask)
+                onResult(e)
         }
-
-        return super.onProcessEvents(forwardEvent, events)
+        return null
     }
 }

@@ -14,6 +14,7 @@ import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import no.iktdev.mediaprocessing.shared.kafka.dto.az
+import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkRequestCreated
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkerArgumentsCreated
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -29,12 +30,21 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: EventCoordinator
 
     override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
         super.onProcessEventsAccepted(event, events)
-
         log.info { "${event.referenceId} triggered by ${event.event}" }
+
+
 
         if (events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterEncodeCreated) }?.isSuccess() != true) {
             return null
         }
+
+        if (!isPermittedToCreateTasks(events)) {
+            log.warn { "Cannot continue until permitted event is present" }
+        }
+
+        val batchEvents = createMessagesByArgs(event)
+
+
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterEncodeCreated) {
             val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterEncodeCreated }
@@ -46,22 +56,24 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: EventCoordinator
             sevent ?: event
         } else event
 
-
-        forwardEvent.data.az<FfmpegWorkerArgumentsCreated>()?.let {
-            val entries = it.entries.firstOrNull() ?: return@let
-            val ffmpegTask = FfmpegTaskData(
-                inputFile = it.inputFile,
-                outFile = entries.outputFile,
-                arguments = entries.arguments
-            )
-            val status = taskManager.createTask(event.referenceId, forwardEvent.eventId, TaskType.Encode, Gson().toJson(ffmpegTask))
-            if (!status) {
-                log.error { "Failed to create Encode task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
-            }
+        batchEvents.forEach { e ->
+            val createdTask = if (e is FfmpegWorkRequestCreated) {
+                FfmpegTaskData(
+                    inputFile = e.inputFile,
+                    outFile = e.outFile,
+                    arguments = e.arguments
+                ).let { task ->
+                    val status = taskManager.createTask(referenceId = event.referenceId, task=  TaskType.Encode, data = Gson().toJson(task))
+                    if (!status) {
+                        log.error { "Failed to create Encode task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
+                    }
+                    status
+                }
+            } else false
+            if (createdTask)
+                onResult(e)
         }
-
-
-        return super.onProcessEvents(forwardEvent, events)
+        return null
     }
 
 }
