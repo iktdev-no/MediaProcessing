@@ -14,6 +14,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.security.MessageDigest
 import java.time.LocalDateTime
+import java.util.*
 
 class TasksManager(private val dataSource: DataSource) {
     private val log = KotlinLogging.logger {}
@@ -122,7 +123,7 @@ class TasksManager(private val dataSource: DataSource) {
         }
     }
 
-    fun createTask(referenceId: String, eventId: String, task: TaskType, data: String): Boolean {
+    fun createTask(referenceId: String, eventId: String = UUID.randomUUID().toString(), task: TaskType, data: String): Boolean {
         return executeWithStatus(dataSource) {
             tasks.insert {
                 it[tasks.referenceId] = referenceId
