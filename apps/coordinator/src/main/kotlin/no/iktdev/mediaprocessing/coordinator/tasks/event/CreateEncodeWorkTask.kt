@@ -42,9 +42,6 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: EventCoordinator
             log.warn { "Cannot continue until permitted event is present" }
         }
 
-        val batchEvents = createMessagesByArgs(event)
-
-
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterEncodeCreated) {
             val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterEncodeCreated }
@@ -55,6 +52,9 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: EventCoordinator
             }
             sevent ?: event
         } else event
+
+        val batchEvents = createMessagesByArgs(forwardEvent)
+
 
         batchEvents.forEach { e ->
             val createdTask = if (e is FfmpegWorkRequestCreated) {

@@ -21,6 +21,6 @@ object tasks: IntIdTable() {
     val integrity: Column<String> = varchar("integrity", 100)
 
     init {
-        uniqueIndex(referenceId, task, integrity)
+        uniqueIndex(referenceId, task, eventId)
     }
 }

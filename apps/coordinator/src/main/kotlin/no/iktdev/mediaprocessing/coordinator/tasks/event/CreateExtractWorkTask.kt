@@ -18,6 +18,7 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.FfmpegWorkerArgu
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinator) : CreateProcesserWorkTask(coordinator) {
@@ -34,14 +35,13 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
 
 
         if (events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }?.isSuccess() != true) {
+            log.warn { "Last instance of ${KafkaEvents.EventMediaParameterExtractCreated} was unsuccessful or null. Skipping.." }
             return null
         }
 
         if (!isPermittedToCreateTasks(events)) {
             log.warn { "Cannot continue until permitted event is present" }
         }
-
-        val batchEvents = createMessagesByArgs(event)
 
         val forwardEvent = if (event.event != KafkaEvents.EventMediaParameterExtractCreated) {
             val sevent = events.findLast { it.event == KafkaEvents.EventMediaParameterExtractCreated }
@@ -53,6 +53,8 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
             sevent ?: event
         } else event
 
+        val batchEvents = createMessagesByArgs(forwardEvent)
+
         batchEvents.forEach { e ->
             val createdTask = if (e is FfmpegWorkRequestCreated) {
                 FfmpegTaskData(
@@ -60,7 +62,7 @@ class CreateExtractWorkTask(@Autowired override var coordinator: EventCoordinato
                     outFile = e.outFile,
                     arguments = e.arguments
                 ).let { task ->
-                    val status = taskManager.createTask(referenceId = event.referenceId, derivedFromEventId = event.eventId, task= TaskType.Encode, data = Gson().toJson(task))
+                    val status = taskManager.createTask(referenceId = event.referenceId, eventId = UUID.randomUUID().toString(), derivedFromEventId = event.eventId, task= TaskType.Encode, data = Gson().toJson(task))
                     if (!status) {
                         log.error { "Failed to create Extract task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
                     }
