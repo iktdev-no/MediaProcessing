@@ -134,7 +134,7 @@ class EncodeServiceV2(
                 data = ProcesserEncodeWorkPerformed(
                     status = Status.COMPLETED,
                     producedBy = serviceId,
-                    derivedFromEventId = task.eventId,
+                    derivedFromEventId = task.derivedFromEventId,
                     outFile = outputFile
                 )
             )
@@ -162,7 +162,7 @@ class EncodeServiceV2(
                 status = Status.ERROR,
                 message = message,
                 producedBy = serviceId,
-                derivedFromEventId = task.eventId
+                derivedFromEventId = task.derivedFromEventId,
             )
         )
         sendProgress(

@@ -35,6 +35,7 @@ class TaskDoz {
             consumed = row[tasks.consumed],
             task = taskType,
             eventId = row[tasks.eventId],
+            derivedFromEventId = row[tasks.derivedFromEventId],
             data = dzdata(taskType, data),
             created = row[tasks.created],
             lastCheckIn = row[tasks.lastCheckIn]

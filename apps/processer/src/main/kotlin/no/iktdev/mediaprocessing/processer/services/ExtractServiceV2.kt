@@ -110,7 +110,7 @@ class ExtractServiceV2(
                 data = ProcesserExtractWorkPerformed(
                     status = Status.COMPLETED,
                     producedBy = serviceId,
-                    derivedFromEventId = task.eventId,
+                    derivedFromEventId = task.derivedFromEventId,
                     outFile = outputFile
                 )
             )
@@ -138,7 +138,7 @@ class ExtractServiceV2(
                 status = Status.ERROR,
                 message = message,
                 producedBy = serviceId,
-                derivedFromEventId = task.eventId
+                derivedFromEventId = task.derivedFromEventId,
             )
         )
         sendProgress(

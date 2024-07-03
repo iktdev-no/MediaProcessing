@@ -10,6 +10,7 @@ data class Task(
     val consumed: Boolean = false,
     val task: TaskType,
     val eventId: String,
+    val derivedFromEventId: String? = null,
     val data: TaskData? = null,
     val created: LocalDateTime,
     val lastCheckIn: LocalDateTime? = null
