@@ -55,7 +55,11 @@ class CreateConvertWorkTask(@Autowired override var coordinator: EventCoordinato
             innerData?.outFile
         } else null
 
-        val convertFile = result?.let { File(it) } ?: return null
+        val convertFile = result?.let { File(it) }
+        if (convertFile == null) {
+            log.warn { "${event.referenceId} No file to perform convert on.." }
+            return null
+        }
 
         val taskData = ConvertTaskData(
             allowOverwrite = true,
@@ -65,24 +69,19 @@ class CreateConvertWorkTask(@Autowired override var coordinator: EventCoordinato
             outFormats = emptyList()
         )
 
-        taskManager.createTask(
+        val status = taskManager.createTask(
             referenceId = event.referenceId,
             eventId = event.eventId,
             task = TaskType.Convert,
+            derivedFromEventId = event.eventId,
             data = Gson().toJson(taskData)
         )
+        if (!status) {
+            log.error { "Failed to create Convert task on ${event.referenceId}@${event.eventId}" }
+        }
 
-        return if (event.isOfEvent(KafkaEvents.EventMediaProcessStarted) &&
-            event.data.az<MediaProcessStarted>()?.operations?.isOnly(StartOperationEvents.CONVERT) == true
-        ) {
-            produceConvertWorkRequest(convertFile, null, event.eventId)
-        } else if (event.isOfEvent(KafkaEvents.EventWorkExtractPerformed) && startedEventData?.operations?.contains(
-                StartOperationEvents.CONVERT
-            ) == true
-        ) {
-            return produceConvertWorkRequest(convertFile, event.referenceId, event.eventId)
 
-        } else null
+        return produceConvertWorkRequest(convertFile, event.referenceId, event.eventId)
     }
 
     private fun produceConvertWorkRequest(

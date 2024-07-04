@@ -63,7 +63,11 @@ class CreateEncodeWorkTask(@Autowired override var coordinator: EventCoordinator
                     outFile = e.outFile,
                     arguments = e.arguments
                 ).let { task ->
-                    val status = taskManager.createTask(referenceId = event.referenceId, derivedFromEventId = event.eventId, task=  TaskType.Encode, data = Gson().toJson(task))
+                    val status = taskManager.createTask(
+                        referenceId = event.referenceId,
+                        derivedFromEventId = event.eventId,
+                        task = TaskType.Encode,
+                        data = Gson().toJson(task))
                     if (!status) {
                         log.error { "Failed to create Encode task on ${forwardEvent.referenceId}@${forwardEvent.eventId}" }
                     }
