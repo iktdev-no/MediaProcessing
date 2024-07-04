@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
 
 
-@EnableScheduling
 @Service
 class ConvertServiceV2(
     @Autowired var tasks: TaskCoordinator,

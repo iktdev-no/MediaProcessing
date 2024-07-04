@@ -15,6 +15,8 @@ class TaskCoordinator(): TaskCoordinatorBase() {
     private val log = KotlinLogging.logger {}
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()
+        runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
+        runnerManager.assignRunner()
     }
 
 
