@@ -12,6 +12,7 @@ findProject(":shared")?.name = "shared"
 findProject(":shared:kafka")?.name = "kafka"
 findProject(":shared:contract")?.name = "contract"
 findProject(":shared:common")?.name = "common"
+findProject(":shared:eventi")?.name = "eventi"
 
 include("apps")
 include("apps:ui")
@@ -23,5 +24,5 @@ include("shared")
 include("shared:kafka")
 include("shared:contract")
 include("shared:common")
-
-
+include("shared:eventi")
+findProject(":shared:eventi")?.name = "eventi"

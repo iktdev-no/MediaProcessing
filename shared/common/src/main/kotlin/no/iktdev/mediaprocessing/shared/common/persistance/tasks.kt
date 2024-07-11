@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 
 object tasks: IntIdTable() {
     val referenceId: Column<String> = varchar("referenceId", 50)
+    val inputFile: Column<String?> = varchar("inputFile", 250).nullable()
     val status: Column<String?> = varchar("status", 10).nullable()
     val claimed: Column<Boolean> = bool("claimed").default(false)
     val claimedBy: Column<String?> = varchar("claimedBy", 100).nullable()
@@ -18,7 +19,6 @@ object tasks: IntIdTable() {
     val data: Column<String> = text("data")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
     val lastCheckIn: Column<LocalDateTime?> = datetime("lastCheckIn").nullable()
-    val integrity: Column<String> = varchar("integrity", 100)
 
     init {
         uniqueIndex(referenceId, task, eventId)

@@ -48,6 +48,7 @@ dependencies {
 
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
+    implementation(project(mapOf("path" to ":shared:eventi")))
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
@@ -56,7 +57,7 @@ dependencies {
     implementation ("mysql:mysql-connector-java:8.0.29")
 
 
-
+    implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation(kotlin("stdlib-jdk8"))
     testImplementation("org.assertj:assertj-core:3.21.0")
 

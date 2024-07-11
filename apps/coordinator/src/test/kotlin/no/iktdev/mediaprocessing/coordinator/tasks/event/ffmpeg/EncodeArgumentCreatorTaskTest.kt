@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.AudioArguments
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioPreference
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
@@ -15,7 +16,7 @@ class EncodeArgumentCreatorTaskTest {
 
     @Test
     fun verifyThatEacStreamGetsCorrectArguments() {
-        val audio = EncodeArgumentCreatorTask.AudioArguments(
+        val audio = AudioArguments(
             audioStream = audioStreamsEAC().first(),
             allStreams = ParsedMediaStreams(listOf(), audioStreamsEAC(), listOf()),
             preference = AudioPreference(preserveChannels = true, forceStereo = false, defaultToEAC3OnSurroundDetected = true)

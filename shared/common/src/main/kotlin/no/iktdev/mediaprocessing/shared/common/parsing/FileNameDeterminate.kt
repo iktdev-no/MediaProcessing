@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.EpisodeInfo
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MovieInfo
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfo
+import no.iktdev.mediaprocessing.shared.contract.data.EpisodeInfo
+import no.iktdev.mediaprocessing.shared.contract.data.MediaInfo
+import no.iktdev.mediaprocessing.shared.contract.data.MovieInfo
 
 
 class FileNameDeterminate(val title: String, val sanitizedName: String, val ctype: ContentType = ContentType.UNDEFINED, val metaTitle: String? = null)  {
@@ -13,7 +13,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         UNDEFINED
     }
 
-    fun getDeterminedVideoInfo(): VideoInfo? {
+    fun getDeterminedVideoInfo(): MediaInfo? {
         return when (ctype) {
             ContentType.MOVIE -> determineMovieFileName()
             ContentType.SERIE -> determineSerieFileName()
@@ -61,7 +61,7 @@ class FileNameDeterminate(val title: String, val sanitizedName: String, val ctyp
         return EpisodeInfo(title = metaTitle ?: title, episode = episodeNumber.toInt(), season =  seasonNumber.toInt(), episodeTitle =  episodeTitle, fullName =  cleanup(fullName))
     }
 
-    private fun determineUndefinedFileName(): VideoInfo? {
+    private fun determineUndefinedFileName(): MediaInfo? {
         val serieEx = SerieEx(title, sanitizedName)
         val (season, episode) = serieEx.findSeasonAndEpisode(sanitizedName)
         val episodeNumber = serieEx.findEpisodeNumber()

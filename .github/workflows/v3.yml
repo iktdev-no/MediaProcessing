@@ -1,0 +1,295 @@
+name: Build V2
+
+on:
+  push:
+    branches:
+      - v3
+  pull_request:
+    branches:
+      - v3
+  workflow_dispatch:
+
+
+jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      pyMetadata: ${{ steps.filter.outputs.pyMetadata }}
+      coordinator: ${{ steps.filter.outputs.coordinator }}
+      processer: ${{ steps.filter.outputs.processer }}
+      converter: ${{ steps.filter.outputs.converter }}
+      shared: ${{ steps.filter.outputs.shared }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            pyMetadata:
+              - 'apps/pyMetadata/**'
+            apps/coordinator:
+              - 'apps/coordinator/**'
+            apps/processer:
+              - 'apps/processer/**'
+            apps/converter:
+              - 'apps/converter/**'
+            
+            shared:
+              - 'shared/**'
+      # Step to print the outputs from "pre-check" job
+      - name: Print Outputs from pre-check job
+        run: |
+          echo "Apps\n"
+          echo "app:pyMetadata: ${{ needs.pre-check.outputs.pyMetadata }}"
+          echo "app:coordinator: ${{ needs.pre-check.outputs.coordinator }}"
+          echo "app:processer: ${{ needs.pre-check.outputs.processer }}"
+          echo "app:converter: ${{ needs.pre-check.outputs.converter }}"
+          
+          echo "Shared"
+          echo "shared: ${{ needs.pre-check.outputs.shared }}"
+          echo "\n"
+          echo "${{ needs.pre-check.outputs }}"
+          echo "${{ needs.pre-check }}"
+
+  build-shared:
+    runs-on: ubuntu-latest
+    needs: pre-check
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Shared code Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
+
+      - name: Build Shared code
+        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :shared:build --stacktrace --info
+
+
+  build-processer:
+    needs: build-shared
+    if: ${{ needs.pre-check.outputs.processer == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.shared == 'true' }}
+    runs-on: ubuntu-latest
+    #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Shared Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
+
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(cat ./apps/processer/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+ 
+
+      - name: Build Processer module
+        id: build-processer
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:processer:bootJar --info
+          echo "Build completed"
+
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./dockerfiles/DebianJavaFfmpeg
+          build-args: |
+            MODULE_NAME=processer
+            PASS_APP_VERSION=${{ env.VERSION }}
+          push: true
+          tags: |
+            bskjon/mediaprocessing-processer:v3
+            bskjon/mediaprocessing-processer:v3-${{ github.sha }}
+            bskjon/mediaprocessing-processer:v3-${{ steps.docker-tag.outputs.tag }}
+
+  build-converter:
+    needs: build-shared
+    if: ${{ needs.pre-check.outputs.converter == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.shared == 'true' }}
+    runs-on: ubuntu-latest
+    #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Cache Shared Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
+
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(cat ./apps/converter/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+
+      - name: Build Converter module
+        id: build-converter
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:converter:bootJar --info
+          echo "Build completed"
+
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./dockerfiles/DebianJava
+          build-args: |
+            MODULE_NAME=converter
+            PASS_APP_VERSION=${{ env.VERSION }}
+          push: true
+          tags: |
+            bskjon/mediaprocessing-converter:v3
+            bskjon/mediaprocessing-converter:v3-${{ github.sha }}
+            bskjon/mediaprocessing-converter:v3-${{ steps.docker-tag.outputs.tag }}
+            
+  build-coordinator:
+    needs: build-shared
+    if: ${{ needs.pre-check.outputs.coordinator == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.shared == 'true' }}
+    runs-on: ubuntu-latest
+    #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Shared Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
+
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(cat ./apps/coordinator/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build Coordinator module
+        id: build-coordinator
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:coordinator:bootJar
+          echo "Build completed"
+
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Debug Check extracted version
+        run: | 
+          echo "Extracted version: ${{ env.VERSION }}"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./dockerfiles/DebianJavaFfmpeg
+          build-args: |
+            MODULE_NAME=coordinator
+            PASS_APP_VERSION=${{ env.VERSION }}
+          push: true
+          tags: |
+            bskjon/mediaprocessing-coordinator:v3
+            bskjon/mediaprocessing-coordinator:v3-${{ github.sha }}
+            bskjon/mediaprocessing-coordinator:v3-${{ steps.docker-tag.outputs.tag }}
+            
+  build-pymetadata:
+    needs: pre-check
+    if:  ${{ needs.pre-check.outputs.pyMetadata == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build pyMetadata module
+        id: build-pymetadata
+        run: |
+          if [[ "${{ steps.check-pymetadata.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            cd apps/pyMetadata
+            # Add the necessary build steps for your Python module here
+            echo "Build completed"
+          else
+            echo "pyMetadata has not changed. Skipping pyMetadata module build."
+            echo "::set-output name=job_skipped::true"
+          fi
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5.1.0
+        with:
+          context: .
+          file: ./dockerfiles/Python
+          build-args:
+            MODULE_NAME=pyMetadata
+          push: true
+          tags: |
+            bskjon/mediaprocessing-pymetadata:v3
+            bskjon/mediaprocessing-pymetadata:v3-${{ github.sha }}
+            bskjon/mediaprocessing-pymetadata:v3-${{ steps.docker-tag.outputs.tag }}

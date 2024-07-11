@@ -1,12 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import no.iktdev.mediaprocessing.PersistentMessageFromJsonDump
+import no.iktdev.mediaprocessing.coordinator.tasksV2.listeners.MediaOutInformationTaskListener
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class MetadataAndBaseInfoToFileOutTest {
@@ -34,7 +34,7 @@ class MetadataAndBaseInfoToFileOutTest {
         val baseInfo = events.lastOrSuccessOf(KafkaEvents.EventMediaReadBaseInfoPerformed) { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed
         val meta = events.lastOrSuccessOf(KafkaEvents.EventMediaMetadataSearchPerformed) { it.data is MetadataPerformed }?.data as MetadataPerformed?
 
-        val pm = MetadataAndBaseInfoToFileOut.ProcessMediaInfoAndMetadata(baseInfo, meta)
+        val pm = MediaOutInformationTaskListener.ProcessMediaInfoAndMetadata(baseInfo, meta)
 
 
         val vi = pm.getVideoPayload()

@@ -2,9 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import com.google.gson.Gson
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
-import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.coordinator.utils.isAwaitingPrecondition
 import no.iktdev.mediaprocessing.coordinator.utils.isAwaitingTask
 import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
@@ -19,11 +17,10 @@ import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStar
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessCompleted
 import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.support.TaskUtils
 import org.springframework.stereotype.Service
 
 @Service
-class CompleteMediaTask(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
+class CompleteMediaTask() : TaskCreator(null) {
     val log = KotlinLogging.logger {}
 
     override val producesEvent: KafkaEvents = KafkaEvents.EventMediaProcessCompleted

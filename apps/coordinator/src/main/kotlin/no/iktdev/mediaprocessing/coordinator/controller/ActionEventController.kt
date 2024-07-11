@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import com.google.gson.Gson
-import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.eventManager
 import no.iktdev.mediaprocessing.shared.contract.dto.RequestWorkProceed
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller
 @RequestMapping(path = ["/action"])
-class ActionEventController(@Autowired var coordinator: EventCoordinator) {
+class ActionEventController(@Autowired var coordinator: EventCoordinatorDep) {
 
 
     @RequestMapping("/flow/proceed")

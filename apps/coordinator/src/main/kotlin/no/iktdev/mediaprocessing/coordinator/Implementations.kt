@@ -9,8 +9,9 @@ import org.springframework.context.annotation.Import
 
 @Configuration
 class SocketLocalInit: SocketImplementation() {
-
 }
+
+
 
 @Configuration
 @Import(CoordinatorProducer::class, DefaultMessageListener::class)

@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
@@ -29,7 +28,7 @@ import java.io.File
 import java.sql.SQLIntegrityConstraintViolationException
 
 @Service
-class CollectAndStoreTask(@Autowired override var coordinator: EventCoordinator) : TaskCreator(coordinator) {
+class CollectAndStoreTask() : TaskCreator(null) {
     val log = KotlinLogging.logger {}
 
 

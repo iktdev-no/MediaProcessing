@@ -13,38 +13,34 @@ import no.iktdev.streamit.library.db.tables.*
 import no.iktdev.streamit.library.db.tables.helper.cast_errors
 import no.iktdev.streamit.library.db.tables.helper.data_audio
 import no.iktdev.streamit.library.db.tables.helper.data_video
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Bean
 
 val log = KotlinLogging.logger {}
+private lateinit var eventDatabase: EventsDatabase
+private lateinit var eventsManager: EventsManager
 
 @SpringBootApplication
 class CoordinatorApplication {
+
+    @Bean
+    fun eventManager(): EventsManager {
+        return eventsManager
+    }
+
 }
 
-private var context: ApplicationContext? = null
 private lateinit var storeDatabase: MySqlDataSource
+
 val ioCoroutine = CoroutinesIO()
 val defaultCoroutine = CoroutinesDefault()
 
-@Suppress("unused")
-fun getContext(): ApplicationContext? {
-    return context
-}
 
 fun getStoreDatabase(): MySqlDataSource {
     return storeDatabase
 }
 
-private lateinit var eventsDatabase: MySqlDataSource
-fun getEventsDatabase(): MySqlDataSource {
-    return eventsDatabase
-}
-
-lateinit var eventManager: PersistentEventManager
 lateinit var taskManager: TasksManager
 
 fun main(args: Array<String>) {
@@ -58,24 +54,17 @@ fun main(args: Array<String>) {
             value.printStackTrace()
         }
     })
+    eventDatabase = EventsDatabase().also {
+        eventsManager = EventsManager(it.database)
+    }
 
-    eventsDatabase = DatabaseEnvConfig.toEventsDatabase()
-    eventsDatabase.createDatabase()
+
 
     storeDatabase = DatabaseEnvConfig.toStoredDatabase()
     storeDatabase.createDatabase()
 
 
-    eventManager = PersistentEventManager(eventsDatabase)
-    taskManager = TasksManager(eventsDatabase)
-
-
-    val kafkaTables = listOf(
-        events, // For kafka
-        allEvents,
-        tasks,
-        runners
-    )
+    taskManager = TasksManager(eventDatabase.database)
 
 
     val tables = arrayOf(
@@ -95,8 +84,7 @@ fun main(args: Array<String>) {
     storeDatabase.createTables(*tables)
 
 
-    eventsDatabase.createTables(*kafkaTables.toTypedArray())
-    context = runApplication<CoordinatorApplication>(*args)
+    runApplication<CoordinatorApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }
 
     printSharedConfig()

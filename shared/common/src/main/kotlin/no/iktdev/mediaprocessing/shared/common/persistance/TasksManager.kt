@@ -123,7 +123,7 @@ class TasksManager(private val dataSource: DataSource) {
         }
     }
 
-    fun createTask(referenceId: String, eventId: String = UUID.randomUUID().toString(), derivedFromEventId: String? = null, task: TaskType, data: String): Boolean {
+    fun createTask(referenceId: String, eventId: String = UUID.randomUUID().toString(), derivedFromEventId: String? = null, task: TaskType, data: String, inputFile: String): Boolean {
         return executeWithStatus(dataSource) {
             tasks.insert {
                 it[tasks.referenceId] = referenceId
@@ -131,7 +131,7 @@ class TasksManager(private val dataSource: DataSource) {
                 it[tasks.task] = task.name
                 it[tasks.data] = data
                 it[tasks.derivedFromEventId] = derivedFromEventId
-                it[tasks.integrity] = getIntegrityOfData(data)
+                it[tasks.inputFile] = inputFile
             }
         }
     }

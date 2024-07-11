@@ -16,6 +16,7 @@
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/common" />
             <option value="$PROJECT_DIR$/shared/contract" />
+            <option value="$PROJECT_DIR$/shared/eventi" />
             <option value="$PROJECT_DIR$/shared/kafka" />
           </set>
         </option>
