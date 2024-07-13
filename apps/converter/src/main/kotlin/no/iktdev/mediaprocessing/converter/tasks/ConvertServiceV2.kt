@@ -3,15 +3,16 @@ package no.iktdev.mediaprocessing.converter.tasks
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.iktdev.eventi.data.EventMetadata
+import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.converter.*
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter2
 import no.iktdev.mediaprocessing.shared.common.services.TaskService
-import no.iktdev.mediaprocessing.shared.common.task.ConvertTaskData
 import no.iktdev.mediaprocessing.shared.common.task.Task
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
+import no.iktdev.mediaprocessing.shared.contract.data.ConvertWorkPerformed
+import no.iktdev.mediaprocessing.shared.contract.data.ConvertedData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
@@ -51,7 +52,7 @@ class ConvertServiceV2(
     }
 
     fun startConvert(task: Task) {
-        val convert = task.data as ConvertTaskData
+        val convert = task.data as ConvertData
         worker = Converter2(convert, this)
         worker?.execute()
     }
@@ -81,15 +82,16 @@ class ConvertServiceV2(
                 readbackIsSuccess = taskManager.isTaskCompleted(task.referenceId, task.eventId)
             }
 
-            tasks.producer.sendMessage(
-                referenceId = task.referenceId, event = KafkaEvents.EventWorkConvertPerformed,
-                data = ConvertWorkPerformed(
-                    status = Status.COMPLETED,
-                    producedBy = serviceId,
+            tasks.onProduceEvent(ConvertWorkPerformed(
+                metadata = EventMetadata(
+                    referenceId = task.referenceId,
                     derivedFromEventId = task.eventId,
-                    outFiles = outputFiles
+                    status = EventStatus.Success
+                ),
+                data = ConvertedData(
+                    outputFiles = outputFiles
                 )
-            )
+            ))
             onClearTask()
         }
     }
@@ -99,17 +101,13 @@ class ConvertServiceV2(
         super.onError(inputFile, message)
         log.info { "Convert error for ${task.referenceId}" }
 
-        val data = ConvertWorkPerformed(
-            status = Status.ERROR,
-            message = message,
-            producedBy = serviceId,
-            derivedFromEventId = task.eventId,
-            outFiles = emptyList()
-        )
-        tasks.producer.sendMessage(
-            referenceId = task.referenceId, event = KafkaEvents.EventWorkConvertPerformed,
-            data = data
-        )
+        tasks.onProduceEvent(ConvertWorkPerformed(
+            metadata = EventMetadata(
+                referenceId = task.referenceId,
+                derivedFromEventId = task.eventId,
+                status = EventStatus.Failed
+            )
+        ))
     }
 
 

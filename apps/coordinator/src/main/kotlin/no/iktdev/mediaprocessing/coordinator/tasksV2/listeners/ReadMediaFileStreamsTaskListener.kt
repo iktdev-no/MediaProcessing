@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.dataAs
 import no.iktdev.eventi.implementations.EventCoordinator
@@ -17,8 +19,8 @@ import no.iktdev.mediaprocessing.shared.contract.EventsListenerContract
 import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.contract.data.Event
 import no.iktdev.mediaprocessing.shared.contract.data.MediaFileStreamsReadEvent
+import no.iktdev.mediaprocessing.shared.contract.data.StartEventData
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -34,24 +36,34 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     override val produceEvent: Events = Events.EventMediaReadStreamPerformed
     override val listensForEvents: List<Events> = listOf(Events.EventMediaProcessStarted)
 
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        val status =  super.shouldIProcessAndHandleEvent(incomingEvent, events)
+        return status
+    }
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
-        val startEvent = incomingEvent.dataAs<MediaProcessStarted>() ?: return
-        if (!startEvent.operations.any { it in requiredOperations }) {
-            log.info { "${incomingEvent.metadata.referenceId} does not contain a operation in ${requiredOperations.joinToString(",") { it.name }}" }
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+
+        val startEvent = event.dataAs<StartEventData>()
+        if (startEvent == null || !startEvent.operations.any { it in requiredOperations }) {
+            log.info { "${event.metadata.referenceId} does not contain a operation in ${requiredOperations.joinToString(",") { it.name }}" }
             return
         }
         val result = runBlocking {
             try {
-                val data = fileReadStreams(startEvent, incomingEvent.metadata.eventId)
+                val data = fileReadStreams(startEvent, event.metadata.eventId)
                 MediaFileStreamsReadEvent(
-                    metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                    metadata = event.makeDerivedEventInfo(EventStatus.Success),
                     data = data
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
                 MediaFileStreamsReadEvent(
-                    metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+                    metadata = event.makeDerivedEventInfo(EventStatus.Failed)
                 )
             }
         }
@@ -59,7 +71,7 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     }
 
 
-    suspend fun fileReadStreams(started: MediaProcessStarted, eventId: String): JsonObject? {
+    suspend fun fileReadStreams(started: StartEventData, eventId: String): JsonObject? {
         val file = File(started.file)
         return if (file.exists() && file.isFile) {
             val result = readStreams(file)

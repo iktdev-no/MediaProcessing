@@ -3,6 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.dataAs
 import no.iktdev.eventi.implementations.EventCoordinator
@@ -34,21 +36,30 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
         Events.EventMediaReadStreamPerformed
     )
 
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        return super.shouldIProcessAndHandleEvent(incomingEvent, events)
+    }
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
-        // MediaFileStreamsReadEvent
-        val readData = incomingEvent.dataAs<MediaFileStreamsReadEvent>()?.data
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+
+        val readData = event.dataAs<JsonObject>()
         val result = try {
             MediaFileStreamsParsedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = parseStreams(readData)
             )
         } catch (e: Exception) {
             e.printStackTrace()
             MediaFileStreamsParsedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
             )
         }
+        onProduceEvent(result)
     }
 
 

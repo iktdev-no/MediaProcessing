@@ -2,9 +2,16 @@ package no.iktdev.mediaprocessing.processer
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.*
+import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
+import no.iktdev.mediaprocessing.shared.common.datasource.withDirtyRead
 import no.iktdev.mediaprocessing.shared.common.persistance.ActiveMode
 import no.iktdev.mediaprocessing.shared.common.persistance.RunnerManager
+import no.iktdev.mediaprocessing.shared.common.persistance.tasks
+import no.iktdev.mediaprocessing.shared.common.persistance.toTask
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
+import no.iktdev.mediaprocessing.shared.contract.data.Event
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.select
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
@@ -62,6 +69,10 @@ class TaskCoordinator(): TaskCoordinatorBase() {
                 }
             }
         }
+    }
+
+    override fun onProduceEvent(event: Event) {
+        taskManager.produceEvent(event)
     }
 
     override fun clearExpiredClaims() {

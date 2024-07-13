@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import com.google.gson.Gson
+import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.contract.dto.EventRequest
 import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
@@ -16,7 +17,7 @@ import java.io.File
 
 @Controller
 @RequestMapping(path = ["/request"])
-class RequestEventController(@Autowired var coordinator: EventCoordinatorDep) {
+class RequestEventController(@Autowired var coordinator: Coordinator) {
 
     @PostMapping("/convert")
     @ResponseStatus(HttpStatus.OK)

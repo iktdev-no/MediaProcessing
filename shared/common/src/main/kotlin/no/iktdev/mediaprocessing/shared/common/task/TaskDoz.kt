@@ -4,6 +4,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mysql.cj.xdevapi.RowResult
 import no.iktdev.mediaprocessing.shared.common.persistance.tasks
+import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
+import no.iktdev.mediaprocessing.shared.contract.data.EncodeArgumentData
+import no.iktdev.mediaprocessing.shared.contract.data.ExtractArgumentData
+import no.iktdev.mediaprocessing.shared.contract.dto.tasks.TaskData
 import org.jetbrains.exposed.sql.ResultRow
 
 class TaskDoz {
@@ -11,12 +15,9 @@ class TaskDoz {
 
     fun <T: TaskData> dzdata(type: TaskType, data: String): T? {
         val clazz: Class<out TaskData> = when(type) {
-            TaskType.Encode, TaskType.Extract -> {
-                FfmpegTaskData::class.java
-            }
-            TaskType.Convert -> {
-                ConvertTaskData::class.java
-            }
+            TaskType.Encode -> EncodeArgumentData::class.java
+            TaskType.Extract -> ExtractArgumentData::class.java
+            TaskType.Convert -> ConvertData::class.java
             else -> TaskData::class.java
         }
         val type = TypeToken.getParameterized(clazz).type

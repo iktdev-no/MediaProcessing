@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
@@ -26,7 +28,19 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
         Events.EventMediaParseStreamPerformed,
         Events.EventMediaReadOutNameAndType
     )
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
+
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        val state = super.shouldIProcessAndHandleEvent(incomingEvent, events)
+        val eventType = events.map { it.eventType }
+        return state && eventType.containsAll(listensForEvents)
+    }
+
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
         val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>() ?: return
         if (started.data == null || started.data?.operations?.contains(StartOperationEvents.EXTRACT) == false) {
             return
@@ -54,11 +68,11 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
         val result = mapper.getArguments()
         if (result.isEmpty()) {
             onProduceEvent(ExtractArgumentCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Skipped)
+                metadata = event.makeDerivedEventInfo(EventStatus.Skipped)
             ))
         } else {
             onProduceEvent(ExtractArgumentCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = result
             ))
         }

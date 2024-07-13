@@ -2,6 +2,8 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
@@ -23,12 +25,19 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.EventWorkDownloadCoverPerformed
     override val listensForEvents: List<Events> = listOf(Events.EventMediaReadOutCover)
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+
+
         val failedEventDefault = MediaCoverDownloadedEvent(
-            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+            metadata = event.makeDerivedEventInfo(EventStatus.Failed)
         )
 
-        val data = incomingEvent.az<MediaCoverInfoReceivedEvent>()?.data
+        val data = event.az<MediaCoverInfoReceivedEvent>()?.data
         if (data == null) {
             log.error { "No valid data for use to obtain cover" }
             onProduceEvent(failedEventDefault)
@@ -37,7 +46,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
 
         val outDir = File(data.outDir)
         if (!outDir.exists()) {
-            log.error { "Check for output directory for cover storage failed for ${incomingEvent.metadata.eventId} " }
+            log.error { "Check for output directory for cover storage failed for ${event.metadata.eventId} " }
             onProduceEvent(failedEventDefault)
         }
 
@@ -62,14 +71,14 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
         }
 
         if (result == null) {
-            log.error { "Could not download cover, check logs ${incomingEvent.metadata.eventId} " }
+            log.error { "Could not download cover, check logs ${event.metadata.eventId} " }
         } else {
             if (!result.exists() || !result.canRead()) {
                 onProduceEvent(failedEventDefault)
                 return
             }
             onProduceEvent(MediaCoverDownloadedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = DownloadedCover(result.absolutePath)
             ))
         }

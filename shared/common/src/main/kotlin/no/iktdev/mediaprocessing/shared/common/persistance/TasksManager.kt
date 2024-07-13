@@ -1,20 +1,27 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.datasource.DataSource
-import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
-import no.iktdev.mediaprocessing.shared.common.datasource.withDirtyRead
-import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
+import no.iktdev.eventi.data.eventId
+import no.iktdev.eventi.data.referenceId
+import no.iktdev.eventi.data.toJson
+import no.iktdev.mediaprocessing.shared.common.datasource.*
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.common.task.TaskDoz
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
+import no.iktdev.mediaprocessing.shared.contract.data.Event
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.util.*
+
+enum class Status {
+    SKIPPED,
+    COMPLETED,
+    ERROR
+}
 
 class TasksManager(private val dataSource: DataSource) {
     private val log = KotlinLogging.logger {}
@@ -134,6 +141,38 @@ class TasksManager(private val dataSource: DataSource) {
                 it[tasks.inputFile] = inputFile
             }
         }
+    }
+
+
+    fun produceEvent(event: Event): Boolean {
+        val exception = executeOrException(dataSource.database) {
+            events.insert {
+                it[referenceId] = event.referenceId()
+                it[eventId] = event.eventId()
+                it[events.event] = event.eventType.event
+                it[data] = event.toJson()
+            }
+        }
+        val success = if (exception != null) {
+            if (exception.isExposedSqlException()) {
+                if ((exception as ExposedSQLException).isCausedByDuplicateError()) {
+                    log.debug { "Error is of SQLIntegrityConstraintViolationException" }
+                    log.error { exception.message }
+                    exception.printStackTrace()
+                } else {
+                    log.debug { "Error code is: ${exception.errorCode}" }
+                    log.error { exception.message }
+                    exception.printStackTrace()
+                }
+            } else {
+                log.error { exception.message }
+                exception.printStackTrace()
+            }
+            false
+        } else {
+            true
+        }
+        return success
     }
 
 }

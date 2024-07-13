@@ -47,7 +47,6 @@ dependencies {
     implementation(project(mapOf("path" to ":shared")))
     implementation(project(mapOf("path" to ":shared:common")))
     implementation(project(mapOf("path" to ":shared:contract")))
-    implementation(project(mapOf("path" to ":shared:kafka")))
 
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

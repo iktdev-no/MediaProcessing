@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
@@ -25,7 +27,14 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
     override val produceEvent: Events = Events.EventMediaReadOutCover
     override val listensForEvents: List<Events> = listOf(Events.EventMediaMetadataSearchPerformed)
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+
+
         val baseInfo = events.find { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data ?: return
         val metadata = events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }?.az<MediaMetadataReceivedEvent>()?.data ?: return
         val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data ?: return
@@ -39,11 +48,11 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         val result = if (coverUrl.isNullOrBlank()) {
             log.warn { "No cover available for ${baseInfo.title}" }
             MediaCoverInfoReceivedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Skipped)
+                metadata = event.makeDerivedEventInfo(EventStatus.Skipped)
             )
         } else {
             MediaCoverInfoReceivedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = CoverDetails(
                     url = coverUrl,
                     outFileBaseName = NameHelper.normalize(coverTitle),

@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
@@ -11,7 +13,6 @@ import no.iktdev.mediaprocessing.shared.contract.data.BaseInfoEvent
 import no.iktdev.mediaprocessing.shared.contract.data.Event
 import no.iktdev.mediaprocessing.shared.contract.data.MediaMetadataReceivedEvent
 import no.iktdev.mediaprocessing.shared.contract.data.az
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -20,6 +21,9 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
+
+val metadataTimeoutMinutes: Int = System.getenv("METADATA_TIMEOUT")?.toIntOrNull() ?: 10
+
 
 @Service
 @EnableScheduling
@@ -37,16 +41,28 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
     )
 
 
-    val metadataTimeout = KafkaEnv.metadataTimeoutMinutes * 60
+    val metadataTimeout = metadataTimeoutMinutes * 60
     val waitingProcessesForMeta: MutableMap<String, MetadataTriggerData> = mutableMapOf()
 
+    /**
+     * This one gets special treatment, since it will only produce a timeout it does not need to use the incoming event
+     */
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
-        if (incomingEvent.eventType == Events.EventMediaReadBaseInfoPerformed &&
-            events.none { it.eventType ==  Events.EventMediaMetadataSearchPerformed }) {
-            val baseInfo = incomingEvent.az<BaseInfoEvent>()?.data
+
+        if (events.any { it.eventType == Events.EventMediaReadBaseInfoPerformed } &&
+            events.none { it.eventType == Events.EventMediaMetadataSearchPerformed } &&
+            !waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)) {
+            val consumedIncoming = incomingEvent.consume()
+            if (consumedIncoming == null) {
+                log.error { "Event is null and should not be available nor provided! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+                return
+            }
+
+
+            val baseInfo = events.find { it.eventType ==  Events.EventMediaReadBaseInfoPerformed}?.az<BaseInfoEvent>()?.data
             if (baseInfo == null) {
-                log.error { "BaseInfoEvent is null for referenceId: ${incomingEvent.metadata.referenceId} on eventId: ${incomingEvent.metadata.eventId}" }
+                log.error { "BaseInfoEvent is null for referenceId: ${consumedIncoming.metadata.referenceId} on eventId: ${consumedIncoming.metadata.eventId}" }
                 return
             }
 
@@ -54,17 +70,16 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
             val dateTime = LocalDateTime.ofEpochSecond(estimatedTimeout, 0, ZoneOffset.UTC)
 
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH)
-            log.info { "Sending ${baseInfo.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
-            if (!waitingProcessesForMeta.containsKey(incomingEvent.metadata.referenceId)) {
-                waitingProcessesForMeta[incomingEvent.metadata.referenceId] =
-                    MetadataTriggerData(incomingEvent.metadata.eventId, LocalDateTime.now())
+            if (!waitingProcessesForMeta.containsKey(consumedIncoming.metadata.referenceId)) {
+                waitingProcessesForMeta[consumedIncoming.metadata.referenceId] =
+                    MetadataTriggerData(consumedIncoming.metadata.eventId, LocalDateTime.now())
+                log.info { "Sending ${baseInfo.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
             }
         }
 
-        if (incomingEvent.eventType == Events.EventMediaMetadataSearchPerformed) {
-            if (waitingProcessesForMeta.containsKey(incomingEvent.metadata.referenceId)) {
-                waitingProcessesForMeta.remove(incomingEvent.metadata.referenceId)
-            }
+        if (events.any { it.eventType == Events.EventMediaMetadataSearchPerformed }
+            && waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)) {
+                waitingProcessesForMeta.remove(incomingEvent.metadata().referenceId)
         }
     }
 

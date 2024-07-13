@@ -30,6 +30,7 @@ dependencies {
     implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("com.google.code.gson:gson:2.8.9")
 
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:2.7.0")

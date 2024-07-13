@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.Coordinator
@@ -9,7 +11,7 @@ import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.data.BaseInfo
 import no.iktdev.mediaprocessing.shared.contract.data.BaseInfoEvent
 import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
+import no.iktdev.mediaprocessing.shared.contract.data.StartEventData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -26,20 +28,26 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
 
 
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
         val message = try {
-            readFileInfo(incomingEvent.data as MediaProcessStarted, incomingEvent.metadata.eventId)?.let {
-                BaseInfoEvent(metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success), data = it)
-            } ?: BaseInfoEvent(metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed))
+            readFileInfo(event.data as StartEventData, event.metadata.eventId)?.let {
+                BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Success), data = it)
+            } ?: BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed))
         } catch (e: Exception) {
-            BaseInfoEvent(metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed))
+            e.printStackTrace()
+            BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed))
         }
         onProduceEvent(message)
     }
 
 
     @Throws(Exception::class)
-    fun readFileInfo(started: MediaProcessStarted, eventId: String): BaseInfo? {
+    fun readFileInfo(started: StartEventData, eventId: String): BaseInfo? {
         return try {
             val fileName = File(started.file).nameWithoutExtension
             val fileNameParser = FileNameParser(fileName)

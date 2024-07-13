@@ -14,11 +14,3 @@ inline fun <reified T: Event> Event.az(): T? {
         null
     } else this
 }
-
-fun Event.referenceId(): String {
-    return this.metadata.referenceId
-}
-
-fun Event.eventId(): String {
-    return this.metadata.eventId
-}

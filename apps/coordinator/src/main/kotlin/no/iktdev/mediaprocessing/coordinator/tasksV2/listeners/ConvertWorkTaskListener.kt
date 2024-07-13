@@ -2,7 +2,9 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import com.google.gson.Gson
 import mu.KotlinLogging
-import no.iktdev.eventi.data.EventStatus
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
+import no.iktdev.eventi.data.*
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
@@ -29,15 +31,33 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         Events.EventWorkExtractPerformed
     )
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
-        if (!canStart(incomingEvent, events)) {
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        if (!isOfEventsIListenFor(incomingEvent))
+            return false
+        if (!incomingEvent.isSuccessful() && !shouldIHandleFailedEvents(incomingEvent)) {
+            return false
+        }
+        val producedEvents = events.filter { it.eventType == produceEvent }
+        val shouldIHandleAndProduce = producedEvents.none { it.derivedFromEventId() == incomingEvent.eventId() }
+        if (shouldIHandleAndProduce) {
+            log.info { "Permitting handling of event: ${incomingEvent.dataAs<ExtractedData>()?.outputFile}" }
+        }
+        return shouldIHandleAndProduce
+    }
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+        if (!canStart(event, events)) {
             return
         }
 
-        val file = if (incomingEvent.eventType == Events.EventWorkExtractPerformed) {
-            incomingEvent.az<ExtractWorkPerformedEvent>()?.data?.outputFile
-        } else if (incomingEvent.eventType == Events.EventMediaProcessStarted) {
-            val startEvent = incomingEvent.az<MediaProcessStartEvent>()?.data
+        val file = if (event.eventType == Events.EventWorkExtractPerformed) {
+            event.az<ExtractWorkPerformedEvent>()?.data?.outputFile
+        } else if (event.eventType == Events.EventMediaProcessStarted) {
+            val startEvent = event.az<MediaProcessStartEvent>()?.data
             if (startEvent?.operations?.isOnly(StartOperationEvents.CONVERT) == true) {
                 startEvent.file
             } else null
@@ -50,7 +70,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         val convertFile = file?.let { File(it) }
         if (convertFile == null || !convertFile.exists()) {
             onProduceEvent(ConvertWorkCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
             ))
             return
         } else {
@@ -61,24 +81,21 @@ class ConvertWorkTaskListener: WorkTaskListener() {
                 allowOverwrite = true
             )
 
-            val status = taskManager.createTask(
-                referenceId = incomingEvent.referenceId(),
-                eventId = incomingEvent.eventId(),
-                task = TaskType.Convert,
-                derivedFromEventId = incomingEvent.eventId(),
-                data = Gson().toJson(convertData),
-                inputFile = convertFile.absolutePath
-            )
 
-            if (!status) {
-                log.error { "Failed to create Convert task on ${incomingEvent.referenceId()}@${incomingEvent.eventId()}" }
-                return
-            }
-
-            onProduceEvent(ConvertWorkCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+            ConvertWorkCreatedEvent(
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = convertData
-            ))
+            ).also { event ->
+                onProduceEvent(event)
+                taskManager.createTask(
+                    referenceId = event.referenceId(),
+                    eventId = event.eventId(),
+                    derivedFromEventId = event.derivedFromEventId(),
+                    task = TaskType.Convert,
+                    data = WGson.gson.toJson(event.data!!),
+                    inputFile = event.data!!.inputFile
+                )
+            }
         }
     }
 }

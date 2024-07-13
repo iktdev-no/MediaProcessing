@@ -1,23 +1,14 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.TaskCreator
 import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
 import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
 import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
 import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
-import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.contract.reader.MetadataDto
 import no.iktdev.mediaprocessing.shared.contract.reader.VideoDetails
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents.*
-import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
-import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
-import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import no.iktdev.streamit.library.db.query.*
 import no.iktdev.streamit.library.db.tables.titles
 import org.jetbrains.exposed.exceptions.ExposedSQLException
@@ -26,24 +17,24 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
 import java.sql.SQLIntegrityConstraintViolationException
-
+/*
 @Service
-class CollectAndStoreTask() : TaskCreator(null) {
+class CollectAndStoreTask()  {
     val log = KotlinLogging.logger {}
 
 
-    override val producesEvent: KafkaEvents = KafkaEvents.EventCollectAndStore
+    val producesEvent: KafkaEvents = KafkaEvents.EventCollectAndStore
 
-    override val requiredEvents: List<KafkaEvents> = listOf(
+    val requiredEvents: List<KafkaEvents> = listOf(
         EventMediaProcessStarted,
         EventMediaProcessCompleted
     )
-    override val listensForEvents: List<KafkaEvents> = KafkaEvents.entries
+    val listensForEvents: List<KafkaEvents> = KafkaEvents.entries
 
 
 
-    override fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
-        super.onProcessEventsAccepted(event, events)
+    fun onProcessEvents(event: PersistentMessage, events: List<PersistentMessage>): MessageDataWrapper? {
+
         log.info { "${event.referenceId} triggered by ${event.event}" }
 
         val started = events.lastOrSuccessOf(EventMediaProcessStarted) ?: return null
@@ -180,4 +171,4 @@ class CollectAndStoreTask() : TaskCreator(null) {
     }
 
 
-}
+}*/

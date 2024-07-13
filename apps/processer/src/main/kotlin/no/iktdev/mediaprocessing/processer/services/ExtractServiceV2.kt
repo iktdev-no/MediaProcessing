@@ -1,8 +1,9 @@
 package no.iktdev.mediaprocessing.processer.services
 
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.iktdev.eventi.data.EventMetadata
+import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.Reporter
 import no.iktdev.mediaprocessing.processer.TaskCoordinator
@@ -11,13 +12,13 @@ import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegTaskService
 import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.taskManager
 import no.iktdev.mediaprocessing.shared.common.limitedWhile
-import no.iktdev.mediaprocessing.shared.common.task.FfmpegTaskData
+import no.iktdev.mediaprocessing.shared.common.persistance.Status
 import no.iktdev.mediaprocessing.shared.common.task.Task
+import no.iktdev.mediaprocessing.shared.contract.data.ExtractArgumentData
+import no.iktdev.mediaprocessing.shared.contract.data.ExtractWorkPerformedEvent
+import no.iktdev.mediaprocessing.shared.contract.data.ExtractedData
 import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserEventInfo
 import no.iktdev.mediaprocessing.shared.contract.dto.WorkStatus
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -54,8 +55,8 @@ class ExtractServiceV2(
 
 
     fun startExtract(event: Task) {
-        val ffwrc = event.data as FfmpegTaskData
-        val outFile = File(ffwrc.outFile).also {
+        val ffwrc = event.data as ExtractArgumentData
+        val outFile = File(ffwrc.outputFile).also {
             it.parentFile.mkdirs()
         }
         if (!logDir.exists()) {
@@ -67,7 +68,7 @@ class ExtractServiceV2(
             log.info { "Claim successful for ${event.referenceId} extract" }
             runner = FfmpegRunner(
                 inputFile = ffwrc.inputFile,
-                outputFile = ffwrc.outFile,
+                outputFile = ffwrc.outputFile,
                 arguments = ffwrc.arguments,
                 logDir = logDir,
                 listener = this
@@ -76,7 +77,7 @@ class ExtractServiceV2(
                 if (ffwrc.arguments.firstOrNull() != "-y") {
                     this.onError(
                         ffwrc.inputFile,
-                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}"
+                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outputFile}"
                     )
                     // Setting consumed to prevent spamming
                     taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR)
@@ -105,13 +106,16 @@ class ExtractServiceV2(
                 successfulComplete = taskManager.isTaskCompleted(task.referenceId, task.eventId)
             }
 
-            tasks.producer.sendMessage(
-                referenceId = task.referenceId, event = KafkaEvents.EventWorkExtractPerformed,
-                data = ProcesserExtractWorkPerformed(
-                    status = Status.COMPLETED,
-                    producedBy = serviceId,
-                    derivedFromEventId = task.derivedFromEventId,
-                    outFile = outputFile
+            tasks.onProduceEvent(
+                ExtractWorkPerformedEvent(
+                    metadata = EventMetadata(
+                        referenceId = task.referenceId,
+                        derivedFromEventId = task.eventId,
+                        status = EventStatus.Success
+                    ),
+                    data = ExtractedData(
+                        outputFile
+                    )
                 )
             )
             sendProgress(
@@ -132,13 +136,13 @@ class ExtractServiceV2(
         taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
 
         log.info { "Encode failed for ${task.referenceId}\n$message" }
-        tasks.producer.sendMessage(
-            referenceId = task.referenceId, event = KafkaEvents.EventWorkExtractPerformed,
-            data = ProcesserExtractWorkPerformed(
-                status = Status.ERROR,
-                message = message,
-                producedBy = serviceId,
-                derivedFromEventId = task.derivedFromEventId,
+        tasks.onProduceEvent(
+            ExtractWorkPerformedEvent(
+                metadata = EventMetadata(
+                    referenceId = task.referenceId,
+                    derivedFromEventId = task.eventId,
+                    status = EventStatus.Failed
+                )
             )
         )
         sendProgress(

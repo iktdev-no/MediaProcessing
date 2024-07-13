@@ -31,6 +31,7 @@ fun getEventsDatabase(): MySqlDataSource {
     return eventsDatabase
 }
 
+
 lateinit var taskManager: TasksManager
 lateinit var runnerManager: RunnerManager
 
@@ -38,6 +39,8 @@ private val log = KotlinLogging.logger {}
 
 
 fun main(args: Array<String>) {
+    runApplication<ProcesserApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
 
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
@@ -59,8 +62,7 @@ fun main(args: Array<String>) {
     runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ProcesserApplication::class.java.simpleName)
     runnerManager.assignRunner()
 
-    val context = runApplication<ProcesserApplication>(*args)
-    log.info { "App Version: ${getAppVersion()}" }
+
 
 }
 

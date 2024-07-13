@@ -1,22 +1,19 @@
 package no.iktdev.mediaprocessing.coordinator.mapping
 
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.contract.reader.MetadataCoverDto
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 import no.iktdev.mediaprocessing.shared.contract.reader.MetadataDto
 import no.iktdev.mediaprocessing.shared.contract.reader.SummaryInfo
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.*
-import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 import java.io.File
 
 
-class MetadataMapping(val events: List<PersistentMessage>) {
-    var collection: String?
+class MetadataMapping(val events: List<Event>) {
+    //var collection: String?
     init {
-        collection = findCollection()
+       // collection = findCollection()
     }
 
 
-    fun map(): MetadataDto? {
+  /*  fun map(): MetadataDto? {
         val baseInfo = events.find { it.data is BaseInfoPerformed }?.data as BaseInfoPerformed?
         val mediaReadOut = events.find { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
         val meta = events.find { it.data is MetadataPerformed }?.data as MetadataPerformed?
@@ -61,6 +58,6 @@ class MetadataMapping(val events: List<PersistentMessage>) {
             return null
         }
         return mediaReadOut?.outDirectory?.let { File(it).name } ?: baseInfo?.title
-    }
+    }*/
 
 }

@@ -18,11 +18,6 @@ class ConvertApplication
 
 val ioCoroutine = CoroutinesIO()
 val defaultCoroutine = CoroutinesDefault()
-private var context: ApplicationContext? = null
-@Suppress("unused")
-fun getContext(): ApplicationContext? {
-    return context
-}
 
 lateinit var taskManager: TasksManager
 lateinit var runnerManager: RunnerManager
@@ -36,6 +31,9 @@ fun getEventsDatabase(): MySqlDataSource {
 }
 
 fun main(args: Array<String>) {
+    runApplication<ConvertApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
+
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
             value.printStackTrace()
@@ -55,9 +53,6 @@ fun main(args: Array<String>) {
 
     runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
     runnerManager.assignRunner()
-
-    context = runApplication<ConvertApplication>(*args)
-    log.info { "App Version: ${getAppVersion()}" }
 
 }
 //private val logger = KotlinLogging.logger {}

@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.persistance.ActiveMode
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
-import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
@@ -17,8 +17,8 @@ abstract class TaskCoordinatorBase() {
     private var ready: Boolean = false
     fun isReady() = ready
 
-    @Autowired
-    lateinit var producer: CoordinatorProducer
+    abstract fun onProduceEvent(event: Event)
+
 
     abstract val taskAvailabilityEventListener: MutableMap<TaskType, MutableList<TaskQueueListener>>
 

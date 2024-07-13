@@ -2,44 +2,44 @@ package no.iktdev.mediaprocessing.coordinator.utils
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.persistance.*
-import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 
 val log = KotlinLogging.logger {}
 
-fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage>): Map<TaskType, Boolean> {
+/*
+fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<Event>): Map<TaskType, Boolean> {
     val response = mutableMapOf<TaskType, Boolean>()
     if (tasks.any { it == TaskType.Encode }) {
         if (events.lastOrNull { it.isOfEvent(
-                KafkaEvents.EventMediaParameterEncodeCreated
+                Events.EventMediaParameterEncodeCreated
             ) } == null) {
             response[TaskType.Encode] = true
-            log.info { "Waiting for ${KafkaEvents.EventMediaParameterEncodeCreated}" }
+            log.info { "Waiting for ${Events.EventMediaParameterEncodeCreated}" }
 
         }
     }
 
-    val convertEvent = events.lastOrNull { it.isOfEvent(KafkaEvents.EventWorkConvertCreated) }
+    val convertEvent = events.lastOrNull { it.isOfEvent(Events.EventWorkConvertCreated) }
     if (tasks.any { it == TaskType.Convert } && tasks.none { it == TaskType.Extract }) {
         if (convertEvent == null) {
             response[TaskType.Convert] = true
-            log.info { "Waiting for ${KafkaEvents.EventWorkConvertCreated}" }
+            log.info { "Waiting for ${Events.EventWorkConvertCreated}" }
         }
     } else if (tasks.any { it == TaskType.Convert }) {
-        val extractEvent =  events.lastOrNull { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }
+        val extractEvent =  events.lastOrNull { it.isOfEvent(Events.EventMediaParameterExtractCreated) }
         if (extractEvent == null || extractEvent.isSuccess() && convertEvent == null) {
             response[TaskType.Convert] = true
-            log.info { "Waiting for ${KafkaEvents.EventMediaParameterExtractCreated}" }
+            log.info { "Waiting for ${Events.EventMediaParameterExtractCreated}" }
         }
     }
 
     if (tasks.contains(TaskType.Extract)) {
         if (events.lastOrNull { it.isOfEvent(
-                KafkaEvents.EventMediaParameterExtractCreated
+                Events.EventMediaParameterExtractCreated
             ) } == null) {
             response[TaskType.Extract] = true
-            log.info { "Waiting for ${KafkaEvents.EventMediaParameterExtractCreated}" }
+            log.info { "Waiting for ${Events.EventMediaParameterExtractCreated}" }
 
         }
     }
@@ -49,12 +49,12 @@ fun isAwaitingPrecondition(tasks: List<TaskType>, events: List<PersistentMessage
 }
 
 
-fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
+fun isAwaitingTask(task: TaskType, events: List<Event>): Boolean {
     val taskStatus = when (task) {
         TaskType.Encode -> {
-            val argumentEvent = KafkaEvents.EventMediaParameterEncodeCreated
-            val taskCreatedEvent = KafkaEvents.EventWorkEncodeCreated
-            val taskCompletedEvent = KafkaEvents.EventWorkEncodePerformed
+            val argumentEvent = Events.EventMediaParameterEncodeCreated
+            val taskCreatedEvent = Events.EventWorkEncodeCreated
+            val taskCompletedEvent = Events.EventWorkEncodePerformed
 
             val argument = events.findLast { it.event == argumentEvent } ?: return true
             if (!argument.isSuccess()) return false
@@ -71,9 +71,9 @@ fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
             waiting
         }
         TaskType.Extract -> {
-            val argumentEvent = KafkaEvents.EventMediaParameterExtractCreated
-            val taskCreatedEvent = KafkaEvents.EventWorkExtractCreated
-            val taskCompletedEvent = KafkaEvents.EventWorkExtractPerformed
+            val argumentEvent = Events.EventMediaParameterExtractCreated
+            val taskCreatedEvent = Events.EventWorkExtractCreated
+            val taskCompletedEvent = Events.EventWorkExtractPerformed
 
             val argument = events.findLast { it.event == argumentEvent } ?: return true
             if (!argument.isSuccess()) return false
@@ -89,12 +89,12 @@ fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
         }
         TaskType.Convert -> {
 
-            val extractEvents = events.findLast { it.isOfEvent(KafkaEvents.EventMediaParameterExtractCreated) }
+            val extractEvents = events.findLast { it.isOfEvent(Events.EventMediaParameterExtractCreated) }
             if (extractEvents == null || extractEvents.isSkipped()) {
                 false
             } else {
-                val taskCreatedEvent = KafkaEvents.EventWorkConvertCreated
-                val taskCompletedEvent = KafkaEvents.EventWorkConvertPerformed
+                val taskCreatedEvent = Events.EventWorkConvertCreated
+                val taskCompletedEvent = Events.EventWorkConvertPerformed
 
                 val argument = events.findLast { it.event == taskCreatedEvent } ?: return true
                 if (!argument.isSuccess()) return false
@@ -114,4 +114,4 @@ fun isAwaitingTask(task: TaskType, events: List<PersistentMessage>): Boolean {
         log.info { "isAwaiting for $task" }
     }
     return taskStatus
-}
+}*/

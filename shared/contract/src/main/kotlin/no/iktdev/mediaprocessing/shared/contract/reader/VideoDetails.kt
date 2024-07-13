@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.shared.contract.reader
 data class VideoDetails(
     val serieInfo: SerieInfo? = null,
     val type: String,
-    val fullName: String
+    val fileName: String
 )
 
 data class SerieInfo(

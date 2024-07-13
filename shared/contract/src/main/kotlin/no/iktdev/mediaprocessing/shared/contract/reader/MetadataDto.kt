@@ -4,7 +4,7 @@ data class MetadataDto(
     val title: String,
     val collection: String,
     val type: String,
-    val cover: MetadataCoverDto?,
+    val cover: String?,
     val summary: List<SummaryInfo> = emptyList(),
     val genres: List<String>,
     val titles: List<String> = emptyList()
@@ -13,10 +13,4 @@ data class MetadataDto(
 data class SummaryInfo(
     val summary: String,
     val language: String = "eng"
-)
-
-data class MetadataCoverDto(
-    val cover: String?, // ex Fancy.jpeg
-    val coverUrl: String?,
-    val coverFile: String?
 )

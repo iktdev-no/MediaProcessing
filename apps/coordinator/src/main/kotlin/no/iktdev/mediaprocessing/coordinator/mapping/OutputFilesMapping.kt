@@ -1,16 +1,11 @@
 package no.iktdev.mediaprocessing.coordinator.mapping
 
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.common.persistance.isSuccess
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 import no.iktdev.mediaprocessing.shared.contract.reader.OutputFilesDto
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserExtractWorkPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
-class OutputFilesMapping(val events: List<PersistentMessage>) {
+class OutputFilesMapping(val events: List<Event>) {
 
-    fun mapTo(): OutputFilesDto {
+    /*fun mapTo(): OutputFilesDto {
 
         val videoResult = events.filter { it.data is ProcesserEncodeWorkPerformed }
             .map { it.data as ProcesserEncodeWorkPerformed }
@@ -38,5 +33,5 @@ class OutputFilesMapping(val events: List<PersistentMessage>) {
         val sub1 = extracted.mapNotNull { it.outFile }
         val sub2 = converted.flatMap { it.outFiles }
         return sub1 + sub2
-    }
+    }*/
 }

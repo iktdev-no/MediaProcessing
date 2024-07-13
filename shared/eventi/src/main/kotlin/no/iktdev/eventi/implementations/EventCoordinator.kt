@@ -2,14 +2,18 @@ package no.iktdev.eventi.implementations
 
 import kotlinx.coroutines.*
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.data.EventImpl
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
-abstract class EventCoordinator<T: EventImpl, E: EventsManagerImpl<T>> {
+abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     abstract var applicationContext: ApplicationContext
     abstract var eventManager: E
 
+    val pullDelay: AtomicLong = AtomicLong(5000)
 
     //private val listeners: MutableList<EventListener<T>> = mutableListOf()
 
@@ -30,23 +34,27 @@ abstract class EventCoordinator<T: EventImpl, E: EventsManagerImpl<T>> {
 
     var taskMode: ActiveMode = ActiveMode.Active
 
-
-    private fun onEventsReceived(list: List<T>) = runBlocking {
+    private var newEventProduced: Boolean = false
+    private fun onEventsReceived(events: List<T>) = runBlocking {
         val listeners = getListeners()
-        list.groupBy { it.metadata.referenceId }.forEach { (referenceId, events) ->
-            launch {
-                events.forEach { event ->
-                    listeners.forEach { listener ->
-                        if (listener.shouldIProcessAndHandleEvent(event, events))
-                            listener.onEventsReceived(event, events)
+        launch {
+            events.forEach { event ->
+                listeners.forEach { listener ->
+                    if (listener.shouldIProcessAndHandleEvent(event, events)) {
+                        val consumableEvent = ConsumableEvent(event)
+                        listener.onEventsReceived(consumableEvent, events)
+                        if (consumableEvent.isConsumed) {
+                            log.info { "Consumption detected for ${listener::class.java.simpleName} on event ${event.eventType}" }
+                            return@launch
+                        }
                     }
                 }
             }
+
         }
     }
 
-
-    private var newItemReceived: Boolean = false
+    private var newEventsProducedOnReferenceId: AtomicReference<List<String>> = AtomicReference(emptyList())
     private fun pullForEvents() {
         coroutine.launch {
             while (taskMode == ActiveMode.Active) {
@@ -54,24 +62,34 @@ abstract class EventCoordinator<T: EventImpl, E: EventsManagerImpl<T>> {
                 if (events == null) {
                     log.warn { "EventManager is not loaded!" }
                 } else {
-                    onEventsReceived(events)
+                    events.forEach { group ->
+                        onEventsReceived(group)
+                    }
                 }
-                waitForConditionOrTimeout(5000) { newItemReceived }.also {
-                    newItemReceived = false
+                waitForConditionOrTimeout(pullDelay.get()) { newEventProduced }.also {
+                    newEventProduced = false
                 }
             }
         }
     }
 
-
+    private var cachedListeners: List<String> = emptyList()
     fun getListeners(): List<EventListenerImpl<T, *>> {
         val serviceBeans: Map<String, Any> = applicationContext.getBeansWithAnnotation(Service::class.java)
 
-        val beans =  serviceBeans.values.stream()
+        val beans = serviceBeans.values.stream()
             .filter { bean: Any? -> bean is EventListenerImpl<*, *> }
             .map { it -> it as EventListenerImpl<*, *> }
             .toList()
-        return beans as List<EventListenerImpl<T, *>>
+        val eventListeners = beans as List<EventListenerImpl<T, *>>
+        val listenerNames = eventListeners.map { it::class.java.name }
+        if (listenerNames != cachedListeners) {
+            listenerNames.filter { it !in cachedListeners }.forEach {
+                log.info { "Registered new listener $it" }
+            }
+        }
+        cachedListeners = listenerNames
+        return eventListeners
     }
 
 
@@ -79,9 +97,12 @@ abstract class EventCoordinator<T: EventImpl, E: EventsManagerImpl<T>> {
      * @return true if its stored
      */
     fun produceNewEvent(event: T): Boolean {
-        val isStored =  eventManager?.storeEvent(event) ?: false
+        val isStored = eventManager.storeEvent(event)
         if (isStored) {
-            newItemReceived = true
+            log.info { "Stored event: ${event.eventType}" }
+            newEventProduced = true
+        } else {
+            log.error { "Failed to store event: ${event.eventType}" }
         }
         return isStored
     }
@@ -89,13 +110,19 @@ abstract class EventCoordinator<T: EventImpl, E: EventsManagerImpl<T>> {
     suspend fun waitForConditionOrTimeout(timeout: Long, condition: () -> Boolean) {
         val startTime = System.currentTimeMillis()
 
-        withTimeout(timeout) {
-            while (!condition()) {
-                delay(100)
-                if (System.currentTimeMillis() - startTime >= timeout) {
-                    break
+        try {
+            withTimeout(timeout) {
+                while (!condition()) {
+                    delay(100)
+                    if (System.currentTimeMillis() - startTime >= timeout) {
+                        break
+                    }
                 }
             }
+        } catch (e: TimeoutCancellationException) {
+            // Do nothing
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

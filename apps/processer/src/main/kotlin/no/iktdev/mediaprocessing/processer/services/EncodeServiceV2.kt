@@ -4,6 +4,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import no.iktdev.eventi.core.WGson
+import no.iktdev.eventi.data.EventMetadata
+import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.Reporter
 import no.iktdev.mediaprocessing.processer.TaskCoordinator
@@ -11,14 +14,15 @@ import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegRunner
 import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegTaskService
 import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.taskManager
-import no.iktdev.mediaprocessing.shared.common.ClaimableTask
-import no.iktdev.mediaprocessing.shared.common.task.FfmpegTaskData
+import no.iktdev.mediaprocessing.shared.common.persistance.Status
+import no.iktdev.mediaprocessing.shared.common.persistance.events
 import no.iktdev.mediaprocessing.shared.common.task.Task
+import no.iktdev.mediaprocessing.shared.contract.Events
+import no.iktdev.mediaprocessing.shared.contract.data.EncodeArgumentData
+import no.iktdev.mediaprocessing.shared.contract.data.EncodeWorkPerformedEvent
+import no.iktdev.mediaprocessing.shared.contract.data.EncodedData
 import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserEventInfo
 import no.iktdev.mediaprocessing.shared.contract.dto.WorkStatus
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.work.ProcesserEncodeWorkPerformed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -56,20 +60,21 @@ class EncodeServiceV2(
 
 
     fun startEncode(event: Task) {
-        val ffwrc = event.data as FfmpegTaskData
-        val outFile = File(ffwrc.outFile)
+        val ffwrc = event.data as EncodeArgumentData
+        val outFile = File(ffwrc.outputFile)
         outFile.parentFile.mkdirs()
         if (!logDir.exists()) {
             logDir.mkdirs()
         }
 
-        val setClaim = taskManager.markTaskAsClaimed(referenceId = event.referenceId, eventId = event.eventId, claimer = serviceId)
+        val setClaim =
+            taskManager.markTaskAsClaimed(referenceId = event.referenceId, eventId = event.eventId, claimer = serviceId)
 
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} encode" }
             runner = FfmpegRunner(
                 inputFile = ffwrc.inputFile,
-                outputFile = ffwrc.outFile,
+                outputFile = ffwrc.outputFile,
                 arguments = ffwrc.arguments,
                 logDir = logDir, listener = this
             )
@@ -77,7 +82,7 @@ class EncodeServiceV2(
                 if (ffwrc.arguments.firstOrNull() != "-y") {
                     this.onError(
                         ffwrc.inputFile,
-                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outFile}"
+                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outputFile}"
                     )
                     // Setting consumed to prevent spamming
                     taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR)
@@ -129,13 +134,16 @@ class EncodeServiceV2(
                 readbackIsSuccess = taskManager.isTaskCompleted(task.referenceId, task.eventId)
             }
 
-            tasks.producer.sendMessage(
-                referenceId = task.referenceId, event = KafkaEvents.EventWorkEncodePerformed,
-                data = ProcesserEncodeWorkPerformed(
-                    status = Status.COMPLETED,
-                    producedBy = serviceId,
-                    derivedFromEventId = task.derivedFromEventId,
-                    outFile = outputFile
+            tasks.onProduceEvent(
+                EncodeWorkPerformedEvent(
+                    metadata = EventMetadata(
+                        referenceId = task.referenceId,
+                        derivedFromEventId = task.eventId,
+                        status = EventStatus.Success
+                    ),
+                    data = EncodedData(
+                        outputFile
+                    )
                 )
             )
             sendProgress(
@@ -156,15 +164,13 @@ class EncodeServiceV2(
         taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
 
         log.info { "Encode failed for ${task.referenceId}\n$message" }
-        tasks.producer.sendMessage(
-            referenceId = task.referenceId, event = KafkaEvents.EventWorkEncodePerformed,
-            data = ProcesserEncodeWorkPerformed(
-                status = Status.ERROR,
-                message = message,
-                producedBy = serviceId,
-                derivedFromEventId = task.derivedFromEventId,
+        tasks.onProduceEvent(EncodeWorkPerformedEvent(
+            metadata = EventMetadata(
+                referenceId = task.referenceId,
+                derivedFromEventId = task.eventId,
+                status = EventStatus.Failed
             )
-        )
+        ))
         sendProgress(
             task.referenceId, task.eventId, status = WorkStatus.Failed, progress = FfmpegDecodedProgress(
                 progress = 0,
@@ -181,7 +187,6 @@ class EncodeServiceV2(
         val task = assignedTask ?: return
         sendProgress(task.referenceId, task.eventId, WorkStatus.Working, progress)
     }
-
 
 
     fun sendProgress(

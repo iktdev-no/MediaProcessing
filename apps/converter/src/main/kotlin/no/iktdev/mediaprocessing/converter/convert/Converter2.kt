@@ -8,15 +8,13 @@ import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.mediaprocessing.converter.ConverterEnv
-import no.iktdev.mediaprocessing.shared.common.task.ConvertTaskData
+import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
 import no.iktdev.mediaprocessing.shared.contract.dto.SubtitleFormats
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ConvertWorkerRequest
 import java.io.File
 import kotlin.jvm.Throws
 
-class Converter2(val data: ConvertTaskData,
-    private val listener: ConvertListener
-) {
+class Converter2(val data: ConvertData,
+    private val listener: ConvertListener) {
 
     @Throws(FileUnavailableException::class)
     private fun getReader(): BaseReader? {
@@ -51,19 +49,19 @@ class Converter2(val data: ConvertTaskData,
             val filtered = read.filter { !it.ignore && it.type !in listOf(DialogType.SIGN_SONG, DialogType.CAPTION) }
             val syncOrNotSync = syncDialogs(filtered)
 
-            val exporter = Export(file, File(data.outDirectory), data.outFileBaseName)
+            val exporter = Export(file, File(data.outputDirectory), data.outputFileName)
 
-            val outFiles = if (data.outFormats.isEmpty()) {
+            val outFiles = if (data.formats.isEmpty()) {
                 exporter.write(syncOrNotSync)
             } else {
                 val exported = mutableListOf<File>()
-                if (data.outFormats.contains(SubtitleFormats.SRT)) {
+                if (data.formats.contains(SubtitleFormats.SRT)) {
                     exported.add(exporter.writeSrt(syncOrNotSync))
                 }
-                if (data.outFormats.contains(SubtitleFormats.SMI)) {
+                if (data.formats.contains(SubtitleFormats.SMI)) {
                     exported.add(exporter.writeSmi(syncOrNotSync))
                 }
-                if (data.outFormats.contains(SubtitleFormats.VTT)) {
+                if (data.formats.contains(SubtitleFormats.VTT)) {
                     exported.add(exporter.writeVtt(syncOrNotSync))
                 }
                 exported

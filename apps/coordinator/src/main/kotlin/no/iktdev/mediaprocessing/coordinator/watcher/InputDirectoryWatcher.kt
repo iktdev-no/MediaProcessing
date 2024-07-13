@@ -34,7 +34,7 @@ interface FileWatcherEvents {
 
 
 @Service
-class InputDirectoryWatcher(@Autowired var coordinator: EventCoordinatorDep): FileWatcherEvents {
+class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatcherEvents {
     private val logger = KotlinLogging.logger {}
     val watcherChannel = SharedConfig.incomingContent.asWatchChannel()
     val queue = FileWatcherQueue()

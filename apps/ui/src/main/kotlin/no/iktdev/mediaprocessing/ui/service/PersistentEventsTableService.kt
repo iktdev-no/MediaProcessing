@@ -2,7 +2,6 @@ package no.iktdev.mediaprocessing.ui.service
 
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
 import no.iktdev.mediaprocessing.shared.common.persistance.events
-import no.iktdev.mediaprocessing.shared.contract.dto.EventsDto
 import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
 import no.iktdev.mediaprocessing.ui.getEventsDatabase
 import org.jetbrains.exposed.sql.*

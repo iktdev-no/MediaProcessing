@@ -14,6 +14,7 @@ dependencies {
 
     implementation(project(mapOf("path" to ":shared:eventi")))
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
 

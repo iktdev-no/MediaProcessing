@@ -8,7 +8,6 @@ import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.*
 import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.*
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEnv
 import no.iktdev.streamit.library.db.tables.*
 import no.iktdev.streamit.library.db.tables.helper.cast_errors
 import no.iktdev.streamit.library.db.tables.helper.data_audio
@@ -44,6 +43,10 @@ fun getStoreDatabase(): MySqlDataSource {
 lateinit var taskManager: TasksManager
 
 fun main(args: Array<String>) {
+
+
+    printSharedConfig()
+
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
             value.printStackTrace()
@@ -82,16 +85,11 @@ fun main(args: Array<String>) {
         titles
     )
     storeDatabase.createTables(*tables)
-
-
     runApplication<CoordinatorApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }
-
-    printSharedConfig()
 }
 
 fun printSharedConfig() {
-    log.info { "Kafka topic: ${KafkaEnv.kafkaTopic}" }
     log.info { "File Input: ${SharedConfig.incomingContent}" }
     log.info { "File Output: ${SharedConfig.outgoingContent}" }
     log.info { "Ffprobe: ${SharedConfig.ffprobe}" }

@@ -44,7 +44,6 @@ dependencies {
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
     //implementation(project(mapOf("path" to ":shared")))
-    implementation(project(mapOf("path" to ":shared:kafka")))
 
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))

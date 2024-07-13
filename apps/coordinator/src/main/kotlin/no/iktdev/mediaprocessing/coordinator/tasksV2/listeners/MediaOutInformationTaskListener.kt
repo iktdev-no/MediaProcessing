@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import com.google.gson.JsonObject
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.exfl.using
@@ -33,14 +35,24 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
         Events.EventMediaMetadataSearchPerformed
     )
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
-        val metadataResult = incomingEvent.az<MediaMetadataReceivedEvent>()
+    override fun shouldIHandleFailedEvents(incomingEvent: Event): Boolean {
+        return (incomingEvent.eventType in listensForEvents)
+    }
+
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+
+        val metadataResult = event.az<MediaMetadataReceivedEvent>()
         val mediaBaseInfo = events.findLast { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
         if (mediaBaseInfo == null) {
             log.error { "Required event ${Events.EventMediaReadBaseInfoPerformed} is not present" }
             coordinator?.produceNewEvent(
                 MediaOutInformationConstructedEvent(
-                    metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+                    metadata = event.makeDerivedEventInfo(EventStatus.Failed)
                 )
             )
             return
@@ -53,12 +65,12 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
                 outDirectory = pm.getOutputDirectory().absolutePath,
                 info = vi
             ).let { MediaOutInformationConstructedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = it
             ) }
         } else {
             MediaOutInformationConstructedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
             )
         }
         onProduceEvent(result)

@@ -1,5 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
+import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
@@ -17,6 +20,9 @@ import java.io.File
 
 @Service
 class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
+    val log = KotlinLogging.logger {}
+
+
     @Autowired
     override var coordinator: Coordinator? = null
 
@@ -28,8 +34,19 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
     )
     val preference = Preference.getPreference()
 
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        val state = super.shouldIProcessAndHandleEvent(incomingEvent, events)
+        val eventType = events.map { it.eventType }
+        return state && eventType.containsAll(listensForEvents)
+    }
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            return
+        }
+
         val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>() ?: return
         if (started.data == null || started.data?.operations?.contains(StartOperationEvents.ENCODE) == false) {
             return
@@ -57,11 +74,11 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
         val result = mapper.getArguments()
         if (result == null) {
             onProduceEvent(EncodeArgumentCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
             ))
         } else {
             onProduceEvent(EncodeArgumentCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = result
             ))
         }

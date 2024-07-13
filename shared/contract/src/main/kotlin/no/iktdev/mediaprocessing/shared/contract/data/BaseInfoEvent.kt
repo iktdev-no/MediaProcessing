@@ -4,9 +4,9 @@ import no.iktdev.eventi.data.EventImpl
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.mediaprocessing.shared.contract.Events
 
-class BaseInfoEvent(
-    override val eventType: Events = Events.EventMediaReadBaseInfoPerformed,
+data class BaseInfoEvent(
     override val metadata: EventMetadata,
+    override val eventType: Events = Events.EventMediaReadBaseInfoPerformed,
     override val data: BaseInfo? = null
 ) : Event()
 

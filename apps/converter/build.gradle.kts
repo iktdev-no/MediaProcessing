@@ -58,7 +58,8 @@ dependencies {
 
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
-    implementation(project(mapOf("path" to ":shared:kafka")))
+    implementation(project(mapOf("path" to ":shared:eventi")))
+
 
     implementation(kotlin("stdlib-jdk8"))
 }

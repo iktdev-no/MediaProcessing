@@ -1,6 +1,7 @@
 package no.iktdev.eventi.mock.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.eventi.implementations.EventListenerImpl
 import no.iktdev.eventi.data.EventImpl
@@ -30,7 +31,7 @@ class ForthEventListener() : MockDataEventListener() {
         super.onProduceEvent(event)
     }
 
-    override fun onEventsReceived(incomingEvent: EventImpl, events: List<EventImpl>) {
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<EventImpl>, events: List<EventImpl>) {
         if (!shouldIProcessAndHandleEvent(incomingEvent, events))
             return
         val info = incomingEvent.makeDerivedEventInfo(EventStatus.Success)

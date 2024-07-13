@@ -1,14 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.mapping
 
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 import no.iktdev.mediaprocessing.shared.contract.reader.SerieInfo
 import no.iktdev.mediaprocessing.shared.contract.reader.VideoDetails
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.EpisodeInfo
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.VideoInfoPerformed
 
-class VideoDetailsMapper(val events: List<PersistentMessage>) {
+class VideoDetailsMapper(val events: List<Event>) {
 
-    fun mapTo(): VideoDetails? {
+   /* fun mapTo(): VideoDetails? {
         val mediaReadOut = events.lastOrNull { it.data is VideoInfoPerformed }?.data as VideoInfoPerformed?
         val proper = mediaReadOut?.toValueObject() ?: return null
 
@@ -23,5 +21,5 @@ class VideoDetailsMapper(val events: List<PersistentMessage>) {
             )
         )
         return details
-    }
+    }*/
 }

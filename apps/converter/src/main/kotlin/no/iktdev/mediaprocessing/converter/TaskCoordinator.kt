@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.*
 import no.iktdev.mediaprocessing.shared.common.persistance.ActiveMode
 import no.iktdev.mediaprocessing.shared.common.persistance.RunnerManager
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
@@ -13,6 +14,10 @@ import org.springframework.stereotype.Service
 @EnableScheduling
 class TaskCoordinator(): TaskCoordinatorBase() {
     private val log = KotlinLogging.logger {}
+    override fun onProduceEvent(event: Event) {
+        taskManager.produceEvent(event)
+    }
+
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()
         runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)

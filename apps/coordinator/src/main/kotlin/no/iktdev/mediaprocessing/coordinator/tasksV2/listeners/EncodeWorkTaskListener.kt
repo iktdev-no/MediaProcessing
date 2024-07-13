@@ -1,10 +1,17 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
+import no.iktdev.eventi.data.derivedFromEventId
+import no.iktdev.eventi.data.eventId
+import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
+import no.iktdev.mediaprocessing.coordinator.taskManager
 import no.iktdev.mediaprocessing.coordinator.tasksV2.implementations.WorkTaskListener
+import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.contract.data.*
@@ -23,27 +30,41 @@ class EncodeWorkTaskListener : WorkTaskListener() {
         Events.EventMediaWorkProceedPermitted
     )
 
-    override fun onEventsReceived(incomingEvent: Event, events: List<Event>) {
-        if (!canStart(incomingEvent, events)) {
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val event = incomingEvent.consume()
+        if (event == null) {
+            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
 
-        val encodeArguments = if (incomingEvent.eventType == Events.EventMediaParameterEncodeCreated) {
-            incomingEvent.az<EncodeArgumentCreatedEvent>()?.data
+        if (!canStart(event, events)) {
+            return
+        }
+
+        val encodeArguments = if (event.eventType == Events.EventMediaParameterEncodeCreated) {
+            event.az<EncodeArgumentCreatedEvent>()?.data
         } else {
             events.find { it.eventType == Events.EventMediaParameterEncodeCreated }
                 ?.az<EncodeArgumentCreatedEvent>()?.data
         }
         if (encodeArguments == null) {
-            log.error { "No Encode arguments found.. referenceId: ${incomingEvent.referenceId()}" }
+            log.error { "No Encode arguments found.. referenceId: ${event.referenceId()}" }
             return
         }
-
-        onProduceEvent(
-            EncodeWorkCreatedEvent(
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
-                data = encodeArguments
+        EncodeWorkCreatedEvent(
+            metadata = event.makeDerivedEventInfo(EventStatus.Success),
+            data = encodeArguments
+        ).also { event ->
+            onProduceEvent(event)
+            taskManager.createTask(
+                referenceId = event.referenceId(),
+                eventId = event.eventId(),
+                derivedFromEventId = event.derivedFromEventId(),
+                task = TaskType.Encode,
+                data = WGson.gson.toJson(event.data!!),
+                inputFile = event.data!!.inputFile
             )
-        )
+        }
+
     }
 }

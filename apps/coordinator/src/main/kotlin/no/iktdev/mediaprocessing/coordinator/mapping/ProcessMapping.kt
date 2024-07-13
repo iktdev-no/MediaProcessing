@@ -1,16 +1,11 @@
 package no.iktdev.mediaprocessing.coordinator.mapping
 
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
-import no.iktdev.mediaprocessing.shared.common.persistance.isSkipped
-import no.iktdev.mediaprocessing.shared.common.persistance.isSuccess
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
+import no.iktdev.mediaprocessing.shared.contract.data.Event
 import no.iktdev.mediaprocessing.shared.contract.reader.MediaProcessedDto
-import no.iktdev.mediaprocessing.shared.kafka.dto.isSuccess
 
-class ProcessMapping(val events: List<PersistentMessage>) {
+class ProcessMapping(val events: List<Event>) {
 
-    fun map(): MediaProcessedDto? {
+   /* fun map(): MediaProcessedDto? {
         val referenceId = events.firstOrNull()?.referenceId ?: return null
         val processStarted = getProcessStarted()
         val meta = MetadataMapping(events)
@@ -68,6 +63,6 @@ class ProcessMapping(val events: List<PersistentMessage>) {
 
     fun canCollect(): Boolean {
         return (!waitsForEncode() && !waitsForExtract() && !waitsForConvert())
-    }
+    }*/
 
 }
