@@ -25,7 +25,15 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
     override var coordinator: Coordinator? = null
 
     override val produceEvent: Events = Events.EventMediaReadOutCover
-    override val listensForEvents: List<Events> = listOf(Events.EventMediaMetadataSearchPerformed)
+    override val listensForEvents: List<Events> = listOf(
+        Events.EventMediaMetadataSearchPerformed,
+        Events.EventMediaReadOutNameAndType
+    )
+
+    override fun isPrerequisitesFulfilled(incomingEvent: Event, events: List<Event>): Boolean {
+        return events.any { it.eventType == Events.EventMediaMetadataSearchPerformed } &&
+                events.any { it.eventType == Events.EventMediaReadOutNameAndType }
+    }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
@@ -35,9 +43,22 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         }
 
 
-        val baseInfo = events.find { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data ?: return
-        val metadata = events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }?.az<MediaMetadataReceivedEvent>()?.data ?: return
-        val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data ?: return
+        val baseInfo = events.find { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
+        if (baseInfo == null) {
+            log.info { "No base info" }
+            return
+        }
+
+        val metadata = events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }?.az<MediaMetadataReceivedEvent>()?.data
+        if (metadata == null) {
+            log.info { "No metadata.." }
+            return
+        }
+        val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data
+        if (mediaOutInfo == null) {
+            log.info { "No Media out info" }
+            return
+        }
         val videoInfo = mediaOutInfo.toValueObject()
 
         var coverTitle = metadata.title ?: videoInfo?.title ?: baseInfo.title
