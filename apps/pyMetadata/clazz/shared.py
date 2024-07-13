@@ -1,5 +1,5 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Any, List, Optional
 from datetime import datetime
 
@@ -12,11 +12,18 @@ class EventMetadata:
     status: str
     created: datetime
 
+    def to_dict(self):
+        return asdict(self)
+
+
 @dataclass
 class EventData:
     title: str
     sanitizedName: str
     searchTitles: List[str]
+
+    def to_dict(self):
+        return asdict(self)
 
 @dataclass
 class MediaEvent:
@@ -24,12 +31,15 @@ class MediaEvent:
     eventType: str
     data: Any| EventData
 
+    def to_dict(self):
+        return asdict(self)
+
 # Funksjon for å parse datetime fra streng
 def parse_datetime(datetime_str: str) -> datetime:
     return datetime.fromisoformat(datetime_str)
 
 def event_data_to_json(event_data: EventData) -> str:
-    return json.dumps(event_data.__dict__)
+    return json.dumps(event_data.to_dict())
 
 # Funksjon for å konvertere JSON til klasser
 def json_to_media_event(json_data: str) -> MediaEvent:
