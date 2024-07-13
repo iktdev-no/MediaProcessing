@@ -82,8 +82,7 @@ class EventsPullerThread(threading.Thread):
                     handler_thread = MessageHandlerThread(row)
                     handler_thread.start()
 
-                # Introduce a small sleep to reduce CPU usage
-                time.sleep(5000)
+
             except mysql.connector.Error as err:
                 logger.error("Database error: %s", err)
             finally:
@@ -91,6 +90,8 @@ class EventsPullerThread(threading.Thread):
                     cursor.close()
                 if connection:
                     connection.close()
+            # Introduce a small sleep to reduce CPU usage
+            time.sleep(1000)
 
     def stop(self):
         self.shutdown.set()
@@ -144,12 +145,12 @@ class MessageHandlerThread(threading.Thread):
                 created= datetime.now().isoformat()
             ),
             data=result,
-            eventType="event:media-metadata-search:performed"
+            eventType="EventMediaMetadataSearchPerformed"
         )
 
         
         logger.info("<== Outgoing message: %s \n%s", event.eventType, event_data_to_json(producedEvent))
-        self.insert_into_database(producedEvent)
+        self.insert_into_database(producedEvent, "event:media-metadata-search:performed")
 
 
 
@@ -178,7 +179,7 @@ class MessageHandlerThread(threading.Thread):
             return prefixSelector
         return None
     
-    def insert_into_database(self, event: MediaEvent):
+    def insert_into_database(self, event: MediaEvent, eventKey: str):
         try:
             connection = mysql.connector.connect(
                 host=events_server_address,
@@ -196,7 +197,7 @@ class MessageHandlerThread(threading.Thread):
             cursor.execute(query, (
                 event.metadata.referenceId,
                 event.metadata.eventId,
-                event.eventType,
+                eventKey,
                 event_data_to_json(event)
             ))
             connection.commit()

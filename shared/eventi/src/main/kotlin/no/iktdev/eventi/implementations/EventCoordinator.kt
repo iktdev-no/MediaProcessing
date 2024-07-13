@@ -4,6 +4,7 @@ import kotlinx.coroutines.*
 import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.data.EventImpl
+import no.iktdev.eventi.data.referenceId
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import java.util.concurrent.atomic.AtomicLong
@@ -50,6 +51,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     }
                 }
             }
+            log.debug { "No consumption detected for ${events.first().referenceId()}" }
 
         }
     }
@@ -58,6 +60,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     private fun pullForEvents() {
         coroutine.launch {
             while (taskMode == ActiveMode.Active) {
+                log.debug { "New pull on database" }
                 val events = eventManager?.readAvailableEvents()
                 if (events == null) {
                     log.warn { "EventManager is not loaded!" }
