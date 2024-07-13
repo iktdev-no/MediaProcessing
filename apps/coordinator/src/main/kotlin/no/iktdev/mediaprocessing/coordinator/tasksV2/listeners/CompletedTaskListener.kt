@@ -132,17 +132,17 @@ class CompletedTaskListener: CoordinatorEventListener() {
 
 
         if (!req1(started, viableEvents)) {
-            log.info { "${this::class.java.simpleName} Failed Req1" }
+            //log.info { "${this::class.java.simpleName} Failed Req1" }
             return false
         }
 
         if (!req2(started.data?.operations ?: emptyList(), viableEvents)) {
-            log.info { "${this::class.java.simpleName} Failed Req2" }
+            //log.info { "${this::class.java.simpleName} Failed Req2" }
             return false
         }
 
         if (!req3(started.data?.operations ?: emptyList(), viableEvents)) {
-            log.info { "${this::class.java.simpleName} Failed Req3" }
+            //log.info { "${this::class.java.simpleName} Failed Req3" }
             return false
         }
         return super.isPrerequisitesFulfilled(incomingEvent, events)
