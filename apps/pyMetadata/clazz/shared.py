@@ -1,74 +1,61 @@
-
-from typing import Any, List
 import json
+from dataclasses import dataclass
+from typing import Any, List, Optional
+from datetime import datetime
 
-
-suppress_ignore: List[str] = [
-    "event:media-process:started",
-    "event:request-process:started",
-    "event::save",
-    "event:media-process:completed",
-    "event:work-encode:created",
-    "event:work-extract:created",
-    "event:work-convert:created",
-    "event:work-encode:performed",
-    "event:work-extract:performed",
-    "event:work-convert:performed",    
-    "event:media-read-out-cover:performed",
-    "event:work-download-cover:performed",
-    "event:media-read-out-name-and-type:performed",
-    "event:media-parse-stream:performed",
-    "event:media-extract-parameter:created",
-    "event:media-encode-parameter:created",
-    "event:media-metadata-search:performed"
-]
-
-consume_on_key: List[str] = [
-    "request:metadata:obtain",
-    "event:media-read-base-info:performed"
-]
-
-def decode_key(key_bytes: bytes | None):
-    return key_bytes.decode('utf-8') if key_bytes else None
-
-def decode_value(value_bytes: bytes | None):
-    return json.loads(value_bytes.decode('utf-8')) if value_bytes else None
-
-
-
-class ConsumerRecord:
-    topic: str
-    partition: int
-    offset: int
-    key: str
-    value: str | None
-    timestamp: int
-
-    def __init__(self, message: Any) -> None:
-        if message is not None:
-            self.key = message.key
-            self.value = message.value
-            self.topic = message.topic
-            self.offset = message.offset
-            self.partition = message.partition
-            self.timestamp = message.timestamp
-
-
-class MediaEvent():
-    __consumerRecord: ConsumerRecord
-    referenceId: str
+# Definer dataclassene for strukturen
+@dataclass
+class EventMetadata:
+    derivedFromEventId: str
     eventId: str
-    data: dict | None
+    referenceId: str
+    status: str
+    created: datetime
 
-    def __init__(self, message: ConsumerRecord) -> None:
-        self.__consumerRecord = message
-        self.referenceId = message.value["referenceId"]
-        self.eventId = message.value["eventId"]
-        self.data = message.value["data"] if "data" in message.value else None
+@dataclass
+class EventData:
+    title: str
+    sanitizedName: str
+    searchTitles: List[str]
 
-    def isConsumable(self) -> bool:
-        if "status" in self.data:
-            if self.data["status"] == "COMPLETED":
-                return True
-        return False
+@dataclass
+class MediaEvent:
+    metadata: EventMetadata
+    eventType: str
+    data: Any| EventData
 
+# Funksjon for å parse datetime fra streng
+def parse_datetime(datetime_str: str) -> datetime:
+    return datetime.fromisoformat(datetime_str)
+
+def event_data_to_json(event_data: EventData) -> str:
+    return json.dumps(event_data.__dict__)
+
+# Funksjon for å konvertere JSON til klasser
+def json_to_media_event(json_data: str) -> MediaEvent:
+    data_dict = json.loads(json_data)
+
+    metadata_dict = data_dict['metadata']
+    event_data_dict = data_dict['data']
+
+    metadata = EventMetadata(
+        derivedFromEventId=metadata_dict['derivedFromEventId'],
+        eventId=metadata_dict['eventId'],
+        referenceId=metadata_dict['referenceId'],
+        status=metadata_dict['status'],
+        created=parse_datetime(metadata_dict['created'])
+    )
+
+    event_data = EventData(
+        title=event_data_dict['title'],
+        sanitizedName=event_data_dict['sanitizedName'],
+        searchTitles=event_data_dict['searchTitles']
+    )
+
+    media_event = MediaEvent(
+        metadata=metadata,
+        eventType=data_dict['eventType'],
+        data=event_data
+    )
+
+    return media_event

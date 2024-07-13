@@ -8,11 +8,13 @@ import threading
 import json
 import time
 from fuzzywuzzy import fuzz
+import mysql.connector
+from datetime import datetime
 
 from algo.AdvancedMatcher import AdvancedMatcher
 from algo.SimpleMatcher import SimpleMatcher
 from algo.PrefixMatcher import PrefixMatcher
-from clazz.shared import ConsumerRecord, MediaEvent, decode_key, decode_value, suppress_ignore, consume_on_key
+from clazz.shared import EventMetadata, MediaEvent, event_data_to_json, json_to_media_event
 from clazz.KafkaMessageSchema import KafkaMessage, MessageDataWrapper
 from clazz.Metadata import Metadata
 from kafka import KafkaConsumer, KafkaProducer
@@ -21,10 +23,21 @@ from sources.anii import Anii
 from sources.imdb import Imdb
 from sources.mal import Mal
 
+
+
+
 # Konfigurer Kafka-forbindelsen
 bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
 consumer_group = os.environ.get("KAFKA_CONSUMER_ID") or f"MetadataConsumer"
 kafka_topic = os.environ.get("KAFKA_TOPIC") or "mediaEvents"
+
+events_server_address = os.environ.get("DATABASE_ADDRESS") or "127.0.0.1"
+events_server_port  = os.environ.get("DATABASE_PORT") or "3306"
+events_server_database_name = os.environ.get("DATABASE_NAME_E") or "events"
+events_server_username = os.environ.get("DATABASE_USERNAME") or "root"
+events_server_password = os.environ.get("DATABASE_PASSWORD") or "root"
+
+
 
 
 # Konfigurer logging
@@ -38,54 +51,50 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Kafka consumer-klasse
-class KafkaConsumerThread(threading.Thread):
-    def __init__(self, bootstrap_servers, topic, consumer_group):
+class EventsPullerThread(threading.Thread):
+    connector = None
+    def __init__(self):
         super().__init__()
-        self.bootstrap_servers = bootstrap_servers
-        self.consumer_group = consumer_group
-        self.topic = topic
         self.shutdown = threading.Event()
 
-    def run(self):
-        consumer = None
-        try:
-            consumer = KafkaConsumer(
-                self.topic,
-                bootstrap_servers=self.bootstrap_servers,
-                group_id=self.consumer_group,
-                key_deserializer=lambda x: decode_key(x),
-                value_deserializer=lambda x: decode_value(x)
-            )
-            logger.info("Kafka Consumer started")
-
-        except:
-            logger.exception("Kafka Consumer failed to start")
-            self.stop()
-            #sys.exit(1)
-
-
+    def run(self) -> None:
         while not self.shutdown.is_set():
-            for cm in consumer:
-                if self.shutdown.is_set():
-                    break
-                message: ConsumerRecord = ConsumerRecord(cm)  
-                
-
-                # Sjekk om meldingen har målnøkkelen
-                if message.key in consume_on_key:
-                    logger.info("==> Incoming message: %s \n%s", message.key, message.value)
-                    # Opprett en ny tråd for å håndtere meldingen
-                    handler_thread = MessageHandlerThread(message)
+            connection = None
+            cursor = None
+            try:
+                connection = mysql.connector.connect(
+                    host=events_server_address,
+                    port=events_server_port,
+                    database=events_server_database_name,
+                    user=events_server_username,
+                    password=events_server_password
+                )
+                cursor = connection.cursor(dictionary=True)
+                cursor.execute("""
+                                    SELECT e1.*
+                                    FROM events e1
+                                    LEFT JOIN events e2 
+                                        ON e1.referenceId = e2.referenceId 
+                                        AND e2.event = 'event:media-metadata-search:performed'
+                                    WHERE e1.event = 'event:media-read-base-info:performed'
+                                    AND e2.referenceId IS NULL;
+                               """)
+                # not event:media-metadata-search:performed
+                for row in cursor.fetchall():
+                    if self.shutdown.is_set():
+                        break
+                    handler_thread = MessageHandlerThread(row)
                     handler_thread.start()
-                else:
-                    if (message.key not in suppress_ignore):
-                        logger.debug("Ignored message: key=%s", message.key)
-            # Introduce a small sleep to reduce CPU usage
-            time.sleep(1)
-        if consumer is not None:
-            consumer.close()
-            logger.info("Kafka Consumer stopped")
+
+                # Introduce a small sleep to reduce CPU usage
+                time.sleep(5000)
+            except mysql.connector.Error as err:
+                logger.error("Database error: %s", err)
+            finally:
+                if cursor:
+                    cursor.close()
+                if connection:
+                    connection.close()
 
     def stop(self):
         self.shutdown.set()
@@ -94,29 +103,25 @@ class KafkaConsumerThread(threading.Thread):
 
 # Kafka message handler-klasse
 class MessageHandlerThread(threading.Thread):
-    producerMessageKey = "event:media-metadata-search:performed"
-    def __init__(self, message: ConsumerRecord):
+    mediaEvent: MediaEvent|None = None
+    def __init__(self, row):
         super().__init__()
-        self.message = message
+        self.mediaEvent = json_to_media_event(json.loads(row['data']))
 
     def run(self):
-
-        mediaEvent = MediaEvent(message=self.message)
-
-        if mediaEvent.data is None:
-            logger.error("No data present for %s", self.message.value)
+        if (self.mediaEvent is None):
+            logger.error("Event does not contain anything...")
             return
-        if mediaEvent.isConsumable() == False:
-            logger.info("Message status is not of 'COMPLETED', %s", self.message.value)
-            return
+
+        event: MediaEvent = self.mediaEvent
     
-        logger.info("Processing record: key=%s, value=%s", self.message.key, self.message.value)
+        logger.info("Processing event: event=%s, value=%s", event.eventType, event)
 
 
-        searchableTitles: List[str] = mediaEvent.data["searchTitles"]
+        searchableTitles: List[str] = event.data.searchTitles
         searchableTitles.extend([
-            mediaEvent.data["title"],
-            mediaEvent.data["sanitizedName"]
+            event.data.title,
+            event.data.sanitizedName
         ])
 
 
@@ -129,26 +134,22 @@ class MessageHandlerThread(threading.Thread):
             result_message = f"No result for {joinedTitles}"
             logger.info(result_message)
 
-        messageData = MessageDataWrapper(
-            status =  "ERROR" if result is None else "COMPLETED",
-            message =  result_message,
-            data = result,
-            derivedFromEventId = mediaEvent.eventId
+
+        producedEvent = MediaEvent(
+            metadata = EventMetadata(
+                referenceId=event.metadata.referenceId,
+                eventId=str(uuid.uuid4()),
+                derivedFromEventId=event.metadata.eventId,
+                status= "Failed" if result is None else "Success",
+                created= datetime.now().isoformat()
+            ),
+            data=result,
+            eventType="event:media-metadata-search:performed"
         )
 
-        producerMessage = KafkaMessage(referenceId=mediaEvent.referenceId, data=messageData).to_json()
-
-        logger.info("<== Outgoing message: %s \n%s", self.producerMessageKey, producerMessage)
-
-        # Send resultatet tilbake ved hjelp av Kafka-producer
-        producer = KafkaProducer(
-            bootstrap_servers=bootstrap_servers,
-            key_serializer=lambda k: k.encode('utf-8') if isinstance(k, str) else None,
-            value_serializer=lambda v: v.encode('utf-8') if isinstance(v, str) else None
-        )
-        producer.send(kafka_topic, key=self.producerMessageKey, value=producerMessage)
-        producer.close()
-
+        
+        logger.info("<== Outgoing message: %s \n%s", event.eventType, event_data_to_json(producedEvent))
+        self.insert_into_database(producedEvent)
 
 
 
@@ -176,6 +177,34 @@ class MessageHandlerThread(threading.Thread):
         if prefixSelector is not None:
             return prefixSelector
         return None
+    
+    def insert_into_database(self, event: MediaEvent):
+        try:
+            connection = mysql.connector.connect(
+                host=events_server_address,
+                port=events_server_port,
+                database=events_server_database_name,
+                user=events_server_username,
+                password=events_server_password
+            )
+            cursor = connection.cursor()
+
+            query = """
+                INSERT INTO events (referenceId, eventId, event, data)
+                VALUES (%s, %s, %s, %s)
+            """
+            cursor.execute(query, (
+                event.metadata.referenceId,
+                event.metadata.eventId,
+                event.eventType,
+                event_data_to_json(event)
+            ))
+            connection.commit()
+            cursor.close()
+            connection.close()
+            logger.info("Storing event")
+        except mysql.connector.Error as err:
+            logger.error("Error inserting into database: %s", err)    
 
 
 # Global variabel for å indikere om applikasjonen skal avsluttes
@@ -193,7 +222,7 @@ def main():
         signal.signal(signal.SIGINT, signal_handler)
 
         # Opprett og start consumer-tråden
-        consumer_thread = KafkaConsumerThread(bootstrap_servers, kafka_topic, consumer_group)
+        consumer_thread = EventsPullerThread()
         consumer_thread.start()
 
         logger.info("App started")
