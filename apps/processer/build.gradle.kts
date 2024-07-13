@@ -49,9 +49,9 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
     //implementation(project(mapOf("path" to ":shared")))
+    implementation(project(mapOf("path" to ":shared:eventi")))
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
-    implementation(project(mapOf("path" to ":shared:eventi")))
 
 
 

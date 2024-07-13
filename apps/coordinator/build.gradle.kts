@@ -45,9 +45,9 @@ dependencies {
 
     //implementation(project(mapOf("path" to ":shared")))
 
+    implementation(project(mapOf("path" to ":shared:eventi")))
     implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
-    implementation(project(mapOf("path" to ":shared:eventi")))
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")

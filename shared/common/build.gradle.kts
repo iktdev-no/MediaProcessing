@@ -42,8 +42,8 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.12.0")
 
 
-    implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:eventi")))
+    implementation(project(mapOf("path" to ":shared:contract")))
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
