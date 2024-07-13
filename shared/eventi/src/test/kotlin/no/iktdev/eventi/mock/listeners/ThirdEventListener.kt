@@ -1,6 +1,7 @@
 package no.iktdev.eventi.mock.listeners
 
 import mu.KotlinLogging
+import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.eventi.implementations.EventListenerImpl
 import no.iktdev.eventi.data.EventImpl
@@ -31,13 +32,15 @@ class ThirdEventListener() : MockDataEventListener() {
         super.onProduceEvent(event)
     }
 
-    override fun onEventsReceived(incomingEvent: EventImpl, events: List<EventImpl>) {
-        if (!shouldIProcessAndHandleEvent(incomingEvent, events))
+    override fun onEventsReceived(incomingEvent: ConsumableEvent<EventImpl>, events: List<EventImpl>) {
+        val event = incomingEvent.consume()
+        if (event == null)
             return
-        (incomingEvent as SecondEvent).data.elements.forEach { element ->
+        val info = event.makeDerivedEventInfo(EventStatus.Success)
+        (event as SecondEvent).data.elements.forEach { element ->
             onProduceEvent(ThirdEvent(
                 eventType = produceEvent,
-                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success),
                 data = element
             )
             )

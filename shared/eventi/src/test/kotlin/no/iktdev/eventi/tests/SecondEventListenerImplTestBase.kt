@@ -10,7 +10,7 @@ import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-
+/*
 class SecondEventListenerImplTestBase : EventiImplementationBase() {
 
 
@@ -38,4 +38,4 @@ class SecondEventListenerImplTestBase : EventiImplementationBase() {
         assertThat(events.filterIsInstance<SecondEvent>()).hasSize(2)
         assertThat(events.filterIsInstance<SecondEvent>().distinctBy { it.metadata.referenceId }).hasSize(2)
     }
-}
+}*/

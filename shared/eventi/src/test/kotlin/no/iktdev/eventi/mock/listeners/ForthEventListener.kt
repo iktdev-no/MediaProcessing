@@ -32,13 +32,14 @@ class ForthEventListener() : MockDataEventListener() {
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<EventImpl>, events: List<EventImpl>) {
-        if (!shouldIProcessAndHandleEvent(incomingEvent, events))
+        val event = incomingEvent.consume()
+        if (event == null)
             return
-        val info = incomingEvent.makeDerivedEventInfo(EventStatus.Success)
+        val info = event.makeDerivedEventInfo(EventStatus.Success)
         onProduceEvent(InitEvent(
             eventType = produceEvent,
             metadata = info,
-            data = incomingEvent.data as String
+            data = event as String
         ))
 
     }

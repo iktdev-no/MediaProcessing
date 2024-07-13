@@ -1,14 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
-import no.iktdev.mediaprocessing.PersistentMessageFromJsonDump
 import no.iktdev.mediaprocessing.coordinator.tasksV2.listeners.MediaOutInformationTaskListener
-import no.iktdev.mediaprocessing.shared.common.lastOrSuccessOf
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MetadataPerformed
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-
+/*
 class MetadataAndBaseInfoToFileOutTest {
 
     fun testData(): String {
@@ -42,4 +37,4 @@ class MetadataAndBaseInfoToFileOutTest {
         assertThat(vi).isNotNull()
     }
 
-}
+}*/

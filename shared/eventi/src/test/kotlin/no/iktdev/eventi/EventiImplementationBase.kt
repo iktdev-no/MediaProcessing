@@ -45,7 +45,7 @@ open class EventiImplementationBase: EventiApplicationTests() {
         return condition()
     }
 
-    fun getEvents(): List<EventImpl> {
+    fun getEvents(): List<List<EventImpl>> {
         return coordinator?.eventManager?.readAvailableEvents() ?: emptyList()
     }
 

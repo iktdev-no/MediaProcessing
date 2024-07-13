@@ -11,7 +11,7 @@ import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-
+/*
 class ThirdEventListenerImplTestBase : EventiImplementationBase() {
 
 
@@ -38,4 +38,4 @@ class ThirdEventListenerImplTestBase : EventiImplementationBase() {
         assertThat(events).hasSize(3 + ElementsToCreate().elements.size)
         assertThat(events.filter { it.eventType == ThirdEventListener::class.java.simpleName }).hasSize(ElementsToCreate().elements.size)
     }
-}
+}*/

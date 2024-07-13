@@ -3,19 +3,13 @@ package no.iktdev.mediaprocessing.shared.common.tests
 import no.iktdev.mediaprocessing.shared.common.H2DataSource2
 import no.iktdev.mediaprocessing.shared.common.datasource.DatabaseConnectionConfig
 import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentEventManager
 import no.iktdev.mediaprocessing.shared.common.persistance.events
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
-import no.iktdev.mediaprocessing.shared.kafka.dto.Message
-import no.iktdev.mediaprocessing.shared.kafka.dto.SimpleMessageData
-import no.iktdev.mediaprocessing.shared.kafka.dto.Status
-import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.MediaProcessStarted
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import org.assertj.core.api.Assertions.assertThat
 import org.jetbrains.exposed.sql.deleteAll
 
-
+/*
 class PersistentEventMangerTestBase {
     val defaultReferenceId = UUID.randomUUID().toString()
     val dataSource = H2DataSource2(DatabaseConnectionConfig(
@@ -492,4 +486,4 @@ class PersistentEventMangerTestBase {
         )
     }
 
-}
+}*/

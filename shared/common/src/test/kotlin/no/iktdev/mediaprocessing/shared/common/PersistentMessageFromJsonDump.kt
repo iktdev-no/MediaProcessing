@@ -1,14 +1,11 @@
 package no.iktdev.mediaprocessing.shared.common
 
 import kotlinx.serialization.json.*
-import no.iktdev.mediaprocessing.shared.common.persistance.PersistentMessage
 import no.iktdev.mediaprocessing.shared.common.persistance.events
-import no.iktdev.mediaprocessing.shared.kafka.core.DeserializingRegistry
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
 import org.json.JSONArray
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
+/*
 
 class PersistentMessageFromJsonDump(events: String) {
     private var data: JsonArray?
@@ -53,4 +50,4 @@ class PersistentMessageFromJsonDump(events: String) {
     }
 
 
-}
+}*/

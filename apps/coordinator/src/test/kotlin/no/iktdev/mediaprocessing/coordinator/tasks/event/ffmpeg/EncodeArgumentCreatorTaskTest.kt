@@ -6,8 +6,6 @@ import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.AudioArgume
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioPreference
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
-import no.iktdev.mediaprocessing.shared.kafka.dto.Message
-import no.iktdev.mediaprocessing.shared.kafka.dto.MessageDataWrapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

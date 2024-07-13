@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.ui.socket
 
-import no.iktdev.mediaprocessing.ui.service.PersistentEventsTableService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.simp.SimpMessagingTemplate

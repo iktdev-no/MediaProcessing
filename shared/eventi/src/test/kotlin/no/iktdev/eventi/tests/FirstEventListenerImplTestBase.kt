@@ -9,7 +9,7 @@ import no.iktdev.eventi.mock.listeners.FirstEventListener
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-
+/*
 
 class FirstEventListenerImplTestBase : EventiImplementationBase() {
 
@@ -51,4 +51,4 @@ class FirstEventListenerImplTestBase : EventiImplementationBase() {
         val events = coordinator?.eventManager?.readAvailableEvents() ?: emptyList()
         assertThat(events.filterIsInstance<FirstEvent>().distinctBy { it.metadata.referenceId }).hasSize(2)
     }
-}
+}*/

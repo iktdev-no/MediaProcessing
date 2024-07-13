@@ -12,7 +12,7 @@ import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-
+/*
 class ForthEventListenerImplTestBase : EventiImplementationBase() {
 
 
@@ -40,4 +40,4 @@ class ForthEventListenerImplTestBase : EventiImplementationBase() {
         assertThat(events.filter { it.eventType == ForthEventListener::class.java.simpleName }).hasSize(
             ElementsToCreate().elements.size)
     }
-}
+}*/

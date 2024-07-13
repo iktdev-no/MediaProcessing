@@ -8,6 +8,7 @@ findProject(":apps:coordinator")?.name = "coordinator"
 findProject(":apps:converter")?.name = "converter"
 findProject(":apps:processer")?.name = "processer"
 
+
 findProject(":shared")?.name = "shared"
 findProject(":shared:contract")?.name = "contract"
 findProject(":shared:common")?.name = "common"
@@ -23,4 +24,3 @@ include("shared")
 include("shared:contract")
 include("shared:common")
 include("shared:eventi")
-findProject(":shared:eventi")?.name = "eventi"
