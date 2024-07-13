@@ -31,9 +31,6 @@ fun getEventsDatabase(): MySqlDataSource {
 }
 
 fun main(args: Array<String>) {
-    runApplication<ConvertApplication>(*args)
-    log.info { "App Version: ${getAppVersion()}" }
-
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
             value.printStackTrace()
@@ -54,5 +51,7 @@ fun main(args: Array<String>) {
     runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
     runnerManager.assignRunner()
 
+    runApplication<ConvertApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
 }
 //private val logger = KotlinLogging.logger {}

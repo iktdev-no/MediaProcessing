@@ -39,9 +39,6 @@ private val log = KotlinLogging.logger {}
 
 
 fun main(args: Array<String>) {
-    runApplication<ProcesserApplication>(*args)
-    log.info { "App Version: ${getAppVersion()}" }
-
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
         override fun onUpdated(value: Throwable) {
             value.printStackTrace()
@@ -62,7 +59,8 @@ fun main(args: Array<String>) {
     runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ProcesserApplication::class.java.simpleName)
     runnerManager.assignRunner()
 
-
+    runApplication<ProcesserApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
 
 }
 
