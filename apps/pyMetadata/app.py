@@ -56,6 +56,7 @@ class EventsPullerThread(threading.Thread):
             connection = None
             cursor = None
             try:
+                logger.info(f"Connecting to {events_server_address}:{events_server_port} on table: {events_server_database_name}")
                 connection = mysql.connector.connect(
                     host=events_server_address,
                     port=events_server_port,
@@ -77,6 +78,7 @@ class EventsPullerThread(threading.Thread):
                 for row in cursor.fetchall():
                     if self.shutdown.is_set():
                         break
+                    logger.debug(row)
                     handler_thread = MessageHandlerThread(row)
                     handler_thread.start()
 
