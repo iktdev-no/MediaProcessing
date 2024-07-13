@@ -12,9 +12,9 @@ from fuzzywuzzy import fuzz
 from algo.AdvancedMatcher import AdvancedMatcher
 from algo.SimpleMatcher import SimpleMatcher
 from algo.PrefixMatcher import PrefixMatcher
-from clazz.KafkaMessageSchema import KafkaMessage, MessageDataWrapper
 from clazz.Metadata import Metadata
 
+from clazz.shared import EventData, EventMetadata, MediaEvent
 from sources.anii import Anii
 from sources.imdb import Imdb
 from sources.mal import Mal
@@ -46,15 +46,17 @@ class DryRun():
             message = f"No result for {combined_titles}"
             logger.info(message)
 
-        messageData = MessageDataWrapper(
-            status =  "ERROR" if result is None else "COMPLETED",
-            message =  message,
-            data = result,
-            derivedFromEventId = None
+        message = MediaEvent(
+            metadata = EventMetadata(
+                referenceId="00000000-0000-0000-0000-000000000000",
+                eventId="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+                derivedFromEventId=None,
+                status= "Failed" if result is None else "Success",
+            ),
+            data=result
         )
 
-        producerMessage = KafkaMessage(referenceId="DryRun..", data=messageData).to_json()
-        logger.info(producerMessage)
+        logger.info(message)
     
     def __getMetadata(self, titles: List[str]) -> Metadata | None:
         mal = Mal(titles=titles)

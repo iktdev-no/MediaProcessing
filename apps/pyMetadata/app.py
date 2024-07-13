@@ -15,9 +15,7 @@ from algo.AdvancedMatcher import AdvancedMatcher
 from algo.SimpleMatcher import SimpleMatcher
 from algo.PrefixMatcher import PrefixMatcher
 from clazz.shared import EventMetadata, MediaEvent, event_data_to_json, json_to_media_event
-from clazz.KafkaMessageSchema import KafkaMessage, MessageDataWrapper
 from clazz.Metadata import Metadata
-from kafka import KafkaConsumer, KafkaProducer
 
 from sources.anii import Anii
 from sources.imdb import Imdb
@@ -26,11 +24,7 @@ from sources.mal import Mal
 
 
 
-# Konfigurer Kafka-forbindelsen
-bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVER") or "127.0.0.1:9092"
-consumer_group = os.environ.get("KAFKA_CONSUMER_ID") or f"MetadataConsumer"
-kafka_topic = os.environ.get("KAFKA_TOPIC") or "mediaEvents"
-
+# Konfigurer Database
 events_server_address = os.environ.get("DATABASE_ADDRESS") or "127.0.0.1"
 events_server_port  = os.environ.get("DATABASE_PORT") or "3306"
 events_server_database_name = os.environ.get("DATABASE_NAME_E") or "events"
