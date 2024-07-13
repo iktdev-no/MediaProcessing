@@ -6,7 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
 }
 
-group = "no.iktdev.mediaprocessing"
+group = "no.iktdev.mediaprocessing.shared"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -55,7 +55,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(17)
 }
