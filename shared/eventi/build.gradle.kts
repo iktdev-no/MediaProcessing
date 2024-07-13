@@ -16,6 +16,7 @@ repositories {
 val exposedVersion = "0.44.0"
 
 dependencies {
+
     /*Spring boot*/
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
 
