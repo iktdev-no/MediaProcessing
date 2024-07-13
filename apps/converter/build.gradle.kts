@@ -77,3 +77,7 @@ tasks.jar {
     archiveFileName.set("app.jar")
     archiveBaseName.set("app")
 }
+
+kotlin {
+    jvmToolchain(17)
+}
