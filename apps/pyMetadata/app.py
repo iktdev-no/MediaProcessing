@@ -78,7 +78,7 @@ class EventsPullerThread(threading.Thread):
                 for row in cursor.fetchall():
                     if self.shutdown.is_set():
                         break
-                    logger.debug(row)
+                    logger.info("Event found!")
                     handler_thread = MessageHandlerThread(row)
                     handler_thread.start()
 
@@ -103,8 +103,10 @@ class MessageHandlerThread(threading.Thread):
     def __init__(self, row):
         super().__init__()
         self.mediaEvent = json_to_media_event(json.loads(row['data']))
+        logger.info(self.mediaEvent)
 
     def run(self):
+        logger.info("Starting processing")
         if (self.mediaEvent is None):
             logger.error("Event does not contain anything...")
             return
