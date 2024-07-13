@@ -102,7 +102,8 @@ class MessageHandlerThread(threading.Thread):
     mediaEvent: MediaEvent|None = None
     def __init__(self, row):
         super().__init__()
-        self.mediaEvent = json_to_media_event(json.loads(row['data']))
+        jsonData = row['data']
+        self.mediaEvent = json_to_media_event(json.loads(jsonData))
         logger.info(self.mediaEvent)
 
     def run(self):
