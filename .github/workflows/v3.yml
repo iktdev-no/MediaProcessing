@@ -104,7 +104,7 @@ jobs:
         id: build-processer
         run: |
           chmod +x ./gradlew
-          ./gradlew :apps:processer:bootJar --info
+          ./gradlew :apps:processer:bootJar --info --stacktrace
           echo "Build completed"
 
 
@@ -161,7 +161,7 @@ jobs:
         id: build-converter
         run: |
           chmod +x ./gradlew
-          ./gradlew :apps:converter:bootJar --info
+          ./gradlew :apps:converter:bootJar --info --debug
           echo "Build completed"
 
 

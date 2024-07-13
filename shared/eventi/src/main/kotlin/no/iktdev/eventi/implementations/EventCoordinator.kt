@@ -74,6 +74,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     }
 
     private var cachedListeners: List<String> = emptyList()
+    @SuppressWarnings("unchecked cast")
     fun getListeners(): List<EventListenerImpl<T, *>> {
         val serviceBeans: Map<String, Any> = applicationContext.getBeansWithAnnotation(Service::class.java)
 
@@ -81,7 +82,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
             .filter { bean: Any? -> bean is EventListenerImpl<*, *> }
             .map { it -> it as EventListenerImpl<*, *> }
             .toList()
-        val eventListeners = beans as List<EventListenerImpl<T, *>>
+        val eventListeners: List<EventListenerImpl<T, *>> = beans as List<EventListenerImpl<T, *>>
         val listenerNames = eventListeners.map { it::class.java.name }
         if (listenerNames != cachedListeners) {
             listenerNames.filter { it !in cachedListeners }.forEach {
