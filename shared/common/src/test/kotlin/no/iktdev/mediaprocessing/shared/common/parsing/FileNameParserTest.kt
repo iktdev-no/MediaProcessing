@@ -65,7 +65,7 @@ class FileNameParserTest {
     @Test
     fun findTitleWithYear() {
         val input = "Dette er (en) tekst med (flere) paranteser som (potet) inneholder (år) som (2024) (2025).";
-        val result = FileNameParser(input).guessSearchableTitle()
+        val result = FileNameParser(input).guessSearchableTitle().first()
         assertThat(result).isEqualTo("Dette er tekst med paranteser som inneholder som (2024) (2025)")
     }
 
@@ -81,13 +81,6 @@ class FileNameParserTest {
         val input = "[FANCY] Urusei Yatsura - 36 [1080p HEVC]"
         val result = FileNameParser(input).guessSearchableTitle()
         assertThat(result.first()).isEqualTo("Urusei Yatsura")
-    }
-
-    @Test
-    fun testName() {
-        val input = "The.Boys.S04E02.Life.Among.the.Septics.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb"
-        val result = FileNameParser(input).guessSearchableTitle()
-        assertThat(result.first()).isEqualTo("Urusei Yatsura (2022)")
     }
 
 }

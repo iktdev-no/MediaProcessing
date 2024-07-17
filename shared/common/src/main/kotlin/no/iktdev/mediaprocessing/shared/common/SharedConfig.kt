@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import no.iktdev.mediaprocessing.shared.common.datasource.DatabaseConnectionConfig
-import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.eventi.database.DatabaseConnectionConfig
+import no.iktdev.eventi.database.MySqlDataSource
 import java.io.File
 
 object SharedConfig {
@@ -26,21 +26,23 @@ object DatabaseEnvConfig {
 }
 
 fun DatabaseEnvConfig.toStoredDatabase(): MySqlDataSource {
-    return MySqlDataSource(DatabaseConnectionConfig(
+    val config = DatabaseConnectionConfig(
         databaseName = this.storedDatabase ?: "streamit",
         address = this.address ?: "localhost",
         port = this.port,
         username = this.username ?: "root",
         password = this.password ?: ""
-    ))
+    )
+    return MySqlDataSource(config)
 }
 
 fun DatabaseEnvConfig.toEventsDatabase(): MySqlDataSource {
-    return MySqlDataSource(DatabaseConnectionConfig(
+    val config = DatabaseConnectionConfig(
         databaseName = this.eventBasedDatabase ?: "persistentEvents",
         address = this.address ?: "localhost",
         port = this.port,
         username = this.username ?: "root",
         password = this.password ?: ""
-    ))
+    )
+    return MySqlDataSource(config)
 }

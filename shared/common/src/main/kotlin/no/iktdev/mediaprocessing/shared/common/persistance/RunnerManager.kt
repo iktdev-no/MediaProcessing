@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing.shared.common.persistance
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.datasource.DataSource
-import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
-import no.iktdev.mediaprocessing.shared.common.datasource.withDirtyRead
+import no.iktdev.eventi.database.DataSource
+import no.iktdev.eventi.database.executeOrException
+import no.iktdev.eventi.database.withDirtyRead
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert

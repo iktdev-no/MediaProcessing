@@ -5,7 +5,7 @@ import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
-import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.eventi.database.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase

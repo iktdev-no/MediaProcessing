@@ -91,7 +91,7 @@ class EventsPullerThread(threading.Thread):
                 if connection:
                     connection.close()
             # Introduce a small sleep to reduce CPU usage
-            time.sleep(1000)
+            time.sleep(5)
         if (self.shutdown.is_set()):
             logger.info("Shutdown is set..")
 

@@ -1,7 +1,7 @@
 package no.iktdev.eventi.implementations
 
 import no.iktdev.eventi.data.EventImpl
-import no.iktdev.mediaprocessing.shared.common.datasource.DataSource
+import no.iktdev.eventi.database.DataSource
 
 /**
  * Interacts with the database, needs to be within the Coordinator

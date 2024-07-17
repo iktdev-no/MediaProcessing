@@ -1,14 +1,5 @@
 package no.iktdev.mediaprocessing.shared.common.tests
 
-import no.iktdev.mediaprocessing.shared.common.H2DataSource2
-import no.iktdev.mediaprocessing.shared.common.datasource.DatabaseConnectionConfig
-import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
-import no.iktdev.mediaprocessing.shared.common.persistance.events
-import org.junit.jupiter.api.Test
-import java.util.UUID
-import org.assertj.core.api.Assertions.assertThat
-import org.jetbrains.exposed.sql.deleteAll
-
 /*
 class PersistentEventMangerTestBase {
     val defaultReferenceId = UUID.randomUUID().toString()

@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.shared.common.datasource
+package no.iktdev.eventi.database
 
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.Database

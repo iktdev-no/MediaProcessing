@@ -1,22 +1,5 @@
 package no.iktdev.mediaprocessing.coordinator.tasks.event
 
-import mu.KotlinLogging
-import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
-import no.iktdev.mediaprocessing.coordinator.mapping.ProcessMapping
-import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
-import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
-import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
-import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
-import no.iktdev.mediaprocessing.shared.contract.reader.MetadataDto
-import no.iktdev.mediaprocessing.shared.contract.reader.VideoDetails
-import no.iktdev.streamit.library.db.query.*
-import no.iktdev.streamit.library.db.tables.titles
-import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.insertIgnore
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import java.io.File
-import java.sql.SQLIntegrityConstraintViolationException
 /*
 @Service
 class CollectAndStoreTask()  {

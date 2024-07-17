@@ -6,7 +6,7 @@ import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.*
-import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.eventi.database.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.streamit.library.db.tables.*
 import no.iktdev.streamit.library.db.tables.helper.cast_errors

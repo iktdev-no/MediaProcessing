@@ -1,6 +1,5 @@
-package no.iktdev.mediaprocessing.shared.common.datasource
+package no.iktdev.eventi.database
 
-import no.iktdev.eventi.database.DatabaseConnectionConfig
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Table
 import java.time.Instant

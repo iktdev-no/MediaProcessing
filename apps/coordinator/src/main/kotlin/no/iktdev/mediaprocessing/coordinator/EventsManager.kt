@@ -5,7 +5,9 @@ import no.iktdev.eventi.data.derivedFromEventId
 import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.data.toJson
-import no.iktdev.mediaprocessing.shared.common.datasource.*
+import no.iktdev.eventi.database.DataSource
+import no.iktdev.eventi.database.isCausedByDuplicateError
+import no.iktdev.eventi.database.isExposedSqlException
 import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
@@ -19,7 +21,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
 
     override fun storeEvent(event: Event): Boolean {
 
-        withTransaction(dataSource.database) {
+        no.iktdev.eventi.database.withTransaction(dataSource.database) {
             allEvents.insert {
                 it[referenceId] = event.referenceId()
                 it[eventId] = event.eventId()
@@ -40,7 +42,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
         }
 
 
-        val exception = executeOrException(dataSource.database) {
+        val exception = no.iktdev.eventi.database.executeOrException(dataSource.database) {
             events.insert {
                 it[referenceId] = event.referenceId()
                 it[eventId] = event.eventId()
@@ -88,7 +90,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
 
 
     override fun readAvailableEvents(): List<List<Event>> {
-        return withTransaction (dataSource.database) {
+        return no.iktdev.eventi.database.withTransaction(dataSource.database) {
             events.selectAll()
                 .groupBy { it[events.referenceId] }
                 .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }
@@ -96,7 +98,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
     }
 
     override fun readAvailableEventsFor(referenceId: String): List<Event> {
-        val events = withTransaction(dataSource.database) {
+        val events = no.iktdev.eventi.database.withTransaction(dataSource.database) {
             events.select { events.referenceId eq referenceId }
                 .mapNotNull { it.toEvent() }
         } ?: emptyList()
@@ -104,7 +106,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
     }
 
     override fun getAllEvents(): List<List<Event>> {
-        val events = withTransaction(dataSource.database) {
+        val events = no.iktdev.eventi.database.withTransaction(dataSource.database) {
             events.selectAll()
                 .groupBy { it[events.referenceId] }
                 .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }
@@ -114,7 +116,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
 
 
     override fun getEventsWith(referenceId: String): List<Event> {
-        return withTransaction(dataSource.database) {
+        return no.iktdev.eventi.database.withTransaction(dataSource.database) {
             events.select {
                 (events.referenceId eq referenceId)
             }
@@ -151,12 +153,12 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
      * Deletes the events
      */
     private fun deleteSupersededEvents(superseded: List<Event>) {
-        withTransaction(dataSource) {
+        no.iktdev.eventi.database.withTransaction(dataSource) {
             superseded.forEach { duplicate ->
                 events.deleteWhere {
-                    (events.referenceId eq duplicate.referenceId()) and
-                            (events.eventId eq duplicate.eventId()) and
-                            (events.event eq duplicate.eventType.event)
+                    (referenceId eq duplicate.referenceId()) and
+                            (eventId eq duplicate.eventId()) and
+                            (event eq duplicate.eventType.event)
                 }
             }
         }

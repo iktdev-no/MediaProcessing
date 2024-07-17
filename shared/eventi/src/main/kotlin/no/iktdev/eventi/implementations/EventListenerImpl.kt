@@ -2,12 +2,23 @@ package no.iktdev.eventi.implementations
 
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.data.*
+import javax.annotation.PostConstruct
 
 abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
     abstract val coordinator: EventCoordinator<T, E>?
 
     abstract val produceEvent: Any
     abstract val listensForEvents: List<Any>
+
+    open fun onReady() {
+
+    }
+
+    @PostConstruct
+    fun onCreated() {
+        onReady()
+    }
+
 
     protected open fun onProduceEvent(event: T) {
         coordinator?.produceNewEvent(event) ?: {

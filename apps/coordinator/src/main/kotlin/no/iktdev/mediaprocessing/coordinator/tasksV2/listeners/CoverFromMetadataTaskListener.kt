@@ -4,14 +4,11 @@ import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
 import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.contract.data.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -33,6 +30,11 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
     override fun isPrerequisitesFulfilled(incomingEvent: Event, events: List<Event>): Boolean {
         return events.any { it.eventType == Events.EventMediaMetadataSearchPerformed } &&
                 events.any { it.eventType == Events.EventMediaReadOutNameAndType }
+    }
+
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        return super.shouldIProcessAndHandleEvent(incomingEvent, events) && incomingEvent.eventType in listensForEvents
+
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {

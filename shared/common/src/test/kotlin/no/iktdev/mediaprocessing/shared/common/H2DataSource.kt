@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import no.iktdev.mediaprocessing.shared.common.datasource.DatabaseConnectionConfig
-import no.iktdev.mediaprocessing.shared.common.datasource.MySqlDataSource
+import no.iktdev.eventi.database.DatabaseConnectionConfig
+import no.iktdev.eventi.database.MySqlDataSource
 import org.h2.jdbcx.JdbcDataSource 
 import java.io.PrintWriter
 import java.sql.Connection

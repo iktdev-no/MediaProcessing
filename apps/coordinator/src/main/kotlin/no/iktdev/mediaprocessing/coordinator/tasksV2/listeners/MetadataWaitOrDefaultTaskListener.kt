@@ -7,7 +7,7 @@ import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.shared.common.datasource.toEpochSeconds
+import no.iktdev.eventi.database.toEpochSeconds
 import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.data.BaseInfoEvent
 import no.iktdev.mediaprocessing.shared.contract.data.Event

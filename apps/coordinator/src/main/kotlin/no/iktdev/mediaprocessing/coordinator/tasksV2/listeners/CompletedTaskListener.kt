@@ -6,9 +6,9 @@ import no.iktdev.eventi.data.*
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
-import no.iktdev.mediaprocessing.shared.common.datasource.executeOrException
-import no.iktdev.mediaprocessing.shared.common.datasource.executeWithStatus
-import no.iktdev.mediaprocessing.shared.common.datasource.withTransaction
+import no.iktdev.eventi.database.executeOrException
+import no.iktdev.eventi.database.executeWithStatus
+import no.iktdev.eventi.database.withTransaction
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.data.*
@@ -30,6 +30,16 @@ import java.sql.SQLIntegrityConstraintViolationException
 @Service
 class CompletedTaskListener: CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
+
+    var doNotProduceComplete = System.getenv("DISABLE_COMPLETE").toBoolean() ?: false
+
+
+    override fun onReady() {
+        super.onReady()
+        if (doNotProduceComplete) {
+            log.warn { "DoNotProduceComplete is set!\n\tNo complete event will be triggered!\n\tTo enable production of complete vents, remove this line in your environment: \"DISABLE_COMPLETE\"" }
+        }
+    }
 
 
     @Autowired
@@ -121,6 +131,26 @@ class CompletedTaskListener: CoordinatorEventListener() {
         return true
     }
 
+    /**
+     * Checks if metadata has cover, if so, 2 events are expected
+     */
+    fun req4(events: List<Event>): Boolean {
+        val metadata = events.find { it.eventType == Events.EventMediaMetadataSearchPerformed }
+        if (metadata?.isSuccessful() != true) {
+            return true
+        }
+
+        val hasCover = metadata.dataAs<pyMetadata>()?.cover != null
+        if (hasCover == false) {
+            return true
+        }
+
+        if (events.any { it.eventType == Events.EventMediaReadOutCover } && events.any { it.eventType == Events.EventWorkDownloadCoverPerformed }) {
+            return true
+        }
+        return false
+    }
+
 
     override fun isPrerequisitesFulfilled(incomingEvent: Event, events: List<Event>): Boolean {
         val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>()
@@ -145,6 +175,13 @@ class CompletedTaskListener: CoordinatorEventListener() {
             //log.info { "${this::class.java.simpleName} Failed Req3" }
             return false
         }
+
+        if (!req4(events)) {
+            log.info { "${this::class.java.simpleName} Failed Req4" }
+            return false
+        }
+
+
         return super.isPrerequisitesFulfilled(incomingEvent, events)
     }
 
@@ -258,18 +295,18 @@ class CompletedTaskListener: CoordinatorEventListener() {
         try {
             withTransaction(getStoreDatabase()) {
                 titles.insertIgnore {
-                    it[titles.masterTitle] = metadata.collection
-                    it[titles.title] = NameHelper.normalize(usedTitle)
-                    it[titles.type] = 1
+                    it[masterTitle] = metadata.collection
+                    it[title] = NameHelper.normalize(usedTitle)
+                    it[type] = 1
                 }
                 titles.insertIgnore {
-                    it[titles.masterTitle] = usedTitle
-                    it[titles.title] = NameHelper.normalize(usedTitle)
-                    it[titles.type] = 2
+                    it[masterTitle] = usedTitle
+                    it[title] = NameHelper.normalize(usedTitle)
+                    it[type] = 2
                 }
                 metadata.titles.forEach { title ->
                     titles.insertIgnore {
-                        it[titles.masterTitle] = usedTitle
+                        it[masterTitle] = usedTitle
                         it[titles.title] = title
                     }
                 }
@@ -336,6 +373,9 @@ class CompletedTaskListener: CoordinatorEventListener() {
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        if (doNotProduceComplete) {
+            return false
+        }
         val result = super.shouldIProcessAndHandleEvent(incomingEvent, events)
         return result
     }
@@ -355,6 +395,7 @@ class CompletedTaskListener: CoordinatorEventListener() {
         } else null
 
 
+
         storeSubtitles(subtitles)
         metadata?.let {
             storeTitles(metadata = metadata, usedTitle = metadata.title)
@@ -372,4 +413,5 @@ class CompletedTaskListener: CoordinatorEventListener() {
             )
         ))
     }
+
 }

@@ -1,7 +1,7 @@
 package no.iktdev.eventi.mock
 
 import no.iktdev.eventi.database.DatabaseConnectionConfig
-import no.iktdev.mediaprocessing.shared.common.datasource.DataSource
+import no.iktdev.eventi.database.DataSource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Table
 

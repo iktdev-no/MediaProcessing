@@ -4,14 +4,13 @@ import mu.KotlinLogging
 import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.data.toJson
-import no.iktdev.mediaprocessing.shared.common.datasource.*
+import no.iktdev.eventi.database.*
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.common.task.TaskDoz
 import no.iktdev.mediaprocessing.shared.contract.data.Event
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import java.security.MessageDigest
 import java.time.LocalDateTime
