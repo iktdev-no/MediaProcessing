@@ -34,9 +34,11 @@
     </loaded-modules>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="83cd22eb-7f21-4585-9fdf-9cf3ac59698d" name="Changes" comment="v3 23">
+    <list default="true" id="83cd22eb-7f21-4585-9fdf-9cf3ac59698d" name="Changes" comment="v3 25">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/EventsManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/EventsManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,87 +138,87 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.Build MediaProcessing2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EncodeArgumentCreatorTaskTest.verifyThatEacStreamGetsCorrectArguments.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EventiApplicationTests.contextLoads.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EventiApplicationTests.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.EventiImplementationBase.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EventiImplementationBase.validateCoordinatorConstruction.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EventiImplementationBase.validateCreation.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameDeterminateTest.serieWithTitleFroMMetadata.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.findSearchableTitle.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.findSearchableTitle2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.findTitleWithYear.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.movieName.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.FileNameParserTest.movieName2.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.FileNameParserTest.serieName.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.serieNameWithNumbers (1).executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.serieNameWithNumbers.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.testName.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.testParsing.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FirstEventListenerImplTestBase.validate2.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.FirstEventListenerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ForthEventListenerTest.validate1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ForthEventListenerTestBase.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ForthEventListenerTestBase.validate1.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.MediaProcessing2 [:apps:processer:bootJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [:clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [:shared:build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [:shared:eventi:compileKotlin].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [apps:build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [clean install].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:apps:processer [bootJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:shared [assemble].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:shared [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:shared:eventi [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:shared:eventi [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MetadataAndBaseInfoToFileOutTest.testVideoData.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.PersistentEventMangerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.PersistentEventMangerTest.testConvertBatchFromExtract.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.PersistentEventMangerTest.testSomeAreSingleSomeAreNot.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.PersistentEventMangerTest.testSupersededButKeepWork.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.PersistentEventMangerTest.testSupersededWork.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SecondEventListenerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SecondEventListenerTest.validate1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SecondEventListenerTestBase.validate1.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.apps.coordinator'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.apps.processer'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.shared.common.test'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.shared.eventi'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.shared.eventi.test'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Tests in 'no.iktdev.eventi'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ThirdEventListenerTest.validate1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ThirdEventListenerTestBase.validate1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ThridEventListenerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ThridEventListenerTest.validate1.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.ThridEventListenerTest.validate2.executor&quot;: &quot;Debug&quot;,
-    &quot;JUnit.All in MediaProcessing.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.ConverterApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.CoordinatorApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.Env - CoordinatorApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.EventiApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.ProcesserApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.UIApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ShowUsagesActions.previewPropertyKey&quot;: &quot;true&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;v3&quot;,
-    &quot;jdk.selected.JAVA_MODULE&quot;: &quot;azul-17&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Workspace/MediaProcessing2/shared/eventi&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Build MediaProcessing2.executor": "Run",
+    "Gradle.EncodeArgumentCreatorTaskTest.verifyThatEacStreamGetsCorrectArguments.executor": "Run",
+    "Gradle.EventiApplicationTests.contextLoads.executor": "Run",
+    "Gradle.EventiApplicationTests.executor": "Debug",
+    "Gradle.EventiImplementationBase.executor": "Run",
+    "Gradle.EventiImplementationBase.validateCoordinatorConstruction.executor": "Run",
+    "Gradle.EventiImplementationBase.validateCreation.executor": "Run",
+    "Gradle.FileNameDeterminateTest.serieWithTitleFroMMetadata.executor": "Run",
+    "Gradle.FileNameParserTest.executor": "Run",
+    "Gradle.FileNameParserTest.findSearchableTitle.executor": "Run",
+    "Gradle.FileNameParserTest.findSearchableTitle2.executor": "Run",
+    "Gradle.FileNameParserTest.findTitleWithYear.executor": "Run",
+    "Gradle.FileNameParserTest.movieName.executor": "Debug",
+    "Gradle.FileNameParserTest.movieName2.executor": "Debug",
+    "Gradle.FileNameParserTest.serieName.executor": "Run",
+    "Gradle.FileNameParserTest.serieNameWithNumbers (1).executor": "Run",
+    "Gradle.FileNameParserTest.serieNameWithNumbers.executor": "Run",
+    "Gradle.FileNameParserTest.testName.executor": "Run",
+    "Gradle.FileNameParserTest.testParsing.executor": "Run",
+    "Gradle.FirstEventListenerImplTestBase.validate2.executor": "Debug",
+    "Gradle.FirstEventListenerTest.executor": "Run",
+    "Gradle.ForthEventListenerTest.validate1.executor": "Run",
+    "Gradle.ForthEventListenerTestBase.executor": "Run",
+    "Gradle.ForthEventListenerTestBase.validate1.executor": "Debug",
+    "Gradle.MediaProcessing2 [:apps:processer:bootJar].executor": "Run",
+    "Gradle.MediaProcessing2 [:clean].executor": "Run",
+    "Gradle.MediaProcessing2 [:shared:build].executor": "Run",
+    "Gradle.MediaProcessing2 [:shared:eventi:compileKotlin].executor": "Run",
+    "Gradle.MediaProcessing2 [apps:build].executor": "Run",
+    "Gradle.MediaProcessing2 [build].executor": "Run",
+    "Gradle.MediaProcessing2 [clean install].executor": "Run",
+    "Gradle.MediaProcessing2 [clean].executor": "Run",
+    "Gradle.MediaProcessing2:apps:processer [bootJar].executor": "Run",
+    "Gradle.MediaProcessing2:shared [assemble].executor": "Run",
+    "Gradle.MediaProcessing2:shared [build].executor": "Run",
+    "Gradle.MediaProcessing2:shared:eventi [build].executor": "Run",
+    "Gradle.MediaProcessing2:shared:eventi [clean].executor": "Run",
+    "Gradle.MetadataAndBaseInfoToFileOutTest.testVideoData.executor": "Debug",
+    "Gradle.PersistentEventMangerTest.executor": "Run",
+    "Gradle.PersistentEventMangerTest.testConvertBatchFromExtract.executor": "Run",
+    "Gradle.PersistentEventMangerTest.testSomeAreSingleSomeAreNot.executor": "Run",
+    "Gradle.PersistentEventMangerTest.testSupersededButKeepWork.executor": "Run",
+    "Gradle.PersistentEventMangerTest.testSupersededWork.executor": "Run",
+    "Gradle.SecondEventListenerTest.executor": "Run",
+    "Gradle.SecondEventListenerTest.validate1.executor": "Run",
+    "Gradle.SecondEventListenerTestBase.validate1.executor": "Debug",
+    "Gradle.Tests in 'MediaProcessing.apps.coordinator'.executor": "Run",
+    "Gradle.Tests in 'MediaProcessing.apps.processer'.executor": "Run",
+    "Gradle.Tests in 'MediaProcessing.shared.common.test'.executor": "Run",
+    "Gradle.Tests in 'MediaProcessing.shared.eventi'.executor": "Run",
+    "Gradle.Tests in 'MediaProcessing.shared.eventi.test'.executor": "Run",
+    "Gradle.Tests in 'no.iktdev.eventi'.executor": "Run",
+    "Gradle.ThirdEventListenerTest.validate1.executor": "Run",
+    "Gradle.ThirdEventListenerTestBase.validate1.executor": "Run",
+    "Gradle.ThridEventListenerTest.executor": "Run",
+    "Gradle.ThridEventListenerTest.validate1.executor": "Debug",
+    "Gradle.ThridEventListenerTest.validate2.executor": "Debug",
+    "JUnit.All in MediaProcessing.executor": "Run",
+    "Kotlin.ConverterApplicationKt.executor": "Run",
+    "Kotlin.CoordinatorApplicationKt.executor": "Run",
+    "Kotlin.Env - CoordinatorApplicationKt.executor": "Debug",
+    "Kotlin.EventiApplicationKt.executor": "Run",
+    "Kotlin.ProcesserApplicationKt.executor": "Run",
+    "Kotlin.UIApplicationKt.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ShowUsagesActions.previewPropertyKey": "true",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
+    "git-widget-placeholder": "v3",
+    "jdk.selected.JAVA_MODULE": "azul-17",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Workspace/MediaProcessing2/shared/eventi",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Workspace\MediaProcessing2\shared\contract\src\main\kotlin\no\iktdev\mediaprocessing\shared\contract\data" />
@@ -269,7 +271,7 @@
       <command value="gradle :clean" />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.All in MediaProcessing">
+  <component name="RunManager" selected="Kotlin.Env - CoordinatorApplicationKt">
     <configuration name="MediaProcessing2 [:clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -370,16 +372,16 @@
       <envs>
         <env name="DATABASE_ADDRESS" value="192.168.2.250" />
         <env name="DATABASE_NAME_E" value="eventsV3" />
-        <env name="DATABASE_NAME_S" value="streamitDev3" />
+        <env name="DATABASE_NAME_S" value="streamit" />
         <env name="DATABASE_PASSWORD" value="shFZ27eL2x2NoxyEDBMfDWkvFO" />
         <env name="DATABASE_PORT" value="3306" />
         <env name="DATABASE_USERNAME" value="root" />
         <env name="DIRECTORY_CONTENT_INCOMING" value="G:\MediaProcessingPlayground\input" />
         <env name="DIRECTORY_CONTENT_OUTGOING" value="G:\MediaProcessingPlayground\output" />
+        <env name="DISABLE_COMPLETE" value="true" />
         <env name="METADATA_TIMEOUT" value="0" />
         <env name="SUPPORTING_EXECUTABLE_FFMPEG" value="G:\MediaProcessingPlayground\ffmpeg.exe" />
         <env name="SUPPORTING_EXECUTABLE_FFPROBE" value="G:\MediaProcessingPlayground\ffprobe.exe" />
-        <env name="DISABLE_COMPLETE" value="true" />
       </envs>
       <option name="MAIN_CLASS_NAME" value="no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt" />
       <module name="MediaProcessing.apps.coordinator.main" />
@@ -414,20 +416,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1712771068889</updated>
-    </task>
-    <task id="LOCAL−00139" summary="Version">
-      <option name="closed" value="true" />
-      <created>1719706352452</created>
-      <option name="number" value="LOCAL−00139" />
-      <option name="presentableId" value="LOCAL−00139" />
-      <updated>1719706352452</updated>
-    </task>
-    <task id="LOCAL−00140" summary="Table">
-      <option name="closed" value="true" />
-      <created>1719708288857</created>
-      <option name="number" value="LOCAL−00140" />
-      <option name="presentableId" value="LOCAL−00140" />
-      <updated>1719708288857</updated>
     </task>
     <task id="LOCAL−00141" summary="Fix">
       <option name="closed" value="true" />
@@ -758,7 +746,21 @@
       <option name="presentableId" value="LOCAL−00187" />
       <updated>1721320748899</updated>
     </task>
-    <option name="localTasksCounter" value="188" />
+    <task id="LOCAL−00188" summary="v3 24">
+      <option name="closed" value="true" />
+      <created>1721321619065</created>
+      <option name="number" value="LOCAL−00188" />
+      <option name="presentableId" value="LOCAL−00188" />
+      <updated>1721321619065</updated>
+    </task>
+    <task id="LOCAL−00189" summary="v3 25">
+      <option name="closed" value="true" />
+      <created>1721329940691</created>
+      <option name="number" value="LOCAL−00189" />
+      <option name="presentableId" value="LOCAL−00189" />
+      <updated>1721329940691</updated>
+    </task>
+    <option name="localTasksCounter" value="190" />
     <servers />
   </component>
   <component name="UnloadedModulesList">
@@ -778,8 +780,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="V3 - Moved to database polling" />
-    <MESSAGE value="v3 - db polling for pyMetadata" />
     <MESSAGE value="v3" />
     <MESSAGE value="v3 2" />
     <MESSAGE value="v3 3" />
@@ -803,7 +803,9 @@
     <MESSAGE value="v3 21" />
     <MESSAGE value="v3 22" />
     <MESSAGE value="v3 23" />
-    <option name="LAST_COMMIT_MESSAGE" value="v3 23" />
+    <MESSAGE value="v3 24" />
+    <MESSAGE value="v3 25" />
+    <option name="LAST_COMMIT_MESSAGE" value="v3 25" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1005,14 +1007,6 @@
           <option name="timeStamp" value="275" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>67</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="288" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ReadMediaFileStreamsTaskListener.kt</url>
           <line>44</line>
           <option name="timeStamp" value="293" />
@@ -1063,7 +1057,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
-          <line>40</line>
+          <line>43</line>
           <option name="timeStamp" value="334" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
@@ -1083,6 +1077,62 @@
             <option name="lambda-ordinal" value="-1" />
           </properties>
           <option name="timeStamp" value="346" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/build.gradle.kts</url>
+          <line>85</line>
+          <option name="timeStamp" value="347" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>46</line>
+          <option name="timeStamp" value="349" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>53</line>
+          <option name="timeStamp" value="350" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>59</line>
+          <option name="timeStamp" value="351" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>64</line>
+          <option name="timeStamp" value="352" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>88</line>
+          <option name="timeStamp" value="353" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
+          <line>47</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="356" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
+          <line>64</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="358" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
+          <line>54</line>
+          <option name="timeStamp" value="359" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>35</line>
+          <option name="timeStamp" value="360" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -93,7 +93,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
         return no.iktdev.eventi.database.withTransaction(dataSource.database) {
             events.selectAll()
                 .groupBy { it[events.referenceId] }
-                .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }
+                .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }.filter { it.none { e -> e.eventType == Events.EventMediaProcessCompleted } }
         } ?: emptyList()
     }
 

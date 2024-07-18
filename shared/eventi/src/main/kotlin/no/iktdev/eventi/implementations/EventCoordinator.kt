@@ -33,41 +33,59 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     }
 
 
-    var taskMode: ActiveMode = ActiveMode.Active
+    open var taskMode: ActiveMode = ActiveMode.Active
+    private val referencePool: MutableMap<String, Deferred<Boolean>> = mutableMapOf()
+    private fun referencePoolIsReadyForEvents(): Boolean {
+        return (referencePool.isEmpty() || referencePool.any { !it.value.isActive })
+    }
 
     private var newEventProduced: Boolean = false
-    private fun onEventsReceived(events: List<T>) = runBlocking {
+
+
+    private fun onEventGroupsReceived(eventGroup: List<List<T>>) {
+        val activePolls = referencePool.values.filter { it.isActive }.size
+        log.info { "Active polls $activePolls/${referencePool.values.size}" }
+        eventGroup.forEach {
+            val referenceId = it.first().referenceId()
+
+            val isAvailable = if (referenceId in referencePool.keys) {
+                referencePool[referenceId]?.isActive != true
+            } else true
+
+            if (isAvailable) {
+                referencePool[referenceId] = coroutine.async {
+                    onEventsReceived(it)
+                }
+            }
+        }
+    }
+
+    private suspend fun onEventsReceived(events: List<T>): Boolean = coroutineScope {
         val listeners = getListeners()
-        launch {
-            events.forEach { event ->
-                listeners.forEach { listener ->
-                    if (listener.shouldIProcessAndHandleEvent(event, events)) {
-                        val consumableEvent = ConsumableEvent(event)
-                        listener.onEventsReceived(consumableEvent, events)
-                        if (consumableEvent.isConsumed) {
-                            log.info { "Consumption detected for ${listener::class.java.simpleName} on event ${event.eventType}" }
-                            return@launch
-                        }
+        events.forEach { event ->
+            listeners.forEach { listener ->
+                if (listener.shouldIProcessAndHandleEvent(event, events)) {
+                    val consumableEvent = ConsumableEvent(event)
+                    listener.onEventsReceived(consumableEvent, events)
+                    if (consumableEvent.isConsumed) {
+                        log.info { "Consumption detected for ${events.first().referenceId()} -> ${listener::class.java.simpleName} on event ${event.eventType}" }
+                        return@coroutineScope true
                     }
                 }
             }
-            log.debug { "No consumption detected for ${events.first().referenceId()}" }
-
         }
+        log.debug { "No consumption detected for ${events.first().referenceId()}" }
+        false
     }
 
     private var newEventsProducedOnReferenceId: AtomicReference<List<String>> = AtomicReference(emptyList())
     private fun pullForEvents() {
         coroutine.launch {
             while (taskMode == ActiveMode.Active) {
-                log.debug { "New pull on database" }
-                val events = eventManager?.readAvailableEvents()
-                if (events == null) {
-                    log.warn { "EventManager is not loaded!" }
-                } else {
-                    events.forEach { group ->
-                        onEventsReceived(group)
-                    }
+                if (referencePoolIsReadyForEvents()) {
+                    log.debug { "New pull on database" }
+                    val events = eventManager.readAvailableEvents()
+                    onEventGroupsReceived(events)
                 }
                 waitForConditionOrTimeout(pullDelay.get()) { newEventProduced }.also {
                     newEventProduced = false

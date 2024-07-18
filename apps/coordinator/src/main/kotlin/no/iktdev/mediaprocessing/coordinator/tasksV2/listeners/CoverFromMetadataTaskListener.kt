@@ -33,8 +33,11 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
-        return super.shouldIProcessAndHandleEvent(incomingEvent, events) && incomingEvent.eventType in listensForEvents
-
+        val state = super.shouldIProcessAndHandleEvent(incomingEvent, events)
+        if (!state) {
+            return false
+        }
+        return incomingEvent.eventType in listensForEvents
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
