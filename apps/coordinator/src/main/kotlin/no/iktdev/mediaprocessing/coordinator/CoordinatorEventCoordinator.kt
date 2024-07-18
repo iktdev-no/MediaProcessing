@@ -27,7 +27,6 @@ class Coordinator(
 ) : EventCoordinator<Event, EventsManager>() {
 
     init {
-        pullDelay.set(100)
     }
 
     public fun startProcess(file: File, type: ProcessType) {

@@ -14,7 +14,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     abstract var applicationContext: ApplicationContext
     abstract var eventManager: E
 
-    val pullDelay: AtomicLong = AtomicLong(5000)
+    val pullDelay: AtomicLong = AtomicLong(1000)
 
     //private val listeners: MutableList<EventListener<T>> = mutableListOf()
 
@@ -86,10 +86,17 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     log.debug { "New pull on database" }
                     val events = eventManager.readAvailableEvents()
                     onEventGroupsReceived(events)
+                    if (events.isNotEmpty()) {
+                        pullDelay.set(500)
+                    } else {
+                        pullDelay.set(2500)
+                    }
+                    referencePool.values.awaitAll()
                 }
-                waitForConditionOrTimeout(pullDelay.get()) { newEventProduced }.also {
-                    newEventProduced = false
+                waitForConditionOrTimeout(pullDelay.get()) {
+                    newEventProduced
                 }
+                newEventProduced = false
             }
         }
     }
@@ -114,11 +121,16 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
         return eventListeners
     }
 
-
+    var doNotProduce = System.getenv("DISABLE_PRODUCE").toBoolean() ?: false
     /**
      * @return true if its stored
      */
     fun produceNewEvent(event: T): Boolean {
+        if (doNotProduce) {
+            newEventProduced = true
+            return true
+        }
+
         val isStored = eventManager.storeEvent(event)
         if (isStored) {
             log.info { "Stored event: ${event.eventType}" }

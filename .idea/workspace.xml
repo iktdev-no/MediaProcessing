@@ -34,10 +34,9 @@
     </loaded-modules>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="83cd22eb-7f21-4585-9fdf-9cf3ac59698d" name="Changes" comment="v3 25">
+    <list default="true" id="83cd22eb-7f21-4585-9fdf-9cf3ac59698d" name="Changes" comment="v3 26">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/EventsManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/EventsManager.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorEventCoordinator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorEventCoordinator.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -200,7 +199,7 @@
     "JUnit.All in MediaProcessing.executor": "Run",
     "Kotlin.ConverterApplicationKt.executor": "Run",
     "Kotlin.CoordinatorApplicationKt.executor": "Run",
-    "Kotlin.Env - CoordinatorApplicationKt.executor": "Debug",
+    "Kotlin.Env - CoordinatorApplicationKt.executor": "Run",
     "Kotlin.EventiApplicationKt.executor": "Run",
     "Kotlin.ProcesserApplicationKt.executor": "Run",
     "Kotlin.UIApplicationKt.executor": "Run",
@@ -382,6 +381,7 @@
         <env name="METADATA_TIMEOUT" value="0" />
         <env name="SUPPORTING_EXECUTABLE_FFMPEG" value="G:\MediaProcessingPlayground\ffmpeg.exe" />
         <env name="SUPPORTING_EXECUTABLE_FFPROBE" value="G:\MediaProcessingPlayground\ffprobe.exe" />
+        <env name="DISABLE_PRODUCE" value="true" />
       </envs>
       <option name="MAIN_CLASS_NAME" value="no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt" />
       <module name="MediaProcessing.apps.coordinator.main" />
@@ -416,13 +416,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1712771068889</updated>
-    </task>
-    <task id="LOCAL−00141" summary="Fix">
-      <option name="closed" value="true" />
-      <created>1719738757568</created>
-      <option name="number" value="LOCAL−00141" />
-      <option name="presentableId" value="LOCAL−00141" />
-      <updated>1719738757569</updated>
     </task>
     <task id="LOCAL−00142" summary="Fix">
       <option name="closed" value="true" />
@@ -760,7 +753,14 @@
       <option name="presentableId" value="LOCAL−00189" />
       <updated>1721329940691</updated>
     </task>
-    <option name="localTasksCounter" value="190" />
+    <task id="LOCAL−00190" summary="v3 26">
+      <option name="closed" value="true" />
+      <created>1721338554955</created>
+      <option name="number" value="LOCAL−00190" />
+      <option name="presentableId" value="LOCAL−00190" />
+      <updated>1721338554955</updated>
+    </task>
+    <option name="localTasksCounter" value="191" />
     <servers />
   </component>
   <component name="UnloadedModulesList">
@@ -780,7 +780,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="v3" />
     <MESSAGE value="v3 2" />
     <MESSAGE value="v3 3" />
     <MESSAGE value="v3 4" />
@@ -805,7 +804,8 @@
     <MESSAGE value="v3 23" />
     <MESSAGE value="v3 24" />
     <MESSAGE value="v3 25" />
-    <option name="LAST_COMMIT_MESSAGE" value="v3 25" />
+    <MESSAGE value="v3 26" />
+    <option name="LAST_COMMIT_MESSAGE" value="v3 26" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1109,27 +1109,7 @@
           <option name="timeStamp" value="353" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>47</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="356" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>64</line>
-          <properties>
-            <option name="lambda-ordinal" value="-1" />
-          </properties>
-          <option name="timeStamp" value="358" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>54</line>
-          <option name="timeStamp" value="359" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
+          <condition expression="incomingEvent.referenceId() == &quot;add9da6f-44a1-4ed2-99cd-cb23ce1800c0&quot; &amp;&amp; incomingEvent.eventId() == &quot;f5c5e2cc-f502-4ecc-af57-d1f1b5994983&quot;" language="kotlin" custom="import no.iktdev.eventi.data.eventId,import no.iktdev.eventi.data.referenceId" />
           <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
           <line>35</line>
           <option name="timeStamp" value="360" />
