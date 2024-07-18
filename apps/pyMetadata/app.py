@@ -52,11 +52,11 @@ class EventsPullerThread(threading.Thread):
         self.shutdown = threading.Event()
 
     def run(self) -> None:
+        logger.info(f"Using {events_server_address}:{events_server_port} on table: {events_server_database_name}")
         while not self.shutdown.is_set():
             connection = None
             cursor = None
             try:
-                logger.info(f"Connecting to {events_server_address}:{events_server_port} on table: {events_server_database_name}")
                 connection = mysql.connector.connect(
                     host=events_server_address,
                     port=events_server_port,
@@ -66,13 +66,18 @@ class EventsPullerThread(threading.Thread):
                 )
                 cursor = connection.cursor(dictionary=True)
                 cursor.execute("""
-                                    SELECT e1.*
-                                    FROM events e1
-                                    LEFT JOIN events e2 
-                                        ON e1.referenceId = e2.referenceId 
-                                        AND e2.event = 'event:media-metadata-search:performed'
-                                    WHERE e1.event = 'event:media-read-base-info:performed'
-                                    AND e2.referenceId IS NULL;
+                                    SELECT *
+                                    FROM events
+                                    WHERE referenceId IN (
+                                        SELECT referenceId
+                                        FROM events
+                                        GROUP BY referenceId
+                                        HAVING 
+                                            SUM(event = 'event:media-read-base-info:performed') > 0
+                                            AND SUM(event = 'event:media-metadata-search:performed') = 0
+                                            AND SUM(event = 'event:media-process:completed') = 0
+                                    )
+                                    AND event = 'event:media-read-base-info:performed';
                                """)
                 # not event:media-metadata-search:performed
                 for row in cursor.fetchall():

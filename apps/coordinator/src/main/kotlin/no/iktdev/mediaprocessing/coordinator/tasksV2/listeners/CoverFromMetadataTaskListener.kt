@@ -53,7 +53,7 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
 
         val metadata = events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }?.az<MediaMetadataReceivedEvent>()?.data
         if (metadata == null) {
-            log.info { "No metadata.." }
+            //log.info { "No metadata.." }
             return
         }
         val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data
