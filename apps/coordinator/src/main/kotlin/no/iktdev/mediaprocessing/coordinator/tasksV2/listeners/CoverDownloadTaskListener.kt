@@ -45,6 +45,11 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
         }
 
         val outDir = File(data.outDir)
+            .also {
+                if (!it.exists()) {
+                    it.mkdirs()
+                }
+            }
         if (!outDir.exists()) {
             log.error { "Check for output directory for cover storage failed for ${event.metadata.eventId} " }
             onProduceEvent(failedEventDefault)
