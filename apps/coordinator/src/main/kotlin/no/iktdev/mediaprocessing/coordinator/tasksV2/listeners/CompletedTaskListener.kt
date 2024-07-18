@@ -218,11 +218,14 @@ class CompletedTaskListener: CoordinatorEventListener() {
 
         val collection = mediaInfo.data?.outDirectory?.let { File(it).name } ?: baseInfoData?.title
 
+        val coverFileName = coverInfo?.data?.absoluteFilePath?.let {
+            File(it).name
+        }
 
         return MetadataDto(
             title = mediaInfoData?.title ?: baseInfoData?.title ?: metadataInfoData?.title ?: return null,
             collection = collection ?: return null,
-            cover = coverInfo?.data?.absoluteFilePath,
+            cover = coverFileName,
             type = metadataInfoData?.type ?: mediaInfoData?.type ?: return null,
             summary = metadataInfoData?.summary?.filter {it.summary != null }?.map { SummaryInfo(language = it.language, summary = it.summary!! ) } ?: emptyList(),
             genres = metadataInfoData?.genres ?: emptyList(),

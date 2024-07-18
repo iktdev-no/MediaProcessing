@@ -34,17 +34,9 @@
     </loaded-modules>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="83cd22eb-7f21-4585-9fdf-9cf3ac59698d" name="Changes" comment="v3 22">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/CoordinatorApplicationKt.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/ProcesserApplicationKt.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverDownloadTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverDownloadTaskListener.kt" afterDir="false" />
+    <list default="true" id="83cd22eb-7f21-4585-9fdf-9cf3ac59698d" name="Changes" comment="v3 23">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -423,13 +415,6 @@
       <option name="presentableId" value="Default" />
       <updated>1712771068889</updated>
     </task>
-    <task id="LOCAL−00138" summary="Version">
-      <option name="closed" value="true" />
-      <created>1719706138747</created>
-      <option name="number" value="LOCAL−00138" />
-      <option name="presentableId" value="LOCAL−00138" />
-      <updated>1719706138747</updated>
-    </task>
     <task id="LOCAL−00139" summary="Version">
       <option name="closed" value="true" />
       <created>1719706352452</created>
@@ -766,7 +751,14 @@
       <option name="presentableId" value="LOCAL−00186" />
       <updated>1721257740643</updated>
     </task>
-    <option name="localTasksCounter" value="187" />
+    <task id="LOCAL−00187" summary="v3 23">
+      <option name="closed" value="true" />
+      <created>1721320748899</created>
+      <option name="number" value="LOCAL−00187" />
+      <option name="presentableId" value="LOCAL−00187" />
+      <updated>1721320748899</updated>
+    </task>
+    <option name="localTasksCounter" value="188" />
     <servers />
   </component>
   <component name="UnloadedModulesList">
@@ -786,7 +778,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Updated" />
     <MESSAGE value="V3 - Moved to database polling" />
     <MESSAGE value="v3 - db polling for pyMetadata" />
     <MESSAGE value="v3" />
@@ -811,7 +802,8 @@
     <MESSAGE value="v3 20" />
     <MESSAGE value="v3 21" />
     <MESSAGE value="v3 22" />
-    <option name="LAST_COMMIT_MESSAGE" value="v3 22" />
+    <MESSAGE value="v3 23" />
+    <option name="LAST_COMMIT_MESSAGE" value="v3 23" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1057,7 +1049,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt</url>
-          <line>383</line>
+          <line>386</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -1066,7 +1058,7 @@
         <line-breakpoint enabled="true" type="kotlin-line">
           <condition expression="incomingEvent.eventType in listensForEvents" language="kotlin" />
           <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt</url>
-          <line>378</line>
+          <line>381</line>
           <option name="timeStamp" value="332" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
