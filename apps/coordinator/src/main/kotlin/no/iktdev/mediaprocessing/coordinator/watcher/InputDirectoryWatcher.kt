@@ -75,6 +75,7 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
             }
         }
         watcherChannel.invokeOnClose {
+            it?.printStackTrace()
             log.warn { "Watcher stopped!!!" }
             if (!isStopping) {
                 ioCoroutine.launch {
