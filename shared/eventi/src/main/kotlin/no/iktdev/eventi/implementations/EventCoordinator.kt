@@ -15,6 +15,8 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     abstract var eventManager: E
 
     val pullDelay: AtomicLong = AtomicLong(1000)
+    val fastPullDelay: AtomicLong = AtomicLong(500)
+    val slowPullDelay: AtomicLong = AtomicLong(2500)
 
     //private val listeners: MutableList<EventListener<T>> = mutableListOf()
 
@@ -43,8 +45,21 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
 
     private fun onEventGroupsReceived(eventGroup: List<List<T>>) {
+        val egRefIds = eventGroup.map { it.first().referenceId() }
+        val orphanedReferences = referencePool.filter { !it.value.isActive }.filter { id -> id.key !in egRefIds }.map { it.key }
+        orphanedReferences.forEach { id -> referencePool.remove(id) }
+
         val activePolls = referencePool.values.filter { it.isActive }.size
-        log.info { "Active polls $activePolls/${referencePool.values.size}" }
+        if (orphanedReferences.isNotEmpty() && referencePool.isEmpty()) {
+            log.info { "Last active references removed from pull pool, " }
+        }
+
+        if (eventGroup.isNotEmpty()) {
+            log.info { "Active polls $activePolls/${referencePool.values.size}" }
+        } else {
+            return
+        }
+
         eventGroup.forEach {
             val referenceId = it.first().referenceId()
 
@@ -87,9 +102,15 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     val events = eventManager.readAvailableEvents()
                     onEventGroupsReceived(events)
                     if (events.isNotEmpty()) {
-                        pullDelay.set(500)
+                        if (pullDelay.get() != fastPullDelay.get()) {
+                            log.info { "Available events found, switching to fast pull @ Delay -> ${fastPullDelay.get()}" }
+                        }
+                        pullDelay.set(fastPullDelay.get())
                     } else {
-                        pullDelay.set(2500)
+                        if (pullDelay.get() != slowPullDelay.get()) {
+                            log.info { "None events available, switching to slow pull @ Delay -> ${slowPullDelay.get()}" }
+                        }
+                        pullDelay.set(slowPullDelay.get())
                     }
                     referencePool.values.awaitAll()
                 }

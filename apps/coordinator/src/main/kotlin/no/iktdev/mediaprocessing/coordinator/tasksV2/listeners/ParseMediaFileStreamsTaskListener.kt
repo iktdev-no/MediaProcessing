@@ -64,6 +64,7 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
 
 
     fun parseStreams(data: JsonObject?): ParsedMediaStreams {
+        val ignoreCodecs = listOf("png", "mjpeg")
         val gson = Gson()
         return try {
             val jStreams = data!!.getAsJsonArray("streams")
@@ -72,17 +73,18 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             val audioStreams = mutableListOf<AudioStream>()
             val subtitleStreams = mutableListOf<SubtitleStream>()
 
-            jStreams.forEach { streamJson ->
+            for (streamJson in jStreams) {
                 val streamObject = streamJson.asJsonObject
-
+                if (!streamObject.has("codec_name")) continue
+                val codecName = streamObject.get("codec_name").asString
                 val codecType = streamObject.get("codec_type").asString
-                if (streamObject.has("codec_name") && streamObject.get("codec_name").asString == "mjpeg") {
-                } else {
-                    when (codecType) {
-                        "video" -> videoStreams.add(gson.fromJson(streamObject, VideoStream::class.java))
-                        "audio" -> audioStreams.add(gson.fromJson(streamObject, AudioStream::class.java))
-                        "subtitle" -> subtitleStreams.add(gson.fromJson(streamObject, SubtitleStream::class.java))
-                    }
+
+                if (codecName in ignoreCodecs) continue
+
+                when (codecType) {
+                    "video" -> videoStreams.add(gson.fromJson(streamObject, VideoStream::class.java))
+                    "audio" -> audioStreams.add(gson.fromJson(streamObject, AudioStream::class.java))
+                    "subtitle" -> subtitleStreams.add(gson.fromJson(streamObject, SubtitleStream::class.java))
                 }
             }
 
