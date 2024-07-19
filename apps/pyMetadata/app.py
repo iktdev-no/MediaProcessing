@@ -74,8 +74,6 @@ class EventsPullerThread(threading.Thread):
         return row
         
     def storeProducedEvent(self, connection: PooledMySQLConnection | MySQLConnectionAbstract, event: MediaEvent) -> bool:
-        return
-
         try:
             cursor = connection.cursor()
 
@@ -114,21 +112,26 @@ class EventsPullerThread(threading.Thread):
                     if (row is not None):
                         try:
                             referenceId = row["referenceId"]
-                            event = row["event"]
+                            incomingEventType = row["event"]
                             logMessage = f"""
 ============================================================================
-Found message for: {referenceId} @ {event}
-============================================================================"""
+Found message
+{referenceId} 
+{incomingEventType}
+============================================================================\n"""
                             logger.info(logMessage)
                             
                             event: MediaEvent = json_to_media_event(row["data"])
-                            producedEvent = MetadataEventHandler(row).run()
+                            producedEvent = MetadataEventHandler(event).run()
 
                             producedMessage = f"""
 ============================================================================
-Producing message for: {referenceId} @ {event}
+Producing message
+{referenceId}
+{incomingEventType}
+
 {event_data_to_json(producedEvent)}
-============================================================================"""
+============================================================================\n"""
                             logger.info(producedMessage)
                             
                             producedEvent = self.storeProducedEvent(connection=connection, event=producedEvent)
@@ -192,8 +195,8 @@ class MetadataEventHandler():
         ])
 
 
-        joinedTitles = ", ".join(searchableTitles)
-        logger.info("Searching for %s", joinedTitles)
+        joinedTitles = "\n".join(searchableTitles)
+        logger.info("Searching for: %s", joinedTitles)
         result: Metadata | None = self.__getMetadata(searchableTitles)
 
         result_message: str | None = None
@@ -227,11 +230,11 @@ class MetadataEventHandler():
             imdb.search()
         ]
         filtered_results = [result for result in results if result is not None]
-        logger.info("Simple matcher")
+        logger.info("\nSimple matcher")
         simpleSelector = SimpleMatcher(titles=titles, metadata=filtered_results).getBestMatch()
-        logger.info("Advanced matcher")
+        logger.info("\nAdvanced matcher")
         advancedSelector = AdvancedMatcher(titles=titles, metadata=filtered_results).getBestMatch()
-        logger.info("Prefrix matcher")
+        logger.info("\nPrefrix matcher")
         prefixSelector = PrefixMatcher(titles=titles, metadata=filtered_results).getBestMatch()
         if simpleSelector is not None:
             return simpleSelector
