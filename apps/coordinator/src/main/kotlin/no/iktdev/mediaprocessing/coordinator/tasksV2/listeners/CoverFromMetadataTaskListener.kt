@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
+import no.iktdev.eventi.data.isSuccessful
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
@@ -23,13 +24,11 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
 
     override val produceEvent: Events = Events.EventMediaReadOutCover
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaMetadataSearchPerformed,
-        Events.EventMediaReadOutNameAndType
+        Events.EventMediaMetadataSearchPerformed
     )
 
     override fun isPrerequisitesFulfilled(incomingEvent: Event, events: List<Event>): Boolean {
-        return events.any { it.eventType == Events.EventMediaMetadataSearchPerformed } &&
-                events.any { it.eventType == Events.EventMediaReadOutNameAndType }
+        return (events.any { it.eventType == Events.EventMediaReadOutNameAndType && it.isSuccessful() })
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
@@ -37,6 +36,8 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         if (!state) {
             return false
         }
+        if (!incomingEvent.isSuccessful())
+            return false
         return incomingEvent.eventType in listensForEvents
     }
 
@@ -54,11 +55,9 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
             return
         }
 
-        val metadata = events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }?.az<MediaMetadataReceivedEvent>()?.data
-        if (metadata == null) {
-            //log.info { "No metadata.." }
-            return
-        }
+        val metadataEvent = if (event.eventType == Events.EventMediaMetadataSearchPerformed) event else events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }
+        val metadata = metadataEvent?.az<MediaMetadataReceivedEvent>()?.data
+            ?: return
         val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data
         if (mediaOutInfo == null) {
             log.info { "No Media out info" }

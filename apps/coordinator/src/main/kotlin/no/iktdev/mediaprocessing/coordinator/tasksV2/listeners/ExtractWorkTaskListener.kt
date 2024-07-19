@@ -30,6 +30,10 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         Events.EventMediaWorkProceedPermitted
     )
 
+    override fun canProduceMultipleEvents(): Boolean {
+        return true
+    }
+
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
         val state =  super.shouldIProcessAndHandleEvent(incomingEvent, events)
         return state

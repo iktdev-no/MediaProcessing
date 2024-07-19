@@ -38,6 +38,11 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
         return false
     }
 
+    open fun canProduceMultipleEvents(): Boolean {
+        return false
+    }
+
+
     open fun haveProducedExpectedMessageBasedOnEvent(incomingEvent: T, events: List<T>): Boolean {
         val eventsProducedByListener = events.filter { it.eventType == produceEvent }
         val triggeredBy = events.filter { it.eventType in listensForEvents }
@@ -61,6 +66,10 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
 
         if (haveProducedExpectedMessageBasedOnEvent(incomingEvent, events))
             return false
+
+        if (events.any { it.eventType == produceEvent } && !canProduceMultipleEvents()) {
+            return false
+        }
 
         //val isDerived = events.any { it.metadata.derivedFromEventId == incomingEvent.metadata.eventId } // && incomingEvent.eventType == produceEvent
         return true

@@ -31,6 +31,7 @@ class SourceBase(ABC):
         partialMatch = fuzz.ratio(title, clean_foundTitle) if clean_foundTitle is not None else 0
 
         if directMatch >= 60:
+            log.info(f"{source} -> Direct Match for '{title}' of '{foundTitle}' on part '{clean_foundTitle}' with direct score: {directMatch} and partial {partialMatch}")
             return True
         elif partialMatch >= 80:
             log.info(f"{source} -> Partial Match for '{title}' of '{foundTitle}' on part '{clean_foundTitle}' with direct score: {directMatch} and partial {partialMatch}")
@@ -40,13 +41,36 @@ class SourceBase(ABC):
         return False
 
 
+    def getMatchingOnTitleWords(self, idToTitle: dict[str, str], titles: List[str]) -> dict[str, str]:
+        matched_idToTitle = {}
+
+        for title in titles:
+            title_words = set(title.split())
+            for id, stored_title in idToTitle.items():
+                stored_title_words = set(stored_title.split())
+                if title_words & stored_title_words:  # sjekker om det er et felles ord
+                    score = fuzz.token_set_ratio(title, stored_title)
+                    if score >= 75:
+                        matched_idToTitle[id] = (stored_title, score)
+        
+        # Returnerer den originale dict med score 0 hvis ingen titler matcher
+        if not matched_idToTitle:
+            for id, stored_title in idToTitle.items():
+                matched_idToTitle[id] = (stored_title, 0)
+        
+        # Returnerer den originale dict hvis ingen titler matcher
+        return matched_idToTitle if matched_idToTitle else idToTitle
+
     def findBestMatchAcrossTitles(self, idToTitle: dict[str, str], titles: List[str]) -> Tuple[str, str]:
+        # Få den filtrerte eller originale idToTitle basert på ordmatching
+        filtered_idToTitle = self.getMatchingOnTitleWords(idToTitle, titles)
+        
         best_match_id = ""
         best_match_title = ""
         best_ratio = 0
 
         for title in titles:
-            for id, stored_title in idToTitle.items():
+            for id, stored_title in filtered_idToTitle.items():
                 ratio = fuzz.ratio(title, stored_title)
                 if ratio > best_ratio:
                     best_ratio = ratio

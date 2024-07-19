@@ -163,7 +163,7 @@ class EncodeServiceV2(
 
         taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
 
-        log.info { "Encode failed for ${task.referenceId}\n$message" }
+        log.error { "Encode failed for ${task.referenceId}\n$message" }
         tasks.onProduceEvent(EncodeWorkPerformedEvent(
             metadata = EventMetadata(
                 referenceId = task.referenceId,

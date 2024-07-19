@@ -31,6 +31,9 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         Events.EventWorkExtractPerformed
     )
 
+    override fun canProduceMultipleEvents(): Boolean {
+        return true
+    }
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
         if (!isOfEventsIListenFor(incomingEvent))
             return false

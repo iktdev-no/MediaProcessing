@@ -30,6 +30,9 @@ class EncodeWorkTaskListener : WorkTaskListener() {
         Events.EventMediaWorkProceedPermitted
     )
 
+    override fun canProduceMultipleEvents(): Boolean {
+        return true
+    }
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
         if (event == null) {

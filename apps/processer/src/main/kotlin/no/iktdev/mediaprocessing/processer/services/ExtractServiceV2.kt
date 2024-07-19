@@ -135,7 +135,7 @@ class ExtractServiceV2(
 
         taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
 
-        log.info { "Encode failed for ${task.referenceId}\n$message" }
+        log.error { "Extract failed for ${task.referenceId}\n$message" }
         tasks.onProduceEvent(
             ExtractWorkPerformedEvent(
                 metadata = EventMetadata(

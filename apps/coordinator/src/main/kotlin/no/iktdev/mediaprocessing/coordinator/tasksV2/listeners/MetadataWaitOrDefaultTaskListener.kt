@@ -5,6 +5,7 @@ import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.eventi.data.EventStatus
+import no.iktdev.eventi.data.isSuccessful
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.eventi.database.toEpochSeconds
@@ -44,21 +45,30 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
     val metadataTimeout = metadataTimeoutMinutes * 60
     val waitingProcessesForMeta: MutableMap<String, MetadataTriggerData> = mutableMapOf()
 
+
     /**
      * This one gets special treatment, since it will only produce a timeout it does not need to use the incoming event
      */
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        val hasReadBaseInfo = events.any { it.eventType == Events.EventMediaReadBaseInfoPerformed && it.isSuccessful() }
+        val hasMetadataSearched = events.any { it.eventType == Events.EventMediaMetadataSearchPerformed }
+        val hasPollerForMetadataEvent = waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)
 
+        if (!hasReadBaseInfo) {
+            return
+        }
 
-        if (events.any { it.eventType == Events.EventMediaReadBaseInfoPerformed } &&
-            events.none { it.eventType == Events.EventMediaMetadataSearchPerformed } &&
-            !waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)) {
+        if (hasPollerForMetadataEvent && hasMetadataSearched) {
+            waitingProcessesForMeta.remove(incomingEvent.metadata().referenceId)
+            return
+        }
+
+        if (!hasMetadataSearched && !hasPollerForMetadataEvent) {
             val consumedIncoming = incomingEvent.consume()
             if (consumedIncoming == null) {
                 log.error { "Event is null and should not be available nor provided! ${WGson.gson.toJson(incomingEvent.metadata())}" }
                 return
             }
-
 
             val baseInfo = events.find { it.eventType ==  Events.EventMediaReadBaseInfoPerformed}?.az<BaseInfoEvent>()?.data
             if (baseInfo == null) {
@@ -70,21 +80,16 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
             val dateTime = LocalDateTime.ofEpochSecond(estimatedTimeout, 0, ZoneOffset.UTC)
 
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH)
-            if (!waitingProcessesForMeta.containsKey(consumedIncoming.metadata.referenceId)) {
-                waitingProcessesForMeta[consumedIncoming.metadata.referenceId] =
-                    MetadataTriggerData(consumedIncoming.metadata.eventId, LocalDateTime.now())
-                log.info { "Sending ${baseInfo.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
-            }
-        }
 
-        if (events.any { it.eventType == Events.EventMediaMetadataSearchPerformed }
-            && waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)) {
-                waitingProcessesForMeta.remove(incomingEvent.metadata().referenceId)
+            waitingProcessesForMeta[consumedIncoming.metadata.referenceId] =
+                MetadataTriggerData(consumedIncoming.metadata.eventId, LocalDateTime.now())
+
+            log.info { "Sending ${baseInfo.title} to waiting queue. Expiry ${dateTime.format(formatter)}" }
         }
     }
 
 
-    @Scheduled(fixedDelay = (1_000))
+    @Scheduled(fixedDelay = (5_000))
     fun sendErrorMessageForMetadata() {
         val expired = waitingProcessesForMeta.filter {
             LocalDateTime.now().toEpochSeconds() > (it.value.executed.toEpochSeconds() + metadataTimeout)
