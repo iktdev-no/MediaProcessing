@@ -20,7 +20,7 @@ abstract class FfmpegTaskService: TaskService(), FfmpegListener {
 
     override fun onTaskAvailable(data: ClaimableTask) {
         if (runner?.isWorking() == true) {
-            log.info { "Worker is already running.., will not consume" }
+            //log.info { "Worker is already running.., will not consume" }
             return
         }
 
