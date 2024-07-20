@@ -33,7 +33,7 @@ class Anii(SourceBase):
                 except IndexError:
                     pass
                 except Exception as e:
-                    if "Data post unsuccessful. (429)" in e:
+                    if "Data post unsuccessful. (429)" in str(e):
                         log.error("Failed to read Anii")
                     else:
                         log.exception(e)

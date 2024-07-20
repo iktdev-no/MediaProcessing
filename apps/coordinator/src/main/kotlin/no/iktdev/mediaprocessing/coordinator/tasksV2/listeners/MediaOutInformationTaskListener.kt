@@ -101,12 +101,16 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
 
         fun getAlreadyUsedForCollectionOrTitle(): String {
             val exisiting = getExistingCollections()
-            val existingMatch = exisiting.find { it.contains(baseInfo.title) }
+            val existingMatch = exisiting.find { it.lowercase().contains(baseInfo.title.lowercase()) }
             if (existingMatch != null) {
                 return existingMatch
             }
+
             val metaTitles = getTitlesFromMetadata()
-            return metaTitles.firstOrNull { it.contains(baseInfo.title) }
+            val existingMatchOnMeta = metaTitles.find { it.lowercase().contains(baseInfo.title.lowercase()) }
+
+
+            return existingMatchOnMeta
                 ?: (getTitlesFromMetadata().firstOrNull { it in exisiting } ?: getTitlesFromMetadata().firstOrNull()
                 ?: baseInfo.title)
         }
