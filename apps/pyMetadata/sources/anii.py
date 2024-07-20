@@ -54,9 +54,18 @@ class Anii(SourceBase):
     async def __getMetadata(self, result: Dict) -> Optional[Metadata]:
         try:
             summary = result.get("desc", None)
+            useTitle = result.get("name_english", None)
+            altTitles = result.get("name_romaji", [])
+            if useTitle is None:
+                useTitle = result.get("name_romaji", None)
+                altTitles = []
+            if useTitle is None:
+                return None
+
+
             return Metadata(
-                title=result.get("name_english", None),
-                altTitle=[result.get("name_romaji", [])],
+                title=useTitle,
+                altTitle=altTitles,
                 cover=result.get("cover_image", None),
                 banner=None,
                 summary=[] if summary is None else [

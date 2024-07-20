@@ -146,7 +146,8 @@ Producing message
                                     eventId=str(uuid.uuid4()),
                                     derivedFromEventId=event.metadata.eventId,
                                     status= "Failed",
-                                    created= datetime.now().isoformat()
+                                    created= datetime.now().isoformat(),
+                                    source="metadataApp"
                                 ),
                                 data=None,
                                 eventType="EventMediaMetadataSearchPerformed"
@@ -160,7 +161,7 @@ Producing message
                     connection.close()
                     connection = None
             # Introduce a small sleep to reduce CPU usage
-            time.sleep(5)
+            time.sleep(2)
         if (self.shutdown.is_set()):
             logger.info("Shutdown is set..")
 
