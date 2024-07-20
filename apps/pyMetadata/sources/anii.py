@@ -30,11 +30,11 @@ class Anii(SourceBase):
                             if givenId:
                                 idToTitle[givenId] = _title
                                 results[givenId] = result
-                except IndexError as notFound:
+                except IndexError:
                     pass
                 except Exception as e:
                     log.exception(e)
-        except IndexError as notFound:
+        except IndexError:
             self.logNoMatch("Anii", titles=self.titles)
             pass
         except Exception as e:
@@ -43,7 +43,7 @@ class Anii(SourceBase):
         if not idToTitle or not results:
             self.logNoMatch("Anii", titles=self.titles)
             return None
-        
+
         best_match_id, best_match_title = await asyncio.to_thread(self.findBestMatchAcrossTitles, idToTitle, self.titles)
 
         return await self.__getMetadata(results[best_match_id])
@@ -73,11 +73,10 @@ class Anii(SourceBase):
             log.exception(e)
             return None
 
-    async def generate_id(self, text: str) -> Optional[str]:
+    def generate_id(self, text: str) -> Optional[str]:
         if text:
-            return await asyncio.to_thread(hashlib.md5, text.encode()).hexdigest()
+            return hashlib.md5(text.encode()).hexdigest()
         return None
 
     def getMediaType(self, type: str) -> str:
         return 'movie' if type.lower() == 'movie' else 'serie'
-

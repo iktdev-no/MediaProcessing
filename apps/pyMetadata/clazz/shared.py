@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, asdict
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 
 # Definer dataclassene for strukturen
@@ -46,7 +46,7 @@ def event_data_to_json(event_data: EventData) -> str:
 def json_to_media_event(json_data: str) -> MediaEvent:
     data_dict = json.loads(json_data)
 
-    metadata_dict = data_dict['metadata']
+    metadata_dict: Dict[str, str] = data_dict['metadata']
     event_data_dict = data_dict['data']
 
     metadata = EventMetadata(
@@ -55,7 +55,7 @@ def json_to_media_event(json_data: str) -> MediaEvent:
         referenceId=metadata_dict['referenceId'],
         status=metadata_dict['status'],
         created=parse_datetime(metadata_dict['created']),
-        source=metadata_dict['source']
+        source= metadata_dict.get('source', None)
     )
 
     event_data = EventData(
