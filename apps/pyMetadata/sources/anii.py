@@ -33,7 +33,10 @@ class Anii(SourceBase):
                 except IndexError:
                     pass
                 except Exception as e:
-                    log.exception(e)
+                    if "Data post unsuccessful. (429)" in e:
+                        log.error("Failed to read Anii")
+                    else:
+                        log.exception(e)
         except IndexError:
             self.logNoMatch("Anii", titles=self.titles)
             pass
@@ -55,7 +58,7 @@ class Anii(SourceBase):
         try:
             summary = result.get("desc", None)
             useTitle = result.get("name_english", None)
-            altTitles = result.get("name_romaji", [])
+            altTitles = [result.get("name_romaji")]
             if useTitle is None:
                 useTitle = result.get("name_romaji", None)
                 altTitles = []
