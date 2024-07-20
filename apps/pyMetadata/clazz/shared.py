@@ -11,6 +11,7 @@ class EventMetadata:
     referenceId: str
     status: str
     created: datetime
+    source: str
 
     def to_dict(self):
         return asdict(self)
@@ -53,7 +54,8 @@ def json_to_media_event(json_data: str) -> MediaEvent:
         eventId=metadata_dict['eventId'],
         referenceId=metadata_dict['referenceId'],
         status=metadata_dict['status'],
-        created=parse_datetime(metadata_dict['created'])
+        created=parse_datetime(metadata_dict['created']),
+        source=metadata_dict['source']
     )
 
     event_data = EventData(

@@ -24,10 +24,14 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-class ExtractServiceV2(
+class ExtractService(
     @Autowired var tasks: TaskCoordinator,
     @Autowired private val reporter: Reporter
 ) : FfmpegTaskService(), TaskCoordinator.TaskEvents {
+
+    fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
 
     override val log = KotlinLogging.logger {}
     override val logDir = ProcesserEnv.encodeLogDirectory
@@ -111,7 +115,8 @@ class ExtractServiceV2(
                     metadata = EventMetadata(
                         referenceId = task.referenceId,
                         derivedFromEventId = task.eventId,
-                        status = EventStatus.Success
+                        status = EventStatus.Success,
+                        source = getProducerName()
                     ),
                     data = ExtractedData(
                         outputFile
@@ -141,7 +146,8 @@ class ExtractServiceV2(
                 metadata = EventMetadata(
                     referenceId = task.referenceId,
                     derivedFromEventId = task.eventId,
-                    status = EventStatus.Failed
+                    status = EventStatus.Failed,
+                    source = getProducerName()
                 )
             )
         )

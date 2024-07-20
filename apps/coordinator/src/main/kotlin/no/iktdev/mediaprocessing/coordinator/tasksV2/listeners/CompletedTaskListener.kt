@@ -33,6 +33,9 @@ class CompletedTaskListener: CoordinatorEventListener() {
 
     var doNotProduceComplete = System.getenv("DISABLE_COMPLETE").toBoolean() ?: false
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
 
     override fun onReady() {
         super.onReady()
@@ -410,7 +413,7 @@ class CompletedTaskListener: CoordinatorEventListener() {
 
 
         onProduceEvent(MediaProcessCompletedEvent(
-            metadata = event.makeDerivedEventInfo(EventStatus.Success),
+            metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
             data = CompletedEventData(
                 events.map { it.eventId() }
             )

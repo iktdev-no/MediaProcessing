@@ -27,6 +27,10 @@ import org.springframework.stereotype.Service
 class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
 
@@ -50,13 +54,13 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
         val readData = event.dataAs<JsonObject>()
         val result = try {
             MediaFileStreamsParsedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = parseStreams(readData)
             )
         } catch (e: Exception) {
             e.printStackTrace()
             MediaFileStreamsParsedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
             )
         }
         onProduceEvent(result)

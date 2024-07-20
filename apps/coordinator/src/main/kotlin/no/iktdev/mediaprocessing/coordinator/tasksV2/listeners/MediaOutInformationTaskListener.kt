@@ -27,6 +27,11 @@ import java.io.FileFilter
 
 @Service
 class MediaOutInformationTaskListener: CoordinatorEventListener() {
+
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
 
@@ -52,7 +57,7 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
             log.error { "Required event ${Events.EventMediaReadBaseInfoPerformed} is not present" }
             coordinator?.produceNewEvent(
                 MediaOutInformationConstructedEvent(
-                    metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+                    metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
                 )
             )
             return
@@ -65,12 +70,12 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
                 outDirectory = pm.getOutputDirectory().absolutePath,
                 info = vi
             ).let { MediaOutInformationConstructedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = it
             ) }
         } else {
             MediaOutInformationConstructedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
             )
         }
         onProduceEvent(result)

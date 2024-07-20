@@ -27,6 +27,11 @@ import java.io.File
 
 @Service
 class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
+
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
 
@@ -57,13 +62,13 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             try {
                 val data = fileReadStreams(startEvent, event.metadata.eventId)
                 MediaFileStreamsReadEvent(
-                    metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                    metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                     data = data
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
                 MediaFileStreamsReadEvent(
-                    metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+                    metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
                 )
             }
         }

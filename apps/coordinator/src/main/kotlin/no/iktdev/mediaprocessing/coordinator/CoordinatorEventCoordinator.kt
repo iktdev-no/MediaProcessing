@@ -29,6 +29,10 @@ class Coordinator(
     init {
     }
 
+    fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     public fun startProcess(file: File, type: ProcessType) {
         val operations: List<StartOperationEvents> = listOf(
             StartOperationEvents.ENCODE,
@@ -43,7 +47,8 @@ class Coordinator(
         val event = MediaProcessStartEvent(
             metadata = EventMetadata(
                 referenceId = referenceId.toString(),
-                status = EventStatus.Success
+                status = EventStatus.Success,
+                source = getProducerName()
             ),
             data = StartEventData(
                 file = file.absolutePath,
@@ -71,7 +76,8 @@ class Coordinator(
             metadata = EventMetadata(
                 referenceId = referenceId,
                 derivedFromEventId = eventToAttachTo.eventId(),
-                status = EventStatus.Success
+                status = EventStatus.Success,
+                source = getProducerName()
             ),
             data = message
         ))

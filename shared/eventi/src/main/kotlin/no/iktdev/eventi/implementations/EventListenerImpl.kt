@@ -19,6 +19,7 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
         onReady()
     }
 
+    abstract fun getProducerName(): String
 
     protected open fun onProduceEvent(event: T) {
         coordinator?.produceNewEvent(event) ?: {
@@ -82,11 +83,12 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
      */
     abstract fun onEventsReceived(incomingEvent: ConsumableEvent<T>, events: List<T>)
 
-    fun T.makeDerivedEventInfo(status: EventStatus): EventMetadata {
+    fun T.makeDerivedEventInfo(status: EventStatus, source: String): EventMetadata {
         return EventMetadata(
             referenceId = this.metadata.referenceId,
             derivedFromEventId = this.metadata.eventId,
-            status = status
+            status = status,
+            source = source
         )
     }
 

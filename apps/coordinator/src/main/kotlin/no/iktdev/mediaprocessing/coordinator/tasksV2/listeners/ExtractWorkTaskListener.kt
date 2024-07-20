@@ -22,6 +22,10 @@ import org.springframework.stereotype.Service
 class ExtractWorkTaskListener: WorkTaskListener() {
     private val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.EventWorkExtractCreated
@@ -62,14 +66,14 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         }
         if (arguments.isEmpty()) {
             ExtractWorkCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
             )
             return
         }
 
         arguments.mapNotNull {
             ExtractWorkCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = it
             )
         }.forEach { event ->

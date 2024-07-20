@@ -34,7 +34,7 @@ events_server_address = os.environ.get("DATABASE_ADDRESS") or "192.168.2.250" # 
 events_server_port  = os.environ.get("DATABASE_PORT") or "3306"
 events_server_database_name = os.environ.get("DATABASE_NAME_E") or "eventsV3" # "events"
 events_server_username = os.environ.get("DATABASE_USERNAME") or "root"
-events_server_password = os.environ.get("DATABASE_PASSWORD") or "shFZ27eL2x2NoxyEDBMfDWkvFO"  #"root"
+events_server_password = os.environ.get("DATABASE_PASSWORD") or "shFZ27eL2x2NoxyEDBMfDWkvFO"  #"root" // default password
 
 
 
@@ -65,8 +65,8 @@ class EventsPullerThread(threading.Thread):
                                 GROUP BY referenceId
                                 HAVING 
                                     SUM(event = 'event:media-read-base-info:performed') > 0
-                                    AND SUM(event = 'event:media-metadata-search:performed') != 0
-                                    AND SUM(event = 'event:media-process:completed') != 0
+                                    AND SUM(event = 'event:media-metadata-search:performed') = 0
+                                    AND SUM(event = 'event:media-process:completed') = 0
                             )
                             AND event = 'event:media-read-base-info:performed';
         """)
@@ -211,7 +211,8 @@ class MetadataEventHandler:
                 eventId=str(uuid.uuid4()),
                 derivedFromEventId=event.metadata.eventId,
                 status="Failed" if result is None else "Success",
-                created=datetime.now().isoformat()
+                created=datetime.now().isoformat(),
+                source="metadataApp"
             ),
             data=result,
             eventType="EventMediaMetadataSearchPerformed"

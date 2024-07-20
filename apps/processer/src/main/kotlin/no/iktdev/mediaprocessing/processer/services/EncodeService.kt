@@ -4,7 +4,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
@@ -15,9 +14,7 @@ import no.iktdev.mediaprocessing.processer.ffmpeg.FfmpegTaskService
 import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.taskManager
 import no.iktdev.mediaprocessing.shared.common.persistance.Status
-import no.iktdev.mediaprocessing.shared.common.persistance.events
 import no.iktdev.mediaprocessing.shared.common.task.Task
-import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.data.EncodeArgumentData
 import no.iktdev.mediaprocessing.shared.contract.data.EncodeWorkPerformedEvent
 import no.iktdev.mediaprocessing.shared.contract.data.EncodedData
@@ -29,10 +26,14 @@ import java.io.File
 import java.time.Duration
 
 @Service
-class EncodeServiceV2(
+class EncodeService(
     @Autowired var tasks: TaskCoordinator,
     @Autowired private val reporter: Reporter
 ) : FfmpegTaskService(), TaskCoordinator.TaskEvents {
+
+    fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
 
     override val log = KotlinLogging.logger {}
     override val logDir = ProcesserEnv.encodeLogDirectory
@@ -139,7 +140,8 @@ class EncodeServiceV2(
                     metadata = EventMetadata(
                         referenceId = task.referenceId,
                         derivedFromEventId = task.eventId,
-                        status = EventStatus.Success
+                        status = EventStatus.Success,
+                        source = getProducerName()
                     ),
                     data = EncodedData(
                         outputFile
@@ -168,7 +170,8 @@ class EncodeServiceV2(
             metadata = EventMetadata(
                 referenceId = task.referenceId,
                 derivedFromEventId = task.eventId,
-                status = EventStatus.Failed
+                status = EventStatus.Failed,
+                source = getProducerName()
             )
         ))
         sendProgress(

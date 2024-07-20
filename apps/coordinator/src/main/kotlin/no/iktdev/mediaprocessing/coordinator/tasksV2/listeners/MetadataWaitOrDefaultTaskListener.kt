@@ -29,6 +29,11 @@ val metadataTimeoutMinutes: Int = System.getenv("METADATA_TIMEOUT")?.toIntOrNull
 @Service
 @EnableScheduling
 class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
+
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
 
@@ -101,7 +106,8 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
                     metadata = EventMetadata(
                         referenceId = it.key,
                         derivedFromEventId = it.value.eventId,
-                        status = EventStatus.Skipped
+                        status = EventStatus.Skipped,
+                        source = getProducerName()
                     )
                 )
 

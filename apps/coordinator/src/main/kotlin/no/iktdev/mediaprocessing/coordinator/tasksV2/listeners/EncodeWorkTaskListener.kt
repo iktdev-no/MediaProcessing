@@ -22,6 +22,10 @@ import org.springframework.stereotype.Service
 class EncodeWorkTaskListener : WorkTaskListener() {
     private val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.EventWorkEncodeCreated
@@ -55,7 +59,7 @@ class EncodeWorkTaskListener : WorkTaskListener() {
             return
         }
         EncodeWorkCreatedEvent(
-            metadata = event.makeDerivedEventInfo(EventStatus.Success),
+            metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
             data = encodeArguments
         ).also { event ->
             onProduceEvent(event)

@@ -14,14 +14,18 @@ import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
 import no.iktdev.mediaprocessing.shared.contract.data.ConvertWorkPerformed
 import no.iktdev.mediaprocessing.shared.contract.data.ConvertedData
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
 
 
 @Service
-class ConvertServiceV2(
+class ConvertService(
     @Autowired var tasks: TaskCoordinator,
 ) : TaskService(), ConvertListener, TaskCoordinator.TaskEvents {
+
+    fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     override val log = KotlinLogging.logger {}
     override val logDir = ConverterEnv.logDirectory
 
@@ -86,7 +90,8 @@ class ConvertServiceV2(
                 metadata = EventMetadata(
                     referenceId = task.referenceId,
                     derivedFromEventId = task.eventId,
-                    status = EventStatus.Success
+                    status = EventStatus.Success,
+                    source = getProducerName()
                 ),
                 data = ConvertedData(
                     outputFiles = outputFiles
@@ -105,7 +110,8 @@ class ConvertServiceV2(
             metadata = EventMetadata(
                 referenceId = task.referenceId,
                 derivedFromEventId = task.eventId,
-                status = EventStatus.Failed
+                status = EventStatus.Failed,
+                source = getProducerName()
             )
         ))
     }

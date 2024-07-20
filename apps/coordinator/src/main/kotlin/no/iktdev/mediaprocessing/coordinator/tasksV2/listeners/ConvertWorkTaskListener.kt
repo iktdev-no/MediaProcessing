@@ -24,6 +24,10 @@ import java.io.File
 class ConvertWorkTaskListener: WorkTaskListener() {
     val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.EventWorkConvertCreated
@@ -73,7 +77,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         val convertFile = file?.let { File(it) }
         if (convertFile == null || !convertFile.exists()) {
             onProduceEvent(ConvertWorkCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+                metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
             ))
             return
         } else {
@@ -86,7 +90,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
 
 
             ConvertWorkCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = convertData
             ).also { event ->
                 onProduceEvent(event)

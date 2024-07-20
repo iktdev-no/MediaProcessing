@@ -24,7 +24,8 @@ data class EventMetadata(
     val eventId: String = UUID.randomUUID().toString(),
     val referenceId: String,
     val status: EventStatus,
-    val created: LocalDateTime = LocalDateTime.now()
+    val created: LocalDateTime = LocalDateTime.now(),
+    val source: String = "Unknown producer"
 )
 
 enum class EventStatus {

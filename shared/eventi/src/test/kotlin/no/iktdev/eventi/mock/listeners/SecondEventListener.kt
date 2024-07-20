@@ -12,6 +12,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class SecondEventListener() : MockDataEventListener() {
+
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: MockEventCoordinator? = null
 
@@ -33,7 +38,7 @@ class SecondEventListener() : MockDataEventListener() {
         val event = incomingEvent.consume()
         if (event == null)
             return
-        val info = event.makeDerivedEventInfo(EventStatus.Success)
+        val info = event.makeDerivedEventInfo(EventStatus.Success,getProducerName())
         onProduceEvent(SecondEvent(
             eventType = produceEvent,
             metadata = info

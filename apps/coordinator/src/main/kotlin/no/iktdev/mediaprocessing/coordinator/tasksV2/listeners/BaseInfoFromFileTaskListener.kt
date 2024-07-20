@@ -26,7 +26,9 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
     override val produceEvent: Events = Events.EventMediaReadBaseInfoPerformed
     override val listensForEvents: List<Events> = listOf(Events.EventMediaProcessStarted)
 
-
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
@@ -36,11 +38,11 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
         }
         val message = try {
             readFileInfo(event.data as StartEventData, event.metadata.eventId)?.let {
-                BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Success), data = it)
-            } ?: BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed))
+                BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()), data = it)
+            } ?: BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName()))
         } catch (e: Exception) {
             e.printStackTrace()
-            BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed))
+            BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName()))
         }
         onProduceEvent(message)
     }

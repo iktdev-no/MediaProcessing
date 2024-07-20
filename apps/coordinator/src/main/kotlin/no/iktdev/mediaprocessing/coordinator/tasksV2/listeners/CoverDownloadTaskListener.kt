@@ -21,6 +21,10 @@ import java.io.File
 class CoverDownloadTaskListener : CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.EventWorkDownloadCoverPerformed
@@ -34,7 +38,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
 
 
         val failedEventDefault = MediaCoverDownloadedEvent(
-            metadata = event.makeDerivedEventInfo(EventStatus.Failed)
+            metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
         )
 
         val data = event.az<MediaCoverInfoReceivedEvent>()?.data
@@ -83,7 +87,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
                 return
             }
             onProduceEvent(MediaCoverDownloadedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = DownloadedCover(result.absolutePath)
             ))
         }

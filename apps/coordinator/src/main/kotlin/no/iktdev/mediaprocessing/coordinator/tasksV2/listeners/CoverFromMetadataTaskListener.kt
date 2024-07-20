@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service
 class CoverFromMetadataTaskListener: CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
 
     @Autowired
     override var coordinator: Coordinator? = null
@@ -73,11 +76,11 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         val result = if (coverUrl.isNullOrBlank()) {
             log.warn { "No cover available for ${baseInfo.title}" }
             MediaCoverInfoReceivedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Skipped)
+                metadata = event.makeDerivedEventInfo(EventStatus.Skipped, getProducerName())
             )
         } else {
             MediaCoverInfoReceivedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = CoverDetails(
                     url = coverUrl,
                     outFileBaseName = NameHelper.normalize(coverTitle),

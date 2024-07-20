@@ -21,6 +21,10 @@ import java.io.File
 class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
 
+    override fun getProducerName(): String {
+        return this::class.java.simpleName
+    }
+
     @Autowired
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.EventMediaParameterExtractCreated
@@ -68,11 +72,11 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
         val result = mapper.getArguments()
         if (result.isEmpty()) {
             onProduceEvent(ExtractArgumentCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Skipped)
+                metadata = event.makeDerivedEventInfo(EventStatus.Skipped, getProducerName())
             ))
         } else {
             onProduceEvent(ExtractArgumentCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success),
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = result
             ))
         }
