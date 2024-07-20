@@ -112,7 +112,6 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                         }
                         pullDelay.set(slowPullDelay.get())
                     }
-                    referencePool.values.awaitAll()
                 }
                 waitForConditionOrTimeout(pullDelay.get()) {
                     newEventProduced

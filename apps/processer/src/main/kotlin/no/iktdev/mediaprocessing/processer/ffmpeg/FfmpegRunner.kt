@@ -20,8 +20,10 @@ class FfmpegRunner(
     val arguments: List<String>,
     private val listener: FfmpegListener,
     val logDir: File
-
 ) {
+    val workOutputFile = "$outputFile.work"
+
+
     val currentDateTime = LocalDateTime.now()
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd.HH.mm")
     val formattedDateTime = currentDateTime.format(formatter)
@@ -39,9 +41,10 @@ class FfmpegRunner(
     }
 
     fun run(progress: Boolean = false) {
+        log.info { "Work file can be found at $workOutputFile" }
         val args = FfmpegArgumentsBuilder()
             .inputFile(inputFile)
-            .outputFile(outputFile)
+            .outputFile(workOutputFile)
             .args(arguments)
             .allowOverwrite(ProcesserEnv.allowOverwrite)
             .withProgress(progress)
@@ -76,9 +79,19 @@ class FfmpegRunner(
         val result = processOp
         onOutputChanged("Received exit code: ${result.resultCode}")
         if (result.resultCode != 0) {
+            log.warn { "Work outputfile is orphaned and could be found using this path:\n$workOutputFile" }
             listener.onError(inputFile, result.output.joinToString("\n"))
         } else {
-            listener.onCompleted(inputFile, outputFile)
+            log.info { "Converting work file to output file: $workOutputFile -> $outputFile" }
+            val success = File(workOutputFile).renameTo(File(outputFile))
+            if (!success) {
+                val outMessage = "Could not convert file $workOutputFile -> $outputFile"
+                log.error { outMessage }
+                listener.onError(inputFile, outMessage)
+            } else {
+                listener.onCompleted(inputFile, outputFile)
+            }
+
         }
     }
 

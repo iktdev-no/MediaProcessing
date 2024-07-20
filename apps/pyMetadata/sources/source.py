@@ -6,6 +6,8 @@ from typing import List, Tuple
 from fuzzywuzzy import fuzz
 
 from clazz.Metadata import Metadata
+import asyncio
+
 
 log = logging.getLogger(__name__)
 
@@ -17,11 +19,11 @@ class SourceBase(ABC):
         self.titles = titles
 
     @abstractmethod
-    def search(self, ) -> Metadata | None:
+    async def search(self, ) -> Metadata | None:
         pass
 
     @abstractmethod
-    def queryIds(self, title: str) -> dict[str, str]:
+    async def queryIds(self, title: str) -> dict[str, str]:
         pass
 
     def isMatchOrPartial(self, source: str | None, title, foundTitle) -> bool:

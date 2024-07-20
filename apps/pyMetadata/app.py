@@ -10,6 +10,7 @@ import time
 from fuzzywuzzy import fuzz
 import mysql.connector
 from datetime import datetime
+import asyncio
 
 import mysql.connector.cursor
 
@@ -64,8 +65,8 @@ class EventsPullerThread(threading.Thread):
                                 GROUP BY referenceId
                                 HAVING 
                                     SUM(event = 'event:media-read-base-info:performed') > 0
-                                    AND SUM(event = 'event:media-metadata-search:performed') = 0
-                                    AND SUM(event = 'event:media-process:completed') = 0
+                                    AND SUM(event = 'event:media-metadata-search:performed') != 0
+                                    AND SUM(event = 'event:media-process:completed') != 0
                             )
                             AND event = 'event:media-read-base-info:performed';
         """)
@@ -122,7 +123,7 @@ Found message
                             logger.info(logMessage)
                             
                             event: MediaEvent = json_to_media_event(row["data"])
-                            producedEvent = MetadataEventHandler(event).run()
+                            producedEvent = asyncio.run(MetadataEventHandler(event).run())
 
                             producedMessage = f"""
 ============================================================================
@@ -171,20 +172,19 @@ Producing message
         global should_stop 
         should_stop = True
 
-class MetadataEventHandler():
+class MetadataEventHandler:
     mediaEvent: MediaEvent | None = None
+
     def __init__(self, data: MediaEvent):
         super().__init__()
-        self.mediaEvent = None
-
         self.mediaEvent = data
         logger.info(self.mediaEvent)
 
-    def run(self) -> MediaEvent:
+    async def run(self) -> MediaEvent | None:
         logger.info("Starting search")
-        if (self.mediaEvent is None):
+        if self.mediaEvent is None:
             logger.error("Event does not contain anything...")
-            return
+            return None
 
         event: MediaEvent = self.mediaEvent
 
@@ -194,48 +194,49 @@ class MetadataEventHandler():
             event.data.sanitizedName
         ])
 
-
         joinedTitles = "\n".join(searchableTitles)
         logger.info("Searching for: %s", joinedTitles)
-        result: Metadata | None = self.__getMetadata(searchableTitles)
+
+        # Kjør den asynkrone søkemetoden
+        result: Metadata | None = await self.__getMetadata(searchableTitles)
 
         result_message: str | None = None
-        if (result is None):
+        if result is None:
             result_message = f"No result for {joinedTitles}"
             logger.info(result_message)
 
-
         producedEvent = MediaEvent(
-            metadata = EventMetadata(
+            metadata=EventMetadata(
                 referenceId=event.metadata.referenceId,
                 eventId=str(uuid.uuid4()),
                 derivedFromEventId=event.metadata.eventId,
-                status= "Failed" if result is None else "Success",
-                created= datetime.now().isoformat()
+                status="Failed" if result is None else "Success",
+                created=datetime.now().isoformat()
             ),
             data=result,
             eventType="EventMediaMetadataSearchPerformed"
         )
         return producedEvent
 
-
-    def __getMetadata(self, titles: List[str]) -> Metadata | None:
+    async def __getMetadata(self, titles: List[str]) -> Metadata | None:
         mal = Mal(titles=titles)
         anii = Anii(titles=titles)
         imdb = Imdb(titles=titles)
 
-        results: List[Metadata] = [
+        results: List[Metadata | None] = await asyncio.gather(
             mal.search(),
             anii.search(),
             imdb.search()
-        ]
+        )
+
         filtered_results = [result for result in results if result is not None]
         logger.info("\nSimple matcher")
         simpleSelector = SimpleMatcher(titles=titles, metadata=filtered_results).getBestMatch()
         logger.info("\nAdvanced matcher")
         advancedSelector = AdvancedMatcher(titles=titles, metadata=filtered_results).getBestMatch()
-        logger.info("\nPrefrix matcher")
+        logger.info("\nPrefix matcher")
         prefixSelector = PrefixMatcher(titles=titles, metadata=filtered_results).getBestMatch()
+
         if simpleSelector is not None:
             return simpleSelector
         if advancedSelector is not None:
@@ -243,7 +244,6 @@ class MetadataEventHandler():
         if prefixSelector is not None:
             return prefixSelector
         return None
-
 
 # Global variabel for å indikere om applikasjonen skal avsluttes
 should_stop = False
