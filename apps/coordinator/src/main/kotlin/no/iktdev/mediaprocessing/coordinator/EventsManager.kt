@@ -70,7 +70,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
             true
         }
         if (success) {
-            deleteSupersededEvents(referenceId = event.referenceId(), eventId = event.eventId(), event = event.eventType, derivedFromId = event.derivedFromEventId())
+            //deleteSupersededEvents(referenceId = event.referenceId(), eventId = event.eventId(), event = event.eventType, derivedFromId = event.derivedFromEventId())
         }
         return success
     }
