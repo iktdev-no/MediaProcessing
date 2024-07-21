@@ -21,7 +21,7 @@ class FfmpegRunner(
     private val listener: FfmpegListener,
     val logDir: File
 ) {
-    val workOutputFile = "$outputFile.work"
+    val workOutputFile = "work.$outputFile"
 
 
     val currentDateTime = LocalDateTime.now()
