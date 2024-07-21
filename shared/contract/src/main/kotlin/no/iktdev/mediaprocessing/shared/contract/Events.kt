@@ -12,6 +12,7 @@ enum class Events(val event: String) {
 
     EventMediaParameterEncodeCreated        ("event:media-encode-parameter:created"),
     EventMediaParameterExtractCreated       ("event:media-extract-parameter:created"),
+
     EventMediaParameterDownloadCoverCreated ("event:media-download-cover-parameter:created"),
 
     EventMediaWorkProceedPermitted          ("event:media-work-proceed:permitted"),

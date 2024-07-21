@@ -10,4 +10,15 @@ object NameHelper {
         val cleaned = "[^A-Za-z0-9 -]".toRegex().replace(result, "")
         return StringUtils.stripAccents(cleaned)
     }
+
+    fun cleanup(input: String): String {
+        var cleaned = Regex("(?<=\\w)[_.](?=\\w)").replace(input, " ")
+        cleaned = Regexes.illegalCharacters.replace(cleaned, " - ")
+        cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
+        return NameHelper.normalize(cleaned)
+    }
+}
+
+fun String.isCharOnlyUpperCase(): Boolean {
+    return "[^A-Za-z]".toRegex().replace(this, "").all { it.isUpperCase() }
 }

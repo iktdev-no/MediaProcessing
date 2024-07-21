@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
@@ -13,9 +12,8 @@ import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
+import no.iktdev.mediaprocessing.shared.common.parsing.isCharOnlyUpperCase
 import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.contract.data.*
 import no.iktdev.mediaprocessing.shared.contract.data.EpisodeInfo
 import no.iktdev.mediaprocessing.shared.contract.data.MovieInfo
@@ -23,6 +21,7 @@ import no.iktdev.mediaprocessing.shared.contract.data.pyMetadata
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.FileFilter
+import javax.naming.Name
 
 
 @Service
@@ -96,45 +95,61 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
             metadata?.altTitle?.let { titles.addAll(it) }
             return titles
         }
-        fun getExistingCollections() =
-            SharedConfig.outgoingContent.listFiles(FileFilter { it.isDirectory })?.map { it.name } ?: emptyList()
+        fun getExistingCollections() = SharedConfig.outgoingContent.listFiles(FileFilter { it.isDirectory })?.map { it.name } ?: emptyList()
 
-        fun getAlreadyUsedForCollectionOrTitle(): String {
+        fun getUsedCollectionForTitleOrNull(): String? {
             val exisiting = getExistingCollections()
-            val existingMatch = exisiting.find { it.lowercase().contains(baseInfo.title.lowercase()) }
-            if (existingMatch != null) {
-                return existingMatch
+            if (exisiting.isEmpty()) {
+                return null
             }
-
-            val metaTitles = getTitlesFromMetadata()
-            val existingMatchOnMeta = metaTitles.find { it.lowercase().contains(baseInfo.title.lowercase()) }
-
-
-            return existingMatchOnMeta
-                ?: (getTitlesFromMetadata().firstOrNull { it in exisiting } ?: getTitlesFromMetadata().firstOrNull()
-                ?: baseInfo.title)
+            val existingMatch = exisiting.find { it.lowercase().contains(baseInfo.title.lowercase()) }
+            return existingMatch
         }
 
         fun getCollection(): String {
-            val title = getAlreadyUsedForCollectionOrTitle()?: metadata?.title ?: baseInfo.title
-            var cleaned = Regexes.illegalCharacters.replace(title, " - ")
-            cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
-            return cleaned
+            val usedCollection = getUsedCollectionForTitleOrNull()
+            if (usedCollection != null) {
+                return usedCollection
+            }
+
+            val metaTitles = getTitlesFromMetadata()
+            val existingCollection = getExistingCollections()
+            val ecList = existingCollection.filter { ec -> metaTitles.any { it.lowercase().contains(ec.lowercase() )} }
+            if (ecList.isNotEmpty()) {
+                return ecList.first()
+            }
+
+            val existingMatchOnMeta = metaTitles.find { it.lowercase().contains(baseInfo.title.lowercase()) && !it.isCharOnlyUpperCase() }
+
+            return NameHelper.cleanup((existingMatchOnMeta ?: baseInfo.title))
         }
 
         fun getTitle(): String {
             val metaTitles = getTitlesFromMetadata()
-            val metaTitle = metaTitles.filter { it.contains(baseInfo.title) || NameHelper.normalize(it).contains(baseInfo.title) }
-            val title = metaTitle.firstOrNull() ?: metaTitles.firstOrNull() ?: baseInfo.title
-            var cleaned = Regexes.illegalCharacters.replace(title, " - ")
-            cleaned = Regexes.trimWhiteSpaces.replace(cleaned, " ")
-            return cleaned
+            val collection = getCollection()
+
+            val filteredMetaTitles = metaTitles.filter { it.lowercase().contains(baseInfo.title.lowercase()) || NameHelper.normalize(it).lowercase().contains(baseInfo.title.lowercase()) }
+
+            //val viableFileTitles = filteredMetaTitles.filter { !it.isCharOnlyUpperCase() }
+
+            return if (collection == baseInfo.title) {
+                collection
+            } else {
+                NameHelper.cleanup (filteredMetaTitles.firstOrNull() ?: baseInfo.title)
+            }
         }
 
         fun getVideoPayload(): JsonObject? {
             val defaultFnd = FileNameDeterminate(getTitle(), baseInfo.sanitizedName, FileNameDeterminate.ContentType.UNDEFINED)
 
-            val determinedContentType = defaultFnd.getDeterminedVideoInfo().let { if (it is EpisodeInfo) FileNameDeterminate.ContentType.SERIE else if (it is MovieInfo) FileNameDeterminate.ContentType.MOVIE else FileNameDeterminate.ContentType.UNDEFINED }
+            val determinedContentType = defaultFnd.getDeterminedVideoInfo()
+                .let {
+                    when (it) {
+                        is EpisodeInfo -> FileNameDeterminate.ContentType.SERIE
+                        is MovieInfo -> FileNameDeterminate.ContentType.MOVIE
+                        else -> FileNameDeterminate.ContentType.UNDEFINED
+                    }
+                }
             return if (determinedContentType == metadataDeterminedContentType && determinedContentType == FileNameDeterminate.ContentType.MOVIE) {
                 FileNameDeterminate(getTitle(), getTitle(), FileNameDeterminate.ContentType.MOVIE).getDeterminedVideoInfo()?.toJsonObject()
             } else {
