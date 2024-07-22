@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Bean
 val log = KotlinLogging.logger {}
 private lateinit var eventDatabase: EventsDatabase
 private lateinit var eventsManager: EventsManager
+lateinit var runnerManager: RunnerManager
+
 
 @SpringBootApplication
 class CoordinatorApplication {
@@ -85,6 +87,10 @@ fun main(args: Array<String>) {
         titles
     )
     storeDatabase.createTables(*tables)
+
+    runnerManager = RunnerManager(dataSource = eventDatabase.database, name = CoordinatorApplication::class.java.simpleName)
+    runnerManager.assignRunner()
+
     runApplication<CoordinatorApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }
 }

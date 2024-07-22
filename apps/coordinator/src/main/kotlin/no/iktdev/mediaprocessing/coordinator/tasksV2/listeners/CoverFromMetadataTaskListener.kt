@@ -50,11 +50,12 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
-
+        active = true
 
         val baseInfo = events.find { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
         if (baseInfo == null) {
             log.info { "No base info" }
+            active = false
             return
         }
 
@@ -64,6 +65,7 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data
         if (mediaOutInfo == null) {
             log.info { "No Media out info" }
+            active = false
             return
         }
         val videoInfo = mediaOutInfo.toValueObject()
@@ -89,6 +91,6 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
             )
         }
         onProduceEvent(result)
-
+        active = false
     }
 }

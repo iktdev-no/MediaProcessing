@@ -10,6 +10,11 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
     abstract val produceEvent: Any
     abstract val listensForEvents: List<Any>
 
+    protected var active: Boolean = false
+    open fun isActive(): Boolean {
+        return active
+    }
+
     open fun onReady() {
 
     }

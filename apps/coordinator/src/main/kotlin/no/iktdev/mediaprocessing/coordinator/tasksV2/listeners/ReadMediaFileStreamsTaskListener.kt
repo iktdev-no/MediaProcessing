@@ -52,10 +52,12 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
+        active = true
 
         val startEvent = event.dataAs<StartEventData>()
         if (startEvent == null || !startEvent.operations.any { it in requiredOperations }) {
             log.info { "${event.metadata.referenceId} does not contain a operation in ${requiredOperations.joinToString(",") { it.name }}" }
+            active = false
             return
         }
         val result = runBlocking {
@@ -73,6 +75,7 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             }
         }
         onProduceEvent(result)
+        active = false
     }
 
 

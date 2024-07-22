@@ -49,23 +49,38 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
-
-        val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>() ?: return
+        active = true
+        val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>()
+        if (started == null) {
+            active = false
+            return
+        }
         if (started.data == null || started.data?.operations?.contains(StartOperationEvents.ENCODE) == false) {
+            active = false
             return
         }
         val streams = events.find { it.eventType == Events.EventMediaParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
         if (streams == null) {
+            active = false
             return
         }
 
         val mediaInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
         if (mediaInfo?.data == null) {
+            active = false
             return
         }
-        val mediaInfoData = mediaInfo.data?.toValueObject() ?: return
+        val mediaInfoData = mediaInfo.data?.toValueObject()
+        if (mediaInfoData == null) {
+            active = false
+            return
+        }
 
-        val inputFile = started.data?.file ?: return
+        val inputFile = started.data?.file
+        if (inputFile == null) {
+            active = false
+            return
+        }
         val mapper = EncodeWorkArgumentsMapping(
             inputFile = inputFile,
             outFileFullName = mediaInfoData.fullName,
@@ -85,7 +100,6 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
                 data = result
             ))
         }
-
-
+        active = false
     }
 }

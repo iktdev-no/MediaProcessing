@@ -50,6 +50,8 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
+        active = true
+
 
         val readData = event.dataAs<JsonObject>()
         val result = try {
@@ -64,6 +66,7 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             )
         }
         onProduceEvent(result)
+        active = false
     }
 
 

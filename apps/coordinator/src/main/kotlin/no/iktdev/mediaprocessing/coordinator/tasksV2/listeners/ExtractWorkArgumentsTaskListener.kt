@@ -45,22 +45,34 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
+        active = true
         val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>() ?: return
         if (started.data == null || started.data?.operations?.contains(StartOperationEvents.EXTRACT) == false) {
+            active = false
             return
         }
         val streams = events.find { it.eventType == Events.EventMediaParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
         if (streams == null) {
+            active = false
             return
         }
 
         val mediaInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
         if (mediaInfo?.data == null) {
+            active = false
             return
         }
-        val mediaInfoData = mediaInfo.data?.toValueObject() ?: return
+        val mediaInfoData = mediaInfo.data?.toValueObject()
+        if (mediaInfoData == null) {
+            active = false
+            return
+        }
 
-        val inputFile = started.data?.file ?: return
+        val inputFile = started.data?.file
+        if (inputFile == null) {
+            active = false
+            return
+        }
 
         val mapper = ExtractWorkArgumentsMapping(
             inputFile = inputFile,
@@ -80,6 +92,6 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
                 data = result
             ))
         }
-
+        active = false
     }
 }

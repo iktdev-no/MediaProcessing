@@ -43,8 +43,9 @@ class EncodeWorkTaskListener : WorkTaskListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
-
+        active = true
         if (!canStart(event, events)) {
+            active = false
             return
         }
 
@@ -56,6 +57,7 @@ class EncodeWorkTaskListener : WorkTaskListener() {
         }
         if (encodeArguments == null) {
             log.error { "No Encode arguments found.. referenceId: ${event.referenceId()}" }
+            active = false
             return
         }
         EncodeWorkCreatedEvent(
@@ -72,6 +74,6 @@ class EncodeWorkTaskListener : WorkTaskListener() {
                 inputFile = event.data!!.inputFile
             )
         }
-
+        active = false
     }
 }

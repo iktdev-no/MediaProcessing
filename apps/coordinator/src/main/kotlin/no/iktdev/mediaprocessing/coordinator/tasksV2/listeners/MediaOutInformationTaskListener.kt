@@ -49,6 +49,7 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
+        active = true
 
         val metadataResult = event.az<MediaMetadataReceivedEvent>()
         val mediaBaseInfo = events.findLast { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
@@ -59,6 +60,7 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
                     metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
                 )
             )
+            active = false
             return
         }
         val pm = ProcessMediaInfoAndMetadata(mediaBaseInfo, metadataResult?.data)
@@ -78,6 +80,7 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
             )
         }
         onProduceEvent(result)
+        active = false
     }
 
     class ProcessMediaInfoAndMetadata(val baseInfo: BaseInfo, val metadata: pyMetadata? = null) {

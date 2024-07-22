@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.eventId
+import no.iktdev.eventi.implementations.ActiveMode
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.shared.contract.Events
 import no.iktdev.mediaprocessing.shared.contract.ProcessType
@@ -81,5 +82,13 @@ class Coordinator(
             ),
             data = message
         ))
+    }
+
+    override fun getActiveTaskMode(): ActiveMode {
+        if (runnerManager.iAmSuperseded()) {
+            // This will let the application complete but not consume new
+            taskMode = ActiveMode.Passive
+        }
+        return taskMode
     }
 }

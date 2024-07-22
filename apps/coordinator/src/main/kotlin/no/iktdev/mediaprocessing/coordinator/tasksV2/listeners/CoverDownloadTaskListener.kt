@@ -35,7 +35,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
-
+        active = true
 
         val failedEventDefault = MediaCoverDownloadedEvent(
             metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
@@ -45,6 +45,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
         if (data == null) {
             log.error { "No valid data for use to obtain cover" }
             onProduceEvent(failedEventDefault)
+            active = false
             return
         }
 
@@ -84,6 +85,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
         } else {
             if (!result.exists() || !result.canRead()) {
                 onProduceEvent(failedEventDefault)
+                active = false
                 return
             }
             onProduceEvent(MediaCoverDownloadedEvent(
@@ -91,6 +93,6 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
                 data = DownloadedCover(result.absolutePath)
             ))
         }
-
+        active = false
     }
 }

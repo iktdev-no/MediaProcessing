@@ -47,10 +47,14 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         val event = incomingEvent.consume()
         if (event == null) {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            active = false
             return
         }
+        active = true
+
 
         if (!canStart(event, events)) {
+            active = false
             return
         }
 
@@ -62,12 +66,11 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         }
         if (arguments == null) {
             log.error { "No Extract arguments found.. referenceId: ${event.referenceId()}" }
+            active = false
             return
         }
         if (arguments.isEmpty()) {
-            ExtractWorkCreatedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
-            )
+            active = false
             return
         }
 
@@ -87,5 +90,6 @@ class ExtractWorkTaskListener: WorkTaskListener() {
                 inputFile = event.data!!.inputFile
             )
         }
+        active = false
     }
 }

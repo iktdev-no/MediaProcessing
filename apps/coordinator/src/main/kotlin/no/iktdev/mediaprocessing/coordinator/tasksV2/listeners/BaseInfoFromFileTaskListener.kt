@@ -36,6 +36,7 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
+        active = true
         val message = try {
             readFileInfo(event.data as StartEventData, event.metadata.eventId)?.let {
                 BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()), data = it)
@@ -45,6 +46,7 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
             BaseInfoEvent(metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName()))
         }
         onProduceEvent(message)
+        active = false
     }
 
 

@@ -57,7 +57,9 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
+        active = true
         if (!canStart(event, events)) {
+            active = false
             return
         }
 
@@ -104,5 +106,6 @@ class ConvertWorkTaskListener: WorkTaskListener() {
                 )
             }
         }
+        active = false
     }
 }

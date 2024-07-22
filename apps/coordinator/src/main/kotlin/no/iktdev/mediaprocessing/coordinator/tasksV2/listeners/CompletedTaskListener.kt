@@ -19,9 +19,13 @@ import no.iktdev.streamit.library.db.query.CatalogQuery
 import no.iktdev.streamit.library.db.query.GenreQuery
 import no.iktdev.streamit.library.db.query.SubtitleQuery
 import no.iktdev.streamit.library.db.query.SummaryQuery
+import no.iktdev.streamit.library.db.tables.catalog
 import no.iktdev.streamit.library.db.tables.titles
 import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insertIgnore
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.update
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -323,13 +327,33 @@ class CompletedTaskListener: CoordinatorEventListener() {
     }
 
     fun storeMetadata(catalogId: Int, metadata: MetadataDto) {
-        metadata.summary.forEach {
+        if (!metadata.cover.isNullOrBlank()) {
             withTransaction(getStoreDatabase()) {
+                val storedCatalogCover = catalog.select {
+                    (catalog.id eq catalogId)
+                }.map { it[catalog.cover] }.firstOrNull()
+                if (storedCatalogCover.isNullOrBlank()) {
+                    catalog.update({
+                        catalog.id eq catalogId
+                    }) {
+                        it[catalog.cover] = metadata.cover
+                    }
+                }
+            }
+        }
+
+
+        metadata.summary.forEach {
+            val result = executeOrException(getStoreDatabase().database) {
                 SummaryQuery(
                     cid = catalogId,
                     language = it.language,
                     description = it.summary
                 ).insert()
+            }
+            val ignoreException = result?.cause is SQLIntegrityConstraintViolationException && (result as ExposedSQLException).errorCode == 1062
+            if (!ignoreException) {
+                result?.printStackTrace()
             }
         }
     }
@@ -371,11 +395,9 @@ class CompletedTaskListener: CoordinatorEventListener() {
             else -> throw RuntimeException("${videoDetails.type} is not supported!")
         }
         val ignoreException = result?.cause is SQLIntegrityConstraintViolationException && (result as ExposedSQLException).errorCode == 1062
-        return if (result == null || ignoreException ) {
-            return withTransaction(getStoreDatabase()) {
-                precreatedCatalogQuery.getId()
-            }
-        } else null
+        return withTransaction(getStoreDatabase()) {
+            precreatedCatalogQuery.getId()
+        }
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
@@ -388,6 +410,7 @@ class CompletedTaskListener: CoordinatorEventListener() {
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume() ?: return
+        active = true
 
         val metadata = getMetadata(events)
         val genres = getGenres(events)
@@ -418,6 +441,7 @@ class CompletedTaskListener: CoordinatorEventListener() {
                 events.map { it.eventId() }
             )
         ))
+        active = false
     }
 
 }

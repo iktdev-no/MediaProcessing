@@ -43,6 +43,9 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
     private var newEventProduced: Boolean = false
 
+    abstract fun getActiveTaskMode(): ActiveMode
+
+
 
     private fun onEventGroupsReceived(eventGroup: List<List<T>>) {
         val egRefIds = eventGroup.map { it.first().referenceId() }
@@ -108,7 +111,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                         pullDelay.set(fastPullDelay.get())
                     } else {
                         if (pullDelay.get() != slowPullDelay.get()) {
-                            log.info { "None events available, switching to slow pull @ Delay -> ${slowPullDelay.get()}" }
+                            log.info { "No events available, switching to slow pull @ Delay -> ${slowPullDelay.get()}" }
                         }
                         pullDelay.set(slowPullDelay.get())
                     }
@@ -118,6 +121,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                 }
                 newEventProduced = false
             }
+            taskMode = getActiveTaskMode()
         }
     }
 

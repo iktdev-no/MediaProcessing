@@ -114,6 +114,7 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
             )
             waitingProcessesForMeta.remove(it.key)
         }
+        active = expired.isNotEmpty()
     }
     data class MetadataTriggerData(val eventId: String, val executed: LocalDateTime)
 
