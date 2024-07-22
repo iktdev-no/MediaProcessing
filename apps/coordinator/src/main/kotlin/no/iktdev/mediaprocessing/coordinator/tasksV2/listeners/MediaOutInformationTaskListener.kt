@@ -102,7 +102,8 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
             if (exisiting.isEmpty()) {
                 return null
             }
-            val existingMatch = exisiting.find { it.lowercase().contains(baseInfo.title.lowercase()) }
+            // Contains will cause mayhem!, ex: Collection with a single letter will make it messy
+            val existingMatch = exisiting.find { it.lowercase() == baseInfo.title.lowercase() }
             return existingMatch
         }
 
@@ -114,14 +115,15 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
 
             val metaTitles = getTitlesFromMetadata()
             val existingCollection = getExistingCollections()
-            val ecList = existingCollection.filter { ec -> metaTitles.any { it.lowercase().contains(ec.lowercase() )} }
+
+            // Contains will cause mayhem!, ex: Collection with a single letter will make it messy
+            val ecList = existingCollection.filter { ec -> metaTitles.any { it.lowercase() == ec.lowercase() } }
             if (ecList.isNotEmpty()) {
                 return ecList.first()
             }
 
-            val existingMatchOnMeta = metaTitles.find { it.lowercase().contains(baseInfo.title.lowercase()) && !it.isCharOnlyUpperCase() }
 
-            return NameHelper.cleanup((existingMatchOnMeta ?: baseInfo.title))
+            return NameHelper.cleanup(baseInfo.title)
         }
 
         fun getTitle(): String {
