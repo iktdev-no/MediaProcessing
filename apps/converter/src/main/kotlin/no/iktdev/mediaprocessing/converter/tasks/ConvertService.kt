@@ -8,6 +8,7 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.converter.*
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter2
+import no.iktdev.mediaprocessing.shared.common.persistance.Status
 import no.iktdev.mediaprocessing.shared.common.services.TaskService
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
@@ -104,7 +105,9 @@ class ConvertService(
     override fun onError(inputFile: String, message: String) {
         val task = assignedTask ?: return
         super.onError(inputFile, message)
-        log.info { "Convert error for ${task.referenceId}" }
+        log.info { "Convert error for ${task.referenceId}\nmessage: $message" }
+
+        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
 
         tasks.onProduceEvent(ConvertWorkPerformed(
             metadata = EventMetadata(
@@ -114,6 +117,7 @@ class ConvertService(
                 source = getProducerName()
             )
         ))
+        onClearTask()
     }
 
 
