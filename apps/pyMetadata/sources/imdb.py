@@ -48,11 +48,14 @@ class Imdb(SourceBase):
     async def __getMetadata(self, id: str) -> Optional[Metadata]:
         try:
             result = await asyncio.to_thread(Cinemagoer().get_movie, id)
+            cover = result.get_fullsizeURL()
+            if cover is None or len(cover) == 0:
+                cover = result.get("cover url", None)
             summary = result.get("plot outline", None)
             return Metadata(
                 title=result.get("title", None),
                 altTitle=[result.get("localized title", [])],
-                cover=result.get("cover url", None),
+                cover=cover,
                 banner=None,
                 summary=[] if summary is None else [
                     Summary(

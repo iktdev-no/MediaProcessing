@@ -73,7 +73,7 @@ class SourceBase(ABC):
 
         for title in titles:
             for id, stored_title in filtered_idToTitle.items():
-                ratio = fuzz.ratio(title, stored_title)
+                ratio = fuzz.ratio(title, stored_title[0])
                 if ratio > best_ratio:
                     best_ratio = ratio
                     best_match_id = id

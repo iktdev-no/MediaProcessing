@@ -100,13 +100,17 @@ class EventsPullerThread(threading.Thread):
         while not self.shutdown.is_set():
             producedMessage: bool = False
 
-            connection = mysql.connector.connect(
+            try:
+                connection = mysql.connector.connect(
                     host=events_server_address,
                     port=events_server_port,
                     database=events_server_database_name,
                     user=events_server_username,
                     password=events_server_password
-            )
+                )
+            except:
+                logging.error(f"Unable to connect to {events_server_address}:{events_server_port}. Either the server or database: {events_server_database_name} is not present yet!")
+
             try:
                 rows = self.getEventsAvailable(connection=connection)
                 for row in rows:
