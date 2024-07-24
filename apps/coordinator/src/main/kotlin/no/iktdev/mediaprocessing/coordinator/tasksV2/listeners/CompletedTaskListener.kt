@@ -48,6 +48,10 @@ class CompletedTaskListener: CoordinatorEventListener() {
         }
     }
 
+    override fun shouldIHandleFailedEvents(incomingEvent: Event): Boolean {
+        return true
+    }
+
 
     @Autowired
     override var coordinator: Coordinator? = null
@@ -178,7 +182,7 @@ class CompletedTaskListener: CoordinatorEventListener() {
             return false
         }
 
-        if (!req3(started.data?.operations ?: emptyList(), viableEvents)) {
+        if (!req3(started.data?.operations ?: emptyList(), events)) {
             //log.info { "${this::class.java.simpleName} Failed Req3" }
             return false
         }
@@ -401,9 +405,6 @@ class CompletedTaskListener: CoordinatorEventListener() {
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
-        if (doNotProduceComplete) {
-            return false
-        }
         val result = super.shouldIProcessAndHandleEvent(incomingEvent, events)
         return result
     }
@@ -433,14 +434,14 @@ class CompletedTaskListener: CoordinatorEventListener() {
             }
         }
 
-
-
-        onProduceEvent(MediaProcessCompletedEvent(
-            metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
-            data = CompletedEventData(
-                events.map { it.eventId() }
-            )
-        ))
+        if (!doNotProduceComplete) {
+            onProduceEvent(MediaProcessCompletedEvent(
+                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
+                data = CompletedEventData(
+                    events.map { it.eventId() }
+                )
+            ))
+        }
         active = false
     }
 
