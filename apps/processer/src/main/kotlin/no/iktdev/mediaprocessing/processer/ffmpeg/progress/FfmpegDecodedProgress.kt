@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.processer.ffmpeg.progress
 
-import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserProgress
+import no.iktdev.mediaprocessing.shared.common.contract.dto.ProcesserProgress
 
 data class FfmpegDecodedProgress(
     val progress: Int = -1,

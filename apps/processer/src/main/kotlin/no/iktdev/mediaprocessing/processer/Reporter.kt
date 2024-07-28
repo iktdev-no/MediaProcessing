@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.processer
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
-import no.iktdev.mediaprocessing.shared.contract.dto.ProcesserEventInfo
+import no.iktdev.mediaprocessing.shared.common.contract.dto.ProcesserEventInfo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service

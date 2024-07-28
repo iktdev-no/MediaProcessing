@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams
 
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoArgumentsDto
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoPreference
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoArgumentsDto
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoPreference
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoStream
 
 class VideoArguments(
     val videoStream: VideoStream,

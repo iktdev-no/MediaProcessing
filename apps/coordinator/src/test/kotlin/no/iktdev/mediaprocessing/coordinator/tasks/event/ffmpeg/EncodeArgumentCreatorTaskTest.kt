@@ -3,9 +3,9 @@ package no.iktdev.mediaprocessing.coordinator.tasks.event.ffmpeg
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.AudioArguments
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioPreference
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioPreference
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -17,7 +17,7 @@ class EncodeArgumentCreatorTaskTest {
         val audio = AudioArguments(
             audioStream = audioStreamsEAC().first(),
             allStreams = ParsedMediaStreams(listOf(), audioStreamsEAC(), listOf()),
-            preference = AudioPreference(preserveChannels = true, forceStereo = false, defaultToEAC3OnSurroundDetected = true)
+            preference = AudioPreference(preserveChannels = true, forceStereo = false, convertToEac3OnUnsupportedSurround = true)
         )
         val arguments = audio.getAudioArguments()
         assertThat(arguments.codecParameters).isEqualTo(listOf("-acodec", "copy"))
@@ -75,4 +75,6 @@ class EncodeArgumentCreatorTaskTest {
         val type = object : TypeToken<List<AudioStream>>() {}.type
         return Gson().fromJson<List<AudioStream>>(streams, type)
     }
+
+
 }

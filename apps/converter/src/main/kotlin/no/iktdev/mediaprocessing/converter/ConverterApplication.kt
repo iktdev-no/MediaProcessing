@@ -6,8 +6,11 @@ import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
 import no.iktdev.eventi.database.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.database.cal.RunnerManager
+import no.iktdev.mediaprocessing.shared.common.database.cal.TasksManager
+import no.iktdev.mediaprocessing.shared.common.database.tables.runners
+import no.iktdev.mediaprocessing.shared.common.database.tables.tasks
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
-import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

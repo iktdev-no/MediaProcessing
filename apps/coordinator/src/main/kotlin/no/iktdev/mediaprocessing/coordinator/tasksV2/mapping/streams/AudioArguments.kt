@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams
 
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioArgumentsDto
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioPreference
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioArgumentsDto
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioPreference
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
 
 class AudioArguments(
     val audioStream: AudioStream,
@@ -12,42 +12,70 @@ class AudioArguments(
 ) {
     fun isAudioCodecEqual() = audioStream.codec_name.lowercase() == preference.codec.lowercase()
 
-    fun isSurroundButNotEAC3(): Boolean {
-        return audioStream.channels > 2 && audioStream.codec_name.lowercase() != "eac3"
+    /**
+     * Checks whether its ac3 or eac3, as google cast supports this and most other devices.
+     */
+    fun isOfSupportedSurroundCodec(): Boolean {
+        return audioStream.codec_name.lowercase() in listOf("eac3", "ac3")
     }
 
-    fun isSurroundAndEAC3(): Boolean {
-        return audioStream.channels > 2 && audioStream.codec_name.lowercase() == "eac3"
-    }
 
     fun isSurround(): Boolean {
         return audioStream.channels > 2
     }
 
-    private fun shouldUseEAC3(): Boolean {
-        return (preference.defaultToEAC3OnSurroundDetected && audioStream.channels > 2 && audioStream.codec_name.lowercase() != "eac3")
-    }
 
     fun getAudioArguments(): AudioArgumentsDto {
         val optionalParams = mutableListOf<String>()
 
-        val codecParams = if (isAudioCodecEqual() || isSurroundAndEAC3()) {
-            listOf("-acodec", "copy")
-        } else if (!isSurroundButNotEAC3() && shouldUseEAC3()) {
-            listOf("-c:a", "eac3")
-        } else {
-            val codecSwap = mutableListOf("-c:a", preference.codec)
-            if (audioStream.channels > 2 && !preference.preserveChannels) {
-                codecSwap.addAll(listOf("-ac", "2"))
+        if (!isSurround()) {
+            return if (isAudioCodecEqual()) {
+                asPassthrough()
+            } else {
+                asStereo()
             }
-            codecSwap
-        }
+        } else {
+            if (preference.forceStereo) {
+                return asStereo()
+            }
+            if (preference.passthroughOnGenerallySupportedSurroundSound && isOfSupportedSurroundCodec()) {
+                return asPassthrough()
+            } else if (preference.passthroughOnGenerallySupportedSurroundSound && !isOfSupportedSurroundCodec()) {
+                return asSurround()
+            }
+            if (preference.convertToEac3OnUnsupportedSurround ) {
+                return asSurround()
+            }
 
-        return AudioArgumentsDto(
-            index = allStreams.audioStream.indexOf(audioStream),
-            codecParameters = codecParams,
-            optionalParameters = optionalParams
-        )
+
+            return asStereo()
+        }
     }
 
+    fun index(): Int {
+        return allStreams.audioStream.indexOf(audioStream)
+    }
+
+    fun asPassthrough(): AudioArgumentsDto {
+        return AudioArgumentsDto(
+            index = index()
+        )
+    }
+    fun asStereo(): AudioArgumentsDto {
+        return AudioArgumentsDto(
+            index = index(),
+            codecParameters = listOf(
+                "-c:a", preference.codec,
+                "-ac", "2"
+            ), optionalParameters = emptyList()
+        )
+    }
+    fun asSurround(): AudioArgumentsDto {
+        return AudioArgumentsDto(
+            index = index(),
+            codecParameters = listOf(
+                "-c:a", "eac3"
+            ), optionalParameters = emptyList()
+        )
+    }
 }

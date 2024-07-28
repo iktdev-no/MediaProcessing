@@ -1,11 +1,10 @@
 package no.iktdev.mediaprocessing.shared.common
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.persistance.ActiveMode
+import no.iktdev.mediaprocessing.shared.common.database.cal.ActiveMode
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import org.springframework.beans.factory.annotation.Autowired
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import javax.annotation.PostConstruct

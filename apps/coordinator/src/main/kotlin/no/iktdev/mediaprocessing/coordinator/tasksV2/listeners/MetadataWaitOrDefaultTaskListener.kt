@@ -9,11 +9,11 @@ import no.iktdev.eventi.data.isSuccessful
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.eventi.database.toEpochSeconds
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.data.BaseInfoEvent
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.contract.data.MediaMetadataReceivedEvent
-import no.iktdev.mediaprocessing.shared.contract.data.az
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.data.BaseInfoEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaMetadataReceivedEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.az
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled

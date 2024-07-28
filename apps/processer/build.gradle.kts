@@ -50,7 +50,6 @@ dependencies {
 
     //implementation(project(mapOf("path" to ":shared")))
     implementation(project(mapOf("path" to ":shared:eventi")))
-    implementation(project(mapOf("path" to ":shared:contract")))
     implementation(project(mapOf("path" to ":shared:common")))
 
 

@@ -10,16 +10,16 @@ import no.iktdev.eventi.data.dataAs
 import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.contract.data.MediaFileStreamsParsedEvent
-import no.iktdev.mediaprocessing.shared.contract.data.MediaFileStreamsReadEvent
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoStream
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
+import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsParsedEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsReadEvent
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.SubtitleStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoStream
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

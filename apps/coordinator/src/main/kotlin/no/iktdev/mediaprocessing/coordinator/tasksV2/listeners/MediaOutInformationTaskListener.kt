@@ -13,11 +13,11 @@ import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
 import no.iktdev.mediaprocessing.shared.common.parsing.isCharOnlyUpperCase
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.data.*
-import no.iktdev.mediaprocessing.shared.contract.data.EpisodeInfo
-import no.iktdev.mediaprocessing.shared.contract.data.MovieInfo
-import no.iktdev.mediaprocessing.shared.contract.data.pyMetadata
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
+import no.iktdev.mediaprocessing.shared.common.contract.data.EpisodeInfo
+import no.iktdev.mediaprocessing.shared.common.contract.data.MovieInfo
+import no.iktdev.mediaprocessing.shared.common.contract.data.pyMetadata
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.FileFilter

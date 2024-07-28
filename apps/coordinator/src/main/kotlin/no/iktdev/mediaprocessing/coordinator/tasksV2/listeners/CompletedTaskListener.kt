@@ -10,11 +10,11 @@ import no.iktdev.eventi.database.executeOrException
 import no.iktdev.eventi.database.executeWithStatus
 import no.iktdev.eventi.database.withTransaction
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.data.*
-import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
-import no.iktdev.mediaprocessing.shared.contract.dto.SubtitleFormats
-import no.iktdev.mediaprocessing.shared.contract.reader.*
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
+import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.SubtitleFormats
+import no.iktdev.mediaprocessing.shared.common.contract.reader.*
 import no.iktdev.streamit.library.db.query.CatalogQuery
 import no.iktdev.streamit.library.db.query.GenreQuery
 import no.iktdev.streamit.library.db.query.SubtitleQuery

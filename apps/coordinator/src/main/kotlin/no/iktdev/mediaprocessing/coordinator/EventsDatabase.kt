@@ -1,10 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
-import no.iktdev.mediaprocessing.shared.common.persistance.allEvents
-import no.iktdev.mediaprocessing.shared.common.persistance.events
-import no.iktdev.mediaprocessing.shared.common.persistance.runners
-import no.iktdev.mediaprocessing.shared.common.persistance.tasks
+import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
+import no.iktdev.mediaprocessing.shared.common.database.tables.events
+import no.iktdev.mediaprocessing.shared.common.database.tables.runners
+import no.iktdev.mediaprocessing.shared.common.database.tables.tasks
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 
 class EventsDatabase() {

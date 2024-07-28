@@ -10,7 +10,7 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
-import no.iktdev.mediaprocessing.shared.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service

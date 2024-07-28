@@ -8,12 +8,12 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.converter.*
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter2
-import no.iktdev.mediaprocessing.shared.common.persistance.Status
+import no.iktdev.mediaprocessing.shared.common.database.cal.Status
 import no.iktdev.mediaprocessing.shared.common.services.TaskService
 import no.iktdev.mediaprocessing.shared.common.task.Task
-import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
-import no.iktdev.mediaprocessing.shared.contract.data.ConvertWorkPerformed
-import no.iktdev.mediaprocessing.shared.contract.data.ConvertedData
+import no.iktdev.mediaprocessing.shared.common.contract.data.ConvertData
+import no.iktdev.mediaprocessing.shared.common.contract.data.ConvertWorkPerformed
+import no.iktdev.mediaprocessing.shared.common.contract.data.ConvertedData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 

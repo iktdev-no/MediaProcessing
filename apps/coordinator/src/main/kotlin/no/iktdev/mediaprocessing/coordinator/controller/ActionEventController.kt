@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.controller
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.EventsManager
-import no.iktdev.mediaprocessing.shared.contract.dto.RequestWorkProceed
+import no.iktdev.mediaprocessing.shared.common.contract.dto.RequestWorkProceed
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

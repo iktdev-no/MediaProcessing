@@ -7,11 +7,11 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameParser
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.data.BaseInfo
-import no.iktdev.mediaprocessing.shared.contract.data.BaseInfoEvent
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.contract.data.StartEventData
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.data.BaseInfo
+import no.iktdev.mediaprocessing.shared.common.contract.data.BaseInfoEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File

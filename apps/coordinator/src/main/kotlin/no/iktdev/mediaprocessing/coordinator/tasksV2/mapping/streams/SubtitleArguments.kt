@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams
 
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleArgumentsDto
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.SubtitleStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.SubtitleArgumentsDto
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.SubtitleStream
 
 class SubtitleArguments(val subtitleStreams: List<SubtitleStream>) {
     /**

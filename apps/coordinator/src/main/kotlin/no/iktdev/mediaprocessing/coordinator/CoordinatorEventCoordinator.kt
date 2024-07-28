@@ -5,13 +5,13 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.implementations.ActiveMode
 import no.iktdev.eventi.implementations.EventCoordinator
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.contract.data.MediaProcessStartEvent
-import no.iktdev.mediaprocessing.shared.contract.data.PermitWorkCreationEvent
-import no.iktdev.mediaprocessing.shared.contract.data.StartEventData
-import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaProcessStartEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.PermitWorkCreationEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
+import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
@@ -73,15 +73,17 @@ class Coordinator(
         }
 
 
-        produceNewEvent(PermitWorkCreationEvent(
-            metadata = EventMetadata(
-                referenceId = referenceId,
-                derivedFromEventId = eventToAttachTo.eventId(),
-                status = EventStatus.Success,
-                source = getProducerName()
-            ),
-            data = message
-        ))
+        produceNewEvent(
+            no.iktdev.mediaprocessing.shared.common.contract.data.PermitWorkCreationEvent(
+                metadata = EventMetadata(
+                    referenceId = referenceId,
+                    derivedFromEventId = eventToAttachTo.eventId(),
+                    status = EventStatus.Success,
+                    source = getProducerName()
+                ),
+                data = message
+            )
+        )
     }
 
     override fun getActiveTaskMode(): ActiveMode {

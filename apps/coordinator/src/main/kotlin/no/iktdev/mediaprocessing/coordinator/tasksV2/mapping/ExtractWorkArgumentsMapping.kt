@@ -2,8 +2,8 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping
 
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.SubtitleArguments
-import no.iktdev.mediaprocessing.shared.contract.data.ExtractArgumentData
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.contract.data.ExtractArgumentData
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
 import java.io.File
 
 class ExtractWorkArgumentsMapping(

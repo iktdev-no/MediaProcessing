@@ -9,10 +9,10 @@ import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
-import no.iktdev.mediaprocessing.shared.contract.data.*
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
+import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File

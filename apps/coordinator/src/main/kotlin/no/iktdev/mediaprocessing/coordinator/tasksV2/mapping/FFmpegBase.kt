@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping
 
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioArgumentsDto
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoArgumentsDto
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioArgumentsDto
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoArgumentsDto
 
 fun toFfmpegWorkerArguments(
     videoArguments: VideoArgumentsDto?,

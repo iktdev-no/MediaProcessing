@@ -2,10 +2,10 @@ package no.iktdev.mediaprocessing.processer
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.*
-import no.iktdev.mediaprocessing.shared.common.persistance.ActiveMode
-import no.iktdev.mediaprocessing.shared.common.persistance.RunnerManager
+import no.iktdev.mediaprocessing.shared.common.database.cal.ActiveMode
+import no.iktdev.mediaprocessing.shared.common.database.cal.RunnerManager
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
-import no.iktdev.mediaprocessing.shared.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.stereotype.Service
 

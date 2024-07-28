@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.utils
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.persistance.*
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
-import no.iktdev.mediaprocessing.shared.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 
 val log = KotlinLogging.logger {}
 

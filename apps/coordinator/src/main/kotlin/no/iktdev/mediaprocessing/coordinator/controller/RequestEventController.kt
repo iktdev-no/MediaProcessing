@@ -2,9 +2,9 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.contract.dto.EventRequest
-import no.iktdev.mediaprocessing.shared.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.contract.dto.EventRequest
+import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

@@ -2,12 +2,11 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.implementations
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.contract.data.MediaProcessStartEvent
-import no.iktdev.mediaprocessing.shared.contract.data.az
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaProcessStartEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.az
 
 abstract class WorkTaskListener: CoordinatorEventListener() {
     private val log = KotlinLogging.logger {}

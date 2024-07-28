@@ -2,12 +2,11 @@ package no.iktdev.mediaprocessing.shared.common.task
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.mysql.cj.xdevapi.RowResult
-import no.iktdev.mediaprocessing.shared.common.persistance.tasks
-import no.iktdev.mediaprocessing.shared.contract.data.ConvertData
-import no.iktdev.mediaprocessing.shared.contract.data.EncodeArgumentData
-import no.iktdev.mediaprocessing.shared.contract.data.ExtractArgumentData
-import no.iktdev.mediaprocessing.shared.contract.dto.tasks.TaskData
+import no.iktdev.mediaprocessing.shared.common.database.tables.tasks
+import no.iktdev.mediaprocessing.shared.common.contract.data.ConvertData
+import no.iktdev.mediaprocessing.shared.common.contract.data.EncodeArgumentData
+import no.iktdev.mediaprocessing.shared.common.contract.data.ExtractArgumentData
+import no.iktdev.mediaprocessing.shared.common.contract.dto.tasks.TaskData
 import org.jetbrains.exposed.sql.ResultRow
 
 class TaskDoz {

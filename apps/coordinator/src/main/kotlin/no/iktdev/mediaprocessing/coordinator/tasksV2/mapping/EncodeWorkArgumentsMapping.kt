@@ -3,11 +3,11 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.AudioArguments
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.VideoArguments
-import no.iktdev.mediaprocessing.shared.contract.data.EncodeArgumentData
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.AudioStream
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.EncodingPreference
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.ParsedMediaStreams
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.VideoStream
+import no.iktdev.mediaprocessing.shared.common.contract.data.EncodeArgumentData
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioStream
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.EncodingPreference
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoStream
 import java.io.File
 
 class EncodeWorkArgumentsMapping(

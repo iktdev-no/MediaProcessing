@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.task
 
-import no.iktdev.mediaprocessing.shared.contract.dto.tasks.TaskData
+import no.iktdev.mediaprocessing.shared.common.contract.dto.tasks.TaskData
 import java.time.LocalDateTime
 
 data class Task(

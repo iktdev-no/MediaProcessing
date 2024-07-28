@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.shared.common
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.contract.ffmpeg.PreferenceDto
+import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.PreferenceDto
 
 private val log = KotlinLogging.logger {}
 class Preference {
@@ -17,7 +17,7 @@ class Preference {
                 log.info { "[Audio]: Language = " + preference.encodePreference.audio.language }
                 log.info { "[Audio]: Channels = " + preference.encodePreference.audio.channels }
                 log.info { "[Audio]: Sample rate = " + preference.encodePreference.audio.sample_rate }
-                log.info { "[Audio]: Use EAC3 for surround = " + preference.encodePreference.audio.defaultToEAC3OnSurroundDetected }
+                log.info { "[Audio]: Use EAC3 for surround = " + preference.encodePreference.audio.convertToEac3OnUnsupportedSurround }
 
                 log.info { "[Video]: Codec = " + preference.encodePreference.video.codec }
                 log.info { "[Video]: Pixel format = " + preference.encodePreference.video.pixelFormat }

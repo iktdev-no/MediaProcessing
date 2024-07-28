@@ -1,18 +1,18 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import no.iktdev.eventi.core.PersistentMessageHelper
-import no.iktdev.eventi.data.derivedFromEventId
 import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.data.toJson
 import no.iktdev.eventi.database.DataSource
 import no.iktdev.eventi.database.isCausedByDuplicateError
 import no.iktdev.eventi.database.isExposedSqlException
-import no.iktdev.mediaprocessing.shared.common.persistance.*
-import no.iktdev.mediaprocessing.shared.contract.Events
-import no.iktdev.mediaprocessing.shared.contract.EventsManagerContract
-import no.iktdev.mediaprocessing.shared.contract.data.Event
-import no.iktdev.mediaprocessing.shared.contract.fromJsonWithDeserializer
+import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
+import no.iktdev.mediaprocessing.shared.common.database.tables.events
+import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
+import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq

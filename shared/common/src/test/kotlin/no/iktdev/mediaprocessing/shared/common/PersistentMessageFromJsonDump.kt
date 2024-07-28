@@ -1,10 +1,5 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import kotlinx.serialization.json.*
-import no.iktdev.mediaprocessing.shared.common.persistance.events
-import org.json.JSONArray
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 /*
 
 class PersistentMessageFromJsonDump(events: String) {

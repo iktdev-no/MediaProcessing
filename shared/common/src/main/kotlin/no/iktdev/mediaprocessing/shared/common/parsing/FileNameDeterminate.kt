@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
-import no.iktdev.mediaprocessing.shared.contract.data.EpisodeInfo
-import no.iktdev.mediaprocessing.shared.contract.data.MediaInfo
-import no.iktdev.mediaprocessing.shared.contract.data.MovieInfo
+import no.iktdev.mediaprocessing.shared.common.contract.data.EpisodeInfo
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaInfo
+import no.iktdev.mediaprocessing.shared.common.contract.data.MovieInfo
 
 
 class FileNameDeterminate(val title: String, val sanitizedName: String, val ctype: ContentType = ContentType.UNDEFINED)  {

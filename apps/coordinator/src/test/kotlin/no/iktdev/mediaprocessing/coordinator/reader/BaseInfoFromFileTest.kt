@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.reader
 /*
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
-import no.iktdev.mediaprocessing.shared.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.BaseInfoPerformed
 import no.iktdev.mediaprocessing.shared.kafka.dto.events_result.ProcessStarted
 import no.iktdev.mediaprocessing.shared.kafka.dto.Status
