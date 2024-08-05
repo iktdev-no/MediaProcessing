@@ -1,11 +1,10 @@
 package no.iktdev.mediaprocessing.ui.explorer
 
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
-import no.iktdev.mediaprocessing.ui.UIEnv
-import no.iktdev.mediaprocessing.ui.dto.ExplorerAttributes
-import no.iktdev.mediaprocessing.ui.dto.ExplorerCursor
-import no.iktdev.mediaprocessing.ui.dto.ExplorerItem
-import no.iktdev.mediaprocessing.ui.dto.ExplorerItemType
+import no.iktdev.mediaprocessing.ui.dto.explore.ExplorerAttributes
+import no.iktdev.mediaprocessing.ui.dto.explore.ExplorerCursor
+import no.iktdev.mediaprocessing.ui.dto.explore.ExplorerItem
+import no.iktdev.mediaprocessing.ui.dto.explore.ExplorerItemType
 import java.io.File
 import java.io.FileFilter
 import java.nio.file.Files

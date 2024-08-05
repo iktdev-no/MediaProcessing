@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.ui.dto
+package no.iktdev.mediaprocessing.ui.dto.explore
 
 data class ExplorerCursor (
     val name: String,

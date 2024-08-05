@@ -8,12 +8,12 @@ import org.springframework.stereotype.Controller
 @Controller
 class EventsTableTopic(
     @Autowired private val template: SimpMessagingTemplate?,
-    @Autowired private val persistentEventsTableService: PersistentEventsTableService
-): TopicSupport() {
+    //@Autowired private val persistentEventsTableService: PersistentEventsTableService
+) {
 
     @MessageMapping("/persistent/events")
     fun readbackEvents() {
-        template?.convertAndSend("/topic/persistent/events", persistentEventsTableService.cachedEvents)
+        //template?.convertAndSend("/topic/persistent/events", persistentEventsTableService.cachedEvents)
     }
 
 }

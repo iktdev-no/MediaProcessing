@@ -3,9 +3,10 @@ import SimpleTable, { TableCellCustomizer, TablePropetyConfig } from "../feature
 import { RootState } from "../store";
 import { useEffect } from "react";
 import { useStompClient } from "react-stomp-hooks";
-import { Box, Button, useTheme } from "@mui/material";
+import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
 import IconRefresh from '@mui/icons-material/Refresh'
-
+import IconCompleted from '@mui/icons-material/Check'
+import IconWorking from '@mui/icons-material/Engineering';
 
 const columns: Array<TablePropetyConfig> = [
     { label: "Title", accessor: "givenTitle" },
@@ -53,11 +54,24 @@ export default function LaunchPage() {
                 <Box sx={{
                     display: "flex",
                 }}>
-                    <Button onClick={onRefresh} sx={{
-                        borderRadius: 5
-                    }}>
-                        <IconRefresh />
-                    </Button>
+<Button
+                        startIcon={ <IconRefresh /> }
+                        onClick={onRefresh} sx={{
+                        borderRadius: 5,
+                        textTransform: 'none'
+                    }}>Refresh</Button >
+                    <Button
+                        startIcon={ <IconCompleted /> }
+                        onClick={onRefresh} sx={{
+                        borderRadius: 5,
+                        textTransform: 'none'
+                    }}>Completed</Button >
+                    <Button
+                        startIcon={ <IconWorking /> }
+                        onClick={onRefresh} sx={{
+                        borderRadius: 5,
+                        textTransform: 'none'
+                    }}>Working</Button >
                 </Box>
             </Box>
             <Box sx={{

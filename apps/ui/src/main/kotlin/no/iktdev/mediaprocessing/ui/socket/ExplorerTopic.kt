@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.ui.socket
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.contract.dto.EventRequest
+import no.iktdev.mediaprocessing.shared.common.contract.dto.EventRequest
 import no.iktdev.mediaprocessing.ui.UIEnv
 import no.iktdev.mediaprocessing.ui.explorer.ExplorerCore
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ class ExplorerTopic(
     @Autowired private val template: SimpMessagingTemplate?,
     @Autowired private val coordinatorTemplate: RestTemplate,
     val explorer: ExplorerCore = ExplorerCore()
-): TopicSupport() {
+) {
 
     @MessageMapping("/explorer/home")
     fun goHome() {

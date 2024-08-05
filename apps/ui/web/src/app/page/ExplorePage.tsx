@@ -58,6 +58,7 @@ function getSegmentedNaviagatablePath(navigateTo: (path: string | null) => void,
   console.log(path);
   const parts: Array<string> = path?.split(/\\|\//).map((value: string, index: number) => value.replaceAll(":", "")) ?? [];
   const segments = parts.map((name: string, index: number) => {
+    console.log(name)
     return (
       <Box key={index} sx={{
         display: "flex",
@@ -65,7 +66,8 @@ function getSegmentedNaviagatablePath(navigateTo: (path: string | null) => void,
         alignItems: "center"
       }}>
         <Button sx={{
-          borderRadius: 5
+          borderRadius: 5,
+          textTransform: 'none'
         }} onClick={() => navigateTo(getPartFor(path!, index))}>
           <Typography>{name}</Typography>
         </Button>

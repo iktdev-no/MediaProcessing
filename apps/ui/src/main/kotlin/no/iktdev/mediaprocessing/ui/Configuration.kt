@@ -2,9 +2,6 @@ package no.iktdev.mediaprocessing.ui
 
 import no.iktdev.mediaprocessing.shared.common.Defaults
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
-import no.iktdev.mediaprocessing.shared.kafka.core.CoordinatorProducer
-import no.iktdev.mediaprocessing.shared.kafka.core.DefaultMessageListener
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaImplementation
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
@@ -67,8 +64,3 @@ class SocketImplemented: SocketImplementation() {
 
 @Configuration
 class DefaultConfiguration: Defaults()
-
-@Configuration
-@Import(CoordinatorProducer::class, DefaultMessageListener::class)
-class KafkaLocalInit: KafkaImplementation() {
-}

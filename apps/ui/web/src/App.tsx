@@ -14,6 +14,7 @@ import { ThemeProvider } from '@mui/material';
 import theme from './theme';
 import { simpleEventsUpdate } from './app/store/kafka-items-flat-slice';
 import { EventDataObject, SimpleEventDataObject } from './types';
+import EventsChainPage from './app/page/EventsChainPage';
 
 function App() {
   const client = useStompClient();
@@ -62,6 +63,7 @@ function App() {
         <BrowserRouter>
             <Routes>
               <Route path='/files' element={<ExplorePage />} />
+              <Route path='/events' element={<EventsChainPage />} />
               <Route path='/' element={<LaunchPage />} />
             </Routes>
           <Footer />

@@ -1,12 +1,12 @@
 package no.iktdev.mediaprocessing.ui.dto
 
-import no.iktdev.mediaprocessing.shared.kafka.core.KafkaEvents
+import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class EventSummary(
     val referenceId: String,
     val baseName: String? = null,
     val collection: String? = null,
-    val events: List<KafkaEvents> = emptyList(),
+    val events: List<Events> = emptyList(),
     val status: SummaryState = SummaryState.Started,
     val activeEvens: Map<String, EventSummarySubItem>
 )

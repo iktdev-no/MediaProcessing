@@ -27,7 +27,7 @@ object EventToClazzTable {
         Events.EventMediaReadStreamPerformed to MediaFileStreamsReadEvent::class.java,
         Events.EventMediaMetadataSearchPerformed to MediaMetadataReceivedEvent::class.java,
         Events.EventMediaReadOutNameAndType to MediaOutInformationConstructedEvent::class.java,
-        Events.EventMediaWorkProceedPermitted to no.iktdev.mediaprocessing.shared.common.contract.data.PermitWorkCreationEvent::class.java,
+        Events.EventMediaWorkProceedPermitted to PermitWorkCreationEvent::class.java,
         Events.EventMediaProcessCompleted to MediaProcessCompletedEvent::class.java
     )
 

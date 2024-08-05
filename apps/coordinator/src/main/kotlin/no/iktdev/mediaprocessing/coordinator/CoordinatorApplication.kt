@@ -7,6 +7,7 @@ import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.*
 import no.iktdev.eventi.database.MySqlDataSource
+import no.iktdev.mediaprocessing.shared.common.database.cal.EventsManager
 import no.iktdev.mediaprocessing.shared.common.database.cal.RunnerManager
 import no.iktdev.mediaprocessing.shared.common.database.cal.TasksManager
 import no.iktdev.streamit.library.db.tables.*

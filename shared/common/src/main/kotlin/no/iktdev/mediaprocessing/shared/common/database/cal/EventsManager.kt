@@ -8,19 +8,18 @@ import no.iktdev.eventi.data.toJson
 import no.iktdev.eventi.database.DataSource
 import no.iktdev.eventi.database.isCausedByDuplicateError
 import no.iktdev.eventi.database.isExposedSqlException
+import no.iktdev.eventi.implementations.EventsManagerImpl
 import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
 import no.iktdev.mediaprocessing.shared.common.database.tables.events
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
-open class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) {
+class EventsManager(dataSource: DataSource) : EventsManagerImpl<Event>(dataSource) {
     val log = KotlinLogging.logger {}
-
 
     override fun storeEvent(event: Event): Boolean {
 
@@ -114,7 +113,7 @@ open class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSou
                 .groupBy { it[events.referenceId] }
                 .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }
         } ?: emptyList()
-        return events.filter { it.none { it.eventType == Events.EventMediaProcessCompleted } }
+        return events
     }
 
 

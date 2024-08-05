@@ -25,6 +25,7 @@
     "react-scripts": "5.0.1",
     "react-stomp": "^5.1.0",
     "react-stomp-hooks": "^2.1.0",
+    "react-tree-graph": "^8.0.2",
     "react-use-websocket": "^4.4.0",
     "redux": "^4.2.1",
     "sockjs-client": "^1.6.1",

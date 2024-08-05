@@ -185,7 +185,6 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     }
 }
 
-// TODO: Ikke implementert enda
 enum class ActiveMode {
     Active,
     Passive

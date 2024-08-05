@@ -44,9 +44,8 @@ dependencies {
     implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-    implementation(project(mapOf("path" to ":shared")))
+    implementation(project(mapOf("path" to ":shared:eventi")))
     implementation(project(mapOf("path" to ":shared:common")))
-    implementation(project(mapOf("path" to ":shared:contract")))
 
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))

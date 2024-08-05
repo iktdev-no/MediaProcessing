@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
@@ -14,7 +15,6 @@
             <option value="$PROJECT_DIR$/apps/ui" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/common" />
-            <option value="$PROJECT_DIR$/shared/contract" />
             <option value="$PROJECT_DIR$/shared/eventi" />
           </set>
         </option>
