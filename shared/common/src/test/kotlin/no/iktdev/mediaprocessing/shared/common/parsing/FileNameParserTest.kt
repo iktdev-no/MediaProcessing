@@ -71,16 +71,23 @@ class FileNameParserTest {
 
     @Test
     fun findSearchableTitle() {
-        val input = "[FANCY] Urusei Yatsura (2022) - 36 [1080p HEVC]"
+        val input = "[FANCY] Urusei Baka (2022) - 36 [1080p HEVC]"
         val result = FileNameParser(input).guessSearchableTitle()
-        assertThat(result.first()).isEqualTo("Urusei Yatsura (2022)")
+        assertThat(result.first()).isEqualTo("Urusei Baka (2022)")
     }
 
     @Test
     fun findSearchableTitle2() {
-        val input = "[FANCY] Urusei Yatsura - 36 [1080p HEVC]"
+        val input = "[FANCY] Urusei Baka - 36 [1080p HEVC]"
         val result = FileNameParser(input).guessSearchableTitle()
-        assertThat(result.first()).isEqualTo("Urusei Yatsura")
+        assertThat(result.first()).isEqualTo("Urusei Baka")
+    }
+
+    @Test
+    fun assertTitleFails() {
+        val input = "S01E03-How to unlucky i am"
+        val result = FileNameParser(input).guessDesiredTitle()
+        assertThat(result).isEmpty()
     }
 
 }

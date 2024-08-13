@@ -56,7 +56,11 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
             val fileName = File(started.file).nameWithoutExtension
             val fileNameParser = FileNameParser(fileName)
             BaseInfo(
-                title = fileNameParser.guessDesiredTitle(),
+                title = fileNameParser.guessDesiredTitle().also {
+                                                                if (it.isBlank()) {
+                                                                    throw RuntimeException("No title found!")
+                                                                }
+                },
                 sanitizedName = fileNameParser.guessDesiredFileName(),
                 searchTitles = fileNameParser.guessSearchableTitle()
             )
