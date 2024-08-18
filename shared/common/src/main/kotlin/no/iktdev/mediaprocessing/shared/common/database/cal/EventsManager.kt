@@ -12,13 +12,14 @@ import no.iktdev.eventi.implementations.EventsManagerImpl
 import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
 import no.iktdev.mediaprocessing.shared.common.database.tables.events
 import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
-class EventsManager(dataSource: DataSource) : EventsManagerImpl<Event>(dataSource) {
+class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) {
     val log = KotlinLogging.logger {}
 
     override fun storeEvent(event: Event): Boolean {

@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.MediaProcessStartEv
 import no.iktdev.mediaprocessing.shared.common.contract.data.PermitWorkCreationEvent
 import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
 import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.database.cal.EventsManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
