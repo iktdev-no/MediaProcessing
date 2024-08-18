@@ -45,21 +45,23 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
     abstract fun getActiveTaskMode(): ActiveMode
 
-
+    private var activePolls: Int = 0
+    data class PollStats(val active: Int, val total: Int)
+    fun getActivePolls(): PollStats {
+        return PollStats(active = activePolls, total = referencePool.values.size)
+    }
 
     private fun onEventGroupsReceived(eventGroup: List<List<T>>) {
         val egRefIds = eventGroup.map { it.first().referenceId() }
         val orphanedReferences = referencePool.filter { !it.value.isActive }.filter { id -> id.key !in egRefIds }.map { it.key }
         orphanedReferences.forEach { id -> referencePool.remove(id) }
 
-        val activePolls = referencePool.values.filter { it.isActive }.size
+        activePolls = referencePool.values.filter { it.isActive }.size
         if (orphanedReferences.isNotEmpty() && referencePool.isEmpty()) {
             log.info { "Last active references removed from pull pool, " }
         }
 
-        if (eventGroup.isNotEmpty()) {
-            log.info { "Active polls $activePolls/${referencePool.values.size}" }
-        } else {
+        if (eventGroup.isEmpty()) {
             return
         }
 
