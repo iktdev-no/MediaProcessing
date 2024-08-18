@@ -1,10 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
-import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
-import no.iktdev.mediaprocessing.shared.common.database.tables.events
-import no.iktdev.mediaprocessing.shared.common.database.tables.runners
-import no.iktdev.mediaprocessing.shared.common.database.tables.tasks
+import no.iktdev.mediaprocessing.shared.common.database.tables.*
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 
 class EventsDatabase() {
@@ -13,7 +10,8 @@ class EventsDatabase() {
         events, // For kafka
         allEvents,
         tasks,
-        runners
+        runners,
+        processed
     )
 
     init {
