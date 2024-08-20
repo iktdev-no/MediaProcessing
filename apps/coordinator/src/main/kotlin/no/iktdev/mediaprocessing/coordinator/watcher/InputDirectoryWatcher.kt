@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.watcher
 import dev.vishna.watchservice.KWatchEvent.Kind.Deleted
 import dev.vishna.watchservice.KWatchEvent.Kind.Initialized
 import dev.vishna.watchservice.asWatchChannel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -51,6 +52,7 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     }
 
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun watchFiles() {
         log.info { "Starting Watcher" }
         watcherChannel.consumeEach {

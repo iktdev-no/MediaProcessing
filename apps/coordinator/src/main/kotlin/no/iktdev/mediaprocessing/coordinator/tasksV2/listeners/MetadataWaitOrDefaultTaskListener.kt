@@ -63,12 +63,10 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
             return
         }
 
-        if (hasPollerForMetadataEvent && hasMetadataSearched) {
+        if (hasMetadataSearched) {
             waitingProcessesForMeta.remove(incomingEvent.metadata().referenceId)
             return
-        }
-
-        if (!hasMetadataSearched && !hasPollerForMetadataEvent) {
+        } else if (!hasPollerForMetadataEvent) {
             val consumedIncoming = incomingEvent.consume()
             if (consumedIncoming == null) {
                 log.error { "Event is null and should not be available nor provided! ${WGson.gson.toJson(incomingEvent.metadata())}" }

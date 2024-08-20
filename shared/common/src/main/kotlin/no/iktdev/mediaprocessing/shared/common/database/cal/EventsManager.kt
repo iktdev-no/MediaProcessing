@@ -8,6 +8,7 @@ import no.iktdev.eventi.data.toJson
 import no.iktdev.eventi.database.DataSource
 import no.iktdev.eventi.database.isCausedByDuplicateError
 import no.iktdev.eventi.database.isExposedSqlException
+import no.iktdev.eventi.database.withDirtyRead
 import no.iktdev.eventi.implementations.EventsManagerImpl
 import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
 import no.iktdev.mediaprocessing.shared.common.database.tables.events
@@ -90,10 +91,22 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
         return event in exemptedFromSingleEvent
     }
 
+     override fun getAvailableReferenceIds(): List<String> {
+        return withDirtyRead(dataSource.database) {
+            val completedEvents = events
+                .slice(events.referenceId)
+                .select { events.event eq Events.EventMediaProcessCompleted.event }
 
+            events
+                .slice(events.referenceId)
+                .select { events.referenceId notInSubQuery completedEvents }
+                .withDistinct()
+                .map { it[events.referenceId] } ?: emptyList()
+        } ?: emptyList()
+    }
 
     override fun readAvailableEvents(): List<List<Event>> {
-        return no.iktdev.eventi.database.withTransaction(dataSource.database) {
+        return withDirtyRead(dataSource.database) {
             events.selectAll()
                 .groupBy { it[events.referenceId] }
                 .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }.filter { it.none { e -> e.eventType == Events.EventMediaProcessCompleted } }
@@ -101,7 +114,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
     }
 
     override fun readAvailableEventsFor(referenceId: String): List<Event> {
-        val events = no.iktdev.eventi.database.withTransaction(dataSource.database) {
+        val events = withDirtyRead(dataSource.database) {
             events.select { events.referenceId eq referenceId }
                 .mapNotNull { it.toEvent() }
         } ?: emptyList()

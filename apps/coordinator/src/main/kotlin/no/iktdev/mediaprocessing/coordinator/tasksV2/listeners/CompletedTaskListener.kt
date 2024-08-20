@@ -172,7 +172,7 @@ class CompletedTaskListener: CoordinatorEventListener() {
         val viableEvents = events.filter { it.isSuccessful() }
 
 
-        if (!req1(started, viableEvents)) {
+        if (!req1(started, events)) {
             //log.info { "${this::class.java.simpleName} Failed Req1" }
             return false
         }
@@ -442,6 +442,9 @@ class CompletedTaskListener: CoordinatorEventListener() {
                 )
             ))
         }
+
+
+
         active = false
     }
 

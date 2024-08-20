@@ -53,6 +53,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
     private fun onEventGroupsReceived(eventGroup: List<List<T>>) {
         val egRefIds = eventGroup.map { it.first().referenceId() }
+
         val orphanedReferences = referencePool.filter { !it.value.isActive }.filter { id -> id.key !in egRefIds }.map { it.key }
         orphanedReferences.forEach { id -> referencePool.remove(id) }
 
@@ -80,6 +81,28 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
         }
     }
 
+    private fun onEventCollectionReceived(referenceId: String, events: List<T>) {
+        val orphanedReferences = referencePool.filter { !it.value.isActive }.filter { id -> id.key !in referenceId }.map { it.key }
+        orphanedReferences.forEach { id -> referencePool.remove(id) }
+
+        activePolls = referencePool.values.filter { it.isActive }.size
+        if (orphanedReferences.isNotEmpty() && referencePool.isEmpty()) {
+            log.info { "Last active references removed from pull pool, " }
+        }
+
+        val isAvailable = if (referenceId in referencePool.keys) {
+            referencePool[referenceId]?.isActive != true
+        } else true
+
+        if (isAvailable) {
+            referencePool[referenceId] = coroutine.async {
+                onEventsReceived(events)
+            }
+        }
+
+    }
+
+
     private suspend fun onEventsReceived(events: List<T>): Boolean = coroutineScope {
         val listeners = getListeners()
         events.forEach { event ->
@@ -104,9 +127,13 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
             while (taskMode == ActiveMode.Active) {
                 if (referencePoolIsReadyForEvents()) {
                     log.debug { "New pull on database" }
-                    val events = eventManager.readAvailableEvents()
-                    onEventGroupsReceived(events)
-                    if (events.isNotEmpty()) {
+                    val referenceIdsAvailable = eventManager.getAvailableReferenceIds()
+                    for (referenceId in referenceIdsAvailable) {
+                        val events = eventManager.readAvailableEventsFor(referenceId)
+                        onEventCollectionReceived(referenceId, events)
+                    }
+
+                    if (referenceIdsAvailable.isNotEmpty()) {
                         if (pullDelay.get() != fastPullDelay.get()) {
                             log.info { "Available events found, switching to fast pull @ Delay -> ${fastPullDelay.get()}" }
                         }

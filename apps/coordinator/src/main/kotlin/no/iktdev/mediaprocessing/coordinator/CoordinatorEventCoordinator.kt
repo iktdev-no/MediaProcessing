@@ -75,7 +75,7 @@ class Coordinator(
 
 
         produceNewEvent(
-            no.iktdev.mediaprocessing.shared.common.contract.data.PermitWorkCreationEvent(
+            PermitWorkCreationEvent(
                 metadata = EventMetadata(
                     referenceId = referenceId,
                     derivedFromEventId = eventToAttachTo.eventId(),

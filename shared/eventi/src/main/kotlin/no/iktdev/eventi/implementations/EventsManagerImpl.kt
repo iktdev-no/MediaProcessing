@@ -7,6 +7,8 @@ import no.iktdev.eventi.database.DataSource
  * Interacts with the database, needs to be within the Coordinator
  */
 abstract class EventsManagerImpl<T: EventImpl>(val dataSource: DataSource) {
+
+    abstract fun getAvailableReferenceIds(): List<String>
     abstract fun readAvailableEvents(): List<List<T>>
     abstract fun readAvailableEventsFor(referenceId: String): List<T>
 
