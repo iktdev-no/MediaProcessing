@@ -81,13 +81,17 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
         }
     }
 
+    private var wasActiveNotify: Boolean = true
     private fun onEventCollectionReceived(referenceId: String, events: List<T>) {
         val orphanedReferences = referencePool.filter { !it.value.isActive }.filter { id -> id.key !in referenceId }.map { it.key }
         orphanedReferences.forEach { id -> referencePool.remove(id) }
 
         activePolls = referencePool.values.filter { it.isActive }.size
-        if (orphanedReferences.isNotEmpty() && referencePool.isEmpty()) {
-            log.info { "Last active references removed from pull pool, " }
+        if (orphanedReferences.isNotEmpty() && referencePool.isEmpty() && wasActiveNotify) {
+            log.info { "Last active references removed from pull pool, $referenceId" }
+            wasActiveNotify = false
+        } else {
+            wasActiveNotify = true
         }
 
         val isAvailable = if (referenceId in referencePool.keys) {
@@ -122,12 +126,19 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     }
 
     private var newEventsProducedOnReferenceId: AtomicReference<List<String>> = AtomicReference(emptyList())
+    var cachedReferenceList: MutableList<String> = mutableListOf()
     private fun pullForEvents() {
         coroutine.launch {
             while (taskMode == ActiveMode.Active) {
                 if (referencePoolIsReadyForEvents()) {
                     log.debug { "New pull on database" }
                     val referenceIdsAvailable = eventManager.getAvailableReferenceIds()
+
+                    val newReferenceIds = cachedReferenceList.subtract(referenceIdsAvailable.toSet())
+                    cachedReferenceList = referenceIdsAvailable.toMutableList()
+
+                    log.info { "New referenceIds found,\n ${newReferenceIds.joinToString("\n")}" }
+
                     for (referenceId in referenceIdsAvailable) {
                         val events = eventManager.readAvailableEventsFor(referenceId)
                         onEventCollectionReceived(referenceId, events)
