@@ -137,7 +137,9 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     val newReferenceIds = cachedReferenceList.subtract(referenceIdsAvailable.toSet())
                     cachedReferenceList = referenceIdsAvailable.toMutableList()
 
-                    log.info { "New referenceIds found,\n ${newReferenceIds.joinToString("\n")}" }
+                    if (newReferenceIds.isNotEmpty()) {
+                        log.info { "New referenceIds found,\n ${newReferenceIds.joinToString("\n")}" }
+                    }
 
                     for (referenceId in referenceIdsAvailable) {
                         val events = eventManager.readAvailableEventsFor(referenceId)
