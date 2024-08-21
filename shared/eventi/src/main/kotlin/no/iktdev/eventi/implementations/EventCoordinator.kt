@@ -87,12 +87,6 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
         orphanedReferences.forEach { id -> referencePool.remove(id) }
 
         activePolls = referencePool.values.filter { it.isActive }.size
-        if (orphanedReferences.isNotEmpty() && referencePool.isEmpty() && wasActiveNotify) {
-            log.info { "Last active references removed from pull pool, $referenceId" }
-            wasActiveNotify = false
-        } else {
-            wasActiveNotify = true
-        }
 
         val isAvailable = if (referenceId in referencePool.keys) {
             referencePool[referenceId]?.isActive != true
@@ -134,11 +128,11 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     log.debug { "New pull on database" }
                     val referenceIdsAvailable = eventManager.getAvailableReferenceIds()
 
-                    val newReferenceIds = cachedReferenceList.subtract(referenceIdsAvailable.toSet())
+                    val newReferenceIds = referenceIdsAvailable.subtract(cachedReferenceList.toSet())
                     cachedReferenceList = referenceIdsAvailable.toMutableList()
 
                     if (newReferenceIds.isNotEmpty()) {
-                        log.info { "New referenceIds found,\n ${newReferenceIds.joinToString("\n")}" }
+                        log.info { "New referenceIds found:\n\t -> ${newReferenceIds.joinToString("\n\t -> ")}" }
                     }
 
                     for (referenceId in referenceIdsAvailable) {
