@@ -186,10 +186,7 @@ Producing message
                 
             except mysql.connector.Error as err:
                 logger.error("Database error: %s", err)
-            finally:
-                if self.connection:
-                    self.connection.close()
-                    self.connection = None
+                
             # Introduce a small sleep to reduce CPU usage
             time.sleep(2)
         if (self.shutdown.is_set()):
