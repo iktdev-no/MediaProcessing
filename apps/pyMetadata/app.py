@@ -36,12 +36,25 @@ events_server_database_name = os.environ.get("DATABASE_NAME_E") or "eventsV3" # 
 events_server_username = os.environ.get("DATABASE_USERNAME") or "root"
 events_server_password = os.environ.get("DATABASE_PASSWORD") or "shFZ27eL2x2NoxyEDBMfDWkvFO"  #"root" // default password
 
+log_level = os.environ.get("LOG_LEVEL") or None
+configured_level = logging.INFO
+if (log_level != None):
+    _log_level = log_level.lower()    
+    if (_log_level.startswith("d")):
+        configured_level = logging.DEBUG
+    elif (_log_level.startswith("e")):
+        configured_level = logging.ERROR
+    elif (_log_level.startswith("w")):
+        configured_level = logging.WARNING
+    else:
+        configured_level = logging.INFO
+    
 
 
 
 # Konfigurer logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=configured_level,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout)
@@ -135,9 +148,11 @@ class EventsPullerThread(threading.Thread):
                 if (self.__connect_to_datasource() == False):
                     logger.info("Waiting 5 seconds before retrying")
                     time.sleep(5)  # Wait 5 seconds before retrying
-
+                else:
+                    logging.debug("A successful connection has been made!")
 
             try:
+                logging.debug("Looking for new available events")
                 rows = self.getEventsAvailable(connection=self.connection)
                 for row in rows:
                     if (row is not None):
@@ -188,11 +203,11 @@ Producing message
                 logger.error("Database error: %s", err)
                 
             # Introduce a small sleep to reduce CPU usage
+            logging.debug("Delaying for 2s")
             time.sleep(2)
         if (self.shutdown.is_set()):
             logger.info("Shutdown is set..")
-
-
+        logging.debug("End of puller function..")
 
 
     def stop(self):
