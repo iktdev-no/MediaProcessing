@@ -50,6 +50,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class EventsPullerThread(threading.Thread):
+    
+    connection: PooledMySQLConnection | MySQLConnectionAbstract | None = None
+    
     def __init__(self):
         super().__init__()
         self.shutdown = threading.Event()
