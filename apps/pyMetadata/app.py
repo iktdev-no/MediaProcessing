@@ -107,7 +107,7 @@ class EventsPullerThread(threading.Thread):
                 user=events_server_username,
                 password=events_server_password
             )
-            if self.connection.is_connected():
+            if myConnection.is_connected():
                 logging.info(f"Successfully connected to {events_server_database_name} at {events_server_address}:{events_server_port}")
                 self.connection = myConnection
                 return True
@@ -115,6 +115,7 @@ class EventsPullerThread(threading.Thread):
                 self.connection = None
         except Exception as e:
             logging.error(f"Error while connecting to database: {e}")
+            logging.exception(e)
             self.connection = None
         return False
 
