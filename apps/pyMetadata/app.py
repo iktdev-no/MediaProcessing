@@ -98,9 +98,9 @@ class EventsPullerThread(threading.Thread):
             logger.error("Error inserting into database: %s", err) 
             return False           
 
-    def __connect_to_datasource(self):
+    def __connect_to_datasource(self) -> bool:
         try:
-            self.connection = mysql.connector.connect(
+            myConnection = mysql.connector.connect(
                 host=events_server_address,
                 port=events_server_port,
                 database=events_server_database_name,
@@ -109,26 +109,31 @@ class EventsPullerThread(threading.Thread):
             )
             if self.connection.is_connected():
                 logging.info(f"Successfully connected to {events_server_database_name} at {events_server_address}:{events_server_port}")
+                self.connection = myConnection
+                return True
+            else:
+                self.connection = None
         except Exception as e:
             logging.error(f"Error while connecting to database: {e}")
             self.connection = None
+        return False
+
+    def __has_connection_to_database(self) -> bool:
+        if (self.connection == None or self.connection.is_connected() == False):
+            return False
+        else:
+            return True
 
     def run(self) -> None:
         logger.info(f"Using {events_server_address}:{events_server_port} on table: {events_server_database_name} with user: {events_server_username}")
         while not self.shutdown.is_set():
             producedMessage: bool = False
 
-            while not self.shutdown.is_set():
-                if (self.connection == None or not self.connection.is_connected()):
-                    logging.info("Attempting to reconnect to the database...")
-                    self.__connect_to_datasource()
-
-                    if self.connection is None:  # Connection failed, wait and retry
-                        time.sleep(5)  # Wait 5 seconds before retrying
-                        continue  # Go back to the start of the connection loop
-                else:
-                # If connection is successful, exit the connection loop and proceed
-                    break
+            while not self.shutdown.is_set() and self.__has_connection_to_database() != True:
+                logging.info("Attempting to reconnect to the database...")
+                if (self.__connect_to_datasource() == False):
+                    logger.info("Waiting 5 seconds before retrying")
+                    time.sleep(5)  # Wait 5 seconds before retrying
 
 
             try:
