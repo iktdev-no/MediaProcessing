@@ -111,12 +111,12 @@ class EventsPullerThread(threading.Thread):
             self.connection = None
 
     def run(self) -> None:
-        logger.info(f"Using {events_server_address}:{events_server_port} on table: {events_server_database_name}")
+        logger.info(f"Using {events_server_address}:{events_server_port} on table: {events_server_database_name} with user: {events_server_username}")
         while not self.shutdown.is_set():
             producedMessage: bool = False
 
             while not self.shutdown.is_set():
-                if self.connection is None or not self.connection.is_connected():
+                if (self.connection == None or not self.connection.is_connected()):
                     logging.info("Attempting to reconnect to the database...")
                     self.__connect_to_datasource()
 
