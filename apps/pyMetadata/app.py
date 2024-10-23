@@ -61,7 +61,15 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-logger.info(f"Log level set to {configured_level}")
+
+if (configured_level == logging.DEBUG):
+    logger.info("Logger configured with DEBUG")
+elif (configured_level == logging.ERROR):
+    logger.info("Logger configured with ERROR")
+elif (configured_level == logging.WARNING):
+    logger.info("Logger configured with WARNING")
+else:
+    logger.info("Logger configured with INFO")
 
 class EventsPullerThread(threading.Thread):
     
