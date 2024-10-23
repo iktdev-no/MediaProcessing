@@ -61,6 +61,7 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+logger.info(f"Log level set to {configured_level}")
 
 class EventsPullerThread(threading.Thread):
     
@@ -154,6 +155,8 @@ class EventsPullerThread(threading.Thread):
             try:
                 logging.debug("Looking for new available events")
                 rows = self.getEventsAvailable(connection=self.connection)
+                if (len(rows) == 0):
+                    logger.debug("No events found..")
                 for row in rows:
                     if (row is not None):
                         try:
