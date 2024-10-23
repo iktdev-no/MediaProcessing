@@ -35,10 +35,10 @@ events_server_port  = os.environ.get("DATABASE_PORT") or "3306"
 events_server_database_name = os.environ.get("DATABASE_NAME_E") or "eventsV3" # "events"
 events_server_username = os.environ.get("DATABASE_USERNAME") or "root"
 events_server_password = os.environ.get("DATABASE_PASSWORD") or "shFZ27eL2x2NoxyEDBMfDWkvFO"  #"root" // default password
-
 log_level = os.environ.get("LOG_LEVEL") or None
+
 configured_level = logging.INFO
-if (log_level != None):
+if (log_level is not None):
     _log_level = log_level.lower()    
     if (_log_level.startswith("d")):
         configured_level = logging.DEBUG
@@ -46,8 +46,6 @@ if (log_level != None):
         configured_level = logging.ERROR
     elif (_log_level.startswith("w")):
         configured_level = logging.WARNING
-    else:
-        configured_level = logging.INFO
     
 
 

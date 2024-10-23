@@ -20,14 +20,39 @@ from sources.imdb import Imdb
 from sources.mal import Mal
 
 
+log_level = os.environ.get("LOG_LEVEL") or None
+
+configured_level = logging.INFO
+if (log_level is not None):
+    _log_level = log_level.lower()    
+    if (_log_level.startswith("d")):
+        configured_level = logging.DEBUG
+    elif (_log_level.startswith("e")):
+        configured_level = logging.ERROR
+    elif (_log_level.startswith("w")):
+        configured_level = logging.WARNING
+    
+
+
+
+# Konfigurer logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=configured_level,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
+
+if (configured_level == logging.DEBUG):
+    logger.info("Logger configured with DEBUG")
+elif (configured_level == logging.ERROR):
+    logger.info("Logger configured with ERROR")
+elif (configured_level == logging.WARNING):
+    logger.info("Logger configured with WARNING")
+else:
+    logger.info("Logger configured with INFO")
 
 
 class DryRun():
