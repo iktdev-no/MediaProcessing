@@ -166,6 +166,7 @@ class EventsPullerThread(threading.Thread):
                 else:
                     logging.debug("A successful connection has been made!")
 
+            event: MediaEvent | None = None
             try:
                 rows = self.getEventsAvailable(connection=self.connection)
                 if (len(rows) == 0):
@@ -183,7 +184,7 @@ Found message
 ============================================================================\n"""
                             logger.info(logMessage)
                             
-                            event: MediaEvent = json_to_media_event(row["data"])
+                            event = json_to_media_event(row["data"])
                             producedEvent = asyncio.run(MetadataEventHandler(event).run())
 
                             producedMessage = f"""
@@ -201,20 +202,23 @@ Producing message
                         except Exception as e:
                             """Produce failure here"""
                             logger.exception(e)
-                            producedEvent = MediaEvent(
-                                metadata = EventMetadata(
-                                    referenceId=event.metadata.referenceId,
-                                    eventId=str(uuid.uuid4()),
-                                    derivedFromEventId=event.metadata.eventId,
-                                    status= "Failed",
-                                    created= datetime.now().isoformat(),
-                                    source="metadataApp"
-                                ),
-                                data=None,
-                                eventType="EventMediaMetadataSearchPerformed"
-                            )
-                            self.storeProducedEvent(connection=self.connection, event=producedEvent)
-                
+                            try:
+                                producedEvent = MediaEvent(
+                                    metadata = EventMetadata(
+                                        referenceId=event.metadata.referenceId,
+                                        eventId=str(uuid.uuid4()),
+                                        derivedFromEventId=event.metadata.eventId,
+                                        status= "Failed",
+                                        created= datetime.now().isoformat(),
+                                        source="metadataApp"
+                                    ),
+                                    data=None,
+                                    eventType="EventMediaMetadataSearchPerformed"
+                                )
+                                self.storeProducedEvent(connection=self.connection, event=producedEvent)
+                            except Exception as iex:
+                                logger.error("Failed to push error to database..")
+
             except mysql.connector.Error as err:
                 logger.error("Database error: %s", err)
                 
