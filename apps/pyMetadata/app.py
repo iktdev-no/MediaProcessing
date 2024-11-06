@@ -9,10 +9,10 @@ import json
 import time
 from fuzzywuzzy import fuzz
 import mysql.connector
+import mysql.connector.cursor
 from datetime import datetime
 import asyncio
 
-import mysql.connector.cursor
 
 from algo.AdvancedMatcher import AdvancedMatcher
 from algo.SimpleMatcher import SimpleMatcher
@@ -38,6 +38,7 @@ events_server_password = os.environ.get("DATABASE_PASSWORD") or "shFZ27eL2x2Noxy
 log_level = os.environ.get("LOG_LEVEL") or None
 
 configured_level = logging.INFO
+
 if (log_level is not None):
     _log_level = log_level.lower()    
     if (_log_level.startswith("d")):
@@ -78,6 +79,7 @@ class EventsPullerThread(threading.Thread):
         self.shutdown = threading.Event()
     
     def getEventsAvailable(self, connection: PooledMySQLConnection | MySQLConnectionAbstract) -> List[MySqlRowType]:
+        logging.debug("Looking for new available events")
         cursor = connection.cursor(dictionary=True)
         cursor.execute("""
                             SELECT *
@@ -143,6 +145,12 @@ class EventsPullerThread(threading.Thread):
         if (self.connection == None or self.connection.is_connected() == False):
             return False
         else:
+            try:
+                self.connection.ping(reconnect=True, attempts=5, delay=5)
+            except Exception as e:
+                logging.warning("Incorrect state for connection! Ping yielded no connection!")
+                logging.exception(e)
+                return False
             return True
 
     def run(self) -> None:
@@ -159,7 +167,6 @@ class EventsPullerThread(threading.Thread):
                     logging.debug("A successful connection has been made!")
 
             try:
-                logging.debug("Looking for new available events")
                 rows = self.getEventsAvailable(connection=self.connection)
                 if (len(rows) == 0):
                     logger.debug("No events found..")
@@ -212,7 +219,6 @@ Producing message
                 logger.error("Database error: %s", err)
                 
             # Introduce a small sleep to reduce CPU usage
-            logging.debug("Delaying for 2s")
             time.sleep(2)
         if (self.shutdown.is_set()):
             logger.info("Shutdown is set..")
