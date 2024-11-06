@@ -166,12 +166,12 @@ class EventsPullerThread(threading.Thread):
                 else:
                     logging.debug("A successful connection has been made!")
 
-            event: MediaEvent | None = None
             try:
                 rows = self.getEventsAvailable(connection=self.connection)
                 if (len(rows) == 0):
                     logger.debug("No events found..")
                 for row in rows:
+                    event: MediaEvent | None = None
                     if (row is not None):
                         try:
                             referenceId = row["referenceId"]
