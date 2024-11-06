@@ -23,7 +23,7 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-val metadataTimeoutMinutes: Int = System.getenv("METADATA_TIMEOUT")?.toIntOrNull() ?: 10
+val metadataTimeoutMinutes: Int = System.getenv("METADATA_TIMEOUT")?.toIntOrNull() ?: 0
 
 
 @Service
@@ -55,6 +55,9 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
      * This one gets special treatment, since it will only produce a timeout it does not need to use the incoming event
      */
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
+        if (metadataTimeoutMinutes <= 0) {
+            return
+        }
         val hasReadBaseInfo = events.any { it.eventType == Events.EventMediaReadBaseInfoPerformed && it.isSuccessful() }
         val hasMetadataSearched = events.any { it.eventType == Events.EventMediaMetadataSearchPerformed }
         val hasPollerForMetadataEvent = waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)
