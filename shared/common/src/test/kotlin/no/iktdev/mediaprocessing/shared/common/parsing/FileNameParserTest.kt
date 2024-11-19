@@ -37,6 +37,15 @@ class FileNameParserTest {
     }
 
     @Test
+    fun assertDotRemoval() {
+        val input = "Like.a.Potato.Chef.S01E01.Departure.\\u0026.Skills.1080p.Potato"
+        val parser = FileNameParser(input)
+        val result = parser.guessDesiredTitle()
+        assertThat(result).isEqualTo("Like a Potato Chef")
+        assertThat(parser.guessDesiredFileName()).isEqualTo("Like a Potato Chef S01E01 Departure \\u0026 Skills")
+    }
+
+    @Test
     fun movieName() {
         val inName = "Wicket.Wicker.Potato.4.2023.UHD.BluRay.2160p"
         val parser = FileNameParser(inName)
@@ -89,5 +98,4 @@ class FileNameParserTest {
         val result = FileNameParser(input).guessDesiredTitle()
         assertThat(result).isEmpty()
     }
-
 }

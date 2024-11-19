@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
-import org.apache.kafka.common.protocol.types.Field.Str
 
 class FileNameParser(val fileName: String) {
     var cleanedFileName: String
@@ -122,7 +121,7 @@ class FileNameParser(val fileName: String) {
     fun removeDot(input: String): String {
         //var text = Regex("(?<=\\s)\\.|\\.(?=\\s)").replace(input, "")
         //return Regex("\\.(?<!(Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave)\\.)\\b").replace(text, " ")
-        return Regex("(?<!\\b(?:Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave))\\.+(?=\\s|\\w)").replace(input, " ")
+        return Regex("(?<!\\b(?:Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave))\\.").replace(input, " ")
     }
 
     fun removeInBetweenCharacters(text: String): String {
