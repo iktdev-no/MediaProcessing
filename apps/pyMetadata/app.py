@@ -218,12 +218,12 @@ Producing message
                                 self.storeProducedEvent(connection=self.connection, event=producedEvent)
                             except Exception as iex:
                                 logger.error("Failed to push error to database..")
-
+                self.connection.close()
             except mysql.connector.Error as err:
                 logger.error("Database error: %s", err)
                 
             # Introduce a small sleep to reduce CPU usage
-            time.sleep(2)
+            time.sleep(5)
         if (self.shutdown.is_set()):
             logger.info("Shutdown is set..")
         logging.debug("End of puller function..")
