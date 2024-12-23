@@ -310,18 +310,16 @@ class CompletedTaskListener: CoordinatorEventListener() {
             withTransaction(getStoreDatabase()) {
                 titles.insertIgnore {
                     it[masterTitle] = metadata.collection
-                    it[title] = NameHelper.normalize(usedTitle)
-                    it[type] = 1
+                    it[alternativeTitle] = NameHelper.normalize(usedTitle)
                 }
                 titles.insertIgnore {
                     it[masterTitle] = usedTitle
-                    it[title] = NameHelper.normalize(usedTitle)
-                    it[type] = 2
+                    it[alternativeTitle] = NameHelper.normalize(usedTitle)
                 }
                 metadata.titles.forEach { title ->
                     titles.insertIgnore {
                         it[masterTitle] = usedTitle
-                        it[titles.title] = title
+                        it[alternativeTitle] = title
                     }
                 }
             }

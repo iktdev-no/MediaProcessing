@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component
 @Component
 class MockEventManager(dataSource: MockDataSource = MockDataSource()) : EventsManagerImpl<EventImpl>(dataSource) {
     val events: MutableList<EventImpl> = mutableListOf()
+    override fun getAvailableReferenceIds(): List<String> {
+        TODO("Not yet implemented")
+    }
+
     override fun readAvailableEvents(): List<List<EventImpl>> {
         return listOf(events)
     }

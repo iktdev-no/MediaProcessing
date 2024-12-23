@@ -1,13 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
 import com.google.gson.JsonObject
+import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
-import no.iktdev.mediaprocessing.coordinator.utils.log
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
@@ -26,6 +26,7 @@ import javax.naming.Name
 
 @Service
 class MediaOutInformationTaskListener: CoordinatorEventListener() {
+    private val logger = KotlinLogging.logger {}
 
     override fun getProducerName(): String {
         return this::class.java.simpleName
@@ -46,7 +47,7 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
         if (event == null) {
-            log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
+            logger.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
         active = true
@@ -54,7 +55,7 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
         val metadataResult = event.az<MediaMetadataReceivedEvent>()
         val mediaBaseInfo = events.findLast { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
         if (mediaBaseInfo == null) {
-            log.error { "Required event ${Events.EventMediaReadBaseInfoPerformed} is not present" }
+            logger.error { "Required event ${Events.EventMediaReadBaseInfoPerformed} is not present" }
             coordinator?.produceNewEvent(
                 MediaOutInformationConstructedEvent(
                     metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
