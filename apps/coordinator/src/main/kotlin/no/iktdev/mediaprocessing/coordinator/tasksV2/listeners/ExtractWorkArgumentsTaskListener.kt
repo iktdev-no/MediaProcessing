@@ -77,7 +77,6 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
         val mapper = ExtractWorkArgumentsMapping(
             inputFile = inputFile,
             outFileFullName = mediaInfoData.fullName,
-            outFileAbsolutePathFile = mediaInfo.data?.outDirectory?.let { File(it) } ?: return,
             streams = streams
         )
 

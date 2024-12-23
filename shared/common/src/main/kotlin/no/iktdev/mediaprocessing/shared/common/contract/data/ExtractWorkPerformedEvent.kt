@@ -12,5 +12,6 @@ data class ExtractWorkPerformedEvent(
 }
 
 data class ExtractedData(
+    val language: String,
     val outputFile: String
 )

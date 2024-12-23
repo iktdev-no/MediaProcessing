@@ -15,6 +15,7 @@ import no.iktdev.mediaprocessing.shared.common.limitedWhile
 import no.iktdev.mediaprocessing.shared.common.database.cal.Status
 import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.shared.common.contract.data.ExtractArgumentData
+import no.iktdev.mediaprocessing.shared.common.contract.data.ExtractWorkCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.contract.data.ExtractWorkPerformedEvent
 import no.iktdev.mediaprocessing.shared.common.contract.data.ExtractedData
 import no.iktdev.mediaprocessing.shared.common.contract.dto.ProcesserEventInfo
@@ -60,9 +61,7 @@ class ExtractService(
 
     fun startExtract(event: Task) {
         val ffwrc = event.data as ExtractArgumentData
-        val outFile = File(ffwrc.outputFile).also {
-            it.parentFile.mkdirs()
-        }
+        val outputFile = getTemporaryStoreFile(ffwrc.outputFileName)
         if (!logDir.exists()) {
             logDir.mkdirs()
         }
@@ -72,16 +71,16 @@ class ExtractService(
             log.info { "Claim successful for ${event.referenceId} extract" }
             runner = FfmpegRunner(
                 inputFile = ffwrc.inputFile,
-                outputFile = ffwrc.outputFile,
+                outputFile = outputFile.absolutePath,
                 arguments = ffwrc.arguments,
                 logDir = logDir,
                 listener = this
             )
-            if (outFile.exists()) {
+            if (outputFile.exists()) {
                 if (ffwrc.arguments.firstOrNull() != "-y") {
                     this.onError(
                         ffwrc.inputFile,
-                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outputFile}"
+                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${outputFile.absolutePath}"
                     )
                     // Setting consumed to prevent spamming
                     taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR)
@@ -102,6 +101,8 @@ class ExtractService(
 
     override fun onCompleted(inputFile: String, outputFile: String) {
         val task = assignedTask ?: return
+        assert(task.data is ExtractArgumentData) { "Wrong data type found!" }
+        val taskData = task.data as ExtractArgumentData
         log.info { "Extract completed for ${task.referenceId}" }
         runBlocking {
             var successfulComplete = false
@@ -119,6 +120,7 @@ class ExtractService(
                         source = getProducerName()
                     ),
                     data = ExtractedData(
+                        taskData.language,
                         outputFile
                     )
                 )

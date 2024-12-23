@@ -14,6 +14,6 @@ data class EncodeArgumentCreatedEvent(
 
 data class EncodeArgumentData(
     val arguments: List<String>,
-    val outputFile: String,
+    val outputFileName: String,
     override val inputFile: String
 ): TaskData()

@@ -63,8 +63,13 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             return
         }
 
+        var language: String? = null
+
+
         val file = if (event.eventType == Events.EventWorkExtractPerformed) {
-            event.az<ExtractWorkPerformedEvent>()?.data?.outputFile
+            val foundEvent = event.az<ExtractWorkPerformedEvent>()?.data
+            language = foundEvent?.language
+            foundEvent?.outputFile
         } else if (event.eventType == Events.EventMediaProcessStarted) {
             val startEvent = event.az<MediaProcessStartEvent>()?.data
             if (startEvent?.operations?.isOnly(StartOperationEvents.CONVERT) == true) {
@@ -77,6 +82,15 @@ class ConvertWorkTaskListener: WorkTaskListener() {
 
 
         val convertFile = file?.let { File(it) }
+        if (language.isNullOrEmpty()) {
+            convertFile?.parentFile?.nameWithoutExtension?.let {
+                if (it.length == 3) {
+                    language = it.lowercase()
+                }
+            }
+        }
+
+
         if (convertFile == null || !convertFile.exists()) {
             onProduceEvent(ConvertWorkCreatedEvent(
                 metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
@@ -84,6 +98,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             return
         } else {
             val convertData = ConvertData(
+                language = language ?: "unk",
                 inputFile = convertFile.absolutePath,
                 outputFileName = convertFile.nameWithoutExtension,
                 outputDirectory = convertFile.parentFile.absolutePath,

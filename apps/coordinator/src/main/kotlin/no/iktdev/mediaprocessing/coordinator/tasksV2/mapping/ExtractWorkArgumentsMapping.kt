@@ -9,19 +9,18 @@ import java.io.File
 class ExtractWorkArgumentsMapping(
     val inputFile: String,
     val outFileFullName: String,
-    val outFileAbsolutePathFile: File,
     val streams: ParsedMediaStreams
 ) {
 
     fun getArguments(): List<ExtractArgumentData> {
-        val subDir = outFileAbsolutePathFile.using("sub")
         val sArg = SubtitleArguments(streams.subtitleStream).getSubtitleArguments()
 
         val entries = sArg.map {
             ExtractArgumentData(
                 inputFile = inputFile,
+                language = it.language,
                 arguments = it.codecParameters + it.optionalParameters + listOf("-map", "0:s:${it.index}"),
-                outputFile = subDir.using(it.language, "${outFileFullName}.${it.format}").absolutePath
+                outputFileName = "${outFileFullName}.${it.language}.${it.format}"
             )
         }
 

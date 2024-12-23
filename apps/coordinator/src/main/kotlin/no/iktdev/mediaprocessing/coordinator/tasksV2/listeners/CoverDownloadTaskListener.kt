@@ -6,9 +6,11 @@ import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.implementations.EventCoordinator
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
 import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
@@ -49,24 +51,13 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
             return
         }
 
-        val outDir = File(data.outDir)
-            .also {
-                if (!it.exists()) {
-                    it.mkdirs()
-                }
-            }
-        if (!outDir.exists()) {
-            log.error { "Check for output directory for cover storage failed for ${event.metadata.eventId} " }
-            onProduceEvent(failedEventDefault)
-        }
-
-        val client = DownloadClient(data.url, File(data.outDir), data.outFileBaseName)
+        val client = DownloadClient(data.url, SharedConfig.cachedContent, data.outFileBaseName)
 
         val outFile = runBlocking {
             client.getOutFile()
         }
 
-        val coversInDifferentFormats = outDir.listFiles { it -> it.isFile && it.extension.lowercase() in client.contentTypeToExtension().values } ?: emptyArray()
+        val coversInDifferentFormats = SharedConfig.cachedContent.listFiles { it -> it.isFile && it.extension.lowercase() in client.contentTypeToExtension().values } ?: emptyArray()
 
         val result = if (outFile?.exists() == true) {
             outFile

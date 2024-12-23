@@ -14,7 +14,6 @@ data class MediaOutInformationConstructedEvent(
 
 data class MediaInfoReceived(
     val info: JsonObject,
-    val outDirectory: String,
 ) {
     fun toValueObject(): MediaInfo? {
         val type = info.get("type").asString

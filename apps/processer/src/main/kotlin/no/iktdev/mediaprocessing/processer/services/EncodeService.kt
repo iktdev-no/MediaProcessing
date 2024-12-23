@@ -62,7 +62,7 @@ class EncodeService(
 
     fun startEncode(event: Task) {
         val ffwrc = event.data as EncodeArgumentData
-        val outFile = File(ffwrc.outputFile)
+        val outFile = getTemporaryStoreFile(ffwrc.outputFileName)
         outFile.parentFile.mkdirs()
         if (!logDir.exists()) {
             logDir.mkdirs()
@@ -75,7 +75,7 @@ class EncodeService(
             log.info { "Claim successful for ${event.referenceId} encode" }
             runner = FfmpegRunner(
                 inputFile = ffwrc.inputFile,
-                outputFile = ffwrc.outputFile,
+                outputFile = outFile.absolutePath,
                 arguments = ffwrc.arguments,
                 logDir = logDir, listener = this
             )
@@ -83,7 +83,7 @@ class EncodeService(
                 if (ffwrc.arguments.firstOrNull() != "-y") {
                     this.onError(
                         ffwrc.inputFile,
-                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${ffwrc.outputFile}"
+                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${outFile.absolutePath}"
                     )
                     // Setting consumed to prevent spamming
                     taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR)

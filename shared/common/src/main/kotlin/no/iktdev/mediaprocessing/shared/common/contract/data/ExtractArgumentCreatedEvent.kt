@@ -13,6 +13,7 @@ data class ExtractArgumentCreatedEvent(
 
 data class ExtractArgumentData(
     val arguments: List<String>,
-    val outputFile: String,
+    val language: String,
+    val outputFileName: String,
     override val inputFile: String
 ): TaskData()

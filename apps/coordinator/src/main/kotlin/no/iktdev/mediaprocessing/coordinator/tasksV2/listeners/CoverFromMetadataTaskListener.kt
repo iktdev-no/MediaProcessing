@@ -86,7 +86,6 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
                 data = CoverDetails(
                     url = coverUrl,
                     outFileBaseName = NameHelper.normalize(coverTitle),
-                    outDir = mediaOutInfo.outDirectory,
                 )
             )
         }

@@ -84,7 +84,6 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
         val mapper = EncodeWorkArgumentsMapping(
             inputFile = inputFile,
             outFileFullName = mediaInfoData.fullName,
-            outFileAbsolutePathFile = mediaInfo.data?.outDirectory?.let { File(it) } ?: return,
             streams = streams,
             preference = preference.encodePreference
         )

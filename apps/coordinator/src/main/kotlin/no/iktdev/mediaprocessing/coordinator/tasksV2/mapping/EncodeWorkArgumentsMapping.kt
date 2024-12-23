@@ -13,13 +13,11 @@ import java.io.File
 class EncodeWorkArgumentsMapping(
     val inputFile: String,
     val outFileFullName: String,
-    val outFileAbsolutePathFile: File,
     val streams: ParsedMediaStreams,
     val preference: EncodingPreference
 ) {
 
     fun getArguments(): EncodeArgumentData? {
-        val outVideoFileAbsolutePath = outFileAbsolutePathFile.using("${outFileFullName}.mp4").absolutePath
         val vaas = VideoAndAudioSelector(streams, preference)
         val vArg = vaas.getVideoStream()
             ?.let { VideoArguments(it, streams, preference.video).getVideoArguments() }
@@ -32,7 +30,7 @@ class EncodeWorkArgumentsMapping(
         } else {
             EncodeArgumentData(
                 inputFile = inputFile,
-                outputFile = outVideoFileAbsolutePath,
+                outputFileName = "${outFileFullName}.mp4",
                 arguments = vaArgs
             )
         }

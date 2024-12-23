@@ -14,6 +14,7 @@ data class ConvertWorkCreatedEvent(
 
 data class ConvertData(
     override val inputFile: String,
+    val language: String,
     val outputDirectory: String,
     val outputFileName: String,
     val formats: List<SubtitleFormats> = emptyList(),

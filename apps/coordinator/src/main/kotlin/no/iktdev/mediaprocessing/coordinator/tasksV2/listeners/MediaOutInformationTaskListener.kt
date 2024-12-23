@@ -7,12 +7,10 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
-import no.iktdev.mediaprocessing.coordinator.utils.log
+import no.iktdev.mediaprocessing.coordinator.log
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameDeterminate
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
-import no.iktdev.mediaprocessing.shared.common.parsing.Regexes
-import no.iktdev.mediaprocessing.shared.common.parsing.isCharOnlyUpperCase
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.data.EpisodeInfo
@@ -68,7 +66,6 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
 
         val result = if (vi != null) {
             MediaInfoReceived(
-                outDirectory = pm.getOutputDirectory().absolutePath,
                 info = vi
             ).let { MediaOutInformationConstructedEvent(
                 metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
@@ -135,7 +132,6 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
 
             val filteredMetaTitles = metaTitles.filter { it.lowercase().contains(baseInfo.title.lowercase()) || NameHelper.normalize(it).lowercase().contains(baseInfo.title.lowercase()) }
 
-            //val viableFileTitles = filteredMetaTitles.filter { !it.isCharOnlyUpperCase() }
 
             return if (collection == baseInfo.title) {
                 collection
@@ -161,10 +157,6 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
                 FileNameDeterminate(getTitle(), baseInfo.sanitizedName, metadataDeterminedContentType).getDeterminedVideoInfo()?.toJsonObject()
             }
         }
-
-        fun getOutputDirectory() = SharedConfig.outgoingContent.using(NameHelper.normalize(getCollection()))
-
-
 
     }
 

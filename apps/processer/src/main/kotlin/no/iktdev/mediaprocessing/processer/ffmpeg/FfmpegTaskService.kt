@@ -2,8 +2,10 @@ package no.iktdev.mediaprocessing.processer.ffmpeg
 
 import kotlinx.coroutines.cancel
 import mu.KLogger
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.taskManager
 import no.iktdev.mediaprocessing.shared.common.ClaimableTask
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.TaskQueueListener
 import no.iktdev.mediaprocessing.shared.common.getComputername
 import no.iktdev.mediaprocessing.shared.common.services.TaskService
@@ -17,6 +19,10 @@ abstract class FfmpegTaskService: TaskService(), FfmpegListener {
     abstract override val log: KLogger
 
     protected var runner: FfmpegRunner? = null
+
+    fun getTemporaryStoreFile(fileName: String): File {
+        return SharedConfig.cachedContent.using(fileName)
+    }
 
     override fun onTaskAvailable(data: ClaimableTask) {
         if (runner?.isWorking() == true) {

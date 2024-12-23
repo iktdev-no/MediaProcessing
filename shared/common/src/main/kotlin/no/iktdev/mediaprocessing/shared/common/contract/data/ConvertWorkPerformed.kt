@@ -12,5 +12,6 @@ class ConvertWorkPerformed(
 }
 
 data class ConvertedData(
+    val language: String,
     val outputFiles: List<String>
 )

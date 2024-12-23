@@ -20,7 +20,6 @@ class EncodeWorkArgumentsMappingTest {
         val parser = EncodeWorkArgumentsMapping(
             "potato.mkv",
             "potato.mp4",
-            File(".\\potato.mp4"),
             event.az<MediaFileStreamsParsedEvent>()!!.data!!,
             EncodingPreference(VideoPreference(), AudioPreference())
         )

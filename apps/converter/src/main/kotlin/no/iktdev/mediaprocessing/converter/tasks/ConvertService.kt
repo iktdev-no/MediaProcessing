@@ -72,6 +72,7 @@ class ConvertService(
 
     override fun onCompleted(inputFile: String, outputFiles: List<String>) {
         val task = assignedTask ?: return
+        val taskData: ConvertData = task.data as ConvertData
         log.info { "Convert completed for ${task.referenceId}" }
         val claimSuccessful = taskManager.markTaskAsCompleted(task.referenceId, task.eventId)
 
@@ -95,6 +96,7 @@ class ConvertService(
                     source = getProducerName()
                 ),
                 data = ConvertedData(
+                    language = taskData.language,
                     outputFiles = outputFiles
                 )
             ))

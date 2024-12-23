@@ -12,6 +12,5 @@ data class MediaCoverInfoReceivedEvent(
 
 data class CoverDetails(
     val url: String,
-    val outDir: String,
     val outFileBaseName: String,
 )

@@ -37,7 +37,7 @@ dependencies {
     implementation("org.json:json:20210307")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-    implementation("no.iktdev.streamit.library:streamit-library-db:0.0.6-alpha27")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha11")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")

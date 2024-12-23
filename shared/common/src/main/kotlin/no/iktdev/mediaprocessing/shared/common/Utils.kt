@@ -5,8 +5,13 @@ import mu.KotlinLogging
 import java.io.File
 import java.io.RandomAccessFile
 import java.net.InetAddress
+import java.util.zip.CRC32
 
 private val logger = KotlinLogging.logger {}
+
+fun File.notExist(): Boolean {
+    return !this.exists()
+}
 
 fun isFileAvailable(file: File): Boolean {
     if (!file.exists()) return false
@@ -59,4 +64,66 @@ fun silentTry(code: () -> Unit) {
     try {
         code.invoke()
     } catch (_: Exception) {}
+}
+
+fun File.getCRC32(): Long {
+    val crc = CRC32()
+    this.inputStream().use { input ->
+        val buffer = ByteArray(1024)
+        var bytesRead: Int
+        while (input.read(buffer).also { bytesRead = it } != -1) {
+            crc.update(buffer, 0, bytesRead)
+        }
+    }
+    return crc.value
+}
+
+fun File.moveTo(destinationFile: File, onProgress: (Double) -> Unit = {}): Boolean {
+    require(this.exists())
+    require(destinationFile.notExist())
+    val tempDestinationFile = File(destinationFile.parentFile, "${destinationFile.name}.tmp")
+
+
+    val success: Boolean = run {
+        try {
+            val totalBytes = this.length()
+            var copiedBytes = 0L
+
+            this.inputStream().use { input ->
+                tempDestinationFile.outputStream().use { output ->
+                    val buffer = ByteArray(1024)
+                    var bytesRead: Int
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        copiedBytes += bytesRead
+                        onProgress(copiedBytes.toDouble() / totalBytes * 100)
+                    }
+                }
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    if (!success) {
+        return false
+    }
+
+    val sourceHash = this.getCRC32()
+    val tempFileHash = tempDestinationFile.getCRC32()
+
+    if (sourceHash == tempFileHash) {
+        if (!tempDestinationFile.renameTo(destinationFile)) {
+            logger.error { "${tempDestinationFile.name} failed to rename to ${destinationFile.name}" }
+            return false
+        }
+        this.delete()
+    } else {
+        logger.error { "${tempDestinationFile.name} failed integrity check" }
+        return false
+    }
+
+    return true
 }
