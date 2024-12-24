@@ -79,8 +79,12 @@ fun File.getCRC32(): Long {
 }
 
 fun File.moveTo(destinationFile: File, onProgress: (Double) -> Unit = {}): Boolean {
-    require(this.exists())
-    require(destinationFile.notExist())
+    assert(this.exists()) {
+        "Sourcefile ${this.absolutePath} does not exist, but it should"
+    }
+    assert(destinationFile.notExist()) {
+        "Destinationfile ${destinationFile.absolutePath} exists, but it shouldn't"
+    }
     val tempDestinationFile = File(destinationFile.parentFile, "${destinationFile.name}.tmp")
 
 
