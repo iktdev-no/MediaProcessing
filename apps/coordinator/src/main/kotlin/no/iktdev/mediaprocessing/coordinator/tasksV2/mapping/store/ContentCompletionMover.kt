@@ -6,6 +6,7 @@ import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
+import no.iktdev.mediaprocessing.shared.common.getCRC32
 import no.iktdev.mediaprocessing.shared.common.moveTo
 import no.iktdev.mediaprocessing.shared.common.notExist
 import java.io.File
@@ -51,6 +52,9 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
             return null
         }
         val storeFile = storeFolder.using(coverFile.name)
+        if (storeFile.exists() && storeFile.getCRC32() == coverFile.getCRC32()) {
+            return Pair(coverFile.absolutePath, storeFile.absolutePath)
+        }
         val result = coverFile.moveTo(storeFile)
         return if (result) Pair(coverFile.absolutePath, storeFile.absolutePath) else null
     }
