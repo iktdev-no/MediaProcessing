@@ -130,7 +130,7 @@ class EventsPullerThread(threading.Thread):
                 password=events_server_password
             )
             if myConnection.is_connected():
-                logging.info(f"Successfully connected to {events_server_database_name} at {events_server_address}:{events_server_port}")
+                logging.debug(f"Successfully connected to {events_server_database_name} at {events_server_address}:{events_server_port}")
                 self.connection = myConnection
                 return True
             else:
@@ -159,9 +159,9 @@ class EventsPullerThread(threading.Thread):
             producedMessage: bool = False
 
             while not self.shutdown.is_set() and self.__has_connection_to_database() != True:
-                logging.info("Attempting to reconnect to the database...")
+                logging.debug("Attempting to reconnect to the database...")
                 if (self.__connect_to_datasource() == False):
-                    logger.info("Waiting 5 seconds before retrying")
+                    logger.info("Failed to connect to database, waiting 5 seconds before retrying")
                     time.sleep(5)  # Wait 5 seconds before retrying
                 else:
                     logging.debug("A successful connection has been made!")
