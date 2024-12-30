@@ -24,7 +24,7 @@ sealed class Stream(
     @Transient open val start_time: String,
     @Transient open val duration_ts: Long? = null,
     @Transient open val duration: String? = null,
-    @Transient open val disposition: Disposition,
+    @Transient open val disposition: Disposition? = null,
     @Transient open val tags: Tags
 )
 
@@ -133,7 +133,7 @@ data class SubtitleStream(
     override val start_time: String,
     override val duration: String?,
     override val duration_ts: Long?,
-    override val disposition: Disposition,
+    override val disposition: Disposition? = null,
     override val tags: Tags,
     val subtitle_tags: SubtitleTags
 ) : Stream(
@@ -163,6 +163,7 @@ data class Disposition(
     val karaoke: Int,
     val forced: Int,
     val hearing_impaired: Int,
+    val captions: Int,
     val visual_impaired: Int,
     val clean_effects: Int,
     val attached_pic: Int,
@@ -173,7 +174,7 @@ data class Tags(
     val title: String?,
     val BPS: String?,
     val DURATION: String?,
-    val NUMBER_OF_FRAMES: String?,
+    val NUMBER_OF_FRAMES: Int? = 0,
     val NUMBER_OF_BYTES: String?,
     val _STATISTICS_WRITING_APP: String?,
     val _STATISTICS_WRITING_DATE_UTC: String?,
