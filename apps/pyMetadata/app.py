@@ -250,14 +250,15 @@ class MetadataEventHandler:
 
         event: MediaEvent = self.mediaEvent
 
-        searchableTitles: List[str] = event.data.searchTitles
-        searchableTitles.extend([
+        unique_titles = set(event.data.searchTitles)
+        unique_titles.update([
             event.data.title,
             event.data.sanitizedName
         ])
+        searchableTitles = list(unique_titles)
 
         joinedTitles = "\n".join(searchableTitles)
-        logger.info("Searching for: %s", joinedTitles)
+        logger.info("Searching for:\n%s", joinedTitles)
 
         # Kjør den asynkrone søkemetoden
         result: Metadata | None = await self.__getMetadata(searchableTitles)
@@ -300,10 +301,10 @@ class MetadataEventHandler:
         logger.info("\nPrefix matcher")
         prefixSelector = PrefixMatcher(titles=titles, metadata=filtered_results).getBestMatch()
 
-        if simpleSelector is not None:
-            return simpleSelector
         if advancedSelector is not None:
             return advancedSelector
+        if simpleSelector is not None:
+            return simpleSelector
         if prefixSelector is not None:
             return prefixSelector
         return None

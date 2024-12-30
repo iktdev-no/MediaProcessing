@@ -6,7 +6,7 @@ from typing import List, Optional
 import uuid
 import threading
 import json
-import time
+import time, asyncio
 from fuzzywuzzy import fuzz
 
 from algo.AdvancedMatcher import AdvancedMatcher
@@ -15,6 +15,7 @@ from algo.PrefixMatcher import PrefixMatcher
 from clazz.Metadata import Metadata
 
 from clazz.shared import EventData, EventMetadata, MediaEvent
+from app import MetadataEventHandler
 from sources.anii import Anii
 from sources.imdb import Imdb
 from sources.mal import Mal
@@ -56,32 +57,37 @@ else:
 
 
 class DryRun():
-    titles: List[str] = []
+    searchTitles: List[str] = []
+    title: str
+    sanitizedName: str
 
-    def __init__(self, titles: List[str]) -> None:
-        self.titles = titles
+    def __init__(self, title: str, sanitizedName: str, searchTitles: List[str]) -> None:
+        self.title = title
+        self.sanitizedName = sanitizedName
+        self.searchTitles = searchTitles
     
     def run(self) -> None:
-        combined_titles = ", ".join(self.titles)
-        logger.info("Searching for %s", combined_titles)
-        result: Metadata | None = self.__getMetadata(self.titles)
-
-        message: str | None = None
-        if (result is None):
-            message = f"No result for {combined_titles}"
-            logger.info(message)
-
-        message = MediaEvent(
-            metadata = EventMetadata(
-                referenceId="00000000-0000-0000-0000-000000000000",
-                eventId="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-                derivedFromEventId=None,
-                status= "Failed" if result is None else "Success",
+        evnet = MediaEvent(
+            metadata=EventMetadata(
+                derivedFromEventId="ccccccccc-cccc-cccc-cccc-cccccccccccc",
+                eventId="eeeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+                referenceId="rrrrrrrrr-rrrr-rrrr-rrrr-rrrrrrrrrrrr",
+                status="Success",
+                created="2024-12-28T16:19:31.917684523",
+                source="DryRun"
             ),
-            data=result
+            eventType="DryRun",
+            data=EventData(
+                title=self.title,
+                sanitizedName=self.sanitizedName,
+                searchTitles=self.searchTitles
+            )
         )
-
-        logger.info(message)
+        
+        handler = MetadataEventHandler(evnet)
+        
+        asyncio.run(handler.run())
+        
     
     def __getMetadata(self, titles: List[str]) -> Metadata | None:
         mal = Mal(titles=titles)
