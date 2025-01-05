@@ -97,13 +97,28 @@ object ContentCatalogStore {
             log.error { "serieInfo in videoDetails is null!" }
             return
         }
-        val insert = withTransaction(getStoreDatabase()) {
-            serie.insertIgnore {
+        val status = insertWithSuccess(getStoreDatabase().database) {
+            serie.insert {
                 it[title] = serieInfo.episodeTitle
                 it[episode] = serieInfo.episodeNumber
                 it[season] = serieInfo.seasonNumber
                 it[video] = videoDetails.fileName
                 it[serie.collection] = collection
+            }
+        }
+        if (!status) {
+            log.error { "Failed to insert ${videoDetails.fileName} with episode: ${serieInfo.episodeNumber} and season ${serieInfo.seasonNumber}" }
+            val finalStatus = insertWithSuccess(getStoreDatabase().database) {
+                serie.insert {
+                    it[title] = serieInfo.episodeTitle
+                    it[episode] = serieInfo.episodeNumber
+                    it[season] = 0
+                    it[video] = videoDetails.fileName
+                    it[serie.collection] = collection
+                }
+            }
+            if (!finalStatus) {
+                log.error { "Failed to insert ${videoDetails.fileName} with fallback season 0" }
             }
         }
     }
