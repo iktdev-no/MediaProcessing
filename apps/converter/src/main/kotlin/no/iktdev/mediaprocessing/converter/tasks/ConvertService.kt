@@ -97,7 +97,8 @@ class ConvertService(
                 ),
                 data = ConvertedData(
                     language = taskData.language,
-                    outputFiles = outputFiles
+                    outputFiles = outputFiles,
+                    baseName = taskData.storeFileName
                 )
             ))
             onClearTask()

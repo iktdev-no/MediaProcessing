@@ -57,7 +57,8 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
             client.getOutFile()
         }
 
-        val coversInDifferentFormats = SharedConfig.cachedContent.listFiles { it -> it.isFile && it.extension.lowercase() in client.contentTypeToExtension().values } ?: emptyArray()
+        val coversInDifferentFormats = SharedConfig.cachedContent.listFiles { it -> it.isFile && it.extension.lowercase() in client.contentTypeToExtension().values }
+            ?.filter { it.nameWithoutExtension.contains(data.outFileBaseName, ignoreCase = true) } ?: emptyList()
 
         val result = if (outFile?.exists() == true) {
             outFile

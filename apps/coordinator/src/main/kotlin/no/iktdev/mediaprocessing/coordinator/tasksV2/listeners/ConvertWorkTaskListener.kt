@@ -64,11 +64,13 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         }
 
         var language: String? = null
+        var storeAsFile: String? = null
 
 
         val file = if (event.eventType == Events.EventWorkExtractPerformed) {
             val foundEvent = event.az<ExtractWorkPerformedEvent>()?.data
             language = foundEvent?.language
+            storeAsFile = foundEvent?.storeFileName
             foundEvent?.outputFile
         } else if (event.eventType == Events.EventMediaProcessStarted) {
             val startEvent = event.az<MediaProcessStartEvent>()?.data
@@ -101,6 +103,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
                 language = language ?: "unk",
                 inputFile = convertFile.absolutePath,
                 outputFileName = convertFile.nameWithoutExtension,
+                storeFileName = storeAsFile ?: convertFile.nameWithoutExtension,
                 outputDirectory = convertFile.parentFile.absolutePath,
                 allowOverwrite = true
             )

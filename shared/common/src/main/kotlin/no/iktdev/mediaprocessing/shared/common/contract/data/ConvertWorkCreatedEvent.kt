@@ -17,6 +17,7 @@ data class ConvertData(
     val language: String,
     val outputDirectory: String,
     val outputFileName: String,
+    val storeFileName: String,
     val formats: List<SubtitleFormats> = emptyList(),
     val allowOverwrite: Boolean
 ): TaskData()

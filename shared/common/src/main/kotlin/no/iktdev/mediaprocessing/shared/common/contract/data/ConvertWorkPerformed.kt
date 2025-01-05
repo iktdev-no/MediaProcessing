@@ -13,5 +13,6 @@ class ConvertWorkPerformed(
 
 data class ConvertedData(
     val language: String,
+    val baseName: String,
     val outputFiles: List<String>
 )

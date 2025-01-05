@@ -120,8 +120,9 @@ class ExtractService(
                         source = getProducerName()
                     ),
                     data = ExtractedData(
-                        taskData.language,
-                        outputFile
+                        language = taskData.language,
+                        outputFile = outputFile,
+                        storeFileName = taskData.storeFileName
                     )
                 )
             )

@@ -166,7 +166,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
                 ContentSubtitleStore.storeSubtitles(
                     collection = usableCollection,
                     language = it.language,
-                    destinationFile = it.destination
+                    destinationFile = File(it.destination)
                 )
             }
         }
@@ -183,7 +183,10 @@ class CompletedTaskListener : CoordinatorEventListener() {
             onProduceEvent(MediaProcessCompletedEvent(
                 metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = CompletedEventData(
-                    events.map { it.eventId() }
+                    eventIdsCollected = events.map { it.eventId() },
+                    coverMoved = newCoverPath?.let { c -> CoverMoved(c.first, c.second) },
+                    videoMoved = newVideoPath?.let { v -> VideoMoved(v.first, v.second) },
+                    subtitlesMoved = newSubtitles?.map { s -> SubtitlesMoved(s.source, s.destination) } ?: emptyList()
                 )
             ))
         }

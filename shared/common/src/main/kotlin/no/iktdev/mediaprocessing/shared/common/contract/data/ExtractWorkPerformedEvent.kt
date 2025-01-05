@@ -13,5 +13,6 @@ data class ExtractWorkPerformedEvent(
 
 data class ExtractedData(
     val language: String,
+    val storeFileName: String,
     val outputFile: String
 )

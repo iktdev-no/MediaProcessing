@@ -10,5 +10,23 @@ data class MediaProcessCompletedEvent(
 ): Event()
 
 data class CompletedEventData(
-    val eventIdsCollected: List<String>
+    val eventIdsCollected: List<String>,
+    val videoMoved: VideoMoved?,
+    val coverMoved: CoverMoved?,
+    val subtitlesMoved: List<SubtitlesMoved>
+)
+
+data class SubtitlesMoved(
+    val source: String,
+    val destination: String
+)
+
+data class CoverMoved(
+    val source: String,
+    val destination: String
+)
+
+data class VideoMoved(
+    val source: String,
+    val destination: String
 )

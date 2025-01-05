@@ -60,20 +60,42 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
     }
 
 
-    fun getMovableSubtitles(): Map<String, List<File>> {
+
+    data class MovableSubtitle(
+        val language: String,
+        val cachedFile: File,
+        val storeFile: String
+    )
+
+    fun getMovableSubtitles(): List<MovableSubtitle> {
         val extracted =
             events.filter { it.eventType == Events.EventWorkExtractPerformed }.mapNotNull { it.dataAs<ExtractedData>() }
         val converted =
             events.filter { it.eventType == Events.EventWorkConvertPerformed }.mapNotNull { it.dataAs<ConvertedData>() }
 
-        return extracted.groupBy { it.language }.mapValues { v -> v.value.map { File(it.outputFile) } } +
-                converted.groupBy { it.language }.mapValues { v -> v.value.flatMap { it.outputFiles }.map { File(it) } }
+        val items = mutableListOf<MovableSubtitle>()
+
+        extracted.map { MovableSubtitle(
+            language = it.language,
+            cachedFile = File(it.outputFile),
+            storeFile = it.storeFileName
+        ) }.also { items.addAll(it) }
+
+        converted.flatMap { it.outputFiles.map { outFile ->
+            MovableSubtitle(
+                language = it.language,
+                cachedFile = File(outFile),
+                storeFile = it.baseName
+            )
+        } }.also { items.addAll(it) }
+
+        return items
     }
 
     data class MovedSubtitle(
         val language: String,
-        val source: File,
-        val destination: File
+        val source: String,
+        val destination: String
     )
 
     fun moveSubtitles(): List<MovedSubtitle>? {
@@ -81,24 +103,22 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
         val moved: MutableList<MovedSubtitle> = mutableListOf()
 
         val subtitles = getMovableSubtitles()
-        if (subtitles.isEmpty() || subtitles.values.isEmpty()) {
+        if (subtitles.isEmpty()) {
             return null
         }
-        for ((lang, files) in subtitles) {
-            val languageFolder = subtitleFolder.using(lang).also {
+        for (movable in subtitles) {
+            val languageFolder = subtitleFolder.using(movable.language).also {
                 if (it.notExist()) {
                     it.mkdirs()
                 }
             }
-            for (file in files) {
-                val storeFile = languageFolder.using(file.name)
-                val success = file.moveTo(storeFile)
-                if (success) {
-                    moved.add(MovedSubtitle(lang, file, storeFile))
-                }
+            val storeFile = languageFolder.using(movable.storeFile)
+            val success = movable.cachedFile.moveTo(storeFile)
+            if (success) {
+                moved.add(MovedSubtitle(movable.language, movable.cachedFile.absolutePath, storeFile.absolutePath))
             }
-
         }
+
         return moved
     }
 
