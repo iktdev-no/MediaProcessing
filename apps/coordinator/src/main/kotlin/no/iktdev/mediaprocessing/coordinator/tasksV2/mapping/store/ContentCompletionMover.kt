@@ -64,7 +64,7 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
     data class MovableSubtitle(
         val language: String,
         val cachedFile: File,
-        val storeFile: String
+        val storeFileName: String
     )
 
     fun getMovableSubtitles(): List<MovableSubtitle> {
@@ -78,14 +78,14 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
         extracted.map { MovableSubtitle(
             language = it.language,
             cachedFile = File(it.outputFile),
-            storeFile = it.storeFileName
+            storeFileName = it.storeFileName
         ) }.also { items.addAll(it) }
 
         converted.flatMap { it.outputFiles.map { outFile ->
             MovableSubtitle(
                 language = it.language,
                 cachedFile = File(outFile),
-                storeFile = it.baseName
+                storeFileName = it.baseName
             )
         } }.also { items.addAll(it) }
 
@@ -112,7 +112,7 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
                     it.mkdirs()
                 }
             }
-            val storeFile = languageFolder.using(movable.storeFile)
+            val storeFile = languageFolder.using("${movable.storeFileName}.${movable.cachedFile.extension}")
             val success = movable.cachedFile.moveTo(storeFile)
             if (success) {
                 moved.add(MovedSubtitle(movable.language, movable.cachedFile.absolutePath, storeFile.absolutePath))

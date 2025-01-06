@@ -21,7 +21,7 @@ class ExtractWorkArgumentsMapping(
                 language = it.language,
                 arguments = it.codecParameters + it.optionalParameters + listOf("-map", "0:s:${it.index}"),
                 outputFileName = "${outFileFullName}.${it.language}.${it.format}",
-                storeFileName = "${outFileFullName}.${it.format}"
+                storeFileName = outFileFullName
             )
         }
 
