@@ -7,6 +7,7 @@ import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
 import no.iktdev.mediaprocessing.shared.common.contract.reader.MetadataDto
 import no.iktdev.mediaprocessing.shared.common.contract.reader.VideoDetails
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
+import no.iktdev.streamit.library.db.executeWithStatus
 import no.iktdev.streamit.library.db.insertWithSuccess
 import no.iktdev.streamit.library.db.query.CatalogQuery
 import no.iktdev.streamit.library.db.query.MovieQuery
@@ -47,14 +48,15 @@ object ContentCatalogStore {
     }
 
     fun storeCatalog(title: String, collection: String, type: String, cover: String?, genres: String?): Int? {
-        withTransaction(getStoreDatabase().database, block = {
+        val status = executeWithStatus(getStoreDatabase().database, block = {
             val existingRow = catalog.select {
                 (catalog.collection eq collection) and
                         (catalog.type eq type)
             }.firstOrNull()
 
             if (existingRow == null) {
-                catalog.insertIgnore {
+                log.info { "$collection does not exist, and will be created" }
+                catalog.insert {
                     it[catalog.title] = title
                     it[catalog.cover] = cover
                     it[catalog.type] = type
@@ -78,6 +80,11 @@ object ContentCatalogStore {
         }, {
             log.error { "Failed to store catalog $collection: ${it.message}" }
         })
+        if (status) {
+            log.info { "$collection was successfully stored!" }
+        } else {
+            log.error { "Unable to store catalog $collection..." }
+        }
         return getId(title, collection, type)
     }
 
@@ -86,7 +93,7 @@ object ContentCatalogStore {
             log.error { "Movie id was not returned!" }
             return
         }
-        withTransaction(getStoreDatabase().database, block = {
+        val status = executeWithStatus(getStoreDatabase().database, block = {
             catalog.update({
                 (catalog.id eq catalogId)
             }) {
@@ -95,6 +102,11 @@ object ContentCatalogStore {
         }, {
             log.error { "Failed to store movie ${videoDetails.fileName}: ${it.message}" }
         })
+        if (status) {
+            log.info { "${videoDetails.fileName} was successfully stored in movies!" }
+        } else {
+            log.error { "Unable to store catalog ${videoDetails.fileName} in movies..." }
+        }
     }
 
     private fun storeSerie(collection: String, videoDetails: VideoDetails) {
@@ -126,7 +138,11 @@ object ContentCatalogStore {
             },  { log.error { "Failed to store serie: ${it.message}" } })
             if (!finalStatus) {
                 log.error { "Failed to insert ${videoDetails.fileName} with fallback season 0" }
+            } else {
+                log.info { "${videoDetails.fileName} was successfully stored in movies with fallback season 0!" }
             }
+        } else {
+            log.info { "${videoDetails.fileName} was successfully stored in series!" }
         }
     }
 
@@ -135,6 +151,10 @@ object ContentCatalogStore {
         when (type) {
             "movie" -> storeMovie(catalogId, videoDetails)
             "serie" -> storeSerie(collection, videoDetails)
+            else -> {
+                log.error { "$type was provided for the function storeMedia, thus failing" }
+                throw RuntimeException("Illegal type provided")
+            }
         }
     }
 

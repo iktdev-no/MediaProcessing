@@ -36,9 +36,11 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
         }
         val storeFile = storeFolder.using(encodedFile.name)
         val result = encodedFile.moveTo(storeFile) {
-
         }
-        return if (result) Pair(encodedFile.absolutePath, storeFile.absolutePath) else throw RuntimeException("Unable to movie file ${encodedFile.absolutePath} to ${storeFile.absolutePath}")
+        return if (result) run {
+            log.info { "Moved ${encodedFile.absolutePath} to ${storeFile.absolutePath} for permanent storage and usage" }
+            Pair(encodedFile.absolutePath, storeFile.absolutePath)
+        } else throw RuntimeException("Unable to movie file ${encodedFile.absolutePath} to ${storeFile.absolutePath}")
     }
 
     fun moveCover(): Pair<String, String>? {
@@ -56,7 +58,10 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
             return Pair(coverFile.absolutePath, storeFile.absolutePath)
         }
         val result = coverFile.moveTo(storeFile)
-        return if (result) Pair(coverFile.absolutePath, storeFile.absolutePath) else null
+        return if (result) {
+            log.info { "Moved ${coverFile.absolutePath} to ${storeFile.absolutePath} for permanent storage and usage" }
+            Pair(coverFile.absolutePath, storeFile.absolutePath)
+        } else null
     }
 
 
@@ -115,6 +120,7 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
             val storeFile = languageFolder.using("${movable.storeFileName}.${movable.cachedFile.extension}")
             val success = movable.cachedFile.moveTo(storeFile)
             if (success) {
+                log.info { "Moved ${movable.cachedFile.absolutePath} to ${storeFile.absolutePath} for permanent storage and usage" }
                 moved.add(MovedSubtitle(movable.language, movable.cachedFile.absolutePath, storeFile.absolutePath))
             }
         }
