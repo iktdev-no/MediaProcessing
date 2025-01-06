@@ -136,46 +136,54 @@ class CompletedTaskListener : CoordinatorEventListener() {
             } else mediaInfo.fallbackCollection
 
         val mover = ContentCompletionMover(usableCollection, events)
-        val newVideoPath = mover.moveVideo()
-        val newCoverPath = mover.moveCover()
-        val newSubtitles = mover.moveSubtitles()
+
 
         val genreIdsForCatalog = ContentGenresStore.storeAndGetIds(mediaInfo.genres)
+        val newCoverPath = mover.moveCover()
 
-
-        val catalogId = ContentCatalogStore.storeCatalog(
+        ContentCatalogStore.storeCatalog(
             title = mediaInfo.title,
             collection = usableCollection,
             type = mediaInfo.type,
             cover = newCoverPath?.second?.let { dp -> File(dp).name },
             genres = genreIdsForCatalog,
-        )
-
-        getVideo(events)?.let { video ->
-            ContentCatalogStore.storeMedia(
-                title = mediaInfo.title,
-                collection = usableCollection,
-                type = mediaInfo.type,
-                videoDetails = video
-            )
-        }
-
-
-        val storedSubtitles = newSubtitles?.let { subtitles ->
-            subtitles.mapNotNull {
-                ContentSubtitleStore.storeSubtitles(
-                    collection = usableCollection,
-                    language = it.language,
-                    destinationFile = File(it.destination)
-                )
-            }
-        }
-
-        catalogId?.let { cid ->
+        )?.also { cid ->
             mediaInfo.summaries.forEach {
                 ContentMetadataStore.storeSummary(cid, it)
             }
             ContentTitleStore.store(mediaInfo.title, mediaInfo.titles)
+        }
+
+
+
+        val newVideoPath = mover.moveVideo()
+        try {
+            getVideo(events)?.let { video ->
+                ContentCatalogStore.storeMedia(
+                    title = mediaInfo.title,
+                    collection = usableCollection,
+                    type = mediaInfo.type,
+                    videoDetails = video
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        val newSubtitles = mover.moveSubtitles()
+
+        try {
+            newSubtitles?.let { subtitles ->
+                subtitles.map {
+                    ContentSubtitleStore.storeSubtitles(
+                        collection = usableCollection,
+                        language = it.language,
+                        destinationFile = File(it.destination)
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
 

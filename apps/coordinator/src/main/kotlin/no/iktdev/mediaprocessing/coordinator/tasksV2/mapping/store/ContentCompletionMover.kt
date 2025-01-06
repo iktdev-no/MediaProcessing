@@ -38,7 +38,7 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
         val result = encodedFile.moveTo(storeFile) {
 
         }
-        return if (result) Pair(encodedFile.absolutePath, storeFile.absolutePath) else null
+        return if (result) Pair(encodedFile.absolutePath, storeFile.absolutePath) else throw RuntimeException("Unable to movie file ${encodedFile.absolutePath} to ${storeFile.absolutePath}")
     }
 
     fun moveCover(): Pair<String, String>? {
