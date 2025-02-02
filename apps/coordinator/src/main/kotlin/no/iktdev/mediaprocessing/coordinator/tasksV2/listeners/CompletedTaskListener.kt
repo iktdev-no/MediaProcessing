@@ -186,6 +186,12 @@ class CompletedTaskListener : CoordinatorEventListener() {
             e.printStackTrace()
         }
 
+        ProcessedItemsStore.store(
+            mediaInfo.title,
+            events,
+            (listOfNotNull(newVideoPath?.second) + (newSubtitles?.map { it.destination } ?: emptyList()))
+        )
+
 
         if (!doNotProduceComplete) {
             onProduceEvent(MediaProcessCompletedEvent(

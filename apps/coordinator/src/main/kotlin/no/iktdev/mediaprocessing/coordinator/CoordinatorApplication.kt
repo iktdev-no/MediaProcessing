@@ -19,7 +19,7 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 
 val log = KotlinLogging.logger {}
-private lateinit var eventDatabase: EventsDatabase
+lateinit var eventDatabase: EventsDatabase
 private lateinit var eventsManager: EventsManager
 lateinit var runnerManager: RunnerManager
 
