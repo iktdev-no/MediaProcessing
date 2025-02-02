@@ -86,7 +86,7 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
             val joined = result.output.joinToString(" ")
             Gson().fromJson(joined, JsonObject::class.java)
         } else {
-            val message = "File in data is not a file or does not exist".also {
+            val message = "File in data is not a file or does not exist: ${file.absolutePath}".also {
                 log.error { it }
             }
             throw RuntimeException(message)

@@ -9,7 +9,9 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
 object processed: IntIdTable() {
+    val title: Column<String> = varchar("title", 256)
     val fileName: Column<String> = varchar("fileName", 256)
+    val processedFiles: Column<String> = text("processedFilesJson")
     val encoded: Column<Boolean> = bool("encoded").default(false)
     val extracted: Column<Boolean> = bool("extracted").default(false)
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
