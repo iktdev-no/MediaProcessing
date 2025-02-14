@@ -5,15 +5,13 @@ import dev.vishna.watchservice.KWatchEvent.Kind.Initialized
 import dev.vishna.watchservice.asWatchChannel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
-import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import java.io.File
 import javax.annotation.PreDestroy
@@ -42,7 +40,7 @@ interface FileWatcherEvents {
 class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatcherEvents {
 
     private val logger = KotlinLogging.logger {}
-    val watcherChannel = SharedConfig.incomingContent.asWatchChannel()
+    val watchDirectories = SharedConfig.incomingContent
     val queue = FileWatcherQueue()
 
     private var isStopping: Boolean = false
@@ -55,36 +53,56 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun watchFiles() {
         log.info { "Starting Watcher" }
-        watcherChannel.consumeEach {
-            if (it.file == SharedConfig.incomingContent) {
-                logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
-            } else {
-                logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
-            }
-            try {
-                when (it.kind) {
-                    Deleted -> removeFile(it.file)
-                    Initialized -> { /* Do nothing */ }
-                    else -> {
-                        val added = addFile(it.file)
-                        if (!added) {
-                            logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
+        for (folder in watchDirectories) {
+            startWatchOnDirectory(folder)
+        }
+    }
+
+    val activeWatchers: MutableList<FileWatcher> = mutableListOf()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun startWatchOnDirectory(file: File) {
+        if (activeWatchers.any {it -> it.file.absolutePath == file.absolutePath}) {
+            log.error { "Attempting to start a watcher on an already watched directory ${file.absolutePath}" }
+        }
+        val watcher =  file.asWatcher { watcher ->
+            watcher.consumeEach {
+                if (it.file == SharedConfig.incomingContent) {
+                    logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
+                } else {
+                    logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
+                }
+                try {
+                    when (it.kind) {
+                        Deleted -> removeFile(it.file)
+                        Initialized -> { /* Do nothing */ }
+                        else -> {
+                            val added = addFile(it.file)
+                            if (!added) {
+                                logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
+                            }
                         }
                     }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        watcherChannel.invokeOnClose {
-            it?.printStackTrace()
-            log.warn { "Watcher stopped!!!" }
-            if (!isStopping) {
-                ioCoroutine.launch {
-                    watchFiles()
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
+        }.also { watcher ->
+            watcher.watcher.invokeOnClose {
+                it?.printStackTrace()
+                log.warn { "Watcher stopped for ${watcher.file}" }
+                if (!isStopping) {
+                    log.info { "Determined that the program is not in a termination stage.. Restarting watcher" }
+                    activeWatchers.remove(watcher)
+                    ioCoroutine.launch {
+                        log.info { "Waiting 500ms before restarting watcher.." }
+                        delay(500)
+                        startWatchOnDirectory(watcher.file)
+                    }
+                }
+            }
         }
+        log.info { "Now watching ${file.absolutePath} for files" }
+        activeWatchers.add(watcher)
     }
 
 

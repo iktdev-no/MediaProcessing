@@ -5,7 +5,10 @@ import no.iktdev.eventi.database.MySqlDataSource
 import java.io.File
 
 object SharedConfig {
-    var incomingContent: File = if (!System.getenv("DIRECTORY_CONTENT_INCOMING").isNullOrBlank()) File(System.getenv("DIRECTORY_CONTENT_INCOMING")) else File("/src/input")
+    var incomingContent: List<File> = if (!System.getenv("DIRECTORY_CONTENT_INCOMING").isNullOrBlank()) {
+        System.getenv("DIRECTORY_CONTENT_INCOMING").split(",")
+            .map { File(it) }
+    } else listOf(File("/src/input"))
     var cachedContent: File = if (!System.getenv("DIRECTORY_CONTENT_CACHE").isNullOrBlank()) File(System.getenv("DIRECTORY_CONTENT_CACHE")) else File("/src/cache")
     val outgoingContent: File = if (!System.getenv("DIRECTORY_CONTENT_OUTGOING").isNullOrBlank()) File(System.getenv("DIRECTORY_CONTENT_OUTGOING")) else File("/src/output")
 
