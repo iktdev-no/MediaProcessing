@@ -50,9 +50,9 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     }
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun watchFiles() {
         log.info { "Starting Watcher" }
+        log.info { "Watching directories:" + watchDirectories.map { it.absolutePath }.joinToString { "\n\t" } }
         for (folder in watchDirectories) {
             startWatchOnDirectory(folder)
         }
