@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
+import no.iktdev.mediaprocessing.shared.common.ifNotEmpty
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -52,8 +53,17 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
 
     suspend fun watchFiles() {
         log.info { "Starting Watcher" }
-        val dirs = watchDirectories.joinToString("\n\t") { it.absolutePath }
-        log.info { "Watching directories: $dirs" }
+        val dirs = watchDirectories.filter { it.exists() && it.isDirectory }
+        if (dirs.isNotEmpty()) {
+            val paths = dirs.joinToString("\n\t") { it.absolutePath }
+            log.info { "Watching directories:\n\t $paths" }
+        }
+
+        //val errorConfiguredDirs = watchDirectories.filter { !it.isDirectory || !it.exists()}.joinToString("\n\t") { it.absolutePath }
+        watchDirectories.filter { !it.isDirectory || !it.exists()}.ifNotEmpty {
+            val errorConfiguredDirs = it.joinToString("\n\t") { it.absolutePath }
+            log.error { "Failed to initialize watcher for the following: \n\t $errorConfiguredDirs" }
+        }
         for (folder in watchDirectories) {
             startWatchOnDirectory(folder)
         }

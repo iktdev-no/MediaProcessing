@@ -131,3 +131,9 @@ fun File.moveTo(destinationFile: File, onProgress: (Double) -> Unit = {}): Boole
 
     return true
 }
+
+fun <T> List<T>.ifNotEmpty(block: (List<T>) -> Unit) {
+    if (this.isNotEmpty()) {
+        block(this)
+    }
+}
