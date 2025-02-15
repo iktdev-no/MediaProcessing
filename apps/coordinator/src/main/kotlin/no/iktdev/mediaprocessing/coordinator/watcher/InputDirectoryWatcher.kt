@@ -52,7 +52,8 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
 
     suspend fun watchFiles() {
         log.info { "Starting Watcher" }
-        log.info { "Watching directories:" + watchDirectories.map { it.absolutePath }.joinToString { "\n\t" } }
+        val dirs = watchDirectories.joinToString("\n\t") { it.absolutePath }
+        log.info { "Watching directories: $dirs" }
         for (folder in watchDirectories) {
             startWatchOnDirectory(folder)
         }
