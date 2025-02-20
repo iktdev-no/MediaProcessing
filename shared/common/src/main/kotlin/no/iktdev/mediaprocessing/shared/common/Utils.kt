@@ -3,8 +3,10 @@ package no.iktdev.mediaprocessing.shared.common
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import java.io.File
+import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.net.InetAddress
+import java.security.MessageDigest
 import java.util.zip.CRC32
 
 private val logger = KotlinLogging.logger {}
@@ -136,4 +138,28 @@ fun <T> List<T>.ifNotEmpty(block: (List<T>) -> Unit) {
     if (this.isNotEmpty()) {
         block(this)
     }
+}
+
+fun File.md5(): String {
+    return getChecksum(this.absolutePath)
+}
+
+fun getChecksum(filePath: String): String {
+    val digest = MessageDigest.getInstance("MD5")
+    val fis = FileInputStream(filePath)
+    val byteArray = ByteArray(1024)
+    var bytesCount: Int
+
+    while (fis.read(byteArray).also { bytesCount = it } != -1) {
+        digest.update(byteArray, 0, bytesCount)
+    }
+
+    fis.close()
+
+    val bytes = digest.digest()
+    val sb = StringBuilder()
+    for (byte in bytes) {
+        sb.append(String.format("%02x", byte))
+    }
+    return sb.toString()
 }

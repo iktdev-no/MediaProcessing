@@ -15,4 +15,5 @@ object processed: IntIdTable() {
     val encoded: Column<Boolean> = bool("encoded").default(false)
     val extracted: Column<Boolean> = bool("extracted").default(false)
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
+    val checksum: Column<String?> = varchar("checksum", 256).nullable()
 }

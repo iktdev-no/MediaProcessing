@@ -7,11 +7,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
+import no.iktdev.eventi.database.executeWithResult
+import no.iktdev.eventi.database.withTransaction
 import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
+import no.iktdev.mediaprocessing.shared.common.database.tables.files
 import no.iktdev.mediaprocessing.shared.common.extended.isSupportedVideoFile
 import no.iktdev.mediaprocessing.shared.common.ifNotEmpty
+import no.iktdev.mediaprocessing.shared.common.md5
+import no.iktdev.streamit.library.db.executeOrException
+import no.iktdev.streamit.library.db.withTransaction
+import org.jetbrains.exposed.sql.insertIgnore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -149,6 +156,14 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
         logger.info { "File available ${file.file.name}" }
 
         // This sends it to coordinator to start the process
+        executeWithResult(eventDatabase.database.database) {
+            files.insertIgnore {
+                it[baseName] = file.file.nameWithoutExtension
+                it[folder] = file.file.parentFile.absolutePath
+                it[fileName] = file.file.absolutePath
+                it[checksum] = file.file.md5()
+            }
+        }
         coordinator.startProcess(file.file, ProcessType.FLOW)
     }
 
