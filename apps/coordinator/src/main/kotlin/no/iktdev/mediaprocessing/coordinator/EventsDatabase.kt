@@ -11,7 +11,8 @@ class EventsDatabase() {
         allEvents,
         tasks,
         runners,
-        processed
+        processed,
+        files
     )
 
     init {
