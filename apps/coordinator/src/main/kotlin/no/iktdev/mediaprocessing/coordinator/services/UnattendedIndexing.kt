@@ -23,13 +23,9 @@ class UnattendedIndexing {
     @Scheduled(fixedDelay = 60_000*60)
     fun indexContent() {
         logger.info { "Performing indexing of input root: ${SharedConfig.inputRoot.absolutePath}" }
-        val foundFiles: MutableList<File> = mutableListOf()
-        SharedConfig.inputRoot.walkTopDown().filter { it.isFile && it.isSupportedVideoFile() }.also {
-            foundFiles.addAll(it)
-        }
-
-        withTransaction(eventDatabase.database) {
-            foundFiles.forEach { file ->
+        val fileList =  SharedConfig.inputRoot.walkTopDown().filter { it.isFile && it.isSupportedVideoFile() }
+        fileList.forEach { file ->
+            withTransaction(eventDatabase.database) {
                 files.insertIgnore {
                     it[this.fileName] = file.absolutePath
                     it[this.baseName] = file.nameWithoutExtension
