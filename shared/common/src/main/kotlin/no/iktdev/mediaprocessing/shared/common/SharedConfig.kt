@@ -5,6 +5,7 @@ import no.iktdev.eventi.database.MySqlDataSource
 import java.io.File
 
 object SharedConfig {
+    var inputRoot: File = if (!System.getenv("INPUT_ROOT").isNullOrBlank()) File(System.getenv("INPUT_ROOT")) else File("/src/input")
     var incomingContent: List<File> = if (!System.getenv("DIRECTORY_CONTENT_INCOMING").isNullOrBlank()) {
         System.getenv("DIRECTORY_CONTENT_INCOMING").split(",")
             .map { File(it) }
