@@ -38,5 +38,7 @@ class UnattendedIndexing {
                 }
             }
         }
+        logger.info { "Indexing completed" }
+
     }
 }
