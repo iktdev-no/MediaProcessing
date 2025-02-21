@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 
-object processedFile: IntIdTable() {
+object filesProcessed: IntIdTable() {
     val title: Column<String> = varchar("title", 256)
     val inputFile: Column<String> = varchar("fileName", 512)
     val data: Column<String> = text("data")
