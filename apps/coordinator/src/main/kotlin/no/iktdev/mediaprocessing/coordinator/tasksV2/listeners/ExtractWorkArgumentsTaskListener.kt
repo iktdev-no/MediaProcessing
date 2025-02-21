@@ -4,18 +4,14 @@ import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.ExtractWorkArgumentsMapping
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.io.File
 
 @Service
 class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
@@ -47,7 +43,7 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
         }
         active = true
         val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>() ?: return
-        if (started.data == null || started.data?.operations?.contains(StartOperationEvents.EXTRACT) == false) {
+        if (started.data == null || started.data?.operations?.contains(OperationEvents.EXTRACT) == false) {
             active = false
             return
         }

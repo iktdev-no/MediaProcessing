@@ -4,7 +4,7 @@ import no.iktdev.eventi.data.dataAs
 import no.iktdev.eventi.data.isSuccessful
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import no.iktdev.mediaprocessing.shared.common.contract.dto.SubtitleFormats
 import java.io.File
 
@@ -17,11 +17,11 @@ object CompletionValidator {
      * Checks whether it requires encode or extract or both, and it has created events with args
      */
     fun req1(started: MediaProcessStartEvent, events: List<Event>): Boolean {
-        val encodeFulfilledOrSkipped = if (started.data?.operations?.contains(StartOperationEvents.ENCODE) == true) {
+        val encodeFulfilledOrSkipped = if (started.data?.operations?.contains(OperationEvents.ENCODE) == true) {
             events.any { it.eventType == Events.EventMediaParameterEncodeCreated }
         } else true
 
-        val extractFulfilledOrSkipped = if (started.data?.operations?.contains(StartOperationEvents.EXTRACT) == true) {
+        val extractFulfilledOrSkipped = if (started.data?.operations?.contains(OperationEvents.EXTRACT) == true) {
             events.any { it.eventType == Events.EventMediaParameterExtractCreated }
         } else true
 
@@ -34,8 +34,8 @@ object CompletionValidator {
      * Checks whether work that was supposed to be created has been created.
      * Checks if all subtitles that can be processed has been created if convert is set.
      */
-    fun req2(operations: List<StartOperationEvents>, events: List<Event>): Boolean {
-        if (StartOperationEvents.ENCODE in operations) {
+    fun req2(operations: List<OperationEvents>, events: List<Event>): Boolean {
+        if (OperationEvents.ENCODE in operations) {
             val encodeParamter = events.find { it.eventType == Events.EventMediaParameterEncodeCreated }?.az<EncodeArgumentCreatedEvent>()
             val encodeWork = events.find { it.eventType == Events.EventWorkEncodeCreated }
             if (encodeParamter?.isSuccessful() == true && (encodeWork == null))
@@ -44,12 +44,12 @@ object CompletionValidator {
 
         val extractParamter = events.find { it.eventType == Events.EventMediaParameterExtractCreated }?.az<ExtractArgumentCreatedEvent>()
         val extractWork = events.filter { it.eventType == Events.EventWorkExtractCreated }
-        if (StartOperationEvents.EXTRACT in operations) {
+        if (OperationEvents.EXTRACT in operations) {
             if (extractParamter?.isSuccessful() == true && extractParamter.data?.size != extractWork.size)
                 return false
         }
 
-        if (StartOperationEvents.CONVERT in operations) {
+        if (OperationEvents.CONVERT in operations) {
             val convertWork = events.filter { it.eventType == Events.EventWorkConvertCreated }
 
             val supportedSubtitleFormats = SubtitleFormats.entries.map { it.name }
@@ -66,22 +66,22 @@ object CompletionValidator {
     /**
      * Checks whether all work that has been created has been completed
      */
-    fun req3(operations: List<StartOperationEvents>, events: List<Event>): Boolean {
-        if (StartOperationEvents.ENCODE in operations) {
+    fun req3(operations: List<OperationEvents>, events: List<Event>): Boolean {
+        if (OperationEvents.ENCODE in operations) {
             val encodeWork = events.filter { it.eventType == Events.EventWorkEncodeCreated }
             val encodePerformed = events.filter { it.eventType == Events.EventWorkEncodePerformed }
             if (encodePerformed.size < encodeWork.size)
                 return false
         }
 
-        if (StartOperationEvents.EXTRACT in operations) {
+        if (OperationEvents.EXTRACT in operations) {
             val extractWork = events.filter { it.eventType == Events.EventWorkExtractCreated }
             val extractPerformed = events.filter { it.eventType == Events.EventWorkExtractPerformed }
             if (extractPerformed.size < extractWork.size)
                 return false
         }
 
-        if (StartOperationEvents.CONVERT in operations) {
+        if (OperationEvents.CONVERT in operations) {
             val convertWork = events.filter { it.eventType == Events.EventWorkConvertCreated }
             val convertPerformed = events.filter { it.eventType == Events.EventWorkConvertPerformed }
             if (convertPerformed.size < convertWork.size)

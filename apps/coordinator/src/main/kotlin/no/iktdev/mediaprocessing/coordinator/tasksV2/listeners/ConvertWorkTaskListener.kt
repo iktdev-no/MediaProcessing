@@ -1,20 +1,16 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
-import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.*
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
-import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.taskManager
 import no.iktdev.mediaprocessing.coordinator.tasksV2.implementations.WorkTaskListener
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import no.iktdev.mediaprocessing.shared.common.contract.dto.isOnly
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -74,7 +70,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             foundEvent?.outputFile
         } else if (event.eventType == Events.EventMediaProcessStarted) {
             val startEvent = event.az<MediaProcessStartEvent>()?.data
-            if (startEvent?.operations?.isOnly(StartOperationEvents.CONVERT) == true) {
+            if (startEvent?.operations?.isOnly(OperationEvents.CONVERT) == true) {
                 startEvent.file
             } else null
         } else {

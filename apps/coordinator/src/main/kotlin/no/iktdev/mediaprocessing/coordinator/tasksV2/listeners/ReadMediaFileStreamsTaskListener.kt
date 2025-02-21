@@ -8,19 +8,16 @@ import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.dataAs
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.runner.CodeToOutput
 import no.iktdev.mediaprocessing.shared.common.runner.getOutputUsing
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsReadEvent
 import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -36,7 +33,7 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     override var coordinator: Coordinator? = null
 
     val log = KotlinLogging.logger {}
-    val requiredOperations = listOf(StartOperationEvents.ENCODE, StartOperationEvents.EXTRACT)
+    val requiredOperations = listOf(OperationEvents.ENCODE, OperationEvents.EXTRACT)
 
     override val produceEvent: Events = Events.EventMediaReadStreamPerformed
     override val listensForEvents: List<Events> = listOf(Events.EventMediaProcessStarted)

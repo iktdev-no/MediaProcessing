@@ -11,7 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import no.iktdev.mediaprocessing.shared.common.contract.data.MediaProcessStartEvent
 import no.iktdev.mediaprocessing.shared.common.contract.data.PermitWorkCreationEvent
 import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import no.iktdev.mediaprocessing.shared.common.database.cal.EventsManager
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -36,15 +36,15 @@ class Coordinator(
     }
 
     public fun startProcess(file: File, type: ProcessType) {
-        val operations: List<StartOperationEvents> = listOf(
-            StartOperationEvents.ENCODE,
-            StartOperationEvents.EXTRACT,
-            StartOperationEvents.CONVERT
+        val operations: List<OperationEvents> = listOf(
+            OperationEvents.ENCODE,
+            OperationEvents.EXTRACT,
+            OperationEvents.CONVERT
         )
         startProcess(file, type, operations)
     }
 
-    fun startProcess(file: File, type: ProcessType, operations: List<StartOperationEvents>): UUID {
+    fun startProcess(file: File, type: ProcessType, operations: List<OperationEvents>): UUID {
         val referenceId: UUID = UUID.randomUUID()
         val event = MediaProcessStartEvent(
             metadata = EventMetadata(

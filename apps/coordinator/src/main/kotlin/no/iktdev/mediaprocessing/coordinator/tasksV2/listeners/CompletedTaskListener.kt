@@ -5,26 +5,16 @@ import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.data.*
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
-import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
-import no.iktdev.eventi.database.executeOrException
-import no.iktdev.eventi.database.withTransaction
+import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.EventsSummaryMapping
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.store.*
 import no.iktdev.mediaprocessing.coordinator.tasksV2.validator.CompletionValidator
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.reader.*
-import no.iktdev.streamit.library.db.query.SummaryQuery
-import no.iktdev.streamit.library.db.tables.catalog
-import no.iktdev.streamit.library.db.tables.titles
-import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.insertIgnore
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.update
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
-import java.sql.SQLIntegrityConstraintViolationException
 
 @Service
 class CompletedTaskListener : CoordinatorEventListener() {
@@ -186,10 +176,13 @@ class CompletedTaskListener : CoordinatorEventListener() {
             e.printStackTrace()
         }
 
-        ProcessedItemsStore.store(
+        val summary = EventsSummaryMapping().map(events)
+
+
+        ProcessedFileStore.store(
             mediaInfo.title,
             events,
-            (listOfNotNull(newVideoPath?.second) + (newSubtitles?.map { it.destination } ?: emptyList()))
+            summary
         )
 
 

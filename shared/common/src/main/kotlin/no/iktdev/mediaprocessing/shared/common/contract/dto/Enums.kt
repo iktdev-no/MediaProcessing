@@ -16,12 +16,12 @@ enum class SubtitleFormats {
     SMI
 }
 
-enum class StartOperationEvents {
+enum class OperationEvents {
     ENCODE,
     EXTRACT,
     CONVERT
 }
 
-fun List<StartOperationEvents>.isOnly(expected: StartOperationEvents): Boolean {
+fun List<OperationEvents>.isOnly(expected: OperationEvents): Boolean {
     return this.size == 1 && this.firstOrNull { it == expected } != null
 }

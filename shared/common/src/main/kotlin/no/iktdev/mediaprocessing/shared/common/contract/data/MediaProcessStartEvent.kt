@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.shared.common.contract.data
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 
 data class MediaProcessStartEvent(
     override val metadata: EventMetadata,
@@ -13,10 +13,10 @@ data class MediaProcessStartEvent(
 
 data class StartEventData(
     val type: ProcessType = ProcessType.FLOW,
-    val operations: List<StartOperationEvents> = listOf(
-        StartOperationEvents.ENCODE,
-        StartOperationEvents.EXTRACT,
-        StartOperationEvents.CONVERT
+    val operations: List<OperationEvents> = listOf(
+        OperationEvents.ENCODE,
+        OperationEvents.EXTRACT,
+        OperationEvents.CONVERT
     ),
     val file: String // AbsolutePath
 )

@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.common.contract.dto.EventRequest
-import no.iktdev.mediaprocessing.shared.common.contract.dto.StartOperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -30,7 +30,7 @@ class RequestEventController(@Autowired var coordinator: Coordinator) {
             if (!file.exists()) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(convert.file)
             }
-            referenceId = coordinator.startProcess(file, ProcessType.FLOW, listOf(StartOperationEvents.CONVERT)).toString()
+            referenceId = coordinator.startProcess(file, ProcessType.FLOW, listOf(OperationEvents.CONVERT)).toString()
 
         } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Gson().toJson(convert))
@@ -49,7 +49,7 @@ class RequestEventController(@Autowired var coordinator: Coordinator) {
             if (!file.exists()) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body(payload)
             }
-            referenceId = coordinator.startProcess(file, ProcessType.MANUAL, listOf(StartOperationEvents.EXTRACT)).toString()
+            referenceId = coordinator.startProcess(file, ProcessType.MANUAL, listOf(OperationEvents.EXTRACT)).toString()
 
         } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(payload)
