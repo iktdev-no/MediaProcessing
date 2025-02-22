@@ -14,67 +14,48 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
-      pyMetadata: ${{ steps.pyMetadataChangesDetected.outputs.changed }}
-      sharedLibrary: ${{ steps.sharedLibraryChangesDetected.outputs.changed }}
-      coordinator: ${{ steps.coordinatorChangesDetected.outputs.changed }}
-      processer: ${{ steps.processerChangesDetected.outputs.changed }}
-      converter: ${{ steps.converterChangesDetected.outputs.changed }}
-      ui: ${{ steps.uiChangesDetected.outputs.changed }}
+      pyMetadata:     ${{ steps.checkAppChanges.outputs.metadata }}
+      sharedLibrary:  ${{ steps.checkAppChanges.outputs.shared }}
+      coordinator:    ${{ steps.checkAppChanges.outputs.coordinator }}
+      processer:      ${{ steps.checkAppChanges.outputs.processer }}
+      converter:      ${{ steps.checkAppChanges.outputs.converter }}
+      ui:             ${{ steps.checkAppChanges.outputs.ui }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Detect if pyMetadata has changed
-        id: pyMetadataChangesDetected
-        uses: tchupp/actions-detect-directory-changes@v1.0.15
+      - uses: dorny/paths-filter@v3
+        name: "Detect app changes"
+        id: checkAppChanges
         with:
-          included-paths: "apps/pyMetadata/**"
-
-      - name: Detect if shared library
-        id: sharedLibraryChangesDetected
-        uses: tchupp/actions-detect-directory-changes@v1.0.15
-        with:
-          included-paths: "shared/**"
-
-      - name: Detect if coordinator has changed
-        id: coordinatorChangesDetected
-        uses: tchupp/actions-detect-directory-changes@v1.0.15
-        with:
-          included-paths: "apps/coordinator/**"
-
-      - name: Detect if processer has changed
-        id: processerChangesDetected
-        uses: tchupp/actions-detect-directory-changes@v1.0.15
-        with:
-          included-paths: "apps/processer/**"
-
-      - name: Detect if converter has changed
-        id: converterChangesDetected
-        uses: tchupp/actions-detect-directory-changes@v1.0.15
-        with:
-          included-paths: "apps/converter/**"
-
-      - name: Detect if ui has changed
-        id: uiChangesDetected
-        uses: tchupp/actions-detect-directory-changes@v1.0.15
-        with:
-          included-paths: "apps/ui/**"
+          filters: |
+            metadata:
+              - 'apps/pyMetadata/**'
+            coordinator:
+              - 'apps/coordinator/**'
+            processer:
+              - 'apps/processer/**'
+            converter:
+              - 'apps/converter/**'
+            ui:
+              - 'apps/ui/**'
+            shared:
+              - 'shared/**'
 
       # Step to print the outputs from "pre-check" job
       - name: Print Outputs from pre-check job
         run: |
           echo "Apps\n"
-          echo "app:pyMetadata: ${{ steps.pyMetadataChangesDetected.outputs.changed }}"
-          echo "app:coordinator: ${{ steps.coordinatorChangesDetected.outputs.changed }}"
-          echo "app:processer: ${{ steps.processerChangesDetected.outputs.changed }}"
-          echo "app:converter: ${{ steps.converterChangesDetected.outputs.changed }}"
-          echo "app:ui: ${{ steps.uiChangesDetected.outputs.changed }}"
+          echo "app:pyMetadata:   ${{ steps.checkAppChanges.outputs.metadata }}"
+          echo "app:coordinator:  ${{ steps.checkAppChanges.outputs.coordinator }}"
+          echo "app:processer:    ${{ steps.checkAppChanges.outputs.processer }}"
+          echo "app:converter:    ${{ steps.checkAppChanges.outputs.converter }}"
+          echo "app:ui:           ${{ steps.checkAppChanges.outputs.ui }}"
           
           echo "Shared"
-          echo "shared: ${{ steps.sharedLibraryChangesDetected.outputs.changed }}"
-          echo "${{ needs.pre-check.outputs }}"
-          echo "${{ needs.pre-check }}"
+          echo "shared:           ${{ steps.checkAppChanges.outputs.shared }}"
+          echo "${{ steps.checkAppChanges.outputs }}"
 
   build-shared:
     runs-on: ubuntu-latest
@@ -98,7 +79,9 @@ jobs:
 
 
   build-processer:
-    needs: build-shared
+    needs: 
+      - build-shared
+      - pre-check
     if: ${{ needs.pre-check.outputs.processer == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
@@ -155,7 +138,9 @@ jobs:
             bskjon/mediaprocessing-processer:v4-${{ steps.docker-tag.outputs.tag }}
 
   build-converter:
-    needs: build-shared
+    needs:
+      - build-shared
+      - pre-check
     if: ${{ needs.pre-check.outputs.converter == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
@@ -213,7 +198,9 @@ jobs:
             bskjon/mediaprocessing-converter:v4-${{ steps.docker-tag.outputs.tag }}
             
   build-coordinator:
-    needs: build-shared
+    needs:
+      - build-shared
+      - pre-check
     if: ${{ needs.pre-check.outputs.coordinator == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
@@ -273,7 +260,8 @@ jobs:
             bskjon/mediaprocessing-coordinator:v4-${{ steps.docker-tag.outputs.tag }}
             
   build-pymetadata:
-    needs: pre-check
+    needs:
+      - pre-check
     if:  ${{ needs.pre-check.outputs.pyMetadata == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
@@ -284,7 +272,7 @@ jobs:
       - name: Build pyMetadata module
         id: build-pymetadata
         run: |
-          if [[ "${{ steps.check-pymetadata.outputs.changed }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "${{ needs.pre-check.outputs.pyMetadata }}" == "true" || "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             cd apps/pyMetadata
             # Add the necessary build steps for your Python module here
             echo "Build completed"
