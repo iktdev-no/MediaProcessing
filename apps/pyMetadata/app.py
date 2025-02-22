@@ -175,6 +175,12 @@ class EventsPullerThread(threading.Thread):
                     if (row is not None):
                         try:
                             referenceId = row["referenceId"]
+                            status = row["status"]
+                            
+                            if (status == "Failed" or status == "Skipped"):
+                                logger.info(f"Skipping failed event referenceId: {referenceId}, eventId: {row['eventId']}")
+                                continue
+                            
                             incomingEventType = row["event"]
                             logMessage = f"""
 ============================================================================
@@ -183,6 +189,7 @@ Found message
 {incomingEventType}
 ============================================================================\n"""
                             logger.info(logMessage)
+                            
                             
                             event = json_to_media_event(row["data"])
                             producedEvent = asyncio.run(MetadataEventHandler(event).run())

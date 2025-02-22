@@ -189,13 +189,11 @@ class CompletedTaskListener : CoordinatorEventListener() {
             e.printStackTrace()
         }
 
-
         ProcessedFileStore.store(
             mediaInfo.title,
             events,
             EventsSummaryMapping().map(events)
         )
-
 
         if (!doNotProduceComplete) {
             onProduceEvent(MediaProcessCompletedEvent(
@@ -205,8 +203,6 @@ class CompletedTaskListener : CoordinatorEventListener() {
         } else {
             log.warn { "Do not produce complete is enabled!" }
         }
-
-
 
         active = false
     }
