@@ -2,31 +2,27 @@ package no.iktdev.mediaprocessing.shared.common.contract.data
 
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.mediaprocessing.shared.common.contract.Events
+import no.iktdev.mediaprocessing.shared.common.contract.reader.SummaryInfo
 
 data class MediaProcessCompletedEvent(
     override val metadata: EventMetadata,
-    override val data: CompletedEventData?,
-    override val eventType: Events = Events.EventMediaProcessCompleted
+    override val data: CompletedData?,
+    override val eventType: Events = Events.ProcessCompleted
 ): Event()
 
-data class CompletedEventData(
+data class CompletedData(
     val eventIdsCollected: List<String>,
-    val videoMoved: VideoMoved?,
-    val coverMoved: CoverMoved?,
-    val subtitlesMoved: List<SubtitlesMoved>
+    val metadataStored: MetadataStored
 )
 
-data class SubtitlesMoved(
-    val source: String,
-    val destination: String
-)
-
-data class CoverMoved(
-    val source: String,
-    val destination: String
-)
-
-data class VideoMoved(
-    val source: String,
-    val destination: String
+data class MetadataStored(
+    val title: String,
+    val titles: List<String>,
+    val type: String,
+    val cover: String? = null,
+    val collection: String,
+    val summary: List<SummaryInfo> = emptyList(),
+    val foundTitles: List<String>,
+    val genres: List<String>,
+    val genreIds: String? = null
 )

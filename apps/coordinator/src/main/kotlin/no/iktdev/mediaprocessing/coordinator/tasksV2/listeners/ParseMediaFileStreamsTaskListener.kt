@@ -7,15 +7,11 @@ import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.dataAs
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsParsedEvent
-import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsReadEvent
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.SubtitleStream
@@ -35,9 +31,9 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     override var coordinator: Coordinator? = null
 
 
-    override val produceEvent: Events = Events.EventMediaParseStreamPerformed
+    override val produceEvent: Events = Events.ParseStreamPerformed
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaReadStreamPerformed
+        Events.ReadStreamPerformed
     )
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {

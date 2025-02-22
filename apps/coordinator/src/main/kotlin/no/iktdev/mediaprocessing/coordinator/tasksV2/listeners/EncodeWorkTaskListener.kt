@@ -7,13 +7,11 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.derivedFromEventId
 import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.data.referenceId
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.taskManager
 import no.iktdev.mediaprocessing.coordinator.tasksV2.implementations.WorkTaskListener
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -28,10 +26,10 @@ class EncodeWorkTaskListener : WorkTaskListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.EventWorkEncodeCreated
+    override val produceEvent: Events = Events.WorkEncodeCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaParameterEncodeCreated,
-        Events.EventMediaWorkProceedPermitted
+        Events.ParameterEncodeCreated,
+        Events.WorkProceedPermitted
     )
 
     override fun canProduceMultipleEvents(): Boolean {
@@ -49,10 +47,10 @@ class EncodeWorkTaskListener : WorkTaskListener() {
             return
         }
 
-        val encodeArguments = if (event.eventType == Events.EventMediaParameterEncodeCreated) {
+        val encodeArguments = if (event.eventType == Events.ParameterEncodeCreated) {
             event.az<EncodeArgumentCreatedEvent>()?.data
         } else {
-            events.find { it.eventType == Events.EventMediaParameterEncodeCreated }
+            events.find { it.eventType == Events.ParameterEncodeCreated }
                 ?.az<EncodeArgumentCreatedEvent>()?.data
         }
         if (encodeArguments == null) {

@@ -7,7 +7,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class MediaOutInformationConstructedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.EventMediaReadOutNameAndType,
+    override val eventType: Events = Events.ReadOutNameAndType,
     override val data: MediaInfoReceived? = null
 ) : Event() {
 }

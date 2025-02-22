@@ -8,7 +8,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 data class MediaProcessStartEvent(
     override val metadata: EventMetadata,
     override val data: StartEventData?,
-    override val eventType: Events = Events.EventMediaProcessStarted
+    override val eventType: Events = Events.ProcessStarted
 ): Event()
 
 data class StartEventData(

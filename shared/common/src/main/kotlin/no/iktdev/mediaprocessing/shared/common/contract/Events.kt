@@ -1,41 +1,37 @@
 package no.iktdev.mediaprocessing.shared.common.contract
 
-enum class Events(val event: String) {
-    EventMediaProcessStarted                ("event:media-process:started"),
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
 
-    EventMediaReadStreamPerformed           ("event:media-read-stream:performed"),
-    EventMediaParseStreamPerformed          ("event:media-parse-stream:performed"),
-    EventMediaReadBaseInfoPerformed         ("event:media-read-base-info:performed"),
-    EventMediaMetadataSearchPerformed       ("event:media-metadata-search:performed"),
-    EventMediaReadOutNameAndType            ("event:media-read-out-name-and-type:performed"),
-    EventMediaReadOutCover                  ("event:media-read-out-cover:performed"),
+enum class Events(val event: String, val dataClass: Class<out Event>) {
+    ProcessStarted                ("event:media-process:started", dataClass = MediaProcessStartEvent::class.java),
 
-    EventMediaParameterEncodeCreated        ("event:media-encode-parameter:created"),
-    EventMediaParameterExtractCreated       ("event:media-extract-parameter:created"),
+    ReadStreamPerformed           ("event:media-read-stream:performed", MediaFileStreamsReadEvent::class.java),
+    ParseStreamPerformed          ("event:media-parse-stream:performed", MediaFileStreamsParsedEvent::class.java),
+    ReadBaseInfoPerformed         ("event:media-read-base-info:performed", BaseInfoEvent::class.java),
+    MetadataSearchPerformed       ("event:media-metadata-search:performed", MediaMetadataReceivedEvent::class.java),
+    ReadOutNameAndType            ("event:media-read-out-name-and-type:performed", MediaOutInformationConstructedEvent::class.java),
+    ReadOutCover                  ("event:media-read-out-cover:performed", MediaCoverInfoReceivedEvent::class.java),
 
-    EventMediaParameterDownloadCoverCreated ("event:media-download-cover-parameter:created"),
+    ParameterEncodeCreated        ("event:media-encode-parameter:created", EncodeArgumentCreatedEvent::class.java),
+    ParameterExtractCreated       ("event:media-extract-parameter:created", ExtractArgumentCreatedEvent::class.java),
 
-    EventMediaWorkProceedPermitted          ("event:media-work-proceed:permitted"),
+    //EventMediaParameterDownloadCoverCreated ("event:media-download-cover-parameter:created"),
 
-    EventNotificationOfWorkItemRemoval("event:notification-work-item-removal"),
+    WorkProceedPermitted          ("event:media-work-proceed:permitted", PermitWorkCreationEvent::class.java),
 
-    EventWorkEncodeCreated                  ("event:work-encode:created"),
-    EventWorkExtractCreated                 ("event:work-extract:created"),
-    EventWorkConvertCreated                 ("event:work-convert:created"),
+    //EventNotificationOfWorkItemRemoval("event:notification-work-item-removal"),
 
-    EventWorkEncodePerformed                ("event:work-encode:performed"),
-    EventWorkExtractPerformed               ("event:work-extract:performed"),
-    EventWorkConvertPerformed               ("event:work-convert:performed"),
-    EventWorkDownloadCoverPerformed         ("event:work-download-cover:performed"),
+    WorkEncodeCreated                  ("event:work-encode:created", EncodeWorkCreatedEvent::class.java),
+    WorkExtractCreated                 ("event:work-extract:created", ExtractWorkCreatedEvent::class.java),
+    WorkConvertCreated                 ("event:work-convert:created", ConvertWorkCreatedEvent::class.java),
 
-    EVENT_STORE_VIDEO_PERFORMED             ("event:store-video:performed"),
-    EVENT_STORE_SUBTITLE_PERFORMED          ("event:store-subtitle:performed"),
-    EVENT_STORE_COVER_PERFORMED             ("event:store-cover:performed"),
-    EVENT_STORE_METADATA_PERFORMED          ("event:store-metadata:performed"),
+    WorkEncodePerformed                ("event:work-encode:performed", EncodeWorkPerformedEvent::class.java),
+    WorkExtractPerformed               ("event:work-extract:performed", ExtractWorkPerformedEvent::class.java),
+    WorkConvertPerformed               ("event:work-convert:performed", ConvertWorkPerformed::class.java),
+    WorkDownloadCoverPerformed         ("event:work-download-cover:performed", MediaCoverDownloadedEvent::class.java),
 
-    EventMediaProcessCompleted              ("event:media-process:completed"),
-    EventCollectAndStore                    ("event::save"),
-
+    PersistContentPerformed            ("event:media-persist:completed", PersistedContentEvent::class.java),
+    ProcessCompleted              ("event:media-process:completed", MediaProcessCompletedEvent::class.java),
     ;
 
     companion object {
@@ -46,20 +42,13 @@ enum class Events(val event: String) {
         fun isOfWork(event: Events): Boolean {
             return event in listOf(
 
-                EventWorkConvertCreated,
-                EventWorkExtractCreated,
-                EventWorkEncodeCreated,
+                WorkConvertCreated,
+                WorkExtractCreated,
+                WorkEncodeCreated,
 
-                EventWorkEncodePerformed,
-                EventWorkConvertPerformed,
-                EventWorkExtractPerformed
-            )
-        }
-
-        fun isOfFinalize(event: Events): Boolean {
-            return event in listOf(
-                EventMediaProcessCompleted,
-                EventCollectAndStore
+                WorkEncodePerformed,
+                WorkConvertPerformed,
+                WorkExtractPerformed
             )
         }
     }

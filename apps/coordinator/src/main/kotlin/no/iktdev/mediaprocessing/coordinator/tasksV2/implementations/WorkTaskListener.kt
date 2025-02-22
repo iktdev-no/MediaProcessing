@@ -12,11 +12,11 @@ abstract class WorkTaskListener: CoordinatorEventListener() {
     private val log = KotlinLogging.logger {}
 
     fun canStart(incomingEvent: Event, events: List<Event>): Boolean {
-        val autoStart = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>()?.data
+        val autoStart = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>()?.data
         if (autoStart == null) {
             log.error { "Start event not found. Requiring permitt event" }
         }
-        return if (incomingEvent.eventType == Events.EventMediaWorkProceedPermitted) {
+        return if (incomingEvent.eventType == Events.WorkProceedPermitted) {
             return true
         } else {
             if (autoStart == null || autoStart.type == ProcessType.MANUAL) {

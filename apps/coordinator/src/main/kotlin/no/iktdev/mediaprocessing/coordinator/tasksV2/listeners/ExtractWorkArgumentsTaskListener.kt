@@ -23,10 +23,10 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.EventMediaParameterExtractCreated
+    override val produceEvent: Events = Events.ParameterExtractCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaParseStreamPerformed,
-        Events.EventMediaReadOutNameAndType
+        Events.ParseStreamPerformed,
+        Events.ReadOutNameAndType
     )
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
@@ -42,18 +42,18 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
             return
         }
         active = true
-        val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>() ?: return
+        val started = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>() ?: return
         if (started.data == null || started.data?.operations?.contains(OperationEvents.EXTRACT) == false) {
             active = false
             return
         }
-        val streams = events.find { it.eventType == Events.EventMediaParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
+        val streams = events.find { it.eventType == Events.ParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
         if (streams == null) {
             active = false
             return
         }
 
-        val mediaInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
+        val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
         if (mediaInfo?.data == null) {
             active = false
             return

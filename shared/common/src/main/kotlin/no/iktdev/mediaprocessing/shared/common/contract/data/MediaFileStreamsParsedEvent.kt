@@ -7,6 +7,6 @@ import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStream
 class MediaFileStreamsParsedEvent(
     override val metadata: EventMetadata,
     override val data: ParsedMediaStreams? = null,
-    override val eventType: Events = Events.EventMediaParseStreamPerformed
+    override val eventType: Events = Events.ParseStreamPerformed
 
 ) : Event()

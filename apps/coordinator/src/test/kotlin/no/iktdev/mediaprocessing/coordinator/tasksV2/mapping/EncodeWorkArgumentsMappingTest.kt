@@ -5,18 +5,15 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsPar
 import no.iktdev.mediaprocessing.shared.common.contract.data.az
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioPreference
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.EncodingPreference
-import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoPreference
 import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class EncodeWorkArgumentsMappingTest {
 
     @Test
     fun parse() {
-        val event = data.fromJsonWithDeserializer(Events.EventMediaParseStreamPerformed)
+        val event = data.fromJsonWithDeserializer(Events.ParseStreamPerformed)
         val parser = EncodeWorkArgumentsMapping(
             "potato.mkv",
             "potato.mp4",

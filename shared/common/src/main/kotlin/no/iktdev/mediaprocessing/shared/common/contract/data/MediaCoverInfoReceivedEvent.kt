@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class MediaCoverInfoReceivedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.EventMediaReadOutCover,
+    override val eventType: Events = Events.ReadOutCover,
     override val data: CoverDetails? = null
 ) : Event() {
 }

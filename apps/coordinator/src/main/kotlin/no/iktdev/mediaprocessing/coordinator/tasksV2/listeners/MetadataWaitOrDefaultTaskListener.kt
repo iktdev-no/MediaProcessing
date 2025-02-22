@@ -40,10 +40,10 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
 
 
-    override val produceEvent: Events = Events.EventMediaMetadataSearchPerformed
+    override val produceEvent: Events = Events.MetadataSearchPerformed
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaReadBaseInfoPerformed,
-        Events.EventMediaMetadataSearchPerformed
+        Events.ReadBaseInfoPerformed,
+        Events.MetadataSearchPerformed
     )
 
 
@@ -58,8 +58,8 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
         if (metadataTimeoutMinutes <= 0) {
             return
         }
-        val hasReadBaseInfo = events.any { it.eventType == Events.EventMediaReadBaseInfoPerformed && it.isSuccessful() }
-        val hasMetadataSearched = events.any { it.eventType == Events.EventMediaMetadataSearchPerformed }
+        val hasReadBaseInfo = events.any { it.eventType == Events.ReadBaseInfoPerformed && it.isSuccessful() }
+        val hasMetadataSearched = events.any { it.eventType == Events.MetadataSearchPerformed }
         val hasPollerForMetadataEvent = waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)
 
         if (!hasReadBaseInfo) {
@@ -76,7 +76,7 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
                 return
             }
 
-            val baseInfo = events.find { it.eventType ==  Events.EventMediaReadBaseInfoPerformed}?.az<BaseInfoEvent>()?.data
+            val baseInfo = events.find { it.eventType ==  Events.ReadBaseInfoPerformed}?.az<BaseInfoEvent>()?.data
             if (baseInfo == null) {
                 log.error { "BaseInfoEvent is null for referenceId: ${consumedIncoming.metadata.referenceId} on eventId: ${consumedIncoming.metadata.eventId}" }
                 return

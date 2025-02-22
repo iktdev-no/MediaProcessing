@@ -1,20 +1,17 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
-import com.google.gson.Gson
 import com.google.gson.JsonObject
-import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.dataAs
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ParseMediaFileStreamsTaskListenerTest {
 
     @Test
     fun testParse() {
-        val event = data.fromJsonWithDeserializer(Events.EventMediaReadStreamPerformed).dataAs<JsonObject>()
+        val event = data.fromJsonWithDeserializer(Events.ReadStreamPerformed).dataAs<JsonObject>()
 
         val parser = ParseMediaFileStreamsTaskListener()
         val result = parser.parseStreams(event)

@@ -5,19 +5,14 @@ import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
-import no.iktdev.eventi.implementations.EventCoordinator
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsListenerContract
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.io.File
 
 @Service
 class CoverDownloadTaskListener : CoordinatorEventListener() {
@@ -29,8 +24,8 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.EventWorkDownloadCoverPerformed
-    override val listensForEvents: List<Events> = listOf(Events.EventMediaReadOutCover)
+    override val produceEvent: Events = Events.WorkDownloadCoverPerformed
+    override val listensForEvents: List<Events> = listOf(Events.ReadOutCover)
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
         if (event == null) {

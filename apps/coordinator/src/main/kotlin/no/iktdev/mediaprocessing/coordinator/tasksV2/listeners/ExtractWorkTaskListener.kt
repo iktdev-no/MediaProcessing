@@ -7,13 +7,11 @@ import no.iktdev.eventi.data.EventStatus
 import no.iktdev.eventi.data.derivedFromEventId
 import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.data.referenceId
-import no.iktdev.eventi.implementations.EventCoordinator
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.taskManager
 import no.iktdev.mediaprocessing.coordinator.tasksV2.implementations.WorkTaskListener
 import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -28,10 +26,10 @@ class ExtractWorkTaskListener: WorkTaskListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.EventWorkExtractCreated
+    override val produceEvent: Events = Events.WorkExtractCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaParameterExtractCreated,
-        Events.EventMediaWorkProceedPermitted
+        Events.ParameterExtractCreated,
+        Events.WorkProceedPermitted
     )
 
     override fun canProduceMultipleEvents(): Boolean {
@@ -58,10 +56,10 @@ class ExtractWorkTaskListener: WorkTaskListener() {
             return
         }
 
-        val arguments = if (event.eventType == Events.EventMediaParameterExtractCreated) {
+        val arguments = if (event.eventType == Events.ParameterExtractCreated) {
             event.az<ExtractArgumentCreatedEvent>()?.data
         } else {
-            events.find { it.eventType == Events.EventMediaParameterExtractCreated }
+            events.find { it.eventType == Events.ParameterExtractCreated }
                 ?.az<ExtractArgumentCreatedEvent>()?.data
         }
         if (arguments == null) {

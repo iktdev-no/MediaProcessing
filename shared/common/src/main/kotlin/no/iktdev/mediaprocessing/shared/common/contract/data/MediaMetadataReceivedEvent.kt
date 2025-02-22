@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class MediaMetadataReceivedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.EventMediaMetadataSearchPerformed,
+    override val eventType: Events = Events.MetadataSearchPerformed,
     override val data: pyMetadata? = null,
     ): Event() {
 }

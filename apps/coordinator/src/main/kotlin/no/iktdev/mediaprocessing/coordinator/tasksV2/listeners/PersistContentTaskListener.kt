@@ -5,7 +5,6 @@ import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.data.*
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
-import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.EventsSummaryMapping
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.store.*
 import no.iktdev.mediaprocessing.coordinator.tasksV2.validator.CompletionValidator
 import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
@@ -14,10 +13,9 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.reader.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.io.File
 
 @Service
-class CompletedTaskListener : CoordinatorEventListener() {
+class PersistContentTaskListener : CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
 
     var doNotProduceComplete = System.getenv("DISABLE_COMPLETE").toBoolean() ?: false
@@ -41,13 +39,12 @@ class CompletedTaskListener : CoordinatorEventListener() {
     @Autowired
     override var coordinator: Coordinator? = null
 
-    override val produceEvent: Events = Events.ProcessCompleted
+    override val produceEvent: Events = Events.PersistContentPerformed
     override val listensForEvents: List<Events> = listOf(
         Events.WorkDownloadCoverPerformed,
         Events.WorkConvertPerformed,
         Events.WorkEncodePerformed,
-        Events.WorkExtractPerformed,
-        Events.PersistContentPerformed
+        Events.WorkExtractPerformed
     )
 
 
@@ -78,30 +75,6 @@ class CompletedTaskListener : CoordinatorEventListener() {
         return super.isPrerequisitesFulfilled(incomingEvent, events)
     }
 
-    fun getVideo(events: List<Event>): VideoDetails? {
-        val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }
-            ?.az<MediaOutInformationConstructedEvent>()
-        val encoded = events.find { it.eventType == Events.WorkEncodePerformed }?.dataAs<EncodedData>()?.outputFile
-        if (encoded == null) {
-            log.warn { "No encode no video details!" }
-            return null
-        }
-
-        val proper = mediaInfo?.data?.toValueObject() ?: return null
-
-        val details = VideoDetails(
-            type = proper.type,
-            fileName = File(encoded).name,
-            serieInfo = if (proper !is EpisodeInfo) null else SerieInfo(
-                episodeTitle = proper.episodeTitle,
-                episodeNumber = proper.episode,
-                seasonNumber = proper.season,
-                title = proper.title
-            )
-        )
-        return details
-    }
-
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
         val result = super.shouldIProcessAndHandleEvent(incomingEvent, events)
         return result
@@ -124,89 +97,23 @@ class CompletedTaskListener : CoordinatorEventListener() {
                 mediaInfo.fallbackCollection
             } else mediaInfo.fallbackCollection
 
-        val genreIdsForCatalog = ContentGenresStore.storeAndGetIds(mediaInfo.genres)
+        val mover = ContentCompletionMover(usableCollection, events)
 
-        val persistedContent: PersistedContent? = events.find { it.eventType == Events.PersistContentPerformed }?.dataAs<PersistedContentEvent>()?.data
-        if (persistedContent == null) {
-            log.error { "PersistedContent is null! can't continue" }
-            return
-        }
+        val newCoverPath = mover.moveCover()
+        val newVideoPath = mover.moveVideo()
+        val newSubtitles = mover.moveSubtitles()
 
-        val completedData = CompletedData(
-            eventIdsCollected = events.map { it.eventId() },
-            metadataStored = MetadataStored(
-                title = mediaInfo.title,
-                titles = mediaInfo.titles,
-                type = mediaInfo.type,
-                cover = persistedContent.cover?.storeDestinationFileName?.let { File(it).name },
-                collection = usableCollection,
-                summary = mediaInfo.summaries,
-                foundTitles = existingTitles,
-                genres = mediaInfo.genres,
-                genreIds = genreIdsForCatalog
-            )
+
+        val contentEvent = PersistedContent(
+            cover = newCoverPath?.let { PersistedItem(it.first, it.second) },
+            video = newVideoPath?.let { PersistedItem(it.first, it.second) },
+            subtitles = newSubtitles?.map { PersistedItem(it.source, it.destination) } ?: emptyList()
         )
 
-        completedData.metadataStored.let { meta ->
-            val catalogId = ContentCatalogStore.storeCatalog(
-                title = meta.title,
-                collection = meta.collection,
-                type = meta.type,
-                cover = meta.cover,
-                genres = meta.genreIds
-            )
-            catalogId?.let { id ->
-                meta.summary.forEach { summary ->
-                    ContentMetadataStore.storeSummary(id, summary)
-                }
-            }
-            ContentTitleStore.store(meta.title, meta.titles)
-        }
-
-
-        val videoInfo = getVideo(events)
-        if (videoInfo != null) {
-            assert(persistedContent.video == null)
-            ContentCatalogStore.storeMedia(
-                title = completedData.metadataStored.title,
-                collection = completedData.metadataStored.collection,
-                type = completedData.metadataStored.type,
-                videoDetails = videoInfo
-            )
-        }
-
-
-        try {
-            persistedContent.subtitles.let { subtitles ->
-                subtitles.map {
-                    ContentSubtitleStore.storeSubtitles(
-                        collection = completedData.metadataStored.collection,
-                        destinationFile = File(it.storeDestinationFileName)
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-
-        ProcessedFileStore.store(
-            mediaInfo.title,
-            events,
-            EventsSummaryMapping().map(events)
-        )
-
-
-        if (!doNotProduceComplete) {
-            onProduceEvent(MediaProcessCompletedEvent(
-                metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
-                data = completedData
-            ))
-        } else {
-            log.warn { "Do not produce complete is enabled!" }
-        }
-
-
+        onProduceEvent(PersistedContentEvent(
+            metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
+            data = contentEvent
+        ))
 
         active = false
     }

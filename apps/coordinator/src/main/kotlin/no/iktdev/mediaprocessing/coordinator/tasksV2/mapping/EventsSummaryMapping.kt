@@ -13,7 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.getChecksum
 class EventsSummaryMapping {
 
     fun map(events: List<Event>): EventSummary {
-        val startOperations = events.find { it.eventType == Events.EventMediaProcessStarted }?.dataAs<StartEventData>() ?: throw RuntimeException("No start event found")
+        val startOperations = events.find { it.eventType == Events.ProcessStarted }?.dataAs<StartEventData>() ?: throw RuntimeException("No start event found")
         val successOperations = listOfNotNull(
             if (isEncodedSuccessful(events)) OperationEvents.ENCODE else null,
             if (isExtractedSuccessful(events)) OperationEvents.EXTRACT else null,
@@ -33,26 +33,26 @@ class EventsSummaryMapping {
     }
 
 
-    fun isEncodedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.EventWorkEncodePerformed }.any { it.isSuccessful() }
-    fun isExtractedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.EventWorkExtractPerformed }.any { it.isSuccessful() }
-    fun isConvertedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.EventWorkConvertPerformed }.any { it.isSuccessful() }
+    fun isEncodedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.WorkEncodePerformed }.any { it.isSuccessful() }
+    fun isExtractedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.WorkExtractPerformed }.any { it.isSuccessful() }
+    fun isConvertedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.WorkConvertPerformed }.any { it.isSuccessful() }
 
     fun getProducesFiles(events: List<Event>): OutputFiles {
         val encoded = if (isEncodedSuccessful(events)) {
-            events.filter { it.eventType == Events.EventWorkEncodePerformed }
+            events.filter { it.eventType == Events.WorkEncodePerformed }
                 .filter { it.isSuccessful() }
                 .mapNotNull { it.dataAs<EncodedData>()?.outputFile }
         } else emptyList()
 
         val extracted = if (isExtractedSuccessful(events)) {
-            events.filter { it.eventType == Events.EventWorkExtractPerformed }
+            events.filter { it.eventType == Events.WorkExtractPerformed }
                 .filter { it.isSuccessful() }
                 .mapNotNull { it.dataAs<ExtractedData>() }
                 .map { it.outputFile }
         } else emptyList()
 
         val converted = if (isConvertedSuccessful(events)) {
-            events.filter { it.eventType == Events.EventWorkConvertPerformed }
+            events.filter { it.eventType == Events.WorkConvertPerformed }
                 .filter { it.isSuccessful() }
                 .mapNotNull { it.dataAs<ConvertedData>() }
                 .flatMap { it.outputFiles }

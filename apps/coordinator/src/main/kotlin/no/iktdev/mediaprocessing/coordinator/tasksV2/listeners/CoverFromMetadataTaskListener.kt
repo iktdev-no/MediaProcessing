@@ -25,13 +25,13 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
     @Autowired
     override var coordinator: Coordinator? = null
 
-    override val produceEvent: Events = Events.EventMediaReadOutCover
+    override val produceEvent: Events = Events.ReadOutCover
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaMetadataSearchPerformed
+        Events.MetadataSearchPerformed
     )
 
     override fun isPrerequisitesFulfilled(incomingEvent: Event, events: List<Event>): Boolean {
-        return (events.any { it.eventType == Events.EventMediaReadOutNameAndType && it.isSuccessful() })
+        return (events.any { it.eventType == Events.ReadOutNameAndType && it.isSuccessful() })
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
@@ -52,17 +52,17 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         }
         active = true
 
-        val baseInfo = events.find { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
+        val baseInfo = events.find { it.eventType == Events.ReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
         if (baseInfo == null) {
             log.info { "No base info" }
             active = false
             return
         }
 
-        val metadataEvent = if (event.eventType == Events.EventMediaMetadataSearchPerformed) event else events.findLast { it.eventType == Events.EventMediaMetadataSearchPerformed }
+        val metadataEvent = if (event.eventType == Events.MetadataSearchPerformed) event else events.findLast { it.eventType == Events.MetadataSearchPerformed }
         val metadata = metadataEvent?.az<MediaMetadataReceivedEvent>()?.data
             ?: return
-        val mediaOutInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data
+        val mediaOutInfo = events.find { it.eventType == Events.ReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()?.data
         if (mediaOutInfo == null) {
             log.info { "No Media out info" }
             active = false

@@ -25,11 +25,11 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
     @Autowired
     override var coordinator: Coordinator? = null
 
-    override val produceEvent: Events = Events.EventMediaParameterEncodeCreated
+    override val produceEvent: Events = Events.ParameterEncodeCreated
 
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaParseStreamPerformed,
-        Events.EventMediaReadOutNameAndType
+        Events.ParseStreamPerformed,
+        Events.ReadOutNameAndType
     )
     val preference = Preference.getPreference()
 
@@ -46,7 +46,7 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
             return
         }
         active = true
-        val started = events.find { it.eventType == Events.EventMediaProcessStarted }?.az<MediaProcessStartEvent>()
+        val started = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>()
         if (started == null) {
             active = false
             return
@@ -55,13 +55,13 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
             active = false
             return
         }
-        val streams = events.find { it.eventType == Events.EventMediaParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
+        val streams = events.find { it.eventType == Events.ParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
         if (streams == null) {
             active = false
             return
         }
 
-        val mediaInfo = events.find { it.eventType == Events.EventMediaReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
+        val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
         if (mediaInfo?.data == null) {
             active = false
             return

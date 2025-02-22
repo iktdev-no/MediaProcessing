@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 class ConvertWorkPerformed(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.EventWorkConvertPerformed,
+    override val eventType: Events = Events.WorkConvertPerformed,
     override val data: ConvertedData? = null,
     val message: String? = null
 ) : Event() {

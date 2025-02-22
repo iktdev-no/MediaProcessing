@@ -11,11 +11,11 @@ import java.io.File
 object ContentSubtitleStore {
     val log = KotlinLogging.logger {}
 
-    fun storeSubtitles(collection: String, language: String, destinationFile: File): Boolean {
+    fun storeSubtitles(collection: String, destinationFile: File): Boolean {
         return executeWithStatus (getStoreDatabase().database, block =  {
             subtitle.insert {
                 it[this.associatedWithVideo] = destinationFile.nameWithoutExtension
-                it[this.language] = language
+                it[this.language] = destinationFile.parentFile.nameWithoutExtension
                 it[this.collection] = collection
                 it[this.format] = destinationFile.extension.uppercase()
                 it[this.subtitle] = destinationFile.name

@@ -7,7 +7,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.dto.tasks.TaskData
 
 data class ConvertWorkCreatedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.EventWorkConvertCreated,
+    override val eventType: Events = Events.WorkConvertCreated,
     override val data: ConvertData? = null
 ) : Event() {
 }

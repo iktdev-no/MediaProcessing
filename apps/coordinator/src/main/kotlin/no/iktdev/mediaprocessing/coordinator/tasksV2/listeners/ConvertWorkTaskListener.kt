@@ -26,9 +26,9 @@ class ConvertWorkTaskListener: WorkTaskListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.EventWorkConvertCreated
+    override val produceEvent: Events = Events.WorkConvertCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.EventWorkExtractPerformed
+        Events.WorkExtractPerformed
     )
 
     override fun canProduceMultipleEvents(): Boolean {
@@ -63,18 +63,18 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         var storeAsFile: String? = null
 
 
-        val file = if (event.eventType == Events.EventWorkExtractPerformed) {
+        val file = if (event.eventType == Events.WorkExtractPerformed) {
             val foundEvent = event.az<ExtractWorkPerformedEvent>()?.data
             language = foundEvent?.language
             storeAsFile = foundEvent?.storeFileName
             foundEvent?.outputFile
-        } else if (event.eventType == Events.EventMediaProcessStarted) {
+        } else if (event.eventType == Events.ProcessStarted) {
             val startEvent = event.az<MediaProcessStartEvent>()?.data
             if (startEvent?.operations?.isOnly(OperationEvents.CONVERT) == true) {
                 startEvent.file
             } else null
         } else {
-            events.find { it.eventType == Events.EventWorkExtractPerformed }
+            events.find { it.eventType == Events.WorkExtractPerformed }
                 ?.az<ExtractWorkPerformedEvent>()?.data?.outputFile
         }
 

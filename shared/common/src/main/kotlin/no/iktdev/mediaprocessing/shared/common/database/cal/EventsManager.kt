@@ -9,7 +9,6 @@ import no.iktdev.eventi.database.DataSource
 import no.iktdev.eventi.database.isCausedByDuplicateError
 import no.iktdev.eventi.database.isExposedSqlException
 import no.iktdev.eventi.database.withDirtyRead
-import no.iktdev.eventi.implementations.EventsManagerImpl
 import no.iktdev.mediaprocessing.shared.common.database.tables.allEvents
 import no.iktdev.mediaprocessing.shared.common.database.tables.events
 import no.iktdev.mediaprocessing.shared.common.contract.Events
@@ -81,10 +80,10 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
 
 
     private val exemptedFromSingleEvent = listOf(
-        Events.EventWorkConvertCreated,
-        Events.EventWorkExtractCreated,
-        Events.EventWorkConvertPerformed,
-        Events.EventWorkExtractPerformed
+        Events.WorkConvertCreated,
+        Events.WorkExtractCreated,
+        Events.WorkConvertPerformed,
+        Events.WorkExtractPerformed
     )
 
     private fun isExempted(event: Events): Boolean {
@@ -95,7 +94,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
         return withDirtyRead(dataSource.database) {
             val completedEvents = events
                 .slice(events.referenceId)
-                .select { events.event eq Events.EventMediaProcessCompleted.event }
+                .select { events.event eq Events.ProcessCompleted.event }
 
             events
                 .slice(events.referenceId)
@@ -109,7 +108,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
         return withDirtyRead(dataSource.database) {
             events.selectAll()
                 .groupBy { it[events.referenceId] }
-                .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }.filter { it.none { e -> e.eventType == Events.EventMediaProcessCompleted } }
+                .mapNotNull { it.value.mapNotNull { v -> v.toEvent() } }.filter { it.none { e -> e.eventType == Events.ProcessCompleted } }
         } ?: emptyList()
     }
 
@@ -118,7 +117,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
             events.select { events.referenceId eq referenceId }
                 .mapNotNull { it.toEvent() }
         } ?: emptyList()
-        return if (events.any { it.eventType == Events.EventMediaProcessCompleted  }) emptyList() else events
+        return if (events.any { it.eventType == Events.ProcessCompleted  }) emptyList() else events
     }
 
     override fun getAllEvents(): List<List<Event>> {

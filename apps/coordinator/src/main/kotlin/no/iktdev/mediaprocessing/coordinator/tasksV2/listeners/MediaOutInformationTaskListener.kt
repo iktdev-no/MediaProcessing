@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.log
@@ -19,7 +18,6 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.pyMetadata
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.FileFilter
-import javax.naming.Name
 
 
 @Service
@@ -32,9 +30,9 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
     @Autowired
     override var coordinator: Coordinator? = null
 
-    override val produceEvent: Events = Events.EventMediaReadOutNameAndType
+    override val produceEvent: Events = Events.ReadOutNameAndType
     override val listensForEvents: List<Events> = listOf(
-        Events.EventMediaMetadataSearchPerformed
+        Events.MetadataSearchPerformed
     )
 
     override fun shouldIHandleFailedEvents(incomingEvent: Event): Boolean {
@@ -50,9 +48,9 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
         active = true
 
         val metadataResult = event.az<MediaMetadataReceivedEvent>()
-        val mediaBaseInfo = events.findLast { it.eventType == Events.EventMediaReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
+        val mediaBaseInfo = events.findLast { it.eventType == Events.ReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
         if (mediaBaseInfo == null) {
-            log.error { "Required event ${Events.EventMediaReadBaseInfoPerformed} is not present" }
+            log.error { "Required event ${Events.ReadBaseInfoPerformed} is not present" }
             coordinator?.produceNewEvent(
                 MediaOutInformationConstructedEvent(
                     metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())
