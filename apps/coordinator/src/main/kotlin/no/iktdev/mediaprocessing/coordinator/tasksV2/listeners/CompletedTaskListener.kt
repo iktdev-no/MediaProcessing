@@ -147,18 +147,18 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
 
         val newVideoPath = mover.moveVideo()
-        try {
-            getVideo(events)?.let { video ->
-                ContentCatalogStore.storeMedia(
-                    title = mediaInfo.title,
-                    collection = usableCollection,
-                    type = mediaInfo.type,
-                    videoDetails = video
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val videoInfo = getVideo(events)
+        if (videoInfo != null) {
+            assert(newVideoPath == null)
+            ContentCatalogStore.storeMedia(
+                title = mediaInfo.title,
+                collection = usableCollection,
+                type = mediaInfo.type,
+                videoDetails = videoInfo
+            )
         }
+
+
 
         val newSubtitles = mover.moveSubtitles()
 
@@ -196,6 +196,8 @@ class CompletedTaskListener : CoordinatorEventListener() {
                     subtitlesMoved = newSubtitles?.map { s -> SubtitlesMoved(s.source, s.destination) } ?: emptyList()
                 )
             ))
+        } else {
+            log.warn { "Do not produce complete is enabled!" }
         }
 
 

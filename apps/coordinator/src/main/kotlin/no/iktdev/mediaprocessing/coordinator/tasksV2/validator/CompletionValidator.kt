@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.validator
 
 import no.iktdev.eventi.data.dataAs
+import no.iktdev.eventi.data.isSkipped
 import no.iktdev.eventi.data.isSuccessful
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
@@ -96,6 +97,10 @@ object CompletionValidator {
      */
     fun req4(events: List<Event>): Boolean {
         val metadata = events.find { it.eventType == Events.EventMediaMetadataSearchPerformed }
+        if (metadata?.isSkipped() == true) {
+            return true
+        }
+
         if (metadata?.isSuccessful() != true) {
             return true
         }

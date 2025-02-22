@@ -14,43 +14,65 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
-      pyMetadata: ${{ steps.filter.outputs.pyMetadata }}
-      coordinator: ${{ steps.filter.outputs.coordinator }}
-      processer: ${{ steps.filter.outputs.processer }}
-      converter: ${{ steps.filter.outputs.converter }}
-      shared: ${{ steps.filter.outputs.shared }}
+      pyMetadata: ${{ steps.pyMetadataChangesDetected.outputs.changed }}
+      sharedLibrary: ${{ steps.sharedLibraryChangesDetected.outputs.changed }}
+      coordinator: ${{ steps.coordinatorChangesDetected.outputs.changed }}
+      processer: ${{ steps.processerChangesDetected.outputs.changed }}
+      converter: ${{ steps.converterChangesDetected.outputs.changed }}
+      ui: ${{ steps.uiChangesDetected.outputs.changed }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - uses: dorny/paths-filter@v2
-        id: filter
+      - name: Detect if pyMetadata has changed
+        id: pyMetadataChangesDetected
+        uses: tchupp/actions-detect-directory-changes@v1.0.15
         with:
-          filters: |
-            pyMetadata:
-              - 'apps/pyMetadata/**'
-            apps/coordinator:
-              - 'apps/coordinator/**'
-            apps/processer:
-              - 'apps/processer/**'
-            apps/converter:
-              - 'apps/converter/**'
-            
-            shared:
-              - 'shared/**'
+          included-paths: "apps/pyMetadata/**"
+
+      - name: Detect if shared library
+        id: sharedLibraryChangesDetected
+        uses: tchupp/actions-detect-directory-changes@v1.0.15
+        with:
+          included-paths: "shared/**"
+
+      - name: Detect if coordinator has changed
+        id: coordinatorChangesDetected
+        uses: tchupp/actions-detect-directory-changes@v1.0.15
+        with:
+          included-paths: "apps/coordinator/**"
+
+      - name: Detect if processer has changed
+        id: processerChangesDetected
+        uses: tchupp/actions-detect-directory-changes@v1.0.15
+        with:
+          included-paths: "apps/processer/**"
+
+      - name: Detect if converter has changed
+        id: converterChangesDetected
+        uses: tchupp/actions-detect-directory-changes@v1.0.15
+        with:
+          included-paths: "apps/converter/**"
+
+      - name: Detect if ui has changed
+        id: uiChangesDetected
+        uses: tchupp/actions-detect-directory-changes@v1.0.15
+        with:
+          included-paths: "apps/ui/**"
+
       # Step to print the outputs from "pre-check" job
       - name: Print Outputs from pre-check job
         run: |
           echo "Apps\n"
-          echo "app:pyMetadata: ${{ needs.pre-check.outputs.pyMetadata }}"
-          echo "app:coordinator: ${{ needs.pre-check.outputs.coordinator }}"
-          echo "app:processer: ${{ needs.pre-check.outputs.processer }}"
-          echo "app:converter: ${{ needs.pre-check.outputs.converter }}"
+          echo "app:pyMetadata: ${{ steps.pyMetadataChangesDetected.outputs.changed }}"
+          echo "app:coordinator: ${{ steps.coordinatorChangesDetected.outputs.changed }}"
+          echo "app:processer: ${{ steps.processerChangesDetected.outputs.changed }}"
+          echo "app:converter: ${{ steps.converterChangesDetected.outputs.changed }}"
+          echo "app:ui: ${{ steps.uiChangesDetected.outputs.changed }}"
           
           echo "Shared"
-          echo "shared: ${{ needs.pre-check.outputs.shared }}"
-          echo "\n"
+          echo "shared: ${{ steps.sharedLibraryChangesDetected.outputs.changed }}"
           echo "${{ needs.pre-check.outputs }}"
           echo "${{ needs.pre-check }}"
 
@@ -69,7 +91,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
 
       - name: Build Shared code
-        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch'
+        if: steps.cache-gradle.outputs.cache-hit != 'true' || needs.pre-check.outputs.sharedLibrary == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           chmod +x ./gradlew
           ./gradlew :shared:build --stacktrace --info
@@ -77,7 +99,7 @@ jobs:
 
   build-processer:
     needs: build-shared
-    if: ${{ needs.pre-check.outputs.processer == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.shared == 'true' }}
+    if: ${{ needs.pre-check.outputs.processer == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
@@ -134,7 +156,7 @@ jobs:
 
   build-converter:
     needs: build-shared
-    if: ${{ needs.pre-check.outputs.converter == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.shared == 'true' }}
+    if: ${{ needs.pre-check.outputs.converter == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 
@@ -192,7 +214,7 @@ jobs:
             
   build-coordinator:
     needs: build-shared
-    if: ${{ needs.pre-check.outputs.coordinator == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.shared == 'true' }}
+    if: ${{ needs.pre-check.outputs.coordinator == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
     runs-on: ubuntu-latest
     #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
 

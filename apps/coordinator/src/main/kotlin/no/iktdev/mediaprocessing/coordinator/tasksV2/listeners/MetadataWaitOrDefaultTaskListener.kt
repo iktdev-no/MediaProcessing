@@ -102,7 +102,10 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
         }
         expired.forEach {
             log.info { "Producing timeout for ${it.key} ${LocalDateTime.now()}" }
-            coordinator?.produceNewEvent(
+            if (coordinator == null) {
+                log.error { "Coordinator is null, not able to get timeout stored!" }
+            }
+            coordinator!!.produceNewEvent(
                 MediaMetadataReceivedEvent(
                     metadata = EventMetadata(
                         referenceId = it.key,

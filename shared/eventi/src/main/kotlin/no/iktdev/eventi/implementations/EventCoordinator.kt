@@ -187,13 +187,14 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
      */
     fun produceNewEvent(event: T): Boolean {
         if (doNotProduce) {
+            log.warn { "Do not produce is enabled!" }
             newEventProduced = true
             return true
         }
 
         val isStored = eventManager.storeEvent(event)
         if (isStored) {
-            log.info { "Stored event: ${event.eventType}" }
+            log.debug { "Stored event: ${event.eventType}" }
             newEventProduced = true
         } else {
             log.error { "Failed to store event: ${event.eventType}" }

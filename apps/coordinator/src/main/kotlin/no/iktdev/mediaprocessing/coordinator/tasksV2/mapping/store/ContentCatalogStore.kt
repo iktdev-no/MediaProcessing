@@ -148,6 +148,7 @@ object ContentCatalogStore {
 
     fun storeMedia(title: String, collection: String, type: String, videoDetails: VideoDetails) {
         val catalogId = getId(title, collection, type) ?: return
+        log.info { "$title is identified as $type" }
         when (type) {
             "movie" -> storeMovie(catalogId, videoDetails)
             "serie" -> storeSerie(collection, videoDetails)
