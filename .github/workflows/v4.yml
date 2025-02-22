@@ -29,6 +29,7 @@ jobs:
         name: "Detect app changes"
         id: checkAppChanges
         with:
+          base: ''
           filters: |
             metadata:
               - 'apps/pyMetadata/**'
