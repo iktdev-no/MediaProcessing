@@ -126,7 +126,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
         val genreIdsForCatalog = ContentGenresStore.storeAndGetIds(mediaInfo.genres)
 
-        val persistedContent: PersistedContent? = events.find { it.eventType == Events.PersistContentPerformed }?.dataAs<PersistedContentEvent>()?.data
+        val persistedContent: PersistedContent? = events.find { it.eventType == Events.PersistContentPerformed }?.az<PersistedContentEvent>()?.data
         if (persistedContent == null) {
             log.error { "PersistedContent is null! can't continue" }
             return
