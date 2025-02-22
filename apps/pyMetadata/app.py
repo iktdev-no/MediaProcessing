@@ -175,13 +175,7 @@ class EventsPullerThread(threading.Thread):
                     event: MediaEvent | None = None
                     if (row is not None):
                         try:
-                            referenceId = row["referenceId"]
-                            status = row["status"]
-                            
-                            if (status == "Failed" or status == "Skipped"):
-                                logger.info(f"Skipping failed event referenceId: {referenceId}, eventId: {row['eventId']}")
-                                continue
-                            
+                            referenceId = row["referenceId"]                            
                             incomingEventType = row["event"]
                             logMessage = f"""
 ============================================================================
