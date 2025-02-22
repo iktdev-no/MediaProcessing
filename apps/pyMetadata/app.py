@@ -93,7 +93,8 @@ class EventsPullerThread(threading.Thread):
                                     AND SUM(event = 'event:media-metadata-search:performed') = 0
                                     AND SUM(event = 'event:media-process:completed') = 0
                             )
-                            AND event = 'event:media-read-base-info:performed';
+                            AND event = 'event:media-read-base-info:performed'
+                            AND JSON_UNQUOTE(JSON_EXTRACT(data, '$.metadata.status')) = 'Success';
         """)
         row = cursor.fetchall()
         cursor.close()
