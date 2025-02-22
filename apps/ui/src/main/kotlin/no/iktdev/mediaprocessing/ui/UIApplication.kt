@@ -35,7 +35,7 @@ class UIApplication {
     }
 }
 
-private lateinit var eventsDatabase: EventsDatabase
+lateinit var eventsDatabase: EventsDatabase
 
 lateinit var taskManager: TasksManager
 
@@ -47,7 +47,6 @@ fun getContext(): ApplicationContext? {
     return context
 }
 
-val fileRegister: ObservableMap<String, ExplorerItem> = observableMapOf()
 
 fun main(args: Array<String>) {
 

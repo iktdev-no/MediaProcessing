@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.ui
 import no.iktdev.mediaprocessing.shared.common.Defaults
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
@@ -15,6 +16,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.util.DefaultUriBuilderFactory
+import org.springframework.web.util.UriTemplateHandler
 
 
 @Configuration
@@ -53,6 +56,7 @@ class ApiCommunicationConfig {
     @Bean
     fun coordinatorTemplate(): RestTemplate {
         val restTemplate = RestTemplate()
+        restTemplate.uriTemplateHandler = DefaultUriBuilderFactory(UIEnv.coordinatorUrl)
         return restTemplate
     }
 }

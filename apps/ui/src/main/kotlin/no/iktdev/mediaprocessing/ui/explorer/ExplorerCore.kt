@@ -70,7 +70,7 @@ class ExplorerCore {
     }
 
     fun getHomeCursor(): ExplorerCursor? {
-        return getCursor(SharedConfig.incomingContent.absolutePath)
+        return getCursor(SharedConfig.inputRoot.absolutePath)
     }
 
 }
