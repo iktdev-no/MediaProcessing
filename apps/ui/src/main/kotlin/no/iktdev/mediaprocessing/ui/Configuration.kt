@@ -66,12 +66,14 @@ class ApiCommunicationConfig {
 
     @Bean
     fun coordinatorTemplate(builder: RestTemplateBuilder): RestTemplate {
-        return try {
+        try {
             val url = UIEnv.coordinatorUrl
             log.info { "CoordinatorUrl: $url" }
             require(url.isNotBlank()) { "UIEnv.coordinatorUrl er ikke satt!" }
-            builder.uriTemplateHandler(DefaultUriBuilderFactory(url))
-            builder.build()
+            return builder
+                .uriTemplateHandler(DefaultUriBuilderFactory(url)) // Bruker den returnerte instansen
+                .build()
+
         } catch (e: Exception) {
             throw IllegalStateException("Feil ved opprettelse av coordinatorTemplate: ${e.message}", e)
         }
