@@ -42,10 +42,6 @@ class EncodeWorkTaskListener : WorkTaskListener() {
             return
         }
         active = true
-        if (!canStart(event, events)) {
-            active = false
-            return
-        }
 
         val encodeArguments = if (event.eventType == Events.ParameterEncodeCreated) {
             event.az<EncodeArgumentCreatedEvent>()?.data

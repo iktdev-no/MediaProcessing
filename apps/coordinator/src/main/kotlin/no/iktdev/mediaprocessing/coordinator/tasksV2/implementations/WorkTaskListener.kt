@@ -11,6 +11,10 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.az
 abstract class WorkTaskListener: CoordinatorEventListener() {
     private val log = KotlinLogging.logger {}
 
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+
+        return canStart(incomingEvent, events)
+    }
     fun canStart(incomingEvent: Event, events: List<Event>): Boolean {
         val autoStart = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>()?.data
         if (autoStart == null) {

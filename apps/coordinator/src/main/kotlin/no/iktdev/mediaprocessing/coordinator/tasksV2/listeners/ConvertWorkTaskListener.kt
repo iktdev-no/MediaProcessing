@@ -35,6 +35,10 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         return true
     }
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        if (!super.shouldIProcessAndHandleEvent(incomingEvent, events)) {
+            return false
+        }
+
         if (!isOfEventsIListenFor(incomingEvent))
             return false
         if (!incomingEvent.isSuccessful() && !shouldIHandleFailedEvents(incomingEvent)) {
@@ -54,10 +58,6 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             return
         }
         active = true
-        if (!canStart(event, events)) {
-            active = false
-            return
-        }
 
         var language: String? = null
         var storeAsFile: String? = null

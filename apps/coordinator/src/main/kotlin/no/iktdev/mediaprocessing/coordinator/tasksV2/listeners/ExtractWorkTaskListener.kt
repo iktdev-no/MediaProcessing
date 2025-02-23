@@ -36,11 +36,6 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         return true
     }
 
-    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
-        val state =  super.shouldIProcessAndHandleEvent(incomingEvent, events)
-        return state
-    }
-
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
         if (event == null) {
@@ -49,12 +44,6 @@ class ExtractWorkTaskListener: WorkTaskListener() {
             return
         }
         active = true
-
-
-        if (!canStart(event, events)) {
-            active = false
-            return
-        }
 
         val arguments = if (event.eventType == Events.ParameterExtractCreated) {
             event.az<ExtractArgumentCreatedEvent>()?.data
