@@ -54,15 +54,13 @@ class WebConfig: WebMvcConfigurer {
 class ApiCommunicationConfig {
 
     @Bean
-    fun coordinatorTemplate(): RestTemplate {
+    fun coordinatorTemplate(builder: RestTemplateBuilder): RestTemplate {
         return try {
             val url = UIEnv.coordinatorUrl
             log.info { "CoordinatorUrl: $url" }
             require(url.isNotBlank()) { "UIEnv.coordinatorUrl er ikke satt!" }
-
-            val restTemplate = RestTemplate()
-            restTemplate.uriTemplateHandler = DefaultUriBuilderFactory(url)
-            restTemplate
+            builder.uriTemplateHandler(DefaultUriBuilderFactory(url))
+            builder.build()
         } catch (e: Exception) {
             throw IllegalStateException("Feil ved opprettelse av coordinatorTemplate: ${e.message}", e)
         }
