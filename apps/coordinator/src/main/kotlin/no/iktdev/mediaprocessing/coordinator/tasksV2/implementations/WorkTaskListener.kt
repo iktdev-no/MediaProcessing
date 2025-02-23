@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.tasksV2.implementations
 
 import com.google.gson.Gson
 import mu.KotlinLogging
+import no.iktdev.eventi.data.referenceId
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
@@ -20,8 +21,10 @@ abstract class WorkTaskListener: CoordinatorEventListener() {
         val startEvent = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>()
         val startType = startEvent?.data?.type
         if (startType == null) {
-            log.error { "Start event not found. Requiring permitt event" }
-            log.error { Gson().toJson(events) }
+            log.error { "Start event not found on ${incomingEvent.referenceId()}. Requiring permit event" }
+            try {
+                log.error { Gson().toJson(startEvent) }
+            } catch (e: Exception) {}
             return false
         }
         return if (incomingEvent.eventType == Events.WorkProceedPermitted) {
