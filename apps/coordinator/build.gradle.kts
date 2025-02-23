@@ -60,6 +60,8 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.21.0")
 
     testImplementation("junit:junit:4.12")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
+
     testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
     testImplementation("org.skyscreamer:jsonassert:1.5.0")
     testImplementation("org.mockito:mockito-core:3.+")
