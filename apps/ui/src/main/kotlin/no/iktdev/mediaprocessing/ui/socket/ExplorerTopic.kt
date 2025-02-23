@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.ui.socket
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.contract.dto.EventRequest
 import no.iktdev.mediaprocessing.ui.UIEnv
@@ -42,6 +43,7 @@ class ExplorerTopic(
 
     @MessageMapping("/request/all")
     fun requestAllAvailableActions(@Payload data: EventRequest) {
+        log.info { "Sending data to coordinator: ${Gson().toJson(data)}" }
         val req = coordinatorTemplate.postForEntity("/request/all", data, String::class.java)
         log.info { req }
     }
