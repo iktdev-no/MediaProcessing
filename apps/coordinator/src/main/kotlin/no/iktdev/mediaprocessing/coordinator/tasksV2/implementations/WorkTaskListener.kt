@@ -19,34 +19,14 @@ abstract class WorkTaskListener: CoordinatorEventListener() {
     }
 
     fun canStart(incomingEvent: Event, events: List<Event>): Boolean {
-        assert(events.isNotEmpty()) {
-            "Events are nor present"
+        val autoStart = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>()?.data
+        if (autoStart == null) {
+            log.error { "Start event not found. Requiring permit event" }
         }
-        val startEvent = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>()
-        if (startEvent == null) {
-            log.error { "Start event not found on ${incomingEvent.referenceId()}." }
-            try {
-                log.error { WGson.toJson(startEvent) }
-                log.warn { "EvenTypes:\n" + events.map { it.eventType }.map { "\n\t$it" } }
-                log.warn { "Events provided:\n ${WGson.toJson(events)}" }
-            } catch (e: Exception) {}
-            return false
-        }
-
-
-        val startType = startEvent?.data?.type
-        if (startEvent == null) {
-            log.error { "Start type on ${incomingEvent.referenceId()}. Requiring permit event" }
-            try {
-                log.error { WGson.toJson(startEvent) }
-            } catch (e: Exception) {}
-            return false
-        }
-
         return if (incomingEvent.eventType == Events.WorkProceedPermitted) {
             return true
         } else {
-            if (startType == ProcessType.MANUAL) {
+            if (autoStart == null || autoStart.type == ProcessType.MANUAL) {
                 log.warn { "${incomingEvent.metadata.referenceId} waiting for Proceed event due to Manual process" }
                 false
             } else true
