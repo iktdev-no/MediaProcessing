@@ -332,7 +332,9 @@ jobs:
         working-directory: ./apps/ui/web
       
       - name: Build React app
-        run: npm run build
+        run: | 
+          npx eslint . || true
+          npm run build
         working-directory: ./apps/ui/web
 
       - name : Copy build files
