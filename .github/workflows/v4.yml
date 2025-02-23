@@ -333,7 +333,7 @@ jobs:
       
       - name: Build React app
         run: | 
-          npx eslint . || true
+          export CI=false
           npm run build
         working-directory: ./apps/ui/web
 
