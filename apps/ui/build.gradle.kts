@@ -58,3 +58,13 @@ tasks.test {
 kotlin {
     jvmToolchain(17)
 }
+
+tasks.bootJar {
+    archiveFileName.set("app.jar")
+    launchScript()
+}
+
+tasks.jar {
+    archiveFileName.set("app.jar")
+    archiveBaseName.set("app")
+}
