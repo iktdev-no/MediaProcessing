@@ -13,7 +13,7 @@ const root = ReactDOM.createRoot(
 
 const protocol = window.location.protocol;
 const host = window.location.host;
-const wsUrl = `${protocol}://${host}/ws`;
+const wsUrl = `${protocol}//${host}/ws`;
 root.render(
   <React.StrictMode>
     <Provider store={store}>
