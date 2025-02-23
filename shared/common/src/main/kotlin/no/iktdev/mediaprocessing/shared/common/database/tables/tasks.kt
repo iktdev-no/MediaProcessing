@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 object tasks: IntIdTable() {
     val referenceId: Column<String> = varchar("referenceId", 50)
-    val inputFile: Column<String?> = varchar("inputFile", 250).nullable()
+    val inputFile: Column<String?> = varchar("inputFile", 350).nullable()
     val status: Column<String?> = varchar("status", 10).nullable()
     val claimed: Column<Boolean> = bool("claimed").default(false)
     val claimedBy: Column<String?> = varchar("claimedBy", 100).nullable()
