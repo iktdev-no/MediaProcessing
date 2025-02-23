@@ -304,3 +304,81 @@ jobs:
             bskjon/mediaprocessing-pymetadata:v4
             bskjon/mediaprocessing-pymetadata:v4-${{ github.sha }}
             bskjon/mediaprocessing-pymetadata:v4-${{ steps.docker-tag.outputs.tag }}
+
+  build-ui:
+    needs: 
+      - build-shared
+      - pre-check
+    if: ${{ needs.pre-check.outputs.ui == 'true' || github.event_name == 'workflow_dispatch' || needs.pre-check.outputs.sharedLibrary == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Cache Shared Gradle dependencies
+        id: cache-gradle
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('shared/build.gradle.kts') }}
+
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./apps/ui/web
+      
+      - name: Build React app
+        run: npm run build
+        working-directory: ./apps/ui/web
+
+      - name : Copy build files
+        run: |
+          mkdir -p ./apps/ui/src/main/resources/static
+          cp -r ./apps/ui/web/build/* ./apps/ui/src/main/resources/static
+
+      - name: Extract version from build.gradle.kts
+        id: extract_version
+        run: |
+          VERSION=$(cat ./apps/ui/build.gradle.kts | grep '^version\s*=\s*\".*\"' | sed 's/^version\s*=\s*\"\(.*\)\"/\1/')
+          echo "VERSION=$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build UI module
+        id: build-ui
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:ui:bootJar
+          echo "Build completed"
+
+
+      - name: Generate Docker image tag
+        id: docker-tag
+        run: echo "::set-output name=tag::$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)"
+
+      - name: Docker login
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Debug Check extracted version
+        run: | 
+          echo "Extracted version: ${{ env.VERSION }}"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./dockerfiles/DebianJava
+          build-args: |
+            MODULE_NAME=ui
+            PASS_APP_VERSION=${{ env.VERSION }}
+          push: true
+          tags: |
+            bskjon/mediaprocessing-ui:v4
+            bskjon/mediaprocessing-ui:v4-${{ github.sha }}
+            bskjon/mediaprocessing-ui:v4-${{ steps.docker-tag.outputs.tag }}
