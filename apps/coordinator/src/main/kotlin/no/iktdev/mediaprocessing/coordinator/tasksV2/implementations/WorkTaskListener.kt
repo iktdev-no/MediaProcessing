@@ -27,6 +27,7 @@ abstract class WorkTaskListener: CoordinatorEventListener() {
             log.error { "Start event not found on ${incomingEvent.referenceId()}." }
             try {
                 log.error { WGson.toJson(startEvent) }
+                log.warn { "EvenTypes:\n" + events.map { it.eventType }.map { "\n\t$it" } }
                 log.warn { "Events provided:\n ${WGson.toJson(events)}" }
             } catch (e: Exception) {}
             return false
