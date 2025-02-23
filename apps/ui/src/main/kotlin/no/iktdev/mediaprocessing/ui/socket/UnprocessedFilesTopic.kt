@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.dto.EventRequest
 import no.iktdev.mediaprocessing.shared.common.database.tables.files
 import no.iktdev.mediaprocessing.shared.common.database.tables.filesProcessed
 import no.iktdev.mediaprocessing.ui.UIEnv
-import no.iktdev.mediaprocessing.ui.eventsDatabase
+import no.iktdev.mediaprocessing.ui.eventDatabase
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +24,7 @@ class UnprocessedFilesTopic(
     @Autowired private val template: SimpMessagingTemplate?,
     @Autowired private val coordinatorTemplate: RestTemplate,
 ) {
-    fun pullUnprocessedFiles(): List<FileInfo> = withTransaction(eventsDatabase.database) {
+    fun pullUnprocessedFiles(): List<FileInfo> = withTransaction(eventDatabase.database) {
         files.select {
             files.checksum notInSubQuery filesProcessed.slice(filesProcessed.checksum).selectAll()
         }.mapNotNull {

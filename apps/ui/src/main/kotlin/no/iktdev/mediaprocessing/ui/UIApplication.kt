@@ -9,9 +9,12 @@ import no.iktdev.exfl.observable.ObservableMap
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.exfl.observable.observableMapOf
 import no.iktdev.mediaprocessing.shared.common.DatabaseEnvConfig
+import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.database.EventsDatabase
 import no.iktdev.mediaprocessing.shared.common.database.cal.EventsManager
+import no.iktdev.mediaprocessing.shared.common.database.cal.RunnerManager
 import no.iktdev.mediaprocessing.shared.common.database.cal.TasksManager
+import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import no.iktdev.mediaprocessing.ui.dto.explore.ExplorerItem
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -19,10 +22,8 @@ import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 
-
-private val logger = KotlinLogging.logger {}
-val ioCoroutine = CoroutinesIO()
-val defaultCoroutine = CoroutinesDefault()
+val log = KotlinLogging.logger {}
+lateinit var eventDatabase: EventsDatabase
 lateinit var eventsManager: EventsManager
 
 
@@ -35,25 +36,12 @@ class UIApplication {
     }
 }
 
-lateinit var eventsDatabase: EventsDatabase
 
-lateinit var taskManager: TasksManager
-
-
-private var context: ApplicationContext? = null
-
-@Suppress("unused")
-fun getContext(): ApplicationContext? {
-    return context
-}
+val ioCoroutine = CoroutinesIO()
+val defaultCoroutine = CoroutinesDefault()
 
 
 fun main(args: Array<String>) {
-
-    eventsDatabase = EventsDatabase().also {
-        eventsManager = EventsManager(it.database)
-    }
-
 
 
     ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
@@ -66,10 +54,15 @@ fun main(args: Array<String>) {
             value.printStackTrace()
         }
     })
-    context = runApplication<UIApplication>(*args)
 
+    eventDatabase = EventsDatabase().also {
+        eventsManager = EventsManager(it.database)
+    }
+
+
+    runApplication<UIApplication>(*args)
+    log.info { "App Version: ${getAppVersion()}" }
 }
-
 
 
 
