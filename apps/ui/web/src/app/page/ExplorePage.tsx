@@ -164,9 +164,21 @@ export default function ExplorePage() {
 
   const onContextMenuItemClickedEvent: ContextMenuActionEvent<ExplorerItem> = {
     selected:(actionIndex: number | null, value: ExplorerItem | null) => {
+      if (!value) {
+        return; 
+      }
       switch(actionIndex) {
         case 0: {
           console.log("All");
+          const request = {
+            file: value.path,
+            source: `Web UI @ ${window.location.href}`,
+            mode: "FLOW"
+          }
+          client?.publish({
+            destination: "/app/request/all",
+            body: JSON.stringify(request)
+          })
           break;
         }
         case 1: {

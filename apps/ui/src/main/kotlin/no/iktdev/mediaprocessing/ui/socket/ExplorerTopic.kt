@@ -41,8 +41,9 @@ class ExplorerTopic(
     }
 
     @MessageMapping("/request/all")
-    fun requestAllAvailableActions() {
-
+    fun requestAllAvailableActions(@Payload data: EventRequest) {
+        val req = coordinatorTemplate.postForEntity("/request/all", data, String::class.java)
+        log.info { req }
     }
 
 }
