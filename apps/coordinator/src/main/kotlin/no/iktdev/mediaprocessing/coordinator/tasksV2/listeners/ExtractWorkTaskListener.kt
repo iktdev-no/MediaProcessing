@@ -67,8 +67,7 @@ class ExtractWorkTaskListener: WorkTaskListener() {
                 data = it
             )
         }.forEach { event ->
-            onProduceEvent(event)
-            taskManager.createTask(
+            val taskCreatedSuccessfully = taskManager.createTask(
                 referenceId = event.referenceId(),
                 eventId = event.eventId(),
                 derivedFromEventId = event.derivedFromEventId(),
@@ -76,6 +75,11 @@ class ExtractWorkTaskListener: WorkTaskListener() {
                 data = WGson.gson.toJson(event.data!!),
                 inputFile = event.data!!.inputFile
             )
+            if (!taskCreatedSuccessfully) {
+                log.error { "Failed to create task for events on referenceId: ${event.referenceId()}" }
+            } else {
+                onProduceEvent(event)
+            }
         }
         active = false
     }

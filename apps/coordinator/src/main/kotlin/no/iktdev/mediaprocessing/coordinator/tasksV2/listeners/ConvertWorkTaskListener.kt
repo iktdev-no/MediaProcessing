@@ -109,8 +109,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
                 metadata = event.makeDerivedEventInfo(EventStatus.Success, getProducerName()),
                 data = convertData
             ).also { event ->
-                onProduceEvent(event)
-                taskManager.createTask(
+                val taskCreatedSuccessfully = taskManager.createTask(
                     referenceId = event.referenceId(),
                     eventId = event.eventId(),
                     derivedFromEventId = event.derivedFromEventId(),
@@ -118,6 +117,13 @@ class ConvertWorkTaskListener: WorkTaskListener() {
                     data = WGson.gson.toJson(event.data!!),
                     inputFile = event.data!!.inputFile
                 )
+
+                if (!taskCreatedSuccessfully) {
+                    log.error { "Failed to create task for events on referenceId: ${event.referenceId()}" }
+                } else {
+                    onProduceEvent(event)
+                }
+
             }
         }
         active = false
