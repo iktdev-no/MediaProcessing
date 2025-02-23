@@ -9,10 +9,12 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.core.io.Resource
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.method.HandlerTypePredicate
 import org.springframework.web.servlet.config.annotation.*
+import org.springframework.web.servlet.resource.PathResourceResolver
 import org.springframework.web.util.DefaultUriBuilderFactory
 import org.springframework.web.util.UriTemplateHandler
 
@@ -26,20 +28,23 @@ class WebConfig: WebMvcConfigurer {
     }
 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+
         registry.addResourceHandler("/**")
             .addResourceLocations("classpath:/static/")
-            .setCachePeriod(0)
+            .resourceChain(true)
+            .addResolver(object: PathResourceResolver() {
+                override fun getResource(resourcePath: String, location: Resource): Resource? {
+                    // Show index.html if no resource was found
+                    return if (!location.createRelative(resourcePath).exists() && !location.createRelative(resourcePath).isReadable) {
+                        location.createRelative("index.html");
+                    } else {
+                        location.createRelative(resourcePath);
+                    }
+                }
+            })
+
     }
 
-    override fun addViewControllers(registry: ViewControllerRegistry) {
-        // Endrer på denne linjen for å være mer presis
-        registry.addViewController("/")
-            .setViewName("forward:/index.html")
-
-        // Denne fanger andre ruter som ikke starter med `/api`
-        registry.addViewController("/**/{spring:[^api].*}")
-            .setViewName("forward:/index.html")
-    }
     override fun configurePathMatch(configurer: PathMatchConfigurer) {
         configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
     }
