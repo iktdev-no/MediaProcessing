@@ -57,6 +57,7 @@ class ApiCommunicationConfig {
     fun coordinatorTemplate(): RestTemplate {
         return try {
             val url = UIEnv.coordinatorUrl
+            log.info { "CoordinatorUrl: $url" }
             require(url.isNotBlank()) { "UIEnv.coordinatorUrl er ikke satt!" }
 
             val restTemplate = RestTemplate()
