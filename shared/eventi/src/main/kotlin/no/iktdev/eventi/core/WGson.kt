@@ -7,4 +7,7 @@ object WGson {
     val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
         .create()
+    fun toJson(data: Any?): String {
+        return gson.toJson(data)
+    }
 }
