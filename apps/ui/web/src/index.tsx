@@ -10,10 +10,14 @@ import { StompSessionProvider } from 'react-stomp-hooks';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+
+const protocol = window.location.protocol;
+const host = window.location.host;
+const wsUrl = `${protocol}://${host}/ws`;
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <StompSessionProvider url={"http://localhost:8080/ws"} connectHeaders={{}} logRawCommunication={true}
+      <StompSessionProvider url={wsUrl} connectHeaders={{}} logRawCommunication={true}
        debug={(str) => {
         if (str === "Opening Web Socket...") {
         }
