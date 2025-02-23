@@ -15,6 +15,9 @@ abstract class WorkTaskListener: CoordinatorEventListener() {
     private val log = KotlinLogging.logger {}
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        if (!super.shouldIProcessAndHandleEvent(incomingEvent, events)) {
+            return false
+        }
         return canStart(incomingEvent, events)
     }
 
