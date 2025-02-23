@@ -12,10 +12,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.method.HandlerTypePredicate
-import org.springframework.web.servlet.config.annotation.CorsRegistry
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.config.annotation.*
 import org.springframework.web.util.DefaultUriBuilderFactory
 import org.springframework.web.util.UriTemplateHandler
 
@@ -28,16 +25,24 @@ class WebConfig: WebMvcConfigurer {
             .allowCredentials(false)
     }
 
-    override fun configurePathMatch(configurer: PathMatchConfigurer) {
-        configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
-     //   configurer.addPathPrefix("/ws", HandlerTypePredicate.forAnnotation(Controller::class.java))
-    }
-
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
         registry.addResourceHandler("/**")
             .addResourceLocations("classpath:/static/")
             .setCachePeriod(0)
     }
+
+    override fun addViewControllers(registry: ViewControllerRegistry) {
+        // Sørger for at alle ikke-API-ruter sendes til React sin index.html
+        registry.addViewController("/{spring:[^api].*}")
+            .setViewName("forward:/index.html")
+        registry.addViewController("/**/{spring:[^api].*}")
+            .setViewName("forward:/index.html")
+    }
+
+    override fun configurePathMatch(configurer: PathMatchConfigurer) {
+        configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
+    }
+
 
     @Value("\${APP_DEPLOYMENT_PORT:8080}")
     private val deploymentPort = 8080
