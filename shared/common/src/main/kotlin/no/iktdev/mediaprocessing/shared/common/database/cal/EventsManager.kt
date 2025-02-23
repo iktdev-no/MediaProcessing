@@ -14,7 +14,7 @@ import no.iktdev.mediaprocessing.shared.common.database.tables.events
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.EventsManagerContract
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
-import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
+import no.iktdev.mediaprocessing.shared.common.contract.jsonToEvent
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -180,14 +180,8 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
     }
 
 
-    private fun ResultRow.toEvent(): Event? {
-        val kev = try {
-            Events.toEvent(this[events.event])
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-            return null
-        }?: return null
-        return this[events.data].fromJsonWithDeserializer(kev)
+    private fun ResultRow.toEvent(): Event {
+        return this[events.data].jsonToEvent(this[events.event])
     }
 
 }
