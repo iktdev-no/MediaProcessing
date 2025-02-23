@@ -22,7 +22,7 @@ class WebConfig: WebMvcConfigurer {
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
             .allowedOrigins("localhost", "*://localhost:3000", "localhost:80")
-            .allowCredentials(false)
+            .allowCredentials(true)
     }
 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
@@ -32,13 +32,14 @@ class WebConfig: WebMvcConfigurer {
     }
 
     override fun addViewControllers(registry: ViewControllerRegistry) {
-        // Sørger for at alle ikke-API-ruter sendes til React sin index.html
-        registry.addViewController("/{spring:[^api].*}")
+        // Endrer på denne linjen for å være mer presis
+        registry.addViewController("/")
             .setViewName("forward:/index.html")
+
+        // Denne fanger andre ruter som ikke starter med `/api`
         registry.addViewController("/**/{spring:[^api].*}")
             .setViewName("forward:/index.html")
     }
-
     override fun configurePathMatch(configurer: PathMatchConfigurer) {
         configurer.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
     }
