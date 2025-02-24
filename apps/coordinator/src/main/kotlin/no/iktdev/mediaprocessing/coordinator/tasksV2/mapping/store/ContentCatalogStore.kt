@@ -110,6 +110,7 @@ object ContentCatalogStore {
     }
 
     private fun storeSerie(collection: String, videoDetails: VideoDetails) {
+        log.info { "Attempting to store $collection!" }
         val serieInfo = videoDetails.serieInfo ?: run {
             log.error { "serieInfo in videoDetails is null!" }
             return

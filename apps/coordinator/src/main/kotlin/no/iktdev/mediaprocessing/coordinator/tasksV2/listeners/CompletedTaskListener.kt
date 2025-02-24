@@ -87,7 +87,10 @@ class CompletedTaskListener : CoordinatorEventListener() {
             return null
         }
 
-        val proper = mediaInfo?.data?.toValueObject() ?: return null
+        val proper = mediaInfo?.data?.toValueObject() ?: run {
+            log.error { "Unable to get media object from data" }
+            return null
+        }
 
         val details = VideoDetails(
             type = proper.type,
