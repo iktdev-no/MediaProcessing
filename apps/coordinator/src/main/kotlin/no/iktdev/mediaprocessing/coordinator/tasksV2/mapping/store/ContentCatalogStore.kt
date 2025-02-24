@@ -39,7 +39,7 @@ object ContentCatalogStore {
         }
     }
 
-    fun storeCatalog(title: String, collection: String, type: String, cover: String?, genres: String?): Int? {
+    fun storeCatalog(title: String, titles: List<String>, collection: String, type: String, cover: String?, genres: String?): Int? {
         val status = executeWithStatus(getStoreDatabase().database, block = {
             val existingRow = catalog.select {
                 (catalog.collection eq collection) and
@@ -77,7 +77,7 @@ object ContentCatalogStore {
         } else {
             log.error { "Unable to store catalog $collection..." }
         }
-        return getId(title, type)
+        return getId(title, titles, collection, type)
     }
 
     private fun storeMovie(catalogId: Int, videoDetails: VideoDetails) {
@@ -139,8 +139,8 @@ object ContentCatalogStore {
         }
     }
 
-    fun storeMedia(title: String, collection: String, type: String, videoDetails: VideoDetails) {
-        val catalogId = getId(title, type) ?: run {
+    fun storeMedia(title: String, titles: List<String>, collection: String, type: String, videoDetails: VideoDetails) {
+        val catalogId = getId(title, titles, collection, type) ?: run {
             log.warn { "Could not find id for $title with type $type" }
             return
         }
@@ -155,11 +155,13 @@ object ContentCatalogStore {
         }
     }
 
-    private fun getId(title: String, type: String): Int? {
+    private fun getId(title: String, titles: List<String>, collection: String, type: String): Int? {
         val ids = withTransaction(getStoreDatabase().database) {
             catalog.select {
-                (catalog.title eq title)
-                    .and(catalog.type eq type)
+                ((catalog.title eq title)
+                        or (catalog.collection eq collection)
+                        or (catalog.title inList titles)) and
+                        (catalog.type eq type)
             }.map { it[catalog.id].value }
         } ?: run {
             log.warn { "No values found on $title with type $type" }

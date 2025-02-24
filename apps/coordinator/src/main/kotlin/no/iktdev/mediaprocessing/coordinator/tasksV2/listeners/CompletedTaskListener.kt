@@ -154,6 +154,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
         completedData.metadataStored.let { meta ->
             val catalogId = ContentCatalogStore.storeCatalog(
                 title = meta.title,
+                titles = mediaInfo.titles,
                 collection = meta.collection,
                 type = meta.type,
                 cover = meta.cover,
@@ -172,6 +173,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
         if (videoInfo != null) {
             ContentCatalogStore.storeMedia(
                 title = completedData.metadataStored.title,
+                titles = mediaInfo.titles,
                 collection = completedData.metadataStored.collection,
                 type = completedData.metadataStored.type,
                 videoDetails = videoInfo
