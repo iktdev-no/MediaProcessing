@@ -82,8 +82,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
     }
 
     fun getVideo(events: List<Event>): VideoDetails? {
-        val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }
-            ?.az<MediaOutInformationConstructedEvent>()
+        val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
         val encoded = events.find { it.eventType == Events.WorkEncodePerformed }?.dataAs<EncodedData>()?.outputFile
         if (encoded == null) {
             log.warn { "No encode no video details!" }
@@ -95,7 +94,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
             return null
         }
 
-        val details = VideoDetails(
+        return VideoDetails(
             type = proper.type,
             fileName = File(encoded).name,
             serieInfo = if (proper !is EpisodeInfo) null else SerieInfo(
@@ -105,7 +104,6 @@ class CompletedTaskListener : CoordinatorEventListener() {
                 title = proper.title
             )
         )
-        return details
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
@@ -172,13 +170,14 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
         val videoInfo = getVideo(events)
         if (videoInfo != null) {
-            assert(persistedContent.video == null)
             ContentCatalogStore.storeMedia(
                 title = completedData.metadataStored.title,
                 collection = completedData.metadataStored.collection,
                 type = completedData.metadataStored.type,
                 videoDetails = videoInfo
             )
+        } else {
+            log.info { "VideoInfo is null" }
         }
 
 
@@ -269,7 +268,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
             .setPrettyPrinting()
             .create()
 
-        log.info { "Events in complete:\n${gson.toJson(events)}" }
+        //log.info { "Events in complete:\n${gson.toJson(events)}" }
 
         val metadataFound = events.find { it.eventType == Events.MetadataSearchPerformed }
         if (metadataFound == null) {

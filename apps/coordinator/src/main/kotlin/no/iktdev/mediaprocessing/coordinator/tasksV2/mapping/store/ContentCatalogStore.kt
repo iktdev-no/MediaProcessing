@@ -1,23 +1,15 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.store
 
 import mu.KotlinLogging
-import no.iktdev.eventi.database.executeOrException
 import no.iktdev.eventi.database.withTransaction
 import no.iktdev.mediaprocessing.coordinator.getStoreDatabase
-import no.iktdev.mediaprocessing.shared.common.contract.reader.MetadataDto
 import no.iktdev.mediaprocessing.shared.common.contract.reader.VideoDetails
-import no.iktdev.mediaprocessing.shared.common.parsing.NameHelper
 import no.iktdev.streamit.library.db.executeWithStatus
 import no.iktdev.streamit.library.db.insertWithSuccess
-import no.iktdev.streamit.library.db.query.CatalogQuery
 import no.iktdev.streamit.library.db.query.MovieQuery
-import no.iktdev.streamit.library.db.query.SerieQuery
 import no.iktdev.streamit.library.db.tables.catalog
 import no.iktdev.streamit.library.db.tables.serie
-import no.iktdev.streamit.library.db.withTransaction
-import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
-import java.sql.SQLIntegrityConstraintViolationException
 
 object ContentCatalogStore {
     val log = KotlinLogging.logger {}
@@ -85,7 +77,7 @@ object ContentCatalogStore {
         } else {
             log.error { "Unable to store catalog $collection..." }
         }
-        return getId(title, collection, type)
+        return getId(title, type)
     }
 
     private fun storeMovie(catalogId: Int, videoDetails: VideoDetails) {
@@ -148,7 +140,10 @@ object ContentCatalogStore {
     }
 
     fun storeMedia(title: String, collection: String, type: String, videoDetails: VideoDetails) {
-        val catalogId = getId(title, collection, type) ?: return
+        val catalogId = getId(title, type) ?: run {
+            log.warn { "Could not find id for $title with type $type" }
+            return
+        }
         log.info { "$title is identified as $type" }
         when (type) {
             "movie" -> storeMovie(catalogId, videoDetails)
@@ -160,12 +155,20 @@ object ContentCatalogStore {
         }
     }
 
-    fun getId(title: String, collection: String, type: String): Int? {
-        return withTransaction(getStoreDatabase().database, block = {
-            catalog.select { catalog.title eq title }.andWhere {
-                catalog.type eq type
-            }.map { it[catalog.id].value }.firstOrNull()
-        })
+    private fun getId(title: String, type: String): Int? {
+        val ids = withTransaction(getStoreDatabase().database) {
+            catalog.select {
+                (catalog.title eq title)
+                    .and(catalog.type eq type)
+            }.map { it[catalog.id].value }
+        } ?: run {
+            log.warn { "No values found on $title with type $type" }
+            return null
+        }
+        if (ids.size > 1) {
+            log.info { "Found ids: ${ids.joinToString(",")}" }
+        }
+        return ids.firstOrNull()
     }
 
 
