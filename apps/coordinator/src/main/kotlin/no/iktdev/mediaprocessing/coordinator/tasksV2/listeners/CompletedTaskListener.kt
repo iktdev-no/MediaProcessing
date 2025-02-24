@@ -1,7 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
+import com.google.gson.GsonBuilder
 import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
+import no.iktdev.eventi.core.LocalDateTimeAdapter
 import no.iktdev.eventi.data.*
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
@@ -15,6 +17,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.reader.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
+import java.time.LocalDateTime
 
 @Service
 class CompletedTaskListener : CoordinatorEventListener() {
@@ -228,12 +231,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
                 log.info { "Cant find BaseInfoEvent on ${Events.ReadBaseInfoPerformed}" }
                 return null
             }
-        val metadataInfo =
-            events.find { it.eventType == Events.MetadataSearchPerformed }?.az<MediaMetadataReceivedEvent>()?.data
-                ?: run {
-                log.info { "Cant find MediaMetadataReceivedEvent on ${Events.MetadataSearchPerformed}" }
-                null
-            }
+        val metadataInfo = getMetadata(events)
         val mediaInfo: MediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }
             ?.az<MediaOutInformationConstructedEvent>()?.let {
                 it.data?.toValueObject()
@@ -262,5 +260,29 @@ class CompletedTaskListener : CoordinatorEventListener() {
         )
     }
 
+
+    private fun getMetadata(events: List<Event>): pyMetadata? {
+        val referenceId = events.firstNotNullOf { it.referenceId() }
+
+        val gson = GsonBuilder()
+            .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
+            .setPrettyPrinting()
+            .create()
+
+        log.info { "Events in complete:\n${gson.toJson(events)}" }
+
+        val metadataFound = events.find { it.eventType == Events.MetadataSearchPerformed }
+        if (metadataFound == null) {
+            log.warn { "ReferenceId: $referenceId -> ${Events.MetadataSearchPerformed} was not found in events" }
+            return null
+        }
+        val data = metadataFound.az<MediaMetadataReceivedEvent>()
+        if (data == null) {
+            log.warn { "ReferenceId: $referenceId -> ${Events.MetadataSearchPerformed} does not contain any data.." }
+            return null
+        }
+
+        return data.data
+    }
 
 }
