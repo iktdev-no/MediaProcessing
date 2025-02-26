@@ -6,14 +6,14 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.az
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioPreference
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.EncodingPreference
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.VideoPreference
-import no.iktdev.mediaprocessing.shared.common.contract.fromJsonWithDeserializer
+import no.iktdev.mediaprocessing.shared.common.contract.jsonToEvent
 import org.junit.jupiter.api.Test
 
 class EncodeWorkArgumentsMappingTest {
 
     @Test
     fun parse() {
-        val event = data.fromJsonWithDeserializer(Events.ParseStreamPerformed)
+        val event = data.jsonToEvent(Events.ParseStreamPerformed.event)
         val parser = EncodeWorkArgumentsMapping(
             "potato.mkv",
             "potato.mp4",

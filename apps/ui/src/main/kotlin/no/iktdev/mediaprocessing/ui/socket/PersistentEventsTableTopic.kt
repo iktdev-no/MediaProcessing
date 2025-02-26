@@ -6,7 +6,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 
 @Controller
-class EventsTableTopic(
+class PersistentEventsTableTopic(
     @Autowired private val template: SimpMessagingTemplate?,
     //@Autowired private val persistentEventsTableService: PersistentEventsTableService
 ) {

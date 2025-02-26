@@ -1,5 +1,4 @@
 import { useDispatch, useSelector } from "react-redux";
-import SimpleTable, { TableCellCustomizer, TablePropetyConfig } from "../features/table"
 import { RootState } from "../store";
 import { useEffect } from "react";
 import { useStompClient } from "react-stomp-hooks";
@@ -7,6 +6,8 @@ import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
 import IconRefresh from '@mui/icons-material/Refresh'
 import IconCompleted from '@mui/icons-material/Check'
 import IconWorking from '@mui/icons-material/Engineering';
+import { TablePropetyConfig } from "../features/table/table";
+import SimpleTable from "../features/table/sortableTable";
 
 const columns: Array<TablePropetyConfig> = [
     { label: "Title", accessor: "givenTitle" },
@@ -54,7 +55,7 @@ export default function LaunchPage() {
                 <Box sx={{
                     display: "flex",
                 }}>
-<Button
+                    <Button
                         startIcon={ <IconRefresh /> }
                         onClick={onRefresh} sx={{
                         borderRadius: 5,

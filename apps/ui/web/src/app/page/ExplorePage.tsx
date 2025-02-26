@@ -3,7 +3,7 @@ import { UnixTimestamp } from '../features/UxTc';
 import { Box, Button, Typography, useTheme } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
-import SimpleTable, { TableCellCustomizer, TablePropetyConfig, TableRowActionEvents } from '../features/table';
+import { TableCellCustomizer, TablePropetyConfig, TableRowActionEvents } from '../features/table/table';
 import { useStompClient } from 'react-stomp-hooks';
 import { useWsSubscription } from '../ws/subscriptions';
 import { updateItems } from '../store/explorer-slice';
@@ -14,6 +14,7 @@ import IconHome from '@mui/icons-material/Home';
 import { ExplorerItem, ExplorerCursor, ExplorerItemType } from '../../types';
 import ContextMenu, { ContextMenuActionEvent, ContextMenuItem } from '../features/ContextMenu';
 import { canConvert, canEncode, canExtract } from '../../fileUtil';
+import SimpleTable from '../features/table/sortableTable';
 
 
 const createTableCell: TableCellCustomizer<ExplorerItem> = (accessor, data) => {

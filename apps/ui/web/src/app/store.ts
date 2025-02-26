@@ -4,6 +4,7 @@ import explorerSlice from './store/explorer-slice';
 import kafkaItemsFlatSlice from './store/kafka-items-flat-slice';
 import contextMenuSlice from './store/context-menu-slice';
 import persistentEventsSlice from './store/persistent-events-slice';
+import chainedEventsSlice from './store/chained-events-slice';
 
 
 export const store = configureStore({
@@ -12,7 +13,8 @@ export const store = configureStore({
     explorer: explorerSlice,
     kafkaComposedFlat: kafkaItemsFlatSlice,
     contextMenu: contextMenuSlice,
-    persistentEvents: persistentEventsSlice
+    persistentEvents: persistentEventsSlice,
+    chained: chainedEventsSlice,
   },
 });
 

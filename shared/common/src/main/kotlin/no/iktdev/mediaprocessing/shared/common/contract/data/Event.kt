@@ -21,6 +21,10 @@ inline fun <reified T: Event> List<Event>.findFirstEventOf(): T? {
     } else null
 }
 
+inline fun List<Event>.findFirstOf(events: Events): Event? {
+    return this.firstOrNull { it.eventType == events }
+}
+
 inline fun <reified T: Event> List<Event>.findEventsOf(): List<T> {
     return this.filterIsInstance<T>().map { it }
 }
