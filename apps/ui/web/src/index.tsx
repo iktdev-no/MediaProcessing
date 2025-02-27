@@ -11,13 +11,20 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const protocol = window.location.protocol;
-const host = window.location.host;
-const wsUrl = "http://localhost:8080/ws" //`${protocol}//${host}/ws`;
+
+const wsUrl = () => {
+  const protocol = window.location.protocol;
+  const host = window.location.host;
+  if (window.location.href.startsWith("http://localhost:3000")) {
+    return "http://localhost:8080/ws";
+  } else {
+    return `${protocol}//${host}/ws`;
+  }
+}
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <StompSessionProvider url={wsUrl} connectHeaders={{}} logRawCommunication={true}
+      <StompSessionProvider url={wsUrl()} connectHeaders={{}} logRawCommunication={true}
        debug={(str) => {
         if (str === "Opening Web Socket...") {
         }
