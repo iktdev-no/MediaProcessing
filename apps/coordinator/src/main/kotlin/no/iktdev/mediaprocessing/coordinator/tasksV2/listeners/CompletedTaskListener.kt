@@ -108,7 +108,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
         val result = super.shouldIProcessAndHandleEvent(incomingEvent, events)
-        return result && events.any { it.eventType == Events.PersistContentPerformed }
+        return result && incomingEvent.eventType == Events.PersistContentPerformed
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
