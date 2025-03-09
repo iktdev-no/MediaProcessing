@@ -51,6 +51,7 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     val watchDirectories = SharedConfig.incomingContent
     val queue = FileWatcherQueue()
 
+    @Volatile
     private var isStopping: Boolean = false
     @PreDestroy
     fun setStop() {
@@ -86,28 +87,35 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
     private suspend fun startWatchOnDirectory(file: File) {
         if (activeWatchers.any {it -> it.file.absolutePath == file.absolutePath}) {
             log.error { "Attempting to start a watcher on an already watched directory ${file.absolutePath}" }
+            return
         }
         val watcher =  file.asWatcher { watcher ->
-            watcher.consumeEach {
-                if (it.file == SharedConfig.incomingContent) {
-                    logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
-                } else {
-                    logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
-                }
-                try {
-                    when (it.kind) {
-                        Deleted -> removeFile(it.file)
-                        Initialized -> { /* Do nothing */ }
-                        else -> {
-                            val added = addFile(it.file)
-                            if (!added) {
-                                logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
+            try {
+                watcher.consumeEach {
+                    if (it.file == SharedConfig.incomingContent) {
+                        logger.info { "IO Watcher ${it.kind} on ${it.file.absolutePath}" }
+                    } else {
+                        logger.info { "IO Event: ${it.kind}: ${it.file.name}" }
+                    }
+                    try {
+                        when (it.kind) {
+                            Deleted -> removeFile(it.file)
+                            Initialized -> { /* Do nothing */ }
+                            else -> {
+                                val added = addFile(it.file)
+                                if (!added) {
+                                    logger.info { "Ignoring event kind: ${it.kind.name} for file ${it.file.name} as it is not a supported video file" }
+                                }
                             }
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
+            } catch (e: Exception) {
+                log.error { "Consume failed ${e.message}" }
+                e.printStackTrace()
+                watcher.close()
             }
         }.also { watcher ->
             watcher.watcher.invokeOnClose {
