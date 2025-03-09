@@ -63,7 +63,12 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
         val dirs = watchDirectories.filter { it.exists() && it.isDirectory }
         if (dirs.isNotEmpty()) {
             val paths = dirs.joinToString("\n\t") { it.absolutePath }
-            log.info { "Watching directories:\n\t $paths" }
+            log.info { "Watching directories:\n\t$paths" }
+
+            for (dir in dirs) {
+                log.info { "Content present for path ${dir.absolutePath}" }
+                log.info { dir.listFiles()?.map { it.name }?.joinToString { "\n\t" } ?: "No files present.." }
+            }
         }
 
         //val errorConfiguredDirs = watchDirectories.filter { !it.isDirectory || !it.exists()}.joinToString("\n\t") { it.absolutePath }
