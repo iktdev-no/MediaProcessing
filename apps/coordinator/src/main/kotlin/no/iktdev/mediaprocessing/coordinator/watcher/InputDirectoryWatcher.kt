@@ -66,8 +66,8 @@ class InputDirectoryWatcher(@Autowired var coordinator: Coordinator): FileWatche
             log.info { "Watching directories:\n\t$paths" }
 
             for (dir in dirs) {
-                log.info { "Content present for path ${dir.absolutePath}" }
-                log.info { dir.listFiles()?.map { it.name }?.joinToString { "\n\t" } ?: "No files present.." }
+                val files = dir.listFiles()?.map { it.name }?.joinToString { "\n\t $it" } ?: "No files present.."
+                log.info { "Content present for path ${dir.absolutePath} \n$files" }
             }
         }
 
