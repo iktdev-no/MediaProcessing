@@ -62,17 +62,18 @@ class SubtitleArguments(val subtitleStreams: List<SubtitleStream>) {
         val languageGrouped = codecFiltered.groupBy { it.tags.language ?: "eng" }
 
         val streamsToExtract = languageGrouped.mapNotNull { item ->
-            val types = item.value.map { getSubtitleType(it) }
-            if (types.none { t -> t == SubtitleType.DEFAULT } || types.count { t -> t == SubtitleType.DEFAULT} > 1) {
-                excludeLowFrameCount(item.value).sortedBy { it.tags.NUMBER_OF_FRAMES }.firstOrNull()
-            } else {
-                item.value.minByOrNull { s -> getSubtitleType(s) }
+            val itemToType = item.value.map { it to getSubtitleType(it) }
+            val usableSubtitles = itemToType.filter { it.second == SubtitleType.DEFAULT }.ifEmpty { itemToType }
+            val excludedLowFrameCount = excludeLowFrameCount(usableSubtitles.map { it.first }).sortedByDescending { it.tags.NUMBER_OF_FRAMES }
+            excludedLowFrameCount.firstOrNull() ?: run {
+                usableSubtitles.map { it.first }.firstOrNull { it.disposition?.default == 1 } ?: usableSubtitles.firstOrNull()?.first
             }
         }
 
         return streamsToExtract.mapNotNull { stream ->
             getFormatToCodec(stream.codec_name)?.let { format ->
                 SubtitleArgumentsDto(
+                    mediaIndex = stream.index,
                     index = subtitleStreams.indexOf(stream),
                     language = stream.tags.language ?: "eng",
                     format = format
@@ -94,7 +95,7 @@ class SubtitleArguments(val subtitleStreams: List<SubtitleStream>) {
 
         return usable.filter {
             val frameCount = it.tags.NUMBER_OF_FRAMES ?: 0
-            frameCount.toDouble() in standardDeviation..upperBound
+            frameCount.toDouble() in lowerBound..upperBound
         }
     }
 

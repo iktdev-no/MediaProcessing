@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.contract.ffmpeg
 
 data class SubtitleArgumentsDto(
+    val mediaIndex: Int,
     val index: Int,
     val language: String,
     val format: String, // Extension as well

@@ -31,7 +31,7 @@ class SubtitleArgumentsTest {
         val data = Gson().fromJson<List<SubtitleStream>>(multipleSubtitleStreamsWithSameLanguage, type)
         val args = SubtitleArguments(data).getSubtitleArguments()
         assertThat(args).hasSize(1)
-        assertThat(args.firstOrNull()?.index).isEqualTo(1)
+        assertThat(args.firstOrNull()?.mediaIndex).isEqualTo(4)
     }
 
     @Test
@@ -39,7 +39,15 @@ class SubtitleArgumentsTest {
         val data = Gson().fromJson<List<SubtitleStream>>(multipleSubtitleStreamsWithSameLanguageWithDisposition, type)
         val args = SubtitleArguments(data).getSubtitleArguments()
         assertThat(args).hasSize(1)
-        assertThat(args.firstOrNull()?.index).isEqualTo(1)
+        assertThat(args.firstOrNull()?.mediaIndex).isEqualTo(4)
+    }
+
+    @Test
+    fun assertThatCorrectTrackIsSelected() {
+        val data = Gson().fromJson<List<SubtitleStream>>(selectCorrectTrack, type)
+        val args = SubtitleArguments(data).getSubtitleArguments()
+        assertThat(args).hasSize(1)
+        assertThat(args.firstOrNull()?.index).isEqualTo(0)
     }
 
 
@@ -123,6 +131,7 @@ class SubtitleArgumentsTest {
                 }]
     """.trimIndent()
 
+    //language=json
     val multipleSubtitleStreamsWithSameLanguageWithDisposition = """
                 [{
                     "index": 3,
@@ -261,5 +270,101 @@ class SubtitleArgumentsTest {
                         "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
                     }
                 }]
+    """.trimIndent()
+
+    val selectCorrectTrack = """
+        [
+                {
+                    "index": 2,
+                    "codec_name": "ass",
+                    "codec_long_name": "ASS (Advanced SSA) subtitle",
+                    "codec_type": "subtitle",
+                    "codec_tag_string": "[0][0][0][0]",
+                    "codec_tag": "0x0000",
+                    "r_frame_rate": "0/0",
+                    "avg_frame_rate": "0/0",
+                    "time_base": "1/1000",
+                    "start_pts": 0,
+                    "start_time": "0.000000",
+                    "duration_ts": 1430048,
+                    "duration": "1430.048000",
+                    "extradata_size": 2185,
+                    "disposition": {
+                        "default": 1,
+                        "dub": 0,
+                        "original": 0,
+                        "comment": 0,
+                        "lyrics": 0,
+                        "karaoke": 0,
+                        "forced": 0,
+                        "hearing_impaired": 0,
+                        "visual_impaired": 0,
+                        "clean_effects": 0,
+                        "attached_pic": 0,
+                        "timed_thumbnails": 0,
+                        "non_diegetic": 0,
+                        "captions": 0,
+                        "descriptions": 0,
+                        "metadata": 0,
+                        "dependent": 0,
+                        "still_image": 0
+                    },
+                    "tags": {
+                        "language": "eng",
+                        "BPS": "173",
+                        "DURATION": "00:23:43.500000000",
+                        "NUMBER_OF_FRAMES": "436",
+                        "NUMBER_OF_BYTES": "30896",
+                        "_STATISTICS_WRITING_APP": "mkvmerge v69.0.0 ('Day And Age') 64-bit",
+                        "_STATISTICS_WRITING_DATE_UTC": "2025-01-03 02:19:23",
+                        "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
+                    }
+                },
+                {
+                    "index": 3,
+                    "codec_name": "subrip",
+                    "codec_long_name": "SubRip subtitle",
+                    "codec_type": "subtitle",
+                    "codec_tag_string": "[0][0][0][0]",
+                    "codec_tag": "0x0000",
+                    "r_frame_rate": "0/0",
+                    "avg_frame_rate": "0/0",
+                    "time_base": "1/1000",
+                    "start_pts": 0,
+                    "start_time": "0.000000",
+                    "duration_ts": 1430048,
+                    "duration": "1430.048000",
+                    "disposition": {
+                        "default": 0,
+                        "dub": 0,
+                        "original": 0,
+                        "comment": 0,
+                        "lyrics": 0,
+                        "karaoke": 0,
+                        "forced": 0,
+                        "hearing_impaired": 0,
+                        "visual_impaired": 0,
+                        "clean_effects": 0,
+                        "attached_pic": 0,
+                        "timed_thumbnails": 0,
+                        "non_diegetic": 0,
+                        "captions": 0,
+                        "descriptions": 0,
+                        "metadata": 0,
+                        "dependent": 0,
+                        "still_image": 0
+                    },
+                    "tags": {
+                        "language": "eng",
+                        "BPS": "83",
+                        "DURATION": "00:23:41.860000000",
+                        "NUMBER_OF_FRAMES": "432",
+                        "NUMBER_OF_BYTES": "14853",
+                        "_STATISTICS_WRITING_APP": "mkvmerge v69.0.0 ('Day And Age') 64-bit",
+                        "_STATISTICS_WRITING_DATE_UTC": "2025-01-03 02:19:23",
+                        "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
+                    }
+                }
+        ]
     """.trimIndent()
 }
