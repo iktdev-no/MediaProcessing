@@ -19,11 +19,11 @@ object CompletionValidator {
      */
     fun req1(started: MediaProcessStartEvent, events: List<Event>): Boolean {
         val encodeFulfilledOrSkipped = if (started.data?.operations?.contains(OperationEvents.ENCODE) == true) {
-            events.any { it.eventType == Events.ParameterEncodeCreated }
+            events.any { it.eventType == Events.EncodeParameterCreated }
         } else true
 
         val extractFulfilledOrSkipped = if (started.data?.operations?.contains(OperationEvents.EXTRACT) == true) {
-            events.any { it.eventType == Events.ParameterExtractCreated }
+            events.any { it.eventType == Events.ExtractParameterCreated }
         } else true
 
         if (!encodeFulfilledOrSkipped || !extractFulfilledOrSkipped) {
@@ -37,21 +37,21 @@ object CompletionValidator {
      */
     fun req2(operations: List<OperationEvents>, events: List<Event>): Boolean {
         if (OperationEvents.ENCODE in operations) {
-            val encodeParamter = events.find { it.eventType == Events.ParameterEncodeCreated }?.az<EncodeArgumentCreatedEvent>()
-            val encodeWork = events.find { it.eventType == Events.WorkEncodeCreated }
+            val encodeParamter = events.find { it.eventType == Events.EncodeParameterCreated }?.az<EncodeArgumentCreatedEvent>()
+            val encodeWork = events.find { it.eventType == Events.EncodeTaskCreated }
             if (encodeParamter?.isSuccessful() == true && (encodeWork == null))
                 return false
         }
 
-        val extractParamter = events.find { it.eventType == Events.ParameterExtractCreated }?.az<ExtractArgumentCreatedEvent>()
-        val extractWork = events.filter { it.eventType == Events.WorkExtractCreated }
+        val extractParamter = events.find { it.eventType == Events.ExtractParameterCreated }?.az<ExtractArgumentCreatedEvent>()
+        val extractWork = events.filter { it.eventType == Events.ExtractTaskCreated }
         if (OperationEvents.EXTRACT in operations) {
             if (extractParamter?.isSuccessful() == true && extractParamter.data?.size != extractWork.size)
                 return false
         }
 
         if (OperationEvents.CONVERT in operations) {
-            val convertWork = events.filter { it.eventType == Events.WorkConvertCreated }
+            val convertWork = events.filter { it.eventType == Events.ConvertTaskCreated }
 
             val supportedSubtitleFormats = SubtitleFormats.entries.map { it.name }
             val eventsSupportsConvert = extractWork.filter { it.data is ExtractArgumentData }
@@ -69,22 +69,22 @@ object CompletionValidator {
      */
     fun req3(operations: List<OperationEvents>, events: List<Event>): Boolean {
         if (OperationEvents.ENCODE in operations) {
-            val encodeWork = events.filter { it.eventType == Events.WorkEncodeCreated }
-            val encodePerformed = events.filter { it.eventType == Events.WorkEncodePerformed }
+            val encodeWork = events.filter { it.eventType == Events.EncodeTaskCreated }
+            val encodePerformed = events.filter { it.eventType == Events.EncodeTaskCompleted }
             if (encodePerformed.size < encodeWork.size)
                 return false
         }
 
         if (OperationEvents.EXTRACT in operations) {
-            val extractWork = events.filter { it.eventType == Events.WorkExtractCreated }
-            val extractPerformed = events.filter { it.eventType == Events.WorkExtractPerformed }
+            val extractWork = events.filter { it.eventType == Events.ExtractTaskCreated }
+            val extractPerformed = events.filter { it.eventType == Events.ExtractTaskCompleted }
             if (extractPerformed.size < extractWork.size)
                 return false
         }
 
         if (OperationEvents.CONVERT in operations) {
-            val convertWork = events.filter { it.eventType == Events.WorkConvertCreated }
-            val convertPerformed = events.filter { it.eventType == Events.WorkConvertPerformed }
+            val convertWork = events.filter { it.eventType == Events.ConvertTaskCreated }
+            val convertPerformed = events.filter { it.eventType == Events.ConvertTaskCompleted }
             if (convertPerformed.size < convertWork.size)
                 return false
         }
@@ -110,7 +110,7 @@ object CompletionValidator {
             return true
         }
 
-        if (events.any { it.eventType == Events.ReadOutCover } && events.any { it.eventType == Events.WorkDownloadCoverPerformed }) {
+        if (events.any { it.eventType == Events.ReadOutCover } && events.any { it.eventType == Events.CoverDownloaded }) {
             return true
         }
         return false

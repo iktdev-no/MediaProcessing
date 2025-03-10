@@ -46,11 +46,11 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
     override val produceEvent: Events = Events.ProcessCompleted
     override val listensForEvents: List<Events> = listOf(
-        Events.WorkDownloadCoverPerformed,
-        Events.WorkConvertPerformed,
-        Events.WorkEncodePerformed,
-        Events.WorkExtractPerformed,
-        Events.PersistContentPerformed
+        Events.CoverDownloaded,
+        Events.ConvertTaskCompleted,
+        Events.EncodeTaskCompleted,
+        Events.ExtractTaskCompleted,
+        Events.PersistContent
     )
 
 
@@ -83,7 +83,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
     fun getVideo(events: List<Event>): VideoDetails? {
         val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
-        val encoded = events.find { it.eventType == Events.WorkEncodePerformed }?.dataAs<EncodedData>()?.outputFile
+        val encoded = events.find { it.eventType == Events.EncodeTaskCompleted }?.dataAs<EncodedData>()?.outputFile
         if (encoded == null) {
             log.warn { "No encode no video details!" }
             return null
@@ -108,7 +108,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
         val result = super.shouldIProcessAndHandleEvent(incomingEvent, events)
-        return result && incomingEvent.eventType == Events.PersistContentPerformed
+        return result && incomingEvent.eventType == Events.PersistContent
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
@@ -130,7 +130,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
         val genreIdsForCatalog = ContentGenresStore.storeAndGetIds(mediaInfo.genres)
 
-        val persistedContent: PersistedContent? = events.find { it.eventType == Events.PersistContentPerformed }?.az<PersistedContentEvent>()?.data
+        val persistedContent: PersistedContent? = events.find { it.eventType == Events.PersistContent }?.az<PersistedContentEvent>()?.data
         if (persistedContent == null) {
             log.error { "PersistedContent is null! can't continue" }
             return
@@ -226,10 +226,10 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
     private fun composeMediaInfo(events: List<Event>): ComposedMediaInfo? {
         val baseInfo =
-            events.find { it.eventType == Events.ReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.let {
+            events.find { it.eventType == Events.BaseInfoRead }?.az<BaseInfoEvent>()?.let {
                 it.data
             } ?: run {
-                log.info { "Cant find BaseInfoEvent on ${Events.ReadBaseInfoPerformed}" }
+                log.info { "Cant find BaseInfoEvent on ${Events.BaseInfoRead}" }
                 return null
             }
         val metadataInfo = getMetadata(events)

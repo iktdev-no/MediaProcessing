@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class ExtractWorkCreatedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.WorkExtractCreated,
+    override val eventType: Events = Events.ExtractTaskCreated,
     override val data: ExtractArgumentData? = null
 ) : Event() {
 }

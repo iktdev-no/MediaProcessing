@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class MediaCoverDownloadedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.WorkDownloadCoverPerformed,
+    override val eventType: Events = Events.CoverDownloaded,
     override val data: DownloadedCover? = null
 ) : Event() {
 }

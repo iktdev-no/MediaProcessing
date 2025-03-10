@@ -1,10 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common.contract
 
 import com.google.gson.*
-import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
 import no.iktdev.eventi.core.LocalDateTimeAdapter
-import no.iktdev.eventi.core.WGson
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import java.lang.reflect.Type
 import java.time.LocalDateTime
@@ -12,65 +10,64 @@ import java.time.LocalDateTime
 private val log = KotlinLogging.logger {}
 
 
-enum class Events(val event: String) {
-    ProcessStarted                ("event:media-process:started"),
+enum class Events {
+    ProcessStarted,
+    StreamRead,
+    StreamParsed,
+    BaseInfoRead,
+    MetadataSearchPerformed,
+    ReadOutNameAndType,
+    ReadOutCover,
+    EncodeParameterCreated,
+    ExtractParameterCreated,
+    WorkProceedPermitted,
+    EncodeTaskCreated,
+    ExtractTaskCreated,
+    ConvertTaskCreated,
+    EncodeTaskCompleted,
+    ExtractTaskCompleted,
+    ConvertTaskCompleted,
+    CoverDownloaded,
+    PersistContent,
+    ProcessCompleted,
 
-    ReadStreamPerformed           ("event:media-read-stream:performed"             ),
-    ParseStreamPerformed          ("event:media-parse-stream:performed"            ),
-    ReadBaseInfoPerformed         ("event:media-read-base-info:performed"          ),
-    MetadataSearchPerformed       ("event:media-metadata-search:performed"         ),
-    ReadOutNameAndType            ("event:media-read-out-name-and-type:performed"  ),
-    ReadOutCover                  ("event:media-read-out-cover:performed"          ),
-    ParameterEncodeCreated        ("event:media-encode-parameter:created"          ),
-    ParameterExtractCreated       ("event:media-extract-parameter:created"         ),
-    WorkProceedPermitted          ("event:media-work-proceed:permitted"            ),
-    WorkEncodeCreated                  ("event:work-encode:created"                ),
-    WorkExtractCreated                 ("event:work-extract:created"               ),
-    WorkConvertCreated                 ("event:work-convert:created"               ),
-    WorkEncodePerformed                ("event:work-encode:performed"              ),
-    WorkExtractPerformed               ("event:work-extract:performed"             ),
-    WorkConvertPerformed               ("event:work-convert:performed"             ),
-    WorkDownloadCoverPerformed         ("event:work-download-cover:performed"      ),
-    PersistContentPerformed            ("event:media-persist:completed"            ),
-    ProcessCompleted              ("event:media-process:completed"                 ),
-
-    Unknown ("")
+    Unknown
     ;
 
     companion object {
         fun toEvent(event: String): Events {
-            return Events.entries.find { it.event == event } ?: Unknown
+            return Events.entries.find { it.name == event } ?: Unknown
         }
     }
 }
 
 fun Events.toEventClass(): Class<out Event> {
-    return when(this) {
-        Events.ProcessStarted                -> MediaProcessStartEvent::class.java
+    return when (this) {
+        Events.ProcessStarted -> MediaProcessStartEvent::class.java
 
-        Events.ReadStreamPerformed           -> MediaFileStreamsReadEvent::class.java
-        Events.ParseStreamPerformed          -> MediaFileStreamsParsedEvent::class.java
-        Events.ReadBaseInfoPerformed         -> BaseInfoEvent::class.java
-        Events.MetadataSearchPerformed       -> MediaMetadataReceivedEvent::class.java
-        Events.ReadOutNameAndType            -> MediaOutInformationConstructedEvent::class.java
-        Events.ReadOutCover                  -> MediaCoverInfoReceivedEvent::class.java
+        Events.StreamRead -> MediaFileStreamsReadEvent::class.java
+        Events.StreamParsed -> MediaFileStreamsParsedEvent::class.java
+        Events.BaseInfoRead -> BaseInfoEvent::class.java
+        Events.MetadataSearchPerformed -> MediaMetadataReceivedEvent::class.java
+        Events.ReadOutNameAndType -> MediaOutInformationConstructedEvent::class.java
+        Events.ReadOutCover -> MediaCoverInfoReceivedEvent::class.java
 
-        Events.ParameterEncodeCreated        -> EncodeArgumentCreatedEvent::class.java
-        Events.ParameterExtractCreated       -> ExtractArgumentCreatedEvent::class.java
+        Events.EncodeParameterCreated -> EncodeArgumentCreatedEvent::class.java
+        Events.ExtractParameterCreated -> ExtractArgumentCreatedEvent::class.java
 
-        Events.WorkProceedPermitted          -> PermitWorkCreationEvent::class.java
+        Events.WorkProceedPermitted -> PermitWorkCreationEvent::class.java
 
-        Events.WorkEncodeCreated             -> EncodeWorkCreatedEvent::class.java
-        Events.WorkExtractCreated            -> ExtractWorkCreatedEvent::class.java
-        Events.WorkConvertCreated            -> ConvertWorkCreatedEvent::class.java
+        Events.EncodeTaskCreated -> EncodeWorkCreatedEvent::class.java
+        Events.ExtractTaskCreated -> ExtractWorkCreatedEvent::class.java
+        Events.ConvertTaskCreated -> ConvertWorkCreatedEvent::class.java
 
-        Events.WorkEncodePerformed           -> EncodeWorkPerformedEvent::class.java
-        Events.WorkExtractPerformed          -> ExtractWorkPerformedEvent::class.java
-        Events.WorkConvertPerformed          -> ConvertWorkPerformed::class.java
-        Events.WorkDownloadCoverPerformed    -> MediaCoverDownloadedEvent::class.java
+        Events.EncodeTaskCompleted -> EncodeWorkPerformedEvent::class.java
+        Events.ExtractTaskCompleted -> ExtractWorkPerformedEvent::class.java
+        Events.ConvertTaskCompleted -> ConvertWorkPerformed::class.java
+        Events.CoverDownloaded -> MediaCoverDownloadedEvent::class.java
 
-        Events.PersistContentPerformed       -> PersistedContentEvent::class.java
-        Events.ProcessCompleted              -> MediaProcessCompletedEvent::class.java
+        Events.PersistContent -> PersistedContentEvent::class.java
+        Events.ProcessCompleted -> MediaProcessCompletedEvent::class.java
         else -> Event::class.java
     }
 }
@@ -106,6 +103,7 @@ object EventJson {
     private val gson = GsonBuilder()
         .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
         .create()
+
     fun fromJson(json: String, event: Events): Event {
         val gson = GsonBuilder()
             .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
@@ -123,6 +121,13 @@ object EventJson {
             // 🔥 Finn riktig klasse basert på eventType (som kommer eksternt fra databasen)
             val eventClass = eventType.toEventClass()
 
+            if (eventClass.simpleName == Event::class.java.simpleName || eventType == Events.Unknown) {
+                val fallbackGson = GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
+                    .create()
+
+                return fallbackGson.fromJson(json, eventClass)
+            }
             // Deserialiser objektet til riktig klasse
             val event = context.deserialize<Event>(json, eventClass)
 

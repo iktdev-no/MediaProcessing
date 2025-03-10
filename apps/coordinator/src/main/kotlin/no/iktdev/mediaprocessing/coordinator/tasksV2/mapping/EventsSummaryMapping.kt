@@ -33,26 +33,26 @@ class EventsSummaryMapping {
     }
 
 
-    fun isEncodedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.WorkEncodePerformed }.any { it.isSuccessful() }
-    fun isExtractedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.WorkExtractPerformed }.any { it.isSuccessful() }
-    fun isConvertedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.WorkConvertPerformed }.any { it.isSuccessful() }
+    fun isEncodedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.EncodeTaskCompleted }.any { it.isSuccessful() }
+    fun isExtractedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.ExtractTaskCompleted }.any { it.isSuccessful() }
+    fun isConvertedSuccessful(events: List<Event>) = events.filter { it.eventType == Events.ConvertTaskCompleted }.any { it.isSuccessful() }
 
     fun getProducesFiles(events: List<Event>): OutputFiles {
         val encoded = if (isEncodedSuccessful(events)) {
-            events.filter { it.eventType == Events.WorkEncodePerformed }
+            events.filter { it.eventType == Events.EncodeTaskCompleted }
                 .filter { it.isSuccessful() }
                 .mapNotNull { it.dataAs<EncodedData>()?.outputFile }
         } else emptyList()
 
         val extracted = if (isExtractedSuccessful(events)) {
-            events.filter { it.eventType == Events.WorkExtractPerformed }
+            events.filter { it.eventType == Events.ExtractTaskCompleted }
                 .filter { it.isSuccessful() }
                 .mapNotNull { it.dataAs<ExtractedData>() }
                 .map { it.outputFile }
         } else emptyList()
 
         val converted = if (isConvertedSuccessful(events)) {
-            events.filter { it.eventType == Events.WorkConvertPerformed }
+            events.filter { it.eventType == Events.ConvertTaskCompleted }
                 .filter { it.isSuccessful() }
                 .mapNotNull { it.dataAs<ConvertedData>() }
                 .flatMap { it.outputFiles }

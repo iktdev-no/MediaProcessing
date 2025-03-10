@@ -35,7 +35,7 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     val log = KotlinLogging.logger {}
     val requiredOperations = listOf(OperationEvents.ENCODE, OperationEvents.EXTRACT)
 
-    override val produceEvent: Events = Events.ReadStreamPerformed
+    override val produceEvent: Events = Events.StreamRead
     override val listensForEvents: List<Events> = listOf(Events.ProcessStarted)
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {

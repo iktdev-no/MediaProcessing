@@ -6,7 +6,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.dto.tasks.TaskData
 
 data class EncodeArgumentCreatedEvent(
     override val metadata: EventMetadata,
-    override val eventType: Events = Events.ParameterEncodeCreated,
+    override val eventType: Events = Events.EncodeParameterCreated,
     override val data: EncodeArgumentData? = null
 ) : Event() {
 

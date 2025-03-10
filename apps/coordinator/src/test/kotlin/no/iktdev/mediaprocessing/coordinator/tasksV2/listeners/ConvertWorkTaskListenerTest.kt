@@ -21,7 +21,7 @@ class ConvertWorkTaskListenerTest {
     @Test
     fun validateCreationOfConvertTasks() {
         val listener: ConvertWorkTaskListener = ConvertWorkTaskListener()
-        val content = Files.MultipleLanguageBased.databaseJsonToEvents().filter { it.eventType in listOf( Events.WorkExtractPerformed, Events.ProcessStarted, Events.WorkConvertCreated, Events.WorkConvertPerformed) }
+        val content = Files.MultipleLanguageBased.databaseJsonToEvents().filter { it.eventType in listOf( Events.ExtractTaskCompleted, Events.ProcessStarted, Events.ConvertTaskCreated, Events.ConvertTaskCompleted) }
         assertThat(listener).isNotNull()
         val success = content.map { listener.shouldIProcessAndHandleEvent(it, content) to it }
         assertThat(success.filter { it.first }.size).isGreaterThan(3)

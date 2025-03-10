@@ -31,9 +31,9 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
     override var coordinator: Coordinator? = null
 
 
-    override val produceEvent: Events = Events.ParseStreamPerformed
+    override val produceEvent: Events = Events.StreamParsed
     override val listensForEvents: List<Events> = listOf(
-        Events.ReadStreamPerformed
+        Events.StreamRead
     )
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {

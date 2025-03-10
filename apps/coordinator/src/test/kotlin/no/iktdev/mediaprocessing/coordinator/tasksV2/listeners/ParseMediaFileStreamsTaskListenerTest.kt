@@ -11,7 +11,7 @@ class ParseMediaFileStreamsTaskListenerTest {
 
     @Test
     fun testParse() {
-        val event = data.jsonToEvent(Events.ReadStreamPerformed.event).dataAs<JsonObject>()
+        val event = data.jsonToEvent(Events.StreamRead.name).dataAs<JsonObject>()
 
         val parser = ParseMediaFileStreamsTaskListener()
         val result = parser.parseStreams(event)

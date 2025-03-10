@@ -64,7 +64,7 @@ class Coordinator(
     }
 
     fun permitWorkToProceedOn(referenceId: String, events: List<Event>, message: String) {
-        val defaultRequiredBy = listOf(Events.ParameterEncodeCreated, Events.ParameterExtractCreated)
+        val defaultRequiredBy = listOf(Events.EncodeParameterCreated, Events.ExtractParameterCreated)
         val eventToAttachTo = if (events.any { it.eventType in defaultRequiredBy }) {
             events.findLast { it.eventType in defaultRequiredBy }
         } else events.find { it.eventType == Events.ProcessStarted }

@@ -53,6 +53,23 @@ class RequestEventController(@Autowired var coordinator: Coordinator) {
         return ResponseEntity.ok(referenceId)
     }
 
+    @PostMapping("/encode")
+    @ResponseStatus(HttpStatus.OK)
+    fun requestEncode(@RequestBody payload: EventRequest): ResponseEntity<String> {
+        var referenceId: String?
+        try {
+            val file = File(payload.file)
+            if (!file.exists()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Gson().toJson(payload))
+            }
+            referenceId = coordinator.startProcess(file, payload.mode, listOf(OperationEvents.ENCODE)).toString()
+
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Gson().toJson(payload))
+        }
+        return ResponseEntity.ok(referenceId)
+    }
+
     @PostMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     fun requestAll(@RequestBody payload: EventRequest): ResponseEntity<String> {

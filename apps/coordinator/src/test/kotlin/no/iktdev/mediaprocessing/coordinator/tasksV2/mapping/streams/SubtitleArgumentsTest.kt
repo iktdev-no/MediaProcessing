@@ -21,7 +21,7 @@ class SubtitleArgumentsTest {
         val data = Gson().fromJson<List<SubtitleStream>>(multipleSubtitleStreamsWithSameLanguage, type)
         val args = SubtitleArguments(data)
         val selectable = args.excludeLowFrameCount(data)
-        assertThat(selectable).hasSize(2)
+        assertThat(selectable).hasSize(3)
         assertThat(selectable.find { it.index == 4 })
         assertThat(selectable.find { it.index == 5 })
     }

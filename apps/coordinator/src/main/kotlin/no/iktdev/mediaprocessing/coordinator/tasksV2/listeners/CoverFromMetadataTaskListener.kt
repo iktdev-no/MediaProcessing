@@ -52,7 +52,7 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         }
         active = true
 
-        val baseInfo = events.find { it.eventType == Events.ReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
+        val baseInfo = events.find { it.eventType == Events.BaseInfoRead }?.az<BaseInfoEvent>()?.data
         if (baseInfo == null) {
             log.info { "No base info" }
             active = false

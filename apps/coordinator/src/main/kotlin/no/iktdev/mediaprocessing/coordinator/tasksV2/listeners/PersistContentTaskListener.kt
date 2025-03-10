@@ -39,12 +39,12 @@ class PersistContentTaskListener : CoordinatorEventListener() {
     @Autowired
     override var coordinator: Coordinator? = null
 
-    override val produceEvent: Events = Events.PersistContentPerformed
+    override val produceEvent: Events = Events.PersistContent
     override val listensForEvents: List<Events> = listOf(
-        Events.WorkDownloadCoverPerformed,
-        Events.WorkConvertPerformed,
-        Events.WorkEncodePerformed,
-        Events.WorkExtractPerformed
+        Events.CoverDownloaded,
+        Events.ConvertTaskCompleted,
+        Events.EncodeTaskCompleted,
+        Events.ExtractTaskCompleted
     )
 
 
@@ -130,10 +130,10 @@ class PersistContentTaskListener : CoordinatorEventListener() {
 
     private fun composeMediaInfo(events: List<Event>): ComposedMediaInfo? {
         val baseInfo =
-            events.find { it.eventType == Events.ReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.let {
+            events.find { it.eventType == Events.BaseInfoRead }?.az<BaseInfoEvent>()?.let {
                 it.data
             } ?: run {
-                log.info { "Cant find BaseInfoEvent on ${Events.ReadBaseInfoPerformed}" }
+                log.info { "Cant find BaseInfoEvent on ${Events.BaseInfoRead}" }
                 return null
             }
         val metadataInfo =

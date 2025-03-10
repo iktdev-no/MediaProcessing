@@ -13,7 +13,7 @@ class EncodeWorkArgumentsMappingTest {
 
     @Test
     fun parse() {
-        val event = data.jsonToEvent(Events.ParseStreamPerformed.event)
+        val event = data.jsonToEvent(Events.StreamParsed.name)
         val parser = EncodeWorkArgumentsMapping(
             "potato.mkv",
             "potato.mp4",

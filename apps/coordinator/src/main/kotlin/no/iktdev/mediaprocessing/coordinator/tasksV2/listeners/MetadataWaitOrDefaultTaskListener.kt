@@ -42,7 +42,7 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
 
     override val produceEvent: Events = Events.MetadataSearchPerformed
     override val listensForEvents: List<Events> = listOf(
-        Events.ReadBaseInfoPerformed,
+        Events.BaseInfoRead,
         Events.MetadataSearchPerformed
     )
 
@@ -58,7 +58,7 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
         if (metadataTimeoutMinutes <= 0) {
             return
         }
-        val hasReadBaseInfo = events.any { it.eventType == Events.ReadBaseInfoPerformed && it.isSuccessful() }
+        val hasReadBaseInfo = events.any { it.eventType == Events.BaseInfoRead && it.isSuccessful() }
         val hasMetadataSearched = events.any { it.eventType == Events.MetadataSearchPerformed }
         val hasPollerForMetadataEvent = waitingProcessesForMeta.containsKey(incomingEvent.metadata().referenceId)
 
@@ -76,7 +76,7 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
                 return
             }
 
-            val baseInfo = events.find { it.eventType ==  Events.ReadBaseInfoPerformed}?.az<BaseInfoEvent>()?.data
+            val baseInfo = events.find { it.eventType ==  Events.BaseInfoRead}?.az<BaseInfoEvent>()?.data
             if (baseInfo == null) {
                 log.error { "BaseInfoEvent is null for referenceId: ${consumedIncoming.metadata.referenceId} on eventId: ${consumedIncoming.metadata.eventId}" }
                 return

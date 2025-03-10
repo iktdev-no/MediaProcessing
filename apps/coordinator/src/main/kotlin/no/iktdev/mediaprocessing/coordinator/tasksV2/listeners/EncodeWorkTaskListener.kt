@@ -26,9 +26,9 @@ class EncodeWorkTaskListener : WorkTaskListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.WorkEncodeCreated
+    override val produceEvent: Events = Events.EncodeTaskCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.ParameterEncodeCreated,
+        Events.EncodeParameterCreated,
         Events.WorkProceedPermitted
     )
 
@@ -43,10 +43,10 @@ class EncodeWorkTaskListener : WorkTaskListener() {
         }
         active = true
 
-        val encodeArguments = if (event.eventType == Events.ParameterEncodeCreated) {
+        val encodeArguments = if (event.eventType == Events.EncodeParameterCreated) {
             event.az<EncodeArgumentCreatedEvent>()?.data
         } else {
-            events.find { it.eventType == Events.ParameterEncodeCreated }
+            events.find { it.eventType == Events.EncodeParameterCreated }
                 ?.az<EncodeArgumentCreatedEvent>()?.data
         }
         if (encodeArguments == null) {

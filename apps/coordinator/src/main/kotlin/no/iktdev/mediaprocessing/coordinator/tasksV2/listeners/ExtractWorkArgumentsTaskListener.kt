@@ -23,9 +23,9 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.ParameterExtractCreated
+    override val produceEvent: Events = Events.ExtractParameterCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.ParseStreamPerformed,
+        Events.StreamParsed,
         Events.ReadOutNameAndType
     )
 
@@ -47,7 +47,7 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
             active = false
             return
         }
-        val streams = events.find { it.eventType == Events.ParseStreamPerformed }?.az<MediaFileStreamsParsedEvent>()?.data
+        val streams = events.find { it.eventType == Events.StreamParsed }?.az<MediaFileStreamsParsedEvent>()?.data
         if (streams == null) {
             active = false
             return

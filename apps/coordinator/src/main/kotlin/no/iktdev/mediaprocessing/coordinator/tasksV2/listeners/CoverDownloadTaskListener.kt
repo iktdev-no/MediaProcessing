@@ -24,7 +24,7 @@ class CoverDownloadTaskListener : CoordinatorEventListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.WorkDownloadCoverPerformed
+    override val produceEvent: Events = Events.CoverDownloaded
     override val listensForEvents: List<Events> = listOf(Events.ReadOutCover)
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()

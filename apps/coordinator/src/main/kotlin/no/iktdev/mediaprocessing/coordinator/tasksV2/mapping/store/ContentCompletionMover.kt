@@ -27,7 +27,7 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
      * @return Pair<OldPath, NewPath> or null if no file found
      */
     fun moveVideo(): Pair<String, String>? {
-        val encodedFile = events.find { it.eventType == Events.WorkEncodePerformed }?.dataAs<EncodedData>()?.outputFile?.let {
+        val encodedFile = events.find { it.eventType == Events.EncodeTaskCompleted }?.dataAs<EncodedData>()?.outputFile?.let {
             File(it)
         } ?: return null
         if (!encodedFile.exists()) {
@@ -44,7 +44,7 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
     }
 
     fun moveCover(): Pair<String, String>? {
-        val coverFile = events.find { it.eventType == Events.WorkDownloadCoverPerformed }?.
+        val coverFile = events.find { it.eventType == Events.CoverDownloaded }?.
             az<MediaCoverDownloadedEvent>()?.data?.absoluteFilePath?.let {
                 File(it)
         } ?: return null
@@ -74,9 +74,9 @@ class ContentCompletionMover(val collection: String, val events: List<Event>) {
 
     fun getMovableSubtitles(): List<MovableSubtitle> {
         val extracted =
-            events.filter { it.eventType == Events.WorkExtractPerformed }.mapNotNull { it.dataAs<ExtractedData>() }
+            events.filter { it.eventType == Events.ExtractTaskCompleted }.mapNotNull { it.dataAs<ExtractedData>() }
         val converted =
-            events.filter { it.eventType == Events.WorkConvertPerformed }.mapNotNull { it.dataAs<ConvertedData>() }
+            events.filter { it.eventType == Events.ConvertTaskCompleted }.mapNotNull { it.dataAs<ConvertedData>() }
 
         val items = mutableListOf<MovableSubtitle>()
 

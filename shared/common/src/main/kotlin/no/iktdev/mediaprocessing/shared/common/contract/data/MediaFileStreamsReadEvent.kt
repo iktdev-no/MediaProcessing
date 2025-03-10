@@ -7,5 +7,5 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 class MediaFileStreamsReadEvent(
     override val metadata: EventMetadata,
     override val data: JsonObject? = null,
-    override val eventType: Events = Events.ReadStreamPerformed
+    override val eventType: Events = Events.StreamRead
 ) : Event()

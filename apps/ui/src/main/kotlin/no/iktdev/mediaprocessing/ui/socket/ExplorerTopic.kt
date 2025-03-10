@@ -35,9 +35,21 @@ class ExplorerTopic(
         }
     }
 
+    @MessageMapping("/request/encode")
+    fun requestEncode(@Payload data: EventRequest) {
+        val req = coordinatorTemplate.postForEntity("/request/encode", data, String::class.java)
+        log.info { req }
+    }
+
+    @MessageMapping("/request/extract")
+    fun requestExtract(@Payload data: EventRequest) {
+        val req = coordinatorTemplate.postForEntity("/request/extract", data, String::class.java)
+        log.info { req }
+    }
+
     @MessageMapping("/request/convert")
     fun requestConvert(@Payload data: EventRequest) {
-        val req = coordinatorTemplate.postForEntity(UIEnv.coordinatorUrl, data, String.javaClass)
+        val req = coordinatorTemplate.postForEntity("/request/convert", data, String::class.java)
         log.info { req }
     }
 

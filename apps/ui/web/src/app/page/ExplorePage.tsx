@@ -124,6 +124,13 @@ function getContextMenuFileActionMenuItems(row: ExplorerItem | null): ContextMen
   return items;
 }
 
+interface ExplorerOperationRequest {
+  destination: string;
+  file: string;
+  source: string;
+  mode: "FLOW" | "MANUAL";
+}
+
 export default function ExplorePage() {
   const muiTheme = useTheme();
   const dispatch = useDispatch();
@@ -168,38 +175,50 @@ export default function ExplorePage() {
       if (!value) {
         return; 
       }
-      switch(actionIndex) {
-        case 0: {
-          console.log("All");
-          const request = {
-            file: value.path,
-            source: `Web UI @ ${window.location.href}`,
-            mode: "FLOW"
+      const payload = (() => {
+        switch(actionIndex) {
+          case 0: {
+            return {
+              destination: "request/all",
+              file: value.path,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as ExplorerOperationRequest
           }
-          client?.publish({
-            destination: "/app/request/all",
-            body: JSON.stringify(request)
-          })
-          break;
+          case 1: {
+            return {
+              destination: "request/encode",
+              file: value.path,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as ExplorerOperationRequest
+          }
+          case 2: {
+            return {
+              destination: "request/extract",
+              file: value.path,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as ExplorerOperationRequest
+          }
+          case 3: {
+            return {
+              destination: "request/convert",
+              file: value.path,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as ExplorerOperationRequest
+          }
+          default: {
+            return null;
+          }
         }
-        case 1: {
-          console.log("Encode")
-          break;
-
-        }
-        case 2: {
-          console.log("Extract")
-          break;
-
-        }
-        case 3: {
-          console.log("Convert")
-          break;
-
-        }
-        default: {
-          
-        }
+      })();
+      if (payload) {
+        client?.publish({
+          destination: "/app/"+payload.destination,
+          body: JSON.stringify(payload)
+        })
       }
     }
   }

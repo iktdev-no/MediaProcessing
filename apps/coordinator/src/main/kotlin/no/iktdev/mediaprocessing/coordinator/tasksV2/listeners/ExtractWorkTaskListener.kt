@@ -26,9 +26,9 @@ class ExtractWorkTaskListener: WorkTaskListener() {
 
     @Autowired
     override var coordinator: Coordinator? = null
-    override val produceEvent: Events = Events.WorkExtractCreated
+    override val produceEvent: Events = Events.ExtractTaskCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.ParameterExtractCreated,
+        Events.ExtractParameterCreated,
         Events.WorkProceedPermitted
     )
 
@@ -45,10 +45,10 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         }
         active = true
 
-        val arguments = if (event.eventType == Events.ParameterExtractCreated) {
+        val arguments = if (event.eventType == Events.ExtractParameterCreated) {
             event.az<ExtractArgumentCreatedEvent>()?.data
         } else {
-            events.find { it.eventType == Events.ParameterExtractCreated }
+            events.find { it.eventType == Events.ExtractParameterCreated }
                 ?.az<ExtractArgumentCreatedEvent>()?.data
         }
         if (arguments == null) {

@@ -28,7 +28,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
             allEvents.insert {
                 it[referenceId] = event.referenceId()
                 it[eventId] = event.eventId()
-                it[events.event] = event.eventType.event
+                it[events.event] = event.eventType.name
                 it[data] = event.toJson()
             }
         }
@@ -49,7 +49,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
             events.insert {
                 it[referenceId] = event.referenceId()
                 it[eventId] = event.eventId()
-                it[events.event] = event.eventType.event
+                it[events.event] = event.eventType.name
                 it[data] = event.toJson()
             }
         }
@@ -80,10 +80,10 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
 
 
     private val exemptedFromSingleEvent = listOf(
-        Events.WorkConvertCreated,
-        Events.WorkExtractCreated,
-        Events.WorkConvertPerformed,
-        Events.WorkExtractPerformed
+        Events.ConvertTaskCreated,
+        Events.ExtractTaskCreated,
+        Events.ConvertTaskCompleted,
+        Events.ExtractTaskCompleted
     )
 
     private fun isExempted(event: Events): Boolean {
@@ -94,7 +94,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
         return withDirtyRead(dataSource.database) {
             val completedEvents = events
                 .slice(events.referenceId)
-                .select { events.event eq Events.ProcessCompleted.event }
+                .select { events.event eq Events.ProcessCompleted.name }
 
             events
                 .slice(events.referenceId)
@@ -173,7 +173,7 @@ class EventsManager(dataSource: DataSource) : EventsManagerContract(dataSource) 
                 events.deleteWhere {
                     (referenceId eq duplicate.referenceId()) and
                             (eventId eq duplicate.eventId()) and
-                            (event eq duplicate.eventType.event)
+                            (event eq duplicate.eventType.name)
                 }
             }
         }

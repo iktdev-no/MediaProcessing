@@ -150,7 +150,7 @@ class TasksManager(private val dataSource: DataSource) {
             events.insert {
                 it[referenceId] = event.referenceId()
                 it[eventId] = event.eventId()
-                it[events.event] = event.eventType.event
+                it[events.event] = event.eventType.name
                 it[data] = event.toJson()
             }
         }

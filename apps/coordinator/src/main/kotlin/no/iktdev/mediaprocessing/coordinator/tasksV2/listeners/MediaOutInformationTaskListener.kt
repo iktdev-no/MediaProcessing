@@ -48,9 +48,9 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
         active = true
 
         val metadataResult = event.az<MediaMetadataReceivedEvent>()
-        val mediaBaseInfo = events.findLast { it.eventType == Events.ReadBaseInfoPerformed }?.az<BaseInfoEvent>()?.data
+        val mediaBaseInfo = events.findLast { it.eventType == Events.BaseInfoRead }?.az<BaseInfoEvent>()?.data
         if (mediaBaseInfo == null) {
-            log.error { "Required event ${Events.ReadBaseInfoPerformed} is not present" }
+            log.error { "Required event ${Events.BaseInfoRead} is not present" }
             coordinator?.produceNewEvent(
                 MediaOutInformationConstructedEvent(
                     metadata = event.makeDerivedEventInfo(EventStatus.Failed, getProducerName())

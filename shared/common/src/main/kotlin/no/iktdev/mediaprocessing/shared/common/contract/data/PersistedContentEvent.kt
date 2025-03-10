@@ -4,7 +4,7 @@ import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 data class PersistedContentEvent(
-    override val eventType: Events = Events.PersistContentPerformed,
+    override val eventType: Events = Events.PersistContent,
     override val metadata: EventMetadata,
     override val data: PersistedContent?
 

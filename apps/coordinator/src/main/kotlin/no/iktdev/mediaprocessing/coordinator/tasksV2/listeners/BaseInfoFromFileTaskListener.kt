@@ -23,7 +23,7 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
 
     val log = KotlinLogging.logger {}
 
-    override val produceEvent: Events = Events.ReadBaseInfoPerformed
+    override val produceEvent: Events = Events.BaseInfoRead
     override val listensForEvents: List<Events> = listOf(Events.ProcessStarted)
 
     override fun getProducerName(): String {
