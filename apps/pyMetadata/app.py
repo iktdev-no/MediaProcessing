@@ -89,11 +89,11 @@ class EventsPullerThread(threading.Thread):
                                 FROM events
                                 GROUP BY referenceId
                                 HAVING 
-                                    SUM(event = 'event:media-read-base-info:performed') > 0
-                                    AND SUM(event = 'event:media-metadata-search:performed') = 0
-                                    AND SUM(event = 'event:media-process:completed') = 0
+                                    SUM(event = 'BaseInfoRead') > 0
+                                    AND SUM(event = 'MetadataSearchPerformed') = 0
+                                    AND SUM(event = 'ProcessCompleted') = 0
                             )
-                            AND event = 'event:media-read-base-info:performed'
+                            AND event = 'BaseInfoRead'
                             AND JSON_UNQUOTE(JSON_EXTRACT(data, '$.metadata.status')) = 'Success';
         """)
         row = cursor.fetchall()
@@ -215,7 +215,7 @@ Producing message
                                         source="metadataApp"
                                     ),
                                     data=None,
-                                    eventType="EventMediaMetadataSearchPerformed"
+                                    eventType="MetadataSearchPerformed"
                                 )
                                 self.storeProducedEvent(connection=self.connection, event=producedEvent)
                             except Exception as iex:
@@ -280,7 +280,7 @@ class MetadataEventHandler:
                 source="metadataApp"
             ),
             data=result,
-            eventType="EventMediaMetadataSearchPerformed"
+            eventType="MetadataSearchPerformed"
         )
         return producedEvent
 
