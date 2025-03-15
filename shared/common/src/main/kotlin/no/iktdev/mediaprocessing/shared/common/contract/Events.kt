@@ -30,7 +30,6 @@ enum class Events {
     CoverDownloaded,
     PersistContent,
     ProcessCompleted,
-
     Unknown
     ;
 
@@ -68,7 +67,7 @@ fun Events.toEventClass(): Class<out Event> {
 
         Events.PersistContent -> PersistedContentEvent::class.java
         Events.ProcessCompleted -> MediaProcessCompletedEvent::class.java
-        else -> Event::class.java
+        else -> UnknownEvent::class.java
     }
 }
 
@@ -121,7 +120,7 @@ object EventJson {
             // 🔥 Finn riktig klasse basert på eventType (som kommer eksternt fra databasen)
             val eventClass = eventType.toEventClass()
 
-            if (eventClass.simpleName == Event::class.java.simpleName || eventType == Events.Unknown) {
+            if (eventType == Events.Unknown || eventClass.simpleName == Event::class.java.simpleName) {
                 val fallbackGson = GsonBuilder()
                     .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
                     .create()

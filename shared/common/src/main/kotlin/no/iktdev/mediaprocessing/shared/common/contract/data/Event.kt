@@ -1,10 +1,18 @@
 package no.iktdev.mediaprocessing.shared.common.contract.data
 
 import no.iktdev.eventi.data.EventImpl
+import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 
 abstract class Event: EventImpl() {
     abstract override val eventType: Events
+}
+
+data class UnknownEvent(
+    override val metadata: EventMetadata,
+    override val eventType: Events = Events.Unknown,
+    override val data: Any? = null,
+): Event() {
 }
 
 inline fun <reified T: Event> Event.az(): T? {
