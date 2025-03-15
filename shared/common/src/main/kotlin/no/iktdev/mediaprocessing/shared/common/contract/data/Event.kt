@@ -17,7 +17,7 @@ data class UnknownEvent(
 
 inline fun <reified T: Event> Event.az(): T? {
     return if (this !is T) {
-        System.err.println("${this::class.java.name} is not a type of ${T::class.java.name}")
+        //System.err.println("${this::class.java.name} is not a type of ${T::class.java.name}")
         null
     } else this
 }
