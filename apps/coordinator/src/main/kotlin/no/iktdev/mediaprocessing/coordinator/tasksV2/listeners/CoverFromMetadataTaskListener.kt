@@ -41,7 +41,7 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         }
         if (!incomingEvent.isSuccessful())
             return false
-        return incomingEvent.eventType in listensForEvents
+        return listensForEvents.any { it == incomingEvent.eventType }
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {

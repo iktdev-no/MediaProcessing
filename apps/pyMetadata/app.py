@@ -111,7 +111,7 @@ class EventsPullerThread(threading.Thread):
             cursor.execute(query, (
                 event.metadata.referenceId,
                 event.metadata.eventId,
-                "event:media-metadata-search:performed",
+                "MetadataSearchPerformed",
                 event_data_to_json(event)
             ))
             connection.commit()
