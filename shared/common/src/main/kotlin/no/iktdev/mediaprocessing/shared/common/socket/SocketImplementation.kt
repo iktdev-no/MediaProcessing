@@ -16,7 +16,6 @@ open class SocketImplementation: WebSocketMessageBrokerConfigurer {
         println("Allowing the following origins for websocket connection\n\t${origins.joinToString("\n\t")}")
         registry.addEndpoint("/ws")
             .setAllowedOrigins(*origins)
-            .withSockJS()
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
