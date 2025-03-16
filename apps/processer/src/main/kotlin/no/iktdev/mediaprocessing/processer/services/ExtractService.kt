@@ -55,6 +55,7 @@ class ExtractService(
     }
 
     override fun onTaskAssigned(task: Task) {
+        reporter.extractTaskAssigned(task)
         startExtract(task)
     }
 

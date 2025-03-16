@@ -8,10 +8,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @EnableWebSocketMessageBroker
 open class SocketImplementation: WebSocketMessageBrokerConfigurer {
+    open val defaultOrigins = listOf("*://localhost:*/*", "http://localhost:3000/")
+    open var additionalOrigins: List<String> = emptyList()
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
+        val origins = (defaultOrigins + additionalOrigins).toTypedArray()
+        println("Allowing the following origins for websocket connection\n\t${origins.joinToString("\n\t")}")
         registry.addEndpoint("/ws")
-            .setAllowedOrigins("*://localhost:*/*", "http://localhost:3000/")
+            .setAllowedOrigins(*origins)
             .withSockJS()
     }
 

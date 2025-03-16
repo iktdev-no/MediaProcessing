@@ -56,6 +56,7 @@ class EncodeService(
     }
 
     override fun onTaskAssigned(task: Task) {
+        reporter.encodeTaskAssigned(task)
         startEncode(task)
     }
 

@@ -15,4 +15,5 @@ public class DefaultProcesserConfiguration: Defaults() {
 
 @Configuration
 class SocketImplemented: SocketImplementation() {
+    override var additionalOrigins: List<String> = ProcesserEnv.wsAllowedOrigins.split(",")
 }

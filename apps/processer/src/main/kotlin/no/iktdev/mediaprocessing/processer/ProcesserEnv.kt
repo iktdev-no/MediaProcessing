@@ -5,6 +5,8 @@ import java.io.File
 
 class ProcesserEnv {
     companion object {
+        val wsAllowedOrigins: String = System.getenv("AllowedOriginsWebsocket")?.takeIf { it.isNotBlank() } ?: ""
+
         val ffmpeg: String = System.getenv("SUPPORTING_EXECUTABLE_FFMPEG") ?: "ffmpeg"
         val allowOverwrite = System.getenv("ALLOW_OVERWRITE").toBoolean() ?: false
 
