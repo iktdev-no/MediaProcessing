@@ -30,9 +30,12 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
     )
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        val startEvent = events.findFirstEventOf<MediaProcessStartEvent>()
+        val hasExtract = startEvent?.data?.operations?.contains(OperationEvents.EXTRACT) ?: false
+
         val state = super.shouldIProcessAndHandleEvent(incomingEvent, events)
         val eventType = events.map { it.eventType }
-        return state && eventType.containsAll(listensForEvents)
+        return hasExtract && state && eventType.containsAll(listensForEvents)
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {

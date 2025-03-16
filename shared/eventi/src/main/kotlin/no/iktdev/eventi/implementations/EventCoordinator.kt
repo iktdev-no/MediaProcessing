@@ -2,6 +2,7 @@ package no.iktdev.eventi.implementations
 
 import kotlinx.coroutines.*
 import mu.KotlinLogging
+import no.iktdev.eventi.EventDeadlockDetector
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.data.EventImpl
 import no.iktdev.eventi.data.referenceId
@@ -109,7 +110,13 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     val consumableEvent = ConsumableEvent(event)
                     listener.onEventsReceived(consumableEvent, events)
                     if (consumableEvent.isConsumed) {
-                        log.info { "Consumption detected for ${events.first().referenceId()} -> ${listener::class.java.simpleName} on event ${event.eventType}" }
+                        // 🚨 Suppress logging hvis det er en deadlock
+                        val referenceId = events.first().referenceId()
+                        val listenerName = listener::class.java.simpleName
+                        if (EventDeadlockDetector.detect(referenceId, listenerName, event.eventType.toString())) {
+                            log.info { "Consumption detected for $referenceId -> $listenerName on event ${event.eventType}" }
+                            EventDeadlockDetector.resolve(referenceId, listenerName, event.eventType.toString())
+                        }
                         return@coroutineScope true
                     }
                 }
