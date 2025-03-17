@@ -2,21 +2,27 @@ package no.iktdev.mediaprocessing.ui
 
 import no.iktdev.mediaprocessing.shared.common.Defaults
 import no.iktdev.mediaprocessing.shared.common.socket.SocketImplementation
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
 import org.springframework.core.io.Resource
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.method.HandlerTypePredicate
 import org.springframework.web.servlet.config.annotation.*
 import org.springframework.web.servlet.resource.PathResourceResolver
+import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.TextMessage
+import org.springframework.web.socket.WebSocketSession
+import org.springframework.web.socket.handler.TextWebSocketHandler
 import org.springframework.web.util.DefaultUriBuilderFactory
-import org.springframework.web.util.UriTemplateHandler
+import java.util.concurrent.ConcurrentHashMap
 
 
 @Configuration
@@ -84,6 +90,39 @@ class ApiCommunicationConfig {
 
 @Configuration
 class SocketImplemented: SocketImplementation() {
+    override var additionalOrigins: List<String> = UIEnv.wsAllowedOrigins.split(",")
+}
+
+@Service
+class WebSocketMonitoringService() {
+    private val clients = ConcurrentHashMap.newKeySet<WebSocketSession>()
+    fun anyListening() = clients.isNotEmpty()
+
+    fun addClient(session: WebSocketSession) {
+        clients.add(session)
+    }
+    fun removeClient(session: WebSocketSession) {
+        clients.remove(session)
+    }
+}
+
+@Component
+class WebSocketHandler(private val webSocketPollingService: WebSocketMonitoringService) : TextWebSocketHandler() {
+
+    // Kalles når en WebSocket-klient kobler til
+    override fun afterConnectionEstablished(session: WebSocketSession) {
+        webSocketPollingService.addClient(session) // Legg til klienten i service
+    }
+
+    // Kalles når en WebSocket-klient kobler fra
+    override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        webSocketPollingService.removeClient(session) // Fjern klienten fra service
+    }
+
+    // Håndterer meldinger fra WebSocket-klientene hvis nødvendig
+    override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
+        // Håndter meldinger fra klienten
+    }
 }
 
 @Configuration

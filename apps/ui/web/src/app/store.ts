@@ -5,6 +5,8 @@ import kafkaItemsFlatSlice from './store/kafka-items-flat-slice';
 import contextMenuSlice from './store/context-menu-slice';
 import persistentEventsSlice from './store/persistent-events-slice';
 import chainedEventsSlice from './store/chained-events-slice';
+import unprocessedFilesSlice from './store/unprocessed-files-slice';
+import tasksSlice from './store/tasks-slice';
 
 
 export const store = configureStore({
@@ -15,6 +17,8 @@ export const store = configureStore({
     contextMenu: contextMenuSlice,
     persistentEvents: persistentEventsSlice,
     chained: chainedEventsSlice,
+    unprocessedFiles: unprocessedFilesSlice,
+    tasks: tasksSlice,
   },
 });
 

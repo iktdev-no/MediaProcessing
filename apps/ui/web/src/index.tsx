@@ -13,10 +13,10 @@ const root = ReactDOM.createRoot(
 
 
 const wsUrl = () => {
-  const protocol = window.location.protocol;
+  const protocol = "ws" // window.location.protocol;
   const host = window.location.host;
   if (window.location.href.startsWith("http://localhost:3000")) {
-    return "http://localhost:8080/ws";
+    return "ws://localhost:8080/ws";
   } else {
     return `${protocol}//${host}/ws`;
   }
@@ -31,7 +31,7 @@ root.render(
         console.log(str);
       }}
       onUnhandledMessage={(val) => {
-        console.log(val)
+        console.log("Unhandled message", val)
       }}
       onStompError={(val) => {
         console.log(val)

@@ -25,8 +25,21 @@ class UnattendedIndexing {
 
     @Scheduled(fixedDelay = 60_000*60)
     fun indexContent() {
-        logger.info { "Performing indexing of input root: ${SharedConfig.inputRoot.absolutePath}" }
-        val fileList =  SharedConfig.inputRoot.walkTopDown().filter { it.isFile && it.isSupportedVideoFile() }.toList()
+        val allFiles = SharedConfig.incomingContent.flatMap { folder ->
+            logger.info { "Performing indexing of folder: ${folder.name}" }
+            folder.walkTopDown()
+                .filter { it.isFile && it.isSupportedVideoFile() }
+                .toMutableList()
+        }
+        val ignoredParents = allFiles
+            .asSequence()
+            .mapNotNull { it.parentFile }
+            .filter { parent -> parent.resolve(".ignore").exists() }
+            .toSet()
+
+        val fileList = allFiles
+            .filter { file -> file.parentFile !in ignoredParents }
+
         fileList.forEach { file ->
             withTransaction(eventDatabase.database) {
                 files.insertIgnore {

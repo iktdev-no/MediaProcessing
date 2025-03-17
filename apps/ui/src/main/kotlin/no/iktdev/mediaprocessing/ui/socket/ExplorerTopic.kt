@@ -35,29 +35,6 @@ class ExplorerTopic(
         }
     }
 
-    @MessageMapping("/request/encode")
-    fun requestEncode(@Payload data: EventRequest) {
-        val req = coordinatorTemplate.postForEntity("/request/encode", data, String::class.java)
-        log.info { req }
-    }
 
-    @MessageMapping("/request/extract")
-    fun requestExtract(@Payload data: EventRequest) {
-        val req = coordinatorTemplate.postForEntity("/request/extract", data, String::class.java)
-        log.info { req }
-    }
-
-    @MessageMapping("/request/convert")
-    fun requestConvert(@Payload data: EventRequest) {
-        val req = coordinatorTemplate.postForEntity("/request/convert", data, String::class.java)
-        log.info { req }
-    }
-
-    @MessageMapping("/request/all")
-    fun requestAllAvailableActions(@Payload data: EventRequest) {
-        log.info { "Sending data to coordinator: ${Gson().toJson(data)}" }
-        val req = coordinatorTemplate.postForEntity("/request/all", data, String::class.java)
-        log.info { req }
-    }
 
 }

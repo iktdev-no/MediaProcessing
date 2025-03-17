@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Box, CssBaseline } from '@mui/material';
+import { Box, CssBaseline, IconButton, SxProps, Theme } from '@mui/material';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Footer from './app/features/footer';
 import LaunchPage from './app/page/LaunchPage';
@@ -15,6 +15,13 @@ import theme from './theme';
 import { simpleEventsUpdate } from './app/store/kafka-items-flat-slice';
 import { EventDataObject, SimpleEventDataObject } from './types';
 import EventsChainPage from './app/page/EventsChainPage';
+import UnprocessedFilesPage from './app/page/UnprocessedFilesPage';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import FolderIcon from '@mui/icons-material/Folder';
+import QueueIcon from '@mui/icons-material/Queue';
+import AppsIcon from '@mui/icons-material/Apps';
+import ConstructionIcon from '@mui/icons-material/Construction';
+import ProcesserTasksPage from './app/page/ProcesserTasksPage';
 
 function App() {
   const client = useStompClient();
@@ -44,14 +51,46 @@ function App() {
     
   }, [client, dispatch]);
   
+  const iconHeight: SxProps<Theme> = {
+    height: 50,
+    width: 50
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{
         height: 70,
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 1,
         backgroundColor: theme.palette.action.selected
       }}>
+        <IconButton onClick={() => window.location.href = "/"} sx={{
+          ...iconHeight
+        }}>
+          <AppsIcon />
+        </IconButton>
+        <IconButton onClick={() => window.location.href = "/events"} sx={{
+          ...iconHeight
+        }}>
+          <AccountTreeIcon />
+        </IconButton>
+        <IconButton onClick={() => window.location.href = "/files"} sx={{
+          ...iconHeight
+        }}>
+          <FolderIcon />
+        </IconButton>
+        <IconButton onClick={() => window.location.href = "/unprocessed"} sx={{
+          ...iconHeight
+        }}>
+          <QueueIcon />
+        </IconButton>
+        <IconButton onClick={() => window.location.href = "/tasks"} sx={{
+          ...iconHeight
+        }}>
+          <ConstructionIcon />
+        </IconButton>
       </Box>
       <Box sx={{
         display: "block",
@@ -62,6 +101,8 @@ function App() {
       }}>
         <BrowserRouter>
             <Routes>
+              <Route path='/tasks' element={<ProcesserTasksPage />} />
+              <Route path='/unprocessed' element={<UnprocessedFilesPage />} />
               <Route path='/files' element={<ExplorePage />} />
               <Route path='/events' element={<EventsChainPage />} />
               <Route path='/' element={<LaunchPage />} />
