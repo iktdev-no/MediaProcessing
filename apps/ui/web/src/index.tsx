@@ -15,10 +15,12 @@ const root = ReactDOM.createRoot(
 const wsUrl = () => {
   const protocol = "ws" // window.location.protocol;
   const host = window.location.host;
+  const wsUrl = `ws://${host}/ws`;
+  console.log("WsUrl", wsUrl)
   if (window.location.href.startsWith("http://localhost:3000")) {
     return "ws://localhost:8080/ws";
   } else {
-    return `${protocol}//${host}/ws`;
+    return wsUrl;
   }
 }
 root.render(
