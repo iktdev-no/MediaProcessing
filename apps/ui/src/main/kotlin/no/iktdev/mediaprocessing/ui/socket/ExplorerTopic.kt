@@ -35,6 +35,12 @@ class ExplorerTopic(
         }
     }
 
+    @MessageMapping("/explorer/root")
+    fun goRoot() {
+        explorer.getRoots()?.let {
+            template?.convertAndSend("/topic/explorer/go", it)
+        }
+    }
 
 
 }
