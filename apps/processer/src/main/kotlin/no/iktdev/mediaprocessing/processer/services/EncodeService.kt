@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.services
 
+import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -209,6 +210,12 @@ class EncodeService(
             outputFiles = listOf(runner.outputFile),
             progress = progress?.toProcessProgress()
         )
+        try {
+            log.info { "Reporting encode progress ${Gson().toJson(processerEventInfo)}" }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         try {
             reporter.sendEncodeProgress(processerEventInfo)
         } catch (e: Exception) {
