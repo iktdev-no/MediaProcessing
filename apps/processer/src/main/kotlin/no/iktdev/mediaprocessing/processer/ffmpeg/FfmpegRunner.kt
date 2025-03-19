@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.ffmpeg
 
+import com.fasterxml.jackson.core.io.UTF8Writer
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
 import kotlinx.coroutines.*
@@ -9,6 +10,7 @@ import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ffmpeg.progress.FfmpegProgressDecoder
 import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -72,7 +74,9 @@ class FfmpegRunner(
             stdout = Redirect.CAPTURE,
             stderr = Redirect.CAPTURE,
             consumer = {
-                //log.info { it }
+                if (ProcesserEnv.fullLogging) {
+                    log.info { it }
+                }
                 onOutputChanged(it)
             },
             destroyForcibly = true
@@ -107,7 +111,7 @@ class FfmpegRunner(
     fun onOutputChanged(line: String) {
         outputCache.add(line)
         writeToLog(line)
-        // toList is needed to prevent mutability.
+
         decoder.parseVideoProgress(outputCache.toList())?.let { decoded ->
             try {
                 val _progress = decoder.getProgress(decoded)
@@ -123,7 +127,7 @@ class FfmpegRunner(
     }
 
     fun writeToLog(line: String) {
-        logFile.printWriter().use {
+        FileOutputStream(logFile, true).bufferedWriter(Charsets.UTF_8).use {
             it.appendLine(line)
         }
     }

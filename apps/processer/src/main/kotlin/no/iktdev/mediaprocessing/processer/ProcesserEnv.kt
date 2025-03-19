@@ -15,5 +15,7 @@ class ProcesserEnv {
 
         val encodeLogDirectory = logDirectory.using("encode")
         val extractLogDirectory = logDirectory.using("extract")
+
+        val fullLogging = System.getenv("FullLogging").toBoolean()
     }
 }
