@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.ffmpeg.progress
 
+import mu.KotlinLogging
 import java.lang.StringBuilder
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -7,6 +8,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.floor
 
 class FfmpegProgressDecoder {
+    private val log = KotlinLogging.logger {}
 
     data class DecodedProgressData(
         val frame: Int?,
@@ -81,13 +83,29 @@ class FfmpegProgressDecoder {
     }
 
 
-    fun isDuration(value: String): Boolean {
-        return value.contains("Duration", ignoreCase = true)
-    }
-    fun setDuration(value: String) {
+    val parsedDurations: MutableList<String> = mutableListOf()
+    var hasReadContinue: Boolean = false
+    fun defineDuration(value: String) {
+        if (hasReadContinue) {
+            return
+        }
+        if (value.contains(Regex("progress=continue"))) {
+            hasReadContinue = true
+        }
+
         val results = Regex("Duration:\\s*([^,]+),").find(value)?.groupValues?.firstOrNull()
-        durationTime = Regex("[0-9]+:[0-9]+:[0-9]+.[0-9]+").find(results.toString())?.value ?: "NA"
-        duration = timeSpanToSeconds(results)
+        log.info { "Identified duration for estimation $results" }
+
+        val parsedDuration = Regex("[0-9]+:[0-9]+:[0-9]+.[0-9]+").find(results.toString())?.value ?: return
+        if (!parsedDurations.contains(parsedDuration)) {
+            parsedDurations.add(parsedDuration)
+        }
+
+        val longestDuration = parsedDurations.mapNotNull {
+            timeSpanToSeconds(it)
+        }.maxOrNull() ?: return
+
+        duration = longestDuration
     }
 
     private fun timeSpanToSeconds(time: String?): Int?

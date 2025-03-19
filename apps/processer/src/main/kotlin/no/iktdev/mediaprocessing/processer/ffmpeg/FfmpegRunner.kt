@@ -111,7 +111,7 @@ class FfmpegRunner(
     fun onOutputChanged(line: String) {
         outputCache.add(line)
         writeToLog(line)
-
+        decoder.defineDuration(line)
         decoder.parseVideoProgress(outputCache.toList())?.let { decoded ->
             try {
                 val _progress = decoder.getProgress(decoded)
