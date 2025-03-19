@@ -212,7 +212,6 @@ class EncodeService(
         )
         try {
             log.info { "Reporting encode progress ${Gson().toJson(processerEventInfo)}" }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }

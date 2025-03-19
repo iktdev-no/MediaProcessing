@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.processer.ffmpeg
 class FfmpegArgumentsBuilder() {
     private val defaultArguments = listOf(
         "-nostdin",
+        "-nostats",
         "-hide_banner"
     )
     private var inputFile: String? = null
