@@ -2,6 +2,9 @@ package no.iktdev.mediaprocessing.shared.common
 
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
+import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.postForEntity
 import java.io.File
 import java.io.FileInputStream
 import java.io.RandomAccessFile
@@ -162,4 +165,16 @@ fun getChecksum(filePath: String): String {
         sb.append(String.format("%02x", byte))
     }
     return sb.toString()
+}
+
+inline fun <reified T> RestTemplate.tryPost(url: String, data: Any, noinline onError: ((Exception) -> Unit)? = null) {
+    try {
+        this.postForEntity(url, data,  T::class.java)
+    } catch (e: Exception) {
+        onError?.invoke(e)
+    }
+}
+
+fun SimpMessagingTemplate.trySend(destination: String, data: Any) {
+    this.convertAndSend(destination, data)
 }

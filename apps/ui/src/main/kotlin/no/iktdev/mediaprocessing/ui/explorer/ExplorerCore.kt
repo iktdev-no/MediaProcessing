@@ -73,4 +73,21 @@ class ExplorerCore {
         return getCursor(SharedConfig.inputRoot.absolutePath)
     }
 
+    fun getRoots(): ExplorerCursor {
+        return ExplorerCursor(
+            name = "root",
+            path = "",
+            items = File.listRoots().map {
+                val attr = getAttr(it)
+                ExplorerItem(
+                    path = it.absolutePath,
+                    name = it.absolutePath,
+                    extension = it.extension,
+                    created = attr.created,
+                    type = ExplorerItemType.FOLDER
+                )
+            },
+        )
+    }
+
 }

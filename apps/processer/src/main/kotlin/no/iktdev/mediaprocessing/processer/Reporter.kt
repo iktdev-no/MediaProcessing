@@ -4,6 +4,8 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.contract.dto.ProcesserEventInfo
 import no.iktdev.mediaprocessing.shared.common.task.Task
+import no.iktdev.mediaprocessing.shared.common.tryPost
+import no.iktdev.mediaprocessing.shared.common.trySend
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
@@ -20,37 +22,21 @@ class Reporter() {
 
 
     fun encodeTaskAssigned(task: Task) {
-        try {
-            messageTemplate.convertAndSend("/topic/encode/assigned", task)
-        } catch (e: Exception) {
-            //log.error { e.message }
-        }
+        messageTemplate.trySend("/topic/encode/assigned", task)
     }
 
     fun extractTaskAssigned(task: Task) {
-        try {
-            messageTemplate.convertAndSend("/topic/extract/assigned", task)
-        } catch (e: Exception) {
-            //log.error { e.message }
-        }
+        messageTemplate.trySend("/topic/extract/assigned", task)
     }
 
     fun sendEncodeProgress(progress: ProcesserEventInfo) {
-        try {
-            restTemplate.postForEntity(SharedConfig.uiUrl + "/encode/progress", progress, String::class.java)
-            messageTemplate.convertAndSend("/topic/encode/progress", progress)
-        } catch (e: Exception) {
-            //log.error { e.message }
-        }
+        restTemplate.tryPost<String>(SharedConfig.uiUrl + "/encode/progress", progress)
+        messageTemplate.trySend("/topic/encode/progress", progress)
     }
 
     fun sendExtractProgress(progress: ProcesserEventInfo) {
-        try {
-            restTemplate.postForEntity(SharedConfig.uiUrl + "/extract/progress", progress, String::class.java)
-            messageTemplate.convertAndSend("/topic/extract/progress", progress)
-        } catch (e: Exception) {
-            //log.error { e.message }
-        }
+        restTemplate.tryPost<String>(SharedConfig.uiUrl + "/extract/progress", progress)
+        messageTemplate.trySend("/topic/extract/progress", progress)
     }
 
 }

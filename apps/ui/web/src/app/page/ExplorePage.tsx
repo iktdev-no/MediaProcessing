@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { UnixTimestamp } from '../features/UxTc';
-import { Box, Button, Typography, useTheme } from '@mui/material';
+import { Box, Button, IconButton, Typography, useTheme } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { TableCellCustomizer, TablePropetyConfig, TableRowActionEvents } from '../features/table/table';
@@ -15,6 +15,7 @@ import { ExplorerItem, ExplorerCursor, ExplorerItemType } from '../../types';
 import ContextMenu, { ContextMenuActionEvent, ContextMenuItem } from '../features/ContextMenu';
 import { canConvert, canEncode, canExtract } from '../../fileUtil';
 import SimpleTable from '../features/table/sortableTable';
+import TagIcon from '@mui/icons-material/Tag';
 
 
 const createTableCell: TableCellCustomizer<ExplorerItem> = (accessor, data) => {
@@ -46,20 +47,76 @@ const columns: Array<TablePropetyConfig> = [
 
 
 
+type Segment = {
+  name: string;
+  absolutePath: string;
+};
+
+function isWindowsPath(path: string): boolean {
+  return /^[A-Za-z]:\\/.test(path);
+}
+
 function getPartFor(path: string, index: number): string | null {
-  if (path.match(/\//)) {
-    return path.split(/\//, index + 1).join("/");
-  } else if (path.match(/\\/)) {
-    return path.split(/\\/, index + 1).join("\\");
+  const separator = path.includes("/") ? "/" : "\\";
+
+  let parts: string[];
+  if (isWindowsPath(path)) {
+    parts = [path.slice(0, 3), ...path.slice(3).split(separator)];
+  } else if (path.startsWith(separator)) {
+    parts = [separator, ...path.slice(1).split(separator)];
+  } else {
+    parts = path.split(separator);
   }
+
+  if (index < parts.length) {
+    // Unngå å legge til ekstra backslash for første element i Windows-path
+    if (isWindowsPath(path) && index === 0) {
+      return parts[0];
+    }
+    return parts.slice(0, index + 1).join(separator);
+  }
+
   return null;
 }
 
-function getSegmentedNaviagatablePath(navigateTo: (path: string | null) => void, path: string | null): JSX.Element {
-  console.log(path);
-  const parts: Array<string> = path?.split(/\\|\//).map((value: string, index: number) => value.replaceAll(":", "")) ?? [];
-  const segments = parts.map((name: string, index: number) => {
-    console.log(name)
+function getSegments(absolutePath: string): Array<Segment> {
+  if (!absolutePath) return [];
+
+  const isWindows = isWindowsPath(absolutePath);
+  const separator = isWindows ? "\\" : "/";
+
+  let parts: string[];
+  if (isWindows) {
+    parts = [absolutePath.slice(0, 3), ...absolutePath.slice(3).split(separator)];
+  } else if (absolutePath.startsWith(separator)) {
+    parts = [separator, ...absolutePath.slice(1).split(separator)];
+  } else {
+    parts = absolutePath.split(separator);
+  }
+
+  const segments = parts.map((value, index) => {
+    const name = isWindows && index === 0 ? value[0] : value;
+
+    return {
+      name: name.replaceAll(":", ""),
+      absolutePath: getPartFor(absolutePath, index)!
+    };
+  });
+
+  console.log({
+    segments: segments,
+    path: absolutePath
+  });
+
+  return segments.filter((segment) => segment.name !== "");
+}
+
+
+
+function getSegmentedNaviagatablePath(rootClick: () => void, navigateTo: (path: string | null) => void, path: string | null): JSX.Element {
+  const segments = getSegments(path!)
+  
+  const utElements = segments.map((segment: Segment, index: number) => {
     return (
       <Box key={index} sx={{
         display: "flex",
@@ -69,19 +126,33 @@ function getSegmentedNaviagatablePath(navigateTo: (path: string | null) => void,
         <Button sx={{
           borderRadius: 5,
           textTransform: 'none'
-        }} onClick={() => navigateTo(getPartFor(path!, index))}>
-          <Typography>{name}</Typography>
+        }} onClick={() => navigateTo(segment.absolutePath!)}>
+          <Typography>{segment.name}</Typography>
         </Button>
-        {index < parts.length - 1 && <IconForward fontSize="small" />}
+        { segments.length > 1 && index < segments.length - 1 && <IconForward fontSize="small" />}
       </Box>
     )
   });
 
 
-  console.log(parts)
   return (
     <Box display="flex">
-      {segments}
+      {isWindowsPath(path!) && (
+              <Box sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center"
+              }}>
+                <IconButton sx={{
+                  borderRadius: 5,
+                  textTransform: 'none'
+                }} onClick={() => rootClick()} >
+                  <TagIcon />
+                </IconButton>
+                <IconForward fontSize="small" />
+              </Box>
+      )}
+      {utElements}
     </Box>
   )
 }
@@ -229,6 +300,12 @@ export default function ExplorePage() {
     })
   }
 
+  const onRootClick = () => {
+    client?.publish({
+      destination: "/app/explorer/root"
+    })
+  }
+
   useWsSubscription<ExplorerCursor>("/topic/explorer/go", (response) => {
     dispatch(updateItems(response))
   });
@@ -275,7 +352,7 @@ export default function ExplorePage() {
               borderRadius: 5,
               backgroundColor: muiTheme.palette.divider
             }}>
-              {getSegmentedNaviagatablePath(navigateTo, cursor?.path)}
+              {getSegmentedNaviagatablePath(onRootClick, navigateTo, cursor?.path)}
             </Box>
           </Box>
         </Box>
