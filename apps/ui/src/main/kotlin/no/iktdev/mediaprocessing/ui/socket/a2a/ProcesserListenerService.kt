@@ -7,12 +7,15 @@ import no.iktdev.mediaprocessing.ui.UIEnv
 import no.iktdev.mediaprocessing.ui.WebSocketMonitoringService
 import no.iktdev.mediaprocessing.ui.log
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.converter.StringMessageConverter
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.stomp.*
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.messaging.WebSocketStompClient
 import java.lang.reflect.Type
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @Service
 class ProcesserListenerService(
@@ -22,12 +25,14 @@ class ProcesserListenerService(
     private val logger = KotlinLogging.logger {}
     private val listeners: MutableList<A2AProcesserListener> = mutableListOf()
 
+    private val scheduler = Executors.newSingleThreadScheduledExecutor()
+    private var reconnectTask: Runnable? = null
+
     fun attachListener(listener: A2AProcesserListener) {
         listeners.add(listener)
     }
 
     val gson = Gson()
-
     val client = WebSocketStompClient(StandardWebSocketClient())
 
     init {
@@ -36,11 +41,22 @@ class ProcesserListenerService(
 
     private final fun connectAndListen() {
         log.info { "EncoderWsUrl: ${UIEnv.socketEncoder}" }
+        client.messageConverter = StringMessageConverter()
         client.connect(UIEnv.socketEncoder, object : StompSessionHandlerAdapter() {
             override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
                 super.afterConnected(session, connectedHeaders)
                 logger.info { "Tilkoblet processer" }
+                stopReconnect()
                 subscribeToTopics(session)
+            }
+
+            override fun handleTransportError(session: StompSession, exception: Throwable) {
+                super.handleTransportError(session, exception)
+                scheduleReconnect()
+            }
+
+            override fun handleFrame(headers: StompHeaders, payload: Any?) {
+                super.handleFrame(headers, payload)
             }
 
             override fun handleException(
@@ -54,6 +70,22 @@ class ProcesserListenerService(
                 logger.error { "Feil ved tilkobling: ${exception.message}" }
             }
         })
+    }
+
+    private fun scheduleReconnect() {
+        (reconnectTask ?: kotlinx.coroutines.Runnable {
+            logger.info { "Attempting to reconnect" }
+            connectAndListen()
+        }).let {
+            scheduler.scheduleAtFixedRate(it, 5, 5, TimeUnit.SECONDS)
+        }
+    }
+
+    private fun stopReconnect() {
+        reconnectTask?.let {
+            scheduler.shutdownNow()
+            reconnectTask = null
+        }
     }
 
     private fun subscribeToTopics(session: StompSession) {

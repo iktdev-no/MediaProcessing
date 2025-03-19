@@ -175,6 +175,10 @@ inline fun <reified T> RestTemplate.tryPost(url: String, data: Any, noinline onE
     }
 }
 
-fun SimpMessagingTemplate.trySend(destination: String, data: Any) {
-    this.convertAndSend(destination, data)
+fun SimpMessagingTemplate.trySend(destination: String, data: Any, onError: ((Exception) -> Unit)? = null) {
+    try {
+        this.convertAndSend(destination, data)
+    } catch (e: Exception) {
+        onError?.invoke(e)
+    }
 }

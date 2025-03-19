@@ -114,7 +114,7 @@ function getSegments(absolutePath: string): Array<Segment> {
 
 
 function getSegmentedNaviagatablePath(rootClick: () => void, navigateTo: (path: string | null) => void, path: string | null): JSX.Element {
-  const segments = getSegments(path!)
+  const segments = getSegments("/src/input/completed")
   
   const utElements = segments.map((segment: Segment, index: number) => {
     return (
