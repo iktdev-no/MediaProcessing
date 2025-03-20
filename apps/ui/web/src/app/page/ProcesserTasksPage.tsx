@@ -49,6 +49,10 @@ export default function ProcesserTasksPage() {
         dispatch(update(response))
     });
 
+    useWsSubscription<any>("/topic/processer/encode/progress", (response) => {
+        console.log(response)
+    });
+
     useEffect(() => {
         client?.publish({
             destination: "/app/tasks/all"
