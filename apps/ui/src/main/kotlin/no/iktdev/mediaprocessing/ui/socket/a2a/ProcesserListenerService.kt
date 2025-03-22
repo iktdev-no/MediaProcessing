@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service
 @Service
 class ProcesserListenerService(
     @Autowired private val webSocketMonitoringService: WebSocketMonitoringService,
-    @Autowired private val message: SimpMessagingTemplate?,
 ) {
     private val logger = KotlinLogging.logger {}
     private val listeners: MutableList<A2AProcesserListener> = mutableListOf()
@@ -50,9 +49,11 @@ class ProcesserListenerService(
     private val encodeProcessMessage = object : SocketMessageHandler() {
         override fun onMessage(socketMessage: String) {
             super.onMessage(socketMessage)
-            message?.convertAndSend("/topic/processer/encode/progress", socketMessage)
             val response = gson.fromJson(socketMessage, ProcesserEventInfo::class.java)
-            if (webSocketMonitoringService.anyListening()) {
+            listeners.forEach { listener ->
+                run {
+                    listener.onEncodeProgress(response)
+                }
             }
         }
     }
@@ -61,11 +62,14 @@ class ProcesserListenerService(
     private val extractProcessFrameHandler = object : SocketMessageHandler() {
         override fun onMessage(socketMessage: String) {
             super.onMessage(socketMessage)
-            message?.convertAndSend("/topic/processer/extract/progress", socketMessage)
             if (webSocketMonitoringService.anyListening()) {
             }
-            //val stringPayload = (if (payload is ByteArray) String(payload) else payload as String)
-            //val response = gson.fromJson(stringPayload, ProcesserEventInfo::class.java)
+            val response = gson.fromJson(socketMessage, ProcesserEventInfo::class.java)
+            listeners.forEach { listener ->
+                run {
+                    listener.onEncodeProgress(response)
+                }
+            }
         }
     }
 

@@ -12,7 +12,6 @@ import { updateItems } from './app/store/composed-slice';
 import ExplorePage from './app/page/ExplorePage';
 import { ThemeProvider } from '@mui/material';
 import theme from './theme';
-import { simpleEventsUpdate } from './app/store/kafka-items-flat-slice';
 import { EventDataObject, SimpleEventDataObject } from './types';
 import EventsChainPage from './app/page/EventsChainPage';
 import UnprocessedFilesPage from './app/page/UnprocessedFilesPage';
@@ -22,6 +21,14 @@ import QueueIcon from '@mui/icons-material/Queue';
 import AppsIcon from '@mui/icons-material/Apps';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import ProcesserTasksPage from './app/page/ProcesserTasksPage';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import GraphicEqIcon from '@mui/icons-material/GraphicEq';
+import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
+import InboxIcon from '@mui/icons-material/Inbox';
+import InputIcon from '@mui/icons-material/Input';
+import NotStartedIcon from '@mui/icons-material/NotStarted';
+import EventsPage from './app/page/EventsPage';
+import TableChartIcon from '@mui/icons-material/TableChart';
 
 function App() {
   const client = useStompClient();
@@ -31,9 +38,6 @@ function App() {
     dispatch(updateItems(response))
   });
 
-  useWsSubscription<Array<SimpleEventDataObject>>("/topic/event/flat", (response) => {
-    dispatch(simpleEventsUpdate(response))
-  });
 
 
   useEffect(() => {
@@ -71,7 +75,12 @@ function App() {
         }}>
           <AppsIcon />
         </IconButton>
-        <IconButton onClick={() => window.location.href = "/events"} sx={{
+        <IconButton onClick={() => window.location.href = "/processer"} sx={{
+          ...iconHeight
+        }}>
+          <GraphicEqIcon />
+        </IconButton>
+        <IconButton onClick={() => window.location.href = "/eventsflow"} sx={{
           ...iconHeight
         }}>
           <AccountTreeIcon />
@@ -89,7 +98,7 @@ function App() {
         <IconButton onClick={() => window.location.href = "/tasks"} sx={{
           ...iconHeight
         }}>
-          <ConstructionIcon />
+          <TableChartIcon />
         </IconButton>
       </Box>
       <Box sx={{
@@ -102,9 +111,10 @@ function App() {
         <BrowserRouter>
             <Routes>
               <Route path='/tasks' element={<ProcesserTasksPage />} />
+              <Route path='/processer' element={<EventsPage />} />
               <Route path='/unprocessed' element={<UnprocessedFilesPage />} />
               <Route path='/files' element={<ExplorePage />} />
-              <Route path='/events' element={<EventsChainPage />} />
+              <Route path='/eventsflow' element={<EventsChainPage />} />
               <Route path='/' element={<LaunchPage />} />
             </Routes>
           <Footer />

@@ -10,16 +10,31 @@ export interface ExpandableItem<T> {
 }
 
 export type ExpandableRender<T> = (item: T) => ExpandableItem<T> | null;
+export interface ExpandableTableItem {
+    rowId: string
+}
 
-
-export default function ExpandableTable<T>({ items, columns, cellCustomizer: customizer, expandableRender, onRowClickedEvent }: { items: Array<T>, columns: Array<TablePropetyConfig>, cellCustomizer?: TableCellCustomizer<T>, expandableRender: ExpandableRender<T>,  onRowClickedEvent?: TableRowActionEvents<T> }) {
+export default function ExpandableTable<T extends ExpandableTableItem>({ items, columns, cellCustomizer: customizer, expandableRender, onRowClickedEvent }: { items: Array<T>, columns: Array<TablePropetyConfig>, cellCustomizer?: TableCellCustomizer<T>, expandableRender: ExpandableRender<T>,  onRowClickedEvent?: TableRowActionEvents<T> }) {
     const muiTheme = useTheme();
     
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
     const [orderBy, setOrderBy] = useState<string>('');
+    const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
     const [selectedRow, setSelectedRow] = useState<T | null>(null);
 
     const tableRowSingleClicked = (row: T | null) => {
+        if (row != null && 'rowId' in row) {
+            setExpandedRowIds(prev => {
+                const newExpandedRows = new Set(prev);
+                if (newExpandedRows.has(row.rowId)) {
+                    newExpandedRows.delete(row.rowId);
+                } else {
+                    newExpandedRows.add(row.rowId);
+                }
+                return newExpandedRows;
+            })
+        }
+
         if (row === selectedRow) {
             setSelectedRow(null);
         } else {
@@ -28,6 +43,7 @@ export default function ExpandableTable<T>({ items, columns, cellCustomizer: cus
                 onRowClickedEvent.click(row);
             }
         }
+
     }
     const tableRowDoubleClicked = (row: T | null) => {
         setSelectedRow(row);
@@ -127,7 +143,7 @@ export default function ExpandableTable<T>({ items, columns, cellCustomizer: cus
                                         </TableCell>
                                     ))}
                                 </TableRow>
-                                {(selectedRow == row) ?
+                                {(expandedRowIds.has(row.rowId)) ?
                                     (<TableRow key={rowIndex + "_1"}>
                                         <TableCell colSpan={columns.length}>
                                             {

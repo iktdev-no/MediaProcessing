@@ -16,6 +16,7 @@ import ContextMenu, { ContextMenuActionEvent, ContextMenuItem } from '../feature
 import { canConvert, canEncode, canExtract } from '../../fileUtil';
 import SimpleTable from '../features/table/sortableTable';
 import TagIcon from '@mui/icons-material/Tag';
+import { CoordinatorOperationRequest } from '../features/types';
 
 
 const createTableCell: TableCellCustomizer<ExplorerItem> = (accessor, data) => {
@@ -195,13 +196,6 @@ function getContextMenuFileActionMenuItems(row: ExplorerItem | null): ContextMen
   return items;
 }
 
-interface ExplorerOperationRequest {
-  destination: string;
-  file: string;
-  source: string;
-  mode: "FLOW" | "MANUAL";
-}
-
 export default function ExplorePage() {
   const muiTheme = useTheme();
   const dispatch = useDispatch();
@@ -254,7 +248,7 @@ export default function ExplorePage() {
               file: value.path,
               source: `Web UI @ ${window.location.href}`,
               mode: "FLOW"
-            } as ExplorerOperationRequest
+            } as CoordinatorOperationRequest
           }
           case 1: {
             return {
@@ -262,7 +256,7 @@ export default function ExplorePage() {
               file: value.path,
               source: `Web UI @ ${window.location.href}`,
               mode: "FLOW"
-            } as ExplorerOperationRequest
+            } as CoordinatorOperationRequest
           }
           case 2: {
             return {
@@ -270,7 +264,7 @@ export default function ExplorePage() {
               file: value.path,
               source: `Web UI @ ${window.location.href}`,
               mode: "FLOW"
-            } as ExplorerOperationRequest
+            } as CoordinatorOperationRequest
           }
           case 3: {
             return {
@@ -278,7 +272,7 @@ export default function ExplorePage() {
               file: value.path,
               source: `Web UI @ ${window.location.href}`,
               mode: "FLOW"
-            } as ExplorerOperationRequest
+            } as CoordinatorOperationRequest
           }
           default: {
             return null;

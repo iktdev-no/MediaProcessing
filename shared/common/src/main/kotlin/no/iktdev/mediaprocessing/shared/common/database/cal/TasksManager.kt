@@ -5,7 +5,9 @@ import no.iktdev.eventi.data.eventId
 import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.data.toJson
 import no.iktdev.eventi.database.*
+import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
+import no.iktdev.mediaprocessing.shared.common.contract.jsonToEvent
 import no.iktdev.mediaprocessing.shared.common.database.tables.events
 import no.iktdev.mediaprocessing.shared.common.database.tables.tasks
 import no.iktdev.mediaprocessing.shared.common.task.Task
@@ -195,4 +197,8 @@ fun Query?.toTask(): List<Task> {
     val dz = TaskDoz()
     val res = this?.mapNotNull {  dz.deserializeTask(it) } ?: emptyList()
     return res
+}
+
+fun Query?.toEvent(): List<Event> {
+    return this?.mapNotNull { it[events.data].jsonToEvent(it[events.event]) } ?: emptyList()
 }

@@ -3,13 +3,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { useStompClient } from "react-stomp-hooks";
 import { Box, Button, Grid, TextField, Typography, useTheme } from '@mui/material';
 import { ExplorerItem } from "../../types";
-import { ContextMenuItem } from "../features/ContextMenu";
+import ContextMenu, { ContextMenuActionEvent, ContextMenuItem } from "../features/ContextMenu";
 import { RootState } from "../store";
 import { useWsSubscription } from "../ws/subscriptions";
 import { FileInfo, FileInfoGroup, IncomingUnprocessedFiles, update, } from "../store/unprocessed-files-slice";
 import SimpleTable from "../features/table/sortableTable";
-import { TablePropetyConfig } from "../features/table/table";
+import { TablePropetyConfig, TableRowActionEvents } from "../features/table/table";
 import MultiListSortedTable from "../features/table/multiListSortedTable";
+import { setContextMenuVisible, setContextMenuPosition } from "../store/context-menu-slice";
+import { canConvert, canEncode, canExtract } from "../../fileUtil";
+import { CoordinatorOperationRequest } from "../features/types";
 
 
 const columns: Array<TablePropetyConfig> = [
@@ -24,12 +27,93 @@ export default function UnprocessedFilesPage() {
     const files = useSelector((state: RootState) => state.unprocessedFiles);
     const [tableItems, setTableItems] = useState<Array<FileInfoGroup>>([]);
 
-    const [selectedRow, setSelectedRow] = useState<ExplorerItem|null>(null);
+    const [selectedRow, setSelectedRow] = useState<FileInfo|null>(null);
     const [actionableItems, setActionableItems] = useState<Array<ContextMenuItem>>([]);
 
     useWsSubscription<IncomingUnprocessedFiles>("/topic/files/unprocessed", (response) => {
         dispatch(update(response))
     });
+
+    
+  const onItemSelectedEvent: TableRowActionEvents<FileInfo> = {
+    contextMenu: (row: FileInfo, x: number, y: number) => {
+      dispatch(setContextMenuVisible(true));
+      dispatch(setContextMenuPosition({ x: x, y: y }));
+      setActionableItems(getContextMenuFileActionMenuItems(row));
+    },
+    click: function (row: FileInfo): void {
+    },
+    doubleClick: function (row: FileInfo): void {
+    }
+  };
+
+  function getContextMenuFileActionMenuItems(row: FileInfo | null): ContextMenuItem[] {
+      const items: Array<ContextMenuItem> = [
+        {
+          actionIndex: 0,
+          icon: null,
+          text: "All available"
+        },
+        {
+          actionIndex: 1,
+          icon: null,
+          text: "Encode"
+        },
+        {
+          actionIndex: 2,
+          icon: null,
+          text: "Extract"
+        }
+
+      ];
+      return items;
+  }
+
+  
+  const onContextMenuItemClickedEvent: ContextMenuActionEvent<FileInfo> = {
+    selected: function (actionIndex: number | null, value: FileInfo | null): void {
+      if (!value) {
+        return; 
+      }
+      const payload = (() => {
+        switch(actionIndex) {
+          case 0: {
+            return {
+              destination: "request/all",
+              file: value.fileName,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as CoordinatorOperationRequest
+          }
+          case 1: {
+            return {
+              destination: "request/encode",
+              file: value.fileName,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as CoordinatorOperationRequest
+          }
+          case 2: {
+            return {
+              destination: "request/extract",
+              file: value.fileName,
+              source: `Web UI @ ${window.location.href}`,
+              mode: "FLOW"
+            } as CoordinatorOperationRequest
+          }
+          default: {
+            return null;
+          }
+        }
+      })();
+      if (payload) {
+        client?.publish({
+          destination: "/app/"+payload.destination,
+          body: JSON.stringify(payload)
+        })
+      }
+    }
+  }
 
 
     const pullData = () => {
@@ -99,9 +183,10 @@ export default function UnprocessedFilesPage() {
               position: "absolute",
               width: "100%"
             }}>
-              <MultiListSortedTable items={tableItems ?? []} columns={columns}   />
+              <MultiListSortedTable items={tableItems ?? []} columns={columns} onRowClickedEvent={onItemSelectedEvent} />
             </Box>
           </Box>
+          <ContextMenu row={selectedRow} actionItems={actionableItems} onContextMenuItemClicked={onContextMenuItemClickedEvent} />
     
         </>
       )

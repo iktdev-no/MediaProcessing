@@ -59,12 +59,10 @@ export default function EventsChainPage() {
 
 
     useEffect(() => {
-        if (Object.keys(cursor).length === 0) {
-            client?.publish({
-                destination: "/app/chained/all"
-            });
-        }
-    }, [cursor, client, dispatch]);
+        client?.publish({
+            destination: "/app/chained/all"
+        });
+    }, [client, dispatch]);
 
     const onRefresh = () => {
         client?.publish({

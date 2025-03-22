@@ -22,15 +22,14 @@ export default function LaunchPage() {
     const dispatch = useDispatch();
     const muiTheme = useTheme();
     const client = useStompClient();
-    const simpleList = useSelector((state: RootState) => state.kafkaComposedFlat)
-    useEffect(() => {
+    /*useEffect(() => {
         if (simpleList.items.filter((item) => item.encodingTimeLeft !== null).length > 0) {
             columns.push({
                 label: "Completion",
                 accessor: "encodingTimeLeft"
             })
         }
-    }, [simpleList, dispatch])
+    }, [simpleList, dispatch])*/
 
     const onRefresh = () => {
         client?.publish({
@@ -82,7 +81,6 @@ export default function LaunchPage() {
                 position: "absolute",
                 width: "100%"
             }}>
-                <SimpleTable items={simpleList.items} columns={columns} />
 
             </Box>
         </Box>

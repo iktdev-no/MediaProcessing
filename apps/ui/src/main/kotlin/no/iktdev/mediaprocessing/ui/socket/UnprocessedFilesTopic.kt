@@ -68,7 +68,7 @@ class UnprocessedFilesTopic(
                 FileInfo(
                     it[files.baseName],
                     it[files.fileName],
-                    it[files.checksum]
+                    it[files.checksum],
                 )
             }
             unprocessedFiles = found
