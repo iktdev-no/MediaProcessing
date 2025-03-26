@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.ui.socket.a2a
 import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.contract.dto.ProcesserEventInfo
+import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.ui.UIEnv
 import no.iktdev.mediaprocessing.ui.WebSocketMonitoringService
 import no.iktdev.mediaprocessing.ui.log
@@ -35,6 +36,8 @@ class ProcesserListenerService(
 
             socketClient?.subscribe("/topic/encode/progress", encodeProcessMessage)
             socketClient?.subscribe("/topic/extract/progress", extractProcessFrameHandler)
+            socketClient?.subscribe("/topic/encode/assigned", encodeTaskAssignedMessage)
+            socketClient?.subscribe("/topic/extract/assigned", extractTaskAssignedMessage)
         }
     }
 
@@ -42,6 +45,30 @@ class ProcesserListenerService(
         SocketClient(UIEnv.socketEncoder, socketEvent).also {
             it.connect()
             this.socketClient = it
+        }
+    }
+
+    private val encodeTaskAssignedMessage = object: SocketMessageHandler() {
+        override fun onMessage(socketMessage: String) {
+            super.onMessage(socketMessage)
+            val response = gson.fromJson(socketMessage, Task::class.java)
+            listeners.forEach { listener ->
+                run {
+                    listener.onEncodeAssigned(response)
+                }
+            }
+        }
+    }
+
+    private val extractTaskAssignedMessage = object: SocketMessageHandler() {
+        override fun onMessage(socketMessage: String) {
+            super.onMessage(socketMessage)
+            val response = gson.fromJson(socketMessage, Task::class.java)
+            listeners.forEach { listener ->
+                run {
+                    listener.onExtractAssigned(response)
+                }
+            }
         }
     }
 
@@ -76,8 +103,8 @@ class ProcesserListenerService(
     interface A2AProcesserListener {
         fun onExtractProgress(info: ProcesserEventInfo)
         fun onEncodeProgress(info: ProcesserEventInfo)
-        fun onEncodeAssigned()
-        fun onExtractAssigned()
+        fun onEncodeAssigned(task: Task)
+        fun onExtractAssigned(task: Task)
     }
 
 }

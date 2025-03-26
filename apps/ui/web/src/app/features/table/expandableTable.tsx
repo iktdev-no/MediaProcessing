@@ -1,5 +1,5 @@
 import { Box, TableContainer, Table, TableHead, TableRow, TableCell, Typography, TableBody, useTheme } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TablePropetyConfig, TableCellCustomizer, TableRowActionEvents } from "./table";
 import IconArrowUp from '@mui/icons-material/ArrowUpward';
 import IconArrowDown from '@mui/icons-material/ArrowDownward';
@@ -14,13 +14,19 @@ export interface ExpandableTableItem {
     rowId: string
 }
 
-export default function ExpandableTable<T extends ExpandableTableItem>({ items, columns, cellCustomizer: customizer, expandableRender, onRowClickedEvent }: { items: Array<T>, columns: Array<TablePropetyConfig>, cellCustomizer?: TableCellCustomizer<T>, expandableRender: ExpandableRender<T>,  onRowClickedEvent?: TableRowActionEvents<T> }) {
+export interface SortByAccessor {
+    accessor: string
+    order: 'asc' | 'desc'
+}
+
+export default function ExpandableTable<T extends ExpandableTableItem>({ items, columns, cellCustomizer: customizer, expandableRender, onRowClickedEvent, defaultSort}: { items: Array<T>, columns: Array<TablePropetyConfig>, cellCustomizer?: TableCellCustomizer<T>, expandableRender: ExpandableRender<T>,  onRowClickedEvent?: TableRowActionEvents<T>, defaultSort?: SortByAccessor }) {
     const muiTheme = useTheme();
     
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
     const [orderBy, setOrderBy] = useState<string>('');
     const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
     const [selectedRow, setSelectedRow] = useState<T | null>(null);
+    const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
     const tableRowSingleClicked = (row: T | null) => {
         if (row != null && 'rowId' in row) {
@@ -37,8 +43,10 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
 
         if (row === selectedRow) {
             setSelectedRow(null);
+            setSelectedRowId(null);
         } else {
             setSelectedRow(row);
+            setSelectedRowId(row?.rowId ?? null);
             if (row && onRowClickedEvent) {
                 onRowClickedEvent.click(row);
             }
@@ -74,18 +82,36 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
         return 0;
     };
 
-    const sortedData = items.slice().sort((a, b) => {
-        if (order === 'asc') {
-            return compareValues(a, b, orderBy);
-        } else {
-            return compareValues(b, a, orderBy);
-        }
-    });
+
+    const sortedData = useMemo(() => {
+        return items.slice().sort((a, b) => {
+            if (order === 'asc') {
+                return compareValues(a, b, orderBy);
+            } else {
+                return compareValues(b, a, orderBy);
+            }
+        });
+    }, [items, order, orderBy]);    
 
     useEffect(() => {
         handleSort(columns[0].accessor)
-    }, [])
+        if (defaultSort) {
+            setOrder(defaultSort.order);
+            setOrderBy(defaultSort.accessor);
+        }
+    }, [defaultSort])
 
+    useEffect(() => {
+        if (selectedRowId) {
+            const matchingRow = items.find((item) => item.rowId === selectedRowId);
+            if (matchingRow) {
+                setSelectedRow(matchingRow);
+            } else {
+                setSelectedRow(null); // Hvis raden ikke finnes lenger, fjern valg
+                setSelectedRowId(null);
+            }
+        }
+    }, [items, selectedRowId]);
 
     return (
         <Box sx={{
@@ -106,7 +132,7 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
                         top: 0,
                         backgroundColor: muiTheme.palette.background.paper,
                     }}>
-                        <TableRow>
+                        <TableRow key={`orderRow-${Math.random()}`}>
                             {columns.map((column) => (
                                 <TableCell key={column.accessor} onClick={() => handleSort(column.accessor)} sx={{ cursor: "pointer" }}>
                                     <Box display="flex">
@@ -124,37 +150,34 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
                     <TableBody sx={{
                         overflowY: "scroll"
                     }}>
-                        {sortedData?.map((row: T, rowIndex: number) => (
-                            <>
-                                <TableRow key={rowIndex}
-                                    onClick={() => tableRowSingleClicked(row)}
-                                    onDoubleClick={() => tableRowDoubleClicked(row)}
-                                    onContextMenu={(e) => {
-                                        tableRowContextMenu(e, row);
-                                        tableRowSingleClicked(row);
-                                    }}
-                                    style={{ cursor: "pointer", backgroundColor: selectedRow === row ? muiTheme.palette.action.selected : '' }}
-                                >
-                                    {columns.map((column) => (
-                                        <TableCell key={column.accessor}>
-                                            {customizer && customizer(column.accessor, row) !== null
-                                                ? customizer(column.accessor, row)
-                                                : <Typography variant='body1'>{(row as any)[column.accessor]}</Typography>}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                                {(expandedRowIds.has(row.rowId)) ?
-                                    (<TableRow key={rowIndex + "_1"}>
-                                        <TableCell colSpan={columns.length}>
-                                            {
-                                                expandableRender(row)?.expandElement
-                                            }
-                                        </TableCell>
-                                    </TableRow>): null
-                                }
-                                
-                            </>
-                        ))}
+                        {sortedData?.map((row: T, rowIndex: number) => [
+                            <TableRow key={row.rowId}
+                                onClick={() => tableRowSingleClicked(row)}
+                                onDoubleClick={() => tableRowDoubleClicked(row)}
+                                onContextMenu={(e) => {
+                                    tableRowContextMenu(e, row);
+                                    tableRowSingleClicked(row);
+                                }}
+                                style={{ cursor: "pointer", backgroundColor: selectedRow === row ? muiTheme.palette.action.selected : '' }}
+                            >
+                                {columns.map((column) => (
+                                    <TableCell key={column.accessor}>
+                                        {customizer && customizer(column.accessor, row) !== null
+                                            ? customizer(column.accessor, row)
+                                            : <Typography variant='body1'>{(row as any)[column.accessor]}</Typography>}
+                                    </TableCell>
+                                ))}
+                            </TableRow>,
+                        (expandedRowIds.has(row.rowId)) ?
+                            (<TableRow key={row.rowId + "-expanded"}>
+                                <TableCell colSpan={columns.length}>
+                                    {
+                                        expandableRender(row)?.expandElement
+                                    }
+                                </TableCell>
+                            </TableRow>): null
+                        
+                        ])}
                     </TableBody>
                 </Table>
             </TableContainer>

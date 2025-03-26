@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.ui.socket
 
+import com.google.gson.Gson
 import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.database.toEpochSeconds
 import no.iktdev.eventi.database.withDirtyRead
@@ -32,24 +33,35 @@ class ProcesserTasksTopic(
     @Autowired private val message: SimpMessagingTemplate?,
 ): SocketListener(message) {
 
+    private var referenceIds: List<String> = emptyList()
 
     final val a2a = object : ProcesserListenerService.A2AProcesserListener {
         override fun onExtractProgress(info: ProcesserEventInfo) {
+            if (referenceIds.none { it == info.referenceId }) {
+                updateTopicWithTasks()
+            }
+            log.info { "Forwarding extract progress ${Gson().toJson(info)}" }
             message?.convertAndSend("/topic/processer/extract/progress", info)
-            pullAllTasks()
         }
 
         override fun onEncodeProgress(info: ProcesserEventInfo) {
+            if (referenceIds.none { it == info.referenceId }) {
+                updateTopicWithTasks()
+            }
+            log.info { "Forwarding encode progress ${Gson().toJson(info)}" }
             message?.convertAndSend("/topic/processer/encode/progress", info)
-            pullAllTasks()
         }
 
-        override fun onEncodeAssigned() {
-            pullAllTasks()
+        override fun onEncodeAssigned(task: Task) {
+            if (referenceIds.none { it == task.referenceId }) {
+                updateTopicWithTasks()
+            }
         }
 
-        override fun onExtractAssigned() {
-            pullAllTasks()
+        override fun onExtractAssigned(task: Task) {
+            if (referenceIds.none { it == task.referenceId }) {
+                updateTopicWithTasks()
+            }
         }
     }
 
@@ -78,7 +90,7 @@ class ProcesserTasksTopic(
 
 
     @MessageMapping("/tasks/all")
-    fun pullAllTaskss() {
+    fun updateTopicWithTasks() {
         val states = update()
         template?.convertAndSend("/topic/tasks/all", states)
     }
@@ -107,7 +119,9 @@ class ProcesserTasksTopic(
         val eventStates: MutableList<ContentEventState> = mutableListOf()
 
         val tasks = pullAllTasks()
-        val availableEvents = pullAllEvents()
+        val availableEvents = pullAllEvents().also {
+            referenceIds = it.keys.toList()
+        }
 
         for ((referenceId, events) in availableEvents) {
             val startEvent = events.findFirstEventOf<MediaProcessStartEvent>() ?: continue

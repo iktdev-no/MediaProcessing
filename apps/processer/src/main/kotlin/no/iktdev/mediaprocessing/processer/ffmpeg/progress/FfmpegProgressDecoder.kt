@@ -93,10 +93,11 @@ class FfmpegProgressDecoder {
             hasReadContinue = true
         }
 
-        val results = Regex("Duration:\\s*([^,]+),").find(value)?.groupValues?.firstOrNull()
+        val results = Regex("Duration:\\s*([^,]+),").find(value)?.groupValues?.firstOrNull() ?: return
         log.info { "Identified duration for estimation $results" }
 
         val parsedDuration = Regex("[0-9]+:[0-9]+:[0-9]+.[0-9]+").find(results.toString())?.value ?: return
+
         if (!parsedDurations.contains(parsedDuration)) {
             parsedDurations.add(parsedDuration)
         }

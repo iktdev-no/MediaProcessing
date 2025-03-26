@@ -63,10 +63,16 @@ function getPartFor(path: string, index: number): string | null {
   let parts: string[];
   if (isWindowsPath(path)) {
     parts = [path.slice(0, 3), ...path.slice(3).split(separator)];
-  } else if (path.startsWith(separator)) {
-    parts = [separator, ...path.slice(1).split(separator)];
   } else {
-    parts = path.split(separator);
+    if (path.length == 1 && index == 0) {
+      return "/"
+    }
+
+    if (path.startsWith(separator)) {
+      parts = [separator, ...path.slice(1).split(separator)];
+    } else {
+      parts = path.split(separator);
+    }
   }
 
   if (index < parts.length) {
@@ -74,7 +80,10 @@ function getPartFor(path: string, index: number): string | null {
     if (isWindowsPath(path) && index === 0) {
       return parts[0];
     }
-    return parts.slice(0, index + 1).join(separator);
+
+    
+    const returningPath = parts.slice(0, index + 1).join(separator).replace(/\/\//g, "/");
+    return returningPath;
   }
 
   return null;
@@ -115,7 +124,7 @@ function getSegments(absolutePath: string): Array<Segment> {
 
 
 function getSegmentedNaviagatablePath(rootClick: () => void, navigateTo: (path: string | null) => void, path: string | null): JSX.Element {
-  const segments = getSegments("/src/input/completed")
+  const segments = getSegments(path!)
   
   const utElements = segments.map((segment: Segment, index: number) => {
     return (
