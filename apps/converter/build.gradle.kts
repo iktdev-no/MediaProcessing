@@ -49,7 +49,7 @@ dependencies {
     implementation("org.json:json:20210307")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-    implementation("no.iktdev.library:subtitle:1.7.9-SNAPSHOT")
+    implementation("no.iktdev.library:subtitle:1.8.0-SNAPSHOT")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
