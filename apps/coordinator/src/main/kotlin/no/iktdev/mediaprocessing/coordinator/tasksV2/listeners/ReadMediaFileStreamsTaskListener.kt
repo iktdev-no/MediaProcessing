@@ -14,9 +14,7 @@ import no.iktdev.mediaprocessing.shared.common.SharedConfig
 import no.iktdev.mediaprocessing.shared.common.runner.CodeToOutput
 import no.iktdev.mediaprocessing.shared.common.runner.getOutputUsing
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.data.Event
-import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsReadEvent
-import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -40,7 +38,12 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
         val status =  super.shouldIProcessAndHandleEvent(incomingEvent, events)
-        return status
+        val permittedOperations = events.findFirstEventOf<MediaProcessStartEvent>()?.data?.operations ?: return false
+        return if (permittedOperations.any { it in requiredOperations }) {
+            status
+        } else {
+            false
+        }
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
