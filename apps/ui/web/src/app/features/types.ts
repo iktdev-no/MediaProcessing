@@ -3,4 +3,4 @@ export interface CoordinatorOperationRequest {
     file: string;
     source: string;
     mode: "FLOW" | "MANUAL";
-  }
+}

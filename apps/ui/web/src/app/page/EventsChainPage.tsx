@@ -9,9 +9,11 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import { Tree } from "react-d3-tree";
 import { EventChain, EventGroup, EventGroups, set } from "../store/chained-events-slice";
 import { toUnixTimestamp, UnixTimestamp } from "../features/UxTc";
-import { TableCellCustomizer, TablePropetyConfig } from "../features/table/table";
-import ExpandableTable, { ExpandableItem } from "../features/table/expandableTable";
+import { TableCellCustomizer, TablePropetyConfig, TableRowGroupedItem } from "../features/table/table";
+import ExpandableTable from "../features/table/expandableTable";
 import { CustomNodeElementProps } from 'react-d3-tree';
+
+export type ExpandableItemRow = TableRowGroupedItem<EventChain> & EventGroup
 
 
 interface RawNodeDatum {
@@ -37,12 +39,8 @@ const transformEventChain = (eventChain: EventChain): RawNodeDatum => ({
 });
 
 // Transformasjonsfunksjon for EventGroups
-const transformEventGroups = (group: EventGroup): RawNodeDatum[] => {
-    return group.events.map(transformEventChain);
-}
-
-interface EventGroupToTreeView extends EventGroup {
-    underView: JSX.Element
+const transformEventGroups = (group: ExpandableItemRow): RawNodeDatum[] => {
+    return group.items.map(transformEventChain);
 }
 
 export default function EventsChainPage() {
@@ -51,12 +49,25 @@ export default function EventsChainPage() {
     const client = useStompClient();
     const cursor = useSelector((state: RootState) => state.chained)
     const [useReferenceId, setUseReferenceId] = useState<string | null>(null);
-    const [treeData, setTreeData] = useState<RawNodeDatum[] | null>(null);
+    const [tableItems, setTableItems] = useState<Array<ExpandableItemRow>>([]);
 
     useWsSubscription<Array<EventGroup>>("/topic/chained/all", (response) => {
         dispatch(set(response))
+        console.log(response)
     });
 
+    useEffect(() => { 
+        const items = cursor.groups.map((group: EventGroup) => {
+            return {
+                rowId: group.referenceId,
+                title: group.fileName ?? group.referenceId,
+                items: group.events,
+                referenceId: group.referenceId,
+            } as ExpandableItemRow
+        });
+        setTableItems(items);
+        console.log("tableItems", items)
+     }, [cursor]);
 
     useEffect(() => {
         client?.publish({
@@ -67,23 +78,10 @@ export default function EventsChainPage() {
     const onRefresh = () => {
         client?.publish({
             "destination": "/app/chained/all",
-            "body": "Potato"
         })
     }
 
-    useEffect(() => {
-        if (useReferenceId) {
-            const eventGroup = cursor.groups.find((group) => group.referenceId === useReferenceId);
-            if (eventGroup) {
-                const data = transformEventGroups(eventGroup);
-                console.log({
-                    "info": "Tree data",
-                    "data": data
-                })
-                setTreeData(data);
-            }
-        }
-    }, [useReferenceId, cursor])
+
 
     const createTableCell: TableCellCustomizer<EventGroup> = (accessor, data) => {
         switch (accessor) {
@@ -101,7 +99,7 @@ export default function EventsChainPage() {
 
     const columns: Array<TablePropetyConfig> = [
         { label: "ReferenceId", accessor: "referenceId" },
-        { label: "File", accessor: "fileName" },
+        { label: "File", accessor: "title" },
         { label: "Created", accessor: "created" },
     ];
 
@@ -144,27 +142,23 @@ export default function EventsChainPage() {
         </>);
     }
 
-    function renderExpandableItem(item: EventGroup): ExpandableItem<EventGroup> | null {
-        return {
-            tag: item.referenceId,
-            expandElement: (() => {
-                const data = transformEventGroups(item);
-                return (
-                    <>
-                        {(data) ? (
-                            <div id="treeWrapper" style={{ width: '100%', height: '60vh',  }}>
-                                <Tree data={data} orientation="vertical" separation={{
-                                    nonSiblings: 3,
-                                    siblings: 2
-                                }} 
-                                renderCustomNodeElement={renderCustomNodeElement}
-                                 />
-                            </div>
-                        ) : <Typography>Tree data not available</Typography>}
-                    </>
-                );
-            })()
-        };
+    function renderExpandableItem(item: ExpandableItemRow): JSX.Element | null {
+        console.log(item);
+        const data = transformEventGroups(item);
+        return (
+            <>
+                {(data) ? (
+                    <div id="treeWrapper" style={{ width: '100%', height: '60vh',  }}>
+                        <Tree data={data} orientation="vertical" separation={{
+                            nonSiblings: 3,
+                            siblings: 2
+                        }} 
+                        renderCustomNodeElement={renderCustomNodeElement}
+                         />
+                    </div>
+                ) : <Typography>Tree data not available</Typography>}
+            </>
+        );
     }
 
 
@@ -185,7 +179,7 @@ export default function EventsChainPage() {
                     position: "absolute",
                     width: "100%"
                 }}>
-                    <ExpandableTable items={cursor?.groups ?? []} columns={columns} cellCustomizer={createTableCell} expandableRender={renderExpandableItem} />
+                    <ExpandableTable items={tableItems ?? []} columns={columns} cellCustomizer={createTableCell} expandableRender={renderExpandableItem} />
                 </Box>
             </Box>
         </>

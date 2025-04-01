@@ -17,10 +17,10 @@ import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import { client } from "stompjs";
 import { useStompClient } from "react-stomp-hooks";
 import { useDispatch, useSelector } from "react-redux";
-import { ContentEventState, ProcesserEventInfo, Status, update, updateEncodeProgress, WorkStatus } from "../store/work-slice";
-import ExpandableTable, { ExpandableItem } from "../features/table/expandableTable";
+import { ContentEventState, ContentEventStateItems, ProcesserEventInfo, Status, update, updateEncodeProgress, WorkStatus } from "../store/work-slice";
+import ExpandableTable from "../features/table/expandableTable";
 import { RootState } from "../store";
-import { TableCellCustomizer, TablePropetyConfig } from "../features/table/table";
+import { KeybasedComparator, SortBy, TableCellCustomizer, TablePropetyConfig, TableRowItem } from "../features/table/table";
 import SimpleTable from "../features/table/sortableTable";
 import { UnixTimestamp } from "../features/UxTc";
 import ProgressbarWithLabel from "../features/components/ProgressbarWithLabel";
@@ -169,12 +169,24 @@ const transformToSteps = (state: ContentEventState): RawNodeDatum => ({
     ]
 });
 
+export type ExpandableItemRow = TableRowItem<ContentEventState>
 
 export default function EventsPage() {
     const client = useStompClient();
     const dispatch = useDispatch();
-    const events = useSelector((state: RootState) => state.work);
+    const events: ContentEventStateItems = useSelector((state: RootState) => state.work);
+    const [tableItems, setTableItems] = useState<Array<ExpandableItemRow>>([]);
 
+    useEffect(() => {  
+        const items = events.items.map((event: ContentEventState) => {
+            return {
+                rowId: event.referenceId,
+                title: event.referenceId,
+                item: event
+            } as ExpandableItemRow
+        });
+        setTableItems(items);
+    }, [events]);
 
     useWsSubscription<Array<ContentEventState>>("/topic/tasks/all", (response) => {
         console.log(response)
@@ -192,7 +204,7 @@ export default function EventsPage() {
         })
     }, [client]);
 
-    const createCellTable: TableCellCustomizer<ContentEventState> = (accessor, data) => {
+    const createCellTable: TableCellCustomizer<ExpandableItemRow> = (accessor, data) => {
         switch (accessor) {
             case "runners": {
                 return (<>
@@ -206,7 +218,7 @@ export default function EventsPage() {
                                 x: 24,
                                 y: 24
                             }}
-                            data={transformToSteps(data)}
+                            data={transformToSteps(data.item)}
                             orientation="horizontal"
                             separation={{
                                 nonSiblings: 1,
@@ -226,8 +238,8 @@ export default function EventsPage() {
                 </>)
             };
             case "created": {
-                if (typeof data[accessor] === "number") {
-                    return UnixTimestamp({ timestamp: data[accessor] });
+                if (typeof data.item[accessor] === "number") {
+                    return UnixTimestamp({ timestamp: data.item[accessor] });
                 }
                 return null;
             }
@@ -235,33 +247,36 @@ export default function EventsPage() {
         }
     };
 
-    function renderExpandableItem(item: ContentEventState): ExpandableItem<ContentEventState> | null {
-        const progress = item.encodeWork?.progress?.progress ?? undefined;
-        const showProgressbar = [WorkStatus.Pending, WorkStatus.Started, WorkStatus.Working, WorkStatus.Completed].includes(item?.encodeWork?.status)
+    const sorter = (a: ExpandableItemRow, b: ExpandableItemRow, orderBy: SortBy, accessor: string) => { 
+        if (orderBy === "asc") {
+            return KeybasedComparator(a.item, b.item, "created")
+        } else {
+            return KeybasedComparator(b.item, a.item, "created")
+        }
+    }
 
-        const processer = item.encodeWork // events.encodeWork[item.referenceId];
+    function renderExpandableItem(item: ExpandableItemRow): JSX.Element | null {
+        const data = item.item;
+        const progress = data.encodeWork?.progress?.progress ?? undefined;
+        const showProgressbar = [WorkStatus.Pending, WorkStatus.Started, WorkStatus.Working, WorkStatus.Completed].includes(data?.encodeWork?.status)
+
+        const processer = data.encodeWork // events.encodeWork[item.referenceId];
         const showIndeterminate = processer?.status in [WorkStatus.Pending, WorkStatus.Started] || processer?.progress?.progress <= 0
         console.log({
             type: "info",
             processer: processer,
             showIndeterminate: showIndeterminate,
             showProgressbar: showProgressbar,
-            isWorking: item.encodeWork?.status == WorkStatus.Working
+            isWorking: data.encodeWork?.status == WorkStatus.Working
         });
-        return {
-            tag: item.referenceId,
-            expandElement: (() => {
-                //const data = transformEventGroups(item);
-                return (
-                    <>
-                        <Typography>{item.encodeWork?.progress?.timeLeft}</Typography>
-                        {(showProgressbar) ?
-                            <ProgressbarWithLabel indeterminateText={"Waiting"} progress={progress} /> : null
-                        }
-                    </>
-                );
-            })()
-        };
+        return (
+            <>
+                <Typography>{data.encodeWork?.progress?.timeLeft}</Typography>
+                {(showProgressbar) ?
+                    <ProgressbarWithLabel indeterminateText={"Waiting"} progress={progress} /> : null
+                }
+            </>
+        );
     }
 
     const columns: Array<TablePropetyConfig> = [
@@ -279,10 +294,10 @@ export default function EventsPage() {
 
     return (
         <>
-            <ExpandableTable items={events.items} columns={columns} cellCustomizer={createCellTable} expandableRender={renderExpandableItem} defaultSort={{
+            <ExpandableTable items={tableItems} columns={columns} cellCustomizer={createCellTable} expandableRender={renderExpandableItem} defaultSort={{
                 order: 'desc',
                 accessor: "created"
-            }} />
+            }} sorter={sorter} />
         </>
     )
 }

@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { ExpandableTableItem } from "../features/table/expandableTable";
 
-export interface EventGroup extends ExpandableTableItem {
+export interface EventGroup {
     referenceId: string,
     created: number,
-    fileName: string|null,
+    fileName?: string,
     events: EventChain[]
 }
 

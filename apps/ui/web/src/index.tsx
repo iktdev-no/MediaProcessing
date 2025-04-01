@@ -29,8 +29,8 @@ root.render(
       <StompSessionProvider url={wsUrl()} connectHeaders={{}} logRawCommunication={true}
        debug={(str) => {
         if (str === "Opening Web Socket...") {
+          console.log("Connecting with Web Socket...")
         }
-        console.log(str);
       }}
       onUnhandledMessage={(val) => {
         console.log("Unhandled message", val)

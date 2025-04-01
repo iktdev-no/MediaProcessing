@@ -66,6 +66,7 @@ export interface TaskGroupList {
 }
 
 export interface TableTaskGroup extends TableItemGroup<Task> {
+    referenceId: string
     title: string
     items: Array<Task>
 }   
@@ -84,6 +85,7 @@ const tasksSlice = createSlice({
     reducers: {
         update(state, action: PayloadAction<Array<TaskGroup>>) {
             state.items = action.payload.map((value) => ({
+                referenceId: value.referenceId,
                 title: value.referenceId,
                 items: value.tasks
             })) ?? []

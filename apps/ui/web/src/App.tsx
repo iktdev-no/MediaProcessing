@@ -20,7 +20,6 @@ import FolderIcon from '@mui/icons-material/Folder';
 import QueueIcon from '@mui/icons-material/Queue';
 import AppsIcon from '@mui/icons-material/Apps';
 import ConstructionIcon from '@mui/icons-material/Construction';
-import ProcesserTasksPage from './app/page/ProcesserTasksPage';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
@@ -110,7 +109,6 @@ function App() {
       }}>
         <BrowserRouter>
             <Routes>
-              <Route path='/tasks' element={<ProcesserTasksPage />} />
               <Route path='/processer' element={<EventsPage />} />
               <Route path='/unprocessed' element={<UnprocessedFilesPage />} />
               <Route path='/files' element={<ExplorePage />} />

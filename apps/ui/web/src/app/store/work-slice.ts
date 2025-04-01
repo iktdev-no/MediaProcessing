@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { ExpandableTableItem } from "../features/table/expandableTable"
 
 export enum WorkStatus {
     Pending = "Pending",
@@ -38,7 +37,7 @@ export enum Status {
 
 
 
-export interface ContentEventState extends ExpandableTableItem {
+export interface ContentEventState {
     referenceId: string
     title: string
     encode: Status

@@ -1,37 +1,28 @@
 import { Box, TableContainer, Table, TableHead, TableRow, TableCell, Typography, TableBody, useTheme } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
-import { TablePropetyConfig, TableCellCustomizer, TableRowActionEvents } from "./table";
+import { TablePropetyConfig, TableCellCustomizer, TableRowActionEvents, SortByAccessor, TableRowItem, DefaultTableContainer, ITableRow, SortBy, TableSorter } from "./table";
 import IconArrowUp from '@mui/icons-material/ArrowUpward';
 import IconArrowDown from '@mui/icons-material/ArrowDownward';
 
-export interface ExpandableItem<T> {
-    tag: string;
-    expandElement: JSX.Element | null;
-}
 
-export type ExpandableRender<T> = (item: T) => ExpandableItem<T> | null;
-export interface ExpandableTableItem {
-    rowId: string
-}
+export type ExpandableRender<T> = (item: T) => JSX.Element | null;
 
-export interface SortByAccessor {
-    accessor: string
-    order: 'asc' | 'desc'
-}
 
-export default function ExpandableTable<T extends ExpandableTableItem>({ items, columns, cellCustomizer: customizer, expandableRender, onRowClickedEvent, defaultSort}: { items: Array<T>, columns: Array<TablePropetyConfig>, cellCustomizer?: TableCellCustomizer<T>, expandableRender: ExpandableRender<T>,  onRowClickedEvent?: TableRowActionEvents<T>, defaultSort?: SortByAccessor }) {
+export default function ExpandableTable<R extends ITableRow<U>, U>({ items, columns, cellCustomizer: customizer, expandableRender, onRowClickedEvent, defaultSort, sorter }: { items: Array<R>, columns: Array<TablePropetyConfig>, cellCustomizer?: TableCellCustomizer<R>, expandableRender: ExpandableRender<R>,  onRowClickedEvent?: TableRowActionEvents<R>, defaultSort?: SortByAccessor, sorter?: TableSorter<R> }) {
     const muiTheme = useTheme();
     
-    const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-    const [orderBy, setOrderBy] = useState<string>('');
+    const [order, setOrder] = useState<'asc' | 'desc'>(defaultSort?.order ?? 'asc');
+    const [orderBy, setOrderBy] = useState<string>(defaultSort?.accessor ?? columns[0].accessor ?? '');
     const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
-    const [selectedRow, setSelectedRow] = useState<T | null>(null);
+    const [selectedRow, setSelectedRow] = useState<R | null>(null);
     const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
-    const tableRowSingleClicked = (row: T | null) => {
+    const tableRowSingleClicked = (row: R | null) => {
+        console.log("tableRowSingleClicked", row)
         if (row != null && 'rowId' in row) {
             setExpandedRowIds(prev => {
                 const newExpandedRows = new Set(prev);
+                console.log("newExpandedRows", newExpandedRows)
                 if (newExpandedRows.has(row.rowId)) {
                     newExpandedRows.delete(row.rowId);
                 } else {
@@ -53,27 +44,23 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
         }
 
     }
-    const tableRowDoubleClicked = (row: T | null) => {
+    const tableRowDoubleClicked = (row: R | null) => {
         setSelectedRow(row);
         if (row && onRowClickedEvent) {
             onRowClickedEvent.doubleClick(row);
         }
     }
 
-    const tableRowContextMenu = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent> , row: T | null) => {
+    const tableRowContextMenu = (e: React.MouseEvent<HTMLTableRowElement, MouseEvent> , row: R | null) => {
         if (row && onRowClickedEvent && onRowClickedEvent.contextMenu) {
             e.preventDefault()
             onRowClickedEvent.contextMenu(row, e.pageX, e.pageY)
         }
     }
 
-    const handleSort = (property: string) => {
-        const isAsc = orderBy === property && order === 'asc';
-        setOrder(isAsc ? 'desc' : 'asc');
-        setOrderBy(property);
-    };
 
     const compareValues = (a: any, b: any, orderBy: string) => {
+        console.log("compareValues", a, b, orderBy)
         if (typeof a[orderBy] === 'string') {
             return a[orderBy].localeCompare(b[orderBy]);
         } else if (typeof a[orderBy] === 'number') {
@@ -84,22 +71,19 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
 
 
     const sortedData = useMemo(() => {
-        return items.slice().sort((a, b) => {
-            if (order === 'asc') {
-                return compareValues(a, b, orderBy);
+        return [...items].sort((a, b) => {
+            if (sorter) {
+                return sorter(a, b, order, orderBy);
             } else {
-                return compareValues(b, a, orderBy);
+                if (order === 'asc') {
+                    return compareValues(a, b, orderBy);
+                } else {
+                    return compareValues(b, a, orderBy);
+                }
             }
-        });
-    }, [items, order, orderBy]);    
-
-    useEffect(() => {
-        handleSort(columns[0].accessor)
-        if (defaultSort) {
-            setOrder(defaultSort.order);
-            setOrderBy(defaultSort.accessor);
         }
-    }, [defaultSort])
+        );
+    }, [items, order, orderBy]);    
 
     useEffect(() => {
         if (selectedRowId) {
@@ -113,20 +97,17 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
         }
     }, [items, selectedRowId]);
 
+
+    const handleSort = (property: string) => {
+        const isAsc = orderBy === property && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(property);
+        console.log("handleSort", property, isAsc ? 'desc' : 'asc')
+    };
+
     return (
-        <Box sx={{
-            display: "flex",
-            flexDirection: "column", // Bruk column-fleksretning
-            height: "100%",
-            overflow: "hidden"
-          }}>
-            <TableContainer sx={{
-              flex: 1,
-              overflowY: "auto",
-              position: "relative", // Legg til denne linjen for å justere layout
-              maxHeight: "100%" // Legg til denne linjen for å begrense høyden
-            }}>
-                <Table>
+        <DefaultTableContainer>
+                            <Table>
                     <TableHead sx={{
                         position: "sticky",
                         top: 0,
@@ -150,7 +131,7 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
                     <TableBody sx={{
                         overflowY: "scroll"
                     }}>
-                        {sortedData?.map((row: T, rowIndex: number) => [
+                        {sortedData?.map((row: R, rowIndex: number) => [
                             <TableRow key={row.rowId}
                                 onClick={() => tableRowSingleClicked(row)}
                                 onDoubleClick={() => tableRowDoubleClicked(row)}
@@ -172,7 +153,7 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
                             (<TableRow key={row.rowId + "-expanded"}>
                                 <TableCell colSpan={columns.length}>
                                     {
-                                        expandableRender(row)?.expandElement
+                                        expandableRender(row)
                                     }
                                 </TableCell>
                             </TableRow>): null
@@ -180,7 +161,6 @@ export default function ExpandableTable<T extends ExpandableTableItem>({ items, 
                         ])}
                     </TableBody>
                 </Table>
-            </TableContainer>
-        </Box>
+        </DefaultTableContainer>
     )
 }
