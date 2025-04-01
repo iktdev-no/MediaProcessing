@@ -40,16 +40,18 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             return false
         }
 
-        if (!isOfEventsIListenFor(incomingEvent))
-            return false
         if (!incomingEvent.isSuccessful() && !shouldIHandleFailedEvents(incomingEvent)) {
             return false
         }
         val producedEvents = events.filter { it.eventType == produceEvent }
         val shouldIHandleAndProduce = producedEvents.none { it.derivedFromEventId() == incomingEvent.eventId() }
-        if (shouldIHandleAndProduce) {
-            log.info { "Permitting handling of event: ${incomingEvent.dataAs<ExtractedData>()?.outputFile}" }
+
+        val extractedEvent = events.findFirstEventOf<ExtractWorkPerformedEvent>()
+        if (extractedEvent?.isSuccessful() == true && shouldIHandleAndProduce) {
+            log.info { "Permitting handling of event: ${extractedEvent.data?.outputFile}" }
+
         }
+
         val startedWithOperations = events.findFirstEventOf<MediaProcessStartEvent>()?.data?.operations ?: return false
         if (startedWithOperations.isOnly(OperationEvents.CONVERT)) {
             return true
