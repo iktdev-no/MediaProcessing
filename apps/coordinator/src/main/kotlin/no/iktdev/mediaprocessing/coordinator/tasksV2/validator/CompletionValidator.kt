@@ -7,6 +7,7 @@ import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import no.iktdev.mediaprocessing.shared.common.contract.dto.SubtitleFormats
+import no.iktdev.mediaprocessing.shared.common.contract.dto.isOnly
 import java.io.File
 
 /**
@@ -85,7 +86,7 @@ object CompletionValidator {
         if (OperationEvents.CONVERT in operations) {
             val convertWork = events.filter { it.eventType == Events.ConvertTaskCreated }
             val convertPerformed = events.filter { it.eventType == Events.ConvertTaskCompleted }
-            if (convertPerformed.size < convertWork.size)
+            if (convertPerformed.size < convertWork.size || (operations.isOnly(OperationEvents.CONVERT) && convertWork.isEmpty()))
                 return false
         }
 

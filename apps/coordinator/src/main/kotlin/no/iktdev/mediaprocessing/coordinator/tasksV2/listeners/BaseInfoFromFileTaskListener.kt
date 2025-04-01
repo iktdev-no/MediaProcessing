@@ -8,10 +8,9 @@ import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.shared.common.parsing.FileNameParser
 import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.data.BaseInfo
-import no.iktdev.mediaprocessing.shared.common.contract.data.BaseInfoEvent
-import no.iktdev.mediaprocessing.shared.common.contract.data.Event
-import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
+import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
+import no.iktdev.mediaprocessing.shared.common.contract.dto.isOnly
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
@@ -28,6 +27,17 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
 
     override fun getProducerName(): String {
         return this::class.java.simpleName
+    }
+
+    override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        if (!super.shouldIProcessAndHandleEvent(incomingEvent, events)) {
+            return false
+        }
+        val startedWith = events.findFirstEventOf<MediaProcessStartEvent>()?.data?.operations;
+        if (startedWith?.isOnly(OperationEvents.CONVERT) == true) {
+            return false
+        }
+        return true
     }
 
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {

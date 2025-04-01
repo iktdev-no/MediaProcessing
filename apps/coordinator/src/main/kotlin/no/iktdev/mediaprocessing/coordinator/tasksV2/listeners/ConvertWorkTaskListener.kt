@@ -28,7 +28,8 @@ class ConvertWorkTaskListener: WorkTaskListener() {
     override var coordinator: Coordinator? = null
     override val produceEvent: Events = Events.ConvertTaskCreated
     override val listensForEvents: List<Events> = listOf(
-        Events.ExtractTaskCompleted
+        Events.ExtractTaskCompleted,
+        Events.ProcessStarted
     )
 
     override fun canProduceMultipleEvents(): Boolean {
@@ -48,6 +49,10 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         val shouldIHandleAndProduce = producedEvents.none { it.derivedFromEventId() == incomingEvent.eventId() }
         if (shouldIHandleAndProduce) {
             log.info { "Permitting handling of event: ${incomingEvent.dataAs<ExtractedData>()?.outputFile}" }
+        }
+        val startedWithOperations = events.findFirstEventOf<MediaProcessStartEvent>()?.data?.operations ?: return false
+        if (startedWithOperations.isOnly(OperationEvents.CONVERT)) {
+            return true
         }
         return shouldIHandleAndProduce
     }
