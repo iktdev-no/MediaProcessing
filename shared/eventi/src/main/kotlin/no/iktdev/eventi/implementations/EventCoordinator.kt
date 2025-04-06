@@ -22,17 +22,16 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     //private val listeners: MutableList<EventListener<T>> = mutableListOf()
 
     private val log = KotlinLogging.logger {}
-    private var coroutine = CoroutineScope(Dispatchers.IO + Job())
+    private var coroutine = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private var ready: Boolean = false
+    open var ready: Boolean = false
     fun isReady(): Boolean {
         return ready
     }
 
-    init {
+    open fun onReady() {
         ready = true
         pullForEvents()
-
     }
 
 
@@ -52,35 +51,6 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
         return PollStats(active = activePolls, total = referencePool.values.size)
     }
 
-    private fun onEventGroupsReceived(eventGroup: List<List<T>>) {
-        val egRefIds = eventGroup.map { it.first().referenceId() }
-
-        val orphanedReferences = referencePool.filter { !it.value.isActive }.filter { id -> id.key !in egRefIds }.map { it.key }
-        orphanedReferences.forEach { id -> referencePool.remove(id) }
-
-        activePolls = referencePool.values.filter { it.isActive }.size
-        if (orphanedReferences.isNotEmpty() && referencePool.isEmpty()) {
-            log.info { "Last active references removed from pull pool, " }
-        }
-
-        if (eventGroup.isEmpty()) {
-            return
-        }
-
-        eventGroup.forEach {
-            val referenceId = it.first().referenceId()
-
-            val isAvailable = if (referenceId in referencePool.keys) {
-                referencePool[referenceId]?.isActive != true
-            } else true
-
-            if (isAvailable) {
-                referencePool[referenceId] = coroutine.async {
-                    onEventsReceived(it)
-                }
-            }
-        }
-    }
 
     private var wasActiveNotify: Boolean = true
     private fun onEventCollectionReceived(referenceId: String, events: List<T>) {
@@ -130,7 +100,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     var cachedReferenceList: MutableList<String> = mutableListOf()
     private fun pullForEvents() {
         coroutine.launch {
-            while (taskMode == ActiveMode.Active) {
+            while (taskMode == ActiveMode.Active && coroutine.isActive) {
                 if (referencePoolIsReadyForEvents()) {
                     log.debug { "New pull on database" }
                     val referenceIdsAvailable = eventManager.getAvailableReferenceIds()

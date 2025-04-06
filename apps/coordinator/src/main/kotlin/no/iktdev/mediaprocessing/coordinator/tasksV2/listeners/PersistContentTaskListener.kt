@@ -76,6 +76,9 @@ class PersistContentTaskListener : CoordinatorEventListener() {
     }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
+        if (doNotProduceComplete) {
+            return false
+        }
         val result = super.shouldIProcessAndHandleEvent(incomingEvent, events)
         return result
     }
@@ -83,6 +86,10 @@ class PersistContentTaskListener : CoordinatorEventListener() {
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume() ?: return
         active = true
+
+        if (doNotProduceComplete) {
+            return
+        }
 
         val mediaInfo: ComposedMediaInfo = composeMediaInfo(events) ?: run {
             log.error { "Unable to compose media info for ${event.referenceId()}" }

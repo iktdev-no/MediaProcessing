@@ -14,7 +14,9 @@ import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
 import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import no.iktdev.mediaprocessing.shared.common.database.cal.EventsManager
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.io.File
 import java.util.*
@@ -28,7 +30,9 @@ class Coordinator(
 
 ) : EventCoordinator<Event, EventsManager>() {
 
-    init {
+    @EventListener(ApplicationReadyEvent::class)
+    fun onApplicationReady() {
+        onReady()
     }
 
     fun getProducerName(): String {
