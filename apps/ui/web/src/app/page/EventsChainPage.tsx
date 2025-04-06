@@ -58,10 +58,12 @@ export default function EventsChainPage() {
 
     useEffect(() => { 
         const items = cursor.groups.map((group: EventGroup) => {
+            const created = group.events[0]?.created ?? 0;
             return {
                 rowId: group.referenceId,
                 title: group.fileName ?? group.referenceId,
                 items: group.events,
+                created: created,
                 referenceId: group.referenceId,
             } as ExpandableItemRow
         });
@@ -84,6 +86,8 @@ export default function EventsChainPage() {
 
 
     const createTableCell: TableCellCustomizer<EventGroup> = (accessor, data) => {
+        console.log(accessor, data);
+
         switch (accessor) {
             case "created": {
                 if (typeof data[accessor] === "number") {
