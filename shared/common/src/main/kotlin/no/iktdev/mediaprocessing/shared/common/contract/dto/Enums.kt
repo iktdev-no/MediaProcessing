@@ -23,5 +23,5 @@ enum class OperationEvents {
 }
 
 fun List<OperationEvents>.isOnly(expected: OperationEvents): Boolean {
-    return this.size == 1 && this.firstOrNull { it == expected } != null
+    return this.size == 1 && this.all { it == expected }
 }

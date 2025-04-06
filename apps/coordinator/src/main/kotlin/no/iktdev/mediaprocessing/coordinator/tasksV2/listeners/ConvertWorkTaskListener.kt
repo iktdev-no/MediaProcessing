@@ -53,7 +53,7 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         }
 
         val startedWithOperations = events.findFirstEventOf<MediaProcessStartEvent>()?.data?.operations ?: return false
-        if (startedWithOperations.isOnly(OperationEvents.CONVERT)) {
+        if (startedWithOperations.isOnly(OperationEvents.CONVERT) && shouldIHandleAndProduce) {
             return true
         }
         return shouldIHandleAndProduce
