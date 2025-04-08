@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.tasksV2.listeners
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
@@ -40,23 +41,26 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             return false
         }
 
-        if (!incomingEvent.isSuccessful() && !shouldIHandleFailedEvents(incomingEvent)) {
-            return false
-        }
         val producedEvents = events.filter { it.eventType == produceEvent }
         val shouldIHandleAndProduce = producedEvents.none { it.derivedFromEventId() == incomingEvent.eventId() }
 
         val extractedEvent = events.findFirstEventOf<ExtractWorkPerformedEvent>()
         if (extractedEvent?.isSuccessful() == true && shouldIHandleAndProduce) {
             log.info { "Permitting handling of event: ${extractedEvent.data?.outputFile}" }
-
         }
 
-        val startedWithOperations = events.findFirstEventOf<MediaProcessStartEvent>()?.data?.operations ?: return false
-        if (startedWithOperations.isOnly(OperationEvents.CONVERT) && shouldIHandleAndProduce) {
+        val startOperation = events.findFirstOf(Events.ProcessStarted)?.dataAs<MediaProcessStartEvent>()
+        if (startOperation == null) {
+            log.error { "Could not find 'ProcessStarted' event" }
+            return false
+        }
+
+        if (startOperation.data?.operations?.isOnly(OperationEvents.CONVERT) == true) {
+            log.info { "StartOperation should only be Convert, ${WGson.toJson(startOperation)}" }
             return true
+        } else {
+            return shouldIHandleAndProduce
         }
-        return shouldIHandleAndProduce
     }
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
