@@ -66,6 +66,9 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
     }
 
     open fun shouldIProcessAndHandleEvent(incomingEvent: T, events: List<T>): Boolean {
+        if (listensForEvents.isEmpty()) {
+            return true
+        }
         if (!isOfEventsIListenFor(incomingEvent))
             return false
         if (!isPrerequisitesFulfilled(incomingEvent, events)) {
