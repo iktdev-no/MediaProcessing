@@ -22,5 +22,12 @@ class Metadata:
     source: str
 
     def to_dict(self):
-        return asdict(self)
-    
+            # Trimmer alle strenger før de konverteres til dict
+            def trim(item):
+                if isinstance(item, str):
+                    return item.strip()
+                elif isinstance(item, list):
+                    return [trim(sub_item) for sub_item in item]
+                return item
+
+            return {key: trim(value) for key, value in asdict(self).items()}
