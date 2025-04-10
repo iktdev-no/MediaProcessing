@@ -37,7 +37,8 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         return true
     }
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
-        if (!super.shouldIProcessAndHandleEvent(incomingEvent, events)) {
+        val mainCheckOk = super.shouldIProcessAndHandleEvent(incomingEvent, events);
+        if (!mainCheckOk) {
             return false
         }
 
@@ -49,18 +50,16 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             log.info { "Permitting handling of event: ${extractedEvent.data?.outputFile}" }
         }
 
-        val startOperation = events.findFirstOf(Events.ProcessStarted)?.dataAs<MediaProcessStartEvent>()
+        val startOperation = events.findFirstOf(Events.ProcessStarted)?.dataAs<StartEventData>()
         if (startOperation == null) {
             log.error { "Could not find 'ProcessStarted' event" }
             return false
         }
 
-        if (startOperation.data?.operations?.isOnly(OperationEvents.CONVERT) == true) {
-            log.info { "StartOperation should only be Convert, ${WGson.toJson(startOperation)}" }
-            return true
-        } else {
-            return shouldIHandleAndProduce
+        if (incomingEvent.isOfEvent(Events.ProcessStarted)) {
+            return startOperation.operations.isOnly(OperationEvents.CONVERT)
         }
+        return shouldIHandleAndProduce
     }
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
         val event = incomingEvent.consume()
