@@ -42,14 +42,6 @@ class ConvertWorkTaskListener: WorkTaskListener() {
             return false
         }
 
-        val producedEvents = events.filter { it.eventType == produceEvent }
-        val shouldIHandleAndProduce = producedEvents.none { it.derivedFromEventId() == incomingEvent.eventId() }
-
-        val extractedEvent = events.findFirstEventOf<ExtractWorkPerformedEvent>()
-        if (extractedEvent?.isSuccessful() == true && shouldIHandleAndProduce) {
-            log.info { "Permitting handling of event: ${extractedEvent.data?.outputFile}" }
-        }
-
         val startOperation = events.findFirstOf(Events.ProcessStarted)?.dataAs<StartEventData>()
         if (startOperation == null) {
             log.error { "Could not find 'ProcessStarted' event" }
@@ -59,6 +51,15 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         if (incomingEvent.isOfEvent(Events.ProcessStarted)) {
             return startOperation.operations.isOnly(OperationEvents.CONVERT)
         }
+
+        val producedEvents = events.filter { it.eventType == produceEvent }
+        val shouldIHandleAndProduce = producedEvents.none { it.derivedFromEventId() == incomingEvent.eventId() }
+
+        val extractedEvent = events.findFirstEventOf<ExtractWorkPerformedEvent>()
+        if (extractedEvent?.isSuccessful() == true && shouldIHandleAndProduce) {
+            log.info { "Permitting handling of event: ${extractedEvent.data?.outputFile}" }
+        }
+
         return shouldIHandleAndProduce
     }
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
