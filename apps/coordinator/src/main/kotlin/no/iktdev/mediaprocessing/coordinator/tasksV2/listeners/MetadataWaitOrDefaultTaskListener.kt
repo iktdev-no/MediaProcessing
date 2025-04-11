@@ -47,24 +47,35 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
         Events.ProcessCompleted
     )
 
-    private val internalFilter = listOf(
-        Events.BaseInfoRead,
-        Events.MetadataSearchPerformed,
-        Events.ProcessCompleted
-    )
-
     val metadataTimeout = metadataTimeoutMinutes * 60
 
     private val timeoutScope = CoroutineScope(Dispatchers.Default)
     val timeoutJobs = ConcurrentHashMap<String, Job>()
 
-    override fun shouldIHandleFailedEvents(incomingEvent: Event): Boolean {
-        return true
-    }
 
     override fun shouldIProcessAndHandleEvent(incomingEvent: Event, events: List<Event>): Boolean {
-        if (!super.shouldIProcessAndHandleEvent(incomingEvent, events))
+        if (!isOfEventsIListenFor(incomingEvent))
             return false
+
+        val childOf = events.filter { it.derivedFromEventId() == incomingEvent.eventId() }
+        val haveListenerProduced = childOf.any { it.eventType == produceEvent }
+        if (haveListenerProduced)
+            return false
+
+        val metadataEvent = events.findEventOf<MediaMetadataReceivedEvent>()
+        val metadataSource = metadataEvent?.metadata?.source
+
+        if (events.any { it.eventType == produceEvent } && !canProduceMultipleEvents() && metadataSource == getProducerName()) {
+            return false
+        }
+
+        if (!havProducedDerivedEventOnIncomingEvent(incomingEvent, events) && canProduceMultipleEvents()) {
+            return true
+        }
+
+        if (haveProducedExpectedMessageBasedOnEvent(incomingEvent, events))
+            return false
+
         return (events.any { it.eventType == Events.BaseInfoRead })
     }
 

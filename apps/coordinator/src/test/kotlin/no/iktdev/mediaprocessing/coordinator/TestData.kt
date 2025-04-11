@@ -2,8 +2,8 @@ package no.iktdev.mediaprocessing.coordinator
 
 import no.iktdev.eventi.data.EventMetadata
 import no.iktdev.eventi.data.EventStatus
-import no.iktdev.mediaprocessing.shared.common.contract.data.MediaProcessStartEvent
-import no.iktdev.mediaprocessing.shared.common.contract.data.StartEventData
+import no.iktdev.mediaprocessing.coordinator.tasksV2.listeners.MetadataWaitOrDefaultTaskListener
+import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
 import java.util.UUID
 
@@ -18,6 +18,37 @@ fun defaultStartEvent(): MediaProcessStartEvent {
         )
     )
 }
+
+fun defaultBaseInfoEvent(): BaseInfoEvent {
+    return BaseInfoEvent(
+        metadata = defaultMetadata(),
+        data = BaseInfo(
+            title = "Potetmos",
+            sanitizedName = "Potetmos mannen",
+            searchTitles = listOf("Potetmos mannen")
+        )
+    )
+}
+
+fun metadataSearchTimedOutEvent(): MediaMetadataReceivedEvent {
+    return MediaMetadataReceivedEvent(
+        metadata = defaultMetadata()
+            .copy(status = EventStatus.Skipped)
+            .copy(source = MetadataWaitOrDefaultTaskListener::class.java.simpleName),
+        data = null
+    )
+}
+
+fun defaultMetadataSearchEvent(): MediaMetadataReceivedEvent {
+    return MediaMetadataReceivedEvent(
+        metadata = defaultMetadata(),
+        data = pyMetadata(
+            title = "Potetmos",
+            type = "movie",
+        )
+    )
+}
+
 
 fun defaultMetadata(): EventMetadata {
     return EventMetadata(
