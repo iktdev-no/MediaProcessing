@@ -36,8 +36,22 @@ class CoordinatorApplication {
 
 private lateinit var storeDatabase: MySqlDataSource
 
-val ioCoroutine = CoroutinesIO()
-val defaultCoroutine = CoroutinesDefault()
+val ioCoroutine = CoroutinesIO().
+        also {
+            it.addListener(object : Observables.ObservableValue.ValueListener<Throwable> {
+                override fun onUpdated(value: Throwable) {
+                    log.error { "IO Coroutine" + value.printStackTrace() }
+                }
+            })
+        }
+val defaultCoroutine = CoroutinesDefault().
+    also {
+        it.addListener(object : Observables.ObservableValue.ValueListener<Throwable> {
+            override fun onUpdated(value: Throwable) {
+                log.error { "Default Coroutine" + value.printStackTrace() }
+            }
+        })
+    }
 
 
 fun getStoreDatabase(): MySqlDataSource {
