@@ -50,6 +50,13 @@ class SubtitleArgumentsTest {
         assertThat(args.firstOrNull()?.index).isEqualTo(0)
     }
 
+    @Test
+    fun assertThatCommentaryIsNotSelected() {
+        val data = Gson().fromJson<List<SubtitleStream>>(streamsWithCommentary, type)
+        val args = SubtitleArguments(data).getSubtitleArguments()
+        assertThat(args).hasSize(1)
+        assertThat(args.firstOrNull()?.mediaIndex).isEqualTo(4)
+    }
 
     val multipleSubtitleStreamsWithSameLanguage = """
                 [{
@@ -362,6 +369,195 @@ class SubtitleArgumentsTest {
                         "NUMBER_OF_BYTES": "14853",
                         "_STATISTICS_WRITING_APP": "mkvmerge v69.0.0 ('Day And Age') 64-bit",
                         "_STATISTICS_WRITING_DATE_UTC": "2025-01-03 02:19:23",
+                        "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
+                    }
+                }
+        ]
+    """.trimIndent()
+
+    val streamsWithCommentary = """
+        [
+                {
+                    "index": 4,
+                    "codec_name": "subrip",
+                    "codec_long_name": "SubRip subtitle",
+                    "codec_type": "subtitle",
+                    "codec_tag_string": "[0][0][0][0]",
+                    "codec_tag": "0x0000",
+                    "r_frame_rate": "0/0",
+                    "avg_frame_rate": "0/0",
+                    "time_base": "1/1000",
+                    "start_pts": 0,
+                    "start_time": "0.000000",
+                    "duration_ts": 5501856,
+                    "duration": "5501.856000",
+                    "disposition": {
+                        "default": 0,
+                        "dub": 0,
+                        "original": 0,
+                        "comment": 0,
+                        "lyrics": 0,
+                        "karaoke": 0,
+                        "forced": 1,
+                        "hearing_impaired": 0,
+                        "visual_impaired": 0,
+                        "clean_effects": 0,
+                        "attached_pic": 0,
+                        "timed_thumbnails": 0,
+                        "non_diegetic": 0,
+                        "captions": 0,
+                        "descriptions": 0,
+                        "metadata": 0,
+                        "dependent": 0,
+                        "still_image": 0
+                    },
+                    "tags": {
+                        "language": "eng",
+                        "title": "English (Forced)",
+                        "BPS": "4",
+                        "DURATION": "00:50:23.770000000",
+                        "NUMBER_OF_FRAMES": "67",
+                        "NUMBER_OF_BYTES": "1591",
+                        "_STATISTICS_WRITING_APP": "mkvmerge v90.0 ('Hanging On') 64-bit",
+                        "_STATISTICS_WRITING_DATE_UTC": "2025-03-12 18:54:52",
+                        "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
+                    }
+                },
+                {
+                    "index": 5,
+                    "codec_name": "subrip",
+                    "codec_long_name": "SubRip subtitle",
+                    "codec_type": "subtitle",
+                    "codec_tag_string": "[0][0][0][0]",
+                    "codec_tag": "0x0000",
+                    "r_frame_rate": "0/0",
+                    "avg_frame_rate": "0/0",
+                    "time_base": "1/1000",
+                    "start_pts": 0,
+                    "start_time": "0.000000",
+                    "duration_ts": 5501856,
+                    "duration": "5501.856000",
+                    "disposition": {
+                        "default": 0,
+                        "dub": 0,
+                        "original": 0,
+                        "comment": 0,
+                        "lyrics": 0,
+                        "karaoke": 0,
+                        "forced": 0,
+                        "hearing_impaired": 1,
+                        "visual_impaired": 0,
+                        "clean_effects": 0,
+                        "attached_pic": 0,
+                        "timed_thumbnails": 0,
+                        "non_diegetic": 0,
+                        "captions": 0,
+                        "descriptions": 0,
+                        "metadata": 0,
+                        "dependent": 0,
+                        "still_image": 0
+                    },
+                    "tags": {
+                        "language": "eng",
+                        "title": "English (SDH)",
+                        "BPS": "54",
+                        "DURATION": "01:28:15.462000000",
+                        "NUMBER_OF_FRAMES": "1302",
+                        "NUMBER_OF_BYTES": "35817",
+                        "_STATISTICS_WRITING_APP": "mkvmerge v90.0 ('Hanging On') 64-bit",
+                        "_STATISTICS_WRITING_DATE_UTC": "2025-03-12 18:54:52",
+                        "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
+                    }
+                },
+                {
+                    "index": 8,
+                    "codec_name": "subrip",
+                    "codec_long_name": "SubRip subtitle",
+                    "codec_type": "subtitle",
+                    "codec_tag_string": "[0][0][0][0]",
+                    "codec_tag": "0x0000",
+                    "r_frame_rate": "0/0",
+                    "avg_frame_rate": "0/0",
+                    "time_base": "1/1000",
+                    "start_pts": 0,
+                    "start_time": "0.000000",
+                    "duration_ts": 5501856,
+                    "duration": "5501.856000",
+                    "disposition": {
+                        "default": 0,
+                        "dub": 0,
+                        "original": 0,
+                        "comment": 0,
+                        "lyrics": 0,
+                        "karaoke": 0,
+                        "forced": 0,
+                        "hearing_impaired": 0,
+                        "visual_impaired": 0,
+                        "clean_effects": 0,
+                        "attached_pic": 0,
+                        "timed_thumbnails": 0,
+                        "non_diegetic": 0,
+                        "captions": 0,
+                        "descriptions": 0,
+                        "metadata": 0,
+                        "dependent": 0,
+                        "still_image": 0
+                    },
+                    "tags": {
+                        "language": "eng",
+                        "title": "English (Commentary #1)",
+                        "BPS": "124",
+                        "DURATION": "01:30:35.847000000",
+                        "NUMBER_OF_FRAMES": "1596",
+                        "NUMBER_OF_BYTES": "84444",
+                        "_STATISTICS_WRITING_APP": "mkvmerge v90.0 ('Hanging On') 64-bit",
+                        "_STATISTICS_WRITING_DATE_UTC": "2025-03-12 18:54:52",
+                        "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
+                    }
+                },
+                {
+                    "index": 9,
+                    "codec_name": "subrip",
+                    "codec_long_name": "SubRip subtitle",
+                    "codec_type": "subtitle",
+                    "codec_tag_string": "[0][0][0][0]",
+                    "codec_tag": "0x0000",
+                    "r_frame_rate": "0/0",
+                    "avg_frame_rate": "0/0",
+                    "time_base": "1/1000",
+                    "start_pts": 0,
+                    "start_time": "0.000000",
+                    "duration_ts": 5501856,
+                    "duration": "5501.856000",
+                    "disposition": {
+                        "default": 0,
+                        "dub": 0,
+                        "original": 0,
+                        "comment": 0,
+                        "lyrics": 0,
+                        "karaoke": 0,
+                        "forced": 0,
+                        "hearing_impaired": 0,
+                        "visual_impaired": 0,
+                        "clean_effects": 0,
+                        "attached_pic": 0,
+                        "timed_thumbnails": 0,
+                        "non_diegetic": 0,
+                        "captions": 0,
+                        "descriptions": 0,
+                        "metadata": 0,
+                        "dependent": 0,
+                        "still_image": 0
+                    },
+                    "tags": {
+                        "language": "eng",
+                        "title": "English (Commentary #2)",
+                        "BPS": "134",
+                        "DURATION": "01:31:22.561000000",
+                        "NUMBER_OF_FRAMES": "1646",
+                        "NUMBER_OF_BYTES": "92269",
+                        "_STATISTICS_WRITING_APP": "mkvmerge v90.0 ('Hanging On') 64-bit",
+                        "_STATISTICS_WRITING_DATE_UTC": "2025-03-12 18:54:52",
                         "_STATISTICS_TAGS": "BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES"
                     }
                 }

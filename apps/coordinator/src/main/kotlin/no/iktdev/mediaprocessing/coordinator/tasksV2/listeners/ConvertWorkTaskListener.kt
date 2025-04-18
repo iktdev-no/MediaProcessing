@@ -139,4 +139,11 @@ class ConvertWorkTaskListener: WorkTaskListener() {
         }
         active = false
     }
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(ConvertWorkCreatedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
 }

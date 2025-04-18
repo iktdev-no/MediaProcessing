@@ -78,6 +78,15 @@ class ReadMediaFileStreamsTaskListener() : CoordinatorEventListener() {
         active = false
     }
 
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(
+            MediaFileStreamsReadEvent(
+                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+                data = null
+            )
+        )
+    }
+
 
     suspend fun fileReadStreams(started: StartEventData, eventId: String): JsonObject? {
         val file = File(started.file)

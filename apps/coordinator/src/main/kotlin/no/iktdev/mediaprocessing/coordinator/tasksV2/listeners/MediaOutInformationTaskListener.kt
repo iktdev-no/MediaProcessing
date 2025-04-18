@@ -78,6 +78,13 @@ class MediaOutInformationTaskListener: CoordinatorEventListener() {
         active = false
     }
 
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(MediaOutInformationConstructedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
+
     class ProcessMediaInfoAndMetadata(val baseInfo: BaseInfo, val metadata: pyMetadata? = null) {
         var metadataDeterminedContentType: FileNameDeterminate.ContentType = metadata?.type?.let { contentType ->
             when (contentType) {

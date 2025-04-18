@@ -97,4 +97,10 @@ class EncodeWorkArgumentsTaskListener: CoordinatorEventListener() {
         }
         active = false
     }
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(EncodeArgumentCreatedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+        ))
+    }
 }

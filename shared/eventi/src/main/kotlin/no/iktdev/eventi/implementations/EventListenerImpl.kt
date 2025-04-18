@@ -32,6 +32,9 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
         }
     }
 
+    abstract fun produceFailure(incomingEvent: T)
+
+
     open fun isOfEventsIListenFor(event: T): Boolean {
         return listensForEvents.any { it == event.eventType }
     }
@@ -97,6 +100,7 @@ abstract class EventListenerImpl<T: EventImpl, E: EventsManagerImpl<T>> {
 
         return true
     }
+
 
     /**
      * @param incomingEvent Can be a new event or iterated form sequence in order to re-produce events

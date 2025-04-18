@@ -81,5 +81,11 @@ class BaseInfoFromFileTaskListener() : CoordinatorEventListener() {
         }
     }
 
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(BaseInfoEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+        ))
+    }
+
 
 }

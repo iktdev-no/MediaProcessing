@@ -45,8 +45,14 @@ class SubtitleArguments(val subtitleStreams: List<SubtitleStream>) {
         return keywords.any { title.contains(it) }
     }
 
+    private fun SubtitleStream.isNonDialog(): Boolean {
+        val title = this.tags.title?.lowercase() ?: return false
+        val keywords = listOf("commentary")
+        return keywords.any { title.contains(it) }
+    }
+
     private fun getSubtitleType(stream: SubtitleStream): SubtitleType {
-        return if (stream.isSignOrSong())
+        return if (stream.isSignOrSong() || stream.isNonDialog())
             SubtitleType.NON_DIALOGUE
         else if (stream.isSHD()) {
             SubtitleType.SHD

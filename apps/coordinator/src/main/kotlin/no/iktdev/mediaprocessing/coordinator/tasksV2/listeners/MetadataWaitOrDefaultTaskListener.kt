@@ -113,7 +113,14 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
             timeoutJobs[digestEvent.referenceId()] = ttsc
         }
     }
-    
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(MediaMetadataReceivedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
+
     suspend fun createTimeout(referenceId: String, eventId: String, baseInfo: BaseInfoEvent) {
         val expiryTime = (Instant.now().epochSecond + metadataTimeout)
         val dateTime = LocalDateTime.ofEpochSecond(expiryTime, 0, ZoneOffset.UTC)

@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.data.Event
 import no.iktdev.mediaprocessing.shared.common.contract.data.MediaFileStreamsParsedEvent
+import no.iktdev.mediaprocessing.shared.common.contract.data.MediaMetadataReceivedEvent
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.AudioStream
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.common.contract.ffmpeg.SubtitleStream
@@ -65,6 +66,14 @@ class ParseMediaFileStreamsTaskListener() : CoordinatorEventListener() {
         active = false
     }
 
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(
+            MediaFileStreamsParsedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        )
+        )
+    }
 
     fun parseStreams(data: JsonObject?): ParsedMediaStreams {
         val ignoreCodecs = listOf("png", "mjpeg")

@@ -92,4 +92,11 @@ class CoverFromMetadataTaskListener: CoordinatorEventListener() {
         onProduceEvent(result)
         active = false
     }
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(MediaCoverInfoReceivedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
 }

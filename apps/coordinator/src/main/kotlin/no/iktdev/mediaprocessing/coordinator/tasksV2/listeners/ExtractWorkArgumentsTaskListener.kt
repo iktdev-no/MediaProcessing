@@ -92,4 +92,11 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
         }
         active = false
     }
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(ExtractArgumentCreatedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
 }

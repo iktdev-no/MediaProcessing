@@ -74,4 +74,11 @@ class EncodeWorkTaskListener : WorkTaskListener() {
         }
         active = false
     }
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(EncodeWorkCreatedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
 }

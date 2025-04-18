@@ -217,6 +217,13 @@ class CompletedTaskListener : CoordinatorEventListener() {
         active = false
     }
 
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(MediaProcessCompletedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
+
     internal data class ComposedMediaInfo(
         val title: String,
         val fallbackCollection: String,
@@ -288,5 +295,7 @@ class CompletedTaskListener : CoordinatorEventListener() {
 
         return data.data
     }
+
+
 
 }

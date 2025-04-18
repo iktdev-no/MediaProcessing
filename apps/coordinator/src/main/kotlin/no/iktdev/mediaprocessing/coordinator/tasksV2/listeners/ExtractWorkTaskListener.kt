@@ -83,4 +83,11 @@ class ExtractWorkTaskListener: WorkTaskListener() {
         }
         active = false
     }
+
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(ExtractWorkCreatedEvent(
+            metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+            data = null
+        ))
+    }
 }

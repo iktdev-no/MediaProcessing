@@ -71,6 +71,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
     }
 
+    val bashingReferenceObject: MutableMap<String, MutableList<Pair<String, Long>>> = mutableMapOf()
 
     private suspend fun onEventsReceived(events: List<T>): Boolean = coroutineScope {
         val listeners = getListeners()
@@ -80,17 +81,35 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                     val consumableEvent = ConsumableEvent(event)
                     listener.onEventsReceived(consumableEvent, events)
                     if (consumableEvent.isConsumed) {
-                        // 🚨 Suppress logging hvis det er en deadlock
                         val referenceId = events.first().referenceId()
                         val listenerName = listener::class.java.simpleName
+                        val eventId = consumableEvent.metadata().eventId
+                        val bashingId = "$eventId-$listenerName"
+                        bashingReferenceObject.computeIfAbsent(referenceId) { mutableListOf() }.add(Pair(bashingId, System.currentTimeMillis()))
+
+                        // 🚨 Suppress logging hvis det er en deadlock
                         if (EventDeadlockDetector.detect(referenceId, listenerName, event.eventType.toString())) {
                             log.info { "Consumption detected for $referenceId -> $listenerName on event ${event.eventType}" }
                             EventDeadlockDetector.resolve(referenceId, listenerName, event.eventType.toString())
                         }
+
+                        val bashed = bashingReferenceObject[referenceId]?.takeLast(10) ?: emptyList()
+                        if (bashed.any { it == bashed.first() }) {
+                            // We have entered a deadlock here
+                            // Due to the nature of the deadlock the event will be determined to be dead
+                            log.error { "Producing Failure on $referenceId on event ${event.eventType} due to deadlock in $listenerName" }
+                            listener.produceFailure(event)
+                        }
+
                         return@coroutineScope true
                     }
                 }
             }
+        }
+        val threshold = System.currentTimeMillis() - 300_000
+        bashingReferenceObject.entries.removeIf { entry ->
+            entry.value.removeIf { it.second < threshold }
+            entry.value.isEmpty() // Fjern oppføringen hvis listen nå er tom
         }
         log.debug { "No consumption detected for ${events.first().referenceId()}" }
         false

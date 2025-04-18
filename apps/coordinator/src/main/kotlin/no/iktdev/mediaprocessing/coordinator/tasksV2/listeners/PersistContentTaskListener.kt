@@ -125,6 +125,15 @@ class PersistContentTaskListener : CoordinatorEventListener() {
         active = false
     }
 
+    override fun produceFailure(incomingEvent: Event) {
+        onProduceEvent(
+            PersistedContentEvent(
+                metadata = incomingEvent.makeDerivedEventInfo(EventStatus.Failed, getProducerName()),
+                data = null
+            )
+        )
+    }
+
     internal data class ComposedMediaInfo(
         val title: String,
         val fallbackCollection: String,
