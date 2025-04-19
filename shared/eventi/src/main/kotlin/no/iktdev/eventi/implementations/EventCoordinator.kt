@@ -94,7 +94,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                         }
 
                         val bashed = bashingReferenceObject[referenceId]?.takeLast(10) ?: emptyList()
-                        if (bashed.all { it == bashed.first() }) {
+                        if (bashed.size == 10 && bashed.all { it == bashed.first() }) {
                             // We have entered a deadlock here
                             // Due to the nature of the deadlock the event will be determined to be dead
                             log.error { "Producing Failure on $referenceId on event ${event.eventType} due to deadlock in $listenerName" }
