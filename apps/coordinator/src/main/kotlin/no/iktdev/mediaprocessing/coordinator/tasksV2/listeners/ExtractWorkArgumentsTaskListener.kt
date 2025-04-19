@@ -4,6 +4,8 @@ import mu.KotlinLogging
 import no.iktdev.eventi.core.ConsumableEvent
 import no.iktdev.eventi.core.WGson
 import no.iktdev.eventi.data.EventStatus
+import no.iktdev.eventi.data.eventId
+import no.iktdev.eventi.data.referenceId
 import no.iktdev.mediaprocessing.coordinator.Coordinator
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEventListener
 import no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.ExtractWorkArgumentsMapping
@@ -44,32 +46,35 @@ class ExtractWorkArgumentsTaskListener: CoordinatorEventListener() {
             log.error { "Event is null and should not be available! ${WGson.gson.toJson(incomingEvent.metadata())}" }
             return
         }
-        active = true
         val started = events.find { it.eventType == Events.ProcessStarted }?.az<MediaProcessStartEvent>() ?: return
-        if (started.data == null || started.data?.operations?.contains(OperationEvents.EXTRACT) == false) {
-            active = false
-            return
-        }
-        val streams = events.find { it.eventType == Events.StreamParsed }?.az<MediaFileStreamsParsedEvent>()?.data
+
+        active = true
+
+        val streamsParsed = events.findEventOf<MediaFileStreamsParsedEvent>()
+        val streams = streamsParsed?.data
         if (streams == null) {
             active = false
+            log.error { "No Streams found for event ${streamsParsed?.metadata?.eventId} with referenceId ${event.metadata.referenceId}" }
             return
         }
 
-        val mediaInfo = events.find { it.eventType == Events.ReadOutNameAndType }?.az<MediaOutInformationConstructedEvent>()
-        if (mediaInfo?.data == null) {
+        val mediaInfoEvent = events.findEventOf<MediaOutInformationConstructedEvent>()
+        val mediaInfo = mediaInfoEvent?.data
+        val mediaInfoData = mediaInfo?.toValueObject()
+        if (mediaInfo == null) {
             active = false
+            log.error { "No media info data was provided for event ${mediaInfoEvent?.eventId()} with referenceId ${event.referenceId()}" }
             return
-        }
-        val mediaInfoData = mediaInfo.data?.toValueObject()
-        if (mediaInfoData == null) {
+        } else if (mediaInfoData == null) {
             active = false
+            log.error { "Media info data was provided but could not be converted to proper value object for event ${mediaInfoEvent?.eventId()} with referenceId ${event.referenceId()}" }
             return
         }
 
         val inputFile = started.data?.file
         if (inputFile == null) {
             active = false
+            log.error { "No input file was provided for the start event ${started.metadata.eventId} with referenceId ${event.referenceId()}" }
             return
         }
 
