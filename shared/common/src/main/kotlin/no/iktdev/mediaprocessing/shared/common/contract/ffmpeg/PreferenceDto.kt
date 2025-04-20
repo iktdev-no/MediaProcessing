@@ -29,7 +29,10 @@ data class VideoPreference(
     val codec: String = "h264",
     val pixelFormat: String = "yuv420p",
     val pixelFormatPassthrough: List<String> = listOf<String>("yuv420p", "yuv420p10le"),
-    val threshold: Int = 16
+    val threshold: Int = 16,
+    val useAnnexB: Boolean = false,
+    val reencodeOnIncorrectMetadataForChromecast: Boolean = false,
+    val h264Level: Double = 4.2
 )
 
 data class AudioPreference(
