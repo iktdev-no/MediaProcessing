@@ -51,7 +51,7 @@ class FileNameParser(val fileName: String) {
                 desiredFileName.split(" - ").firstOrNull() ?: desiredFileName
             } else desiredFileName
             result.trim()
-        }.trim('.', '-')
+        }.trim('.', '-').trim()
     }
 
     fun guessSearchableTitle(): MutableList<String> {
