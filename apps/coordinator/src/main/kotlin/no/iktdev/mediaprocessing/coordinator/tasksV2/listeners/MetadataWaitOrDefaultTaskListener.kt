@@ -24,11 +24,18 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
-val metadataTimeoutMinutes: Int = System.getenv("METADATA_TIMEOUT")?.toIntOrNull() ?: 0
+val metadataTimeoutMinutes: Int = System.getenv("METADATA_TIMEOUT")?.toIntOrNull() ?: -1
 
 
 @Service
 class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
+
+    override fun onReady() {
+        super.onReady()
+        if (metadataTimeoutMinutes == 0) {
+            log.warn { "Metadata timeout is set to 0 minutes.. This will block proceeding until metadata is found.." }
+        }
+    }
 
     override fun getProducerName(): String {
         return this::class.java.simpleName
@@ -83,9 +90,18 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
      * This one gets special treatment, since it will only produce a timeout it does not need to use the incoming event
      */
     override fun onEventsReceived(incomingEvent: ConsumableEvent<Event>, events: List<Event>) {
-        if (metadataTimeoutMinutes <= 0) {
-            return
+        if (metadataTimeoutMinutes <= -1) {
+            log.info { "Metadata has no timeout, a timeout will be created.." }
+            val meta = incomingEvent.metadata()
+            onProduceEvent(MediaMetadataReceivedEvent(
+                metadata = meta.copy(
+                    status = EventStatus.Failed,
+                    source = getProducerName()
+                ),
+                data = null
+            ))
         }
+
 
         val searchPerformedEvent: MediaMetadataReceivedEvent? = events.findEventOf<MediaMetadataReceivedEvent>()
 
@@ -98,19 +114,17 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
 
 
         val baseInfo = events.findFirstEventOf<BaseInfoEvent>()
-
         if (baseInfo?.isSuccessful() != true) {
             return
         }
 
         if (incomingEvent.isOfEvent(Events.BaseInfoRead)) {
-            val digestEvent = incomingEvent.consume() ?: return
-            if (timeoutJobs.containsKey(digestEvent.referenceId()))
+            if (timeoutJobs.containsKey(incomingEvent.metadata().referenceId))
                 return
             val ttsc = timeoutScope.launch {
-                createTimeout(digestEvent.referenceId(), digestEvent.eventId(), baseInfo)
+                createTimeout(incomingEvent.metadata().referenceId, incomingEvent.metadata().eventId, baseInfo)
             }
-            timeoutJobs[digestEvent.referenceId()] = ttsc
+            timeoutJobs[incomingEvent.metadata().referenceId] = ttsc
         }
     }
 
