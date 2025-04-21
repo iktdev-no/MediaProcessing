@@ -100,6 +100,7 @@ class MetadataWaitOrDefaultTaskListener() : CoordinatorEventListener() {
                 ),
                 data = null
             ))
+            return
         }
 
 
