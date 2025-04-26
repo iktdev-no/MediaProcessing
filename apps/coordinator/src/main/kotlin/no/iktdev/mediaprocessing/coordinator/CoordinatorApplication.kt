@@ -104,7 +104,7 @@ fun main(args: Array<String>) {
     )
     storeDatabase.createTables(*tables)
 
-    runnerManager = RunnerManager(dataSource = eventDatabase.database, name = CoordinatorApplication::class.java.simpleName)
+    runnerManager = RunnerManager(dataSource = eventDatabase.database, applicationName = CoordinatorApplication::class.java.simpleName)
     runnerManager.assignRunner()
 
     runApplication<CoordinatorApplication>(*args)

@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct
 abstract class TaskCoordinatorBase() {
     private val log = KotlinLogging.logger {}
     var taskMode: ActiveMode = ActiveMode.Active
+    var isEnabled: Boolean = true
     private var ready: Boolean = false
     fun isReady() = ready
 
@@ -43,13 +44,27 @@ abstract class TaskCoordinatorBase() {
 
     @Scheduled(fixedDelay = (5_000))
     fun pullAvailable() {
-        if (taskMode != ActiveMode.Active) {
+        if (taskMode != ActiveMode.Active || !isEnabled) {
             return
         }
         pullForAvailableTasks()
     }
 
     abstract fun clearExpiredClaims()
+
+    abstract fun getEnabledState(): Boolean
+
+    @Scheduled(fixedDelay = 10_000)
+    fun pullEnabledState() {
+        val prevState = isEnabled
+        isEnabled = getEnabledState()
+        if (prevState != isEnabled) {
+            log.info { "State changed for coordinator: $prevState -> $isEnabled" }
+            if (isEnabled) {
+                log.info { "New tasks will now be processed" }
+            }
+        }
+    }
 
     @Scheduled(fixedDelay = (300_000))
     fun resetExpiredClaims() {

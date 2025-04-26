@@ -11,4 +11,5 @@ object runners: IntIdTable() {
     val application: Column<String> = varchar("application", 50)
     val version: Column<Int> = integer("version")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
+    val enabled: Column<Boolean> = bool("enabled").default(true)
 }

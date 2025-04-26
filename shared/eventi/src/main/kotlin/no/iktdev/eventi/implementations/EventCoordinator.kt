@@ -36,6 +36,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
 
     open var taskMode: ActiveMode = ActiveMode.Active
+    open var isEnabled: Boolean = true
     private val referencePool: MutableMap<String, Deferred<Boolean>> = mutableMapOf()
     private fun referencePoolIsReadyForEvents(): Boolean {
         return (referencePool.isEmpty() || referencePool.any { !it.value.isActive })
@@ -44,6 +45,7 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     private var newEventProduced: Boolean = false
 
     abstract fun getActiveTaskMode(): ActiveMode
+    abstract fun updateEnabledState(): Boolean
 
     private var activePolls: Int = 0
     data class PollStats(val active: Int, val total: Int)
@@ -119,7 +121,8 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
     var cachedReferenceList: MutableList<String> = mutableListOf()
     private fun pullForEvents() {
         coroutine.launch {
-            while (taskMode == ActiveMode.Active && coroutine.isActive) {
+            while (taskMode == ActiveMode.Active && coroutine.isActive && isEnabled) {
+
                 if (referencePoolIsReadyForEvents()) {
                     log.debug { "New pull on database" }
                     val referenceIdsAvailable = eventManager.getAvailableReferenceIds()
@@ -154,6 +157,21 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
                 newEventProduced = false
             }
             taskMode = getActiveTaskMode()
+        }
+        coroutine.launch {
+            while (taskMode == ActiveMode.Active && coroutine.isActive) {
+                val previousState = isEnabled
+                val iminentStatus = updateEnabledState()
+                if (previousState != iminentStatus) {
+                    log.info { "Observed change to enabled state, changed $previousState -> $iminentStatus" }
+                    if (iminentStatus) {
+                        log.info { "Ovserved change to enabled state, new state is enabled\n\tRestarting pullForEvents!" }
+                        onReady()
+                        return@launch
+                    }
+                }
+                delay(10_000)
+            }
         }
     }
 

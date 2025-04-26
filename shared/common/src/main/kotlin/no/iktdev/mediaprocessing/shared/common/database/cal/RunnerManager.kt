@@ -11,24 +11,35 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import java.util.UUID
 
-class RunnerManager(private val dataSource: DataSource, private val startId: String = UUID.randomUUID().toString(), val name: String) {
+class RunnerManager(private val dataSource: DataSource, val startId: String = UUID.randomUUID().toString(), val applicationName: String) {
     private val log = KotlinLogging.logger {}
 
     fun assignRunner(): Boolean {
         return executeOrException(dataSource.database) {
             runners.insert {
                 it[runners.startId] = this@RunnerManager.startId
-                it[runners.application] = this@RunnerManager.name
+                it[runners.application] = this@RunnerManager.applicationName
                 it[runners.version] = getAppVersion()
             }
         } == null
     }
 
+    fun amIEnabled(): Boolean {
+        return withDirtyRead(dataSource.database) {
+            runners.select {
+                (runners.application eq applicationName) and
+                        (runners.startId eq startId)
+            }.singleOrNull()?.get(runners.enabled)
+        } ?: run {
+            log.error { "Failed to get a response, reporting false for enabled" }
+            false
+        }
+    }
 
     fun iAmSuperseded(): Boolean {
         return withDirtyRead(dataSource.database) {
             val runnerVersionCodes = runners.select {
-                (runners.application eq this@RunnerManager.name) and
+                (runners.application eq this@RunnerManager.applicationName) and
                 (runners.startId neq this@RunnerManager.startId)
 
             }.map { it[runners.version] }

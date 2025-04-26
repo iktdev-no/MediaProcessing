@@ -17,7 +17,7 @@ class TaskCoordinator(): TaskCoordinatorBase() {
 
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()
-        runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ProcesserApplication::class.java.simpleName)
+        runnerManager = RunnerManager(dataSource = getEventsDatabase(), applicationName = ProcesserApplication::class.java.simpleName)
         runnerManager.assignRunner()
     }
 
@@ -66,6 +66,10 @@ class TaskCoordinator(): TaskCoordinatorBase() {
 
     override fun onProduceEvent(event: Event) {
         taskManager.produceEvent(event)
+    }
+
+    override fun getEnabledState(): Boolean {
+        return runnerManager.amIEnabled()
     }
 
     override fun clearExpiredClaims() {

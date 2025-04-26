@@ -59,7 +59,7 @@ fun main(args: Array<String>) {
 
     taskManager = TasksManager(eventsDatabase)
 
-    runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ProcesserApplication::class.java.simpleName)
+    runnerManager = RunnerManager(dataSource = getEventsDatabase(), applicationName = ProcesserApplication::class.java.simpleName)
     runnerManager.assignRunner()
 
     runApplication<ProcesserApplication>(*args)

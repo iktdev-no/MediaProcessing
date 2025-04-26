@@ -19,7 +19,7 @@ class TaskCoordinator(): TaskCoordinatorBase() {
 
     override fun onCoordinatorReady() {
         super.onCoordinatorReady()
-        runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
+        runnerManager = RunnerManager(dataSource = getEventsDatabase(), applicationName = ConvertApplication::class.java.simpleName)
         runnerManager.assignRunner()
     }
 
@@ -75,6 +75,10 @@ class TaskCoordinator(): TaskCoordinatorBase() {
                 log.error { "Failed to release claim on ${it.referenceId}::${it.eventId}::${it.task}" }
             }
         }
+    }
+
+    override fun getEnabledState(): Boolean {
+        return runnerManager.amIEnabled()
     }
 
     interface TaskEvents {

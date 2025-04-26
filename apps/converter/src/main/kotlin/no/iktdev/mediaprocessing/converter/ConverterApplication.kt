@@ -50,7 +50,7 @@ fun main(args: Array<String>) {
     eventsDatabase.createTables(tasks, runners)
     taskManager = TasksManager(eventsDatabase)
 
-    runnerManager = RunnerManager(dataSource = getEventsDatabase(), name = ConvertApplication::class.java.simpleName)
+    runnerManager = RunnerManager(dataSource = getEventsDatabase(), applicationName = ConvertApplication::class.java.simpleName)
     runnerManager.assignRunner()
 
     runApplication<ConvertApplication>(*args)

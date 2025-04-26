@@ -98,4 +98,10 @@ class Coordinator(
         }
         return taskMode
     }
+
+    override fun updateEnabledState(): Boolean {
+        isEnabled = runnerManager.amIEnabled()
+        return isEnabled
+    }
+
 }
