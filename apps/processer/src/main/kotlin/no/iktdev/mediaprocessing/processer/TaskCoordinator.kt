@@ -51,7 +51,11 @@ class TaskCoordinator(): TaskCoordinatorBase() {
     override fun pullForAvailableTasks() {
         if (runnerManager.iAmSuperseded()) {
             // This will let the application complete but not consume new
+            val prevState = taskMode
             taskMode = ActiveMode.Passive
+            if (taskMode != prevState && taskMode == ActiveMode.Passive) {
+                log.warn { "A newer version has been detected. Changing mode to $taskMode, no new tasks will be processed" }
+            }
             return
         }
         val available = taskManager.getClaimableTasks().asClaimable()
