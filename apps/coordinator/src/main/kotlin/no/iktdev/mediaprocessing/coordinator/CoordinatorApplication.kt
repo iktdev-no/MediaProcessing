@@ -17,6 +17,8 @@ import no.iktdev.streamit.library.db.tables.helper.data_video
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
+import org.springframework.transaction.annotation.Transactional
+import javax.annotation.PreDestroy
 
 val log = KotlinLogging.logger {}
 lateinit var eventDatabase: EventsDatabase
@@ -30,6 +32,16 @@ class CoordinatorApplication {
     @Bean
     fun eventManager(): EventsManager {
         return eventsManager
+    }
+
+    @PreDestroy
+    fun onShutdown() {
+        doTransactionalCleanup()
+    }
+
+    @Transactional
+    fun doTransactionalCleanup() {
+        runnerManager.unlist()
     }
 
 }

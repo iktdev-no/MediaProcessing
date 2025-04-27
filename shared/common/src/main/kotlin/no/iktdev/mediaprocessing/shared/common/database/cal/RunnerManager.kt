@@ -4,9 +4,12 @@ import mu.KotlinLogging
 import no.iktdev.eventi.database.DataSource
 import no.iktdev.eventi.database.executeOrException
 import no.iktdev.eventi.database.withDirtyRead
+import no.iktdev.eventi.database.withTransaction
 import no.iktdev.mediaprocessing.shared.common.database.tables.runners
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import java.util.UUID
@@ -49,6 +52,12 @@ class RunnerManager(private val dataSource: DataSource, val startId: String = UU
                 (runnerVersionCodes.any { rv -> rv > it })
             } ?: true
         } ?: true
+    }
+
+    fun unlist() {
+        withTransaction(dataSource.database) {
+            runners.deleteWhere { (runners.startId eq startId) and (runners.application eq applicationName) }
+        }
     }
 }
 

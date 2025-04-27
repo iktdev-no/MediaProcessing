@@ -17,7 +17,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
-
+import org.springframework.transaction.annotation.Transactional
+import javax.annotation.PreDestroy
 
 
 private val logger = KotlinLogging.logger {}
@@ -27,6 +28,17 @@ val defaultCoroutine = CoroutinesDefault()
 
 @SpringBootApplication
 class ProcesserApplication {
+
+    @PreDestroy
+    fun onShutdown() {
+        doTransactionalCleanup()
+    }
+
+    @Transactional
+    fun doTransactionalCleanup() {
+        runnerManager.unlist()
+    }
+
 }
 
 private lateinit var eventsDatabase: MySqlDataSource

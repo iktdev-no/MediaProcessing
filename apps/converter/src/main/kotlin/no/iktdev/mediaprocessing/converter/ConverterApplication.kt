@@ -14,9 +14,21 @@ import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.common.toEventsDatabase
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.transaction.annotation.Transactional
+import javax.annotation.PreDestroy
 
 @SpringBootApplication
-class ConvertApplication
+class ConvertApplication {
+    @PreDestroy
+    fun onShutdown() {
+        doTransactionalCleanup()
+    }
+
+    @Transactional
+    fun doTransactionalCleanup() {
+        runnerManager.unlist()
+    }
+}
 
 val ioCoroutine = CoroutinesIO()
 val defaultCoroutine = CoroutinesDefault()
