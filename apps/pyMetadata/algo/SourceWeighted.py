@@ -55,9 +55,17 @@ class UseSource:
                 
                 highScore = fuzz.ratio(self.stripped(title_to_check.lower()), self.stripped(wd.result.title.lower()))
                 for alt_title in wd.result.altTitle:
-                    altScore = fuzz.ratio(self.stripped(title_to_check.lower()), self.stripped(alt_title.lower()))
-                    if altScore > highScore:
-                        highScore = altScore
+                    try:
+                        altScore = fuzz.ratio(self.stripped(title_to_check.lower()), self.stripped(alt_title.lower()))
+                        if altScore > highScore:
+                            highScore = altScore
+                    except Exception as e:
+                        logging.debug("Unntak: {e}")
+                        logging.debug(f"type(title): {type(title)}, value: {title}")
+                        logging.debug(f"type(alt_title): {type(alt_title)}, value: {alt_title}")
+                        logging.debug(f"Metadata objekt:")
+                        logging.debug(weightData)
+                
                 givenScore = highScore * wd.weight
                 result.append(DataAndScore(wd.result, givenScore, wd.weight, title_to_check))
         
