@@ -52,9 +52,12 @@ class Imdb(SourceBase):
             if cover is None or len(cover) == 0:
                 cover = result.get("cover url", None)
             summary = result.get("plot outline", None)
+            localizedTitles = result.get("localized title")
+            altTitle = localizedTitles if isinstance(localizedTitles, list) else []
+
             return Metadata(
                 title=result.get("title", None),
-                altTitle=[result.get("localized title", [])],
+                altTitle=altTitle,
                 cover=cover,
                 banner=None,
                 summary=[] if summary is None else [
