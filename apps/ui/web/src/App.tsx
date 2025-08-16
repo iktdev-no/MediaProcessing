@@ -28,6 +28,7 @@ import InputIcon from '@mui/icons-material/Input';
 import NotStartedIcon from '@mui/icons-material/NotStarted';
 import EventsPage from './app/page/EventsPage';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 
 function App() {
   const client = useStompClient();
@@ -94,21 +95,22 @@ function App() {
         }}>
           <QueueIcon />
         </IconButton>
-        <IconButton onClick={() => window.location.href = "/tasks"} sx={{
+        <IconButton onClick={() => window.location.href = "/events"} sx={{
           ...iconHeight
         }}>
-          <TableChartIcon />
+          <SubscriptionsIcon />
         </IconButton>
       </Box>
       <Box sx={{
         display: "block",
-        maxHeight: window.screen.height - 70,
-        height: window.screen.height - 70,
+        maxHeight: window.innerHeight - 70,
+        height: window.innerHeight - 70,
         width: "100vw",
         maxWidth: "100vw"
       }}>
         <BrowserRouter>
             <Routes>
+              <Route path='/events' element={<EventsPage />} />
               <Route path='/processer' element={<EventsPage />} />
               <Route path='/unprocessed' element={<UnprocessedFilesPage />} />
               <Route path='/files' element={<ExplorePage />} />

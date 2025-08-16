@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.ui.socket
+package no.iktdev.mediaprocessing.ui.socket.impl
 
 import mu.KotlinLogging
 import org.springframework.messaging.simp.stomp.StompCommand

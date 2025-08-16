@@ -7,10 +7,9 @@ import no.iktdev.mediaprocessing.shared.common.task.Task
 import no.iktdev.mediaprocessing.ui.UIEnv
 import no.iktdev.mediaprocessing.ui.WebSocketMonitoringService
 import no.iktdev.mediaprocessing.ui.log
-import no.iktdev.mediaprocessing.ui.socket.SocketClient
-import no.iktdev.mediaprocessing.ui.socket.SocketMessageHandler
+import no.iktdev.mediaprocessing.ui.socket.impl.SocketClient
+import no.iktdev.mediaprocessing.ui.socket.impl.SocketMessageHandler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
 
 @Service

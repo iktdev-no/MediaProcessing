@@ -25,7 +25,7 @@ import SimpleTable from "../features/table/sortableTable";
 import { UnixTimestamp } from "../features/UxTc";
 import ProgressbarWithLabel from "../features/components/ProgressbarWithLabel";
 import { LinearProgress, Typography } from "@mui/material";
-import { stat } from "fs";
+import SaveIcon from '@mui/icons-material/Save';
 
 interface RawNodeDatum {
     name: string;
@@ -107,6 +107,10 @@ function renderCustomNodeElement(nodeData: CustomNodeElementProps): JSX.Element 
             workIcon = <AutoAwesomeMotionIcon />
             break;
         }
+        case "completed": {
+            workIcon = <SaveIcon />
+            break;
+        }
     }
 
 
@@ -163,6 +167,16 @@ const transformToSteps = (state: ContentEventState): RawNodeDatum => ({
                         type: "convert",
                         status: state.extract
                     },
+                    children: [
+                        {
+                            name: state.referenceId,
+                            attributes: {
+                                type: "completed",
+                                status: state.completed
+                            },
+                            children: []
+                        }
+                    ]
                 }
             ]
         },
@@ -181,7 +195,7 @@ export default function EventsPage() {
         const items = events.items.map((event: ContentEventState) => {
             return {
                 rowId: event.referenceId,
-                title: event.referenceId,
+                title: event.title ?? event.referenceId,
                 item: event
             } as ExpandableItemRow
         });
@@ -210,7 +224,7 @@ export default function EventsPage() {
                 return (<>
                     <div id="treeWrapper" style={{
                         ...linkThicc,
-                        width: '150px', height: '90px'
+                        width: '200px', height: '90px'
                     }} ref={containerRef}>
                         <Tree
                             dimensions={dimensions}

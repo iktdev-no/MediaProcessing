@@ -50,7 +50,6 @@ class WebConfig: WebMvcConfigurer {
                     }
                 }
             })
-
     }
 
     override fun configurePathMatch(configurer: PathMatchConfigurer) {

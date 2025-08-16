@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.ui.socket
+package no.iktdev.mediaprocessing.ui.socket.impl
 
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter

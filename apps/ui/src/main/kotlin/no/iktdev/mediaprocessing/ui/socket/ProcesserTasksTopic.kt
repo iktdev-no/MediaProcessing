@@ -5,7 +5,6 @@ import no.iktdev.eventi.data.referenceId
 import no.iktdev.eventi.database.toEpochSeconds
 import no.iktdev.eventi.database.withDirtyRead
 import no.iktdev.eventi.database.withTransaction
-import no.iktdev.mediaprocessing.shared.common.contract.Events
 import no.iktdev.mediaprocessing.shared.common.contract.ProcessType
 import no.iktdev.mediaprocessing.shared.common.contract.data.*
 import no.iktdev.mediaprocessing.shared.common.contract.dto.OperationEvents
@@ -19,6 +18,7 @@ import no.iktdev.mediaprocessing.shared.common.task.TaskType
 import no.iktdev.mediaprocessing.ui.WebSocketMonitoringService
 import no.iktdev.mediaprocessing.ui.eventDatabase
 import no.iktdev.mediaprocessing.ui.socket.a2a.ProcesserListenerService
+import no.iktdev.mediaprocessing.ui.socket.impl.SocketListener
 import org.jetbrains.exposed.sql.selectAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.handler.annotation.MessageMapping
@@ -85,6 +85,7 @@ class ProcesserTasksTopic(
         val encode: Status = Status.Skipped,
         val extract: Status = Status.Skipped,
         val convert: Status = Status.Skipped,
+        val completed: Status = Status.Awaiting,
         val created: Long
     ) {}
 

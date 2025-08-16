@@ -43,6 +43,7 @@ export interface ContentEventState {
     encode: Status
     extract: Status
     convert: Status
+    completed: Status
     created: number
     encodeWork: ProcesserEventInfo
 }
