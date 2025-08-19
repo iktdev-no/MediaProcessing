@@ -94,7 +94,7 @@ class TasksManager(private val dataSource: DataSource) {
         }
     }
 
-    fun markTaskAsCompleted(referenceId: String, eventId: String, status: Status = Status.COMPLETED): Boolean {
+    fun markTaskAsCompleted(referenceId: String, eventId: String, status: Status = Status.COMPLETED, message: String? = null): Boolean {
         return executeWithStatus(dataSource) {
             tasks.update({
                 (tasks.referenceId eq referenceId) and
@@ -103,6 +103,9 @@ class TasksManager(private val dataSource: DataSource) {
                 it[consumed] = true
                 it[claimed] = true
                 it[tasks.status] = status.name
+                message?.let { msg ->
+                    it[tasks.taskResult] = msg
+                }
             }
         }
     }

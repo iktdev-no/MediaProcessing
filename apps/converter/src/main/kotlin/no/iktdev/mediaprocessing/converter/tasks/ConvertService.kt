@@ -110,7 +110,7 @@ class ConvertService(
         super.onError(inputFile, message)
         log.info { "Convert error for ${task.referenceId}\nmessage: $message" }
 
-        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
+        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR, message)
 
         tasks.onProduceEvent(ConvertWorkPerformed(
             metadata = EventMetadata(

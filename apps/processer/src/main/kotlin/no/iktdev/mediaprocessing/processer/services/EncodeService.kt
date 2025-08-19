@@ -82,13 +82,14 @@ class EncodeService(
                 logDir = logDir, listener = this
             )
             if (outFile.exists()) {
+                val reason = "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${outFile.absolutePath}"
                 if (ffwrc.arguments.firstOrNull() != "-y") {
                     this.onError(
                         ffwrc.inputFile,
-                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${outFile.absolutePath}"
+                        reason
                     )
                     // Setting consumed to prevent spamming
-                    taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR)
+                    taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR, reason)
                     return
                 }
             }
@@ -165,7 +166,7 @@ class EncodeService(
     override fun onError(inputFile: String, message: String) {
         val task = assignedTask ?: return
 
-        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
+        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR, message)
 
         log.error { "Encode failed for ${task.referenceId}\n$message" }
         tasks.onProduceEvent(EncodeWorkPerformedEvent(

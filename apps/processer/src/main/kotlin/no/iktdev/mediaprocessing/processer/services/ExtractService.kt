@@ -67,7 +67,8 @@ class ExtractService(
             logDir.mkdirs()
         }
 
-        val setClaim = taskManager.markTaskAsClaimed(referenceId = event.referenceId, eventId = event.eventId, claimer = serviceId)
+        val setClaim =
+            taskManager.markTaskAsClaimed(referenceId = event.referenceId, eventId = event.eventId, claimer = serviceId)
         if (setClaim) {
             log.info { "Claim successful for ${event.referenceId} extract" }
             runner = FfmpegRunner(
@@ -78,13 +79,15 @@ class ExtractService(
                 listener = this
             )
             if (outputFile.exists()) {
+                val reason =
+                    "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${outputFile.absolutePath}"
                 if (ffwrc.arguments.firstOrNull() != "-y") {
                     this.onError(
                         ffwrc.inputFile,
-                        "${this::class.java.simpleName} identified the file as already existing, either allow overwrite or delete the offending file: ${outputFile.absolutePath}"
+                        reason
                     )
                     // Setting consumed to prevent spamming
-                    taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR)
+                    taskManager.markTaskAsCompleted(event.referenceId, event.eventId, Status.ERROR, reason)
                     return
                 }
             }
@@ -107,7 +110,7 @@ class ExtractService(
         log.info { "Extract completed for ${task.referenceId}" }
         runBlocking {
             var successfulComplete = false
-            limitedWhile({!successfulComplete}, 1000 * 10, 1000) {
+            limitedWhile({ !successfulComplete }, 1000 * 10, 1000) {
                 taskManager.markTaskAsCompleted(task.referenceId, task.eventId)
                 successfulComplete = taskManager.isTaskCompleted(task.referenceId, task.eventId)
             }
@@ -142,7 +145,7 @@ class ExtractService(
     override fun onError(inputFile: String, message: String) {
         val task = assignedTask ?: return
 
-        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR)
+        taskManager.markTaskAsCompleted(task.referenceId, task.eventId, Status.ERROR, message)
 
         log.error { "Extract failed for ${task.referenceId}\n$message" }
         tasks.onProduceEvent(
@@ -172,7 +175,12 @@ class ExtractService(
     }
 
 
-    fun sendProgress(referenceId: String, eventId: String, status: WorkStatus, progress: FfmpegDecodedProgress? = null) {
+    fun sendProgress(
+        referenceId: String,
+        eventId: String,
+        status: WorkStatus,
+        progress: FfmpegDecodedProgress? = null
+    ) {
         val runner = runner ?: return
 
         val processerEventInfo = ProcesserEventInfo(

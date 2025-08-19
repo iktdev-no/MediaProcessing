@@ -4,6 +4,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
+import org.w3c.dom.Text
 import java.time.LocalDateTime
 
 object tasks: IntIdTable() {
@@ -19,6 +20,8 @@ object tasks: IntIdTable() {
     val data: Column<String> = text("data")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
     val lastCheckIn: Column<LocalDateTime?> = datetime("lastCheckIn").nullable()
+    val taskResult: Column<String?> = text("taskResult").nullable()
+
 
     init {
         uniqueIndex(referenceId, task, eventId)
