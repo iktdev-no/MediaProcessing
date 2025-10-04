@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator
 
 
+import jakarta.annotation.PreDestroy
 import mu.KotlinLogging
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
@@ -10,15 +11,22 @@ import no.iktdev.eventi.database.MySqlDataSource
 import no.iktdev.mediaprocessing.shared.common.database.cal.EventsManager
 import no.iktdev.mediaprocessing.shared.common.database.cal.RunnerManager
 import no.iktdev.mediaprocessing.shared.common.database.cal.TasksManager
-import no.iktdev.streamit.library.db.tables.*
-import no.iktdev.streamit.library.db.tables.helper.cast_errors
-import no.iktdev.streamit.library.db.tables.helper.data_audio
-import no.iktdev.streamit.library.db.tables.helper.data_video
+import no.iktdev.streamit.library.db.tables.content.CatalogTable
+import no.iktdev.streamit.library.db.tables.content.GenreTable
+import no.iktdev.streamit.library.db.tables.content.MovieTable
+import no.iktdev.streamit.library.db.tables.content.ProgressTable
+import no.iktdev.streamit.library.db.tables.content.SerieTable
+import no.iktdev.streamit.library.db.tables.content.SubtitleTable
+import no.iktdev.streamit.library.db.tables.content.SummaryTable
+import no.iktdev.streamit.library.db.tables.content.TitleTable
+import no.iktdev.streamit.library.db.tables.other.CastErrorTable
+import no.iktdev.streamit.library.db.tables.other.DataAudioTable
+import no.iktdev.streamit.library.db.tables.other.DataVideoTable
+import no.iktdev.streamit.library.db.tables.user.UserTable
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.transaction.annotation.Transactional
-import javax.annotation.PreDestroy
 
 val log = KotlinLogging.logger {}
 lateinit var eventDatabase: EventsDatabase
@@ -101,18 +109,18 @@ fun main(args: Array<String>) {
 
 
     val tables = arrayOf(
-        catalog,
-        genre,
-        movie,
-        serie,
-        subtitle,
-        summary,
-        users,
-        progress,
-        data_audio,
-        data_video,
-        cast_errors,
-        titles
+        CatalogTable,
+        GenreTable,
+        MovieTable,
+        SerieTable,
+        SubtitleTable,
+        SummaryTable,
+        UserTable,
+        ProgressTable,
+        DataAudioTable,
+        DataVideoTable,
+        CastErrorTable,
+        TitleTable
     )
     storeDatabase.createTables(*tables)
 

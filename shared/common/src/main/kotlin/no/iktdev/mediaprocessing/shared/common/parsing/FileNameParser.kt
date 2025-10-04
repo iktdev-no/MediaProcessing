@@ -40,6 +40,7 @@ class FileNameParser(val fileName: String) {
 
             else -> cleanedFileName
         }.trim()
+            .replace(Regex("[-\\s]+$"), "") // fjern trailing "-" og whitespace
     }
 
     fun guessDesiredTitle(): String {
@@ -52,6 +53,7 @@ class FileNameParser(val fileName: String) {
             } else desiredFileName
             result.trim()
         }.trim('.', '-').trim()
+            .replace(Regex("[-\\s]+$"), "") // fjern trailing "-" og whitespace
     }
 
     fun guessSearchableTitle(): MutableList<String> {

@@ -1,7 +1,7 @@
 plugins {
     id("java")
     kotlin("plugin.spring") version "1.5.31"
-    kotlin("jvm") version "1.9.20"
+    kotlin("jvm") version "2.1.0"
 }
 
 group = "no.iktdev.mediaprocessing"

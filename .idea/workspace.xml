@@ -4,44 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="79fc3e25-8083-4c15-b17f-a1e0d61c77a6" name="Changes" comment="Closing connection after every query">
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCatalogStore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCompletionMover.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentGenresStore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentMetadataStore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentSubtitleStore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentTitleStore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/validator/CompletionValidator.kt" afterDir="false" />
+    <list default="true" id="79fc3e25-8083-4c15-b17f-a1e0d61c77a6" name="Changes" comment="Publishing reason for failure">
+      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/UIApplicationKt.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/tasks/ConvertService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/tasks/ConvertService.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/coordinator/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverDownloadTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverDownloadTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/EncodeWorkArgumentsTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/EncodeWorkArgumentsTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ExtractWorkArgumentsTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ExtractWorkArgumentsTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MediaOutInformationTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MediaOutInformationTaskListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/EncodeWorkArgumentsMapping.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/EncodeWorkArgumentsMapping.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/ExtractWorkArgumentsMapping.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/ExtractWorkArgumentsMapping.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/reader/BaseInfoFromFileTest.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/EncodeWorkArgumentsMappingTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/EncodeWorkArgumentsMappingTest.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/FfmpegTaskService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/FfmpegTaskService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/services/EncodeService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/services/EncodeService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/services/ExtractService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/services/ExtractService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/ui/web/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ui/web/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/ui/web/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ui/web/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/ui/web/src/app/page/EventsChainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/apps/ui/web/src/app/page/EventsChainPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/SharedConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/SharedConfig.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ConvertWorkCreatedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ConvertWorkCreatedEvent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ConvertWorkPerformed.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ConvertWorkPerformed.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/EncodeArgumentCreatedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/EncodeArgumentCreatedEvent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractArgumentCreatedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractArgumentCreatedEvent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractWorkPerformedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractWorkPerformedEvent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaCoverInfoReceivedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaCoverInfoReceivedEvent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaOutInformationConstructedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaOutInformationConstructedEvent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/MockEventManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/MockEventManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorApplication.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/UnattendedIndexing.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/UnattendedIndexing.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCatalogStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCatalogStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentGenresStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentGenresStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentMetadataStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentMetadataStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentSubtitleStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentSubtitleStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentTitleStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentTitleStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ProcessedFileStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ProcessedFileStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/watcher/InputDirectoryWatcher.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/watcher/InputDirectoryWatcher.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/shared/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParser.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +46,9 @@
         <task path="$PROJECT_DIR$">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/apps">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
@@ -82,6 +67,24 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="MediaProcessing" type="f1a62948:ProjectNode" />
+                <item name="apps" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="MediaProcessing" type="f1a62948:ProjectNode" />
+                <item name="apps" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="MediaProcessing" type="f1a62948:ProjectNode" />
+                <item name="apps" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
             </expand>
             <select />
           </tree_state>
@@ -92,20 +95,22 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Kotlin Object" />
+        <option value="Kotlin File" />
         <option value="JUnit5 Test Class" />
         <option value="Kotlin Class" />
-        <option value="Kotlin Object" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="v3" />
+        <entry key="$PROJECT_DIR$" value="v4-ui" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="$USER_HOME$/.gradle/wrapper/dists/gradle-8.2-bin/bbg7u40eoinfdyxsxr3z4i7ta/gradle-8.2" javaHome="$USER_HOME$/.jdks/azul-17.0.15" gradleVersion="8.2" />
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -118,34 +123,85 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.AudioArgumentsTest.executor": "Run",
-    "Gradle.AudioArgumentsTest.validateChecks1.executor": "Run",
-    "Gradle.AudioArgumentsTest.validateChecks3.executor": "Run",
-    "Gradle.Build MediaProcessing2.executor": "Run",
-    "Gradle.EncodeArgumentCreatorTaskTest.executor": "Run",
-    "Gradle.FileNameParserTest.assertDotRemoval.executor": "Run",
-    "Gradle.FileNameParserTest.assertTitleFails.executor": "Run",
-    "Gradle.FileNameParserTest.executor": "Run",
-    "Gradle.MediaProcessing2 [build].executor": "Run",
-    "Kotlin.Env - CoordinatorApplicationKt.executor": "Run",
-    "Kotlin.UIApplicationKt.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "git-widget-placeholder": "v4",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Workspace/MediaProcessing2/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.AudioArgumentsTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioArgumentsTest.validateChecks1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioArgumentsTest.validateChecks3.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build MediaProcessing2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validateCreationOfConvertTasks.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validateParsingOfEvents.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.validateMediaInfo.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.validateMetadataRead.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.validateParsingOfStartEvent.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EncodeArgumentCreatorTaskTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FfmpegProgressDecoderTest.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.FfmpegProgressDecoderTest.parseReadout1.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.FileNameParserTest.assertDotRemoval.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FileNameParserTest.assertTitleFails.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FileNameParserTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [apps:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [apps:clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2:apps [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2:apps:coordinator [:apps:coordinator:no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.ParseMediaFileStreamsTaskListenerTest.testParse.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.assertThatCommentaryIsNotSelected.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.assertThatCorrectTrackIsSelected.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate2_2.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate3.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate3_2.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.processer'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.h264Stream1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.h264Stream2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.hevcStream1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.hevcStream2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.vc1Stream.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.vc1Stream2.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.All in MediaProcessing.executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin.Env - CoordinatorApplicationKt.executor&quot;: &quot;Debug&quot;,
+    &quot;Kotlin.UIApplicationKt.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;v4&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/mount/870 EVO 1TB/Workspace/MediaProcessing2&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;JSON&quot;
+    ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Workspace\MediaProcessing2\apps\processer\src\test\kotlin\no\iktdev\mediaprocessing\processer" />
+      <recent name="D:\Workspace\MediaProcessing2\shared\eventi\src\main\kotlin\no\iktdev\eventi" />
       <recent name="D:\Workspace\MediaProcessing2\shared\common\src\main\kotlin\no\iktdev\mediaprocessing\shared\common\contract" />
       <recent name="D:\Workspace\MediaProcessing2\shared\contract\src\main\kotlin\no\iktdev\mediaprocessing\shared\contract\tables" />
     </key>
@@ -156,95 +212,40 @@
       <recent name="" />
     </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="no.iktdev.mediaprocessing.ui.socket.impl" />
       <recent name="no.iktdev.mediaprocessing.shared.common.database.cal" />
       <recent name="no.iktdev.mediaprocessing.shared.common.database.tables" />
       <recent name="no.iktdev.mediaprocessing.shared.contract.tables" />
     </key>
     <key name="CreateTestDialog.RecentsKey">
       <recent name="no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams" />
+      <recent name="no.iktdev.mediaprocessing.coordinator.tasksV2.listeners" />
+      <recent name="no.iktdev.mediaprocessing.processer.ffmpeg.progress" />
+      <recent name="no.iktdev.mediaprocessing.processer.ffmpeg" />
     </key>
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="no.iktdev.mediaprocessing.coordinator.tasksV2.listeners" />
       <recent name="no.iktdev.mediaprocessing.shared.common.database" />
       <recent name="no.iktdev.mediaprocessing.ui.service" />
       <recent name="no.iktdev.mediaprocessing.shared.common.database.cal" />
       <recent name="no.iktdev.mediaprocessing.shared.common.contract" />
-      <recent name="no.iktdev.mediaprocessing.shared.common" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.MediaProcessing2 [build]">
-    <configuration name="FileNameParserTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":shared:common:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.shared.common.parsing.FileNameParserTest&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="FileNameParserTest.assertDotRemoval" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":shared:common:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.shared.common.parsing.FileNameParserTest.assertDotRemoval&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="FileNameParserTest.assertTitleFails" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value=":shared:common:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.shared.common.parsing.FileNameParserTest.assertTitleFails&quot;" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="MediaProcessing2 [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="gradle apps:clean" />
+      <command value="gradle apps:build" />
+    </option>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="JetRunConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="Gradle.Tests in 'MediaProcessing.apps.coordinator.test'">
+    <configuration name="MediaProcessing2 [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -255,7 +256,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="build" />
+            <option value="clean" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -266,43 +267,116 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="UIApplicationKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
-      <envs>
-        <env name="DATABASE_ADDRESS" value="192.168.2.250" />
-        <env name="DATABASE_NAME_E" value="eventsV3" />
-        <env name="DATABASE_NAME_S" value="streamit" />
-        <env name="DATABASE_PASSWORD" value="shFZ27eL2x2NoxyEDBMfDWkvFO" />
-        <env name="DATABASE_PORT" value="3306" />
-        <env name="DATABASE_USERNAME" value="root" />
-        <env name="DIRECTORY_CONTENT_INCOMING" value="G:\MediaProcessingPlayground\input" />
-        <env name="DIRECTORY_CONTENT_OUTGOING" value="G:\MediaProcessingPlayground\output" />
-        <env name="DIRECTORY_CONTENT_STORED" value="G:\MediaProcessingPlayground\output" />
-        <env name="DISABLE_COMPLETE" value="true" />
-        <env name="DISABLE_PRODUCE" value="true" />
-        <env name="EncoderWs" value="ws://192.168.2.250:6300" />
-      </envs>
-      <option name="MAIN_CLASS_NAME" value="no.iktdev.mediaprocessing.ui.UIApplicationKt" />
-      <module name="MediaProcessing.apps.ui.main" />
-      <shortenClasspath name="NONE" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+    <configuration name="Tests in 'MediaProcessing.apps.coordinator.test'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":apps:coordinator:test" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="VideoArgumentsTest.hevcStream2" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":apps:coordinator:test" />
+            <option value="--tests" />
+            <option value="&quot;no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.VideoArgumentsTest.hevcStream2&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="VideoArgumentsTest.vc1Stream" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":apps:coordinator:test" />
+            <option value="--tests" />
+            <option value="&quot;no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.VideoArgumentsTest.vc1Stream&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
+    </configuration>
+    <configuration name="VideoArgumentsTest.vc1Stream2" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":apps:coordinator:test" />
+            <option value="--tests" />
+            <option value="&quot;no.iktdev.mediaprocessing.coordinator.tasksV2.mapping.streams.VideoArgumentsTest.vc1Stream2&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>true</RunAsTest>
+      <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Gradle.FileNameParserTest" />
-      <item itemvalue="Gradle.FileNameParserTest.assertDotRemoval" />
-      <item itemvalue="Gradle.FileNameParserTest.assertTitleFails" />
-      <item itemvalue="Gradle.MediaProcessing2 [build]" />
-      <item itemvalue="Kotlin.Env - CoordinatorApplicationKt" />
+      <item itemvalue="Gradle.MediaProcessing2 [clean]" />
+      <item itemvalue="Gradle.Tests in 'MediaProcessing.apps.coordinator.test'" />
+      <item itemvalue="Gradle.VideoArgumentsTest.hevcStream2" />
+      <item itemvalue="Gradle.VideoArgumentsTest.vc1Stream" />
+      <item itemvalue="Gradle.VideoArgumentsTest.vc1Stream2" />
       <item itemvalue="Kotlin.UIApplicationKt" />
+      <item itemvalue="Kotlin.Env - CoordinatorApplicationKt" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.MediaProcessing2 [build]" />
-        <item itemvalue="Gradle.FileNameParserTest.assertDotRemoval" />
-        <item itemvalue="Gradle.FileNameParserTest" />
-        <item itemvalue="Kotlin.UIApplicationKt" />
-        <item itemvalue="Gradle.FileNameParserTest.assertTitleFails" />
+        <item itemvalue="Gradle.Tests in 'MediaProcessing.apps.coordinator.test'" />
+        <item itemvalue="Gradle.MediaProcessing2 [clean]" />
+        <item itemvalue="Gradle.VideoArgumentsTest.vc1Stream2" />
+        <item itemvalue="Gradle.VideoArgumentsTest.vc1Stream" />
+        <item itemvalue="Gradle.VideoArgumentsTest.hevcStream2" />
       </list>
     </recent_temporary>
   </component>
@@ -315,168 +389,357 @@
       <option name="presentableId" value="Default" />
       <updated>1722029797420</updated>
     </task>
-    <task id="LOCAL−00001" summary="Exception on missing title..">
+    <task id="LOCAL−00117" summary="Removed SockJS">
       <option name="closed" value="true" />
-      <created>1723584577549</created>
-      <option name="number" value="LOCAL−00001" />
-      <option name="presentableId" value="LOCAL−00001" />
-      <updated>1723584577549</updated>
+      <created>1742149170986</created>
+      <option name="number" value="LOCAL−00117" />
+      <option name="presentableId" value="LOCAL−00117" />
+      <updated>1742149170987</updated>
     </task>
-    <task id="LOCAL−00002" summary="Reduced logging and replaced with controller">
+    <task id="LOCAL−00118" summary="Updated UI + Indexing">
       <option name="closed" value="true" />
-      <created>1724005100820</created>
-      <option name="number" value="LOCAL−00002" />
-      <option name="presentableId" value="LOCAL−00002" />
-      <updated>1724005100820</updated>
+      <created>1742231127291</created>
+      <option name="number" value="LOCAL−00118" />
+      <option name="presentableId" value="LOCAL−00118" />
+      <updated>1742231127291</updated>
     </task>
-    <task id="LOCAL−00003" summary="Reduced logging and replaced with controller">
+    <task id="LOCAL−00119" summary="Minifix">
       <option name="closed" value="true" />
-      <created>1724015265497</created>
-      <option name="number" value="LOCAL−00003" />
-      <option name="presentableId" value="LOCAL−00003" />
-      <updated>1724015265497</updated>
+      <created>1742259672547</created>
+      <option name="number" value="LOCAL−00119" />
+      <option name="presentableId" value="LOCAL−00119" />
+      <updated>1742259672547</updated>
     </task>
-    <task id="LOCAL−00004" summary="Fix">
+    <task id="LOCAL−00120" summary="Updates">
       <option name="closed" value="true" />
-      <created>1724018515384</created>
-      <option name="number" value="LOCAL−00004" />
-      <option name="presentableId" value="LOCAL−00004" />
-      <updated>1724018515384</updated>
+      <created>1742406520470</created>
+      <option name="number" value="LOCAL−00120" />
+      <option name="presentableId" value="LOCAL−00120" />
+      <updated>1742406520470</updated>
     </task>
-    <task id="LOCAL−00005" summary="Fix">
+    <task id="LOCAL−00121" summary="Root">
       <option name="closed" value="true" />
-      <created>1724018747714</created>
-      <option name="number" value="LOCAL−00005" />
-      <option name="presentableId" value="LOCAL−00005" />
-      <updated>1724018747714</updated>
+      <created>1742406837120</created>
+      <option name="number" value="LOCAL−00121" />
+      <option name="presentableId" value="LOCAL−00121" />
+      <updated>1742406837120</updated>
     </task>
-    <task id="LOCAL−00006" summary="Small tweaks">
+    <task id="LOCAL−00122" summary="Fixes">
       <option name="closed" value="true" />
-      <created>1724197436532</created>
-      <option name="number" value="LOCAL−00006" />
-      <option name="presentableId" value="LOCAL−00006" />
-      <updated>1724197436532</updated>
+      <created>1742408505115</created>
+      <option name="number" value="LOCAL−00122" />
+      <option name="presentableId" value="LOCAL−00122" />
+      <updated>1742408505115</updated>
     </task>
-    <task id="LOCAL−00007" summary="Log suppressing">
+    <task id="LOCAL−00123" summary="Wip">
       <option name="closed" value="true" />
-      <created>1724281074492</created>
-      <option name="number" value="LOCAL−00007" />
-      <option name="presentableId" value="LOCAL−00007" />
-      <updated>1724281074492</updated>
+      <created>1742421466021</created>
+      <option name="number" value="LOCAL−00123" />
+      <option name="presentableId" value="LOCAL−00123" />
+      <updated>1742421466021</updated>
     </task>
-    <task id="LOCAL−00008" summary="Log suppressing">
+    <task id="LOCAL−00124" summary="log append">
       <option name="closed" value="true" />
-      <created>1724283312428</created>
-      <option name="number" value="LOCAL−00008" />
-      <option name="presentableId" value="LOCAL−00008" />
-      <updated>1724283312428</updated>
+      <created>1742422856466</created>
+      <option name="number" value="LOCAL−00124" />
+      <option name="presentableId" value="LOCAL−00124" />
+      <updated>1742422856466</updated>
     </task>
-    <task id="LOCAL−00009" summary="Database connect if not connected">
+    <task id="LOCAL−00125" summary="Added nostats">
       <option name="closed" value="true" />
-      <created>1728410705301</created>
-      <option name="number" value="LOCAL−00009" />
-      <option name="presentableId" value="LOCAL−00009" />
-      <updated>1728410705301</updated>
+      <created>1742424484995</created>
+      <option name="number" value="LOCAL−00125" />
+      <option name="presentableId" value="LOCAL−00125" />
+      <updated>1742424484995</updated>
     </task>
-    <task id="LOCAL−00010" summary="Updated py">
+    <task id="LOCAL−00126" summary="Fixed duration to set progress">
       <option name="closed" value="true" />
-      <created>1729126953490</created>
-      <option name="number" value="LOCAL−00010" />
-      <option name="presentableId" value="LOCAL−00010" />
-      <updated>1729126953490</updated>
+      <created>1742426398120</created>
+      <option name="number" value="LOCAL−00126" />
+      <option name="presentableId" value="LOCAL−00126" />
+      <updated>1742426398120</updated>
     </task>
-    <task id="LOCAL−00011" summary="Default">
+    <task id="LOCAL−00127" summary="Fixed reconnect issue">
       <option name="closed" value="true" />
-      <created>1729127287407</created>
-      <option name="number" value="LOCAL−00011" />
-      <option name="presentableId" value="LOCAL−00011" />
-      <updated>1729127287407</updated>
+      <created>1742504754055</created>
+      <option name="number" value="LOCAL−00127" />
+      <option name="presentableId" value="LOCAL−00127" />
+      <updated>1742504754055</updated>
     </task>
-    <task id="LOCAL−00012" summary="Fix for locked loop">
+    <task id="LOCAL−00128" summary="minor adjustments">
       <option name="closed" value="true" />
-      <created>1729127765449</created>
-      <option name="number" value="LOCAL−00012" />
-      <option name="presentableId" value="LOCAL−00012" />
-      <updated>1729127765449</updated>
+      <created>1742654317068</created>
+      <option name="number" value="LOCAL−00128" />
+      <option name="presentableId" value="LOCAL−00128" />
+      <updated>1742654317068</updated>
     </task>
-    <task id="LOCAL−00013" summary="Fix for missing assignment">
+    <task id="LOCAL−00129" summary="Progress">
       <option name="closed" value="true" />
-      <created>1729128050503</created>
-      <option name="number" value="LOCAL−00013" />
-      <option name="presentableId" value="LOCAL−00013" />
-      <updated>1729128050503</updated>
+      <created>1743027457048</created>
+      <option name="number" value="LOCAL−00129" />
+      <option name="presentableId" value="LOCAL−00129" />
+      <updated>1743027457048</updated>
     </task>
-    <task id="LOCAL−00014" summary="Removing database closer">
+    <task id="LOCAL−00130" summary="Upgraded Subtitle package">
       <option name="closed" value="true" />
-      <created>1729128276481</created>
-      <option name="number" value="LOCAL−00014" />
-      <option name="presentableId" value="LOCAL−00014" />
-      <updated>1729128276481</updated>
+      <created>1743299339912</created>
+      <option name="number" value="LOCAL−00130" />
+      <option name="presentableId" value="LOCAL−00130" />
+      <updated>1743299339912</updated>
     </task>
-    <task id="LOCAL−00015" summary="Logging">
+    <task id="LOCAL−00131" summary="Added check">
       <option name="closed" value="true" />
-      <created>1729180125525</created>
-      <option name="number" value="LOCAL−00015" />
-      <option name="presentableId" value="LOCAL−00015" />
-      <updated>1729180125525</updated>
+      <created>1743373655200</created>
+      <option name="number" value="LOCAL−00131" />
+      <option name="presentableId" value="LOCAL−00131" />
+      <updated>1743373655200</updated>
     </task>
-    <task id="LOCAL−00016" summary="Logging">
+    <task id="LOCAL−00132" summary="Changed timeout + task complete">
       <option name="closed" value="true" />
-      <created>1729722098624</created>
-      <option name="number" value="LOCAL−00016" />
-      <option name="presentableId" value="LOCAL−00016" />
-      <updated>1729722098624</updated>
+      <created>1743529769655</created>
+      <option name="number" value="LOCAL−00132" />
+      <option name="presentableId" value="LOCAL−00132" />
+      <updated>1743529769655</updated>
     </task>
-    <task id="LOCAL−00017" summary="Logging">
+    <task id="LOCAL−00133" summary="Table fix">
       <option name="closed" value="true" />
-      <created>1729722590315</created>
-      <option name="number" value="LOCAL−00017" />
-      <option name="presentableId" value="LOCAL−00017" />
-      <updated>1729722590315</updated>
+      <created>1743529798931</created>
+      <option name="number" value="LOCAL−00133" />
+      <option name="presentableId" value="LOCAL−00133" />
+      <updated>1743529798931</updated>
     </task>
-    <task id="LOCAL−00018" summary="Logging">
+    <task id="LOCAL−00134" summary="Added missing files">
       <option name="closed" value="true" />
-      <created>1729723155814</created>
-      <option name="number" value="LOCAL−00018" />
-      <option name="presentableId" value="LOCAL−00018" />
-      <updated>1729723155814</updated>
+      <created>1743538672090</created>
+      <option name="number" value="LOCAL−00134" />
+      <option name="presentableId" value="LOCAL−00134" />
+      <updated>1743538672090</updated>
     </task>
-    <task id="LOCAL−00019" summary="Disabling metadata timeout">
+    <task id="LOCAL−00135" summary="A bit of logging fix">
       <option name="closed" value="true" />
-      <created>1730902509789</created>
-      <option name="number" value="LOCAL−00019" />
-      <option name="presentableId" value="LOCAL−00019" />
-      <updated>1730902509789</updated>
+      <created>1743539582153</created>
+      <option name="number" value="LOCAL−00135" />
+      <option name="presentableId" value="LOCAL−00135" />
+      <updated>1743539582153</updated>
     </task>
-    <task id="LOCAL−00020" summary="Logging and ping">
+    <task id="LOCAL−00136" summary="Updated subtitle package">
       <option name="closed" value="true" />
-      <created>1730935750213</created>
-      <option name="number" value="LOCAL−00020" />
-      <option name="presentableId" value="LOCAL−00020" />
-      <updated>1730935750213</updated>
+      <created>1743540700174</created>
+      <option name="number" value="LOCAL−00136" />
+      <option name="presentableId" value="LOCAL−00136" />
+      <updated>1743540700174</updated>
     </task>
-    <task id="LOCAL−00021" summary="Error handling">
+    <task id="LOCAL−00137" summary="Adjusting check">
       <option name="closed" value="true" />
-      <created>1730936604956</created>
-      <option name="number" value="LOCAL−00021" />
-      <option name="presentableId" value="LOCAL−00021" />
-      <updated>1730936604956</updated>
+      <created>1743959676357</created>
+      <option name="number" value="LOCAL−00137" />
+      <option name="presentableId" value="LOCAL−00137" />
+      <updated>1743959676357</updated>
     </task>
-    <task id="LOCAL−00022" summary="Fixed placement">
+    <task id="LOCAL−00138" summary="Update">
       <option name="closed" value="true" />
-      <created>1730937000591</created>
-      <option name="number" value="LOCAL−00022" />
-      <option name="presentableId" value="LOCAL−00022" />
-      <updated>1730937000591</updated>
+      <created>1743972186667</created>
+      <option name="number" value="LOCAL−00138" />
+      <option name="presentableId" value="LOCAL−00138" />
+      <updated>1743972186667</updated>
     </task>
-    <task id="LOCAL−00023" summary="Closing connection after every query">
+    <task id="LOCAL−00139" summary="Fixed created">
       <option name="closed" value="true" />
-      <created>1734554387826</created>
-      <option name="number" value="LOCAL−00023" />
-      <option name="presentableId" value="LOCAL−00023" />
-      <updated>1734554387826</updated>
+      <created>1743973492788</created>
+      <option name="number" value="LOCAL−00139" />
+      <option name="presentableId" value="LOCAL−00139" />
+      <updated>1743973492788</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL−00140" summary="Changes to behaviour">
+      <option name="closed" value="true" />
+      <created>1744148565343</created>
+      <option name="number" value="LOCAL−00140" />
+      <option name="presentableId" value="LOCAL−00140" />
+      <updated>1744148565343</updated>
+    </task>
+    <task id="LOCAL−00141" summary="Trimming data in meta">
+      <option name="closed" value="true" />
+      <created>1744150467620</created>
+      <option name="number" value="LOCAL−00141" />
+      <option name="presentableId" value="LOCAL−00141" />
+      <updated>1744150467620</updated>
+    </task>
+    <task id="LOCAL−00142" summary="Fixes">
+      <option name="closed" value="true" />
+      <created>1744150520932</created>
+      <option name="number" value="LOCAL−00142" />
+      <option name="presentableId" value="LOCAL−00142" />
+      <updated>1744150520932</updated>
+    </task>
+    <task id="LOCAL−00143" summary="Fixes">
+      <option name="closed" value="true" />
+      <created>1744244036781</created>
+      <option name="number" value="LOCAL−00143" />
+      <option name="presentableId" value="LOCAL−00143" />
+      <updated>1744244036781</updated>
+    </task>
+    <task id="LOCAL−00144" summary="Mini change">
+      <option name="closed" value="true" />
+      <created>1744407543459</created>
+      <option name="number" value="LOCAL−00144" />
+      <option name="presentableId" value="LOCAL−00144" />
+      <updated>1744407543459</updated>
+    </task>
+    <task id="LOCAL−00145" summary="Changed behaviour and verification for timeout listener">
+      <option name="closed" value="true" />
+      <created>1744412636735</created>
+      <option name="number" value="LOCAL−00145" />
+      <option name="presentableId" value="LOCAL−00145" />
+      <updated>1744412636735</updated>
+    </task>
+    <task id="LOCAL−00146" summary="Added filter for commentary + failing broken process">
+      <option name="closed" value="true" />
+      <created>1745019520232</created>
+      <option name="number" value="LOCAL−00146" />
+      <option name="presentableId" value="LOCAL−00146" />
+      <updated>1745019520232</updated>
+    </task>
+    <task id="LOCAL−00147" summary="Correction to filter">
+      <option name="closed" value="true" />
+      <created>1745020963070</created>
+      <option name="number" value="LOCAL−00147" />
+      <option name="presentableId" value="LOCAL−00147" />
+      <updated>1745020963070</updated>
+    </task>
+    <task id="LOCAL−00148" summary="Correction to filter++">
+      <option name="closed" value="true" />
+      <created>1745022034145</created>
+      <option name="number" value="LOCAL−00148" />
+      <option name="presentableId" value="LOCAL−00148" />
+      <updated>1745022034145</updated>
+    </task>
+    <task id="LOCAL−00149" summary="Correction to filter+++">
+      <option name="closed" value="true" />
+      <created>1745022602105</created>
+      <option name="number" value="LOCAL−00149" />
+      <option name="presentableId" value="LOCAL−00149" />
+      <updated>1745022602105</updated>
+    </task>
+    <task id="LOCAL−00150" summary="Error logging in regards to cause of failure">
+      <option name="closed" value="true" />
+      <created>1745106976312</created>
+      <option name="number" value="LOCAL−00150" />
+      <option name="presentableId" value="LOCAL−00150" />
+      <updated>1745106976312</updated>
+    </task>
+    <task id="LOCAL−00151" summary="Trimming">
+      <option name="closed" value="true" />
+      <created>1745147805168</created>
+      <option name="number" value="LOCAL−00151" />
+      <option name="presentableId" value="LOCAL−00151" />
+      <updated>1745147805168</updated>
+    </task>
+    <task id="LOCAL−00152" summary="Added changes to encode or remux">
+      <option name="closed" value="true" />
+      <created>1745185371066</created>
+      <option name="number" value="LOCAL−00152" />
+      <option name="presentableId" value="LOCAL−00152" />
+      <updated>1745185371066</updated>
+    </task>
+    <task id="LOCAL−00153" summary="Changes to timeout">
+      <option name="closed" value="true" />
+      <created>1745187342929</created>
+      <option name="number" value="LOCAL−00153" />
+      <option name="presentableId" value="LOCAL−00153" />
+      <updated>1745187342929</updated>
+    </task>
+    <task id="LOCAL−00154" summary="Fixed missing return">
+      <option name="closed" value="true" />
+      <created>1745257036703</created>
+      <option name="number" value="LOCAL−00154" />
+      <option name="presentableId" value="LOCAL−00154" />
+      <updated>1745257036703</updated>
+    </task>
+    <task id="LOCAL−00155" summary="Reduced logging">
+      <option name="closed" value="true" />
+      <created>1745509493368</created>
+      <option name="number" value="LOCAL−00155" />
+      <option name="presentableId" value="LOCAL−00155" />
+      <updated>1745509493368</updated>
+    </task>
+    <task id="LOCAL−00156" summary="enabled mode">
+      <option name="closed" value="true" />
+      <created>1745711890981</created>
+      <option name="number" value="LOCAL−00156" />
+      <option name="presentableId" value="LOCAL−00156" />
+      <updated>1745711890981</updated>
+    </task>
+    <task id="LOCAL−00157" summary="Unlisting">
+      <option name="closed" value="true" />
+      <created>1745714385498</created>
+      <option name="number" value="LOCAL−00157" />
+      <option name="presentableId" value="LOCAL−00157" />
+      <updated>1745714385498</updated>
+    </task>
+    <task id="LOCAL−00158" summary="logging">
+      <option name="closed" value="true" />
+      <created>1745746521912</created>
+      <option name="number" value="LOCAL−00158" />
+      <option name="presentableId" value="LOCAL−00158" />
+      <updated>1745746521912</updated>
+    </task>
+    <task id="LOCAL-00159" summary="Catch and logging">
+      <option name="closed" value="true" />
+      <created>1751753709320</created>
+      <option name="number" value="00159" />
+      <option name="presentableId" value="LOCAL-00159" />
+      <option name="project" value="LOCAL" />
+      <updated>1751753709320</updated>
+    </task>
+    <task id="LOCAL-00160" summary="Fixing alt is array for imdb">
+      <option name="closed" value="true" />
+      <created>1752098790796</created>
+      <option name="number" value="00160" />
+      <option name="presentableId" value="LOCAL-00160" />
+      <option name="project" value="LOCAL" />
+      <updated>1752098790797</updated>
+    </task>
+    <task id="LOCAL-00161" summary="Ui stuff">
+      <option name="closed" value="true" />
+      <created>1755358114328</created>
+      <option name="number" value="00161" />
+      <option name="presentableId" value="LOCAL-00161" />
+      <option name="project" value="LOCAL" />
+      <updated>1755358114328</updated>
+    </task>
+    <task id="LOCAL-00162" summary="Updated ignore">
+      <option name="closed" value="true" />
+      <created>1755358207397</created>
+      <option name="number" value="00162" />
+      <option name="presentableId" value="LOCAL-00162" />
+      <option name="project" value="LOCAL" />
+      <updated>1755358207397</updated>
+    </task>
+    <task id="LOCAL-00163" summary="Updated ignore">
+      <option name="closed" value="true" />
+      <created>1755358238855</created>
+      <option name="number" value="00163" />
+      <option name="presentableId" value="LOCAL-00163" />
+      <option name="project" value="LOCAL" />
+      <updated>1755358238855</updated>
+    </task>
+    <task id="LOCAL-00164" summary="Info controller">
+      <option name="closed" value="true" />
+      <created>1755389466926</created>
+      <option name="number" value="00164" />
+      <option name="presentableId" value="LOCAL-00164" />
+      <option name="project" value="LOCAL" />
+      <updated>1755389466926</updated>
+    </task>
+    <task id="LOCAL-00165" summary="Publishing reason for failure">
+      <option name="closed" value="true" />
+      <created>1755640931383</created>
+      <option name="number" value="00165" />
+      <option name="presentableId" value="LOCAL-00165" />
+      <option name="project" value="LOCAL" />
+      <updated>1755640931383</updated>
+    </task>
+    <option name="localTasksCounter" value="166" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -484,55 +747,55 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Exception on missing title.." />
-    <MESSAGE value="Reduced logging and replaced with controller" />
-    <MESSAGE value="Fix" />
-    <MESSAGE value="Small tweaks" />
-    <MESSAGE value="Log suppressing" />
-    <MESSAGE value="Database connect if not connected" />
-    <MESSAGE value="Updated py" />
-    <MESSAGE value="Default" />
-    <MESSAGE value="Fix for locked loop" />
-    <MESSAGE value="Fix for missing assignment" />
-    <MESSAGE value="Removing database closer" />
-    <MESSAGE value="Logging" />
-    <MESSAGE value="Disabling metadata timeout" />
-    <MESSAGE value="Logging and ping" />
-    <MESSAGE value="Error handling" />
-    <MESSAGE value="Fixed placement" />
-    <MESSAGE value="Closing connection after every query" />
-    <option name="LAST_COMMIT_MESSAGE" value="Closing connection after every query" />
+    <MESSAGE value="Fixed created" />
+    <MESSAGE value="Changes to behaviour" />
+    <MESSAGE value="Trimming data in meta" />
+    <MESSAGE value="Fixes" />
+    <MESSAGE value="Mini change" />
+    <MESSAGE value="Changed behaviour and verification for timeout listener" />
+    <MESSAGE value="Added filter for commentary + failing broken process" />
+    <MESSAGE value="Correction to filter" />
+    <MESSAGE value="Correction to filter++" />
+    <MESSAGE value="Correction to filter+++" />
+    <MESSAGE value="Error logging in regards to cause of failure" />
+    <MESSAGE value="Trimming" />
+    <MESSAGE value="Added changes to encode or remux" />
+    <MESSAGE value="Changes to timeout" />
+    <MESSAGE value="Fixed missing return" />
+    <MESSAGE value="Reduced logging" />
+    <MESSAGE value="enabled mode" />
+    <MESSAGE value="Unlisting" />
+    <MESSAGE value="logging" />
+    <MESSAGE value="Catch and logging" />
+    <MESSAGE value="Fixing alt is array for imdb" />
+    <MESSAGE value="Ui stuff" />
+    <MESSAGE value="Updated ignore" />
+    <MESSAGE value="Info controller" />
+    <MESSAGE value="Publishing reason for failure" />
+    <option name="LAST_COMMIT_MESSAGE" value="Publishing reason for failure" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ChainedEventsTopic.kt</url>
-          <line>23</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>133</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>130</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt</url>
-          <line>131</line>
-          <option name="timeStamp" value="19" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/shared/common/src/test/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParserTest.kt</url>
           <line>44</line>
@@ -572,6 +835,291 @@
           <url>file://$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParser.kt</url>
           <line>41</line>
           <option name="timeStamp" value="28" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArgumentsTest.kt</url>
+          <line>15</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArgumentsTest.kt</url>
+          <line>23</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArgumentsTest.kt</url>
+          <line>21</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArgumentsTest.kt</url>
+          <line>32</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArgumentsTest.kt</url>
+          <line>31</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/shared/common/src/test/kotlin/no/iktdev/mediaprocessing/shared/common/DatabaseDeserializerTest.kt</url>
+          <line>18</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/shared/common/src/test/kotlin/no/iktdev/mediaprocessing/shared/common/DatabaseDeserializerTest.kt</url>
+          <line>96</line>
+          <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>40</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>53</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="51" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>15</line>
+          <option name="timeStamp" value="52" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>17</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>19</line>
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt</url>
+          <line>33</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt</url>
+          <line>31</line>
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt</url>
+          <line>32</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="57" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt</url>
+          <line>24</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="58" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt</url>
+          <line>25</line>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListenerTest.kt</url>
+          <line>74</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="91" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArgumentsTest.kt</url>
+          <line>33</line>
+          <option name="timeStamp" value="97" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>70</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="98" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>71</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="99" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>72</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="100" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>73</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>95</line>
+          <option name="timeStamp" value="103" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>101</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="104" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt</url>
+          <line>78</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="105" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt</url>
+          <line>47</line>
+          <option name="timeStamp" value="113" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/UnprocessedFilesTopic.kt</url>
+          <line>97</line>
+          <option name="timeStamp" value="118" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>72</line>
+          <option name="timeStamp" value="129" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt</url>
+          <line>40</line>
+          <option name="timeStamp" value="130" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt</url>
+          <line>79</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="131" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/processer/src/test/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/progress/FfmpegProgressDecoderTest.kt</url>
+          <line>23</line>
+          <option name="timeStamp" value="140" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/progress/FfmpegProgressDecoder.kt</url>
+          <line>123</line>
+          <option name="timeStamp" value="141" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/progress/FfmpegProgressDecoder.kt</url>
+          <line>122</line>
+          <option name="timeStamp" value="142" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/progress/FfmpegProgressDecoder.kt</url>
+          <line>124</line>
+          <option name="timeStamp" value="143" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListener.kt</url>
+          <line>39</line>
+          <option name="timeStamp" value="175" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListener.kt</url>
+          <line>41</line>
+          <option name="timeStamp" value="176" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListener.kt</url>
+          <line>40</line>
+          <option name="timeStamp" value="177" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/implementations/WorkTaskListener.kt</url>
+          <line>17</line>
+          <option name="timeStamp" value="178" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/implementations/WorkTaskListener.kt</url>
+          <line>18</line>
+          <option name="timeStamp" value="179" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/implementations/WorkTaskListener.kt</url>
+          <line>20</line>
+          <option name="timeStamp" value="180" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt</url>
+          <line>82</line>
+          <option name="timeStamp" value="182" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt</url>
+          <line>83</line>
+          <option name="timeStamp" value="183" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt</url>
+          <line>79</line>
+          <option name="timeStamp" value="184" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt</url>
+          <line>78</line>
+          <option name="timeStamp" value="185" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt</url>
+          <line>69</line>
+          <option name="timeStamp" value="187" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt</url>
+          <line>64</line>
+          <option name="timeStamp" value="188" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/VideoArgumentsTest.kt</url>
+          <line>32</line>
+          <option name="timeStamp" value="189" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-function">
+          <url>file://$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/TaskCoordinator.kt</url>
+          <line>48</line>
+          <properties class="no.iktdev.mediaprocessing.converter.TaskCoordinator" method="pullForAvailableTasks">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="191" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

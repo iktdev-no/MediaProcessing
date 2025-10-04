@@ -77,8 +77,11 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
     private suspend fun onEventsReceived(events: List<T>): Boolean = coroutineScope {
         val listeners = getListeners()
+        log.debug("onEventsReceived called with ${events.size} events for referenceId: ${events.firstOrNull()?.referenceId() ?: "unknown"}")
         events.forEach { event ->
+            log.debug { "Processing event: ${event.eventType} with referenceId: ${event.referenceId()}" }
             listeners.forEach { listener ->
+                log.debug { "Checking listener: ${listener::class.java.simpleName} for event: ${event.eventType}" }
                 if (listener.shouldIProcessAndHandleEvent(event, events)) {
                     val consumableEvent = ConsumableEvent(event)
                     listener.onEventsReceived(consumableEvent, events)
@@ -218,12 +221,13 @@ abstract class EventCoordinator<T : EventImpl, E : EventsManagerImpl<T>> {
 
     suspend fun waitForConditionOrTimeout(timeout: Long, condition: () -> Boolean) {
         val startTime = System.currentTimeMillis()
-
+        log.debug("Waiting for condition with timeout: $timeout ms")
         try {
             withTimeout(timeout) {
                 while (!condition()) {
                     delay(100)
                     if (System.currentTimeMillis() - startTime >= timeout) {
+                        log.debug("Condition not met within timeout: $timeout ms")
                         break
                     }
                 }

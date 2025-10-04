@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.watcher
 import dev.vishna.watchservice.KWatchEvent.Kind.Deleted
 import dev.vishna.watchservice.KWatchEvent.Kind.Initialized
 import dev.vishna.watchservice.asWatchChannel
+import jakarta.annotation.PreDestroy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.delay
@@ -22,7 +23,6 @@ import org.jetbrains.exposed.sql.insertIgnore
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.io.File
-import javax.annotation.PreDestroy
 
 
 interface FileWatcherEvents {

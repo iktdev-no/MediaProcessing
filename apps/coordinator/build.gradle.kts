@@ -2,8 +2,8 @@ plugins {
     id("java")
     kotlin("jvm")
     kotlin("plugin.spring") version "1.5.31"
-    id("org.springframework.boot") version "2.5.5"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.4"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.5.0" // Legg til Kotlin Serialization-plugin
 }
 
@@ -26,18 +26,19 @@ val exposedVersion = "0.44.0"
 dependencies {
 
     /*Spring boot*/
+    implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter:3.2.0")
-    // implementation("org.springframework.kafka:spring-kafka:3.0.1")
-    implementation("org.springframework.kafka:spring-kafka:2.8.5")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework:spring-tx")
+
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-    implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha14")
+    implementation("no.iktdev.streamit.library:streamit-library-db:1.0-rc1")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -70,16 +71,6 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.4.1")
     testImplementation("org.mockito:mockito-core:3.+")
     testImplementation("org.assertj:assertj-core:3.4.1")
-
-    /*testImplementation("org.junit.vintage:junit-vintage-engine")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-    testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testImplementation("org.mockito:mockito-core:5.8.0") // Oppdater versjonen hvis det er nyere tilgjengelig
-    testImplementation("org.mockito:mockito-junit-jupiter:5.8.0")
-    testImplementation(platform("org.junit:junit-bom:5.10.1"))
-    testImplementation("org.junit.platform:junit-platform-runner:1.10.1")*/
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
