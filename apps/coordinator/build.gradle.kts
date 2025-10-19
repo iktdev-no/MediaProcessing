@@ -22,7 +22,7 @@ repositories {
 }
 
 
-val exposedVersion = "0.44.0"
+val exposedVersion = "0.61.0"
 dependencies {
 
     /*Spring boot*/

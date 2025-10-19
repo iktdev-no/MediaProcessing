@@ -7,6 +7,7 @@ import no.iktdev.streamit.library.db.withTransaction
 import org.jetbrains.exposed.sql.insertIgnore
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 
 object ContentTitleStore {
 
@@ -31,7 +32,7 @@ object ContentTitleStore {
 
     fun findMasterTitles(titleList: List<String>): List<String> {
         return withTransaction(getStoreDatabase().database, run = {
-            TitleTable.select {
+            TitleTable.selectAll().where {
                 (TitleTable.alternativeTitle inList titleList) or
                         (TitleTable.masterTitle inList titleList)
             }.map {

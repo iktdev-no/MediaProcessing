@@ -20,7 +20,7 @@ object ContentCatalogStore {
      */
     fun getCollectionByTitleAndType(type: String, titles: List<String>): String? {
         return withTransaction(getStoreDatabase()) {
-            CatalogTable.select {
+            CatalogTable.selectAll().where {
                 (CatalogTable.type eq type) and
                         ((CatalogTable.title inList titles) or
                         (CatalogTable.collection inList titles))
@@ -32,7 +32,7 @@ object ContentCatalogStore {
 
     private fun getCover(collection: String, type: String): String? {
         return withTransaction(getStoreDatabase()) {
-            CatalogTable.select {
+            CatalogTable.selectAll().where {
                 (CatalogTable.collection eq collection) and
                         (CatalogTable.type eq type)
             }.map { it[CatalogTable.cover] }.firstOrNull()
@@ -41,7 +41,7 @@ object ContentCatalogStore {
 
     fun storeCatalog(title: String, titles: List<String>, collection: String, type: String, cover: String?, genres: String?): Int? {
         val status = executeWithStatus(getStoreDatabase().database, run = {
-            val existingRow = CatalogTable.select {
+            val existingRow = CatalogTable.selectAll().where {
                 (CatalogTable.collection eq collection) and
                         (CatalogTable.type eq type)
             }.firstOrNull()
@@ -157,7 +157,7 @@ object ContentCatalogStore {
 
     private fun getId(title: String, titles: List<String>, collection: String, type: String): Int? {
         val ids = withTransaction(getStoreDatabase().database) {
-            CatalogTable.select {
+            CatalogTable.selectAll().where {
                 ((CatalogTable.title eq title)
                         or (CatalogTable.collection eq collection)
                         or (CatalogTable.title inList titles)) and
