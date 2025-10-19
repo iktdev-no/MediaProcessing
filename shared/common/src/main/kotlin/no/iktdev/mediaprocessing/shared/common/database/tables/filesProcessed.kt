@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 object filesProcessed: IntIdTable() {
     val title: Column<String> = varchar("title", 256)
-    val inputFile: Column<String> = varchar("fileName", 512)
+    val inputFile: Column<String> = text("fileName")
     val data: Column<String> = text("data")
     val created: Column<LocalDateTime> = datetime("created").defaultExpression(CurrentDateTime)
     val checksum: Column<String?> = varchar("checksum", 256).nullable()
