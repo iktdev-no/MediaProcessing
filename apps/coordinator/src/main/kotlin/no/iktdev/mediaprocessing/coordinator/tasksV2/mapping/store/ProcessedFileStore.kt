@@ -18,15 +18,16 @@ object ProcessedFileStore {
         val checksum = getChecksum(inputFilePath)
 
 
-        withTransaction(eventDatabase.database.database, run  = {
+        withTransaction(eventDatabase.database.database, block = {
             filesProcessed.insert {
                 it[this.title] = title
                 it[this.inputFile] = inputFilePath
                 it[this.data] = Gson().toJson(summary)
                 it[this.checksum] = checksum
             }
-        }, onError = {
+        }) {
             it.printStackTrace()
-        })
+        }
+
     }
 }
