@@ -5,25 +5,193 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="79fc3e25-8083-4c15-b17f-a1e0d61c77a6" name="Changes" comment="Publishing reason for failure">
-      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations/UIApplicationKt.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorApplication.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorApplication.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/UnattendedIndexing.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/UnattendedIndexing.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCatalogStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCatalogStore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentGenresStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentGenresStore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentMetadataStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentMetadataStore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentSubtitleStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentSubtitleStore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentTitleStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentTitleStore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ProcessedFileStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ProcessedFileStore.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/watcher/InputDirectoryWatcher.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/watcher/InputDirectoryWatcher.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/shared/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParser.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/ConverterApplication.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/ConverterEnv.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/Implementations.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/TaskCoordinator.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/convert/ConvertListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/convert/Converter2.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/tasks/ConvertService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorApplication.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorEventCoordinator.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorEventListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/CoordinatorUtils.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/EventsDatabase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/Implementations.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/controller/ActionEventController.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/controller/InfoController.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/controller/PollController.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/controller/RequestEventController.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/coordination/ProcesserSocketMessageListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/UnattendedIndexing.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/implementations/WorkTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/BaseInfoFromFileTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CompletedTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ConvertWorkTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverDownloadTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/CoverFromMetadataTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/EncodeWorkArgumentsTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/EncodeWorkTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ExtractWorkArgumentsTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ExtractWorkTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MediaOutInformationTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/MetadataWaitOrDefaultTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ParseMediaFileStreamsTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/PersistContentTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/listeners/ReadMediaFileStreamsTaskListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/EncodeWorkArgumentsMapping.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/EventsSummaryMapping.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/ExtractWorkArgumentsMapping.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/FFmpegBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCatalogStore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentCompletionMover.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentGenresStore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentMetadataStore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentSubtitleStore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ContentTitleStore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/store/ProcessedFileStore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/AudioArguments.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/SubtitleArguments.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/VideoArguments.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/validator/CompletionValidator.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/watcher/FileWatcherQueue.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/watcher/InputDirectoryWatcher.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/Implementations.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ProcesserApplication.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ProcesserEnv.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/Reporter.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/TaskCoordinator.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/controller/CancelController.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/FfmpegArgumentsBuilder.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/FfmpegListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/FfmpegRunner.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/FfmpegTaskService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/progress/FfmpegDecodedProgress.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/ffmpeg/progress/FfmpegProgressDecoder.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/services/EncodeService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/services/ExtractService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/Configuration.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/UIApplication.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/UIEnv.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/dto/EventChain.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/dto/EventDataDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/dto/EventSummary.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/dto/explore/ExplorerAttr.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/dto/explore/ExplorerCursor.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/explorer/ExplorerCore.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/service/CompletedEventsService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ChainedEventsTopic.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ExplorerTopic.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/FileRequestTopic.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/ProcesserTasksTopic.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/SocketClient.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/SocketListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/SocketMessageHandler.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/UnprocessedFilesTopic.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/ui/src/main/kotlin/no/iktdev/mediaprocessing/ui/socket/a2a/ProcesserListenerService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/Defaults.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/DownloadClient.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/LogHelper.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/Preference.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/SharedConfig.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/TaskCoordinatorBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/Events.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/EventsListenerContract.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/EventsManagerContract.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/EventsUtil.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ProcessType.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/BaseInfoEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ConvertWorkCreatedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ConvertWorkPerformed.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/EncodeArgumentCreatedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/EncodeWorkCreatedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/EncodeWorkPerformedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/Event.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractArgumentCreatedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractWorkCreatedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/ExtractWorkPerformedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaCoverDownloadedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaCoverInfoReceivedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaFileStreamsParsedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaFileStreamsReadEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaMetadataReceivedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaOutInformationConstructedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaProcessCompletedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/MediaProcessStartEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/PermitWorkCreationEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/data/PersistedContentEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/Enums.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/EventRequest.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/EventSummary.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/ProcesserEventInfo.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/RequestWorkProceed.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/Requester.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/dto/tasks/TaskData.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ffmpeg/AudioArgumentsDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ffmpeg/MediaStreams.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ffmpeg/PreferenceDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ffmpeg/SubtitleArgumentsDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ffmpeg/VideoAndAudioDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/ffmpeg/VideoArgumentsDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/reader/MetadataDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/reader/SubtitlesDto.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/contract/reader/VideoDetails.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/EventsDatabase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/cal/EventsManager.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/cal/RunnerManager.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/cal/TasksManager.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/tables/allEvents.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/tables/events.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/tables/files.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/tables/filesProcessed.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/tables/runners.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/database/tables/tasks.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/extended/FileExt.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameDeterminate.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/FileNameParser.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/NameHelper.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/parsing/Regexes.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/runner/ResultRunner.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/services/TaskService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/socket/SocketImplementation.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/task/Task.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/task/TaskDoz.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/task/TaskType.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/LogHelper.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/core/ConsumableEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/core/LocalDateTimeAdapter.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/core/PersistentMessageHelper.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/core/WGson.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/data/EventImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/database/DataSource.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/database/DatabaseConnectionConfig.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/database/MySqlDataSource.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/database/TableDefaultOperations.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventCoordinator.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventListenerImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/main/kotlin/no/iktdev/eventi/implementations/EventsManagerImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/EventiApplication.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/EventiApplicationTests.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/EventiImplementationBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/TestConfig.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/MockDataEventListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/MockDataSource.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/MockEventCoordinator.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/MockEventManager.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/data/FirstEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/data/InitEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/data/SecondEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/data/ThirdEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/listeners/FirstEventListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/listeners/ForthEventListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/listeners/SecondEventListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/mock/listeners/ThirdEventListener.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/tests/FirstEventListenerImplTestBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/tests/ForthEventListenerImplTestBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/tests/SecondEventListenerImplTestBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/eventi/src/test/kotlin/no/iktdev/eventi/tests/ThirdEventListenerImplTestBase.kt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,7 +273,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="v4-ui" />
+        <entry key="$PROJECT_DIR$" value="v4" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -123,81 +291,81 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.AudioArgumentsTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.AudioArgumentsTest.validateChecks1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.AudioArgumentsTest.validateChecks3.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Build MediaProcessing2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ConvertWorkTaskListenerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ConvertWorkTaskListenerTest.validateCreationOfConvertTasks.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ConvertWorkTaskListenerTest.validateParsingOfEvents.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.DatabaseDeserializerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.DatabaseDeserializerTest.validateMediaInfo.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.DatabaseDeserializerTest.validateMetadataRead.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.DatabaseDeserializerTest.validateParsingOfStartEvent.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.EncodeArgumentCreatorTaskTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FfmpegProgressDecoderTest.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.FfmpegProgressDecoderTest.parseReadout1.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.FileNameParserTest.assertDotRemoval.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.assertTitleFails.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.FileNameParserTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [apps:build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [apps:clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2 [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:apps [assemble].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MediaProcessing2:apps:coordinator [:apps:coordinator:no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.ParseMediaFileStreamsTaskListenerTest.testParse.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.assertThatCommentaryIsNotSelected.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.assertThatCorrectTrackIsSelected.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.validate1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.validate2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.validate2_2.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.validate3.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.SubtitleArgumentsTest.validate3_2.executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Tests in 'MediaProcessing.apps.processer'.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.VideoArgumentsTest.h264Stream1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.VideoArgumentsTest.h264Stream2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.VideoArgumentsTest.hevcStream1.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.VideoArgumentsTest.hevcStream2.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.VideoArgumentsTest.vc1Stream.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.VideoArgumentsTest.vc1Stream2.executor&quot;: &quot;Run&quot;,
-    &quot;JUnit.All in MediaProcessing.executor&quot;: &quot;Run&quot;,
-    &quot;Kotlin.Env - CoordinatorApplicationKt.executor&quot;: &quot;Debug&quot;,
-    &quot;Kotlin.UIApplicationKt.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
-    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;v4&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/mount/870 EVO 1TB/Workspace/MediaProcessing2&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.AudioArgumentsTest.executor": "Run",
+    "Gradle.AudioArgumentsTest.validateChecks1.executor": "Run",
+    "Gradle.AudioArgumentsTest.validateChecks3.executor": "Run",
+    "Gradle.Build MediaProcessing2.executor": "Run",
+    "Gradle.ConvertWorkTaskListenerTest.executor": "Run",
+    "Gradle.ConvertWorkTaskListenerTest.validateCreationOfConvertTasks.executor": "Run",
+    "Gradle.ConvertWorkTaskListenerTest.validateParsingOfEvents.executor": "Run",
+    "Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor": "Run",
+    "Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor": "Run",
+    "Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor": "Run",
+    "Gradle.DatabaseDeserializerTest.executor": "Run",
+    "Gradle.DatabaseDeserializerTest.validateMediaInfo.executor": "Run",
+    "Gradle.DatabaseDeserializerTest.validateMetadataRead.executor": "Debug",
+    "Gradle.DatabaseDeserializerTest.validateParsingOfStartEvent.executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.EncodeArgumentCreatorTaskTest.executor": "Run",
+    "Gradle.FfmpegProgressDecoderTest.executor": "Debug",
+    "Gradle.FfmpegProgressDecoderTest.parseReadout1.executor": "Debug",
+    "Gradle.FileNameParserTest.assertDotRemoval.executor": "Run",
+    "Gradle.FileNameParserTest.assertTitleFails.executor": "Run",
+    "Gradle.FileNameParserTest.executor": "Run",
+    "Gradle.MediaProcessing2 [apps:build].executor": "Run",
+    "Gradle.MediaProcessing2 [apps:clean].executor": "Run",
+    "Gradle.MediaProcessing2 [build].executor": "Run",
+    "Gradle.MediaProcessing2 [clean].executor": "Run",
+    "Gradle.MediaProcessing2:apps [assemble].executor": "Run",
+    "Gradle.MediaProcessing2:apps:coordinator [:apps:coordinator:no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt.main()].executor": "Run",
+    "Gradle.MetadataWaitOrDefaultTaskListenerTest.executor": "Run",
+    "Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor": "Run",
+    "Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor": "Run",
+    "Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor": "Debug",
+    "Gradle.ParseMediaFileStreamsTaskListenerTest.testParse.executor": "Run",
+    "Gradle.SubtitleArgumentsTest.assertThatCommentaryIsNotSelected.executor": "Run",
+    "Gradle.SubtitleArgumentsTest.assertThatCorrectTrackIsSelected.executor": "Debug",
+    "Gradle.SubtitleArgumentsTest.executor": "Run",
+    "Gradle.SubtitleArgumentsTest.validate1.executor": "Run",
+    "Gradle.SubtitleArgumentsTest.validate2.executor": "Run",
+    "Gradle.SubtitleArgumentsTest.validate2_2.executor": "Debug",
+    "Gradle.SubtitleArgumentsTest.validate3.executor": "Run",
+    "Gradle.SubtitleArgumentsTest.validate3_2.executor": "Debug",
+    "Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor": "Run",
+    "Gradle.Tests in 'MediaProcessing.apps.processer'.executor": "Run",
+    "Gradle.VideoArgumentsTest.h264Stream1.executor": "Run",
+    "Gradle.VideoArgumentsTest.h264Stream2.executor": "Run",
+    "Gradle.VideoArgumentsTest.hevcStream1.executor": "Run",
+    "Gradle.VideoArgumentsTest.hevcStream2.executor": "Run",
+    "Gradle.VideoArgumentsTest.vc1Stream.executor": "Run",
+    "Gradle.VideoArgumentsTest.vc1Stream2.executor": "Run",
+    "JUnit.All in MediaProcessing.executor": "Run",
+    "Kotlin.Env - CoordinatorApplicationKt.executor": "Debug",
+    "Kotlin.UIApplicationKt.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
+    "git-widget-placeholder": "v5",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/mount/870 EVO 1TB/Workspace/mediaprocesserv5",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;JSON&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "JSON"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Workspace\MediaProcessing2\apps\processer\src\test\kotlin\no\iktdev\mediaprocessing\processer" />
@@ -368,7 +536,6 @@
       <item itemvalue="Gradle.VideoArgumentsTest.vc1Stream" />
       <item itemvalue="Gradle.VideoArgumentsTest.vc1Stream2" />
       <item itemvalue="Kotlin.UIApplicationKt" />
-      <item itemvalue="Kotlin.Env - CoordinatorApplicationKt" />
     </list>
     <recent_temporary>
       <list>
@@ -1111,15 +1278,6 @@
           <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/tasksV2/mapping/streams/VideoArgumentsTest.kt</url>
           <line>32</line>
           <option name="timeStamp" value="189" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-function">
-          <url>file://$PROJECT_DIR$/apps/converter/src/main/kotlin/no/iktdev/mediaprocessing/converter/TaskCoordinator.kt</url>
-          <line>48</line>
-          <properties class="no.iktdev.mediaprocessing.converter.TaskCoordinator" method="pullForAvailableTasks">
-            <option name="EMULATED" value="true" />
-            <option name="WATCH_EXIT" value="false" />
-          </properties>
-          <option name="timeStamp" value="191" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
