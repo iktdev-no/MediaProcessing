@@ -1,10 +1,10 @@
 plugins {
     id("java")
     kotlin("jvm")
-    kotlin("plugin.spring") version "1.5.31"
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.1.4"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.5.0" // Legg til Kotlin Serialization-plugin
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "no.iktdev.mediaprocessing"
@@ -44,9 +44,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
-    //implementation(project(mapOf("path" to ":shared")))
 
-    implementation(project(mapOf("path" to ":shared:eventi")))
+    implementation(project(mapOf("path" to ":shared:ffmpeg")))
     implementation(project(mapOf("path" to ":shared:common")))
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
@@ -85,7 +84,7 @@ tasks.withType<Test> {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks.bootJar {

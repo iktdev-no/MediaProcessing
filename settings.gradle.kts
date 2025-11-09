@@ -10,7 +10,7 @@ findProject(":apps:processer")?.name = "processer"
 
 
 findProject(":shared")?.name = "shared"
-findProject(":shared:eventi")?.name = "eventi"
+findProject(":shared:ffmpeg")?.name = "ffmpeg"
 findProject(":shared:common")?.name = "common"
 
 include("apps")
@@ -20,5 +20,7 @@ include("apps:converter")
 include("apps:processer")
 
 include("shared")
-include("shared:eventi")
 include("shared:common")
+
+include("shared:ffmpeg")
+include("shared:event-task-contract")

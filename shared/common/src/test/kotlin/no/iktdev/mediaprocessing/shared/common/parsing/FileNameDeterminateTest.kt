@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
-import no.iktdev.mediaprocessing.shared.common.contract.data.EpisodeInfo
+import no.iktdev.mediaprocessing.shared.common.model.EpisodeInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

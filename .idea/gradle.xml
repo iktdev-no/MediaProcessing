@@ -16,7 +16,8 @@
             <option value="$PROJECT_DIR$/apps/ui" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/common" />
-            <option value="$PROJECT_DIR$/shared/eventi" />
+            <option value="$PROJECT_DIR$/shared/event-task-contract" />
+            <option value="$PROJECT_DIR$/shared/ffmpeg" />
           </set>
         </option>
       </GradleProjectSettings>

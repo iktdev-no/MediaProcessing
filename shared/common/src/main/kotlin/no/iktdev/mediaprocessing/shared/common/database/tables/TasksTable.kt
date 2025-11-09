@@ -1,0 +1,21 @@
+package no.iktdev.mediaprocessing.shared.common.database.tables
+
+import no.iktdev.eventi.models.store.TaskStatus
+import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.javatime.CurrentDateTime
+import org.jetbrains.exposed.sql.javatime.datetime
+import java.util.UUID
+
+object TasksTable: IntIdTable(name = "TASKS") {
+    val referenceId: Column<UUID> = uuid("REFERENCE_ID")
+    val taskId: Column<UUID> = uuid("TASK_ID")
+    val task: Column<String> = varchar("TASK",100)
+    val status: Column<TaskStatus> = enumerationByName("STATUS", 50, TaskStatus::class).default(TaskStatus.Pending)
+    val data: Column<String> = text("DATA")
+    val claimed: Column<Boolean> = bool("CLAIMED").default(false)
+    val claimedBy: Column<String?> = varchar("CLAIMED_BY",100).nullable()
+    val consumed: Column<Boolean> = bool("CONSUMED").default(false)
+    val lastCheckIn: Column<java.time.LocalDateTime?> = datetime("LAST_CHECK_IN").nullable()
+    val persistedAt: Column<java.time.LocalDateTime> = datetime("PERSISTED_AT").defaultExpression(CurrentDateTime)
+}

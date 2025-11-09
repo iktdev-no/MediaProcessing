@@ -1,7 +1,9 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
+import no.iktdev.eventi.ZDS
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.postForEntity
@@ -10,6 +12,7 @@ import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.net.InetAddress
 import java.security.MessageDigest
+import java.time.LocalDateTime
 import java.util.zip.CRC32
 
 private val logger = KotlinLogging.logger {}

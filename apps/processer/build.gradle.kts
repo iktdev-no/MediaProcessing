@@ -1,9 +1,9 @@
 plugins {
     id("java")
     kotlin("jvm")
-    kotlin("plugin.spring") version "1.5.31"
-    id("org.springframework.boot") version "2.5.5"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
 }
 
 group = "no.iktdev.mediaprocessing.apps"
@@ -49,7 +49,7 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
     //implementation(project(mapOf("path" to ":shared")))
-    implementation(project(mapOf("path" to ":shared:eventi")))
+    implementation(project(mapOf("path" to ":shared:ffmpeg")))
     implementation(project(mapOf("path" to ":shared:common")))
 
 
@@ -83,5 +83,5 @@ tasks.jar {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }

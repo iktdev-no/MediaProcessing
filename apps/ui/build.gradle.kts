@@ -1,9 +1,9 @@
 plugins {
     id("java")
     kotlin("jvm")
-    kotlin("plugin.spring") version "1.5.31"
-    id("org.springframework.boot") version "2.5.5"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
 }
 
 group = "no.iktdev.mediaprocessing"
@@ -44,7 +44,6 @@ dependencies {
     implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
-    implementation(project(mapOf("path" to ":shared:eventi")))
     implementation(project(mapOf("path" to ":shared:common")))
 
 
@@ -56,7 +55,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks.bootJar {

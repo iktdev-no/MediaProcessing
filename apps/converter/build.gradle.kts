@@ -1,9 +1,8 @@
 plugins {
     id("java")
     kotlin("jvm")
-    kotlin("plugin.spring") version "1.5.31"
-    id("org.springframework.boot") version "2.5.5"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
 }
 
 group = "no.iktdev.mediaprocessing.apps"
@@ -27,22 +26,12 @@ repositories {
     }
 }
 
-val exposedVersion = "0.44.0"
 dependencies {
-
     /*Spring boot*/
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
-   // implementation("org.springframework.kafka:spring-kafka:3.0.1")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
-    implementation("org.springframework.kafka:spring-kafka:2.8.5")
 
-
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.google.code.gson:gson:2.8.9")
@@ -50,17 +39,19 @@ dependencies {
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation("no.iktdev.library:subtitle:1.8.1-SNAPSHOT")
+    implementation("no.iktdev:eventi:1.0-rc13")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
-    implementation(project(mapOf("path" to ":shared:eventi")))
     implementation(project(mapOf("path" to ":shared:common")))
 
-
     implementation(kotlin("stdlib-jdk8"))
+
+    testImplementation("io.mockk:mockk:1.12.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.test {
@@ -78,5 +69,5 @@ tasks.jar {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
