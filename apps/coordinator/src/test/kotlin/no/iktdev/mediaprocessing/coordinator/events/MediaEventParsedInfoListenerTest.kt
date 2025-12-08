@@ -11,14 +11,6 @@ import java.io.File
 class MediaEventParsedInfoListenerTest : MediaEventParsedInfoListener() {
 
 
-    @MethodSource("fileNameSanitizeTest")
-    @ParameterizedTest(name = "{0}")
-    fun fileNameSanitizeTest(testCase: SanitizeTestCase) {
-        val parser = FileNameParser(testCase.input)
-        val result = parser.guessDesiredFileName()
-        assertThat(result).isEqualTo(testCase.expected)
-    }
-
     @MethodSource("parsedInfoTest")
     @ParameterizedTest(name = "{0}")
     fun parsedInfoTest(testCase: ParsedInfoTestCase) {
@@ -39,12 +31,6 @@ class MediaEventParsedInfoListenerTest : MediaEventParsedInfoListener() {
         assertThat(mediaType).isEqualTo(testCase.expectedType)
     }
 
-
-    data class SanitizeTestCase(
-        val input: String,
-        val expected: String
-    )
-
     data class ParsedInfoTestCase(
         val file: File,
         val expectedTitle: String,
@@ -58,61 +44,10 @@ class MediaEventParsedInfoListenerTest : MediaEventParsedInfoListener() {
     )
 
     companion object {
-        @JvmStatic
-        fun fileNameSanitizeTest() = listOf(
-            Named.of(
-                "Basic sanitization",
-                SanitizeTestCase(
-                    input = "Fancy.Thomas.S03E03.Enemy.1080p.AMAZING.WEB-VALUE.DDP5AN.1.H.264",
-                    expected = "Fancy Thomas S03E03 Enemy"
-                )
-            ),
-            Named.of(
-                "Name with numbers",
-                SanitizeTestCase(
-                    input = "[TST] Fancy Name Test 99 - 01 [Nans][#00A8E6]",
-                    expected = "Fancy Name Test 99 - 01"
-                )
-            ),
-            Named.of(
-                "Dot removal and special characters",
-                SanitizeTestCase(
-                    input = "Like.a.Potato.Chef.S01E01.Departure.\\u0026.Skills.1080p.Potato",
-                    expected = "Like a Potato Chef S01E01 Departure \\u0026 Skills"
-                )
-            ),
-            Named.of(
-                "Movie name with numbers",
-                SanitizeTestCase(
-                    input = "Wicket.Wicker.Potato.4.2023.UHD.BluRay.2160p",
-                    expected = "Wicket Wicker Potato 4"
-                )
-            ),
-            Named.of(
-                "Movie with extended title",
-                SanitizeTestCase(
-                    input = "Potato-Pass Movie - Skinke",
-                    expected = "Potato-Pass Movie - Skinke"
-                )
-            ),
-            Named.of(
-                "Title with year in parentheses",
-                SanitizeTestCase(
-                    input = "Amazing Potato (2022) 1080p BluRay",
-                    expected = "Amazing Potato"
-                )
-            ),
-            Named.of(
-                "Same",
-                SanitizeTestCase(
-                    input = "S01E03-How to unlucky i am",
-                    expected = "S01E03-How to unlucky i am"
-                )
-            )
-        )
 
         @JvmStatic
         fun parsedInfoTest() = listOf(
+            // existing parsed cases
             Named.of(
                 "Series episode parsing",
                 ParsedInfoTestCase(
@@ -147,6 +82,154 @@ class MediaEventParsedInfoListenerTest : MediaEventParsedInfoListener() {
                     expectedTitle = "Potato-Pass Movie",
                     expectedFileName = "Potato-Pass Movie - Skinke",
                     expectedSearchTitles = listOf("Potato-Pass Movie", "Potato-Pass Movie - Skinke")
+                )
+            ),
+
+            Named.of(
+                "Name with numbers",
+                ParsedInfoTestCase(
+                    file = File("[TST] Fancy Name Test 99 - 01 [Nans][#00A8E6].mkv"),
+                    expectedTitle = "Fancy Name Test 99",
+                    expectedFileName = "Fancy Name Test 99 - 01",
+                    expectedSearchTitles = listOf("Fancy Name Test 99", "Fancy Name Test 99 - 01")
+                )
+            ),
+            Named.of(
+                "Movie name with numbers",
+                ParsedInfoTestCase(
+                    file = File("Wicket.Wicker.Potato.4.2023.UHD.BluRay.2160p.mkv"),
+                    expectedTitle = "Wicket Wicker Potato 4",
+                    expectedFileName = "Wicket Wicker Potato 4",
+                    expectedSearchTitles = listOf("Wicket Wicker Potato 4")
+                )
+            ),
+            Named.of(
+                "Title with year in parentheses",
+                ParsedInfoTestCase(
+                    file = File("Amazing Potato (2022) 1080p BluRay.mkv"),
+                    expectedTitle = "Amazing Potato",
+                    expectedFileName = "Amazing Potato",
+                    expectedSearchTitles = listOf("Amazing Potato")
+                )
+            ),
+            Named.of(
+                "Same",
+                ParsedInfoTestCase(
+                    file = File("/Dumb ways to die/S01E03-How to unlucky i am.mkv"),
+                    expectedTitle = "Dumb ways to die",
+                    expectedFileName = "Dumb ways to die - S01E03 - How to unlucky i am",
+                    expectedSearchTitles = listOf(
+                        "Dumb ways to die",
+                        "Dumb ways to die - S01E03 - How to unlucky i am"
+                    )
+                )
+            ),
+            Named.of(
+                "Underscores and mixed tags",
+                ParsedInfoTestCase(
+                    file = File("my_movie_title_2019_1080p_x264_YTS.mkv"),
+                    expectedTitle = "my movie title",
+                    expectedFileName = "my movie title (2019)",
+                    expectedSearchTitles = listOf("my movie title (2019)", "my movie title")
+                )
+            ),
+            Named.of(
+                "Multiple bracketed groups and release tags",
+                ParsedInfoTestCase(
+                    file = File("[GROUP][WEBRip][YTS]Some.Movie.Title.720p.WEBRip.x264.AAC-[eztv].mkv"),
+                    expectedTitle = "Some Movie Title",
+                    expectedFileName = "Some Movie Title",
+                    expectedSearchTitles = listOf("Some Movie Title")
+                )
+            ),
+            Named.of(
+                "Remux, PROPER, REPACK and extras",
+                ParsedInfoTestCase(
+                    file = File("Cool.Movie.2018.1080p.BluRay.REMUX.PROPER.REPACK.READNFO-GRP.mkv"),
+                    expectedTitle = "Cool Movie",
+                    expectedFileName = "Cool Movie",
+                    expectedSearchTitles = listOf("Cool Movie")
+                )
+            ),
+            Named.of(
+                "Hyphens and multiple dashes",
+                ParsedInfoTestCase(
+                    file = File("Potato-Fields_-_A-Strange.Day-2017-HDTV-720p.mkv"),
+                    expectedTitle = "Potato-Fields",
+                    expectedFileName = "Potato-Fields - A-Strange Day",
+                    expectedSearchTitles = listOf("Potato-Fields", "Potato-Fields - A-Strange Day")
+                )
+            ),
+            Named.of(
+                "Trailing group and site tags",
+                ParsedInfoTestCase(
+                    file = File("Movie.Name.2015.1080p.BluRay.x264-[YTS.MX].mkv"),
+                    expectedTitle = "Movie Name",
+                    expectedFileName = "Movie Name",
+                    expectedSearchTitles = listOf("Movie Name")
+                )
+            ),
+            Named.of(
+                "IMAX and UNRATED markers",
+                ParsedInfoTestCase(
+                    file = File("Epic.Film.IMAX.UNRATED.2019.2160p.HDR.HEVC.mkv"),
+                    expectedTitle = "Epic Film",
+                    expectedFileName = "Epic Film",
+                    expectedSearchTitles = listOf("Epic Film")
+                )
+            ),
+            Named.of(
+                "Sample and Trailer should be stripped",
+                ParsedInfoTestCase(
+                    file = File("Amazing.Movie.2020.1080p.Trailer-SAMPLE.mp4"),
+                    expectedTitle = "Amazing Movie",
+                    expectedFileName = "Amazing Movie",
+                    expectedSearchTitles = listOf("Amazing Movie")
+                )
+            ),
+            Named.of(
+                "Parentheses director's cut",
+                ParsedInfoTestCase(
+                    file = File("The.Great.Film.(Director's.Cut).2016.1080p.BluRay.mkv"),
+                    expectedTitle = "The Great Film",
+                    expectedFileName = "The Great Film",
+                    expectedSearchTitles = listOf("The Great Film")
+                )
+            ),
+            Named.of(
+                "Mixed separators and version tags",
+                ParsedInfoTestCase(
+                    file = File("Show.Name.S01.E02.720p.HDTV.x264-Group_v2.mkv"),
+                    expectedTitle = "Show Name",
+                    expectedFileName = "Show Name - S01E02",
+                    expectedSearchTitles = listOf("Show Name", "Show Name - S01E02")
+                )
+            ),
+            Named.of(
+                "Square brackets year and tags",
+                ParsedInfoTestCase(
+                    file = File("Title [2014] [1080p] [BluRay] [ENG].mkv"),
+                    expectedTitle = "Title",
+                    expectedFileName = "Title",
+                    expectedSearchTitles = listOf("Title")
+                )
+            ),
+            Named.of(
+                "Version suffixes and fix tags",
+                ParsedInfoTestCase(
+                    file = File("Movie.Title.720p.HDTV.x264-FLEET.fix.mkv"),
+                    expectedTitle = "Movie Title",
+                    expectedFileName = "Movie Title",
+                    expectedSearchTitles = listOf("Movie Title")
+                )
+            ),
+            Named.of(
+                "Nested brackets and group names",
+                ParsedInfoTestCase(
+                    file = File("[HD] (2020) Weird.Movie.Title - Extended.Edition [Group-Name].mkv"),
+                    expectedTitle = "Weird Movie Title",
+                    expectedFileName = "Weird Movie Title - Extended Edition",
+                    expectedSearchTitles = listOf("Weird Movie Title", "Weird Movie Title - Extended Edition")
                 )
             )
         )
@@ -188,8 +271,57 @@ class MediaEventParsedInfoListenerTest : MediaEventParsedInfoListener() {
                     expectedType = MediaType.Movie
                 )
             ),
+
+            // Additional parse/dumb filename cases
+            Named.of(
+                "Lowercase sXe pattern",
+                ParseVideoTypeTestCase(
+                    file = File("weird_show.s01e02.720p.mkv"),
+                    expectedType = MediaType.Serie
+                )
+            ),
+            Named.of(
+                "Spaces and full words",
+                ParseVideoTypeTestCase(
+                    file = File("Some Show Season 02 Episode 09 1080p.mkv"),
+                    expectedType = MediaType.Serie
+                )
+            ),
+            Named.of(
+                "1x02 style",
+                ParseVideoTypeTestCase(
+                    file = File("Show.Name.1x02.HDTV.mp4"),
+                    expectedType = MediaType.Serie
+                )
+            ),
+            Named.of(
+                "Season and episode no separators",
+                ParseVideoTypeTestCase(
+                    file = File("ShowNameSeason03Episode04.avi"),
+                    expectedType = MediaType.Serie
+                )
+            ),
+            Named.of(
+                "Movie with year and extra tags",
+                ParseVideoTypeTestCase(
+                    file = File("Some.Movie.Title.1999.720p.BluRay.x264-GROUP.mkv"),
+                    expectedType = MediaType.Movie
+                )
+            ),
+            Named.of(
+                "Confusing underscores and trailers",
+                ParseVideoTypeTestCase(
+                    file = File("a_movie_trailer_2017_sample.mp4"),
+                    expectedType = MediaType.Movie
+                )
+            ),
+            Named.of(
+                "Mixed separators and version tags",
+                ParseVideoTypeTestCase(
+                    file = File("Show.Name.S01.E02.720p.HDTV.x264-Group_v2.mkv"),
+                    expectedType = MediaType.Serie
+                )
+            ),
         )
     }
-
-
 }

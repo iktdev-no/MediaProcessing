@@ -40,10 +40,12 @@ class MediaEventParsedInfoListener : EventListener() {
     fun String.noResolutionAndAfter() = Regex("[0-9]+[pk].*", RegexOption.IGNORE_CASE).replace(this, "")
     fun String.noSourceTags() =
         Regex("(?i)(bluray|laserdisc|dvd|web|uhd|hd|htds|imax).*", RegexOption.IGNORE_CASE).replace(this, " ")
+
     fun String.noUnderscores() = this.replace("_", " ")
     fun String.noYear() = Regex("\\b\\d{4}\\b").replace(this.takeIf { !it.matches(Regex("^\\d{4}")) } ?: this, "")
     fun String.noDots() = Regex("(?<!\\b(?:Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave))\\.").replace(this, " ")
     fun String.noExtraSpaces() = Regex("\\s{2,}").replace(this, " ")
+    fun String.fullTrim() = this.trim('.', ',', ' ', '_', '-')
 
     enum class MediaType {
         Movie,
@@ -55,14 +57,15 @@ class MediaEventParsedInfoListener : EventListener() {
 
         // Serie-mønstre: dekker alle vanlige shorthand og varianter
         val seriesPatterns = listOf(
-            Regex("s\\d{1,2}e\\d{1,2}"),          // S01E03, s1e5
-            Regex("\\d{1,2}x\\d{1,2}"),           // 1x03, 2x10
-            Regex("season\\s*\\d+"),              // Season 2
-            Regex("episode\\s*\\d+"),             // Episode 5
-            Regex("ep\\s*\\d+"),                  // Ep05, Ep 5
-            Regex("s\\d{1,2}\\s*[- ]\\s*e\\d{1,2}"), // S1 - E5, S01 - E05
-            Regex("s\\d{1,2}\\s*ep\\s*\\d{1,2}"), // S1 Ep05
-            Regex("series\\s*\\d+"),              // Series 2 (britisk stil)
+            Regex("s\\d{1,2}e\\d{1,2}"),              // S01E03, s1e5
+            Regex("\\d{1,2}x\\d{1,2}"),               // 1x03, 2x10
+            Regex("season\\s*\\d+"),                  // Season 2
+            Regex("episode\\s*\\d+"),                 // Episode 5
+            Regex("ep\\s*\\d+"),                      // Ep05, Ep 5
+            Regex("s\\d{1,2}\\s*[- ]\\s*e\\d{1,2}"),  // S1 - E5, S01 - E05
+            Regex("s\\d{1,2}\\s*ep\\s*\\d{1,2}"),     // S1 Ep05
+            Regex("series\\s*\\d+"),                  // Series 2 (britisk stil)
+            Regex("s\\d{1,2}[. ]e\\d{1,2}")           // S01.E02 eller S01 E02
         )
 
         if (seriesPatterns.any { it.containsMatchIn(name) }) {
@@ -89,7 +92,7 @@ class MediaEventParsedInfoListener : EventListener() {
     }
 
     fun File.getDesiredCollection(): String {
-        val collection =  when (this.guessMovieOrSeries()) {
+        val collection = when (this.guessMovieOrSeries()) {
             MediaType.Movie -> this.guessDesiredMovieTitle()
             MediaType.Serie -> this.guessDesiredSerieTitle()
         }
@@ -122,22 +125,43 @@ class MediaEventParsedInfoListener : EventListener() {
         val seasonRegex = Regex("""(?i)(?:S|Season|Series)\s*(\d{1,2})""")
         val episodeRegex = Regex("""(?i)(?:E|Episode|Ep)\s*(\d{1,3})""")
         val revisionRegex = Regex("""(?i)\bv(\d+)\b""")
+        val seasonEpisodeRegex = Regex("""(?i)(\d{1,2})x(\d{1,2})(?:[vV](\d+))?""")
 
-        val seasonMatch = seasonRegex.find(raw)
-        val episodeMatch = episodeRegex.find(raw)
-        val revisionMatch = revisionRegex.find(raw)
+        var season: Int? = null
+        var episode: Int? = null
+        var revision: Int? = null
+        var baseTitle = raw.getCleanedTitle()
+        var episodeTitle = ""
 
-        val season = seasonMatch?.groupValues?.get(1)?.toIntOrNull()
-        val episode = episodeMatch?.groupValues?.get(1)?.toIntOrNull()
-        val revision = revisionMatch?.groupValues?.get(1)?.toIntOrNull()
+        val seMatch = seasonEpisodeRegex.find(raw)
+        if (seMatch != null) {
+            season = seMatch.groupValues[1].toIntOrNull()
+            episode = seMatch.groupValues[2].toIntOrNull()
+            revision = seMatch.groupValues.getOrNull(3)?.toIntOrNull()
+            baseTitle = raw.substring(0, seMatch.range.first).getCleanedTitle()
+            episodeTitle = raw.substring(seMatch.range.last + 1).getCleanedTitle()
+        } else {
+            val seasonMatch = seasonRegex.find(raw)
+            val episodeMatch = episodeRegex.find(raw)
+            val revisionMatch = revisionRegex.find(raw)
 
-        val baseTitle = if (seasonMatch != null) {
-            raw.substring(0, seasonMatch.range.first).getCleanedTitle()
-        } else raw.getCleanedTitle()
+            season = seasonMatch?.groupValues?.get(1)?.toIntOrNull()
+            episode = episodeMatch?.groupValues?.get(1)?.toIntOrNull()
+            revision = revisionMatch?.groupValues?.get(1)?.toIntOrNull()
 
-        val episodeTitle = if (episodeMatch != null) {
-            raw.substring(episodeMatch.range.last + 1).getCleanedTitle()
-        } else ""
+            baseTitle = if (seasonMatch != null) {
+                raw.substring(0, seasonMatch.range.first).getCleanedTitle()
+            } else raw.getCleanedTitle()
+
+            episodeTitle = if (episodeMatch != null) {
+                raw.substring(episodeMatch.range.last + 1).getCleanedTitle()
+            } else ""
+        }
+
+        // Fallback: hvis baseTitle er tom eller bare inneholder S/E, bruk parent‑mappe
+        if (baseTitle.isBlank() || baseTitle.matches(Regex("""(?i)^s?\d+e?\d+$"""))) {
+            baseTitle = this.parentFile?.name?.getCleanedTitle() ?: "Dumb ways to die"
+        }
 
         val tag = buildString {
             append("S${(season ?: 1).toString().padStart(2, '0')}")
@@ -159,36 +183,41 @@ class MediaEventParsedInfoListener : EventListener() {
 
 
     fun File.guessSearchableTitle(): List<String> {
-        val cleaned = this.guessDesiredFileName().noParens()
-            .let {
-                val regex = "\\((?!\\d{4}\\))(?>[^()]+|\\b)\\)"
-                    Regex(regex).replace(it, "")
-            }
+        val cleaned = this.guessDesiredFileName()
             .noResolutionAndAfter()
             .noSourceTags()
             .noDots()
             .noExtraSpaces()
-            .trim('.', ',', ' ')
+            .fullTrim()
 
         val titles = mutableListOf<String>()
 
-        // 1. Første del før bindestrek
+        val yearRegex = Regex("""\b(19|20)\d{2}\b""")
+        val hasYear = yearRegex.containsMatchIn(cleaned)
+
+        // 1. Hvis årstall finnes, legg hele cleaned først
+        if (hasYear) {
+            titles.add(cleaned)
+        }
+
+        // 2. Første del før bindestrek
         val firstPart = cleaned.split(" - ").firstOrNull()?.trim() ?: cleaned
         titles.add(firstPart)
 
-        // 2. Hele cleaned
-        titles.add(cleaned)
+        // 3. Hele cleaned (hvis ikke allerede lagt inn først)
+        if (!hasYear) {
+            titles.add(cleaned)
+        }
 
-        // 3. Fjern årstall hvis det finnes
-        val yearRegex = Regex("""\b(19|20)\d{2}\b""")
-        val noYear = yearRegex.replace(cleaned, "").trim()
+        // 4. Variant uten årstall
+        val noYear = yearRegex.replace(cleaned, "")
+            .noParens().trim()
         if (noYear.isNotEmpty() && noYear != cleaned) {
             titles.add(noYear)
         }
 
         return titles.distinct()
     }
-
 
 
 }
