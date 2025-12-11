@@ -1,0 +1,65 @@
+package no.iktdev.mediaprocessing.processer
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.tasks.AbstractTaskPoller
+import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.mediaprocessing.shared.common.stores.EventStore
+import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import java.util.UUID
+
+@Component
+class PollerAdministrator(
+    private val taskPoller: TaskPoller,
+): ApplicationRunner {
+    override fun run(args: ApplicationArguments?) {
+        CoroutineScope(Dispatchers.Default).launch {
+            taskPoller.start()
+        }
+    }
+}
+
+
+@Service
+class TaskPoller(
+    private val reporter: TaskReporter,
+) : AbstractTaskPoller(
+    taskStore = TaskStore,
+    reporterFactory = { reporter } // én reporter brukes for alle tasks
+) {
+
+}
+
+
+@Component
+class DefaultTaskReporter() : TaskReporter {
+    override fun markClaimed(taskId: UUID, workerId: String) {
+        TaskStore.claim(taskId, workerId)
+    }
+
+    override fun updateLastSeen(taskId: UUID) {
+        TaskStore.heartbeat(taskId)
+    }
+
+    override fun markConsumed(taskId: UUID) {
+        TaskStore.markConsumed(taskId)
+    }
+
+    override fun updateProgress(taskId: UUID, progress: Int) {
+        // Not to be implemented for this application
+    }
+
+    override fun log(taskId: UUID, message: String) {
+        // Not to be implemented for this application
+    }
+
+    override fun publishEvent(event: Event) {
+        EventStore.persist(event)
+    }
+}

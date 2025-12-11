@@ -7,16 +7,13 @@ import no.iktdev.eventi.models.store.TaskStatus
 class ProcesserExtractTaskCreatedEvent: Event() {
 }
 
-// Placeholder event, so that the listener does not continue to create tasks
-class ProcesserEncodeTaskCreatedEvent: Event() {
-}
 
 // Placeholder event, so that the listener does not continue to create tasks
 class ProcesserReadTaskCreatedEvent: Event() {
 }
 
 
-data class ProcesserEncodePerformedEvent(
+data class ProcesserEncodeEvent(
     val data: EncodeResult
 ): Event() {
 
@@ -28,7 +25,7 @@ data class EncodeResult(
 )
 
 
-data class ProcesserExtractedPerformedEvent(
+data class ProcesserExtractEvent(
     val data: ExtractResult
 ): Event()
 

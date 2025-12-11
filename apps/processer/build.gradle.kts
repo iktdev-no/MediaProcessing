@@ -21,7 +21,6 @@ repositories {
     }
 }
 
-val exposedVersion = "0.44.0"
 dependencies {
 
     /*Spring boot*/
@@ -29,20 +28,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter:2.7.0")
    // implementation("org.springframework.kafka:spring-kafka:3.0.1")
     implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
-    implementation("org.springframework.kafka:spring-kafka:2.8.5")
 
-
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation ("mysql:mysql-connector-java:8.0.29")
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
+    implementation("no.iktdev:eventi:1.0-rc13")
+
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
@@ -65,6 +59,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
     testImplementation("io.kotlintest:kotlintest-assertions:3.3.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     implementation(kotlin("stdlib-jdk8"))
 }
 

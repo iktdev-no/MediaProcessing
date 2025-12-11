@@ -39,6 +39,7 @@ dependencies {
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha14")
+    implementation("no.iktdev:eventi:1.0-rc13")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -73,6 +74,7 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:3.+")
     testImplementation("org.assertj:assertj-core:3.4.1")

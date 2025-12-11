@@ -7,7 +7,7 @@ import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter2
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskPerformedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertedData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import org.springframework.stereotype.Component
@@ -43,7 +43,7 @@ class ConvertTaskListener: TaskListener(TaskType.CPU_INTENSIVE) {
 
         return try {
             val result = converter.getResult()
-            val newEvent = ConvertTaskPerformedEvent(
+            val newEvent = ConvertTaskResultEvent(
                 data = ConvertedData(
                     language = task.data.language,
                     outputFiles = result,
@@ -54,7 +54,7 @@ class ConvertTaskListener: TaskListener(TaskType.CPU_INTENSIVE) {
             newEvent
         } catch (e: Exception) {
             e.printStackTrace()
-            val newEvent = ConvertTaskPerformedEvent(
+            val newEvent = ConvertTaskResultEvent(
                 data = null,
                 status = TaskStatus.Failed
             ).producedFrom(task)

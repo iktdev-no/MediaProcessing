@@ -14,10 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Configuration
 
-@SpringBootApplication(scanBasePackages = [
-    "no.iktdev.converter",
-    "no.iktdev.mediaprocessing.shared.common"
-])
+
 open class ConverterApplication: DatabaseApplication() {
 }
 

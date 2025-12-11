@@ -1,0 +1,141 @@
+Guessed Channel Layout for Input Stream #0.1 : 5.1
+Input #0, matroska,webm, from '/src/input/completed/standalone/Potato.mkv':
+  Metadata:
+    encoder         : libebml v1.3.10 + libmatroska v1.5.2
+    creation_time   : 2020-02-17T16:42:19.000000Z
+  Duration: 00:29:09.75, start: 0.000000, bitrate: 9882 kb/s
+    Stream #0:0: Video: h264 (High), yuv420p(tv, bt709, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 23.98 fps, 23.98 tbr, 1k tbn, 47.95 tbc (default)
+    Metadata:
+      BPS-eng         : 9239506
+      DURATION-eng    : 00:29:09.748000000
+      NUMBER_OF_FRAMES-eng: 41952
+      NUMBER_OF_BYTES-eng: 2020851044
+      _STATISTICS_WRITING_APP-eng: mkvmerge v43.0.0 ('The Potato') 64-bit
+      _STATISTICS_WRITING_DATE_UTC-eng: 2020-02-17 16:42:19
+      _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+    Stream #0:1(eng): Audio: eac3, 48000 Hz, 5.1, fltp (default)
+    Metadata:
+      BPS-eng         : 640000
+      DURATION-eng    : 00:29:09.728000000
+      NUMBER_OF_FRAMES-eng: 54679
+      NUMBER_OF_BYTES-eng: 139978240
+      _STATISTICS_WRITING_APP-eng: mkvmerge v43.0.0 ('The Potato') 64-bit
+      _STATISTICS_WRITING_DATE_UTC-eng: 2020-02-17 16:42:19
+      _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+    Stream #0:2(eng): Subtitle: subrip
+    Metadata:
+      BPS-eng         : 120
+      DURATION-eng    : 00:28:08.917000000
+      NUMBER_OF_FRAMES-eng: 718
+      NUMBER_OF_BYTES-eng: 25445
+      _STATISTICS_WRITING_APP-eng: mkvmerge v43.0.0 ('The Potato') 64-bit
+      _STATISTICS_WRITING_DATE_UTC-eng: 2020-02-17 16:42:19
+      _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+    Stream #0:3(eng): Subtitle: subrip
+    Metadata:
+      title           : SDH
+      BPS-eng         : 120
+      DURATION-eng    : 00:28:08.917000000
+      NUMBER_OF_FRAMES-eng: 718
+      NUMBER_OF_BYTES-eng: 25445
+      _STATISTICS_WRITING_APP-eng: mkvmerge v43.0.0 ('The Potato') 64-bit
+      _STATISTICS_WRITING_DATE_UTC-eng: 2020-02-17 16:42:19
+      _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+Stream mapping:
+  Stream #0:0 -> #0:0 (h264 (native) -> hevc (libx265))
+  Stream #0:1 -> #0:1 (copy)
+x265 [info]: HEVC encoder version 3.4
+x265 [info]: build info [Linux][GCC 9.3.0][64 bit] 8bit+10bit+12bit
+x265 [info]: using cpu capabilities: MMX2 SSE2Fast LZCNT SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2
+x265 [info]: Main profile, Level-4 (Main tier)
+x265 [info]: Thread pool created using 16 threads
+x265 [info]: Slices                              : 1
+x265 [info]: frame threads / pool features       : 4 / wpp(17 rows)
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+set_mempolicy: Operation not permitted
+x265 [info]: Coding QT: max CU size, min CU size : 64 / 8
+x265 [info]: Residual QT: max TU size, max depth : 32 / 1 inter / 1 intra
+x265 [info]: ME / range / subpel / merge         : hex / 57 / 2 / 3
+x265 [info]: Keyframe min / max / scenecut / bias  : 23 / 250 / 40 / 5.00
+x265 [info]: Lookahead / bframes / badapt        : 20 / 4 / 2
+x265 [info]: b-pyramid / weightp / weightb       : 1 / 1 / 0
+x265 [info]: References / ref-limit  cu / depth  : 3 / off / on
+x265 [info]: AQ: mode / str / qg-size / cu-tree  : 2 / 1.0 / 32 / 1
+x265 [info]: Rate Control / qCompress            : CRF-16.0 / 0.60
+x265 [info]: tools: rd=3 psy-rd=2.00 early-skip rskip mode=1 signhide tmvp
+x265 [info]: tools: b-intra strong-intra-smoothing lslices=6 deblock sao
+[mp4 @ 0x64a098f4e140] track 1: codec frame size is not set
+Output #0, mp4, to '/src/cache/Potato.work.mp4':
+  Metadata:
+    encoder         : Lavf58.45.100
+    Stream #0:0: Video: hevc (libx265) (hev1 / 0x31766568), yuv420p, 1920x1080 [SAR 1:1 DAR 16:9], q=-1--1, 23.98 fps, 24k tbn, 23.98 tbc (default)
+    Metadata:
+      BPS-eng         : 9239506
+      DURATION-eng    : 00:29:09.748000000
+      NUMBER_OF_FRAMES-eng: 41952
+      NUMBER_OF_BYTES-eng: 2020851044
+      _STATISTICS_WRITING_APP-eng: mkvmerge v43.0.0 ('The Potato') 64-bit
+      _STATISTICS_WRITING_DATE_UTC-eng: 2020-02-17 16:42:19
+      _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+      encoder         : Lavc58.91.100 libx265
+    Side data:
+      cpb: bitrate max/min/avg: 0/0/0 buffer size: 0 vbv_delay: N/A
+    Stream #0:1(eng): Audio: eac3 (ec-3 / 0x332D6365), 48000 Hz, 5.1, fltp (default)
+    Metadata:
+      BPS-eng         : 640000
+      DURATION-eng    : 00:29:09.728000000
+      NUMBER_OF_FRAMES-eng: 54679
+      NUMBER_OF_BYTES-eng: 139978240
+      _STATISTICS_WRITING_APP-eng: mkvmerge v43.0.0 ('The Potato') 64-bit
+      _STATISTICS_WRITING_DATE_UTC-eng: 2020-02-17 16:42:19
+      _STATISTICS_TAGS-eng: BPS DURATION NUMBER_OF_FRAMES NUMBER_OF_BYTES
+frame=34
+fps=0.00
+stream_0_0_q=21.9
+bitrate=   0.2kbits/s
+total_size=44
+out_time_us=2198000
+out_time_ms=2198000
+out_time=00:00:02.198000
+dup_frames=0
+drop_frames=0
+speed=4.04x
+progress=continue

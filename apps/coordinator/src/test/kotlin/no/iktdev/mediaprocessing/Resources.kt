@@ -1,8 +1,6 @@
 package no.iktdev.mediaprocessing
 
-import no.iktdev.mediaprocessing.shared.common.contract.Events
-import no.iktdev.mediaprocessing.shared.common.contract.data.Event
-import no.iktdev.mediaprocessing.shared.common.contract.jsonToEvent
+import no.iktdev.eventi.models.Event
 import org.json.JSONArray
 
 enum class Files(val fileName: String) {
@@ -28,9 +26,9 @@ fun Files.databaseJsonToEvents(): List<Event> {
                     val obj = dataArray.getJSONObject(x)
                     val eventType = obj.getString("event")
                     val dataString = obj.getString("data")
-                    dataString.jsonToEvent(eventType).also {
-                        events.add(it)
-                    }
+//                    dataString.jsonToEvent(eventType).also {
+//                        events.add(it)
+//                    }
                 }
                 return events
             }

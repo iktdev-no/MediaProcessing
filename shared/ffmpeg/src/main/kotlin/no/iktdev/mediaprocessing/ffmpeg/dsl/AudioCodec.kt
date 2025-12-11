@@ -1,0 +1,227 @@
+package no.iktdev.mediaprocessing.ffmpeg.dsl
+
+import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
+
+sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open var sampleRate: Int? = null, open var channels: Int? = null) {
+
+    // AAC (Advanced Audio Coding)
+    class Aac(
+        // Bitrate i kbps (typisk 128–256 for stereo)
+        override var bitrate: Int? = null,
+        // Profile: LC (Low Complexity), HE (High Efficiency), HEv2
+        var profile: AacProfile = AacProfile.LC,
+        // Antall kanaler (1 = mono, 2 = stereo)
+        override var channels: Int? = null, // = 2,
+        // Sample rate i Hz (typisk 44100 eller 48000)
+        override var sampleRate: Int? = null
+    ) : AudioCodec("aac") {
+        override fun determineTranscodeDecision(stream: AudioStream): TranscodeDecision {
+            val superDecision = super.determineTranscodeDecision(stream)
+            if (superDecision == TranscodeDecision.Reencode) return superDecision
+            if (forceCopy) return TranscodeDecision.Copy
+
+            val profileOk = stream.profile.lowercase() == "lc"
+            val channelsOk = stream.channels <= 6
+            val sampleRateOk = stream.sample_rate.toIntOrNull() in listOf(44100, 48000)
+
+            return when {
+                !profileOk -> TranscodeDecision.Reencode // HE/HEv2 → reencode til LC
+                !channelsOk || !sampleRateOk -> TranscodeDecision.Reencode
+                else -> TranscodeDecision.Copy
+            }
+        }
+
+        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
+            val args = super.buildFfmpegArgs(stream, trackIndex).toMutableList()
+
+            // AAC-spesifikt: profile
+            if (profile != AacProfile.LC) {
+                args += listOf("-profile:a", profile.ffmpegName)
+            }
+
+            return args
+        }
+    }
+
+    // MP3 (MPEG Layer III)
+    class Mp3(
+        override var bitrate: Int? = null, // = 192,
+        override var channels: Int? = null, // = 2,
+        override var sampleRate: Int? = null // = 44100
+    ) : AudioCodec("libmp3lame")
+
+    // Opus (moderne, lav latency, bra for streaming)
+    class Opus(
+        override var bitrate: Int? = null, // = 128,
+        override var channels: Int? = null, // = 2,
+        override var sampleRate: Int? = null, // = 48000,
+        // Application mode: audio, voip, lowdelay
+        var application: OpusApplication = OpusApplication.Audio
+    ) : AudioCodec("opus") {
+        override fun determineTranscodeDecision(stream: AudioStream): TranscodeDecision {
+            val base = super.determineTranscodeDecision(stream)
+            if (base == TranscodeDecision.Reencode) return base
+            if (forceCopy) return TranscodeDecision.Copy
+
+            // Opus må alltid være 48kHz internt, så hvis input != 48000 → reencode
+            val sampleRateOk = stream.sample_rate.toIntOrNull() == 48000
+            val channelsOk = (channels ?: stream.channels) <= 2 // typisk stereo
+
+            return if (sampleRateOk && channelsOk) {
+                TranscodeDecision.Copy
+            } else {
+                TranscodeDecision.Reencode
+            }
+        }
+
+        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
+            val args = super.buildFfmpegArgs(stream, trackIndex).toMutableList()
+            // Opus-spesifikt: application mode
+            args += listOf("-application", application.ffmpegName)
+            return args
+        }
+    }
+
+    // Vorbis (åpen kildekode, brukt i Ogg)
+    class Vorbis(
+        override var bitrate: Int? = null, // = 128,
+        override var channels: Int? = null, // = 2,
+        override var sampleRate: Int? = null, // = 44100
+    ) : AudioCodec("libvorbis")
+
+    // FLAC (lossless)
+    class Flac(
+        var compressionLevel: Int? = null, // = 5,
+        override var channels: Int? = null, // = 2,
+        override var sampleRate: Int? = null, // = 48000
+    ) : AudioCodec("flac") {
+        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
+            val args = mutableListOf<String>()
+            args += if (trackIndex != null) listOf("-c:a:$trackIndex", "flac")
+            else listOf("-c:a", "flac")
+
+            compressionLevel?.let { args += listOf("-compression_level", compressionLevel.toString()) }
+            return args
+        }
+    }
+
+    // AC3 (Dolby Digital)
+    class Ac3(
+        override var bitrate: Int? = null, // = 384,
+        override var channels: Int? = null, // = 6,
+        override var sampleRate: Int? = null, // = 48000
+    ) : AudioCodec("ac3")
+
+
+    class Dts(
+        override var bitrate: Int? = null,
+        override var channels: Int? = null, // = 6,
+        override var sampleRate: Int? = null, // = 48000
+    ) : AudioCodec("dts")
+
+    class Pcm : AudioCodec("pcm_s16le") {
+        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
+            val idx = trackIndex?.let { ":$it" } ?: ""
+            return listOf("-c:a$idx", "pcm_s16le")
+        }
+
+        override fun determineTranscodeDecision(stream: AudioStream) = TranscodeDecision.Reencode
+    }
+
+
+    // Kopier eksisterende audio uten reenkoding
+    object Copy : AudioCodec("copy")
+
+    var forceCopy: Boolean = false
+
+    open fun determineTranscodeDecision(stream: AudioStream): TranscodeDecision {
+        // 1) Hvis vi eksplisitt vil kopiere
+        if (forceCopy || this == Copy) return TranscodeDecision.Copy
+
+        // 2) Hvis codec er identisk og ingen parametre er satt → Copy
+        val sameCodec = this.isSame(stream.codec_name)
+        val wantsBitrateChange = bitrate != null
+        val wantsSampleRateChange = sampleRate?.let { sr ->
+            val inSr = stream.sample_rate.toIntOrNull()
+            inSr != null && sr != inSr
+        } ?: false
+        val wantsChannelChange = channels?.let { ch ->
+            ch != stream.channels
+        } ?: false
+
+        return when {
+            // samme codec og ingen endringer → Copy
+            sameCodec && !wantsBitrateChange && !wantsSampleRateChange && !wantsChannelChange ->
+                TranscodeDecision.Copy
+
+            // ellers → Reencode
+            else -> TranscodeDecision.Reencode
+        }
+    }
+
+    /**
+     * Felles bygging av ffmpeg-argumenter.
+     * - Tar hensyn til felter som er satt (bitrate, channels, sampleRate).
+     * - Hopper over felter som er null.
+     * - Validerer mot input-stream (ikke høyere enn input).
+     */
+    open fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int? = null): List<String> {
+        val args = mutableListOf<String>()
+
+        // codec
+        args += if (trackIndex != null) {
+            listOf("-c:a:$trackIndex", codec)
+        } else {
+            listOf("-c:a", codec)
+        }
+
+        // bitrate
+        bitrate?.let {
+            args += listOf("-b:a", "${it}k")
+        }
+
+        // sample rate
+        sampleRate?.let {
+            val effective = it.coerceAtMost(stream.sample_rate.toInt())
+            args += listOf("-ar", effective.toString())
+        }
+
+        // channels
+        channels?.let {
+            val effective = it.coerceAtMost(stream.channels)
+            args += listOf("-ac", effective.toString())
+        }
+
+        return args
+    }
+
+}
+
+fun AudioCodec.isSame(name: String): Boolean {
+    val codecObject = when (name.lowercase()) {
+        "aac", "mp4a", "libfdk_aac" -> AudioCodec.Aac()
+        "mp3", "mpeg3", "libmp3lame" -> AudioCodec.Mp3()
+        "opus", "libopus" -> AudioCodec.Opus()
+        "vorbis", "oggvorbis", "libvorbis" -> AudioCodec.Vorbis()
+        "flac" -> AudioCodec.Flac()
+        "ac3", "dolby", "dolbydigital" -> AudioCodec.Ac3()
+        "dts", "dca" -> AudioCodec.Dts()   // ← lagt til her
+        "pcm_s16le", "pcm" -> AudioCodec.Pcm()
+        "copy" -> AudioCodec.Copy
+        else -> throw IllegalArgumentException("Unsupported audio codec: $name")
+    }
+    return (this.codec == codecObject.codec)
+}
+
+
+enum class AacProfile(val ffmpegName: String) {
+    LC("aac_low"),   // Low Complexity – mest brukt
+    HE("aac_he"),    // High Efficiency – bedre komprimering
+    HEv2("aac_he_v2") // High Efficiency v2 – enda mer komprimering
+}
+
+enum class OpusApplication(val ffmpegName: String) {
+    Audio("audio"),      // Vanlig musikk/lyd
+    Voip("voip"),        // Optimalisert for tale
+    LowDelay("lowdelay") // Lav latency, f.eks. live streaming
+}

@@ -59,7 +59,7 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:7.0.2")
 
-
+    implementation(project(":shared:ffmpeg"))
     implementation("no.iktdev:eventi:1.0-rc13")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
