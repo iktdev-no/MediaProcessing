@@ -42,6 +42,7 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
             scheduledExpiries.filter { it -> it.key in cancelKeys }.keys.forEach { key ->
                 scheduledExpiries.remove(key)?.cancel(true)
             }
+            return null
         }
 
         val useEvent = event as? MediaParsedInfoEvent ?: return null

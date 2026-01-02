@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import io.mockk.clearMocks
 import io.mockk.slot
 import io.mockk.verify
 import no.iktdev.eventi.models.Event
@@ -195,6 +196,53 @@ class MediaCreateMetadataSearchTaskListenerTest : TestBase() {
         verify(exactly = 2) { TaskStore.persist(any<MetadataSearchTask>()) }
     }
 
+    @DisplayName(
+        """
+        Hvis MetadataSearchResultEvent mottas
+        Når onEvent kalles
+        Så:
+            Timeout slettes
+    """
+    )
+    @Test
+    fun timeoutRemoval1() {
+        // Hvis
+        val listener = MediaCreateMetadataSearchTaskListener()
+        val started = defaultStartEvent()
+        val parsed = mediaParsedEvent(
+            "Baking Bread",
+            "Baking Bread - S01E01 - Flour",
+            MediaType.Serie
+        ).derivedOf(started)
+
+        val history = listOf(started, parsed)
+
+        // Når
+        val result = listener.onEvent(parsed, history)
+
+        // Så
+        assertThat(result).isInstanceOf(MetadataSearchTaskCreatedEvent::class.java)
+
+        val slot = slot<MetadataSearchTask>()
+        verify(exactly = 1) { TaskStore.persist(capture(slot)) }
+
+        val taskId = slot.captured.taskId
+        assertThat(listener.scheduledExpiries).containsKey(taskId)
+
+        // Completed Event here
+        clearMocks(TaskStore, answers = false)
+
+        val resultEvent = MetadataSearchResultEvent(
+            status = TaskStatus.Completed,
+            results = emptyList()
+        ).producedFrom(slot.captured)
+
+        val newHistory = history + listOf(resultEvent)
+        listener.onEvent(resultEvent, newHistory)
+        verify(exactly = 0) { TaskStore.persist(any()) }
+
+        assertThat(listener.scheduledExpiries).doesNotContainKey(taskId)
+    }
 
 
 
