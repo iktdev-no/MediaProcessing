@@ -22,7 +22,7 @@ object MockData {
         )
     )
 
-    fun metadataEvent(derivedFrom: Event): List<Event> {
+    fun metadataEvent(derivedFrom: Event, source: String = "potetland", coverUrl: String = "cover.jpg"): List<Event> {
         val dummyTask = DummyTask().derivedOf(derivedFrom)
         val create = MetadataSearchTaskCreatedEvent(dummyTask.taskId).derivedOf(derivedFrom)
 
@@ -34,9 +34,9 @@ object MockData {
                     advancedScore = 10,
                     sourceWeight = 1f,
                     data = MetadataSearchResultEvent.SearchResult.MetadataResult(
-                        source = "test",
+                        source = source,
                         title = "MyCollection",
-                        cover = "cover.jpg",
+                        cover = coverUrl,
                         type = MediaType.Movie,
                         summary = listOf(
                             MetadataSearchResultEvent.SearchResult.MetadataResult.Summary(

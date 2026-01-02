@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Metada
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
 import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import org.jetbrains.annotations.VisibleForTesting
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -20,7 +21,8 @@ import java.util.concurrent.TimeUnit
 @ListenerOrder(5)
 class MediaCreateMetadataSearchTaskListener: EventListener() {
 
-    private val scheduledExpiries = ConcurrentHashMap<UUID, ScheduledFuture<*>>()
+    @VisibleForTesting
+    internal val scheduledExpiries = ConcurrentHashMap<UUID, ScheduledFuture<*>>()
     private val scheduler = Executors.newScheduledThreadPool(1)
 
     override fun onEvent(
@@ -50,6 +52,7 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
                 collection = useEvent.data.parsedCollection
             )
         ).derivedOf(useEvent)
+        TaskStore.persist(task)
         val finalResult = MetadataSearchTaskCreatedEvent(task.taskId).derivedOf(useEvent)
         scheduleTaskExpiry(task.taskId, finalResult.eventId, task.referenceId)
         return finalResult
