@@ -3,8 +3,8 @@ package no.iktdev.mediaprocessing.coordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import no.iktdev.eventi.events.AbstractEventPoller
 import no.iktdev.eventi.events.EventDispatcher
+import no.iktdev.eventi.events.EventPollerImplementation
 import no.iktdev.eventi.events.SequenceDispatchQueue
 import no.iktdev.mediaprocessing.shared.common.stores.EventStore
 import org.springframework.boot.ApplicationArguments
@@ -26,5 +26,6 @@ class PollerAdministrator(
 val sequenceDispatcher = SequenceDispatchQueue(8)
 val dispatcher = EventDispatcher(eventStore = EventStore)
 
-class EventPoller: AbstractEventPoller(eventStore = EventStore, dispatchQueue = sequenceDispatcher, dispatcher = dispatcher) {
+@Component
+class EventPoller: EventPollerImplementation(eventStore = EventStore, dispatchQueue = sequenceDispatcher, dispatcher = dispatcher) {
 }

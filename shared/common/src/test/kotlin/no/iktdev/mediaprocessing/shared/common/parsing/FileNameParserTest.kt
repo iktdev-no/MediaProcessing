@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.Test
 import java.io.File
 

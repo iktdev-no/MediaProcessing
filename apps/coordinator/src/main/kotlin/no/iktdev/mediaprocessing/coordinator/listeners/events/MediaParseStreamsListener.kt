@@ -3,18 +3,19 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import mu.KotlinLogging
+import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamReadEvent
-import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
-@Order(4)
+@ListenerOrder(4)
 @Component
 class MediaParseStreamsListener: EventListener() {
     val log = KotlinLogging.logger {}
@@ -23,7 +24,13 @@ class MediaParseStreamsListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        if (event !is MediaStreamReadEvent) return null
+        if (event !is CoordinatorReadStreamsResultEvent) return null
+        if (event.status != TaskStatus.Completed)
+            return null
+        if (event.data == null) {
+            log.error { "No data to parse in CoordinatorReadStreamsResultEvent" }
+            return null
+        }
 
         val streams = parseStreams(event.data)
         return MediaStreamParsedEvent(

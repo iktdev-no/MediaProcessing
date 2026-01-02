@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 from fuzzywuzzy import fuzz
 
-from clazz.Metadata import Metadata
+from models.metadata import Metadata
 import asyncio
 
 

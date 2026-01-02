@@ -7,10 +7,10 @@ data class ConvertTaskResultEvent(
     val data: ConvertedData?,
     val status: TaskStatus,
 ): Event() {
+    data class ConvertedData(
+        val language: String,
+        val baseName: String,
+        val outputFiles: List<String>
+    )
 }
 
-data class ConvertedData(
-    val language: String,
-    val baseName: String,
-    val outputFiles: List<String>
-)

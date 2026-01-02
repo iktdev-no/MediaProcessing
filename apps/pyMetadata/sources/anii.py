@@ -2,7 +2,8 @@ import logging, sys
 import hashlib
 from typing import List, Dict, Optional
 
-from clazz.Metadata import Metadata, Summary
+from models.enums import MediaType
+from models.metadata import Metadata, Summary
 from .source import SourceBase
 
 from AnilistPython import Anilist
@@ -90,5 +91,5 @@ class Anii(SourceBase):
             return hashlib.md5(text.encode()).hexdigest()
         return None
 
-    def getMediaType(self, type: str) -> str:
-        return 'movie' if type.lower() == 'movie' else 'serie'
+    def getMediaType(self, type: str) -> MediaType:
+        return MediaType.MOVIE if type.lower() == 'movie' else MediaType.SERIE

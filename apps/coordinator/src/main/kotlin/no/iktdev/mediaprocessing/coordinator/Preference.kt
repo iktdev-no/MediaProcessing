@@ -7,10 +7,10 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.shared.common.silentTry
 import java.io.File
 
-class ProcesserPreference {
-    val videoPreference: VideoPreference? = null
+data class ProcesserPreference(
+    val videoPreference: VideoPreference? = null,
     val audioPreference: AudioPreference? = null
-}
+)
 
 data class VideoPreference(
     val codec: VideoCodec,
@@ -18,7 +18,7 @@ data class VideoPreference(
 )
 
 data class AudioPreference(
-    val language: String,
+    val language: String? = null,
     val codec: AudioCodec
 )
 

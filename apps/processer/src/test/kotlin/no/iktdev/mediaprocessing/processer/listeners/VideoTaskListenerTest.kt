@@ -7,14 +7,14 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 class VideoTaskListenerTest {
@@ -68,8 +68,8 @@ class VideoTaskListenerTest {
             listener.accept(testTask, overrideReporter)
             listener.getJob()?.join()
             val event = listener.getResult()
-            assertTrue(event is ProcesserEncodeEvent)
-            assertEquals(TaskStatus.Completed, (event as ProcesserEncodeEvent).data.status)
+            assertTrue(event is ProcesserEncodeResultEvent)
+            assertEquals(TaskStatus.Completed, (event as ProcesserEncodeResultEvent).status)
         }
 
         assertTrue(time >= delay, "Expected onTask to wait at least $delay ms, waited for $time ms")

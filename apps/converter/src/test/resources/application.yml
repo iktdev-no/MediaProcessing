@@ -1,0 +1,28 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  flyway:
+    enabled: false
+    locations: classpath:flyway
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+  output:
+    ansi:
+      enabled: always
+
+springdoc:
+  swagger-ui:
+    path: /open/swagger-ui
+
+logging:
+  level:
+    org.springframework.web.socket.config.WebSocketMessageBrokerStats: WARN
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: mappings

@@ -1,18 +1,15 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import com.google.gson.GsonBuilder
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
-import no.iktdev.eventi.ZDS
+import no.iktdev.eventi.models.Event
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.postForEntity
 import java.io.File
 import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.net.InetAddress
 import java.security.MessageDigest
-import java.time.LocalDateTime
 import java.util.zip.CRC32
 
 private val logger = KotlinLogging.logger {}
@@ -184,4 +181,36 @@ fun SimpMessagingTemplate.trySend(destination: String, data: Any, onError: ((Exc
     } catch (e: Exception) {
         onError?.invoke(e)
     }
+}
+
+
+inline fun <reified T : Event> List<Event>.getInstanceOf(): T? {
+    return this.firstOrNull { it is T } as? T
+}
+
+// Extension-funksjon på List<Event> som returnerer alle instanser av T
+inline fun <reified T : Event> List<Event>.getInstancesOf(): List<T> {
+    return this.filterIsInstance<T>()
+}
+
+inline fun <reified T> List<T>.sizeEquals(other: List<T>): Boolean {
+    return this.size == other.size
+}
+
+fun File.resolveConflict(): File {
+    if (!exists()) return this
+
+    val parent = parentFile
+    val name = nameWithoutExtension
+    val ext = extension
+
+    var index = 1
+    var candidate: File
+
+    do {
+        candidate = File(parent, "$name ($index).$ext")
+        index++
+    } while (candidate.exists())
+
+    return candidate
 }

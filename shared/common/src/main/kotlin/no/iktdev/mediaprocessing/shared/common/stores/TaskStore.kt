@@ -121,10 +121,11 @@ object TaskStore: TaskStore {
         }
     }
 
-    override fun markConsumed(taskId: UUID) {
+    override fun markConsumed(taskId: UUID, status: TaskStatus) {
         withTransaction {
             TasksTable.update({ TasksTable.taskId eq taskId }) {
                 it[consumed] = true
+                it[TasksTable.status] = status
             }
         }
     }

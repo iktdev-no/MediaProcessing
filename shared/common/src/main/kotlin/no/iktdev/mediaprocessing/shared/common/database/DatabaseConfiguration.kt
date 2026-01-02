@@ -1,15 +1,15 @@
 package no.iktdev.mediaprocessing.shared.common.database
 
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import jakarta.annotation.PostConstruct
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.stereotype.Component
 import javax.sql.DataSource
 
 @Configuration
@@ -17,15 +17,35 @@ open class DatabaseConfiguration {
 
     @Bean
     fun dataSource(): DataSource {
-        val access = Access(
-            username = "sa",
-            password = "",
-            address = "", // ikke brukt for H2
-            port = 0,     // ikke brukt for H2
-            databaseName = "testdb",
-            dbType = DbType.H2
-        )
-        return DatabaseConfig.connect(access).second
+        val maxPoolSize: Int = 10
+        val access = DatabaseEnv.toAccess()
+
+        val jdbcUrl = when (access.dbType) {
+            DatabaseTypes.MySQL -> "jdbc:mysql://${access.address}:${access.port}/${access.databaseName}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC"
+            DatabaseTypes.PostgreSQL -> "jdbc:postgresql://${access.address}:${access.port}/${access.databaseName}"
+            DatabaseTypes.SQLite -> "jdbc:sqlite:${access.databaseName}.db"
+            DatabaseTypes.H2 -> "jdbc:h2:mem:${access.databaseName};MODE=MySQL;DB_CLOSE_DELAY=-1"
+        }
+
+        val driver = when (access.dbType) {
+            DatabaseTypes.MySQL -> "com.mysql.cj.jdbc.Driver"
+            DatabaseTypes.PostgreSQL -> "org.postgresql.Driver"
+            DatabaseTypes.SQLite -> "org.sqlite.JDBC"
+            DatabaseTypes.H2 -> "org.h2.Driver"
+        }
+
+        val config = HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            this.driverClassName = driver
+            this.username = access.username
+            this.password = access.password
+            this.maximumPoolSize = maxPoolSize
+            this.isAutoCommit = false
+            this.transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+            this.validate()
+        }
+
+        return HikariDataSource(config)
     }
 
 }
@@ -52,7 +72,7 @@ class FlywayAutoConfig(
 
         val pending = flyway.info().pending()
         if (pending.isEmpty()) {
-            log.warn("⚠️ No pending Flyway migrations found in ${locations.joinToString()}")
+            log.info("⚠️ No pending Flyway migrations found in ${locations.joinToString()}")
         } else {
             log.info("📦 Pending migrations: ${pending.joinToString { it.script }}")
         }

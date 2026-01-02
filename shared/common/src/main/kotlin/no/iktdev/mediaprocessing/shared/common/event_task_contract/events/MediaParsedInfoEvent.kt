@@ -12,8 +12,14 @@ class MediaParsedInfoEvent(
         val parsedCollection: String,
         val parsedFileName: String,
         val parsedSearchTitles: List<String>,
-        val mediaType: MediaType
+        val mediaType: MediaType,
+        val episodeInfo: EpisodeInfo? = null
     ) {
+        data class EpisodeInfo(
+            val episodeNumber: Int,
+            val seasonNumber: Int,
+            val episodeTitle: String? = null,
+        )
     }
 }
 

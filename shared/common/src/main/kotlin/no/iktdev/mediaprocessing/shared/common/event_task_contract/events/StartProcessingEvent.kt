@@ -10,11 +10,11 @@ data class StartProcessingEvent(
 
 data class StartData(
     val operation: Set<OperationType>,
-    val flow: ProcessFlow = ProcessFlow.Auto,
+    val flow: StartFlow = StartFlow.Auto,
     val fileUri: String,
 )
 
-enum class ProcessFlow {
+enum class StartFlow {
     Auto,
     Manual
 }

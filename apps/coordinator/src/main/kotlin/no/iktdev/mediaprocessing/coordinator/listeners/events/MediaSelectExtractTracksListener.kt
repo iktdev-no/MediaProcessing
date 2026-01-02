@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class MediaSelectExtractTracksListener: EventListener() {
 
-    fun limitToLanguages(): Set<String> {
+    open fun limitToLanguages(): Set<String> {
         return emptySet()
     }
 
@@ -36,7 +36,7 @@ class MediaSelectExtractTracksListener: EventListener() {
     }
 
 
-    private fun List<SubtitleStream>.filterOnPreferredLanguage(): List<SubtitleStream> {
+    protected fun List<SubtitleStream>.filterOnPreferredLanguage(): List<SubtitleStream> {
         val languages = limitToLanguages()
         if (languages.isEmpty()) return this
         return this.filter { it.tags.language != null }.filter { languages.contains(it.tags.language) }

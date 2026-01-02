@@ -4,7 +4,8 @@ from imdb.Movie import Movie
 
 from typing import List, Dict, Optional
 
-from clazz.Metadata import Metadata, Summary
+from models.enums import MediaType
+from models.metadata import Metadata, Summary
 from .source import SourceBase
 
 import asyncio
@@ -74,5 +75,5 @@ class Imdb(SourceBase):
             log.exception(e)
         return None
     
-    def getMediaType(self, type: str) -> str:
-        return 'movie' if type.lower() == 'movie' else 'serie'
+    def getMediaType(self, type: str) -> MediaType:
+        return MediaType.MOVIE if type.lower() == 'movie' else MediaType.SERIE

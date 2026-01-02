@@ -38,8 +38,8 @@ class MediaDetermineSubtitleTrackTypeListener: EventListener() {
     }
 
 
-    fun getCommentaryFilters(): Set<String> = setOf("commentary", "kommentar", "kommentaar")
-    fun getSongFilters(): Set<String> = setOf("song", "sign")
+    fun getCommentaryFilters(): Set<String> = setOf("commentary", "comentary", "kommentar", "kommentaar")
+    fun getSongFilters(): Set<String> = setOf("song", "sign", "lyrics")
     fun getClosedCaptionFilters(): Set<String> = setOf("closed caption", "cc", "close caption", "closed-caption", "cc.")
     fun getSHDFilters(): Set<String> = setOf("shd", "hh", "hard of hearing", "hard-of-hearing")
 

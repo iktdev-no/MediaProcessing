@@ -38,6 +38,7 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-mysql")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
@@ -60,7 +61,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.0.2")
 
     implementation(project(":shared:ffmpeg"))
-    implementation("no.iktdev:eventi:1.0-rc13")
+    implementation("no.iktdev:eventi:1.0-rc16")
 
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -73,6 +74,7 @@ dependencies {
 
     testImplementation("io.kotest:kotest-assertions-core:5.7.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    testImplementation("io.github.classgraph:classgraph:4.8.184")
 
 }
 
@@ -82,4 +84,15 @@ tasks.test {
 
 kotlin {
     jvmToolchain(21)
+}
+
+configurations { create("testArtifacts") }
+
+tasks.register<Jar>("testJar") {
+    from(sourceSets.test.get().output)
+    archiveClassifier.set("tests")
+}
+
+artifacts {
+    add("testArtifacts", tasks.named("testJar"))
 }

@@ -22,7 +22,7 @@ repositories {
 }
 
 
-val exposedVersion = "0.44.0"
+val exposedVersion = "0.61.0"
 dependencies {
 
     /*Spring boot*/
@@ -39,7 +39,7 @@ dependencies {
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha14")
-    implementation("no.iktdev:eventi:1.0-rc13")
+    implementation("no.iktdev:eventi:1.0-rc16")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -60,6 +60,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     testImplementation("org.assertj:assertj-core:3.21.0")
 
+
     testImplementation("junit:junit:4.12")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
 
@@ -79,11 +80,23 @@ dependencies {
     testImplementation("org.mockito:mockito-core:3.+")
     testImplementation("org.assertj:assertj-core:3.4.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
+    testImplementation(project(":shared:common", configuration = "testArtifacts"))
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+
+
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+
 
 kotlin {
     jvmToolchain(21)

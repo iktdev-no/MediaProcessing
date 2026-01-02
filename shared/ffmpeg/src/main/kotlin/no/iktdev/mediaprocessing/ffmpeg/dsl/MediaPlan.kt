@@ -58,6 +58,23 @@ data class MediaPlan(
         return args
     }
 
+    fun toContainer(): String {
+        val videoCodec = videoTrack.codec
+        val audioCodecs = audioTracks.map { it.codec }
+
+        return when {
+            // MP4: H.264/HEVC + AAC/MP3
+            (videoCodec is VideoCodec.H264 || videoCodec is VideoCodec.Hevc) &&
+                    audioCodecs.all { it is AudioCodec.Aac || it is AudioCodec.Mp3 } -> "mp4"
+
+            // WEBM: VP8/VP9/AV1 + Opus/Vorbis
+            (videoCodec is VideoCodec.Vp8 || videoCodec is VideoCodec.Vp9 || videoCodec is VideoCodec.Av1) &&
+                    audioCodecs.all { it is AudioCodec.Opus || it is AudioCodec.Vorbis } -> "webm"
+
+            // Fallback: MKV (støtter nesten alt)
+            else -> "mkv"
+        }
+    }
 }
 
 // Video target: index + codec

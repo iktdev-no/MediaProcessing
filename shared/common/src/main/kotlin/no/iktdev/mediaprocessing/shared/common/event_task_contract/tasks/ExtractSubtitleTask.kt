@@ -8,10 +8,10 @@ data class ExtractSubtitleTask(
 }
 
 data class ExtractSubtitleData(
+    val inputFile: String,
     val arguments: List<String>,
     val outputFileName: String,
     val language: String,
-    val inputFile: String
 ) {
 
 }

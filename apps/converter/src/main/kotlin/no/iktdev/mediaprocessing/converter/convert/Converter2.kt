@@ -1,7 +1,5 @@
 package no.iktdev.mediaprocessing.converter.convert
 
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.Data
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SubtitleFormats
 import no.iktdev.library.subtitle.Configuration
 import no.iktdev.library.subtitle.Syncro
 import no.iktdev.library.subtitle.classes.Dialog
@@ -10,11 +8,12 @@ import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.mediaprocessing.converter.ConverterEnv
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
+import no.iktdev.mediaprocessing.shared.common.model.SubtitleFormat
 import java.io.File
-import kotlin.jvm.Throws
 
-class Converter2(val data: Data,
-    private val listener: ConvertListener) {
+class Converter2(val data: ConvertTask.Data,
+                 private val listener: ConvertListener) {
 
     @Throws(FileUnavailableException::class)
     private fun getReader(): BaseReader? {
@@ -55,13 +54,13 @@ class Converter2(val data: Data,
                 exporter.write(syncOrNotSync)
             } else {
                 val exported = mutableListOf<File>()
-                if (data.formats.contains(SubtitleFormats.SRT)) {
+                if (data.formats.contains(SubtitleFormat.SRT)) {
                     exported.add(exporter.writeSrt(syncOrNotSync))
                 }
-                if (data.formats.contains(SubtitleFormats.SMI)) {
+                if (data.formats.contains(SubtitleFormat.SMI)) {
                     exported.add(exporter.writeSmi(syncOrNotSync))
                 }
-                if (data.formats.contains(SubtitleFormats.VTT)) {
+                if (data.formats.contains(SubtitleFormat.VTT)) {
                     exported.add(exporter.writeVtt(syncOrNotSync))
                 }
                 exported

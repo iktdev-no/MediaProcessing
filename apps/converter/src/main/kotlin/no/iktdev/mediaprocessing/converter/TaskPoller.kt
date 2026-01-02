@@ -4,7 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.iktdev.eventi.models.Event
-import no.iktdev.eventi.tasks.AbstractTaskPoller
+import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.common.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
@@ -30,7 +31,7 @@ class PollerAdministrator(
 @Service
 class TaskPoller(
     private val reporter: TaskReporter,
-) : AbstractTaskPoller(
+) : TaskPollerImplementation(
     taskStore = TaskStore,
     reporterFactory = { reporter } // én reporter brukes for alle tasks
 ) {
@@ -49,7 +50,7 @@ class DefaultTaskReporter() : TaskReporter {
     }
 
     override fun markConsumed(taskId: UUID) {
-        TaskStore.markConsumed(taskId)
+        TaskStore.markConsumed(taskId, TaskStatus.Completed)
     }
 
     override fun updateProgress(taskId: UUID, progress: Int) {

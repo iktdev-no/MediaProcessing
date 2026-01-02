@@ -9,8 +9,7 @@ import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.Util
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.EncodeResult
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.springframework.stereotype.Service
 import java.util.*
@@ -29,10 +28,8 @@ class VideoTaskListener: FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
             }
         }
         if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
-            reporter?.publishEvent(ProcesserEncodeEvent(
-                data = EncodeResult(
-                    status = TaskStatus.Failed
-                )
+            reporter?.publishEvent(ProcesserEncodeResultEvent(
+                status = TaskStatus.Failed
             ).producedFrom(task))
             throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
         }
@@ -49,12 +46,12 @@ class VideoTaskListener: FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
         }
         result.run(arguments)
         if (result.result.resultCode != 0 ) {
-            return ProcesserEncodeEvent(data = EncodeResult(status = TaskStatus.Failed)).producedFrom(task)
+            return ProcesserEncodeResultEvent(status = TaskStatus.Failed).producedFrom(task)
         }
 
-        return ProcesserEncodeEvent(
-            data = EncodeResult(
-                status = TaskStatus.Completed,
+        return ProcesserEncodeResultEvent(
+            status = TaskStatus.Completed,
+            data = ProcesserEncodeResultEvent.EncodeResult(
                 cachedOutputFile = cachedOutFile.absolutePath
             )
         ).producedFrom(task)

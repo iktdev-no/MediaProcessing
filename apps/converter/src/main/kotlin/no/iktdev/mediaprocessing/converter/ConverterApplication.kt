@@ -6,15 +6,15 @@ import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
+import no.iktdev.mediaprocessing.shared.common.DatabaseApplication
+import no.iktdev.mediaprocessing.shared.common.MediaProcessingApp
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
-import no.iktdev.mediaprocessing.shared.common.DatabaseApplication
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
-import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Configuration
 
-
+@MediaProcessingApp
 open class ConverterApplication: DatabaseApplication() {
 }
 

@@ -1,40 +1,17 @@
 
 import logging
+from typing import List
 from fuzzywuzzy import fuzz, process
 from .AlgorithmBase import AlgorithmBase, MatchResult
-from clazz.Metadata import Metadata
+from models.metadata import Metadata
 
 
 class SimpleMatcher(AlgorithmBase):
-    def getBestMatch(self) -> Metadata | None:
-        best_match = None
-        best_score = -1
-        match_results = []
+    def getScore(self) -> int:
+        best_score = fuzz.token_sort_ratio(self.title.lower(), self.metadata.title.lower())
 
-        try:
-            for title in self.titles:
-                for metadata in self.metadata:
-                    # Match against metadata title
-                    score = fuzz.token_sort_ratio(title.lower(), metadata.title.lower())
-                    match_results.append(MatchResult(title, metadata.title, score, metadata.source, metadata))
-                    if score > best_score:
-                        best_score = score
-                        best_match = metadata if score >= 70 else None
+        for alt in self.metadata.altTitle:
+            alt_score = fuzz.token_sort_ratio(self.title.lower(), alt.lower())
+            best_score = max(best_score, alt_score)
 
-                    # Match against metadata altTitles
-                    for alt_title in metadata.altTitle:
-                        alt_score = fuzz.token_sort_ratio(title.lower(), alt_title.lower())
-                        match_results.append(MatchResult(title, alt_title, alt_score, metadata.source, metadata))
-                        if alt_score > best_score:
-                            best_score = alt_score
-                            best_match = metadata if alt_score >= 70 else None
-        except Exception as e:
-                logging.debug("Unntak: {e}")
-                logging.debug(f"type(title): {type(title)}, value: {title}")
-                logging.debug(f"type(alt_title): {type(alt_title)}, value: {alt_title}")
-                logging.debug(f"Metadata objekt:")
-                logging.debug(metadata.to_dict()) 
-        # Print match summary
-        self.print_match_summary(match_results)
-
-        return best_match
+        return best_score

@@ -1,13 +1,9 @@
-
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
-
-from fuzzywuzzy import fuzz, process
+from fuzzywuzzy import fuzz
 from tabulate import tabulate
-
-from clazz.Metadata import Metadata
+from models.metadata import Metadata
 
 @dataclass
 class MatchResult:
@@ -17,17 +13,19 @@ class MatchResult:
     source: str
     data: Metadata
 
-
 class AlgorithmBase(ABC):
-    def __init__(self, titles: List[str], metadata: List[Metadata]):
-        self.titles = titles
+    def __init__(self, title: str, metadata: Metadata):
+        self.title = title
         self.metadata = metadata
 
     @abstractmethod
-    def getBestMatch(self) -> Metadata | None:
+    def getScore(self) -> int:
+        """
+        Returnerer alle matchresultater med scorer.
+        """
         pass
 
-    def print_match_summary(self, match_results: List[MatchResult]):
+    def print_match_summary(self, match_results: List[MatchResult]) -> None:
         headers = ["Title", "Matched Title", "Score", "Source"]
-        data = [(result.title, result.matched_title, result.score, result.source) for result in match_results]
+        data = [(r.title, r.matched_title, r.score, r.source) for r in match_results]
         print(tabulate(data, headers=headers))

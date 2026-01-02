@@ -5,6 +5,10 @@ import no.iktdev.eventi.models.Task
 data class CoverDownloadTask(
     val data: CoverDownloadData
 ): Task() {
+    data class CoverDownloadData(
+        val url: String,
+        val source: String,
+        val outputFileName: String
+    )
 }
 
-data class CoverDownloadData(val url: String, val outputFile: String)

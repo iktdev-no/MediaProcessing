@@ -1,15 +1,15 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
-import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import java.io.File
 
-@Order(2)
+@ListenerOrder(2)
 @Component
 class MediaParsedInfoListener : EventListener() {
     override fun onEvent(
@@ -24,12 +24,22 @@ class MediaParsedInfoListener : EventListener() {
         val searchTitles = file.guessSearchableTitle()
         val mediaType = file.guessMovieOrSeries()
 
+        val episodeInfo = if (mediaType == MediaType.Serie) {
+            val serieInfo = file.guessSerieInfo()
+            MediaParsedInfoEvent.ParsedData.EpisodeInfo(
+                episodeNumber = serieInfo.episodeNumber,
+                seasonNumber = serieInfo.seasonNumber,
+                episodeTitle = serieInfo.episodeTitle,
+            )
+        } else null
+
         return MediaParsedInfoEvent(
             MediaParsedInfoEvent.ParsedData(
                 parsedFileName = filename,
                 parsedCollection = collection,
                 parsedSearchTitles = searchTitles,
-                mediaType = mediaType
+                mediaType = mediaType,
+                episodeInfo = episodeInfo,
             )
         ).derivedOf(event)
     }
@@ -99,6 +109,9 @@ class MediaParsedInfoListener : EventListener() {
         return when (type) {
             MediaType.Movie -> this.guessDesiredMovieTitle()
             MediaType.Serie -> this.guessDesiredSerieTitle()
+            MediaType.Subtitle -> {
+                this.nameWithoutExtension
+            }
         }
     }
 
@@ -106,6 +119,9 @@ class MediaParsedInfoListener : EventListener() {
         val collection = when (this.guessMovieOrSeries()) {
             MediaType.Movie -> this.guessDesiredMovieTitle()
             MediaType.Serie -> this.guessDesiredSerieTitle()
+            MediaType.Subtitle -> {
+                this.parentFile.parentFile.nameWithoutExtension
+            }
         }
         return collection.noParens().noYear().split(" - ").first().trim()
     }
@@ -131,6 +147,26 @@ class MediaParsedInfoListener : EventListener() {
      * @return A fully cleaned title including season and episode with possible episode title
      */
     fun File.guessDesiredSerieTitle(): String {
+        val parsedSerieInfo = this.guessSerieInfo()
+
+        val tag = buildString {
+            append("S${(parsedSerieInfo.seasonNumber ?: 1).toString().padStart(2, '0')}")
+            append("E${(parsedSerieInfo.episodeNumber ?: 1).toString().padStart(2, '0')}")
+            if (parsedSerieInfo.revision != null) append(" (v$parsedSerieInfo.revision)")
+        }
+
+        return buildString {
+            append(parsedSerieInfo.serieTitle)
+            append(" - ")
+            append(tag)
+            if (parsedSerieInfo.episodeTitle.isNotEmpty()) {
+                append(" - ")
+                append(parsedSerieInfo.episodeTitle)
+            }
+        }.trim()
+    }
+
+    fun File.guessSerieInfo(): ParsedSerieInfo {
         val raw = this.nameWithoutExtension
 
         val seasonRegex = Regex("""(?i)(?:S|Season|Series)\s*(\d{1,2})""")
@@ -174,22 +210,15 @@ class MediaParsedInfoListener : EventListener() {
             baseTitle = this.parentFile?.name?.getCleanedTitle() ?: "Dumb ways to die"
         }
 
-        val tag = buildString {
-            append("S${(season ?: 1).toString().padStart(2, '0')}")
-            append("E${(episode ?: 1).toString().padStart(2, '0')}")
-            if (revision != null) append(" (v$revision)")
-        }
-
-        return buildString {
-            append(baseTitle)
-            append(" - ")
-            append(tag)
-            if (episodeTitle.isNotEmpty()) {
-                append(" - ")
-                append(episodeTitle)
-            }
-        }.trim()
+        return ParsedSerieInfo(
+            serieTitle = baseTitle,
+            episodeNumber = episode ?: 1,
+            seasonNumber = season ?: 1,
+            revision = revision,
+            episodeTitle
+        )
     }
+
 
 
 
@@ -229,6 +258,14 @@ class MediaParsedInfoListener : EventListener() {
 
         return titles.distinct()
     }
+
+    data class ParsedSerieInfo(
+        val serieTitle: String,
+        val episodeNumber: Int,
+        val seasonNumber: Int,
+        val revision: Int? = null,
+        val episodeTitle: String,
+    )
 
 
 }

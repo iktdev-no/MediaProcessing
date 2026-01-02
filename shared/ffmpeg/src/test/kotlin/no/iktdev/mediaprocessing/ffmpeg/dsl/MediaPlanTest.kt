@@ -262,6 +262,98 @@ class MediaPlanTest {
         assertEquals(expected, args)
     }
 
+    @Test
+    @DisplayName("""
+    Hvis video=H264 og audio=AAC
+    Når toContainer kalles
+    Så:
+        Returneres "mp4"
+    """)
+    fun testChooseContainerMp4() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, VideoCodec.H264()),
+            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Aac(channels = 2)))
+        )
+        assertEquals("mp4", plan.toContainer())
+    }
+
+    @Test
+    @DisplayName("""
+    Hvis video=VP9 og audio=Opus
+    Når toContainer kalles
+    Så:
+        Returneres "webm"
+    """)
+    fun testChooseContainerWebm() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, VideoCodec.Vp9()),
+            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Opus()))
+        )
+        assertEquals("webm", plan.toContainer())
+    }
+
+
+    @Test
+    @DisplayName("""
+    Hvis video=AV1 og audio=FLAC
+    Når toContainer kalles
+    Så:
+        Returneres "mkv" (fallback)
+    """)
+    fun testChooseContainerMkv() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, VideoCodec.Av1()),
+            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Flac()))
+        )
+        assertEquals("mkv", plan.toContainer())
+    }
+
+
+    @Test
+    @DisplayName("""
+        Hvis video=HEVC og audio=AAC
+        Når chooseContainer kalles
+        Så:
+            Returneres "mp4"
+    """)
+    fun testHevcWithAacGivesMp4() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, VideoCodec.Hevc()),
+            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Aac(channels = 2)))
+        )
+        assertEquals("mp4", plan.toContainer())
+    }
+
+    @Test
+    @DisplayName("""
+        Hvis video=HEVC og audio=AC3
+        Når chooseContainer kalles
+        Så:
+            Returneres "mkv" (fallback, siden AC3 ikke støttes i MP4)
+    """)
+    fun testHevcWithAc3GivesMkv() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, VideoCodec.Hevc()),
+            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Ac3()))
+        )
+        assertEquals("mkv", plan.toContainer())
+    }
+
+    @Test
+    @DisplayName("""
+        Hvis video=HEVC og audio=DTS
+        Når chooseContainer kalles
+        Så:
+            Returneres "mkv" (fallback, siden DTS ikke støttes i MP4)
+    """)
+    fun testHevcWithDtsGivesMkv() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, VideoCodec.Hevc()),
+            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Dts()))
+        )
+        assertEquals("mkv", plan.toContainer())
+    }
+
 
     fun mockVideoStream(
         index: Int = 0,

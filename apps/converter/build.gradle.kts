@@ -39,7 +39,7 @@ dependencies {
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation("no.iktdev.library:subtitle:1.8.1-SNAPSHOT")
-    implementation("no.iktdev:eventi:1.0-rc13")
+    implementation("no.iktdev:eventi:1.0-rc15")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -52,6 +52,8 @@ dependencies {
 
     testImplementation("io.mockk:mockk:1.12.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(project(":shared:common", configuration = "testArtifacts"))
+
 }
 
 tasks.test {

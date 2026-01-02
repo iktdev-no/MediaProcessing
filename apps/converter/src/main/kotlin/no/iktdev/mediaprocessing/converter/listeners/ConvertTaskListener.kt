@@ -8,7 +8,6 @@ import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter2
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertedData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import org.springframework.stereotype.Component
 import java.util.*
@@ -44,10 +43,10 @@ class ConvertTaskListener: TaskListener(TaskType.CPU_INTENSIVE) {
         return try {
             val result = converter.getResult()
             val newEvent = ConvertTaskResultEvent(
-                data = ConvertedData(
+                data = ConvertTaskResultEvent.ConvertedData(
                     language = task.data.language,
                     outputFiles = result,
-                    baseName = task.data.storeFileName
+                    baseName = task.data.outputFileName
                 ),
                 status = TaskStatus.Completed
             ).producedFrom(task)

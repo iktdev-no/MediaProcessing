@@ -7,9 +7,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import no.iktdev.mediaprocessing.ffmpeg.data.FFinfoOutput
 
-abstract class FFprobe {
+abstract class FFprobe(val executable: String) {
     open val defaultArguments: List<String> = listOf("-v", "quiet")
-    abstract val executable: String
 
     open suspend fun readJsonStreams(inputFile: String): FFinfoOutput {
         var error: String? = null

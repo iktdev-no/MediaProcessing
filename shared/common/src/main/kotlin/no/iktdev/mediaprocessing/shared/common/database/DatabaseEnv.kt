@@ -1,31 +1,30 @@
 package no.iktdev.mediaprocessing.shared.common.database
 
 object DatabaseEnv {
-    val address: String? = System.getenv("DATABASE_ADDRESS")
-    val port: String? = System.getenv("DATABASE_PORT")
-    val username: String? = System.getenv("DATABASE_USERNAME")
-    val password: String? = System.getenv("DATABASE_PASSWORD")
-    val database: String? = System.getenv("DATABASE_NAME")
-    val databaseType: DbType = DbType.valueOf(System.getenv("DATABASE_TYPE") ?: "MySQL")
+
+    fun address() = System.getenv("DATABASE_ADDRESS") ?: "localhost"
+    fun port(): String? = System.getenv("DATABASE_PORT")
+    fun username() = System.getenv("DATABASE_USERNAME") ?: "root"
+    fun password() = System.getenv("DATABASE_PASSWORD") ?: ""
+    fun databaseName() = System.getenv("DATABASE_NAME") ?: "mediaprocessing"
+    fun databaseType() = DatabaseTypes.valueOf(System.getenv("DATABASE_TYPE") ?: "MySQL")
+
 
     fun toAccess(): Access {
+        val databaseType = databaseType()
         return Access(
-            username = username ?: "root",
-            password = password ?: "",
-            address = address ?: "localhost",
-            port = port?.toIntOrNull() ?: when (databaseType) {
-                DbType.MySQL -> 3306
-                DbType.PostgreSQL -> 5432
-                DbType.SQLite -> 0
-                DbType.H2 -> 0
+            username = username(),
+            password = password(),
+            address = address(),
+            port = port()?.toIntOrNull() ?: when (databaseType) {
+                DatabaseTypes.MySQL -> 3306
+                DatabaseTypes.PostgreSQL -> 5432
+                DatabaseTypes.SQLite -> 0
+                DatabaseTypes.H2 -> 0
             },
-            databaseName = database ?: "mediaprocessing",
+            databaseName = databaseName() ?: "streamit",
             dbType = databaseType
         )
     }
 
-}
-
-enum class DbType {
-    MySQL, PostgreSQL, SQLite, H2
 }

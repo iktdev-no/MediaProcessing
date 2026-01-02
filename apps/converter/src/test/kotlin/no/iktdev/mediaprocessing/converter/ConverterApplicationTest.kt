@@ -1,21 +1,24 @@
 package no.iktdev.mediaprocessing.converter
 
-import io.mockk.junit5.MockKExtension
-import mu.KotlinLogging
 import no.iktdev.eventi.models.Task
+import no.iktdev.mediaprocessing.shared.common.TestBase
+import no.iktdev.mediaprocessing.shared.common.config.DatasourceConfiguration
 import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-@SpringBootTest(classes = [ConverterApplication::class])
+@SpringBootTest(
+    classes = [ConverterApplication::class,
+        DatasourceConfiguration::class],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@TestPropertySource(properties = ["spring.flyway.enabled=true"])
 @ExtendWith(SpringExtension::class)
-class ConverterApplicationTest {
-    private val log = KotlinLogging.logger {}
+class ConverterApplicationTest: TestBase() {
 
     data class TestTask(
         val success: Boolean

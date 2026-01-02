@@ -9,14 +9,13 @@ import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.Util
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ExtractResult
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class SubtitleTaskListener: TaskListener(TaskType.CPU_INTENSIVE) {
+class SubtitleTaskListener: FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
     override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
 
     override fun supports(task: Task) = task is ExtractSubtitleTask
@@ -31,10 +30,8 @@ class SubtitleTaskListener: TaskListener(TaskType.CPU_INTENSIVE) {
         }
 
         if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
-            reporter?.publishEvent(ProcesserExtractEvent(
-                data = ExtractResult(
-                    status = TaskStatus.Failed
-                )
+            reporter?.publishEvent(ProcesserExtractResultEvent(
+                status = TaskStatus.Failed
             ).producedFrom(task))
             throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
         }
@@ -44,23 +41,27 @@ class SubtitleTaskListener: TaskListener(TaskType.CPU_INTENSIVE) {
             .outputFile(cachedOutFile.absolutePath)
             .args(taskData.data.arguments)
 
-        val result = SubtitleFFmpeg()
+        val result = getFfmpeg()
         withHeartbeatRunner {
             reporter?.updateLastSeen(task.taskId)
         }
         result.run(arguments)
         if (result.result.resultCode != 0 ) {
-            return ProcesserExtractEvent(data = ExtractResult(status = TaskStatus.Failed)).producedFrom(task)
+            return ProcesserExtractResultEvent(status = TaskStatus.Failed).producedFrom(task)
         }
 
-        return ProcesserExtractEvent(
-            data = ExtractResult(
-                status = TaskStatus.Completed,
+        return ProcesserExtractResultEvent(
+            status = TaskStatus.Completed,
+            data = ProcesserExtractResultEvent.ExtractResult(
+                language = taskData.data.language,
                 cachedOutputFile = cachedOutFile.absolutePath
             )
         ).producedFrom(task)
     }
 
+    override fun getFfmpeg(): FFmpeg {
+        return SubtitleFFmpeg()
+    }
 
 
     class SubtitleFFmpeg(override val listener: Listener? = null): FFmpeg(executable = ProcesserEnv.ffmpeg, logDir = ProcesserEnv.subtitleExtractLogDirectory ) {

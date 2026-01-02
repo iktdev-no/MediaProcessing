@@ -12,7 +12,7 @@ from fuzzywuzzy import fuzz
 from algo.AdvancedMatcher import AdvancedMatcher
 from algo.SimpleMatcher import SimpleMatcher
 from algo.PrefixMatcher import PrefixMatcher
-from clazz.Metadata import Metadata
+from models.metadata import Metadata
 
 from clazz.shared import EventData, EventMetadata, MediaEvent
 from app import MetadataEventHandler
