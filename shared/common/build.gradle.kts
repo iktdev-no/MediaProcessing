@@ -63,18 +63,21 @@ dependencies {
     implementation(project(":shared:ffmpeg"))
     implementation("no.iktdev:eventi:1.0-rc16")
 
+    testImplementation(kotlin("test"))
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation("io.mockk:mockk:1.12.0")
     implementation("com.h2database:h2:2.2.220")
     testImplementation("org.assertj:assertj-core:3.24.2")
 
     testImplementation("io.kotest:kotest-assertions-core:5.7.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     testImplementation("io.github.classgraph:classgraph:4.8.184")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("io.mockk:mockk:1.13.9")
+
 
 }
 

@@ -21,8 +21,9 @@ class MockFFprobe(
     }
 
     companion object {
-        fun success(json: JsonObject) = MockFFprobe(
-            result = FFinfoOutput(success = true, data = json, error = null)
+        fun success(json: JsonObject, delay: Long = 0) = MockFFprobe(
+            result = FFinfoOutput(success = true, data = json, error = null),
+            delayMillis = delay
         )
         fun failure(errorMsg: String) = MockFFprobe(
             result = FFinfoOutput(success = false, data = null, error = errorMsg)

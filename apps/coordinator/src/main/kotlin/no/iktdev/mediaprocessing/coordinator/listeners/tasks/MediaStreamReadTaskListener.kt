@@ -10,14 +10,14 @@ import no.iktdev.mediaprocessing.ffmpeg.FFprobe
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MediaReadTask
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class MediaStreamReadTaskListener: FfprobeTaskListener(TaskType.CPU_INTENSIVE) {
     val log = KotlinLogging.logger {}
 
     override fun getWorkerId(): String {
-        return "${this::class.java.simpleName}-${TaskType.CPU_INTENSIVE}-${UUID.randomUUID()}"
+        return "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
     }
 
     override fun supports(task: Task): Boolean {

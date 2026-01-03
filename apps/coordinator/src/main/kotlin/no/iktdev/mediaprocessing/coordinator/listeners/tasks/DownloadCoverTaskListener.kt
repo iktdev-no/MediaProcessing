@@ -10,15 +10,16 @@ import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
+import no.iktdev.mediaprocessing.shared.common.notExist
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class DownloadCoverTaskListener: TaskListener(TaskType.MIXED)  {
     val log = KotlinLogging.logger {}
 
     override fun getWorkerId(): String {
-        return "${this::class.java.simpleName}-${TaskType.CPU_INTENSIVE}-${UUID.randomUUID()}"
+        return "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
     }
 
     override fun supports(task: Task): Boolean {
@@ -30,11 +31,15 @@ class DownloadCoverTaskListener: TaskListener(TaskType.MIXED)  {
         log.info { "Downloading cover from ${pickedTask.data.url}" }
         val taskData = pickedTask.data
 
-        val downloadClient = DownloadClient(taskData.url, CoordinatorEnv.cachedContent, taskData.outputFileName)
-        val downloadedFile = downloadClient.download()
+        val downloadClient = getDownloadClient()
+        val downloadResult = try {
+            downloadClient.download(taskData.url, taskData.outputFileName)
+        } catch (e: Exception) {
+            return CoverDownloadResultEvent(status = TaskStatus.Failed)
+        }
+        val downloadedFile = downloadResult.result
 
-
-        if (downloadedFile?.exists() == true) {
+        if (downloadResult.success && downloadedFile != null) {
             log.info { "Downloaded cover to ${downloadedFile.absolutePath}" }
             return CoverDownloadResultEvent(
                 status = TaskStatus.Completed,
@@ -48,6 +53,21 @@ class DownloadCoverTaskListener: TaskListener(TaskType.MIXED)  {
             return CoverDownloadResultEvent(
                 status = TaskStatus.Failed,
             )
+        }
+    }
+
+    open fun getDownloadClient(): DownloadClient {
+        return DefaultDownloadClient()
+    }
+
+    class DefaultDownloadClient() : DownloadClient(
+        outDir = CoordinatorEnv.cachedContent,
+        connectionFactory = DefaultConnectionFactory(),) {
+        override fun onCreate() {
+            super.onCreate()
+            if (outDir.notExist()) {
+                outDir.mkdirs()
+            }
         }
     }
 

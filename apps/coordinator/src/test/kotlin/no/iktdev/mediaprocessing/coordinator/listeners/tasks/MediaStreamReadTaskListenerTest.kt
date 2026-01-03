@@ -4,27 +4,90 @@ import com.google.gson.JsonObject
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.MockFFprobe
 import no.iktdev.mediaprocessing.ffmpeg.FFprobe
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MediaReadTask
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.*
+import kotlin.system.measureTimeMillis
 
 class MediaStreamReadTaskListenerTest {
 
     class MediaStreamReadTaskListenerTestImplementation(): MediaStreamReadTaskListener() {
+        fun getJob() = currentJob
 
         lateinit var probe: FFprobe
         override fun getFfprobe(): FFprobe {
             return probe
         }
+
+        private var _result: Event? = null
+        fun getResult(): Event? {
+            return _result
+        }
+        override fun onComplete(task: Task, result: Event?) {
+            super.onComplete(task, result)
+            this._result = result
+        }
     }
 
-    private val listener = MediaStreamReadTaskListenerTestImplementation()
+    val overrideReporter = object : TaskReporter {
+        override fun markClaimed(taskId: UUID, workerId: String) {}
+        override fun updateLastSeen(taskId: UUID) {}
+        override fun markConsumed(taskId: UUID) {}
+        override fun updateProgress(taskId: UUID, progress: Int) {}
+        override fun log(taskId: UUID, message: String) {}
+        override fun publishEvent(event: Event) {
+
+        }
+    }
+
+    var listener = MediaStreamReadTaskListenerTestImplementation()
+
+    @BeforeEach
+    fun resetListener() {
+        listener = MediaStreamReadTaskListenerTestImplementation()
+    }
+
+
+    @Test
+    fun `onTask waits for runner to complete`() = runTest {
+        val delay = 1000L
+
+        val json = JsonObject().apply { addProperty("codec_type", "video") }
+
+        val task = MediaReadTask(fileUri = "test.mp4").newReferenceId()
+
+        listener = MediaStreamReadTaskListenerTestImplementation().apply {
+            this.probe = MockFFprobe.success(json, delay)
+        }
+
+
+        val time = measureTimeMillis {
+            listener.accept(task, overrideReporter)
+            listener.getJob()?.join()
+            val event = listener.getResult()
+            assertTrue(event is CoordinatorReadStreamsResultEvent)
+            val result = event as CoordinatorReadStreamsResultEvent
+            assertEquals(json, result.data)
+            assertEquals(TaskStatus.Completed, result.status)
+            assertEquals("test.mp4", (listener.probe as MockFFprobe).lastInputFile)
+            assertEquals(TaskStatus.Completed, (event as CoordinatorReadStreamsResultEvent).status)
+        }
+
+        assertTrue(time >= delay, "Expected onTask to wait at least $delay ms, waited for $time ms")
+        assertTrue(time <= (delay*2), "Expected onTask to wait less than ${(delay*2)} ms, waited for $time ms")
+
+    }
+
 
     @Test
     @DisplayName(
@@ -84,7 +147,6 @@ class MediaStreamReadTaskListenerTest {
             Skal MediaStreamReadEvent produseres med data
     """)
     fun verifyEventProducedOnValidJson() = runTest {
-        val listener = MediaStreamReadTaskListenerTestImplementation()
         val json = JsonObject().apply { addProperty("codec_type", "video") }
         listener.probe = MockFFprobe.success(json)
 
@@ -107,7 +169,6 @@ class MediaStreamReadTaskListenerTest {
             Skal onTask returnere null og ikke kaste unntak
     """)
     fun verifyNullOnParsingError() = runTest {
-        val listener = MediaStreamReadTaskListenerTestImplementation()
         listener.probe = MockFFprobe.failure("Could not parse")
 
         val task = MediaReadTask(fileUri = "corrupt.mp4").newReferenceId()
@@ -127,7 +188,6 @@ class MediaStreamReadTaskListenerTest {
             Skal onTask returnere null og logge feilen
     """)
     fun verifyExceptionHandling() = runTest {
-        val listener = MediaStreamReadTaskListenerTestImplementation()
         listener.probe = MockFFprobe.exception()
 
         val task = MediaReadTask(fileUri = "broken.mp4").newReferenceId()
@@ -146,7 +206,6 @@ class MediaStreamReadTaskListenerTest {
             Skal supports returnere false og onTask returnere null
     """)
     fun verifySupportsOnlyMediaReadTask() = runTest {
-        val listener = MediaStreamReadTaskListenerTestImplementation()
         listener.probe = MockFFprobe.failure("Not used")
 
         val otherTask = object : Task() {}.newReferenceId()

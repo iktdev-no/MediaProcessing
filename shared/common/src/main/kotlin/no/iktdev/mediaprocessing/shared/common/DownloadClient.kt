@@ -8,98 +8,103 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
-import java.util.UUID
-import kotlin.apply
-import kotlin.io.use
-import kotlin.run
-import kotlin.text.lastIndexOf
-import kotlin.text.substring
-import kotlin.to
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.util.*
 
-open class DownloadClient(val url: String, val outDir: File, val baseName: String) {
+open class DownloadClient(val outDir: File, private val connectionFactory: ConnectionFactory) {
     val log = KotlinLogging.logger {}
-    protected val http: HttpURLConnection = openConnection()
     private val BUFFER_SIZE = 4096
 
-    private fun openConnection(): HttpURLConnection {
-        try {
-            return URI(url).toURL().openConnection() as HttpURLConnection
+    open fun onCreate() {}
+
+    fun HttpURLConnection.getMetadata(): DownloadMetadata {
+        return DownloadMetadata(
+            this.url.toURI(),
+            this.contentType.also {
+                if (it.isNullOrBlank()) {
+                    log.error { "Unable to determine mime type for $url" }
+                } else {
+                    log.info { "Downloading file from $url with mime type $it" }
+                }
+            },
+            this.contentLengthLong
+        )
+    }
+
+    protected fun getProgress(read: Int, total: Int): Int {
+        return if (total == 0) 0 else ((read * 100) / total)
+    }
+
+    open suspend fun download(useUrl: String, useBaseName: String): DownloadResult {
+        return try {
+            val connection = connectionFactory.open(URI(useUrl))
+            val metadata = connection.getMetadata()
+            val downloadedFile = downloadFile(connection)
+            val resultFile = downloadedFile?.let { file ->
+                finalizeDownload(file, useBaseName, metadata)
+            }
+            DownloadResult(resultFile?.exists() == true, resultFile, null)
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw BadAddressException("Provided url is either not provided (null) or is not a valid http url")
+            DownloadResult(false, null, e.message)
         }
     }
 
-    protected fun getLength(): Int = http.contentLength
-
-
-    protected fun getProgress(read: Int, total: Int = getLength()): Int {
-        return ((read * 100) / total)
-    }
-
-    suspend fun download(): File? = withContext(Dispatchers.IO) {
+    open suspend fun downloadFile(useConnection: HttpURLConnection) = withContext(Dispatchers.IO) {
         val downloadFile = outDir.using(UUID.randomUUID().toString() + ".downloading")
-
         if (downloadFile.exists()) {
             log.info { "${downloadFile.name} already exists. Download skipped!" }
             return@withContext null
         }
 
-        val inputStream = http.inputStream
-        val mimeType: String? = http.contentType
-        if (mimeType == null) {
-            log.error { "Unable to determine mime type for $url" }
-        } else {
-            log.info { "Downloading file from $url with mime type $mimeType" }
-        }
-
-        val fos = FileOutputStream(downloadFile, false)
-
         var totalBytesRead = 0
         val buffer = ByteArray(BUFFER_SIZE)
-        inputStream.apply {
-            fos.use { fout ->
-                run {
-                    var bytesRead = read(buffer)
-                    while (bytesRead >= 0) {
-                        fout.write(buffer, 0, bytesRead)
-                        totalBytesRead += bytesRead
-                        bytesRead = read(buffer)
-                        // System.out.println(getProgress(totalBytesRead))
-                    }
+        useConnection.inputStream.use { input ->
+            FileOutputStream(downloadFile).use { output ->
+                var bytesRead = input.read(buffer)
+                while (bytesRead >= 0) {
+                    output.write(buffer, 0, bytesRead)
+                    totalBytesRead += bytesRead
+                    bytesRead = input.read(buffer)
+                    // System.out.println(getProgress(totalBytesRead))
                 }
             }
         }
-        inputStream.close()
-        fos.close()
 
-        val extension = getExtension(downloadFile, mimeType ?: "")
+        downloadFile
+    }
+
+    open suspend fun finalizeDownload(tempFile: File, baseName: String, metadata: DownloadMetadata): File = withContext(
+        Dispatchers.IO) {
+        val extension = getExtension(tempFile, metadata)
             ?: throw UnsupportedFormatException("Downloaded file does not contain a supported file extension")
 
         val outFile = outDir.using("$baseName.$extension")
-        val renamed = downloadFile.renameTo(outFile)
-        if (!renamed) {
-            log.error { "Failed to rename ${downloadFile.name} to ${outFile.name}" }
-            throw InvalidFileException("Failed to rename downloaded file")
+
+        try {
+            Files.move(
+                tempFile.toPath(),
+                outFile.toPath(),
+                StandardCopyOption.ATOMIC_MOVE
+            )
+        } catch (e: Exception) {
+            log.error { "Failed to atomically move ${tempFile.name} to ${outFile.name}" }
+            throw InvalidFileException("Failed to finalize downloaded file")
         }
 
-        return@withContext outFile
+        outFile
     }
 
-    open fun getExtension(outFile: File, mimeType: String): String? {
-        val extensionFormat = mimeToExtension(mimeType) ?: outFile.getFileType()
-        if (extensionFormat == null) {
-            val possiblyExtension =  url.lastIndexOf(".") + 1
-            if (possiblyExtension > 1) {
-                return url.substring(possiblyExtension)
-            }
-        }
-        return null
+
+
+    open fun getExtension(outFile: File, metadata: DownloadMetadata): String? {
+        return mimeToExtension(metadata.mimeType)
+            ?: outFile.getFileType()
     }
 
-    fun mimeToExtension(mimeType: String): String? {
-        return when(mimeType) {
+
+    fun mimeToExtension(mimeType: String?): String? {
+        return when (mimeType) {
             "image/png" -> "png"
             "image/jpg", "image/jpeg" -> "jpg"
             "image/webp" -> "webp"
@@ -159,5 +164,33 @@ open class DownloadClient(val url: String, val outDir: File, val baseName: Strin
         constructor() : super() {}
         constructor(message: String?) : super(message) {}
         constructor(message: String?, cause: Throwable?) : super(message, cause) {}
+    }
+
+    data class DownloadMetadata(
+        val uri: URI,
+        val mimeType: String?,
+        val length: Long
+    )
+
+    data class DownloadResult(
+        val success: Boolean,
+        val result: File? = null,
+        val error: String? = null
+    )
+
+    interface ConnectionFactory {
+        fun open(uri: URI): HttpURLConnection
+    }
+
+    class DefaultConnectionFactory : ConnectionFactory {
+        override fun open(uri: URI): HttpURLConnection {
+            try {
+                return uri.toURL().openConnection() as HttpURLConnection
+            } catch (e: Exception) {
+                e.printStackTrace()
+                throw BadAddressException("Provided url is either not provided (null) or is not a valid http url")
+            }
+        }
+
     }
 }
