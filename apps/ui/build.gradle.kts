@@ -43,7 +43,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation ("mysql:mysql-connector-java:8.0.29")
 
-    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
+    implementation(libs.exfl)
     implementation(project(mapOf("path" to ":shared:common")))
 
 

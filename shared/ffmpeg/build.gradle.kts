@@ -22,7 +22,7 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.5.1")
     implementation("com.google.code.gson:gson:2.8.9")
 
-    implementation("no.iktdev:exfl:1.0-rc1")
+    implementation(libs.exfl)
 
 
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")

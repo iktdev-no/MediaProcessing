@@ -1,0 +1,7 @@
+[versions]
+eventi = "1.0-rc17"
+exfl = "1.0-rc1"
+
+[libraries]
+eventi = { module = "no.iktdev:eventi", version.ref = "eventi" }
+exfl = { module = "no.iktdev:exfl", version.ref = "exfl" }

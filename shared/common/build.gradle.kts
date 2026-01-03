@@ -29,7 +29,7 @@ dependencies {
 
     implementation("com.github.pgreze:kotlin-process:1.3.1")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
-    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
+    implementation(libs.exfl)
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.google.code.gson:gson:2.8.9")
@@ -61,7 +61,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.0.2")
 
     implementation(project(":shared:ffmpeg"))
-    implementation("no.iktdev:eventi:1.0-rc17")
+    implementation(libs.eventi)
 
     testImplementation(kotlin("test"))
     testImplementation(platform("org.junit:junit-bom:5.10.0"))

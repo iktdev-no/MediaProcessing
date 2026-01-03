@@ -37,9 +37,9 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20210307")
 
-    implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
+    implementation(libs.exfl)
     implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha14")
-    implementation("no.iktdev:eventi:1.0-rc17")
+    implementation(libs.eventi)
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
