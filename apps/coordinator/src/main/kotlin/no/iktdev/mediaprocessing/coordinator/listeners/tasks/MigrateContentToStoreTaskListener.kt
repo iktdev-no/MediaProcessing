@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
+import no.iktdev.mediaprocessing.shared.common.silentTry
 import org.jetbrains.annotations.VisibleForTesting
 import org.springframework.stereotype.Component
 import java.io.File
@@ -40,13 +41,13 @@ class MigrateContentToStoreTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
             coverStatus.none { it.status == MigrateStatus.Failed })
         {
             pickedTask.data.videoContent?.cachedUri?.let { File(it) }?.let {
-                fs.delete(it)
+                silentTry { fs.delete(it) }
             }
             pickedTask.data.subtitleContent?.map { File(it.cachedUri) }?.forEach {
-                fs.delete(it)
+                silentTry { fs.delete(it) }
             }
             pickedTask.data.coverContent?.map { File(it.cachedUri) }?.forEach {
-                fs.delete(it)
+                silentTry { fs.delete(it) }
             }
         } else {
             status = TaskStatus.Failed

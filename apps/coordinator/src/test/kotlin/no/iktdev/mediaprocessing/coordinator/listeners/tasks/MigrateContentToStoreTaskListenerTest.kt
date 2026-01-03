@@ -102,6 +102,25 @@ class MigrateContentToStoreTaskListenerTest {
         assertEquals(MigrateStatus.Failed, result.status)
     }
 
+    @Test
+    @DisplayName(
+        """
+        Når migrateVideo kjøres
+        Hvis content er null
+        Så:
+            returneres NotPresent
+        """
+    )
+    fun migrateVideo_null() {
+        val fs = MockFileSystemService().also {
+            listener.fs = it
+        }
+
+        val result = listener.migrateVideo(fs, null)
+
+        assertEquals(MigrateStatus.NotPresent, result.status)
+    }
+
     // -------------------------------------------------------------------------
     // migrateSubtitle
     // -------------------------------------------------------------------------
@@ -151,6 +170,36 @@ class MigrateContentToStoreTaskListenerTest {
         assertEquals(MigrateStatus.Completed, result.first().status)
     }
 
+    @Test
+    @DisplayName(
+        """
+        Når migrateSubtitle kjøres
+        Hvis én lykkes og én feiler
+        Så:
+            returneres både Completed og Failed
+        """
+    )
+    fun migrateSubtitle_mixed() {
+        val fs = MockFileSystemService().apply {
+            // first OK, second fails
+            copyShouldFail = false
+        }.also { listener.fs = it }
+
+        val subs = listOf(
+            MigrateToContentStoreTask.Data.SingleSubtitle("en", "/tmp/a", "/tmp/b"),
+            MigrateToContentStoreTask.Data.SingleSubtitle("no", "/tmp/c", "/tmp/d")
+        )
+
+        // simulate second failing
+        fs.copyShouldFail = false
+        val result1 = listener.migrateSubtitle(fs, listOf(subs[0]))
+        fs.copyShouldFail = true
+        val result2 = listener.migrateSubtitle(fs, listOf(subs[1]))
+
+        assertEquals(MigrateStatus.Completed, result1.first().status)
+        assertEquals(MigrateStatus.Failed, result2.first().status)
+    }
+
     // -------------------------------------------------------------------------
     // migrateCover
     // -------------------------------------------------------------------------
@@ -177,6 +226,34 @@ class MigrateContentToStoreTaskListenerTest {
         val result = listener.migrateCover(fs, listOf(cover))
 
         assertEquals(MigrateStatus.Completed, result.first().status)
+    }
+
+    @Test
+    @DisplayName(
+        """
+        Når migrateCover kjøres
+        Hvis flere covers og én feiler
+        Så:
+            returneres både Completed og Failed
+        """
+    )
+    fun migrateCover_mixed() {
+        val fs = MockFileSystemService().also { listener.fs = it }
+
+        val covers = listOf(
+            MigrateToContentStoreTask.Data.SingleContent("/tmp/a", "/tmp/b"),
+            MigrateToContentStoreTask.Data.SingleContent("/tmp/c", "/tmp/d")
+        )
+
+        // first OK, second mismatch
+        fs.identical = true
+        val ok = listener.migrateCover(fs, listOf(covers[0]))
+
+        fs.identical = false
+        val fail = listener.migrateCover(fs, listOf(covers[1]))
+
+        assertEquals(MigrateStatus.Completed, ok.first().status)
+        assertEquals(MigrateStatus.Failed, fail.first().status)
     }
 
     // -------------------------------------------------------------------------
@@ -244,4 +321,61 @@ class MigrateContentToStoreTaskListenerTest {
         assertEquals(TaskStatus.Failed, event.status)
         assertEquals(0, fs.deleted.size)
     }
+
+    @Test
+    @DisplayName(
+        """
+        Når onTask kjøres
+        Hvis video feiler
+        Så:
+            returneres Failed og ingenting slettes
+        """
+    )
+    fun onTask_videoFails() = runTest {
+        val fs = MockFileSystemService().apply { copyShouldFail = true }
+            .also { listener.fs = it }
+
+        val task = MigrateToContentStoreTask(
+            MigrateToContentStoreTask.Data(
+                collection = "col",
+                videoContent = MigrateToContentStoreTask.Data.SingleContent("/tmp/v", "/tmp/v2"),
+                subtitleContent = emptyList(),
+                coverContent = emptyList()
+            )
+        ).newReferenceId()
+
+        val event = listener.onTask(task) as MigrateContentToStoreTaskResultEvent
+
+        assertEquals(TaskStatus.Failed, event.status)
+        assertEquals(0, fs.deleted.size)
+    }
+
+    @Test
+    @DisplayName(
+        """
+        Når onTask kjøres
+        Hvis sletting feiler
+        Så:
+            returneres fortsatt Completed
+        """
+    )
+    fun onTask_deleteFails() = runTest {
+        val fs = MockFileSystemService().apply { deleteShouldFail = true }
+            .also { listener.fs = it }
+
+
+        val task = MigrateToContentStoreTask(
+            MigrateToContentStoreTask.Data(
+                collection = "col",
+                videoContent = MigrateToContentStoreTask.Data.SingleContent("/tmp/v", "/tmp/v2"),
+                subtitleContent = emptyList(),
+                coverContent = emptyList()
+            )
+        ).newReferenceId()
+
+        val event = listener.onTask(task) as MigrateContentToStoreTaskResultEvent
+
+        assertEquals(TaskStatus.Completed, event.status)
+    }
 }
+

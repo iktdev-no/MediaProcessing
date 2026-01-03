@@ -4,51 +4,43 @@ import no.iktdev.library.subtitle.Configuration
 import no.iktdev.library.subtitle.Syncro
 import no.iktdev.library.subtitle.classes.Dialog
 import no.iktdev.library.subtitle.classes.DialogType
-import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
-import no.iktdev.library.subtitle.reader.Reader
 import no.iktdev.mediaprocessing.converter.ConverterEnv
+import no.iktdev.mediaprocessing.converter.ConverterEnvironment
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleFormat
 import java.io.File
 
-class Converter2(val data: ConvertTask.Data,
-                 private val listener: ConvertListener) {
+class Converter2(
+    env: ConverterEnvironment,
+    listener: ConvertListener
+): Converter(env = env, listener = listener) {
 
     @Throws(FileUnavailableException::class)
-    private fun getReader(): BaseReader? {
-        val file = File(data.inputFile)
-        if (!file.canRead())
+    override fun getSubtitleReader(useFile: File): BaseReader? {
+        if (!env.canRead(useFile)) {
             throw FileUnavailableException("Can't open file for reading..")
-        return Reader(file).getSubtitleReader()
+        }
+        return env.getReader(useFile)
     }
 
     private fun syncDialogs(input: List<Dialog>): List<Dialog> {
         return if (ConverterEnv.syncDialogs) Syncro().sync(input) else input
     }
 
-    fun canRead(): Boolean {
-        try {
-            val reader = getReader()
-            return reader != null
-        } catch (e: FileUnavailableException) {
-            return false
-        }
-    }
-
     @Throws(FileUnavailableException::class, FileIsNullOrEmpty::class)
-    fun execute() {
+    override suspend fun convert(data: ConvertTask.Data) {
         val file = File(data.inputFile)
         listener.onStarted(file.absolutePath)
         try {
             Configuration.exportJson = true
-            val read = getReader()?.read() ?: throw FileIsNullOrEmpty()
+            val read = getSubtitleReader(file)?.read() ?: throw FileIsNullOrEmpty()
             if (read.isEmpty())
                 throw FileIsNullOrEmpty()
             val filtered = read.filter { !it.ignore && it.type !in listOf(DialogType.SIGN_SONG, DialogType.CAPTION) }
             val syncOrNotSync = syncDialogs(filtered)
 
-            val exporter = Export(file, File(data.outputDirectory), data.outputFileName)
+            val exporter = env.createExporter(file, File(data.outputDirectory), data.outputFileName)
 
             val outFiles = if (data.formats.isEmpty()) {
                 exporter.write(syncOrNotSync)
@@ -65,22 +57,17 @@ class Converter2(val data: ConvertTask.Data,
                 }
                 exported
             }
-            result = outFiles.map { it.absolutePath }
-            listener.onCompleted(file.absolutePath, result!!)
+            writtenUris = outFiles.map { it.absolutePath }
+            listener.onCompleted(file.absolutePath, writtenUris!!)
         } catch (e: Exception) {
             listener.onError(file.absolutePath, e.message ?: e.localizedMessage)
         }
     }
 
-    private var result: List<String>? = null
-    fun getResult(): List<String> {
-        if (result == null) {
+    override fun getResult(): List<String> {
+        if (writtenUris == null) {
             throw IllegalStateException("Execute must be called before getting result")
         }
-        return result!!
+        return writtenUris!!
     }
-
-
-    class FileIsNullOrEmpty(override val message: String? = "File read is null or empty"): RuntimeException()
-    class FileUnavailableException(override val message: String): RuntimeException()
 }

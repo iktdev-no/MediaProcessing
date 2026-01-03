@@ -39,7 +39,7 @@ dependencies {
 
     implementation("no.iktdev:exfl:0.0.16-SNAPSHOT")
     implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha14")
-    implementation("no.iktdev:eventi:1.0-rc16")
+    implementation("no.iktdev:eventi:1.0-rc17")
 
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")

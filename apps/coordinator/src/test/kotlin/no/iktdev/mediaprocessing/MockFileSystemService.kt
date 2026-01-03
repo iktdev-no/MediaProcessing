@@ -5,6 +5,8 @@ import java.io.File
 
 class MockFileSystemService : FileSystemService {
     var copyShouldFail = false
+    var deleteShouldFail = false
+
     var identical = true
     val copied = mutableListOf<Pair<File, File>>()
     val deleted = mutableListOf<File>()
@@ -19,6 +21,7 @@ class MockFileSystemService : FileSystemService {
     }
 
     override fun delete(file: File) {
+        if (deleteShouldFail) throw RuntimeException("delete failed")
         deleted += file
     }
 }

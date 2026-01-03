@@ -61,7 +61,7 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.0.2")
 
     implementation(project(":shared:ffmpeg"))
-    implementation("no.iktdev:eventi:1.0-rc16")
+    implementation("no.iktdev:eventi:1.0-rc17")
 
     testImplementation(kotlin("test"))
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
