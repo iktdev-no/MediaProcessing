@@ -68,7 +68,7 @@ jobs:
           - app: coordinator
             enabled: true
           - app: ui
-            enabled: true   # sett til false for å deaktivere UI
+            enabled: false   # sett til false for å deaktivere UI
 
     uses: ./.github/workflows/build-java-app.yml
     with:

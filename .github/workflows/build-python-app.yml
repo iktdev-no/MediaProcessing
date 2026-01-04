@@ -43,7 +43,7 @@ jobs:
       - name: Run Python tests
         run: |
           cd apps/${{ inputs.app }}
-          pytest -q
+          python -m pytest -q
 
       # Build Docker image locally
       - name: Build Docker image locally
