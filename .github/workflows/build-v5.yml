@@ -16,8 +16,8 @@ jobs:
       converter:   ${{ steps.filter.outputs.converter }}
       coordinator: ${{ steps.filter.outputs.coordinator }}
       ui:          ${{ steps.filter.outputs.ui }}
-      pyMetadata:  ${{ steps.filter.outputs.metadata }}
-      pyWatcher:   ${{ steps.filter.outputs.watcher }}
+      py-metadata:  ${{ steps.filter.outputs.metadata }}
+      py-watcher:   ${{ steps.filter.outputs.watcher }}
       dockerTag:   ${{ steps.tag.outputs.tag }}
 
     steps:
@@ -39,9 +39,9 @@ jobs:
             ui:
               - 'apps/ui/**'
             metadata:
-              - 'apps/pyMetadata/**'
+              - 'apps/py-metadata/**'
             watcher:
-              - 'apps/pyWatcher/**'
+              - 'apps/py-watcher/**'
 
       - name: Generate docker tag
         id: tag
@@ -85,9 +85,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - app: pyMetadata
+          - app: py-metadata
             enabled: true
-          - app: pyWatcher
+          - app: py-watcher
             enabled: true
 
     uses: ./.github/workflows/build-python-app.yml

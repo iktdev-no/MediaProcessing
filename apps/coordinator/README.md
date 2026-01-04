@@ -22,7 +22,7 @@ Only one instance is supported, while multiple processer's can be run at any tim
         - Extracts info from filename
         - Extracts info from file media streams
         - Produces title and sanitized
-    - pyMetadata:
+    - py-metadata:
         - Picks up event
         - Searches with sources using title and sanitized
         - Produces result

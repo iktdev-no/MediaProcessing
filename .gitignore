@@ -43,5 +43,5 @@ bin/
 
 
 .idea/runConfigurations
-/apps/pyMetadata/venv/
-/apps/pyWatcher/venv/
+/apps/py-metadata/venv/
+/apps/py-watcher/venv/
