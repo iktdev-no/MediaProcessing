@@ -34,7 +34,7 @@ jobs:
 
       # Install test dependencies (pytest, asyncio test libs, etc.)
       - name: Install test dependencies
-        if: ${{ hashFiles(format('apps/{0}/requirements-test.txt', inputs.app)) != '' }}
+        if: ${{ exists(format('apps/{0}/requirements-test.txt', inputs.app)) }}
         run: |
           cd apps/${{ inputs.app }}
           pip install -r requirements-test.txt
