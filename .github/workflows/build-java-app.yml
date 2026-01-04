@@ -9,9 +9,17 @@ on:
       dockerTag:
         required: true
         type: string
+      enabled:
+        required: true
+        type: boolean
+      shouldBuild:
+        required: true
+        type: boolean
+
 
 jobs:
   build-java:
+    if: ${{ inputs.enabled && inputs.shouldBuild }}
     runs-on: ubuntu-latest
 
     steps:
