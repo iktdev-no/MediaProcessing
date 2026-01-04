@@ -16,8 +16,8 @@ jobs:
       converter:   ${{ steps.filter.outputs.converter }}
       coordinator: ${{ steps.filter.outputs.coordinator }}
       ui:          ${{ steps.filter.outputs.ui }}
-      py-metadata:  ${{ steps.filter.outputs.metadata }}
-      py-watcher:   ${{ steps.filter.outputs.watcher }}
+      py-metadata: ${{ steps.filter.outputs.metadata }}
+      py-watcher:  ${{ steps.filter.outputs.watcher }}
       dockerTag:   ${{ steps.tag.outputs.tag }}
 
     steps:
@@ -47,11 +47,6 @@ jobs:
         id: tag
         run: echo "tag=$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)" >> $GITHUB_OUTPUT
 
-      - name: Docker login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_NAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
   build-shared:
     needs: pre-check
@@ -73,7 +68,7 @@ jobs:
           - app: coordinator
             enabled: true
           - app: ui
-            enabled: false   # sett til false for å deaktivere UI
+            enabled: false
 
     uses: ./.github/workflows/build-java-app.yml
     with:
@@ -103,3 +98,4 @@ jobs:
       shouldBuild: ${{ needs.pre-check.outputs[matrix.app] == 'true'
         || needs.pre-check.outputs.shared == 'true'
         || github.event_name == 'workflow_dispatch' }}
+    secrets: inherit
