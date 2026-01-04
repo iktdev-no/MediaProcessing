@@ -22,12 +22,12 @@ repositories {
 }
 
 
-val exposedVersion = "0.61.0"
 dependencies {
 
     /*Spring boot*/
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework:spring-tx")
@@ -49,11 +49,6 @@ dependencies {
     implementation(project(mapOf("path" to ":shared:ffmpeg")))
     implementation(project(mapOf("path" to ":shared:common")))
 
-    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation ("mysql:mysql-connector-java:8.0.29")
 
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib")

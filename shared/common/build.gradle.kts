@@ -27,6 +27,11 @@ val exposedVersion = "0.61.0"
 
 dependencies {
 
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+
     implementation("com.github.pgreze:kotlin-process:1.3.1")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation(libs.exfl)
@@ -34,9 +39,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("org.json:json:20231013")
-    implementation("org.springframework.boot:spring-boot-starter-websocket:2.6.3")
 
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
 

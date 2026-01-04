@@ -16,6 +16,7 @@ management:
     health:
       show-details: always
 
+
 logging:
   level:
     root: INFO

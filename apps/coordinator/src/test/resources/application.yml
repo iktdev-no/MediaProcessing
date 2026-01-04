@@ -25,4 +25,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: mappings
+        include:
+          - mappings
+          - health
+  endpoint:
+    health:
+      show-details: always
