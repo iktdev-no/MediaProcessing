@@ -51,56 +51,52 @@ jobs:
   build-shared:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch' }}
-    uses: ./.github/workflows/build-shared.yml@v5
+    uses: ./.github/workflows/build-shared.yml
     with:
       dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
 
 
-  build-apps:
+  build-java:
     needs: [pre-check, build-shared]
-    runs-on: ubuntu-latest
-
     strategy:
       matrix:
         include:
           - app: processer
-            type: java
             enabled: true
           - app: converter
-            type: java
             enabled: true
           - app: coordinator
-            type: java
             enabled: true
           - app: ui
-            type: java
             enabled: false   # sett til false for å deaktivere UI
+
+    if: ${{ matrix.enabled == true &&
+      (needs.pre-check.outputs[matrix.app] == 'true'
+      || needs.pre-check.outputs.shared == 'true'
+      || github.event_name == 'workflow_dispatch') }}
+
+    uses: ./.github/workflows/build-java-app.yml
+    with:
+      app: ${{ matrix.app }}
+      dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+
+
+  build-python:
+    needs: [pre-check, build-shared]
+    strategy:
+      matrix:
+        include:
           - app: pyMetadata
-            type: python
             enabled: true
           - app: pyWatcher
-            type: python
             enabled: true
 
-    steps:
-      - name: Build Java module
-        if: ${{ matrix.enabled == true &&
-          matrix.type == 'java' &&
-          (needs.pre-check.outputs[matrix.app] == 'true'
-          || needs.pre-check.outputs.shared == 'true'
-          || github.event_name == 'workflow_dispatch') }}
-        uses: ./.github/workflows/build-java-app.yml@v5
-        with:
-          app: ${{ matrix.app }}
-          dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+    if: ${{ matrix.enabled == true &&
+      (needs.pre-check.outputs[matrix.app] == 'true'
+      || needs.pre-check.outputs.shared == 'true'
+      || github.event_name == 'workflow_dispatch') }}
 
-      - name: Build Python module
-        if: ${{ matrix.enabled == true &&
-          matrix.type == 'python' &&
-          (needs.pre-check.outputs[matrix.app] == 'true'
-          || needs.pre-check.outputs.shared == 'true'
-          || github.event_name == 'workflow_dispatch') }}
-        uses: ./.github/workflows/build-python-app.yml@v5
-        with:
-          app: ${{ matrix.app }}
-          dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+    uses: ./.github/workflows/build-python-app.yml
+    with:
+      app: ${{ matrix.app }}
+      dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
