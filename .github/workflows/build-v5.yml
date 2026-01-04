@@ -51,7 +51,7 @@ jobs:
   build-shared:
     needs: pre-check
     if: ${{ needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch' }}
-    uses: ./.github/workflows/build-shared.yml
+    uses: ./.github/workflows/build-shared.yml@v5
     with:
       dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
 
@@ -89,7 +89,7 @@ jobs:
           (needs.pre-check.outputs[matrix.app] == 'true'
           || needs.pre-check.outputs.shared == 'true'
           || github.event_name == 'workflow_dispatch') }}
-        uses: ./.github/workflows/build-java-app.yml
+        uses: ./.github/workflows/build-java-app.yml@v5
         with:
           app: ${{ matrix.app }}
           dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
@@ -100,7 +100,7 @@ jobs:
           (needs.pre-check.outputs[matrix.app] == 'true'
           || needs.pre-check.outputs.shared == 'true'
           || github.event_name == 'workflow_dispatch') }}
-        uses: ./.github/workflows/build-python-app.yml
+        uses: ./.github/workflows/build-python-app.yml@v5
         with:
           app: ${{ matrix.app }}
           dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
