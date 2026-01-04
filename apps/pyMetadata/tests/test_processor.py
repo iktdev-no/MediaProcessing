@@ -105,9 +105,9 @@ async def test_process_task_exception(monkeypatch):
 async def test_choose_recommended_prefers_advanced(monkeypatch):
     # Lag tre SearchResult med ulike scorer
     m = make_dummy_metadata("mal")
-    r1 = processor.SearchResult(simpleScore=10, prefixScore=10, advancedScore=90, sourceWeight=1.0, metadata=processor.MetadataResult(source="mal", title="Foo", alternateTitles=None, cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
-    r2 = processor.SearchResult(simpleScore=50, prefixScore=50, advancedScore=20, sourceWeight=1.0, metadata=processor.MetadataResult(source="imdb", title="Foo", alternateTitles=None, cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
-    r3 = processor.SearchResult(simpleScore=80, prefixScore=80, advancedScore=80, sourceWeight=1.0, metadata=processor.MetadataResult(source="anii", title="Foo", alternateTitles=None, cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
+    r1 = processor.SearchResult(simpleScore=10, prefixScore=10, advancedScore=90, sourceWeight=1.0, metadata=processor.MetadataResult(source="mal", title="Foo", alternateTitles=[], cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
+    r2 = processor.SearchResult(simpleScore=50, prefixScore=50, advancedScore=20, sourceWeight=1.0, metadata=processor.MetadataResult(source="imdb", title="Foo", alternateTitles=[], cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
+    r3 = processor.SearchResult(simpleScore=80, prefixScore=80, advancedScore=80, sourceWeight=1.0, metadata=processor.MetadataResult(source="anii", title="Foo", alternateTitles=[], cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
 
     recommended = processor.choose_recommended([r1, r2, r3])
     assert recommended is r1  # høyest advancedScore vinner

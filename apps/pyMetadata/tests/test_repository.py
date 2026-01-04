@@ -50,7 +50,7 @@ def make_event() -> MetadataSearchResultEvent:
             metadata=MetadataResult(
                 source="test",
                 title="title",
-                alternateTitles=None,
+                alternateTitles=[],
                 cover=None,
                 bannerImage=None,
                 type=MediaType.SERIE,
