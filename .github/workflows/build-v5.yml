@@ -78,6 +78,7 @@ jobs:
       shouldBuild: ${{ needs.pre-check.outputs[matrix.app] == 'true'
         || needs.pre-check.outputs.shared == 'true'
         || github.event_name == 'workflow_dispatch' }}
+    secrets: inherit
 
 
   build-python:
