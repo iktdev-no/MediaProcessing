@@ -1,0 +1,85 @@
+name: Build Java App
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        required: true
+        type: string
+      dockerTag:
+        required: true
+        type: string
+
+jobs:
+  build-java:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect frontend
+        id: detect_web
+        run: |
+          if [ -d "apps/${{ inputs.app }}/web" ]; then
+            echo "has_web=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_web=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build React frontend
+        if: ${{ steps.detect_web.outputs.has_web == 'true' }}
+        run: |
+          cd apps/${{ inputs.app }}/web
+          npm install
+          export CI=false
+          npm run build
+
+      - name: Copy React build into Spring Boot resources
+        if: ${{ steps.detect_web.outputs.has_web == 'true' }}
+        run: |
+          rm -rf apps/${{ inputs.app }}/src/main/resources/static
+          mkdir -p apps/${{ inputs.app }}/src/main/resources/static
+          cp -r apps/${{ inputs.app }}/web/build/* apps/${{ inputs.app }}/src/main/resources/static
+
+      - name: Extract version
+        run: |
+          VERSION=$(grep '^version' apps/${{ inputs.app }}/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Build Java module
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:${{ inputs.app }}:bootJar --info --stacktrace
+
+      - name: Build Docker image locally
+        run: |
+          docker build \
+            -f ./dockerfiles/DebianJava \
+            -t local-${{ inputs.app }}:${{ inputs.dockerTag }} \
+            --build-arg MODULE_NAME=${{ inputs.app }} \
+            --build-arg PASS_APP_VERSION=${{ env.VERSION }} \
+            .
+
+      - name: Test Docker container
+        run: |
+          docker run --rm local-${{ inputs.app }}:${{ inputs.dockerTag }} /bin/sh -c "echo 'Smoke test OK'"
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/DebianJava
+          build-args: |
+            MODULE_NAME=${{ inputs.app }}
+            PASS_APP_VERSION=${{ env.VERSION }}
+          push: true
+          tags: |
+            bskjon/mediaprocessing-${{ inputs.app }}:v5
+            bskjon/mediaprocessing-${{ inputs.app }}:v5-${{ inputs.dockerTag }}
+            bskjon/mediaprocessing-${{ inputs.app }}:v5-${{ github.sha }}

@@ -1,0 +1,103 @@
+name: Build v5
+
+on:
+  push:
+    branches: [ v5 ]
+  pull_request:
+    branches: [ v5 ]
+  workflow_dispatch:
+
+jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      shared:      ${{ steps.filter.outputs.shared }}
+      processer:   ${{ steps.filter.outputs.processer }}
+      converter:   ${{ steps.filter.outputs.converter }}
+      coordinator: ${{ steps.filter.outputs.coordinator }}
+      ui:          ${{ steps.filter.outputs.ui }}
+      pyMetadata:  ${{ steps.filter.outputs.metadata }}
+      pyWatcher:   ${{ steps.filter.outputs.watcher }}
+      dockerTag:   ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            shared:
+              - 'shared/**'
+            processer:
+              - 'apps/processer/**'
+            converter:
+              - 'apps/converter/**'
+            coordinator:
+              - 'apps/coordinator/**'
+            ui:
+              - 'apps/ui/**'
+            metadata:
+              - 'apps/pyMetadata/**'
+            watcher:
+              - 'apps/pyWatcher/**'
+
+      - name: Generate docker tag
+        id: tag
+        run: echo "tag=$(date -u +'%Y.%m.%d')-$(uuidgen | cut -c 1-8)" >> $GITHUB_OUTPUT
+
+
+  build-shared:
+    needs: pre-check
+    if: ${{ needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch' }}
+    uses: ./.github/workflows/build-shared.yml
+    with:
+      dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+
+
+  build-apps:
+    needs: [pre-check, build-shared]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - app: processer
+            type: java
+            enabled: true
+          - app: converter
+            type: java
+            enabled: true
+          - app: coordinator
+            type: java
+            enabled: true
+          - app: ui
+            type: java
+            enabled: false
+          - app: pyMetadata
+            type: python
+            enabled: true
+          - app: pyWatcher
+            type: python
+            enabled: true
+
+    if: ${{ matrix.enabled == true &&
+      (needs.pre-check.outputs[matrix.app] == 'true'
+      || needs.pre-check.outputs.shared == 'true'
+      || github.event_name == 'workflow_dispatch') }}
+
+    steps:
+      - name: Call Java workflow
+        if: ${{ matrix.type == 'java' }}
+        uses: ./.github/workflows/build-java-app.yml
+        with:
+          app: ${{ matrix.app }}
+          dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+
+      - name: Call Python workflow
+        if: ${{ matrix.type == 'python' }}
+        uses: ./.github/workflows/build-python-app.yml
+        with:
+          app: ${{ matrix.app }}
+          dockerTag: ${{ needs.pre-check.outputs.dockerTag }}

@@ -7,6 +7,7 @@ import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
+import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.ProcesserEnv
 import no.iktdev.mediaprocessing.processer.Util
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class VideoTaskListener: FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
+class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
+
     override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
 
     override fun supports(task: Task) = task is EncodeTask
@@ -59,16 +61,35 @@ class VideoTaskListener: FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
 
     override fun getFfmpeg(): FFmpeg {
         return VideoFFmpeg(object : FFmpeg.Listener {
+            var lastProgress: FfmpegDecodedProgress? = null
             override fun onStarted(inputFile: String) {
             }
 
             override fun onCompleted(inputFile: String, outputFile: String) {
+                currentTask?.let {
+                    coordinatorWebClient.reportProgress(
+                        referenceId = it.referenceId.toString(),
+                        taskId = it.taskId.toString(),
+                        percent = FfmpegDecodedProgress(100, "", lastProgress?.duration ?: "", "0", estimatedCompletion = "", estimatedCompletionSeconds = 0),
+                        ""
+                    )
+                }
             }
 
             override fun onProgressChanged(
                 inputFile: String,
                 progress: FfmpegDecodedProgress
             ) {
+                lastProgress = progress
+                currentTask?.let {
+                    coordinatorWebClient.reportProgress(
+                        referenceId = it.referenceId.toString(),
+                        taskId = it.taskId.toString(),
+                        percent = progress,
+                        ""
+                    )
+                }
+
             }
         })
     }

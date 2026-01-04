@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.listeners
 
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
@@ -7,6 +8,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
+import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
@@ -19,7 +21,7 @@ import kotlin.system.measureTimeMillis
 
 class VideoTaskListenerTest {
 
-    class TestListener(val delay: Long): VideoTaskListener() {
+    class TestListener(val delay: Long, coordinatorClient: CoordinatorClient): VideoTaskListener(coordinatorClient) {
         fun getJob() = currentJob
 
         private var _result: Event? = null
@@ -50,6 +52,7 @@ class VideoTaskListenerTest {
     fun setup() {
         TaskTypeRegistry.register(EncodeTask::class.java)
     }
+    private val coordinatorClient = mockk<CoordinatorClient>(relaxed = true)
 
     @Test
     fun `onTask waits for runner to complete`() = runTest {
@@ -62,7 +65,7 @@ class VideoTaskListenerTest {
             )
         ).newReferenceId()
 
-        val listener = TestListener(delay)
+        val listener = TestListener(delay, coordinatorClient)
 
         val time = measureTimeMillis {
             listener.accept(testTask, overrideReporter)

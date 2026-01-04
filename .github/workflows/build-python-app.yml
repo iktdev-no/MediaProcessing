@@ -1,0 +1,73 @@
+name: Build Python App
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        required: true
+        type: string
+      dockerTag:
+        required: true
+        type: string
+
+jobs:
+  build-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Optional: install runtime dependencies if requirements.txt exists
+      - name: Install runtime dependencies
+        if: ${{ hashFiles(format('apps/{0}/requirements.txt', inputs.app)) != '' }}
+        run: |
+          cd apps/${{ inputs.app }}
+          pip install -r requirements.txt
+
+      # Install test dependencies (pytest, asyncio test libs, etc.)
+      - name: Install test dependencies
+        if: ${{ hashFiles(format('apps/{0}/requirements-test.txt', inputs.app)) != '' }}
+        run: |
+          cd apps/${{ inputs.app }}
+          pip install -r requirements-test.txt
+
+      # Run Python tests
+      - name: Run Python tests
+        run: |
+          cd apps/${{ inputs.app }}
+          pytest -q
+
+      # Build Docker image locally
+      - name: Build Docker image locally
+        run: |
+          docker build \
+            -f ./dockerfiles/Python \
+            -t local-${{ inputs.app }}:${{ inputs.dockerTag }} \
+            --build-arg MODULE_NAME=${{ inputs.app }} \
+            .
+
+      # Smoke-test the container
+      - name: Test Docker container
+        run: |
+          docker run --rm local-${{ inputs.app }}:${{ inputs.dockerTag }} /bin/sh -c "echo 'Smoke test OK'"
+
+      # Login to Docker Hub
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_NAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # Push final image
+      - name: Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/Python
+          build-args: |
+            MODULE_NAME=${{ inputs.app }}
+          push: true
+          tags: |
+            bskjon/mediaprocessing-${{ inputs.app }}:v5
+            bskjon/mediaprocessing-${{ inputs.app }}:v5-${{ inputs.dockerTag }}
+            bskjon/mediaprocessing-${{ inputs.app }}:v5-${{ github.sha }}
