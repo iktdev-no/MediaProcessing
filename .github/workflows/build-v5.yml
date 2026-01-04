@@ -68,17 +68,16 @@ jobs:
           - app: coordinator
             enabled: true
           - app: ui
-            enabled: false   # sett til false for å deaktivere UI
-
-    if: ${{ matrix.enabled == true &&
-      (needs.pre-check.outputs[matrix.app] == 'true'
-      || needs.pre-check.outputs.shared == 'true'
-      || github.event_name == 'workflow_dispatch') }}
+            enabled: true   # sett til false for å deaktivere UI
 
     uses: ./.github/workflows/build-java-app.yml
     with:
       app: ${{ matrix.app }}
       dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+      enabled: ${{ matrix.enabled }}
+      shouldBuild: ${{ needs.pre-check.outputs[matrix.app] == 'true'
+        || needs.pre-check.outputs.shared == 'true'
+        || github.event_name == 'workflow_dispatch' }}
 
 
   build-python:
@@ -91,12 +90,11 @@ jobs:
           - app: pyWatcher
             enabled: true
 
-    if: ${{ matrix.enabled == true &&
-      (needs.pre-check.outputs[matrix.app] == 'true'
-      || needs.pre-check.outputs.shared == 'true'
-      || github.event_name == 'workflow_dispatch') }}
-
     uses: ./.github/workflows/build-python-app.yml
     with:
       app: ${{ matrix.app }}
       dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
+      enabled: ${{ matrix.enabled }}
+      shouldBuild: ${{ needs.pre-check.outputs[matrix.app] == 'true'
+        || needs.pre-check.outputs.shared == 'true'
+        || github.event_name == 'workflow_dispatch' }}
