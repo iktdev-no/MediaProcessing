@@ -14,7 +14,7 @@ class DatabaseConfig:
         return DatabaseConfig(
             address=os.environ.get("DATABASE_ADDRESS") or "192.168.2.250",
             port=int(os.environ.get("DATABASE_PORT") or "3306"),
-            name=os.environ.get("DATABASE_NAME_E") or "eventsV3",
+            name=os.environ.get("DATABASE_NAME") or "EVENTS",
             username=os.environ.get("DATABASE_USERNAME") or "root",
             password=os.environ.get("DATABASE_PASSWORD") or "def",
         )
