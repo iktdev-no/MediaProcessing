@@ -57,6 +57,8 @@ dependencies {
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 
+    val exposedVersion = "0.61.0"
+    testImplementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
 }
 
 tasks.test {

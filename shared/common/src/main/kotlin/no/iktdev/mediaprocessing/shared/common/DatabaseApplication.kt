@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import mu.KotlinLogging
 import org.jetbrains.exposed.sql.Database
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
@@ -17,12 +17,14 @@ abstract class DatabaseApplication {
     }
 }
 
-@Component
+@Component("ExposedInit")
 class ExposedInitializer(
     private val dataSource: DataSource
-) : ApplicationRunner {
+) : InitializingBean {
+    private val log = KotlinLogging.logger {}
 
-    override fun run(args: ApplicationArguments?) {
+    override fun afterPropertiesSet() {
+        log.info { "Starting database connection" }
         Database.connect(dataSource)
     }
 }

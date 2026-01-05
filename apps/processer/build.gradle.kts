@@ -49,20 +49,33 @@ dependencies {
     implementation(project(mapOf("path" to ":shared:common")))
 
 
-
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-
-    testImplementation("io.mockk:mockk:1.12.0")
-    testImplementation("com.h2database:h2:1.4.200")
-    testImplementation("org.assertj:assertj-core:3.4.1")
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
-    testImplementation("io.kotlintest:kotlintest-assertions:3.3.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     implementation(kotlin("stdlib-jdk8"))
+
+    // --- Spring Boot test stack (inkluderer JUnit 5.10, Mockito, AssertJ, etc.) ---
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.mockito") // valgfritt hvis du kun bruker MockK
+    }
+
+    // --- MockK (Kotlin mocking) ---
+    testImplementation("io.mockk:mockk:1.13.8")
+
+    // --- Coroutines test utilities ---
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // --- H2 for database testing ---
+    testImplementation("com.h2database:h2:2.2.224")
+
+    // --- Optional: AssertJ (Spring Boot inkluderer AssertJ, men du kan eksplisitt legge til) ---
+    // testImplementation("org.assertj:assertj-core:3.24.2")
+
+    // --- Optional: JUnit params (brukes ofte) ---
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+
+    // --- Hvis du trenger test artifacts fra shared:common ---
+    testImplementation(project(":shared:common", configuration = "testArtifacts"))
+
+    val exposedVersion = "0.61.0"
+    testImplementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
 }
 
 tasks.test {

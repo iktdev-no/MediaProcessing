@@ -1,15 +1,22 @@
 package no.iktdev.mediaprocessing.converter
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.verify
 import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.config.DatasourceConfiguration
 import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import org.jetbrains.exposed.sql.Database
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import javax.sql.DataSource
 
 @SpringBootTest(
     classes = [ConverterApplication::class,
@@ -18,7 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 )
 @TestPropertySource(properties = ["spring.flyway.enabled=true"])
 @ExtendWith(SpringExtension::class)
-class ConverterApplicationTest: TestBase() {
+class ConverterApplicationTest : TestBase() {
 
     data class TestTask(
         val success: Boolean
@@ -47,4 +54,28 @@ class ConverterApplicationTest: TestBase() {
         assertNotNull(tasksAfter)
         assert(tasksAfter.isNotEmpty())
     }
+
+    @Test
+    fun `ExposedInitializer should connect to database`() {
+        mockkObject(Database)
+
+        every {
+            Database.connect(
+                any<DataSource>(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns mockk()
+
+
+        val context = SpringApplicationBuilder(ConverterApplication::class.java)
+            .properties("spring.main.web-application-type=none")
+            .run()
+
+        verify(exactly = 1) { Database.connect(any<DataSource>(), any(), any(), any(), any()) }
+    }
+
+
 }
