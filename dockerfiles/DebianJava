@@ -1,4 +1,4 @@
-FROM bskjon/azuljava:17
+FROM bskjon/azuljava:21
 EXPOSE 8080
 
 ARG MODULE_NAME

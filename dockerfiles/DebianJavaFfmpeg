@@ -1,4 +1,4 @@
-FROM bskjon/debian-azuljava17-ffmpeg:latest
+FROM bskjon/debian-azuljava21-ffmpeg:latest
 EXPOSE 8080
 
 ARG MODULE_NAME
