@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class MediaStreamReadTaskListener: FfprobeTaskListener(TaskType.CPU_INTENSIVE) {
+class MediaStreamReadTaskListener(
+    private val coordinatorEnv: CoordinatorEnv
+): FfprobeTaskListener(TaskType.CPU_INTENSIVE) {
     val log = KotlinLogging.logger {}
 
     override fun getWorkerId(): String {
@@ -48,7 +50,7 @@ class MediaStreamReadTaskListener: FfprobeTaskListener(TaskType.CPU_INTENSIVE) {
     }
 
     override fun getFfprobe(): FFprobe {
-        return JsonFfinfo(CoordinatorEnv.ffprobe)
+        return JsonFfinfo(coordinatorEnv.ffprobe)
     }
 
     class JsonFfinfo(executable: String): FFprobe(executable) {

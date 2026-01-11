@@ -5,7 +5,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:flyway
-    baseline-on-migrate: true
+    baseline-on-migrate: false
 
 management:
   endpoints:
@@ -23,3 +23,14 @@ logging:
     org.apache.kafka: INFO
     Exposed: OFF
     org.springframework.web.socket.config.WebSocketMessageBrokerStats: WARN
+
+media:
+  cache: /src/cache
+  outgoing: /src/output
+  incoming: /src/input
+
+streamit:
+  address: http://streamit.service
+
+executables:
+  ffprobe: ffprobe

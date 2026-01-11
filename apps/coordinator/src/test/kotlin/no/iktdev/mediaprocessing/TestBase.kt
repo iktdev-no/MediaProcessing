@@ -3,10 +3,7 @@ package no.iktdev.mediaprocessing
 import io.mockk.*
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
-import no.iktdev.mediaprocessing.coordinator.AudioPreference
-import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.coordinator.ProcesserPreference
-import no.iktdev.mediaprocessing.coordinator.VideoPreference
+import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
@@ -21,16 +18,24 @@ open class TestBase {
     class DummyEvent: Event()
     class DummyTask: Task()
 
+    val preference: Preference = mockk(relaxed = true)
+    val coordinatorEnv = mockk<CoordinatorEnv>(relaxed = true)
+
+
     @BeforeEach
-    fun setup() {
+    open fun setup() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } just Runs
-        mockkObject(Preference)
-        every { Preference.getProcesserPreference() } returns ProcesserPreference(
+        every { preference.getProcesserPreference() } returns ProcesserPreference(
             videoPreference = VideoPreference(codec = VideoCodec.Hevc()),
             audioPreference = AudioPreference(codec = AudioCodec.Aac(channels = 2))
         )
+        every { coordinatorEnv.outgoingContent } returns File("./tmp/output")
+        every { coordinatorEnv.incomingContent } returns File("./tmp/input")
+        every { coordinatorEnv.cachedContent } returns File("./tmp/cached")
+        every { coordinatorEnv.streamitAddress } returns "http://streamit.lan"
     }
+
 
     fun mockkIO() {
         mockkConstructor(File::class)

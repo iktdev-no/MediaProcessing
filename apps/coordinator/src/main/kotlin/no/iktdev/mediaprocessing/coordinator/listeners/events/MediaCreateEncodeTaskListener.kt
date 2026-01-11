@@ -3,16 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioTarget
-import no.iktdev.mediaprocessing.ffmpeg.dsl.MediaPlan
-import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoTarget
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.ffmpeg.dsl.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
@@ -20,13 +12,15 @@ import org.springframework.stereotype.Component
 import java.io.File
 
 @Component
-class MediaCreateEncodeTaskListener : EventListener() {
+class MediaCreateEncodeTaskListener(
+    private val preference: Preference
+) : EventListener() {
 
     override fun onEvent(
         event: Event,
         history: List<Event>
     ): Event? {
-        val preference = Preference.getProcesserPreference()
+        val preference = preference.getProcesserPreference()
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         if (startedEvent.data.operation.isNotEmpty()) {

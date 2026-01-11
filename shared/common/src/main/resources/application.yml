@@ -8,3 +8,13 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+
+media:
+  cache: /src/cache
+  outgoing: /src/output
+  incoming: /src/input
+
+streamit:
+  address: http://streamit.service
+

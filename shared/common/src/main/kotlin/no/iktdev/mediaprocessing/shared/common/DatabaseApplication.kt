@@ -1,11 +1,16 @@
 package no.iktdev.mediaprocessing.shared.common
 
 import mu.KotlinLogging
+import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
+import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
 import org.jetbrains.exposed.sql.Database
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import javax.sql.DataSource
 
@@ -34,4 +39,14 @@ class ExposedInitializer(
 @Retention(AnnotationRetention.RUNTIME)
 @SpringBootApplication
 @ComponentScan("no.iktdev.mediaprocessing") // sikrer at common beans blir plukket opp
+@Import(SharedConfig::class)
 annotation class MediaProcessingApp
+
+@Configuration
+@EnableConfigurationProperties(
+    value = [
+        StreamItConfig::class,
+        MediaPaths::class
+    ]
+)
+class SharedConfig

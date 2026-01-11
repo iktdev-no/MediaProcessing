@@ -26,3 +26,12 @@ management:
     web:
       exposure:
         include: mappings
+
+media:
+  cache: /src/cache
+  outgoing: /src/output
+  incoming: /src/input
+
+streamit:
+  address: http://streamit.service
+

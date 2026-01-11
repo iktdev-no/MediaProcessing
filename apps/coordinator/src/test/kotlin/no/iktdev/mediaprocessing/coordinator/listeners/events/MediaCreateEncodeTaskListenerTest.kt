@@ -1,48 +1,37 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockkObject
-import io.mockk.verify
+import io.mockk.*
+import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.coordinator.AudioPreference
-import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.ProcesserPreference
 import no.iktdev.mediaprocessing.coordinator.VideoPreference
-import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
-import no.iktdev.mediaprocessing.ffmpeg.data.Disposition
-import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
-import no.iktdev.mediaprocessing.ffmpeg.data.Tags
-import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
+import no.iktdev.mediaprocessing.ffmpeg.data.*
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class MediaCreateEncodeTaskListenerTest {
+class MediaCreateEncodeTaskListenerTest: TestBase() {
 
-    private val listener = MediaCreateEncodeTaskListener()
+    private val listener = MediaCreateEncodeTaskListener(preference)
 
     @BeforeEach
-    fun setup() {
+    override fun setup() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } just Runs
-        mockkObject(Preference)
-        every { Preference.getProcesserPreference() } returns ProcesserPreference(
+        every { preference.getProcesserPreference() } returns ProcesserPreference(
             videoPreference = VideoPreference(codec = VideoCodec.Hevc()),
             audioPreference = AudioPreference(codec = AudioCodec.Aac(channels = 2))
         )
     }
+
+
 
     @Test
     @DisplayName("""

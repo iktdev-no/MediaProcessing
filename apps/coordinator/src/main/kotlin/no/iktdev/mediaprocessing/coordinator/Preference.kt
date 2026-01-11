@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator
 import com.google.gson.Gson
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import org.springframework.stereotype.Component
 import java.io.File
 
 
@@ -34,11 +35,11 @@ data class AudioPreference(
     val codec: AudioCodec
 )
 
-
-object Preference {
+@Component
+class Preference(private val coordinatorEnv: CoordinatorEnv) {
     fun getProcesserPreference(): ProcesserPreference {
         var preference: ProcesserPreference = ProcesserPreference.default()
-        CoordinatorEnv.preference.ifExists({
+        coordinatorEnv.preference.ifExists({
             val text = readText()
             try {
                 val result = Gson().fromJson(text, PeferenceConfig::class.java)
@@ -47,7 +48,7 @@ object Preference {
                 e.printStackTrace()
             }
         }, orElse = {
-            CoordinatorEnv.preference.writeText(Gson().toJson(PeferenceConfig(preference)))
+            coordinatorEnv.preference.writeText(Gson().toJson(PeferenceConfig(preference)))
         })
         return preference
     }

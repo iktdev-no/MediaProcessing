@@ -23,7 +23,7 @@ import java.io.File
 
 class MigrateCreateStoreTaskListenerTest : TestBase() {
 
-    private val listener = MigrateCreateStoreTaskListener()
+    private val listener = MigrateCreateStoreTaskListener(coordinatorEnv)
 
     @Test
     @DisplayName(

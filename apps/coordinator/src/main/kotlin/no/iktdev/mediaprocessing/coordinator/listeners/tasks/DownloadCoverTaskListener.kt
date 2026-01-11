@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class DownloadCoverTaskListener: TaskListener(TaskType.MIXED)  {
+class DownloadCoverTaskListener(
+    private val coordinatorEnv: CoordinatorEnv,
+): TaskListener(TaskType.MIXED)  {
     val log = KotlinLogging.logger {}
 
     override fun getWorkerId(): String {
@@ -57,11 +59,11 @@ class DownloadCoverTaskListener: TaskListener(TaskType.MIXED)  {
     }
 
     open fun getDownloadClient(): DownloadClient {
-        return DefaultDownloadClient()
+        return DefaultDownloadClient(coordinatorEnv)
     }
 
-    class DefaultDownloadClient() : DownloadClient(
-        outDir = CoordinatorEnv.cachedContent,
+    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv) : DownloadClient(
+        outDir = coordinatorEnv.cachedContent,
         connectionFactory = DefaultConnectionFactory(),) {
         override fun onCreate() {
             super.onCreate()

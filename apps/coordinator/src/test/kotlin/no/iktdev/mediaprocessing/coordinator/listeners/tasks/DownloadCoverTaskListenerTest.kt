@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.MockDownloadClient
 import no.iktdev.mediaprocessing.TestBase
+import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
@@ -17,9 +18,9 @@ import java.io.File
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-class DownloadCoverTaskListenerTest {
+class DownloadCoverTaskListenerTest: TestBase() {
 
-    class DownloadCoverTaskListenerTestImplementation : DownloadCoverTaskListener() {
+    class DownloadCoverTaskListenerTestImplementation(coordinatorEnv: CoordinatorEnv) : DownloadCoverTaskListener(coordinatorEnv) {
         fun getJob() = currentJob
 
         lateinit var client: DownloadClient
@@ -43,7 +44,7 @@ class DownloadCoverTaskListenerTest {
         override fun publishEvent(event: Event) {}
     }
 
-    private var listener = DownloadCoverTaskListenerTestImplementation()
+    private var listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv)
 
     @Test
     @DisplayName(
@@ -65,7 +66,7 @@ class DownloadCoverTaskListenerTest {
             )
         ).newReferenceId()
 
-        listener = DownloadCoverTaskListenerTestImplementation().apply {
+        listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
             this.client = MockDownloadClient(
                 delayMillis = delay,
                 mockFile = File("/tmp/fancy.jpg")
@@ -103,7 +104,7 @@ class DownloadCoverTaskListenerTest {
             )
         ).newReferenceId()
 
-        listener = DownloadCoverTaskListenerTestImplementation().apply {
+        listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
             this.client = MockDownloadClient(throwException = true)
         }
 
@@ -141,7 +142,7 @@ class DownloadCoverTaskListenerTest {
     fun onTask_produces_correct_output_path() = runTest {
         val mockFile = File("/tmp/expected.jpg")
 
-        listener = DownloadCoverTaskListenerTestImplementation().apply {
+        listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
             this.client = MockDownloadClient(mockFile = mockFile)
         }
 
@@ -172,7 +173,7 @@ class DownloadCoverTaskListenerTest {
     fun accept_is_non_blocking() = runTest {
         val delay = 500L
 
-        listener = DownloadCoverTaskListenerTestImplementation().apply {
+        listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
             this.client = MockDownloadClient(delayMillis = delay, mockFile = File("/tmp/x.jpg"))
         }
 

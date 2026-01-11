@@ -13,7 +13,9 @@ import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
 import org.springframework.stereotype.Component
 
 @Component
-class MigrateCreateStoreTaskListener: EventListener() {
+class MigrateCreateStoreTaskListener(
+    private val coordinatorEnv: CoordinatorEnv,
+): EventListener() {
     private val log = KotlinLogging.logger {}
 
     override fun onEvent(
@@ -31,7 +33,7 @@ class MigrateCreateStoreTaskListener: EventListener() {
             log.warn { "One or more tasks have failed in  ${event.referenceId}" }
         }
 
-        val migrateContentProjection = MigrateContentProject(useHistory, CoordinatorEnv.outgoingContent)
+        val migrateContentProjection = MigrateContentProject(useHistory, coordinatorEnv.outgoingContent)
 
         val collection = migrateContentProjection.useStore?.name ?:
             throw RuntimeException("No content store configured for migration in ${event.referenceId}")

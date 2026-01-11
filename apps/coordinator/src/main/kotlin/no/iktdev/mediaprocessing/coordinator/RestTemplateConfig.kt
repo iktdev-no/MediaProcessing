@@ -9,12 +9,14 @@ import org.springframework.web.client.RestTemplate
 class RestTemplateConfig {
 
     @Configuration
-    class RestTemplateConfig {
+    class RestTemplateConfig(
+        private val coordinatorEnv: CoordinatorEnv
+    ) {
 
         @Bean
         fun streamitRestTemplate(): RestTemplate {
             return RestTemplateBuilder()
-                .rootUri(CoordinatorEnv.streamitAddress)
+                .rootUri(coordinatorEnv.streamitAddress)
                 .build()
         }
     }

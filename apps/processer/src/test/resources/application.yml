@@ -31,3 +31,14 @@ management:
   endpoint:
     health:
       show-details: always
+
+media:
+  cache: /src/cache
+  outgoing: /src/output
+  incoming: /src/input
+
+streamit:
+  address: http://streamit.service
+
+executables:
+  ffmpeg: ffmpeg

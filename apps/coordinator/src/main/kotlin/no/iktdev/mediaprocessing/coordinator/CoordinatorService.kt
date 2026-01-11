@@ -15,4 +15,7 @@ class CoordinatorService {
 
     fun getProgress(taskId: String): ProgressUpdate? =
         progressMap[taskId]
+
+    fun getProgress(): List<ProgressUpdate> =
+        progressMap.values.toList()
 }

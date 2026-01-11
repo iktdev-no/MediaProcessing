@@ -10,6 +10,7 @@ import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.net.InetAddress
 import java.security.MessageDigest
+import java.time.LocalDateTime
 import java.util.zip.CRC32
 
 private val logger = KotlinLogging.logger {}
@@ -214,3 +215,6 @@ fun File.resolveConflict(): File {
 
     return candidate
 }
+
+val LocalDateTimeEpoch: LocalDateTime =
+    LocalDateTime.of(1970, 1, 1, 0, 0, 0)

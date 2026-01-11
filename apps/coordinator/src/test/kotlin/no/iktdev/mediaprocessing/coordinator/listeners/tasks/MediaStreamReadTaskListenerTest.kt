@@ -9,6 +9,8 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.MockFFprobe
+import no.iktdev.mediaprocessing.TestBase
+import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.ffmpeg.FFprobe
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MediaReadTask
@@ -19,9 +21,9 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-class MediaStreamReadTaskListenerTest {
+class MediaStreamReadTaskListenerTest: TestBase() {
 
-    class MediaStreamReadTaskListenerTestImplementation(): MediaStreamReadTaskListener() {
+    class MediaStreamReadTaskListenerTestImplementation(coordinatorEnv: CoordinatorEnv): MediaStreamReadTaskListener(coordinatorEnv) {
         fun getJob() = currentJob
 
         lateinit var probe: FFprobe
@@ -50,11 +52,11 @@ class MediaStreamReadTaskListenerTest {
         }
     }
 
-    var listener = MediaStreamReadTaskListenerTestImplementation()
+    var listener = MediaStreamReadTaskListenerTestImplementation(coordinatorEnv)
 
     @BeforeEach
     fun resetListener() {
-        listener = MediaStreamReadTaskListenerTestImplementation()
+        listener = MediaStreamReadTaskListenerTestImplementation(coordinatorEnv)
     }
 
 
@@ -66,7 +68,7 @@ class MediaStreamReadTaskListenerTest {
 
         val task = MediaReadTask(fileUri = "test.mp4").newReferenceId()
 
-        listener = MediaStreamReadTaskListenerTestImplementation().apply {
+        listener = MediaStreamReadTaskListenerTestImplementation(coordinatorEnv).apply {
             this.probe = MockFFprobe.success(json, delay)
         }
 
