@@ -54,6 +54,12 @@ jobs:
           VERSION=$(grep '^version' apps/${{ inputs.app }}/build.gradle.kts | sed 's/.*"\(.*\)".*/\1/')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Run unit tests
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :apps:${{ inputs.app }}:test --info --stacktrace
+
+
       - name: Build Java module
         run: |
           chmod +x ./gradlew
