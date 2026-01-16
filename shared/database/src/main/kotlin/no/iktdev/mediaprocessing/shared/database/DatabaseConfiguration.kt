@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.shared.common.database
+package no.iktdev.mediaprocessing.shared.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -13,11 +13,11 @@ import org.springframework.context.annotation.Configuration
 import javax.sql.DataSource
 
 @Configuration
-open class DatabaseConfiguration {
+class DatabaseConfiguration {
 
     @Bean
     fun dataSource(): DataSource {
-        val maxPoolSize: Int = 10
+        val maxPoolSize = 10
         val access = DatabaseEnv.toAccess()
 
         val jdbcUrl = when (access.dbType) {

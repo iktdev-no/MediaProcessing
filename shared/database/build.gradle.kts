@@ -7,7 +7,7 @@ plugins {
     id("io.spring.dependency-management")
 }
 
-group = "no.iktdev.mediaprocessing.shared"
+group = "no.iktdev.mediaprocessing"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -23,10 +23,12 @@ repositories {
     }
 }
 
-dependencies {
+val exposedVersion = "0.61.0"
 
+dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
 
     implementation("com.github.pgreze:kotlin-process:1.3.1")
@@ -42,10 +44,26 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+
+
+
+
+
+    implementation ("mysql:mysql-connector-java:8.0.33")
+    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("org.xerial:sqlite-jdbc:3.43.2.0")
+
 
     implementation("org.apache.commons:commons-lang3:3.12.0")
 
+    implementation("com.zaxxer:HikariCP:7.0.2")
+
     implementation(project(":shared:ffmpeg"))
+    implementation(project(":shared:common"))
     implementation(libs.eventi)
 
     testImplementation(kotlin("test"))
@@ -54,6 +72,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
+    implementation("com.h2database:h2:2.2.220")
     testImplementation("org.assertj:assertj-core:3.24.2")
 
     testImplementation("io.kotest:kotest-assertions-core:5.7.2")
@@ -62,15 +81,15 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("io.mockk:mockk:1.13.9")
 
-
-}
-
-tasks.test {
-    useJUnitPlatform()
+    testImplementation(project(":shared:common", configuration = "testArtifacts"))
 }
 
 kotlin {
     jvmToolchain(21)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 configurations { create("testArtifacts") }

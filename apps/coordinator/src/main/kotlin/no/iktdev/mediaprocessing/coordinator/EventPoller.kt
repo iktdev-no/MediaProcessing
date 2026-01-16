@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import no.iktdev.eventi.events.EventDispatcher
 import no.iktdev.eventi.events.EventPollerImplementation
 import no.iktdev.eventi.events.SequenceDispatchQueue
-import no.iktdev.mediaprocessing.shared.common.stores.EventStore
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.annotation.DependsOn
 import org.springframework.stereotype.Component

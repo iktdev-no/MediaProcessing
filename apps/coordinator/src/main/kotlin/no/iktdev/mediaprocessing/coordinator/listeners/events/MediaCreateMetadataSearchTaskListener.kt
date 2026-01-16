@@ -8,7 +8,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaP
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.jetbrains.annotations.VisibleForTesting
 import org.springframework.stereotype.Component
 import java.util.*

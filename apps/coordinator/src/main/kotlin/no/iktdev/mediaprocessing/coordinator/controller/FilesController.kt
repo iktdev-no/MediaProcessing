@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
-import no.iktdev.mediaprocessing.shared.common.database.queries.FilesTableQueries
 import no.iktdev.mediaprocessing.shared.common.dto.FileTableItem
+import no.iktdev.mediaprocessing.shared.database.queries.FilesTableQueries
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

@@ -7,7 +7,8 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.springframework.stereotype.Component
 
 @Component

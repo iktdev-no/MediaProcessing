@@ -6,7 +6,7 @@ import no.iktdev.mediaprocessing.shared.common.LocalDateTimeEpoch
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
-import no.iktdev.mediaprocessing.shared.common.stores.EventStore
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
 
 @Service

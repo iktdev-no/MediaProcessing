@@ -7,7 +7,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Coordi
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MediaReadTask
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.springframework.stereotype.Component
 
 @ListenerOrder(3)

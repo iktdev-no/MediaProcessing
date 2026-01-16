@@ -1,11 +1,12 @@
-package no.iktdev.mediaprocessing.shared.common.database.tables
+package no.iktdev.mediaprocessing.shared.database.tables
 
 import no.iktdev.eventi.models.store.TaskStatus
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
-import java.util.UUID
+import java.time.LocalDateTime
+import java.util.*
 
 object TasksTable: IntIdTable(name = "TASKS") {
     val referenceId: Column<UUID> = uuid("REFERENCE_ID")
@@ -16,6 +17,6 @@ object TasksTable: IntIdTable(name = "TASKS") {
     val claimed: Column<Boolean> = bool("CLAIMED").default(false)
     val claimedBy: Column<String?> = varchar("CLAIMED_BY",100).nullable()
     val consumed: Column<Boolean> = bool("CONSUMED").default(false)
-    val lastCheckIn: Column<java.time.LocalDateTime?> = datetime("LAST_CHECK_IN").nullable()
-    val persistedAt: Column<java.time.LocalDateTime> = datetime("PERSISTED_AT").defaultExpression(CurrentDateTime)
+    val lastCheckIn: Column<LocalDateTime?> = datetime("LAST_CHECK_IN").nullable()
+    val persistedAt: Column<LocalDateTime> = datetime("PERSISTED_AT").defaultExpression(CurrentDateTime)
 }

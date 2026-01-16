@@ -1,16 +1,15 @@
-package no.iktdev.mediaprocessing.shared.common.stores
+package no.iktdev.mediaprocessing.shared.database.stores
 
 import com.google.gson.Gson
-import no.iktdev.eventi.ZDS.toPersisted
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.stores.EventStore
-import no.iktdev.mediaprocessing.shared.common.database.tables.EventsTable
-import no.iktdev.mediaprocessing.shared.common.database.withTransaction
+import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
+import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 object EventStore: EventStore {
     override fun getPersistedEventsAfter(timestamp: LocalDateTime): List<PersistedEvent> {

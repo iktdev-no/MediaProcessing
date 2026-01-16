@@ -48,6 +48,7 @@ dependencies {
 
     implementation(project(mapOf("path" to ":shared:ffmpeg")))
     implementation(project(mapOf("path" to ":shared:common")))
+    implementation(project(mapOf("path" to ":shared:database")))
 
 
 
@@ -81,6 +82,7 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
+    testImplementation(project(":shared:database", configuration = "testArtifacts"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     val exposedVersion = "0.61.0"
     testImplementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")

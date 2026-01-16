@@ -1,13 +1,12 @@
-package no.iktdev.mediaprocessing.shared.common.stores
+package no.iktdev.mediaprocessing.shared.database.stores
 
-import com.google.gson.Gson
 import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.stores.TaskStore
-import no.iktdev.mediaprocessing.shared.common.database.tables.TasksTable
-import no.iktdev.mediaprocessing.shared.common.database.withTransaction
+import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
+import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll

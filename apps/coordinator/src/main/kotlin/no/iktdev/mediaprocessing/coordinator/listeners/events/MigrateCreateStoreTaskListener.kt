@@ -9,7 +9,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Migrat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.MigrateContentProject
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.springframework.stereotype.Component
 
 @Component

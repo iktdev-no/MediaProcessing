@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.shared.common.database
+package no.iktdev.mediaprocessing.shared.database
 
 data class Access(
     val username: String,

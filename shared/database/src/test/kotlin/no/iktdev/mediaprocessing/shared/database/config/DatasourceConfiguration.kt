@@ -1,9 +1,9 @@
-package no.iktdev.mediaprocessing.shared.common.config
+package no.iktdev.mediaprocessing.shared.database.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.iktdev.mediaprocessing.shared.common.database.Access
-import no.iktdev.mediaprocessing.shared.common.database.DatabaseTypes
+import no.iktdev.mediaprocessing.shared.database.Access
+import no.iktdev.mediaprocessing.shared.database.DatabaseTypes
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -23,7 +23,7 @@ class DatasourceConfiguration {
             dbType = DatabaseTypes.H2
         )
 
-        val maxPoolSize: Int = 10
+        val maxPoolSize = 10
         val config = HikariConfig().apply {
             this.jdbcUrl = "jdbc:h2:mem:${access.databaseName};MODE=MySQL;DB_CLOSE_DELAY=-1"
             this.driverClassName = "org.h2.Driver"

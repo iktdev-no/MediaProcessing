@@ -5,7 +5,7 @@ import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListenerRegistry
 import no.iktdev.mediaprocessing.coordinator.CoordinatorApplication
 import no.iktdev.mediaprocessing.coordinator.listeners.events.*
-import no.iktdev.mediaprocessing.shared.common.config.DatasourceConfiguration
+import no.iktdev.mediaprocessing.shared.database.config.DatasourceConfiguration
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import org.assertj.core.api.Assertions.assertThat

@@ -1,20 +1,16 @@
-package no.iktdev.mediaprocessing.shared.common
+package no.iktdev.mediaprocessing.shared.database
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
-import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
+import no.iktdev.mediaprocessing.shared.common.MediaProcessingApp
+import no.iktdev.mediaprocessing.shared.common.MediaProcessingApplication
 import org.jetbrains.exposed.sql.Database
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import javax.sql.DataSource
 
-abstract class DatabaseApplication {
+abstract class DatabaseApplication: MediaProcessingApplication() {
     companion object {
         inline fun <reified T : DatabaseApplication> launch(args: Array<String>) {
             runApplication<T>(*args)
@@ -37,16 +33,8 @@ class ExposedInitializer(
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@SpringBootApplication
-@ComponentScan("no.iktdev.mediaprocessing") // sikrer at common beans blir plukket opp
-@Import(SharedConfig::class)
-annotation class MediaProcessingApp
-
-@Configuration
-@EnableConfigurationProperties(
-    value = [
-        StreamItConfig::class,
-        MediaPaths::class
-    ]
+@MediaProcessingApp
+@ComponentScan(
+    basePackages = ["no.iktdev.mediaprocessing.shared.database"]
 )
-class SharedConfig
+annotation class DatabasebasedMediaProcessingApp

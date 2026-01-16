@@ -47,6 +47,7 @@ dependencies {
     //implementation(project(mapOf("path" to ":shared")))
     implementation(project(mapOf("path" to ":shared:ffmpeg")))
     implementation(project(mapOf("path" to ":shared:common")))
+    implementation(project(mapOf("path" to ":shared:database")))
 
 
     implementation(kotlin("stdlib-jdk8"))
@@ -73,6 +74,7 @@ dependencies {
 
     // --- Hvis du trenger test artifacts fra shared:common ---
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
+    testImplementation(project(":shared:database", configuration = "testArtifacts"))
 
     val exposedVersion = "0.61.0"
     testImplementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")

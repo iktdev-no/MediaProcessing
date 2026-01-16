@@ -1,11 +1,11 @@
-package no.iktdev.mediaprocessing.shared.common.database.tables
+package no.iktdev.mediaprocessing.shared.database.tables
 
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 object EventsTable: IntIdTable(name = "EVENTS") {
     val referenceId: Column<UUID> = uuid("REFERENCE_ID")

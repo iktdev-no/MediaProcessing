@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.shared.common.database
+package no.iktdev.mediaprocessing.shared.database
 
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.boot.actuate.health.Health

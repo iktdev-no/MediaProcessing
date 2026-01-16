@@ -9,7 +9,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreC
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.projection.StoreProjection
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.springframework.stereotype.Component
 
 @Component

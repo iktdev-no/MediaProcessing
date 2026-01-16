@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.shared.common
 
-import no.iktdev.mediaprocessing.shared.common.config.DatasourceConfiguration
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -11,8 +10,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.net.URI
 
 @SpringBootTest(
-    classes = [DatabaseApplication::class,
-        DatasourceConfiguration::class],
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @ExtendWith(SpringExtension::class)

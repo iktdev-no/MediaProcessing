@@ -1,21 +1,29 @@
-package no.iktdev.mediaprocessing.shared.common
+package no.iktdev.mediaprocessing.shared.database
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.database.Access
-import no.iktdev.mediaprocessing.shared.common.database.DatabaseTypes
-import no.iktdev.mediaprocessing.shared.common.database.withTransaction
+import no.iktdev.mediaprocessing.shared.common.TestBase
+import no.iktdev.mediaprocessing.shared.database.config.DatasourceConfiguration
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.statements.jdbc.JdbcConnectionImpl
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import javax.sql.DataSource
 
+@SpringBootTest(
+    classes = [DatabaseApplication::class,
+        DatasourceConfiguration::class],
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@ExtendWith(SpringExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class TestBaseWithDatabase: TestBase() {
     val log = KotlinLogging.logger {}
@@ -41,7 +49,7 @@ abstract class TestBaseWithDatabase: TestBase() {
             databaseName = "testdb",
             dbType = DatabaseTypes.H2
         )
-        database = Database.connect(dataSource)
+        database = Database.Companion.connect(dataSource)
         flyway = Flyway.configure()
             .dataSource(dataSource)
             .locations("classpath:flyway")
@@ -53,7 +61,7 @@ abstract class TestBaseWithDatabase: TestBase() {
 
 
         withTransaction {
-            val jdbc = (TransactionManager.current().connection as JdbcConnectionImpl).connection
+            val jdbc = (TransactionManager.Companion.current().connection as JdbcConnectionImpl).connection
 
             val meta = jdbc.metaData
             val tableNames = listOf<String>(
@@ -65,7 +73,7 @@ abstract class TestBaseWithDatabase: TestBase() {
             }
 
             existingTables.forEach { (tableName, exists) ->
-                assertTrue(exists, "Table $tableName should exist after migration")
+                Assertions.assertTrue(exists, "Table $tableName should exist after migration")
             }
 
             log.info { "Found migrations: ${flyway.info().all().map { it.script }}" }
@@ -75,7 +83,7 @@ abstract class TestBaseWithDatabase: TestBase() {
     @AfterAll
     fun clearDatabase() {
         flyway.clean()
-        TransactionManager.closeAndUnregister(database)
+        TransactionManager.Companion.closeAndUnregister(database)
     }
 
 }

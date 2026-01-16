@@ -49,12 +49,14 @@ dependencies {
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
     implementation(project(mapOf("path" to ":shared:common")))
+    implementation(project(mapOf("path" to ":shared:database")))
 
     implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("io.mockk:mockk:1.12.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
+    testImplementation(project(":shared:database", configuration = "testArtifacts"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 
     val exposedVersion = "0.61.0"

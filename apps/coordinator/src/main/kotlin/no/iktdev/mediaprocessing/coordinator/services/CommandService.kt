@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartD
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.notExist
-import no.iktdev.mediaprocessing.shared.common.stores.EventStore
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
 import java.io.File
 import java.util.*

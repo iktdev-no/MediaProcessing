@@ -6,8 +6,9 @@ import io.mockk.mockkObject
 import io.mockk.verify
 import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.shared.common.TestBase
-import no.iktdev.mediaprocessing.shared.common.config.DatasourceConfiguration
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.config.DatasourceConfiguration
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.jetbrains.exposed.sql.Database
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

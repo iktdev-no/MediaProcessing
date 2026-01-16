@@ -1,8 +1,8 @@
-package no.iktdev.mediaprocessing.shared.common.database.queries
+package no.iktdev.mediaprocessing.shared.database.queries
 
-import no.iktdev.mediaprocessing.shared.common.database.tables.FilesTable
-import no.iktdev.mediaprocessing.shared.common.database.withTransaction
 import no.iktdev.mediaprocessing.shared.common.dto.FileTableItem
+import no.iktdev.mediaprocessing.shared.database.tables.FilesTable
+import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.selectAll
 
 class FilesTableQueries {

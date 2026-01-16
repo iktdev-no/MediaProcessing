@@ -24,3 +24,5 @@ include("shared:common")
 
 include("shared:ffmpeg")
 include("shared:event-task-contract")
+include("shared:database")
+include("shared:database")

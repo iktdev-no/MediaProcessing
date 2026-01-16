@@ -9,7 +9,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartD
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import org.junit.jupiter.api.Assertions.*
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -17,10 +16,10 @@ import java.io.File
 import io.mockk.*
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
-import no.iktdev.mediaprocessing.shared.common.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+
 import org.mockito.Mockito.mockStatic
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import java.nio.file.Files
 import java.nio.file.Path
 
