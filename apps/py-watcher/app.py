@@ -34,7 +34,8 @@ def get_heartbeat():
 
 async def run_worker(db: Database, paths, extensions, shutdown_flag_ref):
     global observers
-    observers = [start_observer(db, [p], extensions, insert_event) for p in paths]
+    observers = [start_observer(db, p, extensions, insert_event) for p in paths]
+
 
     try:
         while not shutdown_flag_ref():

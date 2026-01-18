@@ -22,7 +22,7 @@ async def health():
     db_error = None
     worker_error = None
 
-    # Sjekk database
+    # --- Database check ---
     try:
         db.ping()
         db_ok = True
@@ -30,10 +30,18 @@ async def health():
         db_ok = False
         db_error = str(e)
 
-    # Sjekk worker heartbeat
+    # --- Worker heartbeat check ---
     try:
         last = get_worker_heartbeat()
-        worker_ok = (time.time() - last) < 10
+        now = time.time()
+        diff = now - last
+
+        worker_ok = diff < 10
+
+        # Hvis worker er false og ingen exception ble kastet → legg diff i worker_error
+        if not worker_ok and worker_error is None:
+            worker_error = f"Heartbeat too old: {diff:.2f}s"
+
     except Exception as e:
         worker_ok = False
         worker_error = str(e)
