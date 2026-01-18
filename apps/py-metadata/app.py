@@ -1,7 +1,7 @@
 import signal
 import sys
 from threading import Thread
-from api.health_api import init_health_api
+from api.health_api import app as health_app, init_health_api
 from config.database_config import DatabaseConfig
 from db.database import Database
 from utils.logger import logger
