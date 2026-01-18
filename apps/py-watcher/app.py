@@ -1,8 +1,8 @@
-# app.py
 import asyncio
 import signal
 import sys
 import time
+from threading import Thread
 import uvicorn
 
 from api.health_api import create_health_app
@@ -12,7 +12,6 @@ from db.repository import insert_event
 from worker.file_watcher import start_observer
 from utils.logger import logger
 
-# global flag for shutdown
 shutdown_flag = False
 observers = []
 worker_heartbeat = time.time()
@@ -40,6 +39,7 @@ async def run_worker(db: Database, paths, extensions, shutdown_flag_ref):
     try:
         while not shutdown_flag_ref():
             set_heartbeat(time.time())
+            logger.debug("Heartbeat oppdatert")
             await asyncio.sleep(5)
     finally:
         logger.info("🛑 Stopper observer...")
@@ -48,30 +48,25 @@ async def run_worker(db: Database, paths, extensions, shutdown_flag_ref):
             obs.join()
         logger.info("👋 Alle observers stoppet")
 
-    return observers
+
+def start_health_server(app):
+    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="warning")
 
 
 def main():
-    # registrer signal handlers for graceful shutdown
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
 
-    logger.info("🚀 Starter worker-applikasjon")
+    logger.info("🚀 Starter watcher-applikasjon")
 
     try:
-        # DB
-        config: DatabaseConfig = DatabaseConfig.from_env()
-        db: Database = Database(config)
+        config = DatabaseConfig.from_env()
+        db = Database(config)
         db.connect()
 
-        # paths og extensions
         from config.paths_config import PathsConfig
         paths_config = PathsConfig.from_env()
         paths_config.validate()
-
-        # start worker
-        loop = asyncio.get_event_loop()
-        loop.create_task(run_worker(db, paths_config.watch_paths, paths_config.extensions, lambda: shutdown_flag))
 
         # health API
         app = create_health_app(
@@ -80,7 +75,18 @@ def main():
             heartbeat_ref=get_heartbeat
         )
 
-        uvicorn.run(app, host="0.0.0.0", port=8080)
+        # start health server i egen tråd
+        Thread(target=start_health_server, args=(app,), daemon=True).start()
+        logger.info("🌡️ Health API startet på port 8080")
+
+        # start worker i event loop
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(run_worker(
+            db,
+            paths_config.watch_paths,
+            paths_config.extensions,
+            lambda: shutdown_flag
+        ))
 
     except Exception as e:
         logger.error(f"❌ Kritisk feil i app: {e}")
