@@ -1,3 +1,4 @@
+from ctypes import Union
 from config.database_config import DatabaseConfig
 from utils.logger import logger
 import mysql.connector
@@ -51,3 +52,15 @@ class Database:
         cursor = self.conn.cursor(dictionary=True)
         cursor.execute(sql, params or ())
         return cursor.fetchall()
+
+    def ping(self):
+        try:
+            self.validate()
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT 1")
+            cursor.fetchone()
+            return True
+        except Exception as e:
+            logger.error(f"Ping failed: {e}")
+            return False
+

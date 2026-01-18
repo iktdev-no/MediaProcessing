@@ -47,11 +47,14 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int) -> tuple[int
         db.connect()
         return poll_interval, 5
 
-def run_worker(db: Database, shutdown_flag_ref=lambda: False) -> None:
+def run_worker(db: Database, shutdown_flag_ref=lambda: False, heartbeat_ref=None) -> None:
     poll_interval: int = 5
     worker_id = f"worker-{uuid.uuid4()}"
 
     while not shutdown_flag_ref():
+        if heartbeat_ref: 
+            heartbeat_ref(time.time())
+        
         sleep_interval, poll_interval = run_iteration(db, worker_id, poll_interval)
         time.sleep(sleep_interval)
 
