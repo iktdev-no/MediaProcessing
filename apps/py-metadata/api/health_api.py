@@ -36,7 +36,7 @@ async def health():
         now = time.time()
         diff = now - last
 
-        worker_ok = diff < 10
+        worker_ok = diff < 90 # 90 sekunder toleranse pga at worker kan være inaktiv ved lav belastning
 
         # Hvis worker er false og ingen exception ble kastet → legg diff i worker_error
         if not worker_ok and worker_error is None:

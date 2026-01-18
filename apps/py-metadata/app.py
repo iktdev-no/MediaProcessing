@@ -30,7 +30,7 @@ def get_heartbeat():
 
 
 def start_health_server():
-    uvicorn.run(health_app, host="0.0.0.0", port=8080, log_level="warning")
+    uvicorn.run(health_app, host="0.0.0.0", port=8080, log_level="error")
 
 
 def start_worker(db):

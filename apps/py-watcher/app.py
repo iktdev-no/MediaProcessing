@@ -51,7 +51,7 @@ async def run_worker(db: Database, paths, extensions, shutdown_flag_ref):
 
 
 def start_health_server(app):
-    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="warning")
+    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="error")
 
 
 def main():
