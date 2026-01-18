@@ -85,7 +85,7 @@ jobs:
 
 
   build-python:
-    needs: [pre-check, build-shared]
+    needs: [pre-check]
     strategy:
       matrix:
         include:
