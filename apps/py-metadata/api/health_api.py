@@ -43,7 +43,7 @@ async def health():
     return JSONResponse(
         status_code=200 if status else 500,
         content={
-            "status": "ok" if status else "error",
+            "status": "healthy" if status else "unhealthy",
             "database": db_ok,
             "database_error": db_error,
             "worker": worker_ok,
