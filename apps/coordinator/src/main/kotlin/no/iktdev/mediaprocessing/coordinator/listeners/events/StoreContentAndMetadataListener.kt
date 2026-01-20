@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ManualAllowCompletionEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
@@ -21,7 +22,16 @@ class StoreContentAndMetadataListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event as? MigrateContentToStoreTaskResultEvent ?: return null
+        if (event !is MigrateContentToStoreTaskResultEvent && event !is ManualAllowCompletionEvent)
+            return null
+
+        val useEvent = if (event is ManualAllowCompletionEvent) {
+            history.lastOrNull { it is MigrateContentToStoreTaskResultEvent } as? MigrateContentToStoreTaskResultEvent
+                ?: return null
+        } else {
+            event as MigrateContentToStoreTaskResultEvent
+        }
+
         val collectionEvent = history.lastOrNull { it is CollectedEvent } as? CollectedEvent
             ?: return null
 
@@ -36,6 +46,12 @@ class StoreContentAndMetadataListener: EventListener() {
         val metadata = projection.projectMetadata()
         if (metadata == null) {
             log.error { "Metadata is null @ ${useEvent.referenceId}"}
+            return null
+        }
+
+        if (!projection.canStoreAutomatically()) {
+            log.info { "Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
+            log.info { "A manual allow completion event is required to proceed." }
             return null
         }
 

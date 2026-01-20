@@ -4,12 +4,18 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import java.io.File
 
 class StoreProjection(val events: List<Event>) {
 
+    fun canStoreAutomatically(): Boolean {
+        val manualEvent = events.filterIsInstance<StartProcessingEvent>().lastOrNull()
+        return manualEvent?.data?.flow != StartFlow.Manual
+    }
 
     fun projectMetadata(): ContentExport.MetadataExport? {
         val metadata = CollectProjection(events).metadata

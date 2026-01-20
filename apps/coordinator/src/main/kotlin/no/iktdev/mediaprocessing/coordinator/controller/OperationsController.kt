@@ -16,7 +16,6 @@ class OperationsController(
 
     @PostMapping("/start")
     fun startProcess(@RequestBody req: StartProcessRequest): ResponseEntity<Map<String, String>> {
-        val referenceId = commandService.startProcess(req)
         return when (val result = commandService.startProcess(req)) {
             is CommandService.StartResult.Accepted -> ResponseEntity
                 .accepted()
