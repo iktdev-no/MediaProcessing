@@ -112,6 +112,13 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
         override var sampleRate: Int? = null, // = 48000
     ) : AudioCodec("ac3")
 
+    class Eac3(
+        override var bitrate: Int? = null,
+        override var channels: Int? = null,
+        override var sampleRate: Int? = null,
+    ) : AudioCodec("eac3")
+
+
 
     class Dts(
         override var bitrate: Int? = null,
@@ -205,6 +212,7 @@ fun AudioCodec.isSame(name: String): Boolean {
         "vorbis", "oggvorbis", "libvorbis" -> AudioCodec.Vorbis()
         "flac" -> AudioCodec.Flac()
         "ac3", "dolby", "dolbydigital" -> AudioCodec.Ac3()
+        "eac3", "ec3", "dolbydigitalplus", "ddp" -> AudioCodec.Eac3()
         "dts", "dca" -> AudioCodec.Dts()   // ← lagt til her
         "pcm_s16le", "pcm" -> AudioCodec.Pcm()
         "copy" -> AudioCodec.Copy
