@@ -71,10 +71,11 @@ class FlywayAutoConfig(
             .load()
 
         val pending = flyway.info().pending()
-
+        var migrationsToApply = true
         when {
             pending.isEmpty() -> {
                 log.info("ℹ️ Flyway is up to date. No migrations to apply.")
+                migrationsToApply = false
             }
 
             else -> {
@@ -87,7 +88,9 @@ class FlywayAutoConfig(
         if (result.migrationsExecuted > 0) {
             log.info("✅ Applied ${result.migrationsExecuted} migration(s).")
         } else {
-            log.info("ℹ️ No migrations were applied.")
+            if (migrationsToApply) {
+                log.info("ℹ️ No migrations were applied.")
+            }
         }
     }
 

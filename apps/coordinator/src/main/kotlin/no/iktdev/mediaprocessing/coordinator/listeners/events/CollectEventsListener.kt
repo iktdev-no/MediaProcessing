@@ -27,7 +27,11 @@ class CollectEventsListener: EventListener() {
         }
         val statusAcceptable = taskStatus.none { it in undesiredStates }
         if (!statusAcceptable) {
-            log.warn { "One or more tasks have failed in  ${event.referenceId}" }
+            if (taskStatus.any { it == CollectProjection.TaskStatus.Failed }) {
+                log.warn { "One or more tasks have failed in  ${event.referenceId}" }
+            } else {
+                log.info { "One or more tasks are still pending in  ${event.referenceId}" }
+            }
             return null
         }
 

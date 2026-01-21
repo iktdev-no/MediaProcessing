@@ -70,7 +70,7 @@ class MediaDetermineSubtitleTrackTypeListener: EventListener() {
     }
 
     private fun List<SubtitleItem>.onlySupportedCodecs(): List<SubtitleItem> {
-        return this.filter { it.stream.codec_type in supportedCodecs }
+        return this.filter { it.stream.codec_name in supportedCodecs }
     }
 
 }

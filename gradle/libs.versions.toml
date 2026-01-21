@@ -1,5 +1,5 @@
 [versions]
-eventi = "1.0-rc19"
+eventi = "1.0-rc20"
 exfl = "1.0-rc1"
 
 [libraries]

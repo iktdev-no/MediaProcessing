@@ -16,7 +16,6 @@ on:
         required: true
         type: boolean
 
-
 jobs:
   build-python:
     if: ${{ inputs.enabled && inputs.shouldBuild }}
@@ -25,49 +24,85 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # -----------------------------
+      # Cache pip per app
+      # -----------------------------
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ inputs.app }}-${{ hashFiles('apps/${{ inputs.app }}/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ inputs.app }}-
+
+      # -----------------------------
+      # Install Python deps
+      # -----------------------------
       - name: Install dependencies
+        working-directory: apps/${{ inputs.app }}
         run: |
-          cd apps/${{ inputs.app }}
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt
-          fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
 
-      # Install test dependencies (pytest, asyncio test libs, etc.)
-      - name: Install test dependencies
-        run: |
-          cd apps/${{ inputs.app }}
-          if [ -f requirements-test.txt ]; then
-            pip install -r requirements-test.txt
-          fi
-
-
-      # Run Python tests
+      # -----------------------------
+      # Run tests
+      # -----------------------------
       - name: Run Python tests
-        run: |
-          cd apps/${{ inputs.app }}
-          python -m pytest -q
+        working-directory: apps/${{ inputs.app }}
+        run: python -m pytest -q
 
-      # Build Docker image locally
-      - name: Build Docker image locally
-        run: |
-          docker build \
-            -f ./dockerfiles/Python \
-            -t local-${{ inputs.app }}:${{ inputs.dockerTag }} \
-            --build-arg MODULE_NAME=${{ inputs.app }} \
-            .
+      # -----------------------------
+      # Setup Buildx
+      # -----------------------------
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # Smoke-test the container
-      - name: Test Docker container
-        run: |
-          docker run --rm local-${{ inputs.app }}:${{ inputs.dockerTag }} /bin/sh -c "echo 'Smoke test OK'"
+      # -----------------------------
+      # Cache Docker layers per app
+      # -----------------------------
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache-${{ inputs.app }}
+          key: ${{ runner.os }}-buildx-${{ inputs.app }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ inputs.app }}-
 
+      # -----------------------------
+      # Build image (load locally for smoke test)
+      # -----------------------------
+      - name: Build Docker image (local load)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./dockerfiles/Python
+          build-args: |
+            MODULE_NAME=${{ inputs.app }}
+          load: true
+          tags: local-${{ inputs.app }}:${{ inputs.dockerTag }}
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ inputs.app }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ inputs.app }}-new
+
+      # -----------------------------
+      # Smoke test
+      # -----------------------------
+      - name: Smoke test container
+        run: |
+          docker run --rm local-${{ inputs.app }}:${{ inputs.dockerTag }} \
+            /bin/sh -c "echo 'Smoke test OK'"
+
+      # -----------------------------
+      # Docker login
+      # -----------------------------
       - name: Docker login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_NAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # Push final image
+      # -----------------------------
+      # Push final image (no rebuild)
+      # -----------------------------
       - name: Push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -80,3 +115,13 @@ jobs:
             bskjon/mediaprocessing-${{ inputs.app }}:v5
             bskjon/mediaprocessing-${{ inputs.app }}:v5-${{ inputs.dockerTag }}
             bskjon/mediaprocessing-${{ inputs.app }}:v5-${{ github.sha }}
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ inputs.app }}
+          cache-to: type=local,dest=/tmp/.buildx-cache-${{ inputs.app }}-new
+
+      # -----------------------------
+      # Move Docker cache
+      # -----------------------------
+      - name: Move Docker cache
+        run: |
+          rm -rf /tmp/.buildx-cache-${{ inputs.app }}
+          mv /tmp/.buildx-cache-${{ inputs.app }}-new /tmp/.buildx-cache-${{ inputs.app }}
