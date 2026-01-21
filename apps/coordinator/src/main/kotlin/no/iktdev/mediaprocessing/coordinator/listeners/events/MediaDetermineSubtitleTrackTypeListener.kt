@@ -34,7 +34,7 @@ class MediaDetermineSubtitleTrackTypeListener: EventListener() {
 
         return MediaTracksDetermineSubtitleTypeEvent(
             subtitleTrackItems = collected
-        )
+        ).derivedOf(event)
     }
 
 

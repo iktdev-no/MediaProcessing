@@ -32,7 +32,7 @@ class MediaSelectExtractTracksListener: EventListener() {
 
         return MediaTracksExtractSelectedEvent(
             selectedSubtitleTracks = filtered.map { it.index }
-        )
+        ).derivedOf(event)
     }
 
 
