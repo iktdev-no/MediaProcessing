@@ -4,7 +4,7 @@ from typing import Optional
 from db.database import Database
 from models.enums import TaskStatus
 from models.event import MetadataSearchResultEvent
-from models.task import Task, MetadataSearchTask, MetadataSearchData
+from models.task import MetadataSearchPayload, Task, MetadataSearchTask, MetadataSearchData
 from utils.logger import logger
 
 def fetch_next_task(db: Database) -> Optional[Task]:
@@ -21,7 +21,19 @@ def fetch_next_task(db: Database) -> Optional[Task]:
     try:
         if row["TASK"] == "MetadataSearchTask":
             # hele JSON ligger i DATA
-            return MetadataSearchTask.model_validate_json(row["DATA"])
+            payload = MetadataSearchPayload.model_validate_json(row["DATA"])
+            return MetadataSearchTask(
+                referenceId=row["REFERENCE_ID"],
+                taskId=row["TASK_ID"],
+                task=row["TASK"],
+                status=row["STATUS"],
+                data=payload.data,
+                claimed=row["CLAIMED"],
+                claimedBy=row["CLAIMED_BY"],
+                consumed=row["CONSUMED"],
+                lastCheckIn=row["LAST_CHECK_IN"],
+                persistedAt=row["PERSISTED_AT"]
+            )
         else:
             return None
     except Exception as e:

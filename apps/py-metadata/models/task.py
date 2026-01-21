@@ -10,6 +10,10 @@ class MetadataSearchData(BaseModel):
     searchTitles: List[str]
     collection: str
 
+class MetadataSearchPayload(BaseModel):
+    data: MetadataSearchData
+
+
 
 class Task(BaseModel):
     referenceId: UUID
