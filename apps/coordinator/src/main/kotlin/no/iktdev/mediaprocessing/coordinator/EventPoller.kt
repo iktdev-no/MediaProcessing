@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class PollerAdministrator(
+class EventPollerAdministrator(
     private val eventPoller: EventPoller
 ) : SmartLifecycle {
 
