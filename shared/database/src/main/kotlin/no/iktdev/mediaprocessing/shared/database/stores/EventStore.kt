@@ -19,8 +19,8 @@ object EventStore: EventStore {
                 .map {
                     PersistedEvent(
                         id = it[EventsTable.id].value.toLong(),
-                        referenceId = it[EventsTable.referenceId],
-                        eventId = it[EventsTable.eventId],
+                        referenceId = UUID.fromString(it[EventsTable.referenceId]),
+                        eventId = UUID.fromString(it[EventsTable.eventId]),
                         event = "", // You might want to store the event type as well
                         data = it[EventsTable.data],
                         persistedAt = it[EventsTable.persistedAt]
@@ -33,12 +33,12 @@ object EventStore: EventStore {
     override fun getPersistedEventsFor(referenceId: UUID): List<PersistedEvent> {
         val result = withTransaction {
             EventsTable.selectAll()
-                .where { EventsTable.referenceId eq referenceId}
+                .where { EventsTable.referenceId eq referenceId.toString()}
                 .map {
                     PersistedEvent(
                         id = it[EventsTable.id].value.toLong(),
-                        referenceId = it[EventsTable.referenceId],
-                        eventId = it[EventsTable.eventId],
+                        referenceId = UUID.fromString(it[EventsTable.referenceId]),
+                        eventId = UUID.fromString(it[EventsTable.eventId]),
                         event = "", // You might want to store the event type as well
                         data = it[EventsTable.data],
                         persistedAt = it[EventsTable.persistedAt]
@@ -55,8 +55,8 @@ object EventStore: EventStore {
         }
         withTransaction {
             EventsTable.insert {
-                it[EventsTable.referenceId] = event.referenceId
-                it[EventsTable.eventId] = event.eventId
+                it[EventsTable.referenceId] = event.referenceId.toString()
+                it[EventsTable.eventId] = event.eventId.toString()
                 it[EventsTable.event] = eventName
                 it[EventsTable.data] = asData
                 it[EventsTable.persistedAt] = LocalDateTime.now()

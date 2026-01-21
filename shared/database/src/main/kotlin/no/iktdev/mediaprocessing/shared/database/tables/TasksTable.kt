@@ -6,11 +6,10 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
-import java.util.*
 
 object TasksTable: IntIdTable(name = "TASKS") {
-    val referenceId: Column<UUID> = uuid("REFERENCE_ID")
-    val taskId: Column<UUID> = uuid("TASK_ID")
+    val referenceId: Column<String> = varchar("REFERENCE_ID", 36)
+    val taskId: Column<String> = varchar("TASK_ID", 36)
     val task: Column<String> = varchar("TASK",100)
     val status: Column<TaskStatus> = enumerationByName("STATUS", 50, TaskStatus::class).default(TaskStatus.Pending)
     val data: Column<String> = text("DATA")
