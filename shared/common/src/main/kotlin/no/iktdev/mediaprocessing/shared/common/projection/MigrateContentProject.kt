@@ -32,7 +32,7 @@ open class MigrateContentProject(val events: List<Event>, val storageArea: File)
     }
 
     internal fun getMetadataTitles(): List<String> {
-        val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()?.recommended?.data
+        val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()?.recommended?.metadata
             ?: return emptyList()
         return (metadataEvent.alternateTitles + listOf(metadataEvent.title))
     }

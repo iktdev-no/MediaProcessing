@@ -268,7 +268,7 @@ class ProjectContentStoreTest {
                 prefixScore = 0,
                 advancedScore = 0,
                 sourceWeight = 1f,
-                data = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = "MainTitle",
                     alternateTitles = listOf("Alt1", "Alt2"),
@@ -375,7 +375,7 @@ class ProjectContentStoreTest {
                 prefixScore = 0,
                 advancedScore = 0,
                 sourceWeight = 1f,
-                data = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = "MatchMe",
                     alternateTitles = listOf("Alt1"),
@@ -431,7 +431,7 @@ class ProjectContentStoreTest {
                 prefixScore = 0,
                 advancedScore = 0,
                 sourceWeight = 1f,
-                data = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = "Unrelated",
                     alternateTitles = listOf("Alt1"),
@@ -513,7 +513,7 @@ class ProjectContentStoreTest {
                 prefixScore = 0,
                 advancedScore = 0,
                 sourceWeight = 1f,
-                data = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = case.metadataTitles.last(),
                     alternateTitles = case.metadataTitles.dropLast(1),
@@ -565,7 +565,7 @@ class ProjectContentStoreTest {
                 prefixScore = 0,
                 advancedScore = 0,
                 sourceWeight = 1f,
-                data = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = case.metadataTitles.last(),
                     alternateTitles = case.metadataTitles.dropLast(1),

@@ -71,16 +71,16 @@ class CollectProjection(val events: List<Event>) {
         val coverDownloadResultEvents = events.filterIsInstance<CoverDownloadResultEvent>()
             .filter { it.status == no.iktdev.eventi.models.store.TaskStatus.Completed }
         val coverFile =
-            coverDownloadResultEvents.find { it -> it.data?.source == metadataEvent.recommended?.data?.source }?.data?.outputFile
+            coverDownloadResultEvents.find { it -> it.data?.source == metadataEvent.recommended?.metadata?.source }?.data?.outputFile
                 ?.let { File(it) }
         val result = metadataEvent.recommended ?: return null
         return MetadataProjection(
-            title = result.data.title,
-            summary = result.data.summary,
-            mediaType = result.data.type,
-            genres = result.data.genres,
+            title = result.metadata.title,
+            summary = result.metadata.summary,
+            mediaType = result.metadata.type,
+            genres = result.metadata.genres,
             cover = coverFile,
-            source = result.data.source
+            source = result.metadata.source
         )
     }
 

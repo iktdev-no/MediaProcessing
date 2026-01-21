@@ -26,11 +26,11 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
         }
 
         val downloadData = useEvent.results.map {
-            val data = it.data
+            val data = it.metadata
             val outputFileName = "${data.title}-${data.source}"
             CoverDownloadTask.CoverDownloadData(
-                url = it.data.cover,
-                source = it.data.source,
+                url = it.metadata.cover,
+                source = it.metadata.source,
                 outputFileName = outputFileName
             )
         }

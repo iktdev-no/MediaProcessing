@@ -4,7 +4,7 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Metadata
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
-import java.util.UUID
+import java.util.*
 
 data class MetadataSearchResultEvent(
     val results: List<SearchResult> = emptyList(),
@@ -16,7 +16,7 @@ data class MetadataSearchResultEvent(
         val prefixScore: Int,
         val advancedScore: Int,
         val sourceWeight: Float,
-        val data: MetadataResult
+        val metadata: MetadataResult
     ) {
 
         data class MetadataResult(

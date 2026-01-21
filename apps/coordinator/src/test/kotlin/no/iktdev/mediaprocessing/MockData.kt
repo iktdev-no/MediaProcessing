@@ -33,7 +33,7 @@ object MockData {
                     prefixScore = 10,
                     advancedScore = 10,
                     sourceWeight = 1f,
-                    data = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                    metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                         source = source,
                         title = "MyCollection",
                         cover = coverUrl,
