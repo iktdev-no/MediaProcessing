@@ -4,18 +4,13 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.dsl.SubtitleCodec
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.springframework.stereotype.Component
 import java.io.File
-import java.util.UUID
+import java.util.*
 
 @Component
 class MediaCreateExtractTaskListener: EventListener() {
@@ -33,9 +28,12 @@ class MediaCreateExtractTaskListener: EventListener() {
         val selectedEvent = event as? MediaTracksExtractSelectedEvent ?: return null
         val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
 
-        val selectedStreams: Map<Int, SubtitleStream> = selectedEvent.selectedSubtitleTracks.associateWith {
-            streams.subtitleStream[it]
-        }
+        val selectedStreams: Map<Int, SubtitleStream> =
+            selectedEvent.selectedSubtitleTracks.mapNotNull { streamIndex ->
+                val stream = streams.subtitleStream.firstOrNull { it.index == streamIndex }
+                stream?.let { streams.subtitleStream.indexOf(it) to it }
+            }.toMap()
+
 
         val entries = selectedStreams.mapNotNull { (idx, stream )->
             toSubtitleArgumentData(idx, startedEvent.data.fileUri.let { File(it) }, stream)
