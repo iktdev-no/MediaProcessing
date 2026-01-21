@@ -89,7 +89,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./dockerfiles/DebianJava
+          file: ./dockerfiles/DebianJavaFfmpeg
           build-args: |
             MODULE_NAME=${{ inputs.app }}
             PASS_APP_VERSION=${{ env.VERSION }}
