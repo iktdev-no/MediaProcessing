@@ -25,9 +25,9 @@ object TaskStore: TaskStore {
                 .map { it ->
                     PersistedTask(
                         id = it[TasksTable.id].value.toLong(),
-                        referenceId = it[TasksTable.referenceId],
+                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
                         status = it[TasksTable.status],
-                        taskId = it[TasksTable.taskId],
+                        taskId = UUID.fromString(it[TasksTable.taskId]),
                         task = it[TasksTable.task],
                         data = it[TasksTable.data],
                         claimed = it[TasksTable.claimed],
@@ -54,8 +54,8 @@ object TaskStore: TaskStore {
         }
         withTransaction {
             TasksTable.insert {
-                it[referenceId] = task.referenceId
-                it[taskId] = task.taskId
+                it[referenceId] = task.referenceId.toString()
+                it[taskId] = task.taskId.toString()
                 it[TasksTable.task] = taskName
                 it[status] = TaskStatus.Pending
                 it[data] = asData
@@ -67,13 +67,13 @@ object TaskStore: TaskStore {
     override fun findByTaskId(taskId: UUID): PersistedTask? {
         return withTransaction {
             TasksTable.selectAll()
-                .where { TasksTable.taskId eq taskId }
+                .where { TasksTable.taskId eq taskId.toString() }
                 .singleOrNull()?.let {
                     PersistedTask(
                         id = it[TasksTable.id].value.toLong(),
-                        referenceId = it[TasksTable.referenceId],
+                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
                         status = it[TasksTable.status],
-                        taskId = it[TasksTable.taskId],
+                        taskId = UUID.fromString(it[TasksTable.taskId]),
                         task = it[TasksTable.task],
                         data = it[TasksTable.data],
                         claimed = it[TasksTable.claimed],
@@ -89,13 +89,13 @@ object TaskStore: TaskStore {
     override fun findByReferenceId(referenceId: UUID): List<PersistedTask> {
         return withTransaction {
             TasksTable.selectAll()
-                .where { TasksTable.referenceId eq referenceId }
+                .where { TasksTable.referenceId eq referenceId.toString() }
                 .map {
                     PersistedTask(
                         id = it[TasksTable.id].value.toLong(),
-                        referenceId = it[TasksTable.referenceId],
+                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
                         status = it[TasksTable.status],
-                        taskId = it[TasksTable.taskId],
+                        taskId = UUID.fromString(it[TasksTable.taskId]),
                         task = it[TasksTable.task],
                         data = it[TasksTable.data],
                         claimed = it[TasksTable.claimed],
@@ -111,13 +111,13 @@ object TaskStore: TaskStore {
     override fun findUnclaimed(referenceId: UUID): List<PersistedTask> {
         return withTransaction {
             TasksTable.selectAll()
-                .where { (TasksTable.referenceId eq referenceId) and (TasksTable.claimed eq false) and (TasksTable.consumed eq false) }
+                .where { (TasksTable.referenceId eq referenceId.toString()) and (TasksTable.claimed eq false) and (TasksTable.consumed eq false) }
                 .map {
                     PersistedTask(
                         id = it[TasksTable.id].value.toLong(),
-                        referenceId = it[TasksTable.referenceId],
+                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
                         status = it[TasksTable.status],
-                        taskId = it[TasksTable.taskId],
+                        taskId = UUID.fromString(it[TasksTable.taskId]),
                         task = it[TasksTable.task],
                         data = it[TasksTable.data],
                         claimed = it[TasksTable.claimed],
@@ -137,9 +137,9 @@ object TaskStore: TaskStore {
                 .map {
                     PersistedTask(
                         id = it[TasksTable.id].value.toLong(),
-                        referenceId = it[TasksTable.referenceId],
+                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
                         status = it[TasksTable.status],
-                        taskId = it[TasksTable.taskId],
+                        taskId = UUID.fromString(it[TasksTable.taskId]),
                         task = it[TasksTable.task],
                         data = it[TasksTable.data],
                         claimed = it[TasksTable.claimed],
@@ -155,7 +155,7 @@ object TaskStore: TaskStore {
     override fun claim(taskId: UUID, workerId: String): Boolean {
         return withTransaction {
             TasksTable.update({
-                (TasksTable.taskId eq taskId) and
+                (TasksTable.taskId eq taskId.toString()) and
                 (TasksTable.claimed eq false)
             }) {
                 it[claimed] = true
@@ -167,7 +167,7 @@ object TaskStore: TaskStore {
 
     override fun heartbeat(taskId: UUID) {
         withTransaction {
-            TasksTable.update({ TasksTable.taskId eq taskId }) {
+            TasksTable.update({ TasksTable.taskId eq taskId.toString() }) {
                 it[lastCheckIn] = LocalDateTime.now()
             }
         }
@@ -175,7 +175,7 @@ object TaskStore: TaskStore {
 
     override fun markConsumed(taskId: UUID, status: TaskStatus) {
         withTransaction {
-            TasksTable.update({ TasksTable.taskId eq taskId }) {
+            TasksTable.update({ TasksTable.taskId eq taskId.toString() }) {
                 it[consumed] = true
                 it[TasksTable.status] = status
             }
@@ -206,9 +206,9 @@ object TaskStore: TaskStore {
                 .map {
                     PersistedTask(
                         id = it[TasksTable.id].value.toLong(),
-                        referenceId = it[TasksTable.referenceId],
+                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
                         status = it[TasksTable.status],
-                        taskId = it[TasksTable.taskId],
+                        taskId = UUID.fromString(it[TasksTable.taskId]),
                         task = it[TasksTable.task],
                         data = it[TasksTable.data],
                         claimed = it[TasksTable.claimed],
