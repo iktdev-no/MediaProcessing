@@ -28,7 +28,7 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int) -> tuple[int
 
             logger.info(f"🔔 Fant task {task.taskId} ({task.task}), claimed by {worker_id}")
             try:
-                event: MetadataSearchResultEvent = asyncio.run(process_task(task))
+                event: MetadataSearchResultEvent = asyncio.run(process_task(db, task))
                 if event:
                     persist_event_and_mark_consumed(db, event, str(task.taskId))
                     logger.info(f"✅ Task {task.taskId} ferdig prosessert")
