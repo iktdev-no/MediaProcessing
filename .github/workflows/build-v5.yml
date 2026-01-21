@@ -11,6 +11,7 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
+      sharedDefinitions: ${{ steps.filter.outputs.shared }}
       shared:      ${{ steps.filter.outputs.shared }}
       processer:   ${{ steps.filter.outputs.processer }}
       converter:   ${{ steps.filter.outputs.converter }}
@@ -33,6 +34,8 @@ jobs:
           filters: |
             shared:
               - 'shared/**'
+            sharedDefinitions:
+              - 'gradle/**'
             processer:
               - 'apps/processer/**'
             converter:
@@ -53,11 +56,18 @@ jobs:
 
   build-shared:
     needs: pre-check
-    if: ${{ needs.pre-check.outputs.shared == 'true' || github.event_name == 'workflow_dispatch' }}
+    if: ${{
+          needs.pre-check.outputs.shared == 'true'
+          || needs.pre-check.outputs.sharedDefinitions == 'true'
+          || needs.pre-check.outputs.processer == 'true'
+          || needs.pre-check.outputs.converter == 'true'
+          || needs.pre-check.outputs.coordinator == 'true'
+          || needs.pre-check.outputs.ui == 'true'
+          || github.event_name == 'workflow_dispatch'
+        }}
     uses: ./.github/workflows/build-shared.yml
     with:
       dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
-
 
   build-java:
     needs: [pre-check, build-shared]
@@ -80,6 +90,7 @@ jobs:
       enabled: ${{ matrix.enabled }}
       shouldBuild: ${{ needs.pre-check.outputs[matrix.app] == 'true'
         || needs.pre-check.outputs.shared == 'true'
+        || needs.pre-check.outputs.sharedDefinitions == 'true'
         || github.event_name == 'workflow_dispatch' }}
     secrets: inherit
 
@@ -100,6 +111,5 @@ jobs:
       dockerTag: ${{ needs.pre-check.outputs.dockerTag }}
       enabled: ${{ matrix.enabled }}
       shouldBuild: ${{ needs.pre-check.outputs[matrix.app] == 'true'
-        || needs.pre-check.outputs.shared == 'true'
         || github.event_name == 'workflow_dispatch' }}
     secrets: inherit

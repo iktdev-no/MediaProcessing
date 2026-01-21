@@ -21,7 +21,7 @@ object EventStore: EventStore {
                         id = it[EventsTable.id].value.toLong(),
                         referenceId = UUID.fromString(it[EventsTable.referenceId]),
                         eventId = UUID.fromString(it[EventsTable.eventId]),
-                        event = "", // You might want to store the event type as well
+                        event = it[EventsTable.event],
                         data = it[EventsTable.data],
                         persistedAt = it[EventsTable.persistedAt]
                     )
@@ -39,7 +39,7 @@ object EventStore: EventStore {
                         id = it[EventsTable.id].value.toLong(),
                         referenceId = UUID.fromString(it[EventsTable.referenceId]),
                         eventId = UUID.fromString(it[EventsTable.eventId]),
-                        event = "", // You might want to store the event type as well
+                        event = it[EventsTable.event],
                         data = it[EventsTable.data],
                         persistedAt = it[EventsTable.persistedAt]
                     )
