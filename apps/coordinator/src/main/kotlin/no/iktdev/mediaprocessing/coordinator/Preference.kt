@@ -37,22 +37,46 @@ data class AudioPreference(
 
 @Component
 class Preference(private val coordinatorEnv: CoordinatorEnv) {
+
     fun getProcesserPreference(): ProcesserPreference {
-        var preference: ProcesserPreference = ProcesserPreference.default()
-        coordinatorEnv.preference.ifExists({
-            val text = readText()
-            try {
-                val result = Gson().fromJson(text, PeferenceConfig::class.java)
-                preference = result.processer
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, orElse = {
-            coordinatorEnv.preference.writeText(Gson().toJson(PeferenceConfig(preference)))
-        })
-        return preference
+        val default = ProcesserPreference.default()
+
+        val file = coordinatorEnv.preference
+        if (!file.exists()) {
+            // Opprett fil med default
+            file.writeText(Gson().toJson(PeferenceConfig(default)))
+            return default
+        }
+
+        val text = try {
+            file.readText()
+        } catch (e: Exception) {
+            return default
+        }
+
+        val parsed = try {
+            Gson().fromJson(text, PeferenceConfig::class.java)
+        } catch (e: Exception) {
+            return default
+        }
+
+        // Hvis hele configen er null → default
+        val cfg = parsed ?: return default
+
+        // Hvis processer er null → default
+        val p = cfg.processer ?: return default
+
+        // Hvis underfelter er null → fyll inn default
+        val safeVideo = p.videoPreference ?: default.videoPreference
+        val safeAudio = p.audioPreference ?: default.audioPreference
+
+        return ProcesserPreference(
+            videoPreference = safeVideo,
+            audioPreference = safeAudio
+        )
     }
 }
+
 
 private fun File.ifExists(block: File.() -> Unit, orElse: () -> Unit = {}) {
     if (this.exists()) {
