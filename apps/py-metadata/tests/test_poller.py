@@ -57,7 +57,7 @@ def test_run_worker_processes_one(monkeypatch):
     monkeypatch.setattr("worker.poller.claim_task", lambda *a, **k: True)
 
     # Viktig: async stub
-    async def fake_process_task(task):
+    async def fake_process_task(db, task):
         return make_dummy_event()
     monkeypatch.setattr("worker.poller.process_task", fake_process_task)
 
