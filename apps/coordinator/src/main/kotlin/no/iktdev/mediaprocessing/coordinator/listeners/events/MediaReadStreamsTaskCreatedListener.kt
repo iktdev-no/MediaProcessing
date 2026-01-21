@@ -28,6 +28,6 @@ class MediaReadStreamsTaskCreatedListener: EventListener() {
         ).derivedOf(event)
 
         TaskStore.persist(readTask)
-        return CoordinatorReadStreamsTaskCreatedEvent(readTask.taskId) // Create task instead of event
+        return CoordinatorReadStreamsTaskCreatedEvent(readTask.taskId).derivedOf(event) // Create task instead of event
     }
 }
