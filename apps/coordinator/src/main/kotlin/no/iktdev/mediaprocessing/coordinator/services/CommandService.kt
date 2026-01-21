@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.dto.requests.StartProcessRequest
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
@@ -12,6 +13,7 @@ import java.util.*
 
 @Service
 class CommandService {
+    val log = KotlinLogging.logger {}
 
     fun startProcess(request: StartProcessRequest): StartResult {
         return try {
@@ -33,6 +35,7 @@ class CommandService {
             EventStore.persist(startProcessingEvent)
             StartResult.Accepted(startProcessingEvent.referenceId)
         } catch (e: Exception) {
+            log.error { e }
             StartResult.Rejected("Failed to start process for file ${request.fileUri}, with the following reason: ${e.message}")
         }
     }
