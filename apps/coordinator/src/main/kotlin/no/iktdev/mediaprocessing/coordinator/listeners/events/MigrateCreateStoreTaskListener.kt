@@ -5,12 +5,12 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ManualAllowCompletionEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.MigrateContentProject
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.springframework.stereotype.Component
 
 @Component
@@ -23,7 +23,17 @@ class MigrateCreateStoreTaskListener(
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event as? CollectedEvent ?: return null
+
+        if (event !is CollectedEvent && event !is ManualAllowCompletionEvent)
+            return null
+
+        val useEvent = if (event is ManualAllowCompletionEvent) {
+            history.lastOrNull { it is CollectedEvent } as? CollectedEvent
+                ?: return null
+        } else {
+            event as CollectedEvent
+        }
+
         val useHistory = history.filter { useEvent.eventIds.contains(it.eventId) }
 
         val collectProjection = CollectProjection(useHistory)
@@ -54,6 +64,13 @@ class MigrateCreateStoreTaskListener(
                 coverContent = coverContent
             )
         ).derivedOf(event)
+
+
+        if (!collectProjection.canStoreAutomatically()) {
+            log.info { "Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
+            log.info { "A manual allow completion event is required to proceed." }
+            return null
+        }
 
         TaskStore.persist(storeTask)
 

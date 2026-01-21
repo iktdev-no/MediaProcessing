@@ -54,7 +54,7 @@ class MediaCreateConvertTaskListener: EventListener() {
         ).derivedOf(event)
         TaskStore.persist(convertTask)
 
-        return ConvertTaskCreatedEvent(convertTask.taskId)
+        return ConvertTaskCreatedEvent(convertTask.taskId).derivedOf(event)
 
     }
 }
