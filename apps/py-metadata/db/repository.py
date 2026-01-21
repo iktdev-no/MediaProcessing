@@ -11,7 +11,7 @@ def fetch_next_task(db: Database) -> Optional[Task]:
     db.validate()
     cursor = db.conn.cursor(dictionary=True)
     cursor.execute(
-        "SELECT * FROM TASKS WHERE STATUS='Pending' AND CLAIMED=0 AND CONSUMED=0 "
+        "SELECT * FROM TASKS WHERE TASK='MetadataSearchTask' AND STATUS='Pending' AND CLAIMED=0 AND CONSUMED=0 "
         "ORDER BY PERSISTED_AT ASC LIMIT 1"
     )
     row = cursor.fetchone()
@@ -23,7 +23,7 @@ def fetch_next_task(db: Database) -> Optional[Task]:
             # hele JSON ligger i DATA
             return MetadataSearchTask.model_validate_json(row["DATA"])
         else:
-            return Task.model_validate_json(row["DATA"])
+            return None
     except Exception as e:
         logger.error(f"❌ Feil ved deserialisering av task {row.get('TASK_ID')}: {e}")
         mark_failed(db, row["TASK_ID"])
