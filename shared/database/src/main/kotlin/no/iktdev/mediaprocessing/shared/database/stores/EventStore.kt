@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.shared.database.stores
 
-import com.google.gson.Gson
+import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.stores.EventStore
@@ -49,7 +49,7 @@ object EventStore: EventStore {
     }
 
     override fun persist(event: Event) {
-        val asData = Gson().toJson(event)
+        val asData = ZDS.WGson.toJson(event)
         val eventName = event::class.simpleName ?: run {
             throw RuntimeException("Missing class name for event: $event")
         }
