@@ -41,6 +41,11 @@ class CollectProjection(val events: List<Event>) {
         coverDownloadTaskStatus
     )
 
+    fun canStoreAutomatically(): Boolean {
+        val manualEvent = events.filterIsInstance<StartProcessingEvent>().lastOrNull()
+        return manualEvent?.data?.flow != StartFlow.Manual
+    }
+
     private fun projectUseFile(): File? {
         val added = events.filterIsInstance<FileAddedEvent>().firstOrNull()?.data
         val startEvent = projectStartedWith()
