@@ -3,18 +3,18 @@ package no.iktdev.mediaprocessing.processer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Component
 class PollerAdministrator(
@@ -41,7 +41,10 @@ class TaskPoller(
 
 @Component
 class DefaultTaskReporter() : TaskReporter {
+    private val log = KotlinLogging.logger {}
+
     override fun markClaimed(taskId: UUID, workerId: String) {
+        log.info { "$workerId claiming task $taskId" }
         TaskStore.claim(taskId, workerId)
     }
 
@@ -50,6 +53,7 @@ class DefaultTaskReporter() : TaskReporter {
     }
 
     override fun markConsumed(taskId: UUID) {
+        log.info { "Marking task $taskId as completed" }
         TaskStore.markConsumed(taskId, TaskStatus.Completed)
     }
 

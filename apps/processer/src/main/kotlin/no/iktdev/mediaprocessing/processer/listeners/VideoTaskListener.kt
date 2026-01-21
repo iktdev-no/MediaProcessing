@@ -1,8 +1,10 @@
 package no.iktdev.mediaprocessing.processer.listeners
 
+import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
@@ -17,10 +19,19 @@ import java.util.*
 
 @Service
 class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
+    private val log = KotlinLogging.logger {}
 
     override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
 
     override fun supports(task: Task) = task is EncodeTask
+
+    override fun accept(task: Task, reporter: TaskReporter): Boolean {
+        val accepts = super.accept(task, reporter)
+        if (accepts) {
+            log.info { "${getWorkerId()} accepts video task ${task.taskId}" }
+        }
+        return accepts
+    }
 
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as EncodeTask
