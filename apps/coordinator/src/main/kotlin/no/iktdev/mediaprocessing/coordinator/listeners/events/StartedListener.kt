@@ -20,8 +20,8 @@ class StartedListener : EventListener() {
                 flow = StartFlow.Auto,
                 fileUri = useEvent.data.fileUri,
                 operation = setOf(
-                    OperationType.Extract,
-                    OperationType.Convert,
+                    OperationType.ExtractSubtitles,
+                    OperationType.ConvertSubtitles,
                     OperationType.Encode
                 )
             )

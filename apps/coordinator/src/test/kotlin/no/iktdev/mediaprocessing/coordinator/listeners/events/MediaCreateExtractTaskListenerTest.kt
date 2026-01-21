@@ -183,7 +183,7 @@ class MediaCreateExtractTaskListenerTest {
     """)
     fun testOnEventCreatesTasks() {
         val startEvent = StartProcessingEvent(
-            StartData(setOf(OperationType.Extract), fileUri = "/tmp/movie.mkv")
+            StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
         )
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(subtitleStream = listOf(dummyStream(0, "subrip", "eng")))
@@ -221,7 +221,7 @@ class MediaCreateExtractTaskListenerTest {
     fun testOnEventWithMultipleSubtitles() {
         // Hvis: vi har en StartProcessingEvent og to subtitle streams
         val startEvent = StartProcessingEvent(
-            StartData(setOf(OperationType.Extract), fileUri = "/tmp/movie.mkv")
+            StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
         )
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(

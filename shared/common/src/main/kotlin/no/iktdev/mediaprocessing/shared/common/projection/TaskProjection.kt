@@ -73,14 +73,14 @@ class TaskProjection(val events: List<Event>) {
             ?.data?.operation
             ?: emptySet()
 
-        val hasExtractAndConvert = operations.contains(OperationType.Extract) &&
-                operations.contains(OperationType.Convert)
+        val hasExtractAndConvert = operations.contains(OperationType.ExtractSubtitles) &&
+                operations.contains(OperationType.ConvertSubtitles)
 
         val hasCreatedConvert = events.filterIsInstance<ConvertTaskCreatedEvent>().isNotEmpty()
 
         return when {
             // Convert ikke en del av operasjonene → bruk baseStatus direkte
-            !operations.contains(OperationType.Convert) -> baseStatus
+            !operations.contains(OperationType.ConvertSubtitles) -> baseStatus
 
             // Sekvensregel: både Extract og Convert er planlagt,
             // men ingen ConvertCreated finnes → Pending

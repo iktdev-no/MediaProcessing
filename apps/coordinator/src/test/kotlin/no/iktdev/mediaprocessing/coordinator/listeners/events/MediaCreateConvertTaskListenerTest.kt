@@ -41,7 +41,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = tempFile.absolutePath,
-                operation = setOf(OperationType.Convert)
+                operation = setOf(OperationType.ConvertSubtitles)
             )
         )
         val extractEvent = ProcesserExtractResultEvent(
@@ -128,7 +128,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = tempFile.absolutePath,
-                operation = setOf(OperationType.Convert)
+                operation = setOf(OperationType.ConvertSubtitles)
             )
         )
         val extractEvent = ProcesserExtractResultEvent(
@@ -157,7 +157,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = "video.mp4",
-                operation = setOf(OperationType.Convert)
+                operation = setOf(OperationType.ConvertSubtitles)
             )
         )
         val extractEvent = ProcesserExtractResultEvent(
@@ -183,7 +183,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = "nonexistent.srt",
-                operation = setOf(OperationType.Convert)
+                operation = setOf(OperationType.ConvertSubtitles)
             )
         )
         val extractEvent = ProcesserExtractResultEvent(
@@ -219,7 +219,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
             val startEvent = StartProcessingEvent(
                 data = StartData(
                     fileUri = "/tmp/video.srt",
-                    operation = setOf(OperationType.Convert)
+                    operation = setOf(OperationType.ConvertSubtitles)
                 )
             )
 

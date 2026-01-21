@@ -26,7 +26,7 @@ class MediaCreateExtractTaskListener: EventListener() {
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         if (startedEvent.data.operation.isNotEmpty()) {
-            if (!startedEvent.data.operation.contains(OperationType.Extract))
+            if (!startedEvent.data.operation.contains(OperationType.ExtractSubtitles))
                 return null
         }
 

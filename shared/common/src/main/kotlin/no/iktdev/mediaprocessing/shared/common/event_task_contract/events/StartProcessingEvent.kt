@@ -20,7 +20,7 @@ enum class StartFlow {
 }
 
 enum class OperationType {
-    Extract,
+    ExtractSubtitles,
     Encode,
-    Convert
+    ConvertSubtitles
 }

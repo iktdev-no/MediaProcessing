@@ -30,7 +30,7 @@ class MediaCreateConvertTaskListener: EventListener() {
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         if (startedEvent.data.operation.isNotEmpty()) {
-            if (!startedEvent.data.operation.contains(OperationType.Convert))
+            if (!startedEvent.data.operation.contains(OperationType.ConvertSubtitles))
                 return null
         }
         val selectedEvent = event as? ProcesserExtractResultEvent ?: return null

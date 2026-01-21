@@ -75,7 +75,7 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun success2() {
         val started = defaultStartEvent().let { ev ->
-            ev.copy(data = ev.data.copy(operation = setOf(OperationType.Encode, OperationType.Extract)))
+            ev.copy(data = ev.data.copy(operation = setOf(OperationType.Encode, OperationType.ExtractSubtitles)))
         }
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
@@ -109,7 +109,7 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun success3() {
         val started = defaultStartEvent().let { ev ->
-            ev.copy(data = ev.data.copy(operation = setOf(OperationType.Convert)))
+            ev.copy(data = ev.data.copy(operation = setOf(OperationType.ConvertSubtitles)))
         }
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
