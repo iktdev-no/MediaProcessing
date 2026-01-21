@@ -71,15 +71,26 @@ class FlywayAutoConfig(
             .load()
 
         val pending = flyway.info().pending()
-        if (pending.isEmpty()) {
-            log.info("⚠️ No pending Flyway migrations found in ${locations.joinToString()}")
-        } else {
-            log.info("📦 Pending migrations: ${pending.joinToString { it.script }}")
+
+        when {
+            pending.isEmpty() -> {
+                log.info("ℹ️ Flyway is up to date. No migrations to apply.")
+            }
+
+            else -> {
+                log.info("📦 Pending migrations: ${pending.joinToString { it.script }}")
+            }
         }
 
-        flyway.migrate()
-        log.info("✅ Flyway migration complete.")
+        val result = flyway.migrate()
+
+        if (result.migrationsExecuted > 0) {
+            log.info("✅ Applied ${result.migrationsExecuted} migration(s).")
+        } else {
+            log.info("ℹ️ No migrations were applied.")
+        }
     }
+
 }
 
 @ConfigurationProperties(prefix = "spring.flyway")
