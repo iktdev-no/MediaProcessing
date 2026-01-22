@@ -44,6 +44,6 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
 
         return CoverDownloadTaskCreatedEvent(
             downloadTasks.map { it.taskId }
-        )
+        ).derivedOf(event)
     }
 }
