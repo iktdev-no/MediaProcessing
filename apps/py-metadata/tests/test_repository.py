@@ -87,7 +87,7 @@ def make_row(task_id, ref_id):
         "CLAIMED_BY": None,
         "CONSUMED": False,
         "LAST_CHECK_IN": None,
-        "PERSISTED_AT": utc_now().isoformat()
+        "PERSISTED_AT": utc_now()
     }
 
 def test_fetch_next_task_maps_correctly(monkeypatch):

@@ -36,6 +36,6 @@ def create_event(event_cls, file_name: str, file_uri: str, reference_id: Optiona
     return event_cls(
         referenceId=reference_id or str(uuid.uuid4()),
         eventId=str(uuid.uuid4()),
-        metadata=Metadata(created=utc_now().isoformat()),
+        metadata=Metadata(created=utc_now()),
         data=FileInfo(fileName=file_name, fileUri=file_uri)
     )

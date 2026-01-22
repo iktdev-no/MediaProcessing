@@ -98,7 +98,7 @@ def persist_event_and_mark_consumed(db: Database, event: MetadataSearchResultEve
                 str(event.eventId),
                 event_name,
                 as_data,
-                utc_now().isoformat()
+                utc_now()
             )
         )
 
