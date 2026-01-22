@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 from typing import Optional
 from db.database import Database
@@ -6,6 +5,7 @@ from models.enums import TaskStatus
 from models.event import MetadataSearchResultEvent
 from models.task import MetadataSearchPayload, Task, MetadataSearchTask, MetadataSearchData
 from utils.logger import logger
+from utils.time import utc_now
 
 def fetch_next_task(db: Database) -> Optional[Task]:
     db.validate()
@@ -65,7 +65,7 @@ def claim_task(db: Database, task_id: str, worker_id: str) -> bool:
             SET CLAIMED=1, CLAIMED_BY=%s, LAST_CHECK_IN=%s
             WHERE TASK_ID=%s AND CLAIMED=0 AND CONSUMED=0
             """,
-            (worker_id, datetime.now(), task_id)
+            (worker_id, utc_now(), task_id)
         )
         db.conn.commit()
         return cursor.rowcount > 0
@@ -98,7 +98,7 @@ def persist_event_and_mark_consumed(db: Database, event: MetadataSearchResultEve
                 str(event.eventId),
                 event_name,
                 as_data,
-                datetime.now().isoformat()
+                utc_now().isoformat()
             )
         )
 

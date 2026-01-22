@@ -1,6 +1,7 @@
 import json
 import uuid
 from datetime import datetime
+from utils.time import utc_now
 import pytest
 from db import repository
 from models.event import MetadataSearchResultEvent, EventMetadata, SearchResult, MetadataResult, Summary
@@ -38,7 +39,7 @@ def make_event() -> MetadataSearchResultEvent:
         referenceId=uuid.uuid4(),
         eventId=uuid.uuid4(),
         metadata=EventMetadata(
-            created=datetime.now(),
+            created=utc_now(),
             derivedFromId={uuid.uuid4()}
         ),
         results=[],
@@ -86,7 +87,7 @@ def make_row(task_id, ref_id):
         "CLAIMED_BY": None,
         "CONSUMED": False,
         "LAST_CHECK_IN": None,
-        "PERSISTED_AT": datetime.now().isoformat()
+        "PERSISTED_AT": utc_now().isoformat()
     }
 
 def test_fetch_next_task_maps_correctly(monkeypatch):

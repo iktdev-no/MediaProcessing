@@ -1,6 +1,6 @@
 import asyncio
 import uuid
-from datetime import datetime
+from utils.time import utc_now
 import pytest
 
 import worker.processor as processor
@@ -31,7 +31,7 @@ def make_dummy_task():
         claimedBy=None,
         consumed=False,
         lastCheckIn=None,
-        persistedAt=datetime.now()
+        persistedAt=utc_now()
     )
 
 # --- Tests ---

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from utils.time import utc_now
 
 from tabulate import tabulate
 from models.metadata import Metadata
@@ -105,7 +105,7 @@ async def process_task(db, task: MetadataSearchTask) -> MetadataSearchResultEven
 
         # 4) Bygg event
         core_metadata = EventMetadata(
-            created=datetime.now(),
+            created=utc_now(),
             derivedFromId={task.referenceId, task.taskId}
         )
 

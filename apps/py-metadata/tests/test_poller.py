@@ -5,7 +5,7 @@ from worker.poller import run_worker, run_iteration
 from models.task import MetadataSearchTask, MetadataSearchData
 from models.enums import TaskStatus
 import uuid
-from datetime import datetime
+from utils.time import utc_now
 import time
 
 def make_dummy_event():
@@ -13,11 +13,11 @@ def make_dummy_event():
         referenceId=uuid.uuid4(),
         eventId=uuid.uuid4(),
         metadata=EventMetadata(
-            created=datetime.now(),
+            created=utc_now(),
             derivedFromId={uuid.uuid4()}
         ),
         results=[],
-        persistedAt=datetime.now(),
+        persistedAt=utc_now(),
         recommended=None,              # fyll inn med en gyldig bool
         status="Completed"                # eller enum hvis modellen krever det
     )
@@ -34,7 +34,7 @@ def make_task():
         claimedBy=None,
         consumed=False,
         lastCheckIn=None,
-        persistedAt=datetime.now()
+        persistedAt=utc_now()
     )
 
 def test_run_worker_processes_one(monkeypatch):
