@@ -10,6 +10,7 @@ import java.io.FileInputStream
 import java.io.RandomAccessFile
 import java.net.InetAddress
 import java.security.MessageDigest
+import java.time.Clock
 import java.time.LocalDateTime
 import java.util.zip.CRC32
 
@@ -218,3 +219,7 @@ fun File.resolveConflict(): File {
 
 val LocalDateTimeEpoch: LocalDateTime =
     LocalDateTime.of(1970, 1, 1, 0, 0, 0)
+
+fun UtcNow(): LocalDateTime {
+    return LocalDateTime.now(Clock.systemUTC())
+}

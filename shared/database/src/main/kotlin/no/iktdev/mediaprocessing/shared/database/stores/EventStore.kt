@@ -4,6 +4,7 @@ import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.stores.EventStore
+import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.insert
@@ -59,7 +60,7 @@ object EventStore: EventStore {
                 it[EventsTable.eventId] = event.eventId.toString()
                 it[EventsTable.event] = eventName
                 it[EventsTable.data] = asData
-                it[EventsTable.persistedAt] = LocalDateTime.now()
+                it[EventsTable.persistedAt] = UtcNow()
             }
         }
     }

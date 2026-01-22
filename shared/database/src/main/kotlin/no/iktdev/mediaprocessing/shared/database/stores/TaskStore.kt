@@ -5,12 +5,12 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.PagedTasks
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
 import java.time.Duration
-import java.time.LocalDateTime
 import java.util.*
 
 object TaskStore: TaskStore {
@@ -59,7 +59,7 @@ object TaskStore: TaskStore {
                 it[TasksTable.task] = taskName
                 it[status] = TaskStatus.Pending
                 it[data] = asData
-                it[persistedAt] = LocalDateTime.now()
+                it[persistedAt] = UtcNow()
             }
         }
     }
@@ -160,7 +160,7 @@ object TaskStore: TaskStore {
             }) {
                 it[claimed] = true
                 it[claimedBy] = workerId
-                it[lastCheckIn] = LocalDateTime.now()
+                it[lastCheckIn] = UtcNow()
             }
         }.isSuccess
     }
@@ -168,7 +168,7 @@ object TaskStore: TaskStore {
     override fun heartbeat(taskId: UUID) {
         withTransaction {
             TasksTable.update({ TasksTable.taskId eq taskId.toString() }) {
-                it[lastCheckIn] = LocalDateTime.now()
+                it[lastCheckIn] = UtcNow()
             }
         }
     }
@@ -183,7 +183,7 @@ object TaskStore: TaskStore {
     }
 
     override fun releaseExpiredTasks(timeout: Duration) {
-        val now = LocalDateTime.now()
+        val now = UtcNow()
         val expirationTime = now.minus(timeout)
         withTransaction {
             TasksTable.update({

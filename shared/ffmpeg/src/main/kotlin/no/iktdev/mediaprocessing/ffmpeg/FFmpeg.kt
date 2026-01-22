@@ -7,9 +7,9 @@ import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegProgressDecoder
+import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import java.io.File
 import java.io.FileOutputStream
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 open class FFmpeg(val executable: String, val logDir: File) {
@@ -20,7 +20,7 @@ open class FFmpeg(val executable: String, val logDir: File) {
     private val outputCache = mutableListOf<String>()
 
     //region Log File formatting
-    val currentDateTime = LocalDateTime.now()
+    val currentDateTime = UtcNow()
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd.HH.mm")
     val formattedDateTime = currentDateTime.format(formatter)
     //endregion
