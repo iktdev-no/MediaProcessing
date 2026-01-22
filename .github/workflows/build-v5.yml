@@ -11,7 +11,7 @@ jobs:
   pre-check:
     runs-on: ubuntu-latest
     outputs:
-      sharedDefinitions: ${{ steps.filter.outputs.shared }}
+      sharedDefinitions: ${{ steps.filter.outputs.sharedDefinitions }}
       shared:      ${{ steps.filter.outputs.shared }}
       processer:   ${{ steps.filter.outputs.processer }}
       converter:   ${{ steps.filter.outputs.converter }}
