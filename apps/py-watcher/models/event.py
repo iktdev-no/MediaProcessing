@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import Optional, Set
 from pydantic import BaseModel
 
+from utils.time import utc_now
+
 # --- Metadata ---
 class Metadata(BaseModel):
     created: str
@@ -34,6 +36,6 @@ def create_event(event_cls, file_name: str, file_uri: str, reference_id: Optiona
     return event_cls(
         referenceId=reference_id or str(uuid.uuid4()),
         eventId=str(uuid.uuid4()),
-        metadata=Metadata(created=datetime.now().isoformat()),
+        metadata=Metadata(created=utc_now().isoformat()),
         data=FileInfo(fileName=file_name, fileUri=file_uri)
     )
