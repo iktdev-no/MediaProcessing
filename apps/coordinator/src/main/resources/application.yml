@@ -23,6 +23,7 @@ logging:
     org.apache.kafka: INFO
     Exposed: OFF
     org.springframework.web.socket.config.WebSocketMessageBrokerStats: WARN
+    no.iktdev.eventi: DEBUG
 
 media:
   cache: /src/cache
