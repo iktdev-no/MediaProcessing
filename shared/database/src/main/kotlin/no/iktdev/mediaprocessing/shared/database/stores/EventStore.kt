@@ -16,7 +16,7 @@ object EventStore: EventStore {
     override fun getPersistedEventsAfter(timestamp: LocalDateTime): List<PersistedEvent> {
         val result = withTransaction {
             EventsTable.selectAll()
-                .where { EventsTable.persistedAt greaterEq timestamp }
+                .where { EventsTable.persistedAt greater timestamp }
                 .map {
                     PersistedEvent(
                         id = it[EventsTable.id].value.toLong(),
