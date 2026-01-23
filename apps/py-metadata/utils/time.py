@@ -8,3 +8,4 @@ def parse_mysql_ts(value):
     if value is None:
         return None
     return datetime.strptime(value, "%Y-%m-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
+
