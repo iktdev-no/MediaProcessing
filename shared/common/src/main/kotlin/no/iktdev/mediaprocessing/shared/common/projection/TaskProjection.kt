@@ -16,12 +16,11 @@ class TaskProjection(val events: List<Event>) {
         val createdEvent = events.getInstancesOf<C>().ifEmpty { return TaskStatus.NotInitiated }
         val resultEvent = events.getInstancesOf<R>().ifEmpty { return TaskStatus.Pending }
 
-        if (resultEvent.size != createdEvent.size) return TaskStatus.Pending
-
         val created = createdIds(createdEvent)
         val results = resultIds(resultEvent)
 
-        if (!created.all { it in results }) return TaskStatus.Pending
+        val taskIds = results.filter { it in created }
+        if (!taskIds.containsAll(created) || taskIds.size != created.size) return TaskStatus.Pending
         if (resultEvent.any { resultStatus(it) == no.iktdev.eventi.models.store.TaskStatus.Failed }) return TaskStatus.Failed
 
         return TaskStatus.Completed
