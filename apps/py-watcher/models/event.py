@@ -7,7 +7,7 @@ from utils.time import utc_now
 
 # --- Metadata ---
 class Metadata(BaseModel):
-    created: str
+    created: datetime
     derivedFromId: Optional[Set[str]] = None
 
 # --- FileInfo ---

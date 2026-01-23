@@ -1,7 +1,7 @@
 import json
 import uuid
-from datetime import datetime
-from utils.time import utc_now
+from datetime import datetime, timezone
+from utils.time import parse_mysql_ts, utc_now
 import pytest
 from db import repository
 from models.event import MetadataSearchResultEvent, EventMetadata, SearchResult, MetadataResult, Summary
@@ -87,7 +87,7 @@ def make_row(task_id, ref_id):
         "CLAIMED_BY": None,
         "CONSUMED": False,
         "LAST_CHECK_IN": None,
-        "PERSISTED_AT": utc_now()
+        "PERSISTED_AT": utc_now().strftime("%Y-%m-%d %H:%M:%S.%f")
     }
 
 def test_fetch_next_task_maps_correctly(monkeypatch):
@@ -117,7 +117,7 @@ def test_fetch_next_task_maps_correctly(monkeypatch):
             claimedBy=row["CLAIMED_BY"],
             consumed=row["CONSUMED"],
             lastCheckIn=row["LAST_CHECK_IN"],
-            persistedAt=datetime.fromisoformat(row["PERSISTED_AT"])
+            persistedAt=parse_mysql_ts(row["PERSISTED_AT"])
         )
 
     monkeypatch.setattr(repository, "fetch_next_task", fake_fetch_next_task)

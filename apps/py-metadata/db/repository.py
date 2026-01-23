@@ -5,7 +5,7 @@ from models.enums import TaskStatus
 from models.event import MetadataSearchResultEvent
 from models.task import MetadataSearchPayload, Task, MetadataSearchTask, MetadataSearchData
 from utils.logger import logger
-from utils.time import utc_now
+from utils.time import parse_mysql_ts, utc_now
 
 def fetch_next_task(db: Database) -> Optional[Task]:
     db.validate()
@@ -31,8 +31,8 @@ def fetch_next_task(db: Database) -> Optional[Task]:
                 claimed=row["CLAIMED"],
                 claimedBy=row["CLAIMED_BY"],
                 consumed=row["CONSUMED"],
-                lastCheckIn=row["LAST_CHECK_IN"],
-                persistedAt=row["PERSISTED_AT"]
+                lastCheckIn=parse_mysql_ts(row["LAST_CHECK_IN"]),
+                persistedAt=parse_mysql_ts(row["PERSISTED_AT"])
             )
         else:
             return None
