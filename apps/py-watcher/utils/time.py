@@ -2,9 +2,8 @@ from datetime import datetime, timezone
 
 def utc_now():
     """
-    Returnerer en UTC-basert LocalDateTime uten Z eller offset,
-    med nanosekund-lignende presisjon (mikrosekunder + padding).
+    Matcher nøyaktig formatet Kotlin/Exposed skriver til databasen:
+    yyyy-MM-dd HH:mm:ss.SSSSSS (UTC)
     """
-    dt = datetime.now(timezone.utc).replace(tzinfo=None)
-    return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond:06d}000"
-
+    dt = datetime.now(timezone.utc)
+    return dt.strftime("%Y-%m-%d %H:%M:%S.%f")

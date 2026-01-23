@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.dto
 
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class SequenceSummary(
     val referenceId: String,
@@ -9,7 +9,7 @@ data class SequenceSummary(
     val inputFileName: String?,
     val type: ContextType = ContextType.Content,
     val lastEventId: String,
-    val lastEventTime: LocalDateTime,
+    val lastEventTime: Instant,
     val metadataTaskStatus: CollectProjection.TaskStatus,
     val encodeTaskStatus: CollectProjection.TaskStatus,
     val extractTaskStatus: CollectProjection.TaskStatus,

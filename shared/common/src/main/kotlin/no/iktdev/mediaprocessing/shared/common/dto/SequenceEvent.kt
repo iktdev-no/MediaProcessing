@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.dto
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.*
 import kotlin.reflect.KProperty1
 
@@ -10,14 +10,14 @@ data class SequenceEvent(
     val eventId: UUID,
     val referenceId: UUID,
     val type: String,
-    val timestamp: LocalDateTime,
+    val timestamp: Instant,
     val metadata: MetadataDto,
     val payload: Map<String, Any?>?
 )
 
 data class MetadataDto(
     val derivedFromEventIds: Set<UUID>?,
-    val createdAt: LocalDateTime
+    val createdAt: Instant
 )
 
 fun Event.extractPayload(): Map<String, Any?>? {

@@ -9,11 +9,11 @@ import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.*
 
 object EventStore: EventStore {
-    override fun getPersistedEventsAfter(timestamp: LocalDateTime): List<PersistedEvent> {
+    override fun getPersistedEventsAfter(timestamp: Instant): List<PersistedEvent> {
         val result = withTransaction {
             EventsTable.selectAll()
                 .where { EventsTable.persistedAt greater timestamp }

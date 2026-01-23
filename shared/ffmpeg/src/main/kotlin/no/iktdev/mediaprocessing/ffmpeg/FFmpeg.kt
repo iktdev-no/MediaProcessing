@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegProgressDecoder
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import java.io.File
 import java.io.FileOutputStream
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 open class FFmpeg(val executable: String, val logDir: File) {
@@ -20,9 +21,12 @@ open class FFmpeg(val executable: String, val logDir: File) {
     private val outputCache = mutableListOf<String>()
 
     //region Log File formatting
-    val currentDateTime = UtcNow()
+    val currentDateTime = UtcNow() // Instant, alltid UTC
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd.HH.mm")
-    val formattedDateTime = currentDateTime.format(formatter)
+    val formattedDateTime = currentDateTime
+        .atZone(ZoneId.systemDefault())
+        .format(formatter)
+
     //endregion
     lateinit var logFile: File
 

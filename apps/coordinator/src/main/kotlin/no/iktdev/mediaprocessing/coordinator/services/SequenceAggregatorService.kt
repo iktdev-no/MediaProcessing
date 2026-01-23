@@ -2,18 +2,18 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
-import no.iktdev.mediaprocessing.shared.common.LocalDateTimeEpoch
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class SequenceAggregatorService() {
 
     fun getActiveSequences(): List<SequenceSummary> {
-        val allEvents = EventStore.getPersistedEventsAfter(LocalDateTimeEpoch)
+        val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
 
         // Gruppér først, deserialiser senere
         val grouped = allEvents.groupBy { it.referenceId }
@@ -26,7 +26,7 @@ class SequenceAggregatorService() {
     }
 
     fun getRecentSequences(limit: Int): List<SequenceSummary> {
-        val allEvents = EventStore.getPersistedEventsAfter(LocalDateTimeEpoch)
+        val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
 
         val grouped = allEvents.groupBy { it.referenceId }
 
