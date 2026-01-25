@@ -49,7 +49,7 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int) -> tuple[int
 
 def run_worker(db: Database, shutdown_flag_ref=lambda: False, heartbeat_ref=None) -> None:
     poll_interval: int = 5
-    worker_id = f"worker-{uuid.uuid4()}"
+    worker_id = f"PyMetadata-{uuid.uuid4()}"
 
     while not shutdown_flag_ref():
         if heartbeat_ref: 

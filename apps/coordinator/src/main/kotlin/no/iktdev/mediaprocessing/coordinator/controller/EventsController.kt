@@ -2,10 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.services.EventPagingService
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -14,9 +11,10 @@ class EventsController(
     private val paging: EventPagingService
 ) {
 
-    @GetMapping
+
+    @GetMapping("/sequence/{referenceId}")
     fun getEvents(
-        @RequestParam referenceId: UUID,
+        @PathVariable referenceId: UUID,
         @RequestParam(required = false) beforeEventId: UUID?,
         @RequestParam(required = false) afterEventId: UUID?,
         @RequestParam(defaultValue = "50") limit: Int

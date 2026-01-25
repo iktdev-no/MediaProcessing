@@ -59,7 +59,7 @@ def fetch_next_task(db: Database) -> Optional[MetadataSearchTask]:
 def mark_failed(db: Database, task_id: str) -> None:
     cursor = db.conn.cursor()
     cursor.execute(
-        "UPDATE TASKS SET STATUS='Failed' WHERE TASK_ID=%s",
+        "UPDATE TASKS SET STATUS='Failed', CLAIMED=1, CONSUMED=1 WHERE TASK_ID=%s",
         (task_id,)
     )
     db.conn.commit()
