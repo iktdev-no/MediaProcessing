@@ -187,86 +187,86 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.AudioArgumentsTest.executor": "Run",
-    "Gradle.AudioArgumentsTest.validateChecks1.executor": "Run",
-    "Gradle.AudioArgumentsTest.validateChecks3.executor": "Run",
-    "Gradle.Build MediaProcessing2.executor": "Run",
-    "Gradle.ConvertWorkTaskListenerTest.executor": "Run",
-    "Gradle.ConvertWorkTaskListenerTest.validateCreationOfConvertTasks.executor": "Run",
-    "Gradle.ConvertWorkTaskListenerTest.validateParsingOfEvents.executor": "Run",
-    "Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor": "Run",
-    "Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor": "Run",
-    "Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor": "Run",
-    "Gradle.ConverterApplicationTest.Verify that we can access TaskStore.executor": "Debug",
-    "Gradle.ConverterApplicationTest.context loads and common configuration is available.executor": "Run",
-    "Gradle.ConverterApplicationTest.executor": "Run",
-    "Gradle.DatabaseDeserializerTest.executor": "Run",
-    "Gradle.DatabaseDeserializerTest.validateMediaInfo.executor": "Run",
-    "Gradle.DatabaseDeserializerTest.validateMetadataRead.executor": "Debug",
-    "Gradle.DatabaseDeserializerTest.validateParsingOfStartEvent.executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.EncodeArgumentCreatorTaskTest.executor": "Run",
-    "Gradle.FfmpegProgressDecoderTest.executor": "Debug",
-    "Gradle.FfmpegProgressDecoderTest.parseReadout1.executor": "Debug",
-    "Gradle.FileNameParserTest.assertDotRemoval.executor": "Run",
-    "Gradle.FileNameParserTest.assertTitleFails.executor": "Run",
-    "Gradle.FileNameParserTest.executor": "Run",
-    "Gradle.FlywayMigrationTest.executor": "Run",
-    "Gradle.FlywayMigrationTest.should run flyway migrations and create expected tables.executor": "Debug",
-    "Gradle.MediaProcessing2 [apps:build].executor": "Run",
-    "Gradle.MediaProcessing2 [apps:clean].executor": "Run",
-    "Gradle.MediaProcessing2 [build].executor": "Run",
-    "Gradle.MediaProcessing2 [clean].executor": "Run",
-    "Gradle.MediaProcessing2:apps [assemble].executor": "Run",
-    "Gradle.MediaProcessing2:apps:coordinator [:apps:coordinator:no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt.main()].executor": "Run",
-    "Gradle.MetadataWaitOrDefaultTaskListenerTest.executor": "Run",
-    "Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor": "Run",
-    "Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor": "Run",
-    "Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor": "Debug",
-    "Gradle.ParseMediaFileStreamsTaskListenerTest.testParse.executor": "Run",
-    "Gradle.SubtitleArgumentsTest.assertThatCommentaryIsNotSelected.executor": "Run",
-    "Gradle.SubtitleArgumentsTest.assertThatCorrectTrackIsSelected.executor": "Debug",
-    "Gradle.SubtitleArgumentsTest.executor": "Run",
-    "Gradle.SubtitleArgumentsTest.validate1.executor": "Run",
-    "Gradle.SubtitleArgumentsTest.validate2.executor": "Run",
-    "Gradle.SubtitleArgumentsTest.validate2_2.executor": "Debug",
-    "Gradle.SubtitleArgumentsTest.validate3.executor": "Run",
-    "Gradle.SubtitleArgumentsTest.validate3_2.executor": "Debug",
-    "Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.apps.processer'.executor": "Run",
-    "Gradle.VideoArgumentsTest.h264Stream1.executor": "Run",
-    "Gradle.VideoArgumentsTest.h264Stream2.executor": "Run",
-    "Gradle.VideoArgumentsTest.hevcStream1.executor": "Run",
-    "Gradle.VideoArgumentsTest.hevcStream2.executor": "Run",
-    "Gradle.VideoArgumentsTest.vc1Stream.executor": "Run",
-    "Gradle.VideoArgumentsTest.vc1Stream2.executor": "Run",
-    "JUnit.All in MediaProcessing.executor": "Run",
-    "Kotlin.Env - CoordinatorApplicationKt.executor": "Debug",
-    "Kotlin.UIApplicationKt.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "git-widget-placeholder": "v5",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/mount/870 EVO 1TB/Workspace/mediaprocesserv5/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/model",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.AudioArgumentsTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioArgumentsTest.validateChecks1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioArgumentsTest.validateChecks3.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build MediaProcessing2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validateCreationOfConvertTasks.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validateParsingOfEvents.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConvertWorkTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConverterApplicationTest.Verify that we can access TaskStore.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.ConverterApplicationTest.context loads and common configuration is available.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ConverterApplicationTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.validateMediaInfo.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.validateMetadataRead.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.DatabaseDeserializerTest.validateParsingOfStartEvent.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EncodeArgumentCreatorTaskTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FfmpegProgressDecoderTest.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.FfmpegProgressDecoderTest.parseReadout1.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.FileNameParserTest.assertDotRemoval.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FileNameParserTest.assertTitleFails.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FileNameParserTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FlywayMigrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FlywayMigrationTest.should run flyway migrations and create expected tables.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaProcessing2 [apps:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [apps:clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2:apps [assemble].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaProcessing2:apps:coordinator [:apps:coordinator:no.iktdev.mediaprocessing.coordinator.CoordinatorApplicationKt.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MetadataWaitOrDefaultTaskListenerTest.validate_shouldIProcessAndHandleEvent3.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.ParseMediaFileStreamsTaskListenerTest.testParse.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.assertThatCommentaryIsNotSelected.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.assertThatCorrectTrackIsSelected.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate2_2.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate3.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleArgumentsTest.validate3_2.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.processer'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.h264Stream1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.h264Stream2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.hevcStream1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.hevcStream2.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.vc1Stream.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoArgumentsTest.vc1Stream2.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.All in MediaProcessing.executor&quot;: &quot;Run&quot;,
+    &quot;Kotlin.Env - CoordinatorApplicationKt.executor&quot;: &quot;Debug&quot;,
+    &quot;Kotlin.UIApplicationKt.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;v5&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/mount/870 EVO 1TB/Workspace/mediaprocesserv5/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/model&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "JSON"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;JSON&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/model" />
@@ -340,8 +340,11 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>true</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="ConverterApplicationTest.Verify that we can access TaskStore" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -364,8 +367,11 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>true</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="ConverterApplicationTest.context loads and common configuration is available" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -388,8 +394,11 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>true</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="FlywayMigrationTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -412,8 +421,11 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>true</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <configuration name="FlywayMigrationTest.should run flyway migrations and create expected tables" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -436,8 +448,11 @@
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
       <RunAsTest>true</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
     <list>
