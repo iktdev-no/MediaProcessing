@@ -15,10 +15,16 @@ data class SequenceSummary(
     val extractTaskStatus: CollectProjection.TaskStatus,
     val convertTaskStatus: CollectProjection.TaskStatus,
     val coverDownloadTaskStatus: CollectProjection.TaskStatus,
+    val mode: Mode,
     val hasErrors: Boolean,
 )
 
 enum class ContextType {
     Content,
     Metadata
+}
+
+enum class Mode {
+    Auto,
+    Manual
 }

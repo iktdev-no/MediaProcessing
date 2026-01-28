@@ -2,8 +2,10 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.shared.common.dto.Mode
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
@@ -55,6 +57,11 @@ class SequenceAggregatorService() {
             extractTaskStatus = projection.extreactTaskStatus,
             convertTaskStatus = projection.convertTaskStatus,
             coverDownloadTaskStatus = projection.coverDownloadTaskStatus,
+            mode = when (projection.startedWith?.mode) {
+                StartFlow.Auto -> Mode.Auto
+                StartFlow.Manual -> Mode.Manual
+                else -> Mode.Auto
+            },
             hasErrors = projection.getTaskStatus().any { it == CollectProjection.TaskStatus.Failed }
         )
     }
