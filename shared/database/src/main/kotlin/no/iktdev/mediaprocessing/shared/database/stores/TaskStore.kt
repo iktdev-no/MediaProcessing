@@ -8,10 +8,14 @@ import no.iktdev.eventi.stores.TaskStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.time.Duration
 import java.util.*
 
@@ -34,13 +38,7 @@ object TaskStore: TaskStore {
                     where { TasksTable.status inList enums }
                 }
                 query.key?.let { keys ->
-                    if (keys.isNotEmpty()) {
-                        where {
-                            keys
-                                .map { key -> TasksTable.task like "%$key%" }
-                                .reduce(Op<Boolean>::or)
-                        }
-                    }
+                    where { TasksTable.task.likeAny(keys) }
                 }
 
                 query.claimed?.let { where { TasksTable.claimed eq it } }

@@ -10,7 +10,7 @@ object EventsTable: IntIdTable(name = "EVENTS") {
     val referenceId: Column<String> = varchar("REFERENCE_ID", 36)
     val eventId: Column<String> = varchar("EVENT_ID", 36)
     val event: Column<String> = varchar("EVENT",100)
-    val data = registerColumn<String>("data", LongTextColumnType())
+    val data = registerColumn<String>("DATA", LongTextColumnType())
     val persistedAt = timestamp("PERSISTED_AT")
         .clientDefault { UtcNow() }
 

@@ -7,12 +7,11 @@ import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
-import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
 import java.util.*
@@ -40,13 +39,7 @@ object EventStore: EventStore {
                 }
 
                 query.key?.let { keys ->
-                    if (keys.isNotEmpty()) {
-                        where {
-                            keys
-                                .map { key -> EventsTable.event like "%$key%" }
-                                .reduce(Op<Boolean>::or)
-                        }
-                    }
+                    where { EventsTable.event.likeAny(keys)}
                 }
 
                 query.from?.let { from ->

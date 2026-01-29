@@ -1,5 +1,9 @@
 package no.iktdev.mediaprocessing.shared.database
 
+import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun <T> withTransaction(
@@ -21,3 +25,9 @@ fun <T> withTransaction(
         Result.failure(e)
     }
 }
+
+
+fun Column<String>.likeAny(values: List<String>): Op<Boolean> =
+    values
+        .map { this like "%$it%" }
+        .reduce(Op<Boolean>::or)
