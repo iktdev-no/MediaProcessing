@@ -16,6 +16,8 @@ class CollectEventsListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
+        // Prevent Rouge trigger when replayed
+        if (history.any { it is CollectedEvent }) return null
 
         val collectProjection = CollectProjection(history)
         log.info { collectProjection.prettyPrint() }
