@@ -178,6 +178,7 @@ object TaskStore: TaskStore {
             TasksTable.update({ TasksTable.taskId eq taskId.toString() }) {
                 it[consumed] = true
                 it[TasksTable.status] = status
+                it[lastCheckIn] = UtcNow()
             }
         }
     }
