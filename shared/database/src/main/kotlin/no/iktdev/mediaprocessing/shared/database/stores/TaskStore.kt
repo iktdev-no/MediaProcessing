@@ -38,7 +38,7 @@ object TaskStore: TaskStore {
                     )
                 }
             PagedTasks(
-                content = rows,
+                items = rows,
                 page = page,
                 size = size,
                 total = total
