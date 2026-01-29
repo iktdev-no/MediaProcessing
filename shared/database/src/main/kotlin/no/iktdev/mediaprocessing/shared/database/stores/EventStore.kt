@@ -37,7 +37,7 @@ object EventStore: EventStore {
                     where { EventsTable.eventId like "%$id%" }
                 }
 
-                query.event?.let { ev ->
+                query.key?.let { ev ->
                     where { EventsTable.event like "%$ev%" }
                 }
 

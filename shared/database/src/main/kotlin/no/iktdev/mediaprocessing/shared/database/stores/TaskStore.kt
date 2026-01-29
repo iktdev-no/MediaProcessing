@@ -36,7 +36,9 @@ object TaskStore: TaskStore {
                     val enums = statuses.map { TaskStatus.valueOf(it) }
                     where { TasksTable.status inList enums }
                 }
-
+                query.key?.let { k ->
+                    where { TasksTable.task like "%$k%" }
+                }
                 query.claimed?.let { where { TasksTable.claimed eq it } }
                 query.consumed?.let { where { TasksTable.consumed eq it } }
                 query.referenceId?.let { where { TasksTable.referenceId like "%$it%" } }
