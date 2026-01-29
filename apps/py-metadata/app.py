@@ -11,7 +11,11 @@ from utils.logger import logger
 from worker.poller import run_worker
 
 shutdown_flag = False
+
+# Heartbeat state
 worker_heartbeat = time.time()
+worker_in_backoff = False
+worker_error = None
 
 
 def handle_shutdown(signum, frame):
@@ -20,25 +24,23 @@ def handle_shutdown(signum, frame):
     shutdown_flag = True
 
 
-def set_heartbeat(ts):
-    global worker_heartbeat
+def set_heartbeat(ts, in_backoff=False, error=None):
+    global worker_heartbeat, worker_in_backoff, worker_error
     worker_heartbeat = ts
+    worker_in_backoff = in_backoff
+    worker_error = error
 
 
 def get_heartbeat():
-    return worker_heartbeat
+    return {
+        "ts": worker_heartbeat,
+        "inBackoff": worker_in_backoff,
+        "error": worker_error
+    }
 
 
 def start_health_server():
     uvicorn.run(health_app, host="0.0.0.0", port=8080, log_level="error")
-
-
-def start_worker(db):
-    run_worker(
-        db=db,
-        shutdown_flag_ref=lambda: shutdown_flag,
-        heartbeat_ref=lambda ts: set_heartbeat(ts)
-    )
 
 
 def main():
@@ -59,13 +61,13 @@ def main():
         Thread(target=start_health_server, daemon=True).start()
         logger.info("🌡️ Health API startet på port 8080")
 
-        # Start worker i egen tråd
-        Thread(target=start_worker, args=(db,), daemon=True).start()
-        logger.info("🔁 Worker startet i egen tråd")
-
-        # Hold main-tråden i live
-        while not shutdown_flag:
-            time.sleep(1)
+        # Worker kjører i main-tråden
+        logger.info("🔁 Starter worker i main-tråden")
+        run_worker(
+            db=db,
+            shutdown_flag_ref=lambda: shutdown_flag,
+            heartbeat_ref=set_heartbeat
+        )
 
     except Exception as e:
         logger.error(f"❌ Kritisk feil i app: {e}")

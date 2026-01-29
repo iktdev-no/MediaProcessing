@@ -1,4 +1,3 @@
-# health_api.py
 import time
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -21,6 +20,7 @@ async def health():
     worker_ok = False
     db_error = None
     worker_error = None
+    in_backoff = None
 
     # --- Database check ---
     try:
@@ -32,13 +32,17 @@ async def health():
 
     # --- Worker heartbeat check ---
     try:
-        last = get_worker_heartbeat()
+        hb = get_worker_heartbeat()
+        last = hb["ts"]
+        in_backoff = hb["inBackoff"]
+        worker_error = hb["error"]
+
         now = time.time()
         diff = now - last
 
-        worker_ok = diff < 90 # 90 sekunder toleranse pga at worker kan være inaktiv ved lav belastning
+        # Worker må ha iterert siste 90 sekunder
+        worker_ok = diff < 90 and worker_error is None
 
-        # Hvis worker er false og ingen exception ble kastet → legg diff i worker_error
         if not worker_ok and worker_error is None:
             worker_error = f"Heartbeat too old: {diff:.2f}s"
 
@@ -55,6 +59,7 @@ async def health():
             "database": db_ok,
             "database_error": db_error,
             "worker": worker_ok,
-            "worker_error": worker_error
+            "worker_error": worker_error,
+            "worker_in_backoff": in_backoff
         }
     )
