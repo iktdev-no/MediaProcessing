@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.shared.database.tables
 
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.UtcNow
+import no.iktdev.mediaprocessing.shared.database.LongTextColumnType
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.javatime.timestamp
@@ -12,7 +13,7 @@ object TasksTable: IntIdTable(name = "TASKS") {
     val taskId: Column<String> = varchar("TASK_ID", 36)
     val task: Column<String> = varchar("TASK",100)
     val status: Column<TaskStatus> = enumerationByName("STATUS", 50, TaskStatus::class).default(TaskStatus.Pending)
-    val data: Column<String> = text("DATA")
+    val data = registerColumn<String>("data", LongTextColumnType())
     val claimed: Column<Boolean> = bool("CLAIMED").default(false)
     val claimedBy: Column<String?> = varchar("CLAIMED_BY",100).nullable()
     val consumed: Column<Boolean> = bool("CONSUMED").default(false)
