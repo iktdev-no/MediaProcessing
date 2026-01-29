@@ -61,5 +61,6 @@ async def health():
             "worker": worker_ok,
             "worker_error": worker_error,
             **hb  # inkluderer alle backoff-feltene
-        }
+        },
+        headers={"Refresh": "5"} # ← auto-refresh hvert 5. sekund )
     )
