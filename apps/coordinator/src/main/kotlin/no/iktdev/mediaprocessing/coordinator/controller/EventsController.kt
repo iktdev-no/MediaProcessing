@@ -1,6 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
-import no.iktdev.mediaprocessing.coordinator.services.EventPagingService
+import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.coordinator.services.EventService
+import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
+import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -8,18 +11,22 @@ import java.util.*
 @RestController
 @RequestMapping("/events")
 class EventsController(
-    private val paging: EventPagingService
+    private val paging: EventService
 ) {
 
+    @GetMapping()
+    fun getEvents(query: EventQuery): Paginated<PersistedEvent> {
+        return paging.getEvents(query)
+    }
 
     @GetMapping("/sequence/{referenceId}")
-    fun getEvents(
+    fun getEventSequence(
         @PathVariable referenceId: UUID,
         @RequestParam(required = false) beforeEventId: UUID?,
         @RequestParam(required = false) afterEventId: UUID?,
         @RequestParam(defaultValue = "50") limit: Int
     ): List<SequenceEvent> {
-        return paging.getEvents(
+        return paging.getPagedEvents(
             referenceId = referenceId,
             beforeEventId = beforeEventId,
             afterEventId = afterEventId,

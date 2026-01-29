@@ -6,45 +6,60 @@ import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.stores.TaskStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
-import no.iktdev.mediaprocessing.shared.common.dto.PagedTasks
+import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import java.time.Duration
 import java.util.*
 
 object TaskStore: TaskStore {
 
-    fun getPagedTasks(page: Int, size: Int): PagedTasks {
-        return withTransaction {
-            val total = TasksTable.selectAll().count()
-            val rows = TasksTable
-                .selectAll()
-                .orderBy(TasksTable.persistedAt, SortOrder.DESC)
-                .limit(size).offset(start = (page * size).toLong())
-                .map { it ->
-                    PersistedTask(
-                        id = it[TasksTable.id].value.toLong(),
-                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
-                        status = it[TasksTable.status],
-                        taskId = UUID.fromString(it[TasksTable.taskId]),
-                        task = it[TasksTable.task],
-                        data = it[TasksTable.data],
-                        claimed = it[TasksTable.claimed],
-                        claimedBy = it[TasksTable.claimedBy],
-                        consumed = it[TasksTable.consumed],
-                        lastCheckIn = it[TasksTable.lastCheckIn],
-                        persistedAt = it[TasksTable.persistedAt]
-                    )
+    fun getPagedTasks(query: TaskQuery): Paginated<PersistedTask> =
+        pagedQuery(
+            table = TasksTable,
+            query = query,
+            sortColumns = mapOf(
+                "taskId" to TasksTable.taskId,
+                "referenceId" to TasksTable.referenceId,
+                "status" to TasksTable.status,
+                "persistedAt" to TasksTable.persistedAt,
+                "lastCheckIn" to TasksTable.lastCheckIn
+            ),
+            applyFilters = {
+                query.status?.let { statuses ->
+                    val enums = statuses.map { TaskStatus.valueOf(it) }
+                    where { TasksTable.status inList enums }
                 }
-            PagedTasks(
-                items = rows,
-                page = page,
-                size = size,
-                total = total
-            )
-        }.getOrDefault(PagedTasks(emptyList(), page, size, 0))
-    }
+
+                query.claimed?.let { where { TasksTable.claimed eq it } }
+                query.consumed?.let { where { TasksTable.consumed eq it } }
+                query.referenceId?.let { where { TasksTable.referenceId like "%$it%" } }
+                query.from?.let { where { TasksTable.persistedAt greaterEq it } }
+                query.to?.let { where { TasksTable.persistedAt lessEq it } }
+            },
+            mapper = { row ->
+                PersistedTask(
+                    id = row[TasksTable.id].value.toLong(),
+                    referenceId = UUID.fromString(row[TasksTable.referenceId]),
+                    status = row[TasksTable.status],
+                    taskId = UUID.fromString(row[TasksTable.taskId]),
+                    task = row[TasksTable.task],
+                    data = row[TasksTable.data],
+                    claimed = row[TasksTable.claimed],
+                    claimedBy = row[TasksTable.claimedBy],
+                    consumed = row[TasksTable.consumed],
+                    lastCheckIn = row[TasksTable.lastCheckIn],
+                    persistedAt = row[TasksTable.persistedAt]
+                )
+            }
+        )
+
 
 
     override fun persist(task: Task) {

@@ -1,6 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
+import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
+import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
 import no.iktdev.mediaprocessing.shared.common.dto.toDto
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -8,9 +11,9 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class EventPagingService {
+class EventService {
 
-        fun getEvents(
+        fun getPagedEvents(
             referenceId: UUID,
             beforeEventId: UUID?,
             afterEventId: UUID?,
@@ -37,5 +40,9 @@ class EventPagingService {
                     persisted.toDto(event)
                 }
         }
+
+    fun getEvents(query: EventQuery): Paginated<PersistedEvent> {
+        return EventStore.getPagedEvents(query)
+    }
 
 }
