@@ -17,6 +17,9 @@ object EventRegistry {
             CoverDownloadTaskCreatedEvent::class.java,
             CoverDownloadResultEvent::class.java,
 
+            DeletedTaskResultEvent::class.java,
+            ForcedTaskResetAuditEvent::class.java,
+
             FileAddedEvent::class.java,
             FileReadyEvent::class.java,
             FileRemovedEvent::class.java,

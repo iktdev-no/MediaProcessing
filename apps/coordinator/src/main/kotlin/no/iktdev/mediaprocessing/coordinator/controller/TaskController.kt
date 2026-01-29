@@ -2,19 +2,22 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 
 import no.iktdev.eventi.models.store.PersistedTask
+import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
+import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
 @RequestMapping("/tasks")
 class TaskController(
     private val taskService: TaskService,
+    private val eventService: EventService
 ) {
 
     @GetMapping("/active")
@@ -30,4 +33,41 @@ class TaskController(
     @GetMapping("/{id}")
     fun getTask(@PathVariable id: UUID): PersistedTask? =
         taskService.getTaskById(id)
+
+
+    @PostMapping("/{taskId}/reset")
+    fun resetTask(@PathVariable taskId: UUID, forced: Boolean = false): ResponseEntity<ResetTaskResponse> {
+        val task = taskService.getTaskById(taskId)
+            ?: return ResponseEntity.notFound().build()
+
+        val referenceId = task.referenceId
+
+        // 1. Opprett DeleteEvent
+        val deletedId = eventService.deleteTaskFailureForReset(referenceId, taskId)
+        if (deletedId == null) {
+            if (forced) {
+                eventService.createForcedTaskResetAuditEvent(referenceId, taskId)
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build()
+            }
+        }
+
+        // 2. Reset task
+        taskService.resetFailedTask(taskId)
+
+        return ResponseEntity.ok(
+            ResetTaskResponse(
+                taskId = taskId,
+                referenceId = referenceId,
+                status = "reset",
+                deletedEventId = deletedId,
+                resetAt = UtcNow()
+            )
+        )
+    }
+    @PostMapping("/{taskId}/reset/force")
+    fun resetTaskForce(@PathVariable taskId: UUID): ResponseEntity<ResetTaskResponse> {
+        return resetTask(taskId, true)
+    }
+
 }

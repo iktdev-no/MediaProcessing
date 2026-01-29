@@ -107,67 +107,28 @@ object TaskStore: TaskStore {
 
     override fun findByReferenceId(referenceId: UUID): List<PersistedTask> {
         return withTransaction {
-            TasksTable.selectAll()
-                .where { TasksTable.referenceId eq referenceId.toString() }
-                .map {
-                    PersistedTask(
-                        id = it[TasksTable.id].value.toLong(),
-                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
-                        status = it[TasksTable.status],
-                        taskId = UUID.fromString(it[TasksTable.taskId]),
-                        task = it[TasksTable.task],
-                        data = it[TasksTable.data],
-                        claimed = it[TasksTable.claimed],
-                        claimedBy = it[TasksTable.claimedBy],
-                        consumed = it[TasksTable.consumed],
-                        lastCheckIn = it[TasksTable.lastCheckIn],
-                        persistedAt = it[TasksTable.persistedAt]
-                    )
-                }
+            TasksTable.getWhere {
+                TasksTable.referenceId eq referenceId.toString()
+            }
         }.getOrDefault(emptyList())
     }
 
     override fun findUnclaimed(referenceId: UUID): List<PersistedTask> {
         return withTransaction {
-            TasksTable.selectAll()
-                .where { (TasksTable.referenceId eq referenceId.toString()) and (TasksTable.claimed eq false) and (TasksTable.consumed eq false) }
-                .map {
-                    PersistedTask(
-                        id = it[TasksTable.id].value.toLong(),
-                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
-                        status = it[TasksTable.status],
-                        taskId = UUID.fromString(it[TasksTable.taskId]),
-                        task = it[TasksTable.task],
-                        data = it[TasksTable.data],
-                        claimed = it[TasksTable.claimed],
-                        claimedBy = it[TasksTable.claimedBy],
-                        consumed = it[TasksTable.consumed],
-                        lastCheckIn = it[TasksTable.lastCheckIn],
-                        persistedAt = it[TasksTable.persistedAt]
-                    )
-                }
+            TasksTable.getWhere {
+                (TasksTable.referenceId eq referenceId.toString()) and
+                        (TasksTable.claimed eq false) and
+                        (TasksTable.consumed eq false)
+            }
         }.getOrDefault(emptyList())
     }
 
     fun findActiveTasks(): List<PersistedTask> {
         return withTransaction {
-            TasksTable.selectAll()
-                .where { (TasksTable.status inList listOf(TaskStatus.Pending, TaskStatus.InProgress)) and (TasksTable.consumed eq false) }
-                .map {
-                    PersistedTask(
-                        id = it[TasksTable.id].value.toLong(),
-                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
-                        status = it[TasksTable.status],
-                        taskId = UUID.fromString(it[TasksTable.taskId]),
-                        task = it[TasksTable.task],
-                        data = it[TasksTable.data],
-                        claimed = it[TasksTable.claimed],
-                        claimedBy = it[TasksTable.claimedBy],
-                        consumed = it[TasksTable.consumed],
-                        lastCheckIn = it[TasksTable.lastCheckIn],
-                        persistedAt = it[TasksTable.persistedAt]
-                    )
-                }
+            TasksTable.getWhere {
+                (TasksTable.status inList listOf(TaskStatus.Pending, TaskStatus.InProgress)) and
+                        (TasksTable.consumed eq false)
+            }
         }.getOrDefault(emptyList())
     }
 
@@ -220,25 +181,29 @@ object TaskStore: TaskStore {
         }
     }
 
+    fun resetTaskById(taskId: UUID): Result<Int> {
+        return withTransaction {
+            TasksTable.update({
+                (TasksTable.claimed eq true) and
+                        (TasksTable.consumed eq false) and
+                        (TasksTable.status eq TaskStatus.Failed) and
+                        (TasksTable.taskId eq taskId.toString())
+            }) {
+                it[claimed] = false
+                it[claimedBy] = null
+                it[consumed] = false
+                it[lastCheckIn] = null
+                it[status] = TaskStatus.Pending
+            }
+        }
+    }
+
     override fun getPendingTasks(): List<PersistedTask> {
         return withTransaction {
-            TasksTable.selectAll()
-                .where { (TasksTable.consumed eq false) and (TasksTable.claimed eq false) }
-                .map {
-                    PersistedTask(
-                        id = it[TasksTable.id].value.toLong(),
-                        referenceId = UUID.fromString(it[TasksTable.referenceId]),
-                        status = it[TasksTable.status],
-                        taskId = UUID.fromString(it[TasksTable.taskId]),
-                        task = it[TasksTable.task],
-                        data = it[TasksTable.data],
-                        claimed = it[TasksTable.claimed],
-                        claimedBy = it[TasksTable.claimedBy],
-                        consumed = it[TasksTable.consumed],
-                        lastCheckIn = it[TasksTable.lastCheckIn],
-                        persistedAt = it[TasksTable.persistedAt]
-                    )
-                }
+            TasksTable.getWhere {
+                (TasksTable.consumed eq false) and
+                        (TasksTable.claimed eq false)
+            }
         }.getOrDefault(emptyList())
     }
 }

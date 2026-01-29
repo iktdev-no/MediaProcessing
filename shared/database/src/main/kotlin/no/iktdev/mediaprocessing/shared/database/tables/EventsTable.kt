@@ -1,10 +1,15 @@
 package no.iktdev.mediaprocessing.shared.database.tables
 
+import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.database.LongTextColumnType
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.sql.selectAll
+import java.util.*
 
 object EventsTable: IntIdTable(name = "EVENTS") {
     val referenceId: Column<String> = varchar("REFERENCE_ID", 36)
@@ -17,5 +22,20 @@ object EventsTable: IntIdTable(name = "EVENTS") {
 
     init {
         uniqueIndex(referenceId, eventId, event)
+    }
+
+    fun getWhere(predicate: SqlExpressionBuilder.() -> Op<Boolean>): List<PersistedEvent> {
+        return EventsTable.selectAll()
+            .where(predicate)
+            .map {
+                PersistedEvent(
+                    id = it[EventsTable.id].value.toLong(),
+                    referenceId = UUID.fromString(it[EventsTable.referenceId]),
+                    eventId = UUID.fromString(it[EventsTable.eventId]),
+                    event = it[EventsTable.event],
+                    data = it[EventsTable.data],
+                    persistedAt = it[EventsTable.persistedAt]
+                )
+            }
     }
 }

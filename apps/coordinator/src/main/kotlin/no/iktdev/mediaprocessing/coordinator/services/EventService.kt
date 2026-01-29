@@ -45,4 +45,11 @@ class EventService {
         return EventStore.getPagedEvents(query)
     }
 
+    fun deleteTaskFailureForReset(referenceId: UUID, taskId: UUID): UUID? {
+        return EventStore.deleteFailedEventForTask(referenceId, taskId)
+    }
+
+    fun createForcedTaskResetAuditEvent(referenceId: UUID, taskId: UUID): UUID? {
+        return EventStore.createTaskResetAudioEvent(referenceId, taskId)
+    }
 }

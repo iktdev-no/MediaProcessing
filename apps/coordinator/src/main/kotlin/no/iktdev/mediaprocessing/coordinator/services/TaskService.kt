@@ -23,4 +23,9 @@ class TaskService {
     fun getTaskById(taskId: UUID): PersistedTask? {
         return TaskStore.findByTaskId(taskId)
     }
+
+    fun resetFailedTask(taskId: UUID): Boolean {
+        val resetSuccess = TaskStore.resetTaskById(taskId).isSuccess
+        return resetSuccess
+    }
 }

@@ -1,12 +1,17 @@
 package no.iktdev.mediaprocessing.shared.database.tables
 
+import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.database.LongTextColumnType
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
+import java.util.*
 
 object TasksTable: IntIdTable(name = "TASKS") {
     val referenceId: Column<String> = varchar("REFERENCE_ID", 36)
@@ -20,4 +25,25 @@ object TasksTable: IntIdTable(name = "TASKS") {
     val lastCheckIn: Column<Instant?> = timestamp("LAST_CHECK_IN").nullable()
     val persistedAt = timestamp("PERSISTED_AT")
         .clientDefault { UtcNow() }
+
+    fun getWhere(predicate: SqlExpressionBuilder.() -> Op<Boolean>): List<PersistedTask> {
+        return TasksTable.selectAll()
+            .where(predicate)
+            .map {
+                PersistedTask(
+                    id = it[TasksTable.id].value.toLong(),
+                    referenceId = UUID.fromString(it[TasksTable.referenceId]),
+                    status = it[TasksTable.status],
+                    taskId = UUID.fromString(it[TasksTable.taskId]),
+                    task = it[TasksTable.task],
+                    data = it[TasksTable.data],
+                    claimed = it[TasksTable.claimed],
+                    claimedBy = it[TasksTable.claimedBy],
+                    consumed = it[TasksTable.consumed],
+                    lastCheckIn = it[TasksTable.lastCheckIn],
+                    persistedAt = it[TasksTable.persistedAt]
+                )
+            }
+    }
+
 }
