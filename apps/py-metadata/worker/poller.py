@@ -15,20 +15,12 @@ from worker.processor import process_task
 from utils.logger import logger
 from models.task import MetadataSearchTask, Task
 
-# Viktig: dette er heartbeat_ref fra app.py
-from app import set_heartbeat as heartbeat_ref
 
-
-def run_iteration(db: Database, worker_id: str, poll_interval: int) -> tuple[int, int]:
-    """
-    Kjør én iterasjon av poller-loopen.
-    Returnerer (sleep_interval, next_poll_interval).
-    """
+def run_iteration(db: Database, worker_id: str, poll_interval: int, heartbeat_ref) -> tuple[int, int]:
     try:
         task: Optional[Task] = fetch_next_task(db)
 
         if task:
-            # Worker er aktiv → ikke i backoff
             heartbeat_ref(time.time(), in_backoff=False, error=None)
 
             if not isinstance(task, MetadataSearchTask):
@@ -54,11 +46,9 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int) -> tuple[int
                 mark_failed(db, str(task.taskId))
                 heartbeat_ref(time.time(), in_backoff=False, error=str(task_error))
 
-            # Etter en task → reset poll interval
             return poll_interval, 5
 
         else:
-            # Ingen tasks → worker går i backoff
             logger.debug("Ingen nye tasks.")
             heartbeat_ref(time.time(), in_backoff=True, error=None)
             return poll_interval, min(poll_interval * 2, 60)
@@ -70,12 +60,12 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int) -> tuple[int
         return poll_interval, 5
 
 
-def run_worker(db: Database, shutdown_flag_ref=lambda: False) -> None:
+def run_worker(db: Database, shutdown_flag_ref=lambda: False, heartbeat_ref=None) -> None:
     poll_interval: int = 5
     worker_id = f"PyMetadata-{uuid.uuid4()}"
 
     while not shutdown_flag_ref():
-        sleep_interval, poll_interval = run_iteration(db, worker_id, poll_interval)
+        sleep_interval, poll_interval = run_iteration(db, worker_id, poll_interval, heartbeat_ref)
         time.sleep(sleep_interval)
 
     logger.info("👋 run_worker loop avsluttet")

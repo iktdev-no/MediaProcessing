@@ -14,8 +14,8 @@ from worker.poller import run_worker
 shutdown_flag = False
 
 # Heartbeat state (nå med full backoff-tracking)
-worker_heartbeat = None
-worker_in_backoff = None
+worker_heartbeat = time.time()
+worker_in_backoff = False
 worker_error = None
 
 backoff_entered_at = None
@@ -38,7 +38,7 @@ def set_heartbeat(ts, in_backoff=False, error=None):
     global backoff_entered_at, backoff_exited_at
     global backoff_entered_human, backoff_exited_human
 
-    prev = worker_in_backoff
+    prev: bool = worker_in_backoff
 
     # Går INN i backoff
     if in_backoff and prev is False:

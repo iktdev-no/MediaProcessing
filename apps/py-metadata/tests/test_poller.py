@@ -1,12 +1,11 @@
-from typing import Set
 import pytest
+import uuid
+import time
 from models.event import MetadataSearchResultEvent, EventMetadata
-from worker.poller import run_worker, run_iteration
+from worker.poller import run_worker
 from models.task import MetadataSearchTask, MetadataSearchData
 from models.enums import TaskStatus
-import uuid
 from utils.time import utc_now
-import time
 
 
 def make_dummy_event():
@@ -71,8 +70,8 @@ def test_run_worker_processes_one(monkeypatch):
     monkeypatch.setattr("worker.poller.mark_failed", lambda *a, **k: events.append("failed"))
     monkeypatch.setattr("worker.poller.time.sleep", lambda s: None)
 
-    # NEW: dummy heartbeat
     monkeypatch.setattr("worker.poller.time.time", lambda: 123)
+
     dummy_hb = lambda ts, in_backoff=False, error=None: None
 
     run_worker(
@@ -93,15 +92,7 @@ def test_backoff(monkeypatch):
 
     monkeypatch.setattr("worker.poller.fetch_next_task", lambda db: None)
 
-    def fake_sleep(seconds):
-        intervals.append(seconds)
-
-    monkeypatch.setattr(time, "sleep", fake_sleep)
-
-    monkeypatch.setattr("worker.poller.claim_task", lambda db, tid, wid: True)
-    monkeypatch.setattr("worker.poller.process_task", lambda t: "dummy_event")
-    monkeypatch.setattr("worker.poller.persist_event_and_mark_consumed", lambda db, e, tid: None)
-    monkeypatch.setattr("worker.poller.mark_failed", lambda db, tid: None)
+    monkeypatch.setattr(time, "sleep", lambda s: intervals.append(s))
 
     dummy_hb = lambda ts, in_backoff=False, error=None: None
 
@@ -123,20 +114,9 @@ def test_backoff_on_connection_error(monkeypatch):
             reconnects.append("reconnect")
         def close(self): pass
 
-    def failing_fetch(db):
-        raise RuntimeError("DB connection lost")
+    monkeypatch.setattr("worker.poller.fetch_next_task", lambda db: (_ for _ in ()).throw(RuntimeError("lost")))
 
-    monkeypatch.setattr("worker.poller.fetch_next_task", failing_fetch)
-
-    def fake_sleep(seconds):
-        intervals.append(seconds)
-
-    monkeypatch.setattr(time, "sleep", fake_sleep)
-
-    monkeypatch.setattr("worker.poller.claim_task", lambda db, tid, wid: True)
-    monkeypatch.setattr("worker.poller.process_task", lambda t: "dummy_event")
-    monkeypatch.setattr("worker.poller.persist_event_and_mark_consumed", lambda db, e, tid: None)
-    monkeypatch.setattr("worker.poller.mark_failed", lambda db, tid: None)
+    monkeypatch.setattr(time, "sleep", lambda s: intervals.append(s))
 
     dummy_hb = lambda ts, in_backoff=False, error=None: None
 
@@ -147,4 +127,43 @@ def test_backoff_on_connection_error(monkeypatch):
     )
 
     assert reconnects == ["reconnect", "reconnect"]
-    assert all(interval == 5 for interval in intervals)
+    assert intervals == [5, 5]
+
+
+def test_backoff_enter_exit(monkeypatch):
+    calls = []
+
+    class FakeDB:
+        def connect(self): pass
+        def close(self): pass
+
+    seq = [True, False, True]
+
+    def fake_fetch(db):
+        return make_task() if seq.pop(0) else None
+
+    import worker.poller as poller
+
+    monkeypatch.setattr("worker.poller.fetch_next_task", fake_fetch)
+    monkeypatch.setattr("worker.poller.claim_task", lambda *a, **k: True)
+
+    async def fake_process_task(db, task):
+        return make_dummy_event()
+
+    monkeypatch.setattr("worker.poller.process_task", fake_process_task)
+    monkeypatch.setattr("worker.poller.persist_event_and_mark_consumed", lambda *a, **k: None)
+    monkeypatch.setattr("worker.poller.mark_failed", lambda *a, **k: None)
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+
+    def record_hb(ts, in_backoff=False, error=None):
+        calls.append(in_backoff)
+
+    db = FakeDB()
+    poll_interval = 5
+    worker_id = "test-worker"
+
+    poller.run_iteration(db, worker_id, poll_interval, record_hb)
+    poller.run_iteration(db, worker_id, poll_interval, record_hb)
+    poller.run_iteration(db, worker_id, poll_interval, record_hb)
+
+    assert calls == [False, True, False]
