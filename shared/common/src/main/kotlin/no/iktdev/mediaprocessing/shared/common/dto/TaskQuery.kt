@@ -15,12 +15,12 @@ data class TaskQuery(
     override val order: Sort = Sort.DESC,
     override val page: Int = 0,
     override val pageSize: Int = 50,
-    override val key: String? = null
+    override val key: List<String>? = null
 ): PagedQuery {
     fun toQueryParams(): MultiValueMap<String, String> {
         val params = LinkedMultiValueMap<String, String>()
 
-        key?.let { params.add("key", it) }
+        key?.forEach { params.add("key", it) }
         status?.forEach { params.add("status", it) }
         claimed?.let { params.add("claimed", it.toString()) }
         consumed?.let { params.add("consumed", it.toString()) }

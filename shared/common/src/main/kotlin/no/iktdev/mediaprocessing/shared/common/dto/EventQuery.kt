@@ -13,12 +13,12 @@ data class EventQuery(
     override val order: Sort = Sort.DESC,
     override val page: Int = 0,
     override val pageSize: Int = 50,
-    override val key: String?
+    override val key: List<String>?
 ) : PagedQuery {
 
     fun toQueryParams(): MultiValueMap<String, String> {
         val params = LinkedMultiValueMap<String, String>()
-        key?.let { params.add("key", it) }
+        key?.forEach { params.add("key", it) }
         referenceId?.let { params.add("referenceId", it) }
         eventId?.let { params.add("eventId", it) }
         from?.let { params.add("from", it.toString()) }

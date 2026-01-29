@@ -10,7 +10,9 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
 import java.util.*
@@ -37,8 +39,14 @@ object EventStore: EventStore {
                     where { EventsTable.eventId like "%$id%" }
                 }
 
-                query.key?.let { ev ->
-                    where { EventsTable.event like "%$ev%" }
+                query.key?.let { keys ->
+                    if (keys.isNotEmpty()) {
+                        where {
+                            keys
+                                .map { key -> EventsTable.event like "%$key%" }
+                                .reduce(Op<Boolean>::or)
+                        }
+                    }
                 }
 
                 query.from?.let { from ->

@@ -5,5 +5,5 @@ interface PagedQuery {
     val pageSize: Int
     val sort: String
     val order: Sort
-    val key: String?
+    val key: List<String>?
 }

@@ -11,10 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.*
 import java.time.Duration
 import java.util.*
 
@@ -36,9 +33,16 @@ object TaskStore: TaskStore {
                     val enums = statuses.map { TaskStatus.valueOf(it) }
                     where { TasksTable.status inList enums }
                 }
-                query.key?.let { k ->
-                    where { TasksTable.task like "%$k%" }
+                query.key?.let { keys ->
+                    if (keys.isNotEmpty()) {
+                        where {
+                            keys
+                                .map { key -> TasksTable.task like "%$key%" }
+                                .reduce(Op<Boolean>::or)
+                        }
+                    }
                 }
+
                 query.claimed?.let { where { TasksTable.claimed eq it } }
                 query.consumed?.let { where { TasksTable.consumed eq it } }
                 query.referenceId?.let { where { TasksTable.referenceId like "%$it%" } }
