@@ -180,6 +180,7 @@ object TaskStore: TaskStore {
                 it[claimed] = true
                 it[claimedBy] = workerId
                 it[lastCheckIn] = UtcNow()
+                it[status] = TaskStatus.InProgress
             }
         }.isSuccess
     }

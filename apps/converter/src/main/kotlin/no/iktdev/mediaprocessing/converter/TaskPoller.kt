@@ -9,12 +9,11 @@ import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Component
 class PollerAdministrator(
@@ -49,9 +48,15 @@ class DefaultTaskReporter() : TaskReporter {
         TaskStore.heartbeat(taskId)
     }
 
-    override fun markConsumed(taskId: UUID) {
+    override fun markCompleted(taskId: UUID) {
         TaskStore.markConsumed(taskId, TaskStatus.Completed)
+
     }
+
+    override fun markFailed(taskId: UUID) {
+        TaskStore.markConsumed(taskId, TaskStatus.Failed)
+    }
+
 
     override fun updateProgress(taskId: UUID, progress: Int) {
         // Not to be implemented for this application

@@ -48,8 +48,12 @@ class DefaultTaskReporter() : TaskReporter {
         TaskStore.heartbeat(taskId)
     }
 
-    override fun markConsumed(taskId: UUID) {
+    override fun markCompleted(taskId: UUID) {
         TaskStore.markConsumed(taskId, TaskStatus.Completed)
+    }
+
+    override fun markFailed(taskId: UUID) {
+        TaskStore.markConsumed(taskId, TaskStatus.Failed)
     }
 
     override fun updateProgress(taskId: UUID, progress: Int) {
