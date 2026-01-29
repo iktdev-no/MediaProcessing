@@ -10,7 +10,10 @@ import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
 @RestController
@@ -35,7 +38,7 @@ class TaskController(
         taskService.getTaskById(id)
 
 
-    @PostMapping("/{taskId}/reset")
+    @GetMapping("/{taskId}/reset")
     fun resetTask(@PathVariable taskId: UUID, forced: Boolean = false): ResponseEntity<ResetTaskResponse> {
         val task = taskService.getTaskById(taskId)
             ?: return ResponseEntity.notFound().build()
@@ -65,7 +68,7 @@ class TaskController(
             )
         )
     }
-    @PostMapping("/{taskId}/reset/force")
+    @GetMapping("/{taskId}/reset/force")
     fun resetTaskForce(@PathVariable taskId: UUID): ResponseEntity<ResetTaskResponse> {
         return resetTask(taskId, true)
     }
