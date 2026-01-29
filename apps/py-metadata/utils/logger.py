@@ -18,7 +18,11 @@ class ColoredFormatter(logging.Formatter):
         message = super().format(record)
         return f"{color}{prefix}{COLORS['RESET']} {message}"
 
-def setup_logger(level=logging.INFO):
+def setup_logger():
+    import os
+    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+
     handler = logging.StreamHandler(sys.stdout)
     formatter = ColoredFormatter("%(asctime)s - %(name)s - %(message)s")
     handler.setFormatter(formatter)
@@ -27,6 +31,7 @@ def setup_logger(level=logging.INFO):
     logger.setLevel(level)
     logger.handlers = [handler]
     return logger
+
 
 # Opprett global logger
 logger: logging.Logger = setup_logger()
