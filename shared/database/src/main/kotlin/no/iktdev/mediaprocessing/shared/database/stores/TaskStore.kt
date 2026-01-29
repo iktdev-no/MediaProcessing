@@ -185,7 +185,7 @@ object TaskStore: TaskStore {
         return withTransaction {
             TasksTable.update({
                 (TasksTable.claimed eq true) and
-                        (TasksTable.consumed eq false) and
+                        (TasksTable.consumed eq true) and
                         (TasksTable.status eq TaskStatus.Failed) and
                         (TasksTable.taskId eq taskId.toString())
             }) {

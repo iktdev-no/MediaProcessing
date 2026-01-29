@@ -7,6 +7,6 @@ data class ResetTaskResponse(
     val taskId: UUID,
     val referenceId: UUID,
     val deletedEventId: UUID?,
-    val status: String,
+    val reset: Boolean,
     val resetAt: Instant
 )

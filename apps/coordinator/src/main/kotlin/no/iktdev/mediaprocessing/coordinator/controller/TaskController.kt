@@ -56,13 +56,13 @@ class TaskController(
         }
 
         // 2. Reset task
-        taskService.resetFailedTask(taskId)
+        val success = taskService.resetFailedTask(taskId)
 
         return ResponseEntity.ok(
             ResetTaskResponse(
                 taskId = taskId,
                 referenceId = referenceId,
-                status = "reset",
+                reset = success,
                 deletedEventId = deletedId,
                 resetAt = UtcNow()
             )
