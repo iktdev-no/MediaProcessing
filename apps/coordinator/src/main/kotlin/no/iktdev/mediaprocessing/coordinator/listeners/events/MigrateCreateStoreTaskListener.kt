@@ -66,7 +66,7 @@ class MigrateCreateStoreTaskListener(
         ).derivedOf(event)
 
 
-        if (!collectProjection.canStoreAutomatically()) {
+        if (!collectProjection.isStorePermitted()) {
             log.info { "Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
             log.info { "A manual allow completion event is required to proceed." }
             return null

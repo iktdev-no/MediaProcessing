@@ -16,6 +16,7 @@ data class SequenceSummary(
     val convertTaskStatus: CollectProjection.TaskStatus,
     val coverDownloadTaskStatus: CollectProjection.TaskStatus,
     val mode: Mode,
+    val currentState: CurrentState,
     val hasErrors: Boolean,
 )
 
@@ -27,4 +28,9 @@ enum class ContextType {
 enum class Mode {
     Auto,
     Manual
+}
+
+enum class CurrentState {
+    Continuing,
+    OnHold
 }

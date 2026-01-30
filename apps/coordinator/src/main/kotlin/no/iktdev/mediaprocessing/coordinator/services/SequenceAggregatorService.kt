@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.shared.common.dto.CurrentState
 import no.iktdev.mediaprocessing.shared.common.dto.Mode
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
@@ -46,6 +47,10 @@ class SequenceAggregatorService() {
 
         val projection = CollectProjection(domainEvents)
 
+        val state = if (events.any { it.event == CollectedEvent::class.java.simpleName }) {
+            if (projection.isStorePermitted()) CurrentState.Continuing else CurrentState.OnHold
+        } else CurrentState.Continuing
+
         return SequenceSummary(
             referenceId = last.referenceId.toString(),
             title = "",
@@ -62,6 +67,7 @@ class SequenceAggregatorService() {
                 StartFlow.Manual -> Mode.Manual
                 else -> Mode.Auto
             },
+            currentState = state,
             hasErrors = projection.getTaskStatus().any { it == CollectProjection.TaskStatus.Failed }
         )
     }
