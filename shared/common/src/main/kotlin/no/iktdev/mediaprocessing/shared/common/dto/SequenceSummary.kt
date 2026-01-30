@@ -15,6 +15,8 @@ data class SequenceSummary(
     val extractTaskStatus: CollectProjection.TaskStatus,
     val convertTaskStatus: CollectProjection.TaskStatus,
     val coverDownloadTaskStatus: CollectProjection.TaskStatus,
+    val contentMigratedTaskStatus: CollectProjection.TaskStatus,
+    val contentStoredTaskStatus: CollectProjection.TaskStatus,
     val mode: Mode,
     val currentState: CurrentState,
     val hasErrors: Boolean,

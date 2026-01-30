@@ -7,6 +7,7 @@ object EventRegistry {
     fun getEvents(): List<Class<out Event>> {
         return listOf(
             CollectedEvent::class.java,
+            CompletedEvent::class.java,
 
             ConvertTaskCreatedEvent::class.java,
             ConvertTaskResultEvent::class.java,

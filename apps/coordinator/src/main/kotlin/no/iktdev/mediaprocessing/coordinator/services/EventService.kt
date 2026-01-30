@@ -1,12 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
-import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
 import no.iktdev.mediaprocessing.shared.common.dto.toDto
+import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
 import java.util.*
@@ -55,27 +55,11 @@ class EventService {
     }
 
     fun getEffectiveHistory(referenceId: UUID): List<PersistedEvent> {
-        val persisted = EventStore.getPersistedEventsFor(referenceId)
-
-        // Parse alle events (kan være null hvis ukjent type)
-        val parsed = persisted.mapNotNull { pe ->
-            pe.toEvent()?.let { ev -> pe to ev }
-        }
-
-        // Finn alle eventIds som er slettet
-        val deletedIds = parsed
-            .map { it.second }
-            .filterIsInstance<DeleteEvent>()
-            .map { it.deletedEventId }
-            .toSet()
-
-        // Filtrer persisted basert på event-logikken
-        val filtered = parsed
-            .filter { (_, ev) -> ev.eventId !in deletedIds }   // fjern slettede
-            .filter { (_, ev) -> ev !is DeleteEvent }          // fjern selve DeleteEvent
-            .map { it.first }                                  // behold kun PersistedEvent
-        return filtered.sortedByDescending { it.persistedAt }
+        return EventStore
+            .getPersistedEventsFor(referenceId)
+            .effectivePersisted()
     }
+
 
 
 }

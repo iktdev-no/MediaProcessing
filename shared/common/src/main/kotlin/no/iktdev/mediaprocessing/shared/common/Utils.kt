@@ -2,7 +2,10 @@ package no.iktdev.mediaprocessing.shared.common
 
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
+import no.iktdev.eventi.ZDS.toEvent
+import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.PersistedEvent
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
 import java.io.File
@@ -217,3 +220,32 @@ fun File.resolveConflict(): File {
 }
 
 fun UtcNow(): Instant = Instant.now()
+
+fun List<Event>.effective(): List<Event> {
+    val deletedIds = this
+        .filterIsInstance<DeleteEvent>()
+        .map { it.deletedEventId }
+        .toSet()
+
+    return this
+        .filter { it.eventId !in deletedIds }
+        .filterNot { it is DeleteEvent }
+}
+
+fun List<PersistedEvent>.effectivePersisted(): List<PersistedEvent> {
+    val parsed = this.mapNotNull { pe ->
+        pe.toEvent()?.let { ev -> pe to ev }
+    }
+
+    val effectiveEvents = parsed
+        .map { it.second }
+        .effective() // bruker extension over
+
+    val effectiveIds = effectiveEvents.map { it.eventId }.toSet()
+
+    return parsed
+        .filter { (_, ev) -> ev.eventId in effectiveIds }
+        .map { it.first }
+        .sortedBy { it.persistedAt }
+}
+

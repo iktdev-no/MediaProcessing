@@ -90,6 +90,20 @@ class TaskProjection(val events: List<Event>) {
         }
     }
 
+    fun projectMigrateContentStatus(): TaskStatus {
+        return projectStatus<MigrateContentToStoreTaskCreatedEvent, MigrateContentToStoreTaskResultEvent>(
+            createdIds = { it.map { e -> e.taskId }},
+            resultStatus = { it.status },
+            resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
+        )
+    }
 
+    fun projectStoreContentAndMetadataStatus(): TaskStatus {
+        return projectStatus<StoreContentAndMetadataTaskCreatedEvent, StoreContentAndMetadataTaskResultEvent>(
+            createdIds = { it.map { e -> e.taskId }},
+            resultStatus = {it.taskStatus},
+            resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
+        )
+    }
 
 }

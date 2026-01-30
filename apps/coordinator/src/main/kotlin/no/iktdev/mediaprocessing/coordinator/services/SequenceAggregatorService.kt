@@ -5,7 +5,9 @@ import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.shared.common.dto.CurrentState
 import no.iktdev.mediaprocessing.shared.common.dto.Mode
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
+import no.iktdev.mediaprocessing.shared.common.effective
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -23,7 +25,7 @@ class SequenceAggregatorService() {
 
         return grouped.values
             // aktive = ingen CollectedEvent
-            .filter { events -> events.none { it.event == CollectedEvent::class.java.simpleName } }
+            .filter { events -> events.none { it.event == CompletedEvent::class.java.simpleName } }
             .mapNotNull { events -> buildSummary(events) }
             .sortedByDescending { it.lastEventTime }
     }
@@ -44,6 +46,7 @@ class SequenceAggregatorService() {
 
         // Deserialiser kun eventene for denne sekvensen
         val domainEvents = events.mapNotNull { it.toEvent() }
+            .effective()
 
         val projection = CollectProjection(domainEvents)
 
@@ -62,6 +65,8 @@ class SequenceAggregatorService() {
             extractTaskStatus = projection.extreactTaskStatus,
             convertTaskStatus = projection.convertTaskStatus,
             coverDownloadTaskStatus = projection.coverDownloadTaskStatus,
+            contentMigratedTaskStatus = projection.contentMigratedTaskStatus,
+            contentStoredTaskStatus = projection.contentStoredTaskStatus,
             mode = when (projection.startedWith?.mode) {
                 StartFlow.Auto -> Mode.Auto
                 StartFlow.Manual -> Mode.Manual
