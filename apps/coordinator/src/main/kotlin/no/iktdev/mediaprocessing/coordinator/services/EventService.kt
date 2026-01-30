@@ -70,10 +70,11 @@ class EventService {
             .toSet()
 
         // Filtrer persisted basert på event-logikken
-        return parsed
+        val filtered = parsed
             .filter { (_, ev) -> ev.eventId !in deletedIds }   // fjern slettede
             .filter { (_, ev) -> ev !is DeleteEvent }          // fjern selve DeleteEvent
             .map { it.first }                                  // behold kun PersistedEvent
+        return filtered.sortedByDescending { it.persistedAt }
     }
 
 
