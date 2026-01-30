@@ -57,6 +57,10 @@ class DefaultTaskReporter() : TaskReporter {
         TaskStore.markConsumed(taskId, TaskStatus.Failed)
     }
 
+    override fun markCancelled(taskId: UUID) {
+        TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
+    }
+
 
     override fun updateProgress(taskId: UUID, progress: Int) {
         // Not to be implemented for this application
