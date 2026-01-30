@@ -44,6 +44,8 @@ def set_heartbeat(ts, in_backoff=False, error=None):
     if in_backoff and prev is False:
         backoff_entered_at = ts
         backoff_entered_human = datetime.fromtimestamp(ts).isoformat()
+        backoff_exited_at = None
+        backoff_exited_human = None
 
     # Går UT av backoff
     if not in_backoff and prev is True:
