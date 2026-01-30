@@ -19,7 +19,8 @@ class Database:
                     host=self.config.address,
                     user=self.config.username,
                     password=self.config.password,
-                    database=self.config.name
+                    database=self.config.name,
+                    autocommit=True
                 )
                 if self.conn.is_connected(): 
                     logger.info("✅ Tilkoblet til databasen")
