@@ -115,6 +115,7 @@ object EventStore: EventStore {
         } else {
             log.info { "Identified ${targetedEvent.eventId} in ${targetedEvent.referenceId} as being derived from $taskId" }
             val preparedDeleteEvent = DeletedTaskResultEvent(targetedEvent.eventId)
+                .apply { usingReferenceId(targetedEvent.referenceId) }
             persist(preparedDeleteEvent)
             return preparedDeleteEvent.deletedEventId
         }
