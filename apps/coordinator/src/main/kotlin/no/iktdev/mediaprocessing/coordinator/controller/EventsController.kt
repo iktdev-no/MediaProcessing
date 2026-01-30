@@ -33,4 +33,11 @@ class EventsController(
             limit = limit
         )
     }
+
+    @GetMapping("/history/{referenceId}/effective")
+    fun getEffectiveHistory(
+        @PathVariable referenceId: UUID,
+    ): List<PersistedEvent> {
+        return paging.getEffectiveHistory(referenceId)
+    }
 }
