@@ -74,6 +74,6 @@ class MigrateCreateStoreTaskListener(
 
         TaskStore.persist(storeTask)
 
-        return MigrateContentToStoreTaskCreatedEvent(storeTask.taskId)
+        return MigrateContentToStoreTaskCreatedEvent(storeTask.taskId).derivedOf(useEvent)
     }
 }
