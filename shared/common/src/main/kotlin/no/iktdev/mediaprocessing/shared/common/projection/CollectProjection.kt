@@ -9,6 +9,8 @@ class CollectProjection(val events: List<Event>) {
 
     val useFile: File? by lazy { projectUseFile() }
     val startedWith: StartProjection? by lazy { projectStartedWith() }
+    var readStreamsTaskStatus: TaskStatus = TaskStatus.NotInitiated
+        private set
     var metadataTaskStatus: TaskStatus = TaskStatus.NotInitiated
         private set
     var encodeTaskStatus: TaskStatus = TaskStatus.NotInitiated
@@ -29,6 +31,7 @@ class CollectProjection(val events: List<Event>) {
 
     init {
         val taskProjection = TaskProjection(events)
+        readStreamsTaskStatus = taskProjection.projectStreamReadStatus()
         metadataTaskStatus = taskProjection.projectMetadataSearchStatus()
         encodeTaskStatus = taskProjection.projectEncodingPerformedStatus()
         extreactTaskStatus = taskProjection.projectExtractSubtitleStatus()

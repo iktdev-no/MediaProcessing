@@ -60,6 +60,7 @@ class SequenceAggregatorService() {
             inputFileName = projection.useFile?.name,
             lastEventId = last.eventId.toString(),
             lastEventTime = last.persistedAt,
+            readStreamsTaskStatus = projection.readStreamsTaskStatus,
             metadataTaskStatus = projection.metadataTaskStatus,
             encodeTaskStatus = projection.encodeTaskStatus,
             extractTaskStatus = projection.extreactTaskStatus,

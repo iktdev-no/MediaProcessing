@@ -10,6 +10,7 @@ data class SequenceSummary(
     val type: ContextType = ContextType.Content,
     val lastEventId: String,
     val lastEventTime: Instant,
+    val readStreamsTaskStatus: CollectProjection.TaskStatus,
     val metadataTaskStatus: CollectProjection.TaskStatus,
     val encodeTaskStatus: CollectProjection.TaskStatus,
     val extractTaskStatus: CollectProjection.TaskStatus,
