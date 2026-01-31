@@ -50,8 +50,7 @@ class StoreContentAndMetadataListener: EventListener() {
             return null
         }
 
-        val collectProjection = CollectProjection(useHistory)
-        if (!collectProjection.isStorePermitted()) {
+        if (!CollectProjection(history).isStorePermitted()) {
             log.info { "\uD83D\uDED1 Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
             log.info { "A manual allow completion event is required to proceed." }
             return null
