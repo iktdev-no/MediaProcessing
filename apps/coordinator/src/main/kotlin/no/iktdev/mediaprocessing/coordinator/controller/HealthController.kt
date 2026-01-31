@@ -19,9 +19,9 @@ class HealthController(
         return healthService.getHealth()
     }
 
-    @GetMapping("/health/events")
+    @GetMapping("/events")
     fun getEventRate(): EventRate = healthService.getEventRate()
 
-    @GetMapping("/health/storage")
+    @GetMapping("/storage")
     fun getDiskStatus(): List<DiskInfo> = healthService.getDiskHealth()
 }
