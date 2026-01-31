@@ -6,11 +6,18 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.resolveConflict
 import java.io.File
 
-open class MigrateContentProject(val events: List<Event>, val storageArea: File) {
+open class MigrateContentProject(
+    val events: List<Event>,
+    val storageArea: File
+) {
+
     val useStore: File? = getDesiredStoreFolder()
 
     open fun getFoldersInStore(): List<String> {
-        return storageArea.listFiles { file -> file.isDirectory }?.map { it.name }?.toList() ?: emptyList()
+        return storageArea
+            .listFiles { file -> file.isDirectory }
+            ?.map { it.name }
+            ?: emptyList()
     }
 
     internal fun getFileName(): String? {
@@ -19,75 +26,77 @@ open class MigrateContentProject(val events: List<Event>, val storageArea: File)
     }
 
     internal fun getDesiredStoreFolder(): File? {
-        val assuredCollection = getDesiredCollection() ?: return null
-        val assuredStore = storageArea.using(assuredCollection)
-        val existingCollectionNames = getFoldersInStore().ifEmpty {
+        val desiredCollection = getDesiredCollection() ?: return null
+        val assuredStore = storageArea.using(desiredCollection)
+
+        val existingCollectionNames = getFoldersInStore()
+        if (existingCollectionNames.isEmpty()) {
             return assuredStore
         }
+
         val titles = getMetadataTitles()
-        val existingCollection = titles.filter { it in existingCollectionNames }.firstOrNull()?.let {
-            File(it)
-        } ?: assuredStore
-        return existingCollection
+
+        val matchedExisting = titles
+            .firstOrNull { it in existingCollectionNames }
+            ?.let { storageArea.using(it) }
+
+        return matchedExisting ?: assuredStore
     }
 
     internal fun getMetadataTitles(): List<String> {
-        val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()?.recommended?.metadata
+        val metadataEvent = events
+            .filterIsInstance<MetadataSearchResultEvent>()
+            .lastOrNull()
+            ?.recommended
+            ?.metadata
             ?: return emptyList()
-        return (metadataEvent.alternateTitles + listOf(metadataEvent.title))
+
+        return metadataEvent.alternateTitles + metadataEvent.title
     }
 
     internal fun getDesiredCollection(): String? {
-        val metadataEvent = events.filterIsInstance<MediaParsedInfoEvent>().lastOrNull()?.data
-        return metadataEvent?.parsedCollection
+        return events
+            .filterIsInstance<MediaParsedInfoEvent>()
+            .lastOrNull()
+            ?.data
+            ?.parsedCollection
     }
-
 
     fun getVideoStoreFile(): CachedToStore? {
         val encoded = events.filterIsInstance<ProcesserEncodeResultEvent>().lastOrNull()
-        val cached = encoded?.data?.cachedOutputFile?.let { File(it) } ?: return null
-        val useFilename = getFileName()?.let { "$it.${cached.extension}" } ?: return null
-        val store = useStore?.using(useFilename) ?: return null
-        return CachedToStore(
-            cachedFile = cached,
-            storeFile = store
-        )
+        val cached = encoded?.data?.cachedOutputFile?.let(::File) ?: return null
+
+        val filename = getFileName()?.let { "$it.${cached.extension}" } ?: return null
+        val store = useStore?.using(filename) ?: return null
+
+        return CachedToStore(cachedFile = cached, storeFile = store)
     }
 
     fun getSubtitleStoreFiles(): List<CachedToStoreLanguage>? {
-        val extractedFiles: Map<String, List<File>> = events
+        val extractedFiles = events
             .filterIsInstance<ProcesserExtractResultEvent>()
             .mapNotNull { it.data }
-            .map { data -> data.language to File(data.cachedOutputFile) }
+            .map { it.language to File(it.cachedOutputFile) }
             .groupBy({ it.first }, { it.second })
 
-        val convertedFilesGrouped: Map<String, List<File>> = events
+        val convertedFiles = events
             .filterIsInstance<ConvertTaskResultEvent>()
             .mapNotNull { it.data }
-            .map { x -> x.outputFiles.map { x.language to File(it) } }
-            .flatten()
+            .flatMap { d -> d.outputFiles.map { d.language to File(it) } }
             .groupBy({ it.first }, { it.second })
 
-
         val byLanguage = mutableMapOf<String, MutableList<File>>()
-        extractedFiles.forEach { (lang, files) ->
-            byLanguage.getOrPut(lang) { mutableListOf() }.addAll(files)
-        }
-        convertedFilesGrouped.forEach { (lang, files) ->
-            byLanguage.getOrPut(lang) { mutableListOf() }.addAll(files)
-        }
+        extractedFiles.forEach { (lang, files) -> byLanguage.getOrPut(lang) { mutableListOf() }.addAll(files) }
+        convertedFiles.forEach { (lang, files) -> byLanguage.getOrPut(lang) { mutableListOf() }.addAll(files) }
 
-        val useFilename = getFileName() ?: return null
+        val baseName = getFileName() ?: return null
 
         return byLanguage.flatMap { (language, files) ->
             files.mapNotNull { cached ->
-                val useFilename = "$useFilename.${cached.extension}"
-                val store = useStore?.using(language, useFilename) ?: return@mapNotNull null
+                val filename = "$baseName.${cached.extension}"
+                val store = useStore?.using(language, filename) ?: return@mapNotNull null
                 CachedToStoreLanguage(
-                    CachedToStore(
-                        cachedFile = cached,
-                        storeFile = store
-                    ),
+                    cts = CachedToStore(cachedFile = cached, storeFile = store),
                     language = language
                 )
             }
@@ -95,10 +104,11 @@ open class MigrateContentProject(val events: List<Event>, val storageArea: File)
     }
 
     fun getCoverStoreFiles(): List<CachedToStore>? {
-        val downloaded = events.filterIsInstance<CoverDownloadResultEvent>()
-            .mapNotNull { event ->
-                val file = event.data?.outputFile?.let(::File) ?: return@mapNotNull null
-                event to file
+        val downloaded = events
+            .filterIsInstance<CoverDownloadResultEvent>()
+            .mapNotNull { e ->
+                val file = e.data?.outputFile?.let(::File) ?: return@mapNotNull null
+                e to file
             }
 
         val baseName = getDesiredCollection() ?: return null
@@ -110,10 +120,7 @@ open class MigrateContentProject(val events: List<Event>, val storageArea: File)
             val ext = cached.extension
             val source = event.data?.source ?: "unknown"
 
-            // Bestem om vi skal bruke source i navnet
-            val useSource = multiple || store.using("$baseName.$ext").exists()
-
-            val filename = if (useSource) {
+            val filename = if (multiple || store.using("$baseName.$ext").exists()) {
                 "$baseName-$source.$ext"
             } else {
                 "$baseName.$ext"
@@ -121,21 +128,10 @@ open class MigrateContentProject(val events: List<Event>, val storageArea: File)
 
             val storeFile = store.using(filename).resolveConflict()
 
-            CachedToStore(
-                cachedFile = cached,
-                storeFile = storeFile
-            )
+            CachedToStore(cachedFile = cached, storeFile = storeFile)
         }
     }
 
-
-    data class CachedToStore(
-        val cachedFile: File,
-        val storeFile: File
-    )
-
-    data class CachedToStoreLanguage(
-        val cts: CachedToStore,
-        val language: String
-    )
+    data class CachedToStore(val cachedFile: File, val storeFile: File)
+    data class CachedToStoreLanguage(val cts: CachedToStore, val language: String)
 }
