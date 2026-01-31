@@ -18,7 +18,9 @@ class CoordinatorHealthService(
 
     fun getHealth(): CoordinatorHealth {
         val tasks = taskService.getActiveTasks()
-        val incompleteSequences = eventService.getIncompleteSequences().groupBy { it.referenceId }.values
+        val incompleteSequences = eventService.getIncompleteSequences()
+            .groupBy { it.referenceId }
+            .values
 
         // --- TASK HEALTH ---
         val abandonedTaskIds = tasks
@@ -34,17 +36,31 @@ class CoordinatorHealthService(
             .filter { EventLifecycleRules.isOverdue(it) }
             .map { seq ->
                 val refId = seq.first().referenceId
-                val first = seq.minOf { it.persistedAt }
-                val last = seq.maxOf { it.persistedAt }
-                val expected = EventLifecycleRules.expectedCompletionTimeWindow(seq)
-                val age = Duration.between(first, Instant.now())
+                val firstEventAt = seq.minOf { it.persistedAt }
+                val lastEventAt = seq.maxOf { it.persistedAt }
+
+                val expectedWindow = EventLifecycleRules.expectedCompletionTimeWindow(seq)
+                val actualAge = Duration.between(firstEventAt, Instant.now())
+
+                // Operasjonelle verdier frontend trenger
+                val expectedFinish = firstEventAt.plus(expectedWindow)
+                val overdueDuration = actualAge.minus(expectedWindow).coerceAtLeast(Duration.ZERO)
+                val isOverdue = overdueDuration > Duration.ZERO
 
                 SequenceHealth(
                     referenceId = refId.toString(),
-                    age = age,
-                    expected = expected,
-                    lastEventAt = last,
-                    eventCount = seq.size
+
+                    // eksisterende felter
+                    age = actualAge,
+                    expected = expectedWindow,
+                    lastEventAt = lastEventAt,
+                    eventCount = seq.size,
+
+                    // nye operasjonelle felter
+                    startTime = firstEventAt,
+                    expectedFinishTime = expectedFinish,
+                    overdueDuration = overdueDuration,
+                    isOverdue = isOverdue
                 )
             }
 
@@ -62,7 +78,7 @@ class CoordinatorHealthService(
         val eventsLastMinute = eventService.getEventsLast(1)
         val eventsLastFive = eventService.getEventsLast(5)
 
-        val last = listOfNotNull(
+        val lastActivityCandidates = listOfNotNull(
             tasks.maxOfOrNull { it.persistedAt },
             eventService.getLastEventTimestamp()
         )
@@ -73,7 +89,7 @@ class CoordinatorHealthService(
             stalledTasks = stalledTaskIds.size,
             activeTasks = tasks.count { !it.consumed },
             queuedTasks = TaskStore.getPendingTasks().size,
-            lastActivity = last.max(),
+            lastActivity = lastActivityCandidates.maxOrNull(),
 
             abandonedTaskIds = abandonedTaskIds.map { it.toString() },
             stalledTaskIds = stalledTaskIds.map { it.toString() },
@@ -90,4 +106,3 @@ class CoordinatorHealthService(
         )
     }
 }
-
