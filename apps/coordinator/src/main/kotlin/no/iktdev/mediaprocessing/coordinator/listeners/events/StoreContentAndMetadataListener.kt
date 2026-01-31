@@ -3,11 +3,13 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ManualAllowCompletionEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.StoreProjection
@@ -47,6 +49,10 @@ class StoreContentAndMetadataListener: EventListener() {
         val metadata = projection.projectMetadata()
         if (metadata == null) {
             log.error { "Metadata is null @ ${useEvent.referenceId}"}
+            return null
+        }
+        if (useEvent.status != TaskStatus.Completed) {
+            log.info { "${useEvent.referenceId} - ${MigrateContentToStoreTaskResultEvent::class.getName()} is failed, thus no task will be created" }
             return null
         }
 
