@@ -7,6 +7,7 @@ import no.iktdev.mediaprocessing.coordinator.dto.health.SequenceHealth
 import no.iktdev.mediaprocessing.coordinator.dto.rate.EventRate
 import no.iktdev.mediaprocessing.coordinator.util.DiskInfo
 import no.iktdev.mediaprocessing.coordinator.util.getDiskInfoFor
+import no.iktdev.mediaprocessing.shared.common.dto.CurrentState
 import no.iktdev.mediaprocessing.shared.common.rules.EventLifecycleRules
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -18,6 +19,7 @@ import java.time.Instant
 class CoordinatorHealthService(
     private val taskService: TaskService,
     private val eventService: EventService,
+    private val aggregator: SequenceAggregatorService,
     private val coordinatorEnv: CoordinatorEnv
 ) {
 
@@ -37,6 +39,7 @@ class CoordinatorHealthService(
             .map { it.taskId }
 
         val failedTasks = taskService.getFailedTasks()
+        val sequencesOnHold = aggregator.getActiveSequences().filter { it.currentState == CurrentState.OnHold }
 
         // --- SEQUENCE HEALTH ---
         val overdueSequences = incompleteSequences
@@ -99,6 +102,8 @@ class CoordinatorHealthService(
 
             abandonedTaskIds = abandonedTaskIds.map { it.toString() },
             stalledTaskIds = stalledTaskIds.map { it.toString() },
+            sequencesOnHold = sequencesOnHold.size,
+            sequencesOnHoldIds = sequencesOnHold.map { it.referenceId },
             overdueSequenceIds = overdueSequenceIds,
             overdueSequences = overdueSequences,
 

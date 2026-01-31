@@ -9,12 +9,15 @@ data class CoordinatorHealth(
     val activeTasks: Int,
     val queuedTasks: Int,
     val failedTasks: Int,
+    val sequencesOnHold: Int,
     val lastActivity: Instant?,
 
     // IDs for UI linking
     val abandonedTaskIds: List<String>,
     val stalledTaskIds: List<String>,
+    val sequencesOnHoldIds: List<String>,
     val overdueSequenceIds: List<String>,
+
 
     // Detailed sequence info
     val overdueSequences: List<SequenceHealth>,

@@ -71,5 +71,4 @@ class EventService {
 
     fun getLastEventTimestamp(): Instant? = EventStore.getLastEventTimestamp()
 
-
 }
