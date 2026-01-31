@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.dto
+package no.iktdev.mediaprocessing.coordinator.dto.health
 
 enum class CoordinatorHealthStatus {
     HEALTHY,

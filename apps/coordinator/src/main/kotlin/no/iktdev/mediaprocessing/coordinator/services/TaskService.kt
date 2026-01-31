@@ -28,4 +28,8 @@ class TaskService {
         val resetSuccess = TaskStore.resetTaskById(taskId).isSuccess
         return resetSuccess
     }
+
+    fun getFailedTasks(): List<PersistedTask> {
+        return TaskStore.getFailedTasks()
+    }
 }

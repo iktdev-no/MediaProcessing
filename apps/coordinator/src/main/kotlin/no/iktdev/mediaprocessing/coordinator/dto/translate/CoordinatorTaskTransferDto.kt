@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.translateDto
+package no.iktdev.mediaprocessing.coordinator.dto.translate
 
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules

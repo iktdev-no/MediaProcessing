@@ -1,8 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
-import no.iktdev.mediaprocessing.coordinator.dto.CoordinatorHealth
-import no.iktdev.mediaprocessing.coordinator.dto.CoordinatorHealthStatus
-import no.iktdev.mediaprocessing.coordinator.dto.SequenceHealth
+import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
+import no.iktdev.mediaprocessing.coordinator.dto.health.CoordinatorHealth
+import no.iktdev.mediaprocessing.coordinator.dto.health.CoordinatorHealthStatus
+import no.iktdev.mediaprocessing.coordinator.dto.health.SequenceHealth
+import no.iktdev.mediaprocessing.coordinator.dto.rate.EventRate
+import no.iktdev.mediaprocessing.coordinator.util.DiskInfo
+import no.iktdev.mediaprocessing.coordinator.util.getDiskInfoFor
 import no.iktdev.mediaprocessing.shared.common.rules.EventLifecycleRules
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -13,7 +17,8 @@ import java.time.Instant
 @Service
 class CoordinatorHealthService(
     private val taskService: TaskService,
-    private val eventService: EventService
+    private val eventService: EventService,
+    private val coordinatorEnv: CoordinatorEnv
 ) {
 
     fun getHealth(): CoordinatorHealth {
@@ -30,6 +35,8 @@ class CoordinatorHealthService(
         val stalledTaskIds = tasks
             .filter { TaskLifecycleRules.isStalled(it) }
             .map { it.taskId }
+
+        val failedTasks = taskService.getFailedTasks()
 
         // --- SEQUENCE HEALTH ---
         val overdueSequences = incompleteSequences
@@ -75,8 +82,6 @@ class CoordinatorHealthService(
             else -> CoordinatorHealthStatus.HEALTHY
         }
 
-        val eventsLastMinute = eventService.getEventsLast(1)
-        val eventsLastFive = eventService.getEventsLast(5)
 
         val lastActivityCandidates = listOfNotNull(
             tasks.maxOfOrNull { it.persistedAt },
@@ -88,6 +93,7 @@ class CoordinatorHealthService(
             abandonedTasks = abandonedTaskIds.size,
             stalledTasks = stalledTaskIds.size,
             activeTasks = tasks.count { !it.consumed },
+            failedTasks = failedTasks.count(),
             queuedTasks = TaskStore.getPendingTasks().size,
             lastActivity = lastActivityCandidates.maxOrNull(),
 
@@ -99,10 +105,23 @@ class CoordinatorHealthService(
             details = mapOf(
                 "oldestActiveTaskAgeMinutes" to tasks.minOfOrNull {
                     Duration.between(it.persistedAt, Instant.now()).toMinutes()
-                },
-                "eventsLastMinute" to eventsLastMinute,
-                "eventsLastFiveMinutes" to eventsLastFive,
+                }
             )
         )
+    }
+
+    fun getEventRate(): EventRate {
+        return EventRate(
+            lastMinute = eventService.getEventsLast(1),
+            lastFiveMinutes = eventService.getEventsLast(5)
+        )
+    }
+
+    fun getDiskHealth(): List<DiskInfo> {
+        val paths = listOf(coordinatorEnv.incomingContent,
+            coordinatorEnv.cachedContent,
+            coordinatorEnv.outgoingContent)
+            .map { it -> it.absolutePath }
+        return getDiskInfoFor(paths)
     }
 }

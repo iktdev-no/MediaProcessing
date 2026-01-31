@@ -3,8 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
-import no.iktdev.mediaprocessing.coordinator.translateDto.CoordinatorTaskTransferDto
-import no.iktdev.mediaprocessing.coordinator.translateDto.toCoordinatorTransferDto
+import no.iktdev.mediaprocessing.coordinator.dto.translate.CoordinatorTaskTransferDto
+import no.iktdev.mediaprocessing.coordinator.dto.translate.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse

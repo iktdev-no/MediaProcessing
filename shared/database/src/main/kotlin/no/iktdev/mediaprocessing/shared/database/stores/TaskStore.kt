@@ -218,5 +218,13 @@ object TaskStore: TaskStore {
         }.getOrDefault(emptyList())
     }
 
+    fun getFailedTasks(): List<PersistedTask> {
+        return withTransaction {
+            TasksTable.getWhere {
+                (TasksTable.status eq TaskStatus.Failed)
+            }
+        }.getOrDefault(emptyList())
+    }
+
 
 }

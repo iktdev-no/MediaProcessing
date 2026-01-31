@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.dto
+package no.iktdev.mediaprocessing.coordinator.dto.health
 
 import java.time.Duration
 import java.time.Instant

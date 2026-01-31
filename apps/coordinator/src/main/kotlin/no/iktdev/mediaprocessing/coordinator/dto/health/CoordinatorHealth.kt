@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.dto
+package no.iktdev.mediaprocessing.coordinator.dto.health
 
 import java.time.Instant
 
@@ -8,6 +8,7 @@ data class CoordinatorHealth(
     val stalledTasks: Int,
     val activeTasks: Int,
     val queuedTasks: Int,
+    val failedTasks: Int,
     val lastActivity: Instant?,
 
     // IDs for UI linking
