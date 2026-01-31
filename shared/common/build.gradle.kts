@@ -61,6 +61,9 @@ dependencies {
     testImplementation("io.github.classgraph:classgraph:4.8.184")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
+    testImplementation("org.reflections:reflections:0.10.2")
+
 
 
 }

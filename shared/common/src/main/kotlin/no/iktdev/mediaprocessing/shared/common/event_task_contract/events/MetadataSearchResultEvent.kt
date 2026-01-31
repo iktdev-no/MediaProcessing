@@ -6,11 +6,11 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEve
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import java.util.*
 
-data class MetadataSearchResultEvent(
+class MetadataSearchResultEvent(
     val results: List<SearchResult> = emptyList(),
     val recommended: SearchResult? = null,
-    override val status: TaskStatus,
-    override val error: String? = null
+    status: TaskStatus,
+    error: String? = null
 ) : TaskResultEvent(status, error) {
     data class SearchResult(
         val simpleScore: Int,

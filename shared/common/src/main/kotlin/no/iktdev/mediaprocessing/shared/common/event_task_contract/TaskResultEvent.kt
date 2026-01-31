@@ -6,7 +6,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 /**
  * Base class, should not be serialized into
  */
-abstract class TaskResultEvent(
-    open val status: TaskStatus,
-    open val error: String? = null
+open class TaskResultEvent(
+    val status: TaskStatus,
+    val error: String? = null
 ) : Event()
