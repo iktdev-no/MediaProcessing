@@ -6,7 +6,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEve
 data class ConvertTaskResultEvent(
     val data: ConvertedData?,
     override val status: TaskStatus,
-): TaskResultEvent(status = status) {
+    override val error: String? = null,
+): TaskResultEvent(status, error) {
     data class ConvertedData(
         val language: String,
         val baseName: String,
