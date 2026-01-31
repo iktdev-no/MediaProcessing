@@ -17,6 +17,7 @@ import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.insert
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -152,4 +153,13 @@ object EventStore: EventStore {
         }.getOrDefault(emptyList())
     }
 
+    fun getLastEventTimestamp(): Instant? {
+        return withTransaction {
+            EventsTable.select(EventsTable.persistedAt)
+                .orderBy(EventsTable.persistedAt, SortOrder.DESC)
+                .limit(1)
+                .firstOrNull()
+                ?.get(EventsTable.persistedAt)
+        }.getOrDefault(null)
+    }
 }

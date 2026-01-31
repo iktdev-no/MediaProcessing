@@ -62,6 +62,10 @@ class CoordinatorHealthService(
         val eventsLastMinute = eventService.getEventsLast(1)
         val eventsLastFive = eventService.getEventsLast(5)
 
+        val last = listOfNotNull(
+            tasks.maxOfOrNull { it.persistedAt },
+            eventService.getLastEventTimestamp()
+        )
 
         return CoordinatorHealth(
             status = status,
@@ -69,7 +73,7 @@ class CoordinatorHealthService(
             stalledTasks = stalledTaskIds.size,
             activeTasks = tasks.count { !it.consumed },
             queuedTasks = TaskStore.getPendingTasks().size,
-            lastActivity = tasks.maxOfOrNull { it.persistedAt },
+            lastActivity = last.max(),
 
             abandonedTaskIds = abandonedTaskIds.map { it.toString() },
             stalledTaskIds = stalledTaskIds.map { it.toString() },

@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.toDto
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -68,6 +69,7 @@ class EventService {
         return EventStore.eventsLast(minutes)
     }
 
+    fun getLastEventTimestamp(): Instant? = EventStore.getLastEventTimestamp()
 
 
 }
