@@ -60,6 +60,14 @@ class EventService {
             .effectivePersisted()
     }
 
+    fun getIncompleteSequences(): List<PersistedEvent> {
+        return EventStore.getIncompletedEventSequence()
+    }
+
+    fun getEventsLast(minutes: Long = 1): Long {
+        return EventStore.eventsLast(minutes)
+    }
+
 
 
 }

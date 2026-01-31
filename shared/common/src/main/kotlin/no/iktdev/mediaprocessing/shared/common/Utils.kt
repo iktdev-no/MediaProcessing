@@ -15,6 +15,7 @@ import java.net.InetAddress
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.zip.CRC32
+import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
@@ -248,4 +249,9 @@ fun List<PersistedEvent>.effectivePersisted(): List<PersistedEvent> {
         .map { it.first }
         .sortedBy { it.persistedAt }
 }
+
+fun <T : Any> KClass<T>.getName(): String =
+    this.simpleName ?: this.java.simpleName
+
+
 

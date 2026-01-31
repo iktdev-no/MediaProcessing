@@ -39,16 +39,11 @@ object EventRegistry {
             MigrateContentToStoreTaskCreatedEvent::class.java,
             MigrateContentToStoreTaskResultEvent::class.java,
 
-            ProcesserEncodePerformedEvent::class.java,
             ProcesserEncodeResultEvent::class.java,
             ProcesserEncodeTaskCreatedEvent::class.java,
 
-            ProcesserExtractPerformedEvent::class.java,
             ProcesserExtractResultEvent::class.java,
             ProcesserExtractTaskCreatedEvent::class.java,
-
-            ProcesserEncodeTaskCreatedEvent::class.java,
-            ProcesserEncodeResultEvent::class.java,
 
             StartProcessingEvent::class.java,
 

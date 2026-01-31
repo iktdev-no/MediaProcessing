@@ -12,11 +12,10 @@ import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.*
 import java.time.Duration
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 object TaskStore: TaskStore {
@@ -202,8 +201,22 @@ object TaskStore: TaskStore {
         return withTransaction {
             TasksTable.getWhere {
                 (TasksTable.consumed eq false) and
-                        (TasksTable.claimed eq false)
+                        (TasksTable.claimed eq false) and
+                        (TasksTable.status eq TaskStatus.Pending)
             }
         }.getOrDefault(emptyList())
     }
+
+    fun findAbandonedTasks(): List<PersistedTask> {
+        val cutoff = Instant.now().minus(15, ChronoUnit.MINUTES)
+        return withTransaction {
+            TasksTable.getWhere {
+                (TasksTable.lastCheckIn less cutoff or TasksTable.lastCheckIn.isNull()) and
+                        (TasksTable.consumed eq false) and
+                        (TasksTable.claimed eq true)
+            }
+        }.getOrDefault(emptyList())
+    }
+
+
 }

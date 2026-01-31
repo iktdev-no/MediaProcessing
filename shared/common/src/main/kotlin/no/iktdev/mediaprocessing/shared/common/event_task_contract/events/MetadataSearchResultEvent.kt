@@ -1,16 +1,17 @@
 package no.iktdev.mediaprocessing.shared.common.event_task_contract.events
 
-import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Metadata
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import java.util.*
 
 data class MetadataSearchResultEvent(
     val results: List<SearchResult> = emptyList(),
     val recommended: SearchResult? = null,
-    val status: TaskStatus
-): Event() {
+    override val status: TaskStatus,
+    override val error: String? = null
+) : TaskResultEvent(status, error) {
     data class SearchResult(
         val simpleScore: Int,
         val prefixScore: Int,

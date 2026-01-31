@@ -8,7 +8,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreCo
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -116,7 +115,7 @@ class StoreContentAndMetadataTaskListenerTest {
 
         assertThat(event).isInstanceOf(StoreContentAndMetadataTaskResultEvent::class.java)
         val result = event as StoreContentAndMetadataTaskResultEvent
-        assertThat(result.taskStatus).isEqualTo(TaskStatus.Completed)
+        assertThat(result.status).isEqualTo(TaskStatus.Completed)
     }
 
     @Test
@@ -144,7 +143,7 @@ class StoreContentAndMetadataTaskListenerTest {
 
         assertThat(event).isInstanceOf(StoreContentAndMetadataTaskResultEvent::class.java)
         val result = event as StoreContentAndMetadataTaskResultEvent
-        assertThat(result.taskStatus).isEqualTo(TaskStatus.Failed)
+        assertThat(result.status).isEqualTo(TaskStatus.Failed)
     }
 
     @Test

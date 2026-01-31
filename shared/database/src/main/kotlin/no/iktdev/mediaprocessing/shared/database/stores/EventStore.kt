@@ -9,14 +9,17 @@ import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeletedTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ForcedTaskResetAuditEvent
+import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.insert
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -128,4 +131,25 @@ object EventStore: EventStore {
         persist(auditEvent)
         return auditEvent.eventId
     }
+
+    fun eventsLast(minutes: Long = 1): Long {
+        val cutoff = Instant.now().minus(minutes, ChronoUnit.MINUTES)
+        return withTransaction {
+            EventsTable.select(EventsTable.eventId).where {
+                EventsTable.persistedAt greater cutoff
+            }.count()
+        }.getOrDefault(-1)
+    }
+
+    fun getIncompletedEventSequence(): List<PersistedEvent> {
+        return withTransaction {
+            val completedReferences = EventsTable.select(EventsTable.referenceId)
+                .where { EventsTable.event eq CompletedEvent::class.getName() }
+                .map { it[EventsTable.referenceId] }
+            EventsTable.getWhere {
+                EventsTable.referenceId notInList completedReferences
+            }
+        }.getOrDefault(emptyList())
+    }
+
 }

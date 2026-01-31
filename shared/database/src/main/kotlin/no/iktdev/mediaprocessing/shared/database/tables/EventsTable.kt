@@ -38,4 +38,6 @@ object EventsTable: IntIdTable(name = "EVENTS") {
                 )
             }
     }
+
+
 }

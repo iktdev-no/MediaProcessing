@@ -1,13 +1,15 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 
-import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
+import no.iktdev.mediaprocessing.coordinator.translateDto.CoordinatorTaskTransferDto
+import no.iktdev.mediaprocessing.coordinator.translateDto.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.dto.map
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,18 +26,20 @@ class TaskController(
 ) {
 
     @GetMapping("/active")
-    fun getActiveTasks(): List<PersistedTask> =
-        taskService.getActiveTasks()
+    fun getActiveTasks(): List<CoordinatorTaskTransferDto> =
+        taskService.getActiveTasks().map { it.toCoordinatorTransferDto() }
 
     @GetMapping
-    fun getPagedTasks(query: TaskQuery): Paginated<PersistedTask> =
-        taskService.getPagedTasks(query)
+    fun getPagedTasks(query: TaskQuery): Paginated<CoordinatorTaskTransferDto> {
+        val paginatedTasks = taskService.getPagedTasks(query)
+        return paginatedTasks.map { it.toCoordinatorTransferDto() }
+    }
 
 
 
     @GetMapping("/{id}")
-    fun getTask(@PathVariable id: UUID): PersistedTask? =
-        taskService.getTaskById(id)
+    fun getTask(@PathVariable id: UUID): CoordinatorTaskTransferDto? =
+        taskService.getTaskById(id)?.toCoordinatorTransferDto()
 
 
     @GetMapping("/{taskId}/reset")

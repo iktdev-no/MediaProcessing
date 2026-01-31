@@ -101,7 +101,7 @@ class TaskProjection(val events: List<Event>) {
     fun projectStoreContentAndMetadataStatus(): TaskStatus {
         return projectStatus<StoreContentAndMetadataTaskCreatedEvent, StoreContentAndMetadataTaskResultEvent>(
             createdIds = { it.map { e -> e.taskId }},
-            resultStatus = {it.taskStatus},
+            resultStatus = {it.status},
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )
     }

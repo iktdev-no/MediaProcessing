@@ -1,0 +1,22 @@
+package no.iktdev.mediaprocessing.coordinator.dto
+
+import java.time.Instant
+
+data class CoordinatorHealth(
+    val status: CoordinatorHealthStatus,
+    val abandonedTasks: Int,
+    val stalledTasks: Int,
+    val activeTasks: Int,
+    val queuedTasks: Int,
+    val lastActivity: Instant?,
+
+    // IDs for UI linking
+    val abandonedTaskIds: List<String>,
+    val stalledTaskIds: List<String>,
+    val overdueSequenceIds: List<String>,
+
+    // Detailed sequence info
+    val overdueSequences: List<SequenceHealth>,
+
+    val details: Map<String, Any?>
+)
