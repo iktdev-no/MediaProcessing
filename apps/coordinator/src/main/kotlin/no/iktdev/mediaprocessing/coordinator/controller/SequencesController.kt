@@ -1,11 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
+import no.iktdev.mediaprocessing.coordinator.dto.translate.ApiResponse
 import no.iktdev.mediaprocessing.coordinator.services.SequenceAggregatorService
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/sequences")
@@ -24,4 +26,32 @@ class SequenceController(
     ): List<SequenceSummary> {
         return aggregator.getRecentSequences(limit)
     }
+
+    @PostMapping("/{referenceId}/continue")
+    fun continueSequence(
+        @PathVariable referenceId: UUID
+    ): ResponseEntity<ApiResponse> {
+        return try {
+
+            val id = EventStore.createManuallyContinueEvent(referenceId)
+
+            ResponseEntity.ok(
+                ApiResponse(
+                    ok = true,
+                    message = "Sequence continued, event $id created!"
+                )
+            )
+
+        } catch (ex: Exception) {
+            ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(
+                    ApiResponse(
+                        ok = false,
+                        message = ex.message ?: "Unknown error"
+                    )
+                )
+        }
+    }
+
 }

@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeletedTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ForcedTaskResetAuditEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ManualAllowCompletionEvent
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
@@ -126,11 +127,24 @@ object EventStore: EventStore {
         return null
     }
 
-    fun createTaskResetAudioEvent(referenceId: UUID, taskId: UUID): UUID {
+    fun createTaskResetAuditEvent(referenceId: UUID, taskId: UUID): UUID {
         val auditEvent = ForcedTaskResetAuditEvent(taskId)
             .usingReferenceId(referenceId)
         persist(auditEvent)
         return auditEvent.eventId
+    }
+
+    fun createManuallyContinueEvent(referenceId: UUID): UUID? {
+        return try {
+            val continueEvent = ManualAllowCompletionEvent().apply {
+                usingReferenceId(referenceId)
+            }
+            persist(continueEvent)
+            return continueEvent.eventId
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     fun eventsLast(minutes: Long = 1): Long {

@@ -52,7 +52,7 @@ class EventService {
     }
 
     fun createForcedTaskResetAuditEvent(referenceId: UUID, taskId: UUID): UUID? {
-        return EventStore.createTaskResetAudioEvent(referenceId, taskId)
+        return EventStore.createTaskResetAuditEvent(referenceId, taskId)
     }
 
     fun getEffectiveHistory(referenceId: UUID): List<PersistedEvent> {
