@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Migrat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
+import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.StoreProjection
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
@@ -49,8 +50,9 @@ class StoreContentAndMetadataListener: EventListener() {
             return null
         }
 
-        if (!projection.canStoreAutomatically()) {
-            log.info { "Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
+        val collectProjection = CollectProjection(useHistory)
+        if (!collectProjection.isStorePermitted()) {
+            log.info { "\uD83D\uDED1 Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
             log.info { "A manual allow completion event is required to proceed." }
             return null
         }

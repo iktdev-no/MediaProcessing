@@ -50,13 +50,16 @@ class CollectProjection(val events: List<Event>) {
     )
 
     fun isStorePermitted(): Boolean {
-        val isAuto = events.filterIsInstance<StartProcessingEvent>().lastOrNull()?.data?.flow == StartFlow.Auto
-        if (isAuto) {
-            return true
+        val start = events.filterIsInstance<StartProcessingEvent>().firstOrNull()
+            ?: return false // ingen start → ingen store
+
+        return when (start.data.flow) {
+            StartFlow.Auto -> true
+            StartFlow.Manual -> events.any { it is ManualAllowCompletionEvent }
+            null -> false // eksplisitt: ukjent flow → ikke tillatt
         }
-        val anyAllow = events.filterIsInstance<ManualAllowCompletionEvent>().lastOrNull()
-        return anyAllow != null
     }
+
 
     private fun projectUseFile(): File? {
         val added = events.filterIsInstance<FileAddedEvent>().firstOrNull()?.data
