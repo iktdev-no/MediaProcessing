@@ -58,6 +58,19 @@ class DownloadCoverTaskListener(
         }
     }
 
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
+        }
+        return CoverDownloadResultEvent(null, status, error = message)
+    }
+
     open fun getDownloadClient(): DownloadClient {
         return DefaultDownloadClient(coordinatorEnv)
     }

@@ -71,6 +71,19 @@ class SubtitleTaskListener: FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
         ).producedFrom(task)
     }
 
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
+        }
+        return ProcesserExtractResultEvent(null, status, error = message)
+    }
+
     override fun getFfmpeg(): FFmpeg {
         return SubtitleFFmpeg()
     }

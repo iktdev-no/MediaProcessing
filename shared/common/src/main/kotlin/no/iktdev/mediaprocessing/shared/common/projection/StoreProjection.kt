@@ -14,7 +14,8 @@ class StoreProjection(val events: List<Event>) {
         val metadata = CollectProjection(events).metadata
         if (metadata != null) {
             val useCover = if (metadata.cover != null) {
-                val migrated = events.filterIsInstance<MigrateContentToStoreTaskResultEvent>().lastOrNull { it.status == TaskStatus.Completed }?.coverMigrate ?: emptyList()
+                val migrateData = events.filterIsInstance<MigrateContentToStoreTaskResultEvent>().lastOrNull { it.status == TaskStatus.Completed }?.migrateData
+                val migrated = migrateData?.coverMigrate ?: emptyList()
                 migrated.filter { it.status == MigrateStatus.Completed && it.storedUri != null }
                     .map { File(it.storedUri!!).name }
                     .find { it == metadata.cover.name }
@@ -47,7 +48,7 @@ class StoreProjection(val events: List<Event>) {
     }
 
     fun projectMediaFiles(): ContentExport.MediaExport? {
-        val migrated = events.filterIsInstance<MigrateContentToStoreTaskResultEvent>().lastOrNull { it.status == TaskStatus.Completed }
+        val migrated = events.filterIsInstance<MigrateContentToStoreTaskResultEvent>().lastOrNull { it.status == TaskStatus.Completed }?.migrateData
         return ContentExport.MediaExport(
             videoFile = migrated?.videoMigrate?.let { video ->
                 if (video.status == MigrateStatus.Completed) File(video.storedUri!!).name else null
@@ -59,7 +60,7 @@ class StoreProjection(val events: List<Event>) {
 
     fun getCollection(): String? {
         val migrated = events.filterIsInstance<MigrateContentToStoreTaskResultEvent>().lastOrNull { it.status == TaskStatus.Completed } ?: return null
-        return if (migrated.status == TaskStatus.Completed) migrated.collection else null
+        return if (migrated.status == TaskStatus.Completed) migrated.migrateData?.collection else null
     }
 
 }

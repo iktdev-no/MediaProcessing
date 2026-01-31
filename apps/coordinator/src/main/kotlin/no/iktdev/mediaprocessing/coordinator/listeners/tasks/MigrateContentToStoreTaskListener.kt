@@ -28,61 +28,89 @@ class MigrateContentToStoreTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
 
     override suspend fun onTask(task: Task): Event? {
         val pickedTask = task as? MigrateToContentStoreTask ?: return null
-
         val fs = getFileSystemService()
 
+        // Disse vil kaste exceptions hvis noe går galt
         val videoStatus = migrateVideo(fs, pickedTask.data.videoContent)
         val subtitleStatus = migrateSubtitle(fs, pickedTask.data.subtitleContent ?: emptyList())
         val coverStatus = migrateCover(fs, pickedTask.data.coverContent ?: emptyList())
 
-        var status = TaskStatus.Completed
-        if (videoStatus.status != MigrateStatus.Failed &&
-            subtitleStatus.none { it.status == MigrateStatus.Failed } &&
-            coverStatus.none { it.status == MigrateStatus.Failed })
-        {
-            pickedTask.data.videoContent?.cachedUri?.let { File(it) }?.let {
-                silentTry { fs.delete(it) }
-            }
-            pickedTask.data.subtitleContent?.map { File(it.cachedUri) }?.forEach {
-                silentTry { fs.delete(it) }
-            }
-            pickedTask.data.coverContent?.map { File(it.cachedUri) }?.forEach {
-                silentTry { fs.delete(it) }
-            }
-        } else {
-            status = TaskStatus.Failed
-        }
+        // Hvis vi kommer hit, har ingen migrering kastet exceptions → alt OK
+        deleteCache(fs, pickedTask)
 
-
-        val completedEvent = MigrateContentToStoreTaskResultEvent(
-            status = status,
-            collection = pickedTask.data.collection,
-            videoMigrate = videoStatus,
-            subtitleMigrate = subtitleStatus,
-            coverMigrate = coverStatus
+        return MigrateContentToStoreTaskResultEvent(
+            status = TaskStatus.Completed,
+            migrateData = MigrateContentToStoreTaskResultEvent.MigrateData(
+                collection = pickedTask.data.collection,
+                videoMigrate = videoStatus,
+                subtitleMigrate = subtitleStatus,
+                coverMigrate = coverStatus
+            )
         ).producedFrom(task)
-
-        return completedEvent
     }
 
-    @VisibleForTesting
-    internal fun migrateVideo(fs: FileSystemService, videoContent: MigrateToContentStoreTask.Data.SingleContent?): MigrateContentToStoreTaskResultEvent.FileMigration {
-        if (videoContent == null) return MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.NotPresent)
+
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
+        }
+        return MigrateContentToStoreTaskResultEvent(null, status, error = message)
+    }
+
+    private fun deleteCache(fs: FileSystemService, task: MigrateToContentStoreTask) {
+        task.data.videoContent?.cachedUri?.let { silentTry { fs.delete(File(it)) } }
+        task.data.subtitleContent?.forEach { silentTry { fs.delete(File(it.cachedUri)) } }
+        task.data.coverContent?.forEach { silentTry { fs.delete(File(it.cachedUri)) } }
+    }
+
+
+    internal fun migrateVideo(
+        fs: FileSystemService,
+        videoContent: MigrateToContentStoreTask.Data.SingleContent?
+    ): MigrateContentToStoreTaskResultEvent.FileMigration {
+
+        if (videoContent == null) {
+            return MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.NotPresent)
+        }
+
         val source = File(videoContent.cachedUri)
         val destination = File(videoContent.storeUri)
-        return try {
-            if (!fs.copy(source, destination)) {
-                return MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.Failed)
-            }
 
-            if (!fs.areIdentical(source, destination)) {
-                return MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.Failed)
+        // 1. Hvis destinasjonen finnes, sjekk identitet
+        if (destination.exists()) {
+            if (fs.areIdentical(source, destination)) {
+                // Skip – allerede migrert
+                return MigrateContentToStoreTaskResultEvent.FileMigration(
+                    destination.absolutePath,
+                    MigrateStatus.Completed
+                )
+            } else {
+                throw IllegalStateException(
+                    "Destination file already exists but is not identical: $destination"
+                )
             }
-
-            MigrateContentToStoreTaskResultEvent.FileMigration(destination.absolutePath, MigrateStatus.Completed)
-        } catch (e: Exception) {
-            MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.Failed)
         }
+
+        // 2. Utfør kopiering
+        if (!fs.copy(source, destination)) {
+            throw IllegalStateException("File could not be copied to: $destination from $source")
+        }
+
+        // 3. Verifiser kopien (optional)
+        if (!fs.areIdentical(source, destination)) {
+            throw IllegalStateException("Copied file is not identical to source: $destination")
+        }
+
+        return MigrateContentToStoreTaskResultEvent.FileMigration(
+            destination.absolutePath,
+            MigrateStatus.Completed
+        )
     }
 
     @VisibleForTesting
@@ -90,52 +118,115 @@ class MigrateContentToStoreTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
         fs: FileSystemService,
         subtitleContents: List<MigrateToContentStoreTask.Data.SingleSubtitle>
     ): List<MigrateContentToStoreTaskResultEvent.SubtitleMigration> {
-        if (subtitleContents.isEmpty()) return listOf(MigrateContentToStoreTaskResultEvent.SubtitleMigration(null,  null, MigrateStatus.NotPresent))
-        val results = mutableListOf<MigrateContentToStoreTaskResultEvent.SubtitleMigration>()
-        for (subtitle in subtitleContents) {
+
+        if (subtitleContents.isEmpty()) {
+            return listOf(
+                MigrateContentToStoreTaskResultEvent.SubtitleMigration(
+                    language = null,
+                    storedUri = null,
+                    status = MigrateStatus.NotPresent
+                )
+            )
+        }
+
+        return subtitleContents.map { subtitle ->
             val source = File(subtitle.cachedUri)
             val destination = File(subtitle.storeUri)
-            try {
-                if (!fs.copy(source, destination)) {
-                    results.add(MigrateContentToStoreTaskResultEvent.SubtitleMigration(subtitle.language, destination.absolutePath, MigrateStatus.Failed))
-                    continue
-                }
 
-                if (!fs.areIdentical(source, destination)) {
-                    results.add(MigrateContentToStoreTaskResultEvent.SubtitleMigration(subtitle.language, destination.absolutePath, MigrateStatus.Failed))
+            // 1. Hvis destinasjonen finnes
+            if (destination.exists()) {
+                if (fs.areIdentical(source, destination)) {
+                    return@map MigrateContentToStoreTaskResultEvent.SubtitleMigration(
+                        subtitle.language,
+                        destination.absolutePath,
+                        MigrateStatus.Completed
+                    )
                 } else {
-                    results.add(MigrateContentToStoreTaskResultEvent.SubtitleMigration(subtitle.language,destination.absolutePath, MigrateStatus.Completed))
+                    throw IllegalStateException(
+                        "Destination subtitle exists but is not identical: ${destination.absolutePath}"
+                    )
                 }
-            } catch (e: Exception) {
-                results.add(MigrateContentToStoreTaskResultEvent.SubtitleMigration(subtitle.language,destination.absolutePath, MigrateStatus.Failed))
             }
+
+            // 2. Kopier
+            if (!fs.copy(source, destination)) {
+                throw IllegalStateException(
+                    "Failed to copy subtitle ${subtitle.language} from $source to $destination"
+                )
+            }
+
+            // 3. Verifiser
+            if (!fs.areIdentical(source, destination)) {
+                throw IllegalStateException(
+                    "Copied subtitle ${subtitle.language} is not identical: ${destination.absolutePath}"
+                )
+            }
+
+            // 4. OK
+            MigrateContentToStoreTaskResultEvent.SubtitleMigration(
+                subtitle.language,
+                destination.absolutePath,
+                MigrateStatus.Completed
+            )
         }
-        return results
     }
 
     @VisibleForTesting
-    internal fun migrateCover(fs: FileSystemService, coverContents: List<MigrateToContentStoreTask.Data.SingleContent>): List<MigrateContentToStoreTaskResultEvent.FileMigration> {
-        if (coverContents.isEmpty()) return listOf(MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.NotPresent))
-        val results = mutableListOf<MigrateContentToStoreTaskResultEvent.FileMigration>()
-        for (cover in coverContents) {
+    internal fun migrateCover(
+        fs: FileSystemService,
+        coverContents: List<MigrateToContentStoreTask.Data.SingleContent>
+    ): List<MigrateContentToStoreTaskResultEvent.FileMigration> {
+
+        if (coverContents.isEmpty()) {
+            return listOf(
+                MigrateContentToStoreTaskResultEvent.FileMigration(
+                    storedUri = null,
+                    status = MigrateStatus.NotPresent
+                )
+            )
+        }
+
+        return coverContents.map { cover ->
             val source = File(cover.cachedUri)
             val destination = File(cover.storeUri)
-            try {
-                if (!fs.copy(source, destination)) {
-                    results.add(MigrateContentToStoreTaskResultEvent.FileMigration(destination.absolutePath, MigrateStatus.Failed))
-                    continue
-                }
-                if (!fs.areIdentical(source, destination)) {
-                    results.add(MigrateContentToStoreTaskResultEvent.FileMigration(destination.absolutePath, MigrateStatus.Failed))
+
+            // 1. Hvis destinasjonen finnes
+            if (destination.exists()) {
+                if (fs.areIdentical(source, destination)) {
+                    return@map MigrateContentToStoreTaskResultEvent.FileMigration(
+                        destination.absolutePath,
+                        MigrateStatus.Completed
+                    )
                 } else {
-                    results.add(MigrateContentToStoreTaskResultEvent.FileMigration(destination.absolutePath, MigrateStatus.Completed))
+                    throw IllegalStateException(
+                        "Destination cover exists but is not identical: ${destination.absolutePath}"
+                    )
                 }
-            } catch (e: Exception) {
-                results.add(MigrateContentToStoreTaskResultEvent.FileMigration(destination.absolutePath, MigrateStatus.Failed))
             }
+
+            // 2. Kopier
+            if (!fs.copy(source, destination)) {
+                throw IllegalStateException(
+                    "Failed to copy cover from $source to $destination"
+                )
+            }
+
+            // 3. Verifiser
+            if (!fs.areIdentical(source, destination)) {
+                throw IllegalStateException(
+                    "Copied cover is not identical: ${destination.absolutePath}"
+                )
+            }
+
+            // 4. OK
+            MigrateContentToStoreTaskResultEvent.FileMigration(
+                destination.absolutePath,
+                MigrateStatus.Completed
+            )
         }
-        return results
     }
+
+
 
     open fun getFileSystemService(): FileSystemService {
         return DefaultFileSystemService()

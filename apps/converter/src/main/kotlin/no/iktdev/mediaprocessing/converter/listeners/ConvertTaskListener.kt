@@ -33,6 +33,7 @@ open class ConvertTaskListener(): TaskListener(TaskType.CPU_INTENSIVE) {
         return task is ConvertTask
     }
 
+
     override suspend fun onTask(task: Task): Event? {
         if (task !is ConvertTask) {
             throw IllegalArgumentException("Invalid task type: ${task::class.java.name}")
@@ -66,6 +67,19 @@ open class ConvertTaskListener(): TaskListener(TaskType.CPU_INTENSIVE) {
             ).producedFrom(task)
             newEvent
         }
+    }
+
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
+        }
+        return ConvertTaskResultEvent(null, status, error = message)
     }
 
     open fun getConverter(): Converter {

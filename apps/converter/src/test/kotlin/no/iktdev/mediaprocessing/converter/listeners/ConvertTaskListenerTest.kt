@@ -108,8 +108,8 @@ class ConvertTaskListenerTest {
         override fun markClaimed(taskId: UUID, workerId: String) {}
         override fun updateLastSeen(taskId: UUID) {}
         override fun markCompleted(taskId: UUID) {}
-        override fun markFailed(taskId: UUID) {}
-        override fun markCancelled(taskId: UUID) {}
+        override fun markFailed(referenceId: UUID, taskId: UUID) {}
+        override fun markCancelled(referenceId: UUID, taskId: UUID) {}
         override fun updateProgress(taskId: UUID, progress: Int) {}
         override fun log(taskId: UUID, message: String) {}
         override fun publishEvent(event: Event) {

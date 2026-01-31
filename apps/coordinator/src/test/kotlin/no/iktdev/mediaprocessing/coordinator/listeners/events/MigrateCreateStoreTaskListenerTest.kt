@@ -279,25 +279,27 @@ class MigrateCreateStoreTaskListenerTest : TestBase() {
         subtitleUris: List<String>
     ) = MigrateContentToStoreTaskResultEvent(
         status = TaskStatus.Completed,
-        collection = collection,
-        videoMigrate = MigrateContentToStoreTaskResultEvent.FileMigration(
-            storedUri = videoUri,
-            status = if (videoUri != null) MigrateStatus.Completed else MigrateStatus.Failed
-        ),
-        subtitleMigrate = subtitleUris.map {
-            MigrateContentToStoreTaskResultEvent.SubtitleMigration(
-                language = "en",
-                storedUri = it,
-                status = MigrateStatus.Completed
-            )
-        },
-        coverMigrate = listOfNotNull(
-            coverUri?.let {
-                MigrateContentToStoreTaskResultEvent.FileMigration(
+        migrateData = MigrateContentToStoreTaskResultEvent.MigrateData(
+            collection = collection,
+            videoMigrate = MigrateContentToStoreTaskResultEvent.FileMigration(
+                storedUri = videoUri,
+                status = if (videoUri != null) MigrateStatus.Completed else MigrateStatus.Failed
+            ),
+            subtitleMigrate = subtitleUris.map {
+                MigrateContentToStoreTaskResultEvent.SubtitleMigration(
+                    language = "en",
                     storedUri = it,
                     status = MigrateStatus.Completed
                 )
-            }
+            },
+            coverMigrate = listOfNotNull(
+                coverUri?.let {
+                    MigrateContentToStoreTaskResultEvent.FileMigration(
+                        storedUri = it,
+                        status = MigrateStatus.Completed
+                    )
+                }
+            )
         )
     )
 }

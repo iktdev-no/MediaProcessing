@@ -49,6 +49,19 @@ class MediaStreamReadTaskListener(
         }
     }
 
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
+        }
+        return CoordinatorReadStreamsResultEvent(null, status, error = message)
+    }
+
     override fun getFfprobe(): FFprobe {
         return JsonFfinfo(coordinatorEnv.ffprobe)
     }

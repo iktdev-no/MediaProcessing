@@ -5,13 +5,18 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEve
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 
 class MigrateContentToStoreTaskResultEvent(
-    val collection: String,
-    val videoMigrate: FileMigration,
-    val subtitleMigrate: List<SubtitleMigration>,
-    val coverMigrate: List<FileMigration>,
+    val migrateData: MigrateData? = null,
     status: TaskStatus,
     error: String? = null
 ) : TaskResultEvent(status, error) {
+
+    data class MigrateData(
+        val collection: String,
+        val videoMigrate: FileMigration,
+        val subtitleMigrate: List<SubtitleMigration>,
+        val coverMigrate: List<FileMigration>,
+    )
+
     data class FileMigration(
         val storedUri: String?,
         val status: MigrateStatus

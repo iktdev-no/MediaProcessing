@@ -70,6 +70,20 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
         ).producedFrom(task)
     }
 
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
+        }
+        return ProcesserEncodeResultEvent(null, status, error = message)
+    }
+
+
     override fun getFfmpeg(): FFmpeg {
         return VideoFFmpeg(object : FFmpeg.Listener {
             var lastProgress: FfmpegDecodedProgress? = null

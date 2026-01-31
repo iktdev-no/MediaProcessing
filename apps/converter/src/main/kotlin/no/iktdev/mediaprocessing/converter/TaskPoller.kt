@@ -53,11 +53,11 @@ class DefaultTaskReporter() : TaskReporter {
 
     }
 
-    override fun markFailed(taskId: UUID) {
+    override fun markFailed(referenceId: UUID, taskId: UUID) {
         TaskStore.markConsumed(taskId, TaskStatus.Failed)
     }
 
-    override fun markCancelled(taskId: UUID) {
+    override fun markCancelled(referenceId: UUID, taskId: UUID) {
         TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
     }
 

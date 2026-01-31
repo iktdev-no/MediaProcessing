@@ -6,7 +6,6 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
@@ -15,10 +14,11 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
-import java.util.UUID
+import java.util.*
 
 @Component
-class StoreContentAndMetadataTaskListener: TaskListener(TaskType.MIXED) {
+class StoreContentAndMetadataTaskListener : TaskListener(TaskType.MIXED) {
+
     @Autowired
     lateinit var streamitRestTemplate: RestTemplate
 
@@ -36,21 +36,38 @@ class StoreContentAndMetadataTaskListener: TaskListener(TaskType.MIXED) {
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
         val entity = HttpEntity(pickedTask.data, headers)
 
-        val response = try {
-            val res = streamitRestTemplate.exchange(
-                "open/api/mediaprocesser/import",
-                HttpMethod.POST,
-                entity,
-                Void::class.java,
-            )
-            res.statusCode.is2xxSuccessful
-        } catch (e: Exception) {
-            false
+        // ❗ Ikke fang exceptions — la TaskListener håndtere dem
+        val response = streamitRestTemplate.exchange(
+            "/open/api/mediaprocesser/import",
+            HttpMethod.POST,
+            entity,
+            Void::class.java,
+        )
+
+        if (!response.statusCode.is2xxSuccessful) {
+            throw IllegalStateException("StreamIt returned ${response.statusCode}")
+        }
+
+        // Hvis vi kommer hit → alt OK
+        return StoreContentAndMetadataTaskResultEvent(
+            status = TaskStatus.Completed
+        ).producedFrom(task)
+    }
+
+    override fun createIncompleteStateTaskEvent(
+        task: Task,
+        status: TaskStatus,
+        exception: Exception?
+    ): Event {
+        val message = when (status) {
+            TaskStatus.Failed -> exception?.message ?: "Unknown error, see log"
+            TaskStatus.Cancelled -> "Canceled"
+            else -> ""
         }
 
         return StoreContentAndMetadataTaskResultEvent(
-            if (response) TaskStatus.Completed else TaskStatus.Failed
-        )
+            status = status,
+            error = message
+        ).producedFrom(task)
     }
-
 }
