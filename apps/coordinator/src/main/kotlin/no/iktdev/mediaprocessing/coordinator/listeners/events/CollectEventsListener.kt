@@ -8,35 +8,25 @@ import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import org.springframework.stereotype.Component
 
 @Component
-class CollectEventsListener: EventListener() {
+class CollectEventsListener : EventListener() {
     private val log = KotlinLogging.logger {}
 
-    val undesiredStates = listOf(CollectProjection.TaskStatus.Failed, CollectProjection.TaskStatus.Pending)
-    override fun onEvent(
-        event: Event,
-        history: List<Event>
-    ): Event? {
-        // Prevent Rouge trigger when replayed
+    override fun onEvent(event: Event, history: List<Event>): Event? {
+        // Avoid double-collection
         if (event is CollectedEvent || history.any { it is CollectedEvent }) return null
 
-        val collectProjection = CollectProjection(history)
-        log.info { collectProjection.prettyPrint() }
+        val projection = CollectProjection(history)
 
-        val taskStatus = collectProjection.getTaskStatus()
-        if (taskStatus.all { it == CollectProjection.TaskStatus.NotInitiated }) {
-            // No work has been done, so we are not ready
-            return null
-        }
-        val statusAcceptable = taskStatus.none { it in undesiredStates }
-        if (!statusAcceptable) {
-            if (taskStatus.any { it == CollectProjection.TaskStatus.Failed }) {
-                log.warn { "One or more tasks have failed in  ${event.referenceId}" }
-            } else {
-                log.info { "One or more tasks are still pending in  ${event.referenceId}" }
-            }
-            return null
-        }
+        // Must have a StartProcessingEvent
+        if (projection.startedWith == null) return null
+
+        // Must be allowed to store (Auto or Manual + AllowCompletion)
+        if (!projection.isStorePermitted()) return null
+
+        // Must have all relevant tasks completed
+        if (!projection.isWorkflowComplete()) return null
 
         return CollectedEvent(history.map { it.eventId }.toSet()).derivedOf(event)
     }
 }
+

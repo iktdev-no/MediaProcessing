@@ -49,6 +49,37 @@ class CollectProjection(val events: List<Event>) {
         coverDownloadTaskStatus
     )
 
+    fun getRelevantTaskStatuses(): List<TaskStatus> {
+        val required = startedWith?.tasks ?: emptySet()
+
+        val statusMap = mapOf(
+            OperationType.Encode to encodeTaskStatus,
+            OperationType.ExtractSubtitles to extreactTaskStatus,
+            OperationType.ConvertSubtitles to convertTaskStatus,
+            OperationType.Metadata to metadataTaskStatus,
+        )
+
+        return required.map { statusMap[it] ?: TaskStatus.NotInitiated }
+    }
+
+    fun isWorkflowComplete(): Boolean {
+        val statuses = getRelevantTaskStatuses()
+
+        if (statuses.isEmpty()) return false
+
+        val anyFailed = statuses.any { it == TaskStatus.Failed }
+        val anyPending = statuses.any { it == TaskStatus.Pending }
+        val allCompleted = statuses.all { it == TaskStatus.Completed }
+
+        if (anyFailed) return false
+        if (anyPending) return false
+
+        return allCompleted
+    }
+
+
+
+
     fun isStorePermitted(): Boolean {
         val start = events.filterIsInstance<StartProcessingEvent>().firstOrNull()
             ?: return false // ingen start → ingen store

@@ -8,5 +8,6 @@ import no.iktdev.eventi.models.store.TaskStatus
  */
 open class TaskResultEvent(
     val status: TaskStatus,
-    val error: String? = null
+    val error: String? = null,
+    val logFile: String? = null
 ) : Event()

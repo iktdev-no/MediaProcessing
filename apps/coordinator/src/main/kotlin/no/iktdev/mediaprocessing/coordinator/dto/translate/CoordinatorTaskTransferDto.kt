@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.dto.translate
 
 import no.iktdev.eventi.models.store.PersistedTask
+import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import java.time.Instant
 import java.util.*
@@ -17,11 +18,16 @@ data class CoordinatorTaskTransferDto(
     val consumed: Boolean,
     val lastCheckIn: Instant?,
     val persistedAt: Instant,
+    val logs: List<String> = emptyList(),
     val abandoned: Boolean,
 ) {
 }
 
-fun PersistedTask.toCoordinatorTransferDto(): CoordinatorTaskTransferDto {
+fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): CoordinatorTaskTransferDto {
+    val matchingLogs = logs
+        .filter { log -> log.ids.contains(taskId) }
+        .map { it.logFile }
+
     return CoordinatorTaskTransferDto(
         id = id,
         referenceId = referenceId,
@@ -34,6 +40,7 @@ fun PersistedTask.toCoordinatorTransferDto(): CoordinatorTaskTransferDto {
         consumed = consumed,
         lastCheckIn = lastCheckIn,
         persistedAt = persistedAt,
+        logs = matchingLogs,
         abandoned = TaskLifecycleRules.isAbandoned(consumed, persistedAt, lastCheckIn)
     )
 }

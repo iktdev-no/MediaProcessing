@@ -88,6 +88,17 @@ object EventStore: EventStore {
         return result.getOrDefault(emptyList())
     }
 
+    fun getPersistedEventsFor(referenceId: Set<UUID>, eventNames: List<String>): List<PersistedEvent> {
+        val deleted = getDeletedSequences(referenceId).map { it.toString() }
+        val result = withTransaction {
+            EventsTable
+                .getWhere { (EventsTable.referenceId eq referenceId.toString()) and
+                        (EventsTable.referenceId notInList deleted.toList()) and
+                        (EventsTable.event inList eventNames )}
+        }
+        return result.getOrDefault(emptyList())
+    }
+
     override fun persist(event: Event) {
         val asData = ZDS.WGson.toJson(event)
         val eventName = event::class.simpleName ?: run {

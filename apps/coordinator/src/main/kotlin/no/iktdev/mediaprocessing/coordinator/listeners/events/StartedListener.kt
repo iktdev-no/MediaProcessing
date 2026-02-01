@@ -22,7 +22,8 @@ class StartedListener : EventListener() {
                 operation = setOf(
                     OperationType.ExtractSubtitles,
                     OperationType.ConvertSubtitles,
-                    OperationType.Encode
+                    OperationType.Encode,
+                    OperationType.Metadata
                 )
             )
         )

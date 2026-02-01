@@ -6,17 +6,17 @@ import reactor.core.publisher.Mono
 
 @Component
 class ProcesserClient(
-    private val webClient: WebClient
+    private val processerWebClient: WebClient
 ) {
 
     fun fetchLog(path: String): Mono<String> =
-        webClient.get()
+        processerWebClient.get()
             .uri { it.path("/state/log").queryParam("path", path).build() }
             .retrieve()
             .bodyToMono(String::class.java)
 
     fun ping(): Mono<String> =
-        webClient.get()
+        processerWebClient.get()
             .uri("/actuator/health")
             .retrieve()
             .bodyToMono(String::class.java)

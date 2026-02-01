@@ -26,20 +26,28 @@ class TaskController(
 ) {
 
     @GetMapping("/active")
-    fun getActiveTasks(): List<CoordinatorTaskTransferDto> =
-        taskService.getActiveTasks().map { it.toCoordinatorTransferDto() }
+    fun getActiveTasks(): List<CoordinatorTaskTransferDto> {
+        val tasks = taskService.getActiveTasks()
+        val logEvents = eventService.getTaskEventResultsWithLogs(tasks.map { it.referenceId }.toSet())
+        return tasks.map { it.toCoordinatorTransferDto(logEvents) }
+    }
 
     @GetMapping
     fun getPagedTasks(query: TaskQuery): Paginated<CoordinatorTaskTransferDto> {
         val paginatedTasks = taskService.getPagedTasks(query)
-        return paginatedTasks.map { it.toCoordinatorTransferDto() }
+        val logEvents = eventService.getTaskEventResultsWithLogs(paginatedTasks.items.map { it.referenceId }.toSet())
+
+        return paginatedTasks.map { it.toCoordinatorTransferDto(logEvents) }
     }
 
 
 
     @GetMapping("/{id}")
-    fun getTask(@PathVariable id: UUID): CoordinatorTaskTransferDto? =
-        taskService.getTaskById(id)?.toCoordinatorTransferDto()
+    fun getTask(@PathVariable id: UUID): CoordinatorTaskTransferDto? {
+        val tasks = taskService.getTaskById(id) ?: return null
+        val logEvents = eventService.getTaskEventResultsWithLogs(setOf(tasks.referenceId))
+        return tasks.toCoordinatorTransferDto(logEvents)
+    }
 
 
     @GetMapping("/{taskId}/reset")

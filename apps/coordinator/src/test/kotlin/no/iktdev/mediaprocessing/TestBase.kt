@@ -46,7 +46,7 @@ open class TestBase {
     fun defaultStartEvent(): StartProcessingEvent {
         val start = StartProcessingEvent(
             data = StartData(
-                operation = setOf(OperationType.Encode, OperationType.ExtractSubtitles, OperationType.ConvertSubtitles),
+                operation = setOf(OperationType.Encode, OperationType.ExtractSubtitles, OperationType.ConvertSubtitles, OperationType.Metadata),
                 fileUri = "file:///unit/${UUID.randomUUID()}.mkv"
             )
         )

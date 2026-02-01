@@ -67,69 +67,95 @@ class CollectEventsListenerTest : TestBase() {
     @Test
     @DisplayName(
         """
-            Hvis vi har kun encoded hendelse, men vi har sagt at vi også skal ha extract, men ikke har opprettet extract
-            Når encode result kommer inn
-            Så:
-                Opprettes CollectEvent basert på historikken
+        Hvis vi har kun encoded hendelse, men vi har sagt at vi også skal ha extract, men ikke har opprettet extract
+        Når encode result kommer inn
+        Så:
+            Opprettes CollectEvent basert på historikken
         """
     )
     fun success2() {
         val started = defaultStartEvent().let { ev ->
-            ev.copy(data = ev.data.copy(operation = setOf(OperationType.Encode, OperationType.ExtractSubtitles)))
+            ev.copy(
+                data = ev.data.copy(
+                    operation = setOf(
+                        OperationType.Metadata,
+                        OperationType.Encode,
+                        OperationType.ExtractSubtitles
+                    )
+                )
+            )
         }
+
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
 
+        val metadata = metadataEvent(parsed).first()
         val encode = encodeEvent("/tmp/video.mp4", parsed)
 
         val history = listOf(
             started,
             parsed,
+            metadata,
             *encode.toTypedArray(),
         )
+
         val result = listener.onEvent(history.last(), history)
-        assertThat(result).isNotNull()
-        assertThat {
-            result is CollectedEvent
-        }
+
+        assertThat(result).isNull()
     }
+
 
 
     @Test
     @DisplayName(
-        """
+    """
             Hvis vi har kun convert hendelse
-            Når convert har komment inn
+            Når convert har kommet inn
             Så:
                 Opprettes CollectEvent basert på historikken
-        """
+    """
     )
     fun success3() {
         val started = defaultStartEvent().let { ev ->
-            ev.copy(data = ev.data.copy(operation = setOf(OperationType.ConvertSubtitles)))
+            ev.copy(
+                data = ev.data.copy(
+                    operation = setOf(
+                        OperationType.Metadata,
+                        OperationType.ConvertSubtitles
+                    )
+                )
+            )
         }
+
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
 
-        val convert = encodeEvent("/tmp/fancy.srt", parsed)
+        val metadata = metadataEvent(parsed)
+        val convert = convertEvent(
+            language = "en",
+            baseName = "sub1",
+            outputFiles = listOf("/tmp/sub1.vtt"),
+            derivedFrom = parsed
+        )
 
         val history = listOf(
             started,
             parsed,
+            *metadata.toTypedArray(),
             *convert.toTypedArray(),
         )
+
         val result = listener.onEvent(history.last(), history)
-        assertThat(result).isNotNull()
-        assertThat {
-            result is CollectedEvent
-        }
+
+        assertThat(result).isInstanceOf(CollectedEvent::class.java)
     }
+
 
 
     @Test
@@ -200,6 +226,8 @@ class CollectEventsListenerTest : TestBase() {
 
         assertThat(result).isNull()
     }
+
+
     @Test
     @DisplayName(
         """

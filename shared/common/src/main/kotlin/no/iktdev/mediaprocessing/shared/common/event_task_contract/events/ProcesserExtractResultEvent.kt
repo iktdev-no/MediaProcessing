@@ -6,8 +6,9 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEve
 class ProcesserExtractResultEvent(
     val data: ExtractResult? = null,
     status: TaskStatus,
-    error: String? = null
-) : TaskResultEvent(status, error) {
+    error: String? = null,
+    logFile: String? = null,
+) : TaskResultEvent(status, error, logFile) {
     data class ExtractResult(
         val language: String,
         val cachedOutputFile: String

@@ -2,11 +2,14 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
 import no.iktdev.mediaprocessing.shared.common.dto.toDto
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -76,5 +79,33 @@ class EventService {
     fun getDeletedSequences(referenceIds: Set<UUID>): Set<UUID> {
         return EventStore.getDeletedSequences(referenceIds)
     }
+
+    val taskResultEventTypes: List<String> =
+        EventRegistry.getEvents()
+            .filter { TaskResultEvent::class.java.isAssignableFrom(it) }
+            .map { it.simpleName }
+
+
+    fun getTaskEventResultsWithLogs(referenceIds: Set<UUID>): List<LogAssociatedIds> {
+        // 1. Hent persisted events som matcher TaskResultEvent-typene
+        val persisted = EventStore.getPersistedEventsFor(referenceIds, taskResultEventTypes)
+
+        // 2. Deserialiser til domeneklasse
+        val domainEvents = persisted.map { it.toEvent() }
+
+        // 3. Filtrer til TaskResultEvent-instansene som har logg
+        return domainEvents
+            .filterIsInstance<TaskResultEvent>()
+            .filter { it.logFile != null }
+            .map {
+                LogAssociatedIds(
+                    referenceId = it.referenceId,
+                    ids = setOf( it.eventId, *(it.metadata.derivedFromId?.toTypedArray() ?: emptyArray())),
+                    logFile = it.logFile!!
+                )
+            }
+    }
+
+
 
 }

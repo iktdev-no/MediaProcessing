@@ -4,12 +4,9 @@ import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.jetbrains.annotations.VisibleForTesting
 import org.springframework.stereotype.Component
 import java.util.*
@@ -30,6 +27,13 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
+
+        val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
+        if (startedEvent.data.operation.isNotEmpty()) {
+            if (!startedEvent.data.operation.contains(OperationType.Metadata))
+                return null
+        }
+
         // For replay
         if (event is MetadataSearchTaskCreatedEvent) {
             val hasResult = history.filter { it is MetadataSearchResultEvent }
