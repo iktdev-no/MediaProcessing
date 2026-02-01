@@ -49,8 +49,7 @@ open class TestBase {
                 operation = setOf(OperationType.Encode, OperationType.ExtractSubtitles, OperationType.ConvertSubtitles, OperationType.Metadata),
                 fileUri = "file:///unit/${UUID.randomUUID()}.mkv"
             )
-        )
-        start.newReferenceId()
+        ).apply { newReferenceId() }
         return start
 
     }

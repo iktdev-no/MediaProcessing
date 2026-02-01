@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework:spring-tx")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
 
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")

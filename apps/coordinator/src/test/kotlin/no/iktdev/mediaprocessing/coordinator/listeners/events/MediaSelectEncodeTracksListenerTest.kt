@@ -1,14 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.models.Event
-import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
-import no.iktdev.mediaprocessing.ffmpeg.data.Disposition
-import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
-import no.iktdev.mediaprocessing.ffmpeg.data.Tags
-import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
+import no.iktdev.mediaprocessing.ffmpeg.data.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -210,7 +205,7 @@ class MediaTracksEncodeSelectorTest: MediaSelectEncodeTracksListener() {
         val audioStreams = listOf(dummyAudioStream(0, "jpn", 2), dummyAudioStream(1, "jpn", 6))
         val parsedEvent = MediaStreamParsedEvent(
             ParsedMediaStreams(videoStream = videoStreams, audioStream = audioStreams, subtitleStream = emptyList())
-        )
+        ).newReferenceId()
         val result = onEvent(parsedEvent, emptyList()) as MediaTracksEncodeSelectedEvent
         assertEquals(0, result.selectedVideoTrack)
         assertEquals(0, result.selectedAudioTrack)

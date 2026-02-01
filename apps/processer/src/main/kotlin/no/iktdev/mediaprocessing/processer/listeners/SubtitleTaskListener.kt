@@ -88,7 +88,7 @@ class SubtitleTaskListener(
             TaskStatus.Cancelled -> "Canceled"
             else -> ""
         }
-        return ProcesserExtractResultEvent(null, status, error = message)
+        return ProcesserExtractResultEvent(null, status, error = message).producedFrom(task)
     }
 
     override fun getFfmpeg(): FFmpeg {

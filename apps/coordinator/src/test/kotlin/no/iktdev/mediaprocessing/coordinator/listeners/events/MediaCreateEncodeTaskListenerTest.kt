@@ -45,17 +45,17 @@ class MediaCreateEncodeTaskListenerTest: TestBase() {
     fun testOnEventWithSingleAudioTrack() {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.Encode), fileUri = "/tmp/movie.mkv")
-        )
+        ).newReferenceId()
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 videoStream = listOf(mockVideoStream(index = 0, codec = "h264", disposition = mockDisposition(), tags = mockTags())),
                 audioStream = listOf(mockAudioStream(index = 1, codec = "aac", disposition = mockDisposition(), tags = mockTags()))
             )
-        )
+        ).derivedOf(startEvent)
         val selectedEvent = MediaTracksEncodeSelectedEvent(
             selectedVideoTrack = 0,
             selectedAudioTrack = 0
-        )
+        ).derivedOf(parsedEvent)
 
         val history = listOf(startEvent, parsedEvent)
 
@@ -85,7 +85,8 @@ class MediaCreateEncodeTaskListenerTest: TestBase() {
     fun testOnEventWithExtendedAudioTrack() {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.Encode), fileUri = "/tmp/movie.mkv")
-        )
+        ).newReferenceId()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 videoStream = listOf(mockVideoStream(index = 0, codec = "h264", disposition = mockDisposition(), tags = mockTags())),
@@ -94,12 +95,12 @@ class MediaCreateEncodeTaskListenerTest: TestBase() {
                     mockAudioStream(index = 2, codec = "aac", disposition = mockDisposition(), tags = mockTags())
                 )
             )
-        )
+        ).derivedOf(startEvent)
         val selectedEvent = MediaTracksEncodeSelectedEvent(
             selectedVideoTrack = 0,
             selectedAudioTrack = 0,
             selectedAudioExtendedTrack = 1
-        )
+        ).derivedOf(parsedEvent)
 
         val history = listOf(startEvent, parsedEvent)
 

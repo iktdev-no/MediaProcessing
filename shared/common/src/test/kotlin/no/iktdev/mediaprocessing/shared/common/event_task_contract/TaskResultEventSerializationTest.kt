@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializer
+import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -106,8 +107,9 @@ class TaskResultEventSerializationTest {
             // --- 5. Fallback ---
             null
         }
-
-        return ctor.callBy(args)
+        val instance = ctor.callBy(args)
+        if (instance is Event) { instance.newReferenceId() }
+        return instance
     }
 
 

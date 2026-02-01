@@ -8,12 +8,14 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.TestUtils
+import no.iktdev.mediaprocessing.processer.assertSameReferenceId
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.system.measureTimeMillis
@@ -86,4 +88,86 @@ class SubtitleTaskListenerTest {
 
     }
 
+    @Test
+    @DisplayName("""
+        Når en event produseres fra en task
+        Hvis task har en gitt referenceId
+        Så:
+            Skal eventen ha samme referenceId
+        """
+    )
+    fun producedFrom_keeps_referenceId() {
+        val task = ExtractSubtitleTask(
+            ExtractSubtitleData(
+                inputFile = "input.mp4",
+                outputFileName = "output.srt",
+                arguments = listOf("-y"),
+                language = "eng"
+            )
+        ).newReferenceId()
+
+        val event = ProcesserExtractResultEvent(
+            status = TaskStatus.Completed
+        ).producedFrom(task)
+
+        assertSameReferenceId(task, event)
+    }
+
+    @Test
+    @DisplayName("""
+        Når en task feiler og createIncompleteStateTaskEvent kalles
+        Hvis task har en referenceId
+        Så:
+            Skal eventen som returneres ha samme referenceId
+    """)
+    fun createIncompleteStateTaskEvent_keeps_referenceId() {
+        val task = ExtractSubtitleTask(
+            ExtractSubtitleData(
+                inputFile = "input.mp4",
+                outputFileName = "output.srt",
+                arguments = listOf("-y"),
+                language = "eng"
+            )
+        ).newReferenceId()
+
+        val listener = SubtitleTaskListener(
+            fileUtil = TestUtils.getFileUtil(),
+            executableConfig = TestUtils.getExecutableConfig()
+        )
+
+        val event = listener.createIncompleteStateTaskEvent(
+            task = task,
+            status = TaskStatus.Failed,
+            exception = RuntimeException("boom")
+        )
+
+        assertSameReferenceId(task, event)
+    }
+
+    @Test
+    @DisplayName("""
+        Når VideoTaskListener kjører en EncodeTask
+        Hvis task har en referenceId
+        Så:
+            Skal resultat-eventen ha samme referenceId
+        """)
+    fun onTask_keeps_referenceId() = runTest {
+        val task = ExtractSubtitleTask(
+            ExtractSubtitleData(
+                inputFile = "input.mp4",
+                outputFileName = "output.srt",
+                arguments = listOf("-y"),
+                language = "eng"
+            )
+        ).newReferenceId()
+
+        val listener = TestListener(delay = 10)
+
+        listener.accept(task, overrideReporter)
+        listener.getJob()?.join()
+
+        val event = listener.getResult()
+        assertTrue(event is ProcesserExtractResultEvent)
+        assertSameReferenceId(task, event)
+    }
 }

@@ -54,6 +54,8 @@ class MediaReadStreamsTaskCreatedListenerTest: TestBase() {
             Returneres CoordinatorReadStreamsTaskCreatedEvent med riktig taskId
     """)
     fun testOnEventParsedInfoEventWithStartProcessing() {
+        val startEvent = StartProcessingEvent(StartData(fileUri = "file://test.mkv", operation = emptySet()))
+            .newReferenceId()
         val parsedEvent = MediaParsedInfoEvent(
             MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "collection",
@@ -61,8 +63,8 @@ class MediaReadStreamsTaskCreatedListenerTest: TestBase() {
                 parsedSearchTitles = listOf("title"),
                 mediaType = MediaType.Movie
             )
-        )
-        val startEvent = StartProcessingEvent(StartData(fileUri = "file://test.mkv", operation = emptySet()))
+        ).derivedOf(startEvent)
+
 
         val result = listener.onEvent(parsedEvent, listOf(startEvent))
 

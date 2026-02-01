@@ -8,7 +8,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaT
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -78,7 +79,7 @@ class MediaSelectExtractTracksListenerTest: TestBase() {
             dummySubtitleStream(0, "eng", SubtitleType.Dialogue),
             dummySubtitleStream(1, "eng", SubtitleType.Commentary)
         )
-        val event = MediaTracksDetermineSubtitleTypeEvent(subtitleTrackItems = items)
+        val event = MediaTracksDetermineSubtitleTypeEvent(subtitleTrackItems = items).newReferenceId()
         val result = listener.onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
         assertEquals(listOf(0), result.selectedSubtitleTracks)
     }

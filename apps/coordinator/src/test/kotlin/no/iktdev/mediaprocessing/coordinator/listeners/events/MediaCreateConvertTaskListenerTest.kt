@@ -1,25 +1,18 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import io.mockk.verify
+import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import org.junit.jupiter.api.Assertions.*
-
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import java.io.File
-
-import io.mockk.*
-import no.iktdev.eventi.models.Event
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mockStatic
 import org.mockito.kotlin.any
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -43,14 +36,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
                 fileUri = tempFile.absolutePath,
                 operation = setOf(OperationType.ConvertSubtitles)
             )
-        )
+        ).newReferenceId()
         val extractEvent = ProcesserExtractResultEvent(
             status = TaskStatus.Completed,
             data = ProcesserExtractResultEvent.ExtractResult(
                 cachedOutputFile = tempFile.absolutePath,
                 language = "en"
             )
-        )
+        ).derivedOf(startEvent)
 
         val history = listOf(startEvent)
         val result = listener.onEvent(extractEvent, history)
@@ -221,7 +214,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
                     fileUri = "/tmp/video.srt",
                     operation = setOf(OperationType.ConvertSubtitles)
                 )
-            )
+            ).newReferenceId()
 
             val extractEvent = ProcesserExtractResultEvent(
                 status = TaskStatus.Completed,
@@ -229,7 +222,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
                     cachedOutputFile = "/tmp/video.srt",
                     language = "en"
                 )
-            )
+            ).derivedOf(startEvent)
 
             val history = listOf(startEvent)
             val result = listener.onEvent(extractEvent, history)

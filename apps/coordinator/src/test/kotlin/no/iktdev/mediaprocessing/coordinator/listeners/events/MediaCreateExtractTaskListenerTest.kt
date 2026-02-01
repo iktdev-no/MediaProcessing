@@ -1,11 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockkObject
-import io.mockk.verify
+import io.mockk.*
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
@@ -13,22 +9,16 @@ import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleTags
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.time.Duration
-import java.util.UUID
+import java.util.*
 
 class MediaCreateExtractTaskListenerTest {
 
@@ -184,11 +174,12 @@ class MediaCreateExtractTaskListenerTest {
     fun testOnEventCreatesTasks() {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
-        )
+        ).newReferenceId()
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(subtitleStream = listOf(dummyStream(0, "subrip", "eng")))
-        )
+        ).derivedOf(startEvent)
         val selectedEvent = MediaTracksExtractSelectedEvent(selectedSubtitleTracks = listOf(0))
+            .derivedOf(parsedEvent)
 
         val history = listOf(startEvent, parsedEvent)
 
@@ -222,7 +213,7 @@ class MediaCreateExtractTaskListenerTest {
         // Hvis: vi har en StartProcessingEvent og to subtitle streams
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
-        )
+        ).newReferenceId()
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 subtitleStream = listOf(
@@ -230,8 +221,9 @@ class MediaCreateExtractTaskListenerTest {
                     dummyStream(1, "ass", "jpn")
                 )
             )
-        )
+        ).derivedOf(startEvent)
         val selectedEvent = MediaTracksExtractSelectedEvent(selectedSubtitleTracks = listOf(0, 1))
+            .derivedOf(parsedEvent)
 
         val history = listOf(startEvent, parsedEvent)
 

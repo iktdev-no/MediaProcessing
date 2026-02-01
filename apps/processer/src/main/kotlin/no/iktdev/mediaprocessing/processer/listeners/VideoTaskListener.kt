@@ -94,7 +94,7 @@ class VideoTaskListener(
             TaskStatus.Cancelled -> "Canceled"
             else -> ""
         }
-        return ProcesserEncodeResultEvent(null, null, status, error = message)
+        return ProcesserEncodeResultEvent(null, null, status, error = message).producedFrom(task)
     }
 
 

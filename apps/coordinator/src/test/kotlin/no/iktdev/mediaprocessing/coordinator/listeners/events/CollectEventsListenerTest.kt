@@ -84,7 +84,7 @@ class CollectEventsListenerTest : TestBase() {
                     )
                 )
             )
-        }
+        }.newReferenceId()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
@@ -128,7 +128,7 @@ class CollectEventsListenerTest : TestBase() {
                     )
                 )
             )
-        }
+        }.newReferenceId()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
@@ -279,7 +279,7 @@ class CollectEventsListenerTest : TestBase() {
     fun failure4() {
         val started = defaultStartEvent().let { ev ->
             ev.copy(data = ev.data.copy(operation = setOf(OperationType.Encode)))
-        }
+        }.newReferenceId()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
