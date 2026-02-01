@@ -33,12 +33,17 @@ management:
       show-details: always
 
 media:
-  cache: /src/cache
-  outgoing: /src/output
-  incoming: /src/input
-
-streamit:
-  address: http://streamit.service
+  cache: build/test-cache
+  outgoing: build/test-output
+  incoming: build/test-input
 
 executables:
   ffmpeg: ffmpeg
+
+processer:
+  coordinator-url: ${COORDINATOR_URL:http://coordinator:8080}
+  coordinator-ping-on-startup: false
+  allow-overwrite: ${ALLOW_OVERWRITE:false}
+
+directories:
+  logs: build/test-logs

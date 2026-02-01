@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.processer
+package no.iktdev.mediaprocessing.processer.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

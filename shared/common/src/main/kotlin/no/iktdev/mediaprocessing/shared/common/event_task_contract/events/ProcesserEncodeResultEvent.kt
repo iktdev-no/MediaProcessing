@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEve
 
 class ProcesserEncodeResultEvent(
     val data: EncodeResult? = null,
+    val logFile: String? = null,
     status: TaskStatus,
     error: String? = null
 ) : TaskResultEvent(status, error) {

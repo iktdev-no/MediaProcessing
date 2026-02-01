@@ -29,7 +29,6 @@ annotation class MediaProcessingApp
 @Configuration
 @EnableConfigurationProperties(
     value = [
-        StreamItConfig::class,
         MediaPaths::class
     ]
 )

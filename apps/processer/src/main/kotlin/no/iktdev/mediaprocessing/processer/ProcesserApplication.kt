@@ -6,6 +6,10 @@ import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
+import no.iktdev.mediaprocessing.processer.config.DirectoryProperties
+import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
+import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
@@ -57,7 +61,10 @@ open class ApplicationConfiguration() {
 @Configuration
 @EnableConfigurationProperties(
     value = [
-        ExecutablesConfig::class
+        ExecutablesConfig::class,
+        DirectoryProperties::class,
+        ProcesserProperties::class,
+        MediaPaths::class
     ]
 )
 class ProcesserConfig

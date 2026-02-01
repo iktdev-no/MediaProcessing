@@ -31,7 +31,7 @@ class CoordinatorHealthService(
 
         // --- TASK HEALTH ---
         val abandonedTaskIds = tasks
-            .filter { TaskLifecycleRules.isAbandoned(it.consumed, it.lastCheckIn) }
+            .filter { TaskLifecycleRules.isAbandoned(it.consumed, it.persistedAt, it.lastCheckIn) }
             .map { it.taskId }
 
         val stalledTaskIds = tasks

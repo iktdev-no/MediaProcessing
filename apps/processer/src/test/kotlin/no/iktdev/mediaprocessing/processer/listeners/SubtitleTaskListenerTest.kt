@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
+import no.iktdev.mediaprocessing.processer.TestUtils
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
@@ -19,7 +20,10 @@ import kotlin.system.measureTimeMillis
 
 class SubtitleTaskListenerTest {
 
-    class TestListener(val delay: Long): SubtitleTaskListener() {
+    class TestListener(val delay: Long): SubtitleTaskListener(
+        fileUtil = TestUtils.getFileUtil(),
+        executableConfig = TestUtils.getExecutableConfig(),
+    ) {
         fun getJob() = currentJob
 
         private var _result: Event? = null

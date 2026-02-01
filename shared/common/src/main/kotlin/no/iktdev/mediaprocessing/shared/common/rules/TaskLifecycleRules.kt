@@ -11,14 +11,14 @@ object TaskLifecycleRules {
 
     fun isAbandoned(
         consumed: Boolean,
-        createdAt: Instant,
+        persistedAt: Instant,
         lastCheckIn: Instant?
     ): Boolean {
         if (consumed) return false
 
         val cutoff = Instant.now().minus(abandonedAfterMinutes, ChronoUnit.MINUTES)
 
-        val reference = lastCheckIn ?: createdAt
+        val reference = lastCheckIn ?: persistedAt
         return reference.isBefore(cutoff)
     }
 

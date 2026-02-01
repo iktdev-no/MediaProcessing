@@ -26,12 +26,17 @@ logging:
 
 
 media:
-  cache: /src/cache
+  cache: ${DIRECTORY_CONTENT_CACHE:/src/cache}
   outgoing: /src/output
   incoming: /src/input
 
-streamit:
-  address: http://streamit.service
+processer:
+  coordinator-url: ${COORDINATOR_URL:http://coordinator:8080}
+  coordinator-ping-on-startup: true
+  allow-overwrite: ${ALLOW_OVERWRITE:false}
 
 executables:
-  ffmpeg: ffmpeg
+  ffmpeg: ${SUPPORTING_EXECUTABLE_FFMPEG:ffmpeg}
+
+directories:
+  logs: ${LOG_DIR:/data/logs}

@@ -40,5 +40,8 @@ media:
 streamit:
   address: http://streamit.service
 
+processer:
+  base-url: http://processer.service:8080
+
 executables:
   ffprobe: ffprobe

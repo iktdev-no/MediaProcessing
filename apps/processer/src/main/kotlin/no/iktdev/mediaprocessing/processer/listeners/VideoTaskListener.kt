@@ -6,19 +6,27 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.CoordinatorClient
-import no.iktdev.mediaprocessing.processer.ProcesserEnv
-import no.iktdev.mediaprocessing.processer.Util
+import no.iktdev.mediaprocessing.processer.FileUtil
+import no.iktdev.mediaprocessing.processer.LocalProgressCache
+import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.springframework.stereotype.Service
+import java.io.File
 import java.util.*
 
 @Service
-class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
+class VideoTaskListener(
+    private var coordinatorWebClient: CoordinatorClient,
+    private val localProgress: LocalProgressCache,
+    private val executableConfig: ExecutablesConfig,
+    private val fileUtil: FileUtil,
+) : FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
     private val log = KotlinLogging.logger {}
 
     override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
@@ -35,15 +43,17 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
 
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as EncodeTask
-        val cachedOutFile = Util.getTemporaryStoreFile(taskData.data.outputFileName).also {
+        val cachedOutFile = fileUtil.getTemporaryStoreFile(taskData.data.outputFileName).also {
             if (!it.parentFile.exists()) {
                 it.parentFile.mkdirs()
             }
         }
         if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
-            reporter?.publishEvent(ProcesserEncodeResultEvent(
-                status = TaskStatus.Failed
-            ).producedFrom(task))
+            reporter?.publishEvent(
+                ProcesserEncodeResultEvent(
+                    status = TaskStatus.Failed
+                ).producedFrom(task)
+            )
             throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
         }
 
@@ -58,12 +68,16 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
             reporter?.updateLastSeen(task.taskId)
         }
         result.run(arguments)
-        if (result.result.resultCode != 0 ) {
-            return ProcesserEncodeResultEvent(status = TaskStatus.Failed).producedFrom(task)
+        if (result.result.resultCode != 0) {
+            return ProcesserEncodeResultEvent(
+                status = TaskStatus.Failed,
+                logFile = result.logFile.absolutePath
+            ).producedFrom(task)
         }
 
         return ProcesserEncodeResultEvent(
             status = TaskStatus.Completed,
+            logFile = result.logFile.absolutePath,
             data = ProcesserEncodeResultEvent.EncodeResult(
                 cachedOutputFile = cachedOutFile.absolutePath
             )
@@ -80,12 +94,15 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
             TaskStatus.Cancelled -> "Canceled"
             else -> ""
         }
-        return ProcesserEncodeResultEvent(null, status, error = message)
+        return ProcesserEncodeResultEvent(null, null, status, error = message)
     }
 
 
     override fun getFfmpeg(): FFmpeg {
-        return VideoFFmpeg(object : FFmpeg.Listener {
+        val logDirectory = fileUtil.getLogDirectory().using("encode")
+        return VideoFFmpeg(execPath = executableConfig.ffmpeg,
+            logDirectory = logDirectory,
+            listener = object : FFmpeg.Listener {
             var lastProgress: FfmpegDecodedProgress? = null
             override fun onStarted(inputFile: String) {
             }
@@ -95,7 +112,14 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
                     coordinatorWebClient.reportProgress(
                         referenceId = it.referenceId.toString(),
                         taskId = it.taskId.toString(),
-                        percent = FfmpegDecodedProgress(100, "", lastProgress?.duration ?: "", "0", estimatedCompletion = "", estimatedCompletionSeconds = 0),
+                        percent = FfmpegDecodedProgress(
+                            100,
+                            "",
+                            lastProgress?.duration ?: "",
+                            "0",
+                            estimatedCompletion = "",
+                            estimatedCompletionSeconds = 0
+                        ),
                         ""
                     )
                 }
@@ -107,6 +131,7 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
             ) {
                 lastProgress = progress
                 currentTask?.let {
+                    localProgress.update(it.taskId, progress)
                     coordinatorWebClient.reportProgress(
                         referenceId = it.referenceId.toString(),
                         taskId = it.taskId.toString(),
@@ -120,12 +145,13 @@ class VideoTaskListener(private var coordinatorWebClient: CoordinatorClient): Ff
     }
 
 
-    class VideoFFmpeg(override val listener: Listener? = null): FFmpeg(executable = ProcesserEnv.ffmpeg, logDir = ProcesserEnv.encodeLogDirectory) {
+    class VideoFFmpeg(override val listener: Listener? = null, private val execPath: String, val logDirectory: File) :
+        FFmpeg(executable = execPath, logDir = logDirectory) {
 
         override fun onCreate() {
             super.onCreate()
-            if (!ProcesserEnv.encodeLogDirectory.exists()) {
-                ProcesserEnv.encodeLogDirectory.mkdirs()
+            if (!logDirectory.exists()) {
+                logDirectory.mkdirs()
             }
         }
     }

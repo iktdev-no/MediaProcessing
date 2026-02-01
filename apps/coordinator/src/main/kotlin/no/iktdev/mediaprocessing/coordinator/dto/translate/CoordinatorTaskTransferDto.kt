@@ -34,6 +34,6 @@ fun PersistedTask.toCoordinatorTransferDto(): CoordinatorTaskTransferDto {
         consumed = consumed,
         lastCheckIn = lastCheckIn,
         persistedAt = persistedAt,
-        abandoned = TaskLifecycleRules.isAbandoned(consumed, lastCheckIn)
+        abandoned = TaskLifecycleRules.isAbandoned(consumed, persistedAt, lastCheckIn)
     )
 }

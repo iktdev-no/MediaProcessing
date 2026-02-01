@@ -7,6 +7,8 @@ import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.coordinator.config.ExecutablesConfig
+import no.iktdev.mediaprocessing.coordinator.config.ProcesserClientProperties
+import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
@@ -58,7 +60,9 @@ open class ApplicationConfiguration() {
 @Configuration
 @EnableConfigurationProperties(
     value = [
-        ExecutablesConfig::class
+        ExecutablesConfig::class,
+        StreamItConfig::class,
+        ProcesserClientProperties::class
     ]
 )
 class CoordinatorConfig

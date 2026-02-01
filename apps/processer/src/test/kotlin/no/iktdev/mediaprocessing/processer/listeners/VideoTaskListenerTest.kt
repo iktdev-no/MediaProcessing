@@ -9,6 +9,8 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskTypeRegistry
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.CoordinatorClient
+import no.iktdev.mediaprocessing.processer.LocalProgressCache
+import no.iktdev.mediaprocessing.processer.TestUtils
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
@@ -21,7 +23,13 @@ import kotlin.system.measureTimeMillis
 
 class VideoTaskListenerTest {
 
-    class TestListener(val delay: Long, coordinatorClient: CoordinatorClient): VideoTaskListener(coordinatorClient) {
+
+    class TestListener(val delay: Long, coordinatorClient: CoordinatorClient):
+        VideoTaskListener(coordinatorWebClient = coordinatorClient,
+            localProgress = LocalProgressCache(),
+            fileUtil = TestUtils.getFileUtil(),
+            executableConfig = TestUtils.getExecutableConfig(),
+        ) {
         fun getJob() = currentJob
 
         private var _result: Event? = null
