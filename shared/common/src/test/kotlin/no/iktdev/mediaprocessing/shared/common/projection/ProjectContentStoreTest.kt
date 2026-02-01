@@ -120,9 +120,10 @@ class ProjectContentStoreTest {
         assertEquals(2, results?.size)
 
         results?.forEach { entry ->
-            assertEquals("eng", entry.cts.storeFile.parentFile.name)
-            assertEquals("MyShow", entry.cts.storeFile.parentFile.parentFile.name)
-            assertEquals(temp, entry.cts.storeFile.parentFile.parentFile.parentFile)
+            assertEquals("eng", (entry.cts.storeFile.parentFile).name)
+            assertEquals("sub", entry.cts.storeFile.parentFile.parentFile.name)
+            assertEquals("MyShow", entry.cts.storeFile.parentFile.parentFile.parentFile.name)
+            assertEquals(temp, entry.cts.storeFile.parentFile.parentFile.parentFile.parentFile)
         }
     }
 
