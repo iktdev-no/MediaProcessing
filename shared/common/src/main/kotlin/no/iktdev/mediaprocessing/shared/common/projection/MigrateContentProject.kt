@@ -94,7 +94,7 @@ open class MigrateContentProject(
         return byLanguage.flatMap { (language, files) ->
             files.mapNotNull { cached ->
                 val filename = "$baseName.${cached.extension}"
-                val store = useStore?.using(language, filename) ?: return@mapNotNull null
+                val store = useStore?.using("sub", language, filename) ?: return@mapNotNull null
                 CachedToStoreLanguage(
                     cts = CachedToStore(cachedFile = cached, storeFile = store),
                     language = language
