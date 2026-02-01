@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer
 
+import jakarta.annotation.PostConstruct
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventTypeRegistry
 import no.iktdev.eventi.tasks.TaskTypeRegistry
@@ -67,4 +68,14 @@ open class ApplicationConfiguration() {
         MediaPaths::class
     ]
 )
-class ProcesserConfig
+class ProcesserConfig(
+    private val directoryProperties: DirectoryProperties
+) {
+    @PostConstruct
+    fun validate() {
+        require(directoryProperties.logs.isNotBlank()) {
+            "directories.logs must be set"
+        }
+    }
+
+}
