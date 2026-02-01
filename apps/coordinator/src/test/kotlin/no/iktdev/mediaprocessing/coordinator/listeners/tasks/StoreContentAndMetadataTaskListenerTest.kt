@@ -150,7 +150,7 @@ class StoreContentAndMetadataTaskListenerTest {
 
         whenever(
             restTemplate.exchange(
-                eq("/open/api/mediaprocesser/import"),
+                eq("/api/mediaprocesser/import"),
                 eq(HttpMethod.POST),
                 any(),
                 eq(Void::class.java)
