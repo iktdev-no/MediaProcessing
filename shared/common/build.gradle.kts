@@ -48,6 +48,8 @@ dependencies {
     implementation(project(":shared:ffmpeg"))
     implementation(libs.eventi)
 
+    implementation("com.ibm.icu:icu4j:75.1")
+
     testImplementation(kotlin("test"))
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

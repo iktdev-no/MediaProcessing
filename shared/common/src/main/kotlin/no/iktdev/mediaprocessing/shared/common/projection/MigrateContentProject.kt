@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.shared.common.cleanForFileSystem
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.resolveConflict
 import java.io.File
@@ -22,11 +23,11 @@ open class MigrateContentProject(
 
     internal fun getFileName(): String? {
         val parsedInfo = events.filterIsInstance<MediaParsedInfoEvent>().lastOrNull() ?: return null
-        return parsedInfo.data.parsedFileName
+        return parsedInfo.data.parsedFileName.cleanForFileSystem()
     }
 
     internal fun getDesiredStoreFolder(): File? {
-        val desiredCollection = getDesiredCollection() ?: return null
+        val desiredCollection = getDesiredCollection()?.cleanForFileSystem() ?: return null
         val assuredStore = storageArea.using(desiredCollection)
 
         val existingCollectionNames = getFoldersInStore()
@@ -34,7 +35,7 @@ open class MigrateContentProject(
             return assuredStore
         }
 
-        val titles = getMetadataTitles()
+        val titles = getMetadataTitles().map { it.cleanForFileSystem() }
 
         val matchedExisting = titles
             .firstOrNull { it in existingCollectionNames }
@@ -111,7 +112,7 @@ open class MigrateContentProject(
                 e to file
             }
 
-        val baseName = getDesiredCollection() ?: return null
+        val baseName = getDesiredCollection()?.cleanForFileSystem() ?: return null
         val store = useStore ?: return null
 
         val multiple = downloaded.size > 1

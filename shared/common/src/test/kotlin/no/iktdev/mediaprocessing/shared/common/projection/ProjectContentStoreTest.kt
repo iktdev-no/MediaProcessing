@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.shared.common.cleanForFileSystem
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.assertj.core.util.Files
@@ -76,7 +77,7 @@ class ProjectContentStoreTest {
     Hvis extract- og convert-events inneholder undertekstfiler
     Når getSubtitleStoreFiles kalles
     Så:
-        skal filer lagres under <storage>/<collection>/<language>/<filnavn>
+        skal filer lagres under <storage>/<collection>/sub/<language>/<filnavn>
     """
     )
     @Test
@@ -87,7 +88,7 @@ class ProjectContentStoreTest {
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "MyShow",
-                parsedFileName = "episode1.mkv",
+                parsedFileName = "episode1",
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Serie
             )
@@ -104,7 +105,7 @@ class ProjectContentStoreTest {
         val convert = ConvertTaskResultEvent(
             data = ConvertTaskResultEvent.ConvertedData(
                 language = "eng",
-                "sub1",
+                baseName = "sub1",
                 outputFiles = listOf("/tmp/cache/sub1.vtt")
             ),
             status = TaskStatus.Completed
@@ -120,12 +121,25 @@ class ProjectContentStoreTest {
         assertEquals(2, results?.size)
 
         results?.forEach { entry ->
-            assertEquals("eng", (entry.cts.storeFile.parentFile).name)
-            assertEquals("sub", entry.cts.storeFile.parentFile.parentFile.name)
-            assertEquals("MyShow", entry.cts.storeFile.parentFile.parentFile.parentFile.name)
-            assertEquals(temp, entry.cts.storeFile.parentFile.parentFile.parentFile.parentFile)
+            val file = entry.cts.storeFile
+
+            // Filnavn
+            assertTrue(file.name == "episode1.srt" || file.name == "episode1.vtt")
+
+            // <language>
+            assertEquals("eng", file.parentFile.name)
+
+            // sub/
+            assertEquals("sub", file.parentFile.parentFile.name)
+
+            // <collection>
+            assertEquals("MyShow", file.parentFile.parentFile.parentFile.name)
+
+            // <storage>
+            assertEquals(temp, file.parentFile.parentFile.parentFile.parentFile)
         }
     }
+
 
     @DisplayName(
         """
@@ -638,8 +652,8 @@ class ProjectContentStoreTest {
                 name = "Weird folder names (spaces, unicode)",
                 parsedCollection = "Fallback",
                 metadataTitles = listOf("ÆØÅ Show"),
-                existingFolders = listOf("ÆØÅ Show"),
-                expectedFolder = "ÆØÅ Show"
+                existingFolders = listOf("ÆØÅ Show".cleanForFileSystem()),
+                expectedFolder = "AEOA Show"
             ),
             DesiredStoreCase(
                 name = "Case-insensitive mismatch → fallback",

@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common
 
+import com.ibm.icu.text.Transliterator
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import no.iktdev.eventi.ZDS.toEvent
@@ -253,5 +254,17 @@ fun List<PersistedEvent>.effectivePersisted(): List<PersistedEvent> {
 fun <T : Any> KClass<T>.getName(): String =
     this.simpleName ?: this.java.simpleName
 
+
+private val transliterator = Transliterator.getInstance("Any-Latin; Latin-ASCII")
+fun String.cleanForFileSystem(): String {
+    // 1. Full translitterering (Æ→AE, Ø→O, Å→AA, Ł→L, Þ→Th, etc.)
+    val ascii = transliterator.transliterate(this)
+
+    // 2. Fjern alt som ikke er bokstav, tall, mellomrom, bindestrek, parentes, komma, punktum
+    val cleaned = ascii.replace(Regex("[^\\p{L}\\p{N}\\s\\-(),.]"), " ")
+
+    // 3. Normaliser whitespace
+    return cleaned.replace(Regex("\\s{2,}"), " ").trim()
+}
 
 

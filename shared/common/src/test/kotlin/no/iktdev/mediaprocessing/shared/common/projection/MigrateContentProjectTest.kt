@@ -2,10 +2,9 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
+import no.iktdev.mediaprocessing.shared.common.cleanForFileSystem
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent.ParsedData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
@@ -116,4 +115,113 @@ class MigrateContentProjectPathTest {
             project.useStore!!.absolutePath
         )
     }
+
+    @Test
+    fun cleanForFileSystem_transliteration() {
+        assertEquals("Senor de los Cielos", "Señor de los Cielos".cleanForFileSystem())
+        assertEquals("Amelie (2001)", "Amélie (2001)".cleanForFileSystem())
+        assertEquals("Ubermensch", "Übermensch".cleanForFileSystem())
+        assertEquals("Lodz, Polska", "Łódź, Polska".cleanForFileSystem())
+    }
+
+    @Test
+    fun cleanForFileSystem_removesSpecialCharacters() {
+        assertEquals("Hello World", "Hello@World!".cleanForFileSystem())
+        assertEquals("Spider-Man No Way Home", "Spider-Man: No Way Home!".cleanForFileSystem())
+    }
+    @Test
+    fun videoStoreFile_usesSanitizedName() {
+        val temp = File("build/test-folder/file")
+
+        val parsed = MediaParsedInfoEvent(
+            data = MediaParsedInfoEvent.ParsedData(
+                parsedCollection = "Señor de los Cielos",
+                parsedFileName = "Amélie (2001)",
+                parsedSearchTitles = emptyList(),
+                mediaType = MediaType.Movie
+            )
+        )
+
+        val encode = ProcesserEncodeResultEvent(
+            data = ProcesserEncodeResultEvent.EncodeResult(
+                cachedOutputFile = "/tmp/cache/video.mp4"
+            ),
+            status = TaskStatus.Completed
+        )
+
+        val store = MigrateContentProject(listOf(parsed, encode), temp)
+        val result = store.getVideoStoreFile()
+
+        assertNotNull(result)
+        assertEquals("Amelie (2001).mp4", result!!.storeFile.name)
+        assertEquals("Senor de los Cielos", result.storeFile.parentFile.name)
+    }
+
+    @Test
+    fun subtitleStoreFiles_useSanitizedNames() {
+        val temp = File("build/test-folder/file")
+
+
+        val parsed = MediaParsedInfoEvent(
+            data = MediaParsedInfoEvent.ParsedData(
+                parsedCollection = "Señor de los Cielos",
+                parsedFileName = "Niña Épica",
+                parsedSearchTitles = emptyList(),
+                mediaType = MediaType.Serie
+            )
+        )
+
+        val extract = ProcesserExtractResultEvent(
+            status = TaskStatus.Completed,
+            data = ProcesserExtractResultEvent.ExtractResult(
+                language = "spa",
+                cachedOutputFile = "/tmp/cache/sub1.srt"
+            )
+        )
+
+        val store = MigrateContentProject(listOf(parsed, extract), temp)
+        val results = store.getSubtitleStoreFiles()
+
+        assertNotNull(results)
+        val file = results!!.first().cts.storeFile
+
+        assertEquals("Nina Epica.srt", file.name)
+        assertEquals("spa", file.parentFile.name)
+        assertEquals("sub", file.parentFile.parentFile.name)
+        assertEquals("Senor de los Cielos", file.parentFile.parentFile.parentFile.name)
+    }
+
+    @Test
+    fun coverStoreFiles_useSanitizedNames() {
+        val temp = File("build/test-folder/file")
+
+
+        val parsed = MediaParsedInfoEvent(
+            data = MediaParsedInfoEvent.ParsedData(
+                parsedCollection = "João e Maria",
+                parsedFileName = "ignored",
+                parsedSearchTitles = emptyList(),
+                mediaType = MediaType.Movie
+            )
+        )
+
+        val cover = CoverDownloadResultEvent(
+            data = CoverDownloadResultEvent.CoverDownloadedData(
+                source = "tmdb",
+                outputFile = "/tmp/cache/cover.jpg"
+            ),
+            status = TaskStatus.Completed
+        )
+
+        val store = MigrateContentProject(listOf(parsed, cover), temp)
+        val results = store.getCoverStoreFiles()
+
+        assertNotNull(results)
+        val file = results!!.first().storeFile
+
+        assertEquals("Joao e Maria.jpg", file.name)
+    }
+
+
+
 }
