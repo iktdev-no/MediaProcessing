@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.io.File
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -44,7 +45,7 @@ class VideoTaskListenerTest {
             this._result = result
         }
 
-        override fun getFfmpeg(): FFmpeg {
+        override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
             return MockFFmpeg(delayMillis = delay, listener = MockFFmpeg.emptyListener())
         }
     }
