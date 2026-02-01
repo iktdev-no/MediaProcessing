@@ -54,4 +54,31 @@ class SequenceController(
         }
     }
 
+    @PostMapping("/{referenceId}/delete")
+    fun deleteSequences(
+        @PathVariable referenceId: UUID
+    ): ResponseEntity<ApiResponse> {
+        return try {
+
+            val id = EventStore.deleteSequence(referenceId)
+
+            ResponseEntity.ok(
+                ApiResponse(
+                    ok = true,
+                    message = "Sequence deleted, Event id for deletion marking is $id"
+                )
+            )
+
+        } catch (ex: Exception) {
+            ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(
+                    ApiResponse(
+                        ok = false,
+                        message = ex.message ?: "Unknown error"
+                    )
+                )
+        }
+    }
+
 }

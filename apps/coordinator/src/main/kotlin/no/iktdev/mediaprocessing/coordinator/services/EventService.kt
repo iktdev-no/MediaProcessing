@@ -70,5 +70,11 @@ class EventService {
     }
 
     fun getLastEventTimestamp(): Instant? = EventStore.getLastEventTimestamp()
+    fun isSequenceDeleted(referenceId: UUID): Boolean {
+        return EventStore.isEventSequenceDeleted(referenceId)
+    }
+    fun getDeletedSequences(referenceIds: Set<UUID>): Set<UUID> {
+        return EventStore.getDeletedSequences(referenceIds)
+    }
 
 }

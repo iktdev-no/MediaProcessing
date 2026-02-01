@@ -9,19 +9,24 @@ import java.util.*
 
 
 @Service
-class TaskService {
+class TaskService(
+    private val eventService: EventService
+) {
 
 
     fun getActiveTasks(): List<PersistedTask> {
-        return TaskStore.findActiveTasks()
+        return getNonDeleted(TaskStore.findActiveTasks())
     }
 
     fun getPagedTasks(page: TaskQuery): Paginated<PersistedTask> {
-        return TaskStore.getPagedTasks(page)
+        return TaskStore.getPagedTasks(page).let {
+            it.copy(items = getNonDeleted(it.items))
+        }
     }
 
     fun getTaskById(taskId: UUID): PersistedTask? {
-        return TaskStore.findByTaskId(taskId)
+        val task = TaskStore.findByTaskId(taskId) ?: return null
+        return if (eventService.isSequenceDeleted(task.referenceId)) null else task
     }
 
     fun resetFailedTask(taskId: UUID): Boolean {
@@ -30,6 +35,20 @@ class TaskService {
     }
 
     fun getFailedTasks(): List<PersistedTask> {
-        return TaskStore.getFailedTasks()
+        return getNonDeleted(TaskStore.getFailedTasks())
     }
+
+    private fun getNonDeleted(tasks: List<PersistedTask>): List<PersistedTask> {
+        if (tasks.isEmpty()) return emptyList()
+
+        // 1. Finn alle referenceId i batchen
+        val referenceIds = tasks.map { it.referenceId }.toSet()
+
+        // 2. Slå opp alle slettede sekvenser i ett kall
+        val deleted = eventService.getDeletedSequences(referenceIds)
+
+        // 3. Filtrer bort tasks som tilhører slettede sekvenser
+        return tasks.filterNot { it.referenceId in deleted }
+    }
+
 }

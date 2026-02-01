@@ -9,16 +9,14 @@ import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeletedTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ForcedTaskResetAuditEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ManualAllowCompletionEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -74,15 +72,15 @@ object EventStore: EventStore {
 
 
     override fun getPersistedEventsAfter(timestamp: Instant): List<PersistedEvent> {
-        val result = withTransaction {
+        return withTransaction {
             EventsTable.getWhere {
                 EventsTable.persistedAt greater timestamp
             }
-        }
-        return result.getOrDefault(emptyList())
+        }.getOrDefault(emptyList())
     }
 
     override fun getPersistedEventsFor(referenceId: UUID): List<PersistedEvent> {
+        if (isEventSequenceDeleted(referenceId)) return emptyList()
         val result = withTransaction {
             EventsTable
                 .getWhere { EventsTable.referenceId eq referenceId.toString()}
@@ -164,7 +162,8 @@ object EventStore: EventStore {
             EventsTable.getWhere {
                 EventsTable.referenceId notInList completedReferences
             }
-        }.getOrDefault(emptyList())
+        }.getOrDefault(emptyList()).groupBy { it.referenceId }
+            .filterNot { (referenceId, _) -> isEventSequenceDeleted(referenceId) }.values.flatten()
     }
 
     fun getLastEventTimestamp(): Instant? {
@@ -176,4 +175,33 @@ object EventStore: EventStore {
                 ?.get(EventsTable.persistedAt)
         }.getOrDefault(null)
     }
+
+    fun isEventSequenceDeleted(referenceId: UUID): Boolean {
+        return withTransaction {
+            EventsTable.getWhere {
+                (EventsTable.referenceId eq referenceId.toString()) and
+                        (EventsTable.event eq DeleteSequenceEvent::class.getName())
+            }.count() > 0
+        }.getOrDefault(false)
+    }
+
+    fun getDeletedSequences(referenceIds: Set<UUID>): Set<UUID> {
+        if (referenceIds.isEmpty()) return emptySet()
+        return withTransaction {
+            EventsTable.select(EventsTable.referenceId)
+                .where {
+                    (EventsTable.referenceId inList referenceIds.map { it.toString() }) and
+                            (EventsTable.event eq DeleteSequenceEvent::class.getName())
+                }
+                .map { UUID.fromString(it[EventsTable.referenceId]) }
+                .toSet()
+        }.getOrDefault(emptySet())
+    }
+
+    fun deleteSequence(referenceId: UUID): UUID {
+        val deleteSequenceEvent = DeleteSequenceEvent().usingReferenceId(referenceId)
+        persist(deleteSequenceEvent)
+        return deleteSequenceEvent.eventId
+    }
+
 }

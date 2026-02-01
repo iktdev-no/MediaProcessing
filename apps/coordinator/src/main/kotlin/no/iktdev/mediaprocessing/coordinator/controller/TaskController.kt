@@ -1,10 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 
-import no.iktdev.mediaprocessing.coordinator.services.EventService
-import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.coordinator.dto.translate.CoordinatorTaskTransferDto
 import no.iktdev.mediaprocessing.coordinator.dto.translate.toCoordinatorTransferDto
+import no.iktdev.mediaprocessing.coordinator.services.EventService
+import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
@@ -48,6 +48,9 @@ class TaskController(
             ?: return ResponseEntity.notFound().build()
 
         val referenceId = task.referenceId
+        if (eventService.isSequenceDeleted(referenceId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build()
+        }
 
         // 1. Opprett DeleteEvent
         val deletedId = eventService.deleteTaskFailureForReset(referenceId, taskId)

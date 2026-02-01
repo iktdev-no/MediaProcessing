@@ -18,6 +18,7 @@ object EventRegistry {
             CoverDownloadTaskCreatedEvent::class.java,
             CoverDownloadResultEvent::class.java,
 
+            DeleteSequenceEvent::class.java,
             DeletedTaskResultEvent::class.java,
             ForcedTaskResetAuditEvent::class.java,
 

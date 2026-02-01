@@ -15,15 +15,20 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class SequenceAggregatorService() {
+class SequenceAggregatorService(
+    private val eventService: EventService
+) {
 
     fun getActiveSequences(): List<SequenceSummary> {
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
 
         // Gruppér først, deserialiser senere
         val grouped = allEvents.groupBy { it.referenceId }
+        val deleted = eventService.getDeletedSequences(grouped.keys)
 
-        return grouped.values
+        return grouped
+            .filterNot { (referenceId, _) -> referenceId in deleted }
+            .values
             // aktive = ingen CollectedEvent
             .filter { events -> events.none { it.event == CompletedEvent::class.java.simpleName } }
             .mapNotNull { events -> buildSummary(events) }
@@ -34,8 +39,11 @@ class SequenceAggregatorService() {
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
 
         val grouped = allEvents.groupBy { it.referenceId }
+        val deleted = eventService.getDeletedSequences(grouped.keys)
 
-        return grouped.values
+        return grouped
+            .filterNot { (referenceId, _) -> referenceId in deleted }
+            .values
             .mapNotNull { events -> buildSummary(events) }
             .sortedByDescending { it.lastEventTime }
             .take(limit)
