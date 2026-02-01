@@ -11,9 +11,9 @@ import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.CoordinatorClient
-import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
+import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.springframework.stereotype.Service
@@ -63,7 +63,12 @@ class VideoTaskListener(
             .args(taskData.data.arguments)
             .withProgress(true)
 
-        val result = getFfmpeg()
+        val logDirectory = fileUtil.getLogDirectory().using("encode")
+        val result = getFfmpeg(
+            listener = listener,
+            logDirectory = logDirectory,
+            execPath = executableConfig.ffmpeg
+        )
         withHeartbeatRunner {
             reporter?.updateLastSeen(task.taskId)
         }
@@ -97,53 +102,52 @@ class VideoTaskListener(
         return ProcesserEncodeResultEvent(null, null, status, error = message).producedFrom(task)
     }
 
+    val listener = object : FFmpeg.Listener {
+        var lastProgress: FfmpegDecodedProgress? = null
+        override fun onStarted(inputFile: String) {
+        }
 
-    override fun getFfmpeg(): FFmpeg {
-        val logDirectory = fileUtil.getLogDirectory().using("encode")
-        return VideoFFmpeg(execPath = executableConfig.ffmpeg,
-            logDirectory = logDirectory,
-            listener = object : FFmpeg.Listener {
-            var lastProgress: FfmpegDecodedProgress? = null
-            override fun onStarted(inputFile: String) {
+        override fun onCompleted(inputFile: String, outputFile: String) {
+            currentTask?.let {
+                coordinatorWebClient.reportProgress(
+                    referenceId = it.referenceId.toString(),
+                    taskId = it.taskId.toString(),
+                    percent = FfmpegDecodedProgress(
+                        100,
+                        "",
+                        lastProgress?.duration ?: "",
+                        "0",
+                        estimatedCompletion = "",
+                        estimatedCompletionSeconds = 0
+                    ),
+                    ""
+                )
+            }
+        }
+
+        override fun onProgressChanged(
+            inputFile: String,
+            progress: FfmpegDecodedProgress
+        ) {
+            lastProgress = progress
+            currentTask?.let {
+                localProgress.update(it.taskId, progress)
+                coordinatorWebClient.reportProgress(
+                    referenceId = it.referenceId.toString(),
+                    taskId = it.taskId.toString(),
+                    percent = progress,
+                    ""
+                )
             }
 
-            override fun onCompleted(inputFile: String, outputFile: String) {
-                currentTask?.let {
-                    coordinatorWebClient.reportProgress(
-                        referenceId = it.referenceId.toString(),
-                        taskId = it.taskId.toString(),
-                        percent = FfmpegDecodedProgress(
-                            100,
-                            "",
-                            lastProgress?.duration ?: "",
-                            "0",
-                            estimatedCompletion = "",
-                            estimatedCompletionSeconds = 0
-                        ),
-                        ""
-                    )
-                }
-            }
-
-            override fun onProgressChanged(
-                inputFile: String,
-                progress: FfmpegDecodedProgress
-            ) {
-                lastProgress = progress
-                currentTask?.let {
-                    localProgress.update(it.taskId, progress)
-                    coordinatorWebClient.reportProgress(
-                        referenceId = it.referenceId.toString(),
-                        taskId = it.taskId.toString(),
-                        percent = progress,
-                        ""
-                    )
-                }
-
-            }
-        })
+        }
     }
 
+    override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
+        return VideoFFmpeg(execPath = executableConfig.ffmpeg,
+            logDirectory = logDirectory,
+            listener = listener)
+    }
 
     class VideoFFmpeg(override val listener: Listener? = null, private val execPath: String, val logDirectory: File) :
         FFmpeg(executable = execPath, logDir = logDirectory) {

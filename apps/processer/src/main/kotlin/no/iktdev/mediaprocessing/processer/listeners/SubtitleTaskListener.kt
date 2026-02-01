@@ -9,8 +9,8 @@ import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
-import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
+import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import org.springframework.stereotype.Service
@@ -60,7 +60,8 @@ class SubtitleTaskListener(
             .outputFile(cachedOutFile.absolutePath)
             .args(taskData.data.arguments)
 
-        val result = getFfmpeg()
+        val logDirectory = fileUtil.getLogDirectory().using("subtitles")
+        val result = getFfmpeg(execPath = executableConfig.ffmpeg, logDirectory = logDirectory)
         withHeartbeatRunner {
             reporter?.updateLastSeen(task.taskId)
         }
@@ -91,11 +92,9 @@ class SubtitleTaskListener(
         return ProcesserExtractResultEvent(null, status, error = message).producedFrom(task)
     }
 
-    override fun getFfmpeg(): FFmpeg {
-        val logDirectory = fileUtil.getLogDirectory().using("subtitles")
-        return SubtitleFFmpeg(null, executableConfig.ffmpeg, logDirectory)
+    override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
+        return SubtitleFFmpeg(listener, executableConfig.ffmpeg, logDirectory)
     }
-
 
     class SubtitleFFmpeg(override val listener: Listener? = null, private val executablePath: String, val logDirectory: File) :
         FFmpeg(executable = executablePath, logDir = logDirectory) {

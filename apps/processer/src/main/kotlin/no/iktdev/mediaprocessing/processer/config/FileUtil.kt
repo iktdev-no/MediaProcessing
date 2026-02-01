@@ -11,11 +11,10 @@ class FileUtil(
     private val dirs: DirectoryProperties,
     private val mediaPaths: MediaPaths
 ) {
-    init {
-        assert(dirs.logs != null)
-    }
     fun getTemporaryStoreFile(fileName: String): File =
         File(mediaPaths.cache).using(fileName)
 
-    fun getLogDirectory(): File = File(dirs.logs)
+    fun getLogDirectory(): File {
+        return File(dirs.logs)
+    }
 }

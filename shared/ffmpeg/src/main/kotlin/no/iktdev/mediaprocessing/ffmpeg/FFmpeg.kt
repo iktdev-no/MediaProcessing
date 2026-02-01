@@ -36,10 +36,6 @@ open class FFmpeg(val executable: String, val logDir: File) {
 
     open fun onCreate() {}
 
-    init {
-        onCreate()
-    }
-
     protected lateinit var inputFile: String
     open suspend fun run(argument: MpegArgument) {
         inputFile = if (argument.inputFile == null) throw RuntimeException("Input file is required") else  argument.inputFile!!
