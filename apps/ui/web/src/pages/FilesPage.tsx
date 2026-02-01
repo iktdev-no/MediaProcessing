@@ -1,0 +1,227 @@
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
+import {
+    Box,
+    IconButton,
+    Stack,
+    ToggleButton,
+    ToggleButtonGroup,
+    Typography
+} from "@mui/material"
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react"
+import { useSearchParams } from "react-router-dom"
+import { apiGet } from "../api/client"
+import type { FileAction, IFile, MediaAction } from "../types/files"
+
+import { startProcess } from "../api/media"
+import { BreadcrumbPath } from "../components/BreadcrumbPath"
+import { ConfirmationDialog } from "../components/ConfirmationDialog"
+import { FileContextMenu } from "../components/FileContextMenu"
+import { FileList } from "../components/FileList"
+import { LoadingToast } from "../components/LoadingToast"
+
+/* ───────────────── Helpers ───────────────── */
+
+type SortKey = "name" | "created" | "type"
+type SortDir = "asc" | "desc"
+
+
+/* ───────────────── Component ───────────────── */
+
+export default function FilesPage() {
+    const [searchParams, setSearchParams] = useSearchParams()
+    const path = searchParams.get("path") ?? "/"
+
+    const [files, setFiles] = useState<IFile[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const [sortKey, setSortKey] = useState<SortKey>("name")
+    const [sortDir, setSortDir] = useState<SortDir>("asc")
+
+    const [menuPos, setMenuPos] = useState<{ mouseX: number; mouseY: number } | null>(null)
+    const [menuFile, setMenuFile] = useState<IFile | null>(null)
+
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [confirmTarget, setConfirmTarget] = useState<IFile | null>(null)
+
+    /* ───── Data loading tied to URL ───── */
+
+    const load = useCallback(
+        async (path: string, push = true) => {
+            try {
+                setLoading(true)
+                setError(null)
+
+                const endpoint =
+                    path === "/" ? "/files/roots" : `/files/explore?path=${encodeURIComponent(path)}`
+                const data = await apiGet<IFile[]>(endpoint)
+                setFiles(data)
+
+                if (push) setSearchParams({ path })
+            } catch {
+                setError("Kunne ikke laste mappe")
+            } finally {
+                setLoading(false)
+            }
+        },
+        [setSearchParams]
+    )
+
+    useEffect(() => {
+        load(path, false)
+    }, [path, load])
+
+    /* ───── Sorting ───── */
+
+    const sortedFiles = useMemo(() => {
+        const copy = [...files]
+        copy.sort((a, b) => {
+            if (a.type !== b.type) return a.type === "Folder" ? -1 : 1
+
+            let res = 0
+            switch (sortKey) {
+                case "name":
+                    res = a.name.localeCompare(b.name, undefined, { numeric: true })
+                    break
+                case "created":
+                    res = a.created - b.created
+                    break
+                case "type":
+                    res = a.type.localeCompare(b.type)
+                    break
+            }
+            return sortDir === "asc" ? res : -res
+        })
+        return copy
+    }, [files, sortKey, sortDir])
+
+    /* ───── Context menu ───── */
+
+    const openMenu = (e: MouseEvent<HTMLElement>, file: IFile) => {
+        e.preventDefault()
+        setMenuFile(file)
+        setMenuPos({
+            mouseX: e.clientX + 2,
+            mouseY: e.clientY + 4,
+        })
+    }
+
+    const closeMenu = () => {
+        setMenuPos(null)
+        setMenuFile(null)
+    }
+
+    const onCopyPath = (file: IFile) => {
+        navigator.clipboard.writeText(file.uri)
+        closeMenu()
+    }
+
+    const onMediaAction = async (action: MediaAction, file: IFile) => {
+
+        console.log("MEDIA ACTION:", action, file)
+        closeMenu()
+        try {
+            await startProcess({ fileUri: file.uri, mediaAction: action.id })
+            console.log("Started process:", action.id, "for", file.uri)
+        } catch (err) {
+            console.error("Failed to start process", err)
+        }
+    }
+
+    const onFileAction = (action: FileAction, file: IFile) => {
+        console.log("FILE ACTION:", action, file)
+        if (action.id === "Open" && file.type === "Folder") {
+            console.log("OPEN FOLDER:", file)
+            load(file.uri)
+            closeMenu()
+            return
+        }
+
+        if (action.id === "Delete") {
+            setConfirmTarget(file)
+            setConfirmOpen(true)
+            closeMenu()
+            return
+        }
+
+        closeMenu()
+    }
+
+    if (error) return <Typography color="error">{error}</Typography>
+
+    return (
+        <Box sx={{ height: "100%", width: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <Box sx={{ flex: 1, overflow: "auto", width: "100%" }}>
+                {/* Sticky header */}
+                <Box
+                    sx={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 20,
+                        pt: 1,
+                        bgcolor: "background.paper",
+                        borderBottom: 1,
+                        borderColor: "divider",
+                    }}
+                >
+                    <Stack direction="row" alignItems="center" spacing={2} p={1}>
+                        <Stack direction="row" alignItems="center" spacing={1} flex={1}>
+
+                            <BreadcrumbPath path={path} onNavigate={load} />
+
+                        </Stack>
+
+                        <ToggleButtonGroup
+                            size="small"
+                            value={sortKey}
+                            exclusive
+                            onChange={(_, v) => v && setSortKey(v)}
+                        >
+                            <ToggleButton value="name">Navn</ToggleButton>
+                            <ToggleButton value="created">Dato</ToggleButton>
+                            <ToggleButton value="type">Type</ToggleButton>
+                        </ToggleButtonGroup>
+
+                        <IconButton onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}>
+                            {sortDir === "asc" ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+                        </IconButton>
+                    </Stack>
+                </Box>
+
+                {/* File list */}
+                <FileList
+                    files={sortedFiles}
+                    onOpenFolder={(file) => load(file.uri)}
+                    onContextMenu={openMenu}
+                />
+            </Box>
+
+            {/* Context menu */}
+            <FileContextMenu
+                file={menuFile}
+                position={menuPos}
+                onClose={closeMenu}
+                onMediaAction={onMediaAction}
+                onFileAction={onFileAction}
+                onCopyPath={onCopyPath}
+            />
+
+            {/* Delete confirmation */}
+            <ConfirmationDialog
+                open={confirmOpen}
+                title="Slette fil?"
+                message={`Vil du slette ${confirmTarget?.name}?`}
+                confirmLabel="Slett"
+                confirmColor="error"
+                onCancel={() => setConfirmOpen(false)}
+                onConfirm={() => {
+                    console.log("DELETE:", confirmTarget)
+                    setConfirmOpen(false)
+                }}
+            />
+            <LoadingToast open={loading} />
+
+        </Box>
+    )
+}

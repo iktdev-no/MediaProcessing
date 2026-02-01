@@ -1,0 +1,46 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: INFO
+    Exposed: OFF
+    org.springframework.web.socket.config.WebSocketMessageBrokerStats: INFO
+
+media:
+  cache: /src/cache
+  outgoing: /src/output
+  incoming: /src/input
+
+streamit:
+  address: http://streamit.service
+
+mediaprocessing:
+  apps:
+    coordinator:
+      address: http://coordinator:8080
+      health: /actuator/health
+    processer:
+      address: http://processor:8080
+      health: /actuator/health
+    converter:
+      address: http://converter:8080
+      health: /actuator/health
+    metadata:
+      address: http://py-metadata:8080
+      health: /health
+    watcher:
+      address: http://py-watcher:8080
+      health: /health

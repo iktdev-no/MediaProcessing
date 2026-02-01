@@ -1,0 +1,52 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: INFO
+    Exposed: OFF
+    org.springframework.web.socket.config.WebSocketMessageBrokerStats: INFO
+
+media:
+  cache: /media/remote/mediaprocessingCache
+  cache-rewrite:
+    to: /src/cache
+  outgoing: /media/remote/streamit
+  outgoing-rewrite:
+      to: /src/output
+  incoming: /media/remote/torrent
+  incoming-rewrite:
+    to: /src/input
+
+streamit:
+  address: http://streamit.service
+
+mediaprocessing:
+  apps:
+    coordinator:
+      address: http://192.168.2.250:6080
+      health: /actuator/health
+    processer:
+      address: http://192.168.2.250:6082
+      health: /actuator/health
+    converter:
+      address: http://192.168.2.250:6081
+      health: /actuator/health
+    metadata:
+      address: http://192.168.2.250:6083
+      health: /health
+    watcher:
+      address: http://192.168.2.250:6084
+      health: /health
