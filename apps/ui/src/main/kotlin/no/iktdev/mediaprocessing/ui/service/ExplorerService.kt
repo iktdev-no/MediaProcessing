@@ -73,7 +73,8 @@ class ExplorerService(
             return listOf(
                 MediaAction(MediaActionType.All),
                 MediaAction(MediaActionType.Encode),
-                MediaAction(MediaActionType.ExtractSubtitles)
+                MediaAction(MediaActionType.ExtractSubtitles),
+                MediaAction(MediaActionType.MetadataSearch),
             )
         }
 

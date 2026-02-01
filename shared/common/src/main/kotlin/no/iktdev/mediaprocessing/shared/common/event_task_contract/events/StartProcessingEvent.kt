@@ -23,5 +23,5 @@ enum class OperationType {
     ExtractSubtitles,
     Encode,
     ConvertSubtitles,
-    Metadata
+    MetadataSearch
 }

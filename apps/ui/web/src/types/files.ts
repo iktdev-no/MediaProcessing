@@ -9,8 +9,9 @@ export type MediaActionType =
     | "Encode"
     | "ExtractSubtitles"
     | "ConvertSubtitle"
+    |
 
-export interface MediaAction {
+    export interface MediaAction {
     id: MediaActionType
     title: string
 }

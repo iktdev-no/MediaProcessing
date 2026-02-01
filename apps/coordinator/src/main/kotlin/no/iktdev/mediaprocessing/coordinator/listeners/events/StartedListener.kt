@@ -23,7 +23,7 @@ class StartedListener : EventListener() {
                     OperationType.ExtractSubtitles,
                     OperationType.ConvertSubtitles,
                     OperationType.Encode,
-                    OperationType.Metadata
+                    OperationType.MetadataSearch
                 )
             )
         )

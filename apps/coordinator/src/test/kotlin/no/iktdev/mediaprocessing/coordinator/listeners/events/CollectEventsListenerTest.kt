@@ -78,7 +78,7 @@ class CollectEventsListenerTest : TestBase() {
             ev.copy(
                 data = ev.data.copy(
                     operation = setOf(
-                        OperationType.Metadata,
+                        OperationType.MetadataSearch,
                         OperationType.Encode,
                         OperationType.ExtractSubtitles
                     )
@@ -123,7 +123,7 @@ class CollectEventsListenerTest : TestBase() {
             ev.copy(
                 data = ev.data.copy(
                     operation = setOf(
-                        OperationType.Metadata,
+                        OperationType.MetadataSearch,
                         OperationType.ConvertSubtitles
                     )
                 )

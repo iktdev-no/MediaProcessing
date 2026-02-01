@@ -4,6 +4,7 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.processer.config.DirectoryProperties
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
+import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import org.junit.jupiter.api.Assertions.assertEquals
 

@@ -178,11 +178,13 @@ class CoordinatorClient(
             MediaActionType.All -> setOf(
                 OperationType.Encode,
                 OperationType.ExtractSubtitles,
-                OperationType.ConvertSubtitles
+                OperationType.ConvertSubtitles,
+                OperationType.MetadataSearch
             )
             MediaActionType.Encode -> setOf(OperationType.Encode)
             MediaActionType.ExtractSubtitles -> setOf(OperationType.ExtractSubtitles)
             MediaActionType.ConvertSubtitle -> setOf(OperationType.ConvertSubtitles)
+            MediaActionType.MetadataSearch -> setOf(OperationType.MetadataSearch)
         }
 
 

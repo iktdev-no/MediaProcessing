@@ -30,7 +30,7 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         if (startedEvent.data.operation.isNotEmpty()) {
-            if (!startedEvent.data.operation.contains(OperationType.Metadata))
+            if (!startedEvent.data.operation.contains(OperationType.MetadataSearch))
                 return null
         }
 

@@ -56,7 +56,7 @@ class CollectProjection(val events: List<Event>) {
             OperationType.Encode to encodeTaskStatus,
             OperationType.ExtractSubtitles to extreactTaskStatus,
             OperationType.ConvertSubtitles to convertTaskStatus,
-            OperationType.Metadata to metadataTaskStatus,
+            OperationType.MetadataSearch to metadataTaskStatus,
         )
 
         return required.map { statusMap[it] ?: TaskStatus.NotInitiated }

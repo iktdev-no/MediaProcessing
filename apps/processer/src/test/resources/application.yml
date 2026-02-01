@@ -41,9 +41,9 @@ executables:
   ffmpeg: ffmpeg
 
 processer:
-  coordinator-url: ${COORDINATOR_URL:http://coordinator:8080}
+  coordinator-url: http://coordinator:8080
   coordinator-ping-on-startup: false
-  allow-overwrite: ${ALLOW_OVERWRITE:false}
+  allow-overwrite: false
 
 directories:
   logs: build/test-logs

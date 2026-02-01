@@ -26,17 +26,17 @@ logging:
 
 
 media:
-  cache: ${DIRECTORY_CONTENT_CACHE:/src/cache}
+  cache: /src/cache
   outgoing: /src/output
   incoming: /src/input
 
 processer:
-  coordinator-url: ${COORDINATOR_URL:http://coordinator:8080}
+  coordinator-url: http://coordinator:8080
   coordinator-ping-on-startup: true
-  allow-overwrite: ${ALLOW_OVERWRITE:false}
+  allow-overwrite: false
 
 executables:
-  ffmpeg: ${SUPPORTING_EXECUTABLE_FFMPEG:ffmpeg}
+  ffmpeg: ffmpeg
 
 directories:
-  logs: ${LOG_DIR:/data/logs}
+  logs: /data/logs
