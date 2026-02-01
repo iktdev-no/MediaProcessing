@@ -38,7 +38,7 @@ class StoreContentAndMetadataTaskListener : TaskListener(TaskType.MIXED) {
 
         // ❗ Ikke fang exceptions — la TaskListener håndtere dem
         val response = streamitRestTemplate.exchange(
-            "/open/api/mediaprocesser/import",
+            "/api/mediaprocesser/import",
             HttpMethod.POST,
             entity,
             Void::class.java,
