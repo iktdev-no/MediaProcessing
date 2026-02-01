@@ -16,11 +16,13 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.database.DatabaseApplication
 import no.iktdev.mediaprocessing.shared.database.DatabasebasedMediaProcessingApp
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Configuration
 
 @DatabasebasedMediaProcessingApp
+@ConfigurationPropertiesScan("no.iktdev.mediaprocessing.processer")
 class ProcesserApplication: DatabaseApplication() {
 }
 
