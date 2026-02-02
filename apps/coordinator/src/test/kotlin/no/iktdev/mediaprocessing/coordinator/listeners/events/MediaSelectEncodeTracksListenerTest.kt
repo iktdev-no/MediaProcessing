@@ -1,212 +1,151 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.models.Event
-import no.iktdev.mediaprocessing.ffmpeg.data.*
+import no.iktdev.mediaprocessing.FakeCoordinatorEnv
+import no.iktdev.mediaprocessing.MockData
+import no.iktdev.mediaprocessing.coordinator.Preference
+import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.io.File
 
-class MediaTracksEncodeSelectorTest: MediaSelectEncodeTracksListener() {
+class MediaTracksEncodeSelectorTest {
 
-    private fun dummyAudioStream(
-        index: Int,
-        language: String,
-        channels: Int,
-        durationTs: Long = 1000
-    ): AudioStream {
-        return AudioStream(
-            index = index,
-            codec_name = "aac",
-            codec_long_name = "AAC",
-            codec_type = "audio",
-            codec_tag_string = "",
-            codec_tag = "",
-            r_frame_rate = "0/0",
-            avg_frame_rate = "0/0",
-            time_base = "1/1000",
-            start_pts = 0,
-            start_time = "0",
-            duration = null,
-            duration_ts = durationTs,
-            disposition = Disposition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            tags = Tags(
-                title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
-                NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
-                _STATISTICS_TAGS = null, language = language, filename = null, mimetype = null
-            ),
-            profile = "LC",
-            sample_fmt = "fltp",
-            sample_rate = "48000",
-            channels = channels,
-            channel_layout = "stereo",
-            bits_per_sample = 0
+    private fun testPreference(): Preference {
+        val tmp = File.createTempFile("pref", ".json")
+        tmp.writeText(
+            """
+            {
+              "processer": {},
+              "language": {
+                "preferredAudio": ["jpn", "eng"],
+                "preferredSubtitles": ["eng"],
+                "preferOriginal": true,
+                "avoidDub": true,
+                "subtitleFormatPriority": ["ass","srt","vtt","smi"],
+                "subtitleSelectionMode": "DialogueOnly"
+              }
+            }
+            """.trimIndent()
         )
+        return Preference(FakeCoordinatorEnv(tmp))
     }
 
-    private fun dummyVideoStream(index: Int, durationTs: Long = 1000): VideoStream {
-        return VideoStream(
-            index = index,
-            codec_name = "h264",
-            codec_long_name = "H.264",
-            codec_type = "video",
-            codec_tag_string = "",
-            codec_tag = "",
-            r_frame_rate = "25/1",
-            avg_frame_rate = "25/1",
-            time_base = "1/1000",
-            start_pts = 0,
-            start_time = "0",
-            duration = null,
-            duration_ts = durationTs,
-            disposition = Disposition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            tags = Tags(
-                title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
-                NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
-                _STATISTICS_TAGS = null, language = "eng", filename = null, mimetype = null
-            ),
-            profile = "main",
-            width = 1920,
-            height = 1080,
-            coded_width = 1920,
-            coded_height = 1080,
-            closed_captions = 0,
-            has_b_frames = 0,
-            sample_aspect_ratio = "1:1",
-            display_aspect_ratio = "16:9",
-            pix_fmt = "yuv420p",
-            level = 30,
-            color_range = "tv",
-            color_space = "bt709",
-            color_transfer = "bt709",
-            color_primaries = "bt709",
-            chroma_location = "left",
-            refs = 1
-        )
-    }
+    private val listener = MediaSelectEncodeTracksListener(testPreference())
+
+    // ------------------------------------------------------------
+    // TESTS
+    // ------------------------------------------------------------
 
     @Test
     @DisplayName("""
-        Hvis video streams har ulik varighet
-        Når getVideoTrackToUse kalles
+        Når video streams er tilgjengelige
+        Hvis en stream har lengre varighet enn de andre
         Så:
-            Returneres index til stream med lengst varighet
-    """)
+         Velges video-sporet med lengst varighet
+        """)
     fun testVideoTrackSelection() {
-        val streams = listOf(dummyVideoStream(0, 1000), dummyVideoStream(1, 5000))
-        val index = getVideoTrackToUse(streams)
-        assertEquals(1, index)
-    }
-
-    @Test
-    @DisplayName("""
-        Hvis audio streams inneholder foretrukket språk jpn med 2 kanaler
-        Når getAudioDefaultTrackToUse kalles
-        Så:
-            Returneres index til jpn stereo track
-    """)
-    fun testAudioDefaultTrackSelectionPreferredLanguageStereo() {
         val streams = listOf(
-            dummyAudioStream(0, "eng", 2),
-            dummyAudioStream(1, "jpn", 2),
-            dummyAudioStream(2, "jpn", 6)
-        )
-        val index = getAudioDefaultTrackToUse(streams)
-        assertEquals(1, index)
-    }
-
-    @Test
-    @DisplayName("""
-        Hvis audio streams inneholder foretrukket språk jpn med 6 kanaler
-        Når getAudioExtendedTrackToUse kalles
-        Så:
-            Returneres index til jpn 6-kanals track
-    """)
-    fun testAudioExtendedTrackSelectionPreferredLanguageSurround() {
-        val streams = listOf(
-            dummyAudioStream(0, "jpn", 2),
-            dummyAudioStream(1, "jpn", 6)
-        )
-        val defaultIndex = getAudioDefaultTrackToUse(streams)
-        val extendedIndex = getAudioExtendedTrackToUse(streams, defaultIndex)
-        assertEquals(0, defaultIndex)
-        assertEquals(1, extendedIndex)
-    }
-
-    @Test
-    @DisplayName("""
-        Hvis audio streams ikke matcher foretrukket språk
-        Når filterOnPreferredLanguage kalles
-        Så:
-            Returneres original liste uten filtrering
-    """)
-    fun testFilterOnPreferredLanguageFallback() {
-        val streams = listOf(
-            dummyAudioStream(0, "eng", 2),
-            dummyAudioStream(1, "fra", 2)
-        )
-        val filtered = streams.filterOnPreferredLanguage()
-        assertEquals(streams.size, filtered.size)
-    }
-
-    @Test
-    @DisplayName("""
-    Hvis audio streams ikke matcher foretrukket språk
-    Når getAudioDefaultTrackToUse kalles
-    Så:
-        Velges et spor (fallback) selv om ingen matcher
-    """)
-    fun testAudioDefaultTrackFallbackSelection() {
-        val streams = listOf(
-            dummyAudioStream(0, "eng", 2),
-            dummyAudioStream(1, "fra", 2)
+            MockData.dummyVideoStream(0, 1000),
+            MockData.dummyVideoStream(1, 5000)
         )
 
-        // filterOnPreferredLanguage skal returnere original listen
-        val filtered = streams.filterOnPreferredLanguage()
-        assertEquals(streams.size, filtered.size)
-
-        // getAudioDefaultTrackToUse skal likevel velge et spor
-        val selectedIndex = getAudioDefaultTrackToUse(streams)
-
-        // Sjekk at det faktisk er en gyldig index
-        assertTrue(selectedIndex in streams.indices)
-
-        // I dette tilfellet velges siste med høyest index (1)
-        assertEquals(0, selectedIndex)
-    }
-
-
-
-    class DummyEvent: Event()
-
-    @Test
-    @DisplayName("""
-        Hvis event ikke er MediaStreamParsedEvent
-        Når onEvent kalles
-        Så:
-            Returneres null
-    """)
-    fun testOnEventNonParsedEvent() {
-        val result = onEvent(DummyEvent(), emptyList())
-        assertNull(result)
-    }
-
-    @Test
-    @DisplayName("""
-        Hvis event er MediaStreamParsedEvent med video og audio
-        Når onEvent kalles
-        Så:
-            Returneres MediaTracksEncodeSelectedEvent med riktige spor
-    """)
-    fun testOnEventParsedEvent() {
-        val videoStreams = listOf(dummyVideoStream(0, 1000))
-        val audioStreams = listOf(dummyAudioStream(0, "jpn", 2), dummyAudioStream(1, "jpn", 6))
-        val parsedEvent = MediaStreamParsedEvent(
-            ParsedMediaStreams(videoStream = videoStreams, audioStream = audioStreams, subtitleStream = emptyList())
+        val event = MediaStreamParsedEvent(
+            ParsedMediaStreams(videoStream = streams, audioStream = emptyList(), subtitleStream = emptyList())
         ).newReferenceId()
-        val result = onEvent(parsedEvent, emptyList()) as MediaTracksEncodeSelectedEvent
+
+        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        assertEquals(1, result.selectedVideoTrack)
+    }
+
+    @Test@DisplayName("""
+        Når audio streams inneholder flere språk og kanaloppsett
+        Hvis foretrukket språk finnes i stereo
+        Så:
+         Velges jpn stereo som default audio
+        """)
+    fun testAudioDefaultTrackSelectionPreferredLanguageStereo() {
+        val audio = listOf(
+            MockData.dummyAudioStream(0, "eng", 2),
+            MockData.dummyAudioStream(1, "jpn", 2),
+            MockData.dummyAudioStream(2, "jpn", 6)
+        )
+
+        val event = MediaStreamParsedEvent(
+            ParsedMediaStreams(
+                videoStream = listOf(MockData.dummyVideoStream(0)),
+                audioStream = audio,
+                subtitleStream = emptyList()
+            )
+        ).newReferenceId()
+
+        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        assertEquals(1, result.selectedAudioTrack)
+    }
+
+    @Test
+    @DisplayName("""
+        Når audio streams inneholder både stereo og surround
+        Hvis foretrukket språk finnes i begge
+        Så:
+         Velges jpn 6-kanals som extended audio
+        """)
+    fun testAudioExtendedTrackSelectionPreferredLanguageSurround() {
+        val audio = listOf(
+            MockData.dummyAudioStream(0, "jpn", 2),
+            MockData.dummyAudioStream(1, "jpn", 6)
+        )
+
+        val event = MediaStreamParsedEvent(
+            ParsedMediaStreams(
+                videoStream = listOf(MockData.dummyVideoStream(0)),
+                audioStream = audio,
+                subtitleStream = emptyList()
+            )
+        ).newReferenceId()
+
+        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        assertEquals(0, result.selectedAudioTrack)
+        assertEquals(1, result.selectedAudioExtendedTrack)
+    }
+
+    class DummyEvent : Event()
+
+    @Test
+    @DisplayName("""
+        Når event ikke er av typen MediaStreamParsedEvent
+        Hvis onEvent kalles
+        Så:
+         Returneres null
+        """)
+    fun testOnEventNonParsedEvent() {
+        assertNull(listener.onEvent(DummyEvent(), emptyList()))
+    }
+
+    @Test
+    @DisplayName("""
+        Når MediaStreamParsedEvent mottas med video og audio streams
+        Hvis sporene analyseres etter preferanser
+        Så:
+         Velges riktige video-, default audio- og extended audio-spor
+        """)
+    fun testOnEventParsedEvent() {
+        val video = listOf(MockData.dummyVideoStream(0, 1000))
+        val audio = listOf(
+            MockData.dummyAudioStream(0, "jpn", 2),
+            MockData.dummyAudioStream(1, "jpn", 6)
+        )
+
+        val parsed = MediaStreamParsedEvent(
+            ParsedMediaStreams(videoStream = video, audioStream = audio, subtitleStream = emptyList())
+        ).newReferenceId()
+
+        val result = listener.onEvent(parsed, emptyList()) as MediaTracksEncodeSelectedEvent
+
         assertEquals(0, result.selectedVideoTrack)
         assertEquals(0, result.selectedAudioTrack)
         assertEquals(1, result.selectedAudioExtendedTrack)

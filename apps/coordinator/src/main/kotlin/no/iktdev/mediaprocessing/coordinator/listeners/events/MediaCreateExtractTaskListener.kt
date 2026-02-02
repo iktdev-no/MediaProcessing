@@ -13,7 +13,7 @@ import java.io.File
 import java.util.*
 
 @Component
-class MediaCreateExtractTaskListener: EventListener() {
+class MediaCreateExtractTaskListener(): EventListener() {
     override fun onEvent(
         event: Event,
         history: List<Event>

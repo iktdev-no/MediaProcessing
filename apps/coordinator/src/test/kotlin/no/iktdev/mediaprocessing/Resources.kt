@@ -4,7 +4,8 @@ import no.iktdev.eventi.models.Event
 import org.json.JSONArray
 
 enum class Files(val fileName: String) {
-    MultipleLanguageBased("Events.json")
+    MultipleLanguageBased("Events.json"),
+    MediaStreamParsedEvent("MediaStreamParsedEvent.json")
 }
 
 fun Files.getContent(): String? {

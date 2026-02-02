@@ -1,9 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
-import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
-import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleTags
-import no.iktdev.mediaprocessing.ffmpeg.data.Tags
+import no.iktdev.eventi.models.Event
+import no.iktdev.mediaprocessing.FakeCoordinatorEnv
+import no.iktdev.mediaprocessing.MockData
+import no.iktdev.mediaprocessing.coordinator.Preference
+import no.iktdev.mediaprocessing.coordinator.SubtitleSelectionMode
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
@@ -12,111 +13,145 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.io.File
 
-class MediaSelectExtractTracksListenerTest: TestBase() {
+class MediaSelectExtractTracksListenerTest {
 
-
-    // Vi lager en subclass som gir oss tilgang til alt og lar oss overstyre språkpreferanser
-    class TestableMediaSelectExtractTracksListener(
-        private val preferredLanguages: Set<String> = emptySet()
-    ) : MediaSelectExtractTracksListener() {
-        override fun limitToLanguages(): Set<String> = preferredLanguages
-        // gjør private extension tilgjengelig via wrapper
-        fun callFilterOnPreferredLanguage(streams: List<SubtitleStream>): List<SubtitleStream> {
-            return streams.filterOnPreferredLanguage()
-        }
-    }
-
-    private fun dummySubtitleStream(index: Int, language: String?, type: SubtitleType): SubtitleItem {
-        val stream = SubtitleStream(
-            index = index,
-            codec_name = "ass",
-            codec_long_name = "ASS",
-            codec_type = "subtitle",
-            codec_tag_string = "",
-            codec_tag = "",
-            r_frame_rate = "0/0",
-            avg_frame_rate = "0/0",
-            time_base = "1/1000",
-            start_pts = 0,
-            start_time = "0",
-            duration = null,
-            duration_ts = 1000,
-            disposition = null,
-            tags = Tags(
-                title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
-                NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
-                _STATISTICS_TAGS = null, language = language, filename = null, mimetype = null
-            ),
-            subtitle_tags = SubtitleTags(language = language, filename = null, mimetype = null)
+    // ------------------------------------------------------------
+    // Helper: create a Preference with custom subtitle settings
+    // ------------------------------------------------------------
+    private fun testPreference(
+        preferredSubtitles: List<String> = listOf("eng"),
+        formatPriority: List<String> = listOf("ass", "srt", "vtt", "smi"),
+        mode: SubtitleSelectionMode = SubtitleSelectionMode.DialogueOnly
+    ): Preference {
+        val tmp = File.createTempFile("pref", ".json")
+        tmp.writeText(
+            """
+            {
+              "processer": {},
+              "language": {
+                "preferredAudio": ["eng"],
+                "preferredSubtitles": ${preferredSubtitles},
+                "preferOriginal": true,
+                "avoidDub": true,
+                "subtitleFormatPriority": ${formatPriority},
+                "subtitleSelectionMode": "$mode"
+              }
+            }
+            """.trimIndent()
         )
-        return SubtitleItem(stream = stream, type = type)
+        return Preference(FakeCoordinatorEnv(tmp))
     }
+
+    private fun listener(
+        preferredSubtitles: List<String> = listOf("eng"),
+        formatPriority: List<String> = listOf("ass", "srt", "vtt", "smi"),
+        mode: SubtitleSelectionMode = SubtitleSelectionMode.DialogueOnly
+    ) = MediaSelectExtractTracksListener(
+        testPreference(preferredSubtitles, formatPriority, mode)
+    )
+
+    class DummyEvent : Event()
+
+    // ------------------------------------------------------------
+    // TESTS
+    // ------------------------------------------------------------
 
     @Test
     @DisplayName("""
-        Hvis event ikke er MediaTracksDetermineSubtitleTypeEvent
-        Når onEvent kalles
+        Når event ikke er av typen MediaTracksDetermineSubtitleTypeEvent
+        Hvis onEvent kalles
         Så:
-            Returneres null
-    """)
+         Returneres null
+        """)
     fun testOnEventNonSubtitleEvent() {
-        val listener = TestableMediaSelectExtractTracksListener()
-        val result = listener.onEvent(DummyEvent(), emptyList())
+        val result = listener().onEvent(DummyEvent(), emptyList())
         assertNull(result)
     }
 
+
     @Test
     @DisplayName("""
-        Hvis event inneholder Dialogue subtitles
-        Når onEvent kalles
+        Når subtitles inneholder Dialogue og Commentary
+        Hvis modus er DialogueOnly
         Så:
-            Returneres MediaTracksExtractSelectedEvent med index til Dialogue tracks
-    """)
-    fun testOnEventDialogueTracksSelected() {
-        val listener = TestableMediaSelectExtractTracksListener()
+         Velges kun Dialogue subtitles
+        """)
+    fun testDialogueSelection() {
         val items = listOf(
-            dummySubtitleStream(0, "eng", SubtitleType.Dialogue),
-            dummySubtitleStream(1, "eng", SubtitleType.Commentary)
+            SubtitleItem(MockData.dummySubtitleStream(0, "eng"), SubtitleType.Dialogue),
+            SubtitleItem(MockData.dummySubtitleStream(1, "eng"), SubtitleType.Commentary)
         )
-        val event = MediaTracksDetermineSubtitleTypeEvent(subtitleTrackItems = items).newReferenceId()
-        val result = listener.onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+        val result = listener().onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
         assertEquals(listOf(0), result.selectedSubtitleTracks)
     }
 
-    @Test
-    @DisplayName("""
-        Hvis limitToLanguages returnerer jpn
-        Når filterOnPreferredLanguage kalles
-        Så:
-            Returneres kun spor med språk jpn
-    """)
-    fun testFilterOnPreferredLanguageWithLimit() {
-        val listener = TestableMediaSelectExtractTracksListener(setOf("jpn"))
-        val streams = listOf(
-            dummySubtitleStream(0, "eng", SubtitleType.Dialogue).stream,
-            dummySubtitleStream(1, "jpn", SubtitleType.Dialogue).stream
-        )
-        val filtered = listener.callFilterOnPreferredLanguage(streams)
-        assertEquals(1, filtered.size)
-        assertEquals("jpn", filtered[0].tags.language)
-    }
 
     @Test
     @DisplayName("""
-        Hvis limitToLanguages er tom
-        Når filterOnPreferredLanguage kalles
+        Når subtitles finnes i flere språk
+        Hvis foretrukket språk er jpn
         Så:
-            Returneres original liste uten filtrering
-    """)
-    fun testFilterOnPreferredLanguageNoLimit() {
-        val listener = TestableMediaSelectExtractTracksListener()
-        val streams = listOf(
-            dummySubtitleStream(0, "eng", SubtitleType.Dialogue).stream,
-            dummySubtitleStream(1, "fra", SubtitleType.Dialogue).stream
+         Velges kun subtitles i jpn
+        """)
+    fun testPreferredLanguageSelection() {
+        val items = listOf(
+            SubtitleItem(MockData.dummySubtitleStream(0, "eng"), SubtitleType.Dialogue),
+            SubtitleItem(MockData.dummySubtitleStream(1, "jpn"), SubtitleType.Dialogue)
         )
-        val filtered = listener.callFilterOnPreferredLanguage(streams)
-        assertEquals(streams.size, filtered.size)
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+        val result = listener(preferredSubtitles = listOf("jpn"))
+            .onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        assertEquals(listOf(1), result.selectedSubtitleTracks)
+    }
+
+
+    @Test
+    @DisplayName("""
+        Når flere subtitles i samme språk finnes
+        Hvis format-prioritet er ass > srt
+        Så:
+         Velges subtitle med codec ass
+        """)
+    fun testFormatPrioritySelection() {
+        val items = listOf(
+            SubtitleItem(MockData.dummySubtitleStream(0, "eng").copy(codec_name = "srt"), SubtitleType.Dialogue),
+            SubtitleItem(MockData.dummySubtitleStream(1, "eng").copy(codec_name = "ass"), SubtitleType.Dialogue)
+        )
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+        val result = listener(
+            preferredSubtitles = listOf("eng"),
+            formatPriority = listOf("ass", "srt")
+        ).onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        assertEquals(listOf(1), result.selectedSubtitleTracks)
+    }
+
+
+    @Test
+    @DisplayName("""
+        Når flere subtitles i samme språk finnes
+        Hvis kun én subtitle per språk skal velges
+        Så:
+         Returneres kun ett spor
+        """)
+    fun testUniquePerLanguage() {
+        val items = listOf(
+            SubtitleItem(MockData.dummySubtitleStream(0, "eng").copy(codec_name = "srt"), SubtitleType.Dialogue),
+            SubtitleItem(MockData.dummySubtitleStream(1, "eng").copy(codec_name = "vtt"), SubtitleType.Dialogue)
+        )
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+        val result = listener().onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        assertEquals(1, result.selectedSubtitleTracks.size)
     }
 
 }
