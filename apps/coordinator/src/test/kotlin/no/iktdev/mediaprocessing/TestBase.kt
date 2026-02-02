@@ -1,14 +1,17 @@
 package no.iktdev.mediaprocessing
 
 import io.mockk.*
+import no.iktdev.eventi.events.EventTypeRegistry
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.coordinator.*
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.database.InMemoryEventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
 import org.junit.jupiter.api.BeforeEach
@@ -16,6 +19,9 @@ import java.io.File
 import java.util.*
 
 open class TestBase {
+    val eventStore = InMemoryEventStore()
+
+
     class DummyEvent: Event()
     class DummyTask: Task()
 
@@ -35,13 +41,13 @@ open class TestBase {
         every { coordinatorEnv.incomingContent } returns File("./tmp/input")
         every { coordinatorEnv.cachedContent } returns File("./tmp/cached")
         every { coordinatorEnv.streamitAddress } returns "http://streamit.lan"
+
+        EventRegistry.getEvents().let {
+            EventTypeRegistry.register(it)
+        }
+        eventStore.clear()
     }
 
-
-    fun mockkIO() {
-        mockkConstructor(File::class)
-        every { anyConstructed<File>().exists() } returns true
-    }
 
     fun defaultStartEvent(): StartProcessingEvent {
         val start = StartProcessingEvent(
