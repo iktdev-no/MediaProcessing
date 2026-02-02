@@ -19,9 +19,7 @@ class CollectEventsListener : EventListener() {
 
         // Must have a StartProcessingEvent
         if (projection.startedWith == null) return null
-
-        // Must be allowed to store (Auto or Manual + AllowCompletion)
-        if (!projection.isStorePermitted()) return null
+        
 
         // Must have all relevant tasks completed
         if (!projection.isWorkflowComplete()) return null
