@@ -42,4 +42,8 @@ class CoordinatorClient(
             .bodyValue(ProgressUpdate(referenceId, taskId, percent, message))
             .retrieve()
             .toBodilessEntity()
+            .doOnSuccess { log.info { "Progress sent" } }
+            .doOnError { e -> log.error(e) { "Failed to send progress" } }
+            .subscribe()
+
 }
