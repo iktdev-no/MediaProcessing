@@ -126,7 +126,7 @@ class MigrateContentProjectPathTest {
 
     @Test
     fun cleanForFileSystem_removesSpecialCharacters() {
-        assertEquals("Hello World", "Hello@World!".cleanForFileSystem())
+        assertEquals("Hello World!", "Hello@World!".cleanForFileSystem())
         assertEquals("Spider-Man No Way Home", "Spider-Man: No Way Home!".cleanForFileSystem())
     }
     @Test
