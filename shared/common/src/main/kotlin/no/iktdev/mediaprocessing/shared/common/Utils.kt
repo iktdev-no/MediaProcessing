@@ -261,7 +261,7 @@ fun String.cleanForFileSystem(): String {
     val ascii = transliterator.transliterate(this)
 
     // 2. Fjern alt som ikke er bokstav, tall, mellomrom, bindestrek, parentes, komma, punktum
-    val cleaned = ascii.replace(Regex("[^\\p{L}\\p{N}\\s\\-(),.]"), " ")
+    val cleaned = ascii.replace(Regex("[^\\p{L}\\p{N}\\s\\-(),.!]"), " ")
 
     // 3. Normaliser whitespace
     return cleaned.replace(Regex("\\s{2,}"), " ").trim()
