@@ -122,6 +122,7 @@ class CollectProjection(val events: List<Event>) {
         val result = metadataEvent.recommended ?: return null
         return MetadataProjection(
             title = result.metadata.title,
+            alternativeTitles = result.metadata.alternateTitles,
             summary = result.metadata.summary,
             mediaType = result.metadata.type,
             genres = result.metadata.genres,
@@ -179,6 +180,7 @@ class CollectProjection(val events: List<Event>) {
 
     data class MetadataProjection(
         val title: String,
+        val alternativeTitles: List<String> = emptyList(),
         val summary: List<MetadataSearchResultEvent.SearchResult.MetadataResult.Summary>,
         val mediaType: MediaType,
         val genres: List<String>,

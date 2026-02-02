@@ -23,6 +23,7 @@ class StoreProjection(val events: List<Event>) {
 
             return ContentExport.MetadataExport(
                 title = metadata.title,
+                alternativeTitles = metadata.alternativeTitles,
                 genres = metadata.genres,
                 cover = useCover,
                 summary = metadata.summary,
