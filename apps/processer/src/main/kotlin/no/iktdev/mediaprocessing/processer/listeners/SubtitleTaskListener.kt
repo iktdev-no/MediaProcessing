@@ -67,7 +67,10 @@ class SubtitleTaskListener(
         }
         result.run(arguments)
         if (result.result.resultCode != 0) {
-            return ProcesserExtractResultEvent(status = TaskStatus.Failed).producedFrom(task)
+            throw FfmpegFailedException(
+                logFile = result.logFile,
+                "FFmpeg worker returned non zero result code, was ${result.result.resultCode}"
+            )
         }
 
         return ProcesserExtractResultEvent(
@@ -89,7 +92,8 @@ class SubtitleTaskListener(
             TaskStatus.Cancelled -> "Canceled"
             else -> ""
         }
-        return ProcesserExtractResultEvent(null, status, error = message).producedFrom(task)
+        val logFile = if (exception is FfmpegFailedException) exception.logFile?.absolutePath else null
+        return ProcesserExtractResultEvent(null, status, error = message, logFile = logFile).producedFrom(task)
     }
 
     override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {

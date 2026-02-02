@@ -74,10 +74,10 @@ class VideoTaskListener(
         }
         result.run(arguments)
         if (result.result.resultCode != 0) {
-            return ProcesserEncodeResultEvent(
-                status = TaskStatus.Failed,
-                logFile = result.logFile.absolutePath
-            ).producedFrom(task)
+            throw FfmpegFailedException(
+                logFile = result.logFile,
+                "FFmpeg worker returned non zero result code, was ${result.result.resultCode}"
+            )
         }
 
         return ProcesserEncodeResultEvent(
@@ -99,7 +99,8 @@ class VideoTaskListener(
             TaskStatus.Cancelled -> "Canceled"
             else -> ""
         }
-        return ProcesserEncodeResultEvent(null, null, status, error = message).producedFrom(task)
+        val logFile = if (exception is FfmpegFailedException) exception.logFile?.absolutePath else null
+        return ProcesserEncodeResultEvent(null, logFile, status, error = message).producedFrom(task)
     }
 
     val listener = object : FFmpeg.Listener {

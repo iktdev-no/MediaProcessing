@@ -18,4 +18,10 @@ abstract class FfmpegTaskListener(taskType: TaskType): TaskListener(taskType) {
     }
 
     abstract fun buildFfmpeg(listener: Listener? = null, execPath: String, logDirectory: File): FFmpeg
+
+    class FfmpegFailedException(
+        val logFile: File? = null,
+        message: String
+    ) : RuntimeException(message)
+
 }
