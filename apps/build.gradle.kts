@@ -3,22 +3,16 @@ plugins {
     kotlin("jvm")
 }
 
-group = "no.iktdev.mediaprocessing"
+group = "no.iktdev.mediaprocessing.apps"
 version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
+    maven { url = uri("https://reposilite.iktdev.no/releases") }
+    maven { url = uri("https://reposilite.iktdev.no/snapshots") }
 }
 
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    implementation(kotlin("stdlib-jdk8"))
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
 kotlin {
     jvmToolchain(21)
 }

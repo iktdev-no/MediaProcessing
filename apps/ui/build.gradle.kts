@@ -14,40 +14,32 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
-    maven {
-        url = uri("https://reposilite.iktdev.no/releases")
-    }
-    maven {
-        url = uri("https://reposilite.iktdev.no/snapshots")
-    }
+    maven { url = uri("https://reposilite.iktdev.no/releases") }
+    maven { url = uri("https://reposilite.iktdev.no/snapshots") }
 }
 
 dependencies {
-    // Kotlin
-    implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    // Spring Boot (WebFlux gir deg SSE + non-blocking IO)
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.3.0"))
+    // Spring Boot (BOM styres globalt)
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework:spring-webflux")
 
-    // JSON (Jackson Kotlin)
+    // Riktig WebFlux for Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // Jackson (BOM-styrt)
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    // Logging
+    // Logging (flyttet til root, men beholdes hvis du ikke har lagt det inn der ennå)
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
-
-    // Dine custom libs
+    // Custom libs
     implementation(libs.exfl)
     implementation(project(":shared:common"))
     implementation(project(":transfer-model"))
 
     // Testing
-    testImplementation(platform("org.junit:junit-bom:5.9.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.register("generateTs") {
@@ -67,10 +59,10 @@ tasks.named("build") {
     finalizedBy("generateTs")
 }
 
-
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
     jvmToolchain(21)
 }
