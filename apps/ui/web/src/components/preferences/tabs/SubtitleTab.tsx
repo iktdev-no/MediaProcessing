@@ -10,6 +10,10 @@ export function SubtitleTab({
 }) {
     const lang = prefs.language;
 
+    if (!lang) {
+        return (<Typography variant="subtitle1">Missing valid Language preference</Typography>)
+    }
+
     const update = (patch: Partial<typeof lang>) =>
         setPrefs({ ...prefs, language: { ...lang, ...patch } });
 

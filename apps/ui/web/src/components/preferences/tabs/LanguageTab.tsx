@@ -21,6 +21,10 @@ export function LanguageTab({
 }) {
     const lang = prefs.language;
 
+    if (!lang) {
+        return (<Typography variant="subtitle1">Missing valid Language preference</Typography>)
+    }
+
     // Null-safe arrays
     const preferredAudio = lang.preferredAudio ?? [];
     const preferredSubtitles = lang.preferredSubtitles ?? [];

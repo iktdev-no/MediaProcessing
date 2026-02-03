@@ -24,6 +24,12 @@ export function VideoTab({
     prefs: PreferenceConfig;
     setPrefs: (p: PreferenceConfig) => void;
 }) {
+
+    if (!prefs.processer || !prefs.processer.videoPreference) {
+        return (<Typography variant="subtitle1">Missing valid Processer preference</Typography>)
+    }
+
+
     const video = prefs.processer.videoPreference?.codec;
     const enforceMkv = prefs.processer.videoPreference?.enforceMkv ?? false;
 

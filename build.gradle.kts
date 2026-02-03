@@ -1,9 +1,9 @@
 plugins {
     id("java")
-    kotlin("jvm") version "2.1.0"
-    kotlin("plugin.spring") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
-    id("org.springframework.boot") version "3.2.2"
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.spring") version "2.2.0"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
+    id("org.springframework.boot") version "3.4.1"
 }
 
 group = "no.iktdev.mediaprocessing"

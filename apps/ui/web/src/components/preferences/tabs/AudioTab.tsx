@@ -22,19 +22,24 @@ export function AudioTab({
     prefs: PreferenceConfig;
     setPrefs: (p: PreferenceConfig) => void;
 }) {
-    const audio = prefs.processer.audioPreference?.codec;
 
-    if (!audio) {
+    if (!prefs.processer || !prefs.processer.audioPreference) {
+        return (<Typography variant="subtitle1">Missing valid Processer preference</Typography>)
+    }
+
+    const audioCodec = prefs.processer.audioPreference?.codec;
+
+    if (!audioCodec) {
         return <Typography>No audio preferences configured.</Typography>;
     }
 
-    const update = (patch: Partial<typeof audio>) =>
+    const update = (patch: Partial<typeof audioCodec>) =>
         setPrefs({
             ...prefs,
             processer: {
                 ...prefs.processer,
                 audioPreference: {
-                    codec: { ...audio, ...patch }
+                    codec: { ...audioCodec, ...patch }
                 }
             }
         });
@@ -49,7 +54,7 @@ export function AudioTab({
                 <Select
                     labelId="audio-codec-label"
                     label="Codec"
-                    value={audio.type}
+                    value={audioCodec.type}
                     onChange={e => update({ type: e.target.value as AudioCodecType })}
                 >
                     {[
@@ -76,7 +81,7 @@ export function AudioTab({
                 fullWidth
                 type="number"
                 label="Bitrate (kbps)"
-                value={audio.bitrate ?? ""}
+                value={audioCodec.bitrate ?? ""}
                 onChange={e =>
                     update({ bitrate: e.target.value ? Number(e.target.value) : null })
                 }
@@ -87,7 +92,7 @@ export function AudioTab({
                 fullWidth
                 type="number"
                 label="Channels"
-                value={audio.channels ?? ""}
+                value={audioCodec.channels ?? ""}
                 onChange={e =>
                     update({ channels: e.target.value ? Number(e.target.value) : null })
                 }
@@ -98,20 +103,20 @@ export function AudioTab({
                 fullWidth
                 type="number"
                 label="Sample Rate (Hz)"
-                value={audio.sampleRate ?? ""}
+                value={audioCodec.sampleRate ?? ""}
                 onChange={e =>
                     update({ sampleRate: e.target.value ? Number(e.target.value) : null })
                 }
             />
 
             {/* AAC Profile */}
-            {audio.type === "AAC" && (
+            {audioCodec.type === "AAC" && (
                 <FormControl fullWidth>
                     <InputLabel id="aac-profile-label">AAC Profile</InputLabel>
                     <Select
                         labelId="aac-profile-label"
                         label="AAC Profile"
-                        value={audio.profile ?? ""}
+                        value={audioCodec.profile ?? ""}
                         onChange={e =>
                             update({ profile: e.target.value as AacProfile })
                         }
@@ -124,13 +129,13 @@ export function AudioTab({
             )}
 
             {/* Opus Application */}
-            {audio.type === "OPUS" && (
+            {audioCodec.type === "OPUS" && (
                 <FormControl fullWidth>
                     <InputLabel id="opus-app-label">Opus Application</InputLabel>
                     <Select
                         labelId="opus-app-label"
                         label="Opus Application"
-                        value={audio.application ?? ""}
+                        value={audioCodec.application ?? ""}
                         onChange={e =>
                             update({ application: e.target.value as OpusApplication })
                         }
@@ -147,7 +152,7 @@ export function AudioTab({
                 fullWidth
                 type="number"
                 label="Compression Level"
-                value={audio.compressionLevel ?? ""}
+                value={audioCodec.compressionLevel ?? ""}
                 onChange={e =>
                     update({
                         compressionLevel: e.target.value ? Number(e.target.value) : null

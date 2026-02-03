@@ -19,13 +19,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import javax.sql.DataSource
 
 @SpringBootTest(
-    classes = [DatabaseApplication::class,
+    classes = [
+        TestDatabaseApplication::class,
         DatasourceConfiguration::class],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
 @ExtendWith(SpringExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class TestBaseWithDatabase: TestBase() {
+abstract class TestBaseWithDatabase() {
     val log = KotlinLogging.logger {}
 
     var validToken: String? = null

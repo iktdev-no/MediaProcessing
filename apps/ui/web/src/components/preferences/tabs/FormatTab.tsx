@@ -10,6 +10,11 @@ export function FormatTab({
     prefs: PreferenceConfig;
     setPrefs: (p: PreferenceConfig) => void;
 }) {
+
+    if (!prefs || !prefs.language) {
+        return (<Typography variant="subtitle1">Missing valid Processer preference</Typography>)
+    }
+
     const lang = prefs.language;
 
     const move = (index: number, direction: "up" | "down") => {
