@@ -1,190 +1,123 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import com.google.gson.JsonSyntaxException
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.LanguagePreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.PreferenceConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.VideoPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioPreference
 import org.springframework.stereotype.Component
-import java.io.File
-import java.io.IOException
-
-// ------------------------------------------------------------
-// MODELLER
-// ------------------------------------------------------------
-
-data class PeferenceConfig(
-    val processer: ProcesserPreference,
-    val language: LanguagePreference
-)
-
-data class LanguagePreference(
-    val preferredAudio: List<String>,
-    val preferredSubtitles: List<String>,
-
-    val preferOriginal: Boolean = true,
-    val avoidDub: Boolean = true,
-
-    // NEW: Prioritet for hvilket subtitle-format som skal brukes som master
-    val subtitleFormatPriority: List<String> = listOf("ass", "srt", "vtt", "smi"),
-
-    // NEW: Hvordan subtitles skal velges
-    val subtitleSelectionMode: SubtitleSelectionMode = SubtitleSelectionMode.DialogueOnly
-) {
-    companion object {
-        fun default() = LanguagePreference(
-            preferredAudio = listOf("eng", "nor", "jpn"),
-            preferredSubtitles = listOf("eng", "nor"),
-            preferOriginal = true,
-            avoidDub = true,
-            subtitleFormatPriority = listOf("ass", "srt", "vtt", "smi"),
-            subtitleSelectionMode = SubtitleSelectionMode.DialogueOnly
-        )
-    }
-}
-
-enum class SubtitleSelectionMode {
-    DialogueOnly,          // Kun dialog
-    DialogueAndForced,     // Dialog + forced
-    All                    // Alle typer
-}
-
-
-data class ProcesserPreference(
-    val videoPreference: VideoPreference? = null,
-    val audioPreference: AudioPreference? = null
-) {
-    companion object {
-        fun default(): ProcesserPreference {
-            return ProcesserPreference(
-                videoPreference = VideoPreference(VideoCodec.Hevc(), false),
-                audioPreference = AudioPreference(AudioCodec.Aac())
-            )
-        }
-    }
-}
-
-data class VideoPreference(
-    val codec: VideoCodec,
-    val enforceMkv: Boolean = false
-)
-
-data class AudioPreference(
-    val codec: AudioCodec
-)
-
-// ------------------------------------------------------------
-// PREFERENCE COMPONENT
-// ------------------------------------------------------------
 
 @Component
-class Preference(private val coordinatorEnv: CoordinatorEnv) {
+class Preference(
+    private val coordinatorEnv: CoordinatorEnv
+) {
 
     private val gson = Gson()
     private val lock = Any()
 
-    /**
-     * Leser hele configen, men bevarer ukjente felter.
-     */
-    fun getFullConfig(): PeferenceConfig {
+    // ------------------------------------------------------------
+    // FULL CONFIG
+    // ------------------------------------------------------------
+
+    fun getFullConfig(): no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.PreferenceConfig {
         val file = coordinatorEnv.preference
 
         if (!file.exists()) {
-            val default = PeferenceConfig(
-                processer = ProcesserPreference.default(),
-                language = LanguagePreference.default()
-            )
-            writeJsonObject(JsonObject().apply {
-                add("processer", gson.toJsonTree(default.processer))
-                add("language", gson.toJsonTree(default.language))
-            }, file)
+            val default = defaultConfig()
+            writeConfig(default)
             return default
         }
 
-        val root = try {
-            JsonParser.parseString(file.readText()).asJsonObject
-        } catch (e: Exception) {
-            return PeferenceConfig(
-                processer = ProcesserPreference.default(),
-                language = LanguagePreference.default()
-            )
+        return try {
+            gson.fromJson(file.readText(), PreferenceConfig::class.java)
+                ?: defaultConfig().also { writeConfig(it) }
+        } catch (e: JsonSyntaxException) {
+            val fallback = defaultConfig()
+            writeConfig(fallback)
+            fallback
         }
-
-        val processer = try {
-            gson.fromJson(root.get("processer"), ProcesserPreference::class.java)
-                ?: ProcesserPreference.default()
-        } catch (_: Exception) {
-            ProcesserPreference.default()
-        }
-
-        val language = try {
-            gson.fromJson(root.get("language"), LanguagePreference::class.java)
-                ?: LanguagePreference.default()
-        } catch (_: Exception) {
-            LanguagePreference.default()
-        }
-
-        return PeferenceConfig(processer, language)
     }
 
-    fun getProcesserPreference(): ProcesserPreference =
-        getFullConfig().processer
+    fun saveFullConfig(cfg: PreferenceConfig) {
+        synchronized(lock) {
+            writeConfig(cfg)
+        }
+    }
+
+    // ------------------------------------------------------------
+    // LANGUAGE
+    // ------------------------------------------------------------
 
     fun getLanguagePreference(): LanguagePreference =
         getFullConfig().language
 
-    /**
-     * Oppdaterer kun processer-delen og bevarer resten av JSON.
-     */
-    fun saveProcesserPreference(pref: ProcesserPreference) {
-        val file = coordinatorEnv.preference
-        synchronized(lock) {
-            val root = readOrEmpty(file)
-            root.add("processer", gson.toJsonTree(pref))
-            writeJsonObject(root, file)
-        }
-    }
-
-    /**
-     * Oppdaterer kun language-delen og bevarer resten av JSON.
-     */
     fun saveLanguagePreference(pref: LanguagePreference) {
-        val file = coordinatorEnv.preference
         synchronized(lock) {
-            val root = readOrEmpty(file)
-            root.add("language", gson.toJsonTree(pref))
-            writeJsonObject(root, file)
+            val cfg = getFullConfig().copy(language = pref)
+            writeConfig(cfg)
         }
     }
 
-    /**
-     * Overskriver hele configen (brukes hvis FE sender alt).
-     */
-    fun saveFullConfig(cfg: PeferenceConfig) {
-        val file = coordinatorEnv.preference
+    // ------------------------------------------------------------
+    // PROCESSER
+    // ------------------------------------------------------------
+
+    fun getProcesserPreference(): ProcesserPreference =
+        getFullConfig().processer
+
+    fun saveProcesserPreference(pref: ProcesserPreference) {
         synchronized(lock) {
-            val root = JsonObject()
-            root.add("processer", gson.toJsonTree(cfg.processer))
-            root.add("language", gson.toJsonTree(cfg.language))
-            writeJsonObject(root, file)
+            val cfg = getFullConfig().copy(processer = pref)
+            writeConfig(cfg)
         }
     }
 
-    private fun readOrEmpty(file: File): JsonObject =
-        if (file.exists()) {
-            try {
-                JsonParser.parseString(file.readText()).asJsonObject
-            } catch (_: Exception) {
-                JsonObject()
-            }
-        } else JsonObject()
+    // ------------------------------------------------------------
+    // VIDEO
+    // ------------------------------------------------------------
 
-    private fun writeJsonObject(obj: JsonObject, file: File) {
-        try {
-            file.parentFile?.mkdirs()
-            file.writeText(gson.toJson(obj))
-        } catch (e: IOException) {
-            throw RuntimeException("Failed to write preference file", e)
+    fun getVideoPreference(): VideoPreference =
+        getFullConfig().processer.videoPreference
+            ?: ProcesserPreference.default().videoPreference!!
+
+    fun saveVideoPreference(pref: VideoPreference) {
+        synchronized(lock) {
+            val current = getFullConfig()
+            val updatedProcesser = current.processer.copy(videoPreference = pref)
+            writeConfig(current.copy(processer = updatedProcesser))
         }
     }
+
+    // ------------------------------------------------------------
+    // AUDIO
+    // ------------------------------------------------------------
+
+    fun getAudioPreference(): AudioPreference =
+        getFullConfig().processer.audioPreference
+            ?: ProcesserPreference.default().audioPreference!!
+
+    fun saveAudioPreference(pref: AudioPreference) {
+        synchronized(lock) {
+            val current = getFullConfig()
+            val updatedProcesser = current.processer.copy(audioPreference = pref)
+            writeConfig(current.copy(processer = updatedProcesser))
+        }
+    }
+
+    // ------------------------------------------------------------
+    // INTERNAL HELPERS
+    // ------------------------------------------------------------
+
+    private fun writeConfig(cfg: PreferenceConfig) {
+        val file = coordinatorEnv.preference
+        file.parentFile?.mkdirs()
+        file.writeText(gson.toJson(cfg))
+    }
+
+    private fun defaultConfig() = PreferenceConfig(
+        processer = ProcesserPreference.default(),
+        language = LanguagePreference.default()
+    )
 }

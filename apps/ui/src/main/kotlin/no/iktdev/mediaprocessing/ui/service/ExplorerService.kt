@@ -50,9 +50,12 @@ class ExplorerService(
                 uri = file.absolutePath,
                 created = file.lastModified(),
                 extension = file.extension,
-                actions = FileActions(mediaActions = getMediaActionsForFile(file), fileActions = listOf(
-                    FileAction(id = FileActionType.Delete, requiresConfirmation = true)
-                ))
+                actions = FileActions(
+                    mediaActions = getMediaActionsForFile(file), fileActions = listOf(
+                        FileAction(id = FileActionType.Delete, requiresConfirmation = true)
+                    )
+                ),
+                size = file.length()
             )
         }
     }

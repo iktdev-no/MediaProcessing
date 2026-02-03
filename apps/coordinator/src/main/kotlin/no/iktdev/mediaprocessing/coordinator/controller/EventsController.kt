@@ -4,7 +4,7 @@ import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
-import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
 import org.springframework.web.bind.annotation.*
 import java.util.*
 

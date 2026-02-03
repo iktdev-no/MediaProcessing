@@ -1,15 +1,15 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 
-import no.iktdev.mediaprocessing.coordinator.dto.translate.CoordinatorTaskTransferDto
-import no.iktdev.mediaprocessing.coordinator.dto.translate.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
+import no.iktdev.mediaprocessing.coordinator.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.dto.map
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,14 +26,14 @@ class TaskController(
 ) {
 
     @GetMapping("/active")
-    fun getActiveTasks(): List<CoordinatorTaskTransferDto> {
+    fun getActiveTasks(): List<CoordinatorTaskDto> {
         val tasks = taskService.getActiveTasks()
         val logEvents = eventService.getTaskEventResultsWithLogs(tasks.map { it.referenceId }.toSet())
         return tasks.map { it.toCoordinatorTransferDto(logEvents) }
     }
 
     @GetMapping
-    fun getPagedTasks(query: TaskQuery): Paginated<CoordinatorTaskTransferDto> {
+    fun getPagedTasks(query: TaskQuery): Paginated<CoordinatorTaskDto> {
         val paginatedTasks = taskService.getPagedTasks(query)
         val logEvents = eventService.getTaskEventResultsWithLogs(paginatedTasks.items.map { it.referenceId }.toSet())
 
@@ -43,7 +43,7 @@ class TaskController(
 
 
     @GetMapping("/{id}")
-    fun getTask(@PathVariable id: UUID): CoordinatorTaskTransferDto? {
+    fun getTask(@PathVariable id: UUID): CoordinatorTaskDto? {
         val tasks = taskService.getTaskById(id) ?: return null
         val logEvents = eventService.getTaskEventResultsWithLogs(setOf(tasks.referenceId))
         return tasks.toCoordinatorTransferDto(logEvents)

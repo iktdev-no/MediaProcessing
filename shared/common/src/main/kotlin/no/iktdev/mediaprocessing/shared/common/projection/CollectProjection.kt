@@ -204,8 +204,10 @@ class CollectProjection(val events: List<Event>) {
     enum class TaskStatus {
         NotInitiated,
         Pending,
+        InProgress,
         Completed,
-        Failed
+        Failed,
+        Cancelled
     }
 
     fun prettyPrint(): String = buildString {
@@ -250,8 +252,10 @@ class CollectProjection(val events: List<Event>) {
     private fun TaskStatus.colored(): String = when (this) {
         TaskStatus.NotInitiated -> "\u001B[90m$this\u001B[0m" // grå
         TaskStatus.Pending -> "\u001B[33m$this\u001B[0m" // gul
+        TaskStatus.InProgress -> "\u001B[33m$this\u001B[0m" // gul
         TaskStatus.Completed -> "\u001B[32m$this\u001B[0m" // grønn
         TaskStatus.Failed -> "\u001B[31m$this\u001B[0m" // rød
+        TaskStatus.Cancelled -> "\u001B[90m$this\u001B[0m" // grå
     }
 
 }

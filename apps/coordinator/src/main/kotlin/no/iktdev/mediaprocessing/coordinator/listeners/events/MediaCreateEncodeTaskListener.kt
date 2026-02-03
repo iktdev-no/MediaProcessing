@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.coordinator.Preference
+import no.iktdev.mediaprocessing.coordinator.toDsl
 import no.iktdev.mediaprocessing.ffmpeg.dsl.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
@@ -22,6 +23,8 @@ class MediaCreateEncodeTaskListener(
         history: List<Event>
     ): Event? {
         val preference = preference.getProcesserPreference()
+        val audioDsl = preference.audioPreference?.codec?.toDsl()
+        val videoDsl = preference.videoPreference?.codec?.toDsl()
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         if (startedEvent.data.operation.isNotEmpty()) {
@@ -31,8 +34,8 @@ class MediaCreateEncodeTaskListener(
         val selectedEvent = event as? MediaTracksEncodeSelectedEvent ?: return null
         val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
 
-        val videoPreference = preference.videoPreference?.codec ?: VideoCodec.Hevc()
-        val audioPreference = preference.audioPreference?.codec ?: AudioCodec.Aac(channels = 2)
+        val videoPreference = videoDsl ?: VideoCodec.Hevc()
+        val audioPreference =  audioDsl ?: AudioCodec.Aac(channels = 2)
 
         val audioTargets = mutableListOf<AudioTarget>(
             AudioTarget(

@@ -3,7 +3,6 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("io.spring.dependency-management")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
@@ -25,6 +24,7 @@ repositories {
 dependencies {
 
     /*Spring boot*/
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.3.0"))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -46,6 +46,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
+    implementation(project(":transfer-model"))
 
     implementation(project(mapOf("path" to ":shared:ffmpeg")))
     implementation(project(mapOf("path" to ":shared:common")))

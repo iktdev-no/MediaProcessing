@@ -4,16 +4,21 @@ import io.mockk.*
 import no.iktdev.eventi.events.EventTypeRegistry
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
-import no.iktdev.mediaprocessing.coordinator.*
-import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
+import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.database.InMemoryEventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.VideoPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType
 import org.junit.jupiter.api.BeforeEach
 import java.io.File
 import java.util.*
@@ -28,14 +33,16 @@ open class TestBase {
     val preference: Preference = mockk(relaxed = true)
     val coordinatorEnv = mockk<CoordinatorEnv>(relaxed = true)
 
+    val defaultVideoPreference = VideoPreference(VideoCodecConfig(VideoCodecType.HEVC))
+    val defaultAudioPreference = AudioPreference(AudioCodecConfig(AudioCodecType.AAC).copy(channels = 2))
 
     @BeforeEach
     open fun setup() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } just Runs
         every { preference.getProcesserPreference() } returns ProcesserPreference(
-            videoPreference = VideoPreference(codec = VideoCodec.Hevc()),
-            audioPreference = AudioPreference(codec = AudioCodec.Aac(channels = 2))
+            videoPreference = defaultVideoPreference,
+            audioPreference = defaultAudioPreference
         )
         every { coordinatorEnv.outgoingContent } returns File("./tmp/output")
         every { coordinatorEnv.incomingContent } returns File("./tmp/input")

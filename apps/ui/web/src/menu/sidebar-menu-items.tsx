@@ -3,6 +3,7 @@ import BallotIcon from '@mui/icons-material/Ballot';
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from '@mui/icons-material/Folder';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import SettingsIcon from '@mui/icons-material/Settings';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import { useNavigate } from "react-router-dom";
 
@@ -47,6 +48,12 @@ export function useSidebarMenu() {
                 label: "Health",
                 icon: <MonitorHeartIcon />,
                 onClick: () => navigate("/health")
+            },
+            {
+                id: "setting",
+                label: "Setting",
+                icon: <SettingsIcon />,
+                onClick: () => navigate("/setting")
             }
         ]
     }

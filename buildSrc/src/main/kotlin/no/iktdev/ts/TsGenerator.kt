@@ -69,13 +69,13 @@ object TsGenerator {
     }
 
     private fun dataClassToTs(cls: KClass<*>): String {
-        val typeParams = cls.typeParameters
+        val typeParams = cls.typeParameters.map { it.name } // generics på klassen
         val generic = if (typeParams.isNotEmpty()) {
-            "<" + typeParams.joinToString(", ") { it.name } + ">"
+            "<" + typeParams.joinToString(", ") + ">"
         } else ""
 
         val props = cls.memberProperties.joinToString("\n") { prop ->
-            val tsType = kotlinToTsType(prop.returnType.toString())
+            val tsType = kotlinToTsType(prop.returnType.toString(), typeParams)
             "  ${prop.name}: $tsType;"
         }
 
@@ -86,19 +86,14 @@ object TsGenerator {
         }
     }
 
-
-
     // ------------------------------------------------------------
     // Type mapping
     // ------------------------------------------------------------
 
-    private fun kotlinToTsType(kotlinType: String): String {
+    private fun kotlinToTsType(kotlinType: String, genericParams: List<String> = emptyList()): String {
         val isNullable = kotlinType.endsWith("?")
         val clean = kotlinType.removeSuffix("?")
 
-        // -----------------------------
-        // UUID → string
-        // -----------------------------
         // UUID → string
         if (clean == "java.util.UUID") {
             return if (isNullable) "string | null" else "string"
@@ -110,69 +105,66 @@ object TsGenerator {
         }
 
         // Duration → string
-        if (clean in listOf("kotlin.time.Duration", "java.time.Duration") ) {
+        if (clean in listOf("kotlin.time.Duration", "java.time.Duration")) {
             return if (isNullable) "string | null" else "string"
         }
 
-
-        // -----------------------------
         // Map<K, V> → Record<K, V>
-        // -----------------------------
         if (clean.startsWith("kotlin.collections.Map") ||
             clean.startsWith("kotlin.collections.MutableMap")) {
 
             val inner = clean.substringAfter("<").substringBeforeLast(">")
             val (key, value) = inner.split(",").map { it.trim() }
 
-            val tsKey = kotlinToTsType(key)
-            val tsValue = kotlinToTsType(value)
+            val tsKey = kotlinToTsType(key, genericParams)
+            val tsValue = kotlinToTsType(value, genericParams)
 
             val base = "Record<$tsKey, $tsValue>"
             return if (isNullable) "$base | null" else base
         }
 
-        // -----------------------------
-        // Set<T> → T[]
-        // -----------------------------
+        // Set<T> → T[] (generics-aware)
         if (clean.startsWith("kotlin.collections.Set") ||
             clean.startsWith("kotlin.collections.MutableSet")) {
 
             val inner = clean.substringAfter("<").substringBeforeLast(">")
-            val tsInner = kotlinToTsType(inner)
 
+            if (genericParams.contains(inner)) {
+                val base = "${inner}[]"
+                return if (isNullable) "$base | null" else base
+            }
+
+            val tsInner = kotlinToTsType(inner, genericParams)
             val base = "$tsInner[]"
             return if (isNullable) "$base | null" else base
         }
 
-        // -----------------------------
-        // List<T> → T[]
-        // -----------------------------
+        // List<T> → T[] (generics-aware)
         if (clean.startsWith("kotlin.collections.List") ||
             clean.startsWith("kotlin.collections.MutableList")) {
 
             val inner = clean.substringAfter("<").substringBeforeLast(">")
-            val tsInner = kotlinToTsType(inner)
 
+            if (genericParams.contains(inner)) {
+                val base = "${inner}[]"
+                return if (isNullable) "$base | null" else base
+            }
+
+            val tsInner = kotlinToTsType(inner, genericParams)
             val base = "$tsInner[]"
             return if (isNullable) "$base | null" else base
         }
 
-        // -----------------------------
         // Primitive mappings
-        // -----------------------------
         val base = when (clean) {
             "kotlin.String" -> "string"
             "kotlin.Int",
             "kotlin.Long",
             "kotlin.Float",
             "kotlin.Double" -> "number"
-
             "kotlin.Boolean" -> "boolean"
-
             "kotlin.Any" -> "any"
-
             else -> {
-                // Custom class → use simple name
                 if (clean.contains(".")) clean.substringAfterLast(".")
                 else "any"
             }
@@ -180,8 +172,6 @@ object TsGenerator {
 
         return if (isNullable) "$base | null" else base
     }
-
-
 
     // ------------------------------------------------------------
     // Class scanning
@@ -206,30 +196,19 @@ object TsGenerator {
             val file = File(url.toURI())
             println("TsGenerator: resolved file = ${file.absolutePath}, exists=${file.exists()}, isDir=${file.isDirectory}")
 
-
             if (file.exists() && file.isDirectory) {
                 file.walkTopDown().forEach { f ->
                     if (f.extension == "class") {
-                        println("TsGenerator: found class file: ${f.absolutePath}")
-
                         val className = f.toClassName(path)
-                        println("TsGenerator: → trying to load class: $className")
-
                         try {
                             val cls = Class.forName(className, false, classLoader).kotlin
-                            println("TsGenerator: ✓ loaded class: ${cls.qualifiedName}")
                             classes.add(cls)
-                        } catch (e: Throwable) {
-                            println("TsGenerator: ✗ FAILED to load $className (${e::class.simpleName}: ${e.message})")
-                        }
+                        } catch (_: Throwable) {}
                     }
                 }
             }
         }
 
-        println("TsGenerator: TOTAL LOADED CLASSES = ${classes.size}")
         return classes
     }
-
-
 }

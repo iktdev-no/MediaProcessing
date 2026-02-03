@@ -1,16 +1,16 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
-import no.iktdev.mediaprocessing.coordinator.dto.health.CoordinatorHealth
-import no.iktdev.mediaprocessing.coordinator.dto.health.CoordinatorHealthStatus
-import no.iktdev.mediaprocessing.coordinator.dto.health.SequenceHealth
-import no.iktdev.mediaprocessing.coordinator.dto.rate.EventRate
 import no.iktdev.mediaprocessing.coordinator.util.DiskInfo
 import no.iktdev.mediaprocessing.coordinator.util.getDiskInfoFor
-import no.iktdev.mediaprocessing.shared.common.dto.CurrentState
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CurrentState
 import no.iktdev.mediaprocessing.shared.common.rules.EventLifecycleRules
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorHealth
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorHealthStatus
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.EventRate
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceHealth
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.Instant

@@ -4,7 +4,6 @@ plugins {
     kotlin("plugin.spring") version "2.1.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
     id("org.springframework.boot") version "3.2.2"
-    id("io.spring.dependency-management") version "1.1.4"
 }
 
 group = "no.iktdev.mediaprocessing"
@@ -18,6 +17,9 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.3.0"))
+
 }
 
 tasks.test {

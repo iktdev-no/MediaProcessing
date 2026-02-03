@@ -4,11 +4,11 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
 import no.iktdev.mediaprocessing.MockData
 import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.coordinator.SubtitleSelectionMode
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.SubtitleSelectionMode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName

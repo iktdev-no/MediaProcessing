@@ -1,4 +1,5 @@
-import type { EventQuery, PagedUiEvent, UiEvent } from "../types/backendTypes";
+import type { EventQuery, PagedUiEvent } from "../types/backendTypes";
+import type { UiEvent } from "../types/types";
 import { apiGet, buildQuery } from "./client";
 
 export function getEvents(query: EventQuery) {

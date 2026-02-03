@@ -2,16 +2,11 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.*
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.coordinator.AudioPreference
-import no.iktdev.mediaprocessing.coordinator.ProcesserPreference
-import no.iktdev.mediaprocessing.coordinator.VideoPreference
 import no.iktdev.mediaprocessing.ffmpeg.data.*
-import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -27,8 +22,8 @@ class MediaCreateEncodeTaskListenerTest: TestBase() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } just Runs
         every { preference.getProcesserPreference() } returns ProcesserPreference(
-            videoPreference = VideoPreference(codec = VideoCodec.Hevc()),
-            audioPreference = AudioPreference(codec = AudioCodec.Aac(channels = 2))
+            videoPreference = defaultVideoPreference,
+            audioPreference = defaultAudioPreference
         )
     }
 

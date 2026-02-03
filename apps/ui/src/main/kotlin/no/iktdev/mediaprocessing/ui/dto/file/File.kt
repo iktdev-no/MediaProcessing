@@ -18,7 +18,8 @@ data class FileItem(
     override val uri: String,
     override val created: Long,
     val extension: String,
-    override val actions: FileActions
+    override val actions: FileActions,
+    val size: Long
 ) : IFile() {
     override val type = FileType.File
 }

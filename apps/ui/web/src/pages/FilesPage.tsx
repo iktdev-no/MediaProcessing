@@ -10,9 +10,10 @@ import {
 } from "@mui/material"
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react"
 import { useSearchParams } from "react-router-dom"
-import { apiGet } from "../api/client"
+import { apiDelete, apiGet } from "../api/client"
 import type { FileAction, IFile, MediaAction } from "../types/files"
 
+import { toast } from "react-toastify"
 import { startProcess } from "../api/media"
 import { BreadcrumbPath } from "../components/BreadcrumbPath"
 import { ConfirmationDialog } from "../components/ConfirmationDialog"
@@ -148,6 +149,25 @@ export default function FilesPage() {
         closeMenu()
     }
 
+    const onDelete = async (item: IFile | null) => {
+        if (!item) return
+        setLoading(true)
+
+        try {
+            await apiDelete("/files/delete", {
+                body: { uri: item.uri }
+            })
+            console.log("Deleted:", item)
+            toast.success(`Deleted ${item.uri}`)
+        } catch (err) {
+            toast.error(`Faield to delete ${item.uri}`)
+            console.error("Delete failed", err)
+        } finally {
+            setLoading(false)
+            setConfirmOpen(false)
+        }
+    }
+
     if (error) return <Typography color="error">{error}</Typography>
 
     return (
@@ -211,14 +231,11 @@ export default function FilesPage() {
             <ConfirmationDialog
                 open={confirmOpen}
                 title="Slette fil?"
-                message={`Vil du slette ${confirmTarget?.name}?`}
+                message={`Vil du slette ${confirmTarget?.name} ? `}
                 confirmLabel="Slett"
                 confirmColor="error"
                 onCancel={() => setConfirmOpen(false)}
-                onConfirm={() => {
-                    console.log("DELETE:", confirmTarget)
-                    setConfirmOpen(false)
-                }}
+                onConfirm={() => onDelete(confirmTarget)}
             />
             <LoadingToast open={loading} />
 

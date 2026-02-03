@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
-import no.iktdev.mediaprocessing.coordinator.dto.translate.ApiResponse
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.ApiResponse
 import no.iktdev.mediaprocessing.coordinator.services.SequenceAggregatorService
-import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceSummary
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

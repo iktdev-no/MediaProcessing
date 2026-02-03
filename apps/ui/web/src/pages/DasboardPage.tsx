@@ -85,8 +85,12 @@ export default function DashboardPage() {
 
     // Initial health load
     useEffect(() => {
-        getCoordinatorHealth().then(setHealth)
+        const fetchHealth = () => getCoordinatorHealth().then(setHealth)
+        fetchHealth()
+        const interval = setInterval(fetchHealth, 5000)
+        return () => clearInterval(interval)
     }, [])
+
 
     if (!health) return <div>Laster systemstatus…</div>
 

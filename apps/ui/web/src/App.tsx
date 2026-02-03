@@ -13,6 +13,7 @@ import EventsSequencePage from './pages/EventsSequencePage'
 import FilesPage from './pages/FilesPage'
 import HealthPage from './pages/HealthPage'
 import { SequencePage } from './pages/SequencePage'
+import SettingPage from './pages/SettingPage'
 import TasksPage from './pages/TasksPage'
 
 interface AppLayoutProps {
@@ -64,6 +65,7 @@ function App() {
         <AppLayout>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/setting" element={<SettingPage />} />
             <Route path='/sequences' element={<SequencePage />} />
             <Route path="/files" element={<FilesPage />} />
             <Route path="/health" element={<HealthPage />} />

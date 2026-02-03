@@ -3,12 +3,12 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.coordinator.SubtitleSelectionMode
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.SubtitleSelectionMode
 import org.springframework.stereotype.Component
 
 @Component

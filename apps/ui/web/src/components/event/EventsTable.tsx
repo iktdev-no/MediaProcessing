@@ -18,7 +18,8 @@ export function EventsTable({
         <TableContainer
             component={Paper}
             sx={{
-                maxHeight: 600,
+                flex: 1,
+                minHeight: 0,
                 overflow: "auto"
             }}
         >

@@ -2,15 +2,16 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
-import no.iktdev.mediaprocessing.shared.common.dto.CurrentState
-import no.iktdev.mediaprocessing.shared.common.dto.Mode
-import no.iktdev.mediaprocessing.shared.common.dto.SequenceSummary
+import no.iktdev.mediaprocessing.coordinator.translate
 import no.iktdev.mediaprocessing.shared.common.effective
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CurrentState
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.Mode
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceSummary
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -68,14 +69,14 @@ class SequenceAggregatorService(
             inputFileName = projection.useFile?.name,
             lastEventId = last.eventId.toString(),
             lastEventTime = last.persistedAt,
-            readStreamsTaskStatus = projection.readStreamsTaskStatus,
-            metadataTaskStatus = projection.metadataTaskStatus,
-            encodeTaskStatus = projection.encodeTaskStatus,
-            extractTaskStatus = projection.extreactTaskStatus,
-            convertTaskStatus = projection.convertTaskStatus,
-            coverDownloadTaskStatus = projection.coverDownloadTaskStatus,
-            contentMigratedTaskStatus = projection.contentMigratedTaskStatus,
-            contentStoredTaskStatus = projection.contentStoredTaskStatus,
+            readStreamsTaskStatus = projection.readStreamsTaskStatus.translate(),
+            metadataTaskStatus = projection.metadataTaskStatus.translate(),
+            encodeTaskStatus = projection.encodeTaskStatus.translate(),
+            extractTaskStatus = projection.extreactTaskStatus.translate(),
+            convertTaskStatus = projection.convertTaskStatus.translate(),
+            coverDownloadTaskStatus = projection.coverDownloadTaskStatus.translate(),
+            contentMigratedTaskStatus = projection.contentMigratedTaskStatus.translate(),
+            contentStoredTaskStatus = projection.contentStoredTaskStatus.translate(),
             mode = when (projection.startedWith?.mode) {
                 StartFlow.Auto -> Mode.Auto
                 StartFlow.Manual -> Mode.Manual

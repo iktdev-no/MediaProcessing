@@ -12,6 +12,7 @@ findProject(":apps:processer")?.name = "processer"
 findProject(":shared")?.name = "shared"
 findProject(":shared:ffmpeg")?.name = "ffmpeg"
 findProject(":shared:common")?.name = "common"
+findProject(":transfer-model")?.name = "transfer-model"
 
 include("apps")
 include("apps:ui")
@@ -23,6 +24,6 @@ include("shared")
 include("shared:common")
 
 include("shared:ffmpeg")
-include("shared:event-task-contract")
 include("shared:database")
 include("shared:database")
+include("transfer-model")

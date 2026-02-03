@@ -68,6 +68,55 @@ export async function apiPost<TRequest, TResponse>(path: string, body: TRequest)
     return text as unknown as TResponse
 }
 
+export async function apiDelete<TResponse>(
+    path: string,
+    opts?: {
+        body?: any
+        onError?: (status: number, body: any) => void
+    }
+): Promise<TResponse> {
+    const res = await fetch(`/api${path}`, {
+        method: "DELETE",
+        headers: {
+            "Accept": "*/*",
+            ...(opts?.body ? { "Content-Type": "application/json" } : {})
+        },
+        body: opts?.body ? JSON.stringify(opts.body) : undefined
+    })
+
+    if (!res.ok) {
+        const status = res.status
+        let body: any = null
+
+        try {
+            body = await res.json()
+        } catch {
+            body = await res.text().catch(() => null)
+        }
+
+        if (opts?.onError) {
+            opts.onError(status, body)
+            return Promise.reject({ status, body })
+        }
+
+        const error: any = new Error(`DELETE ${path} failed with ${status}`)
+        error.status = status
+        error.body = body
+        throw error
+    }
+
+    const contentType = res.headers.get("content-type") ?? ""
+
+    if (contentType.includes("application/json")) {
+        return res.json()
+    }
+
+    const text = await res.text()
+    return text as unknown as TResponse
+}
+
+
+
 export function apiSse(
     onEvent: (eventName: string, data: any) => void,
     onError?: (err: any) => void

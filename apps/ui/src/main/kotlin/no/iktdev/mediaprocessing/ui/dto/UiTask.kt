@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ui.dto
 
-import java.time.LocalDateTime
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
+import java.time.Instant
 import java.util.*
 
 data class UiTask(
@@ -13,8 +14,8 @@ data class UiTask(
     val claimed: Boolean,
     val claimedBy: String?,
     val consumed: Boolean,
-    val lastCheckIn: LocalDateTime?,
-    val persistedAt: LocalDateTime,
+    val lastCheckIn: Instant?,
+    val persistedAt: Instant,
     val abandoned: Boolean,
 
     // Sanntidsfelter (kun fra SSE)
@@ -22,4 +23,21 @@ data class UiTask(
     val timeLeft: Double? = null,
     val speed: Double? = null,
     val elapsed: Double? = null,
-)
+) {
+    companion object {
+        fun from(c: CoordinatorTaskDto) = UiTask(
+            id = c.id,
+            referenceId = c.referenceId,
+            status = c.status,
+            taskId = c.taskId,
+            task = c.task,
+            data = c.data,
+            claimed = c.claimed,
+            claimedBy = c.claimedBy,
+            consumed = c.consumed,
+            lastCheckIn = c.lastCheckIn,
+            persistedAt = c.persistedAt,
+            abandoned = c.abandoned,
+        )
+    }
+}

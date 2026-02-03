@@ -4,7 +4,6 @@ plugins {
     kotlin("plugin.spring")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.springframework.boot")
-    id("io.spring.dependency-management")
 }
 
 group = "no.iktdev.mediaprocessing"
@@ -26,6 +25,7 @@ repositories {
 val exposedVersion = "0.61.0"
 
 dependencies {
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:3.3.0"))
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

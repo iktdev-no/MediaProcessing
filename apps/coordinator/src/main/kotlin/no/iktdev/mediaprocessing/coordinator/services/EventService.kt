@@ -3,14 +3,14 @@ package no.iktdev.mediaprocessing.coordinator.services
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
+import no.iktdev.mediaprocessing.coordinator.toDto
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
-import no.iktdev.mediaprocessing.shared.common.dto.SequenceEvent
-import no.iktdev.mediaprocessing.shared.common.dto.toDto
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.*
