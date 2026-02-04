@@ -136,7 +136,6 @@ data class SubtitleStream(
     override val duration_ts: Long?,
     override val disposition: Disposition? = null,
     override val tags: Tags,
-    val subtitle_tags: SubtitleTags
 ) : Stream(
     index,
     codec_name,
@@ -180,12 +179,6 @@ data class Tags(
     val _STATISTICS_WRITING_APP: String?,
     val _STATISTICS_WRITING_DATE_UTC: String?,
     val _STATISTICS_TAGS: String?,
-    val language: String?,
-    val filename: String?,
-    val mimetype: String?
-)
-
-data class SubtitleTags(
     val language: String?,
     val filename: String?,
     val mimetype: String?
