@@ -4,6 +4,7 @@ import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.data.Disposition
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -574,6 +575,61 @@ class MediaPlanTest {
     }
 
 
+    @Test
+    @DisplayName("""
+    Når codec ber om høyere bitrate, channels og samplerate enn kilden
+    Hvis source har lavere verdier
+    Så:
+        Skal MediaPlan clamp'e alle verdier til source
+""")
+    fun testNoUpscalingBitrateChannelsSampleRate() {
+
+        // Source: stereo, 48000 Hz, 128k bitrate
+        val source = mockAudioStream(
+            index = 0,
+            codec = "aac",
+            channels = 2,
+            profile = "LC",
+            disposition = mockDisposition(),
+            tags = mockTags()
+        ).copy(
+            sample_rate = "48000",
+            bit_rate = 128_000L
+        )
+
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(
+                    listIndex = 0,
+                    ffmpegIndex = 0,
+                    codec = AudioCodec.Aac(
+                        bitrate = 320,   // request 320k
+                        channels = 8,    // request 7.1
+                        sampleRate = 96000
+                    )
+                )
+            )
+        )
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(mockVideoStream(disposition = mockDisposition(), tags = mockTags())),
+            audioStreams = listOf(source)
+        )
+
+        // Rekkefølgen FFmpeg genererer er:
+        // -c:a:0 aac
+        // -b:a:0 128k
+        // -ar:0 48000
+        // -ac:0 2
+
+        assertThat(args).containsSequence("-c:a:0", "aac")
+        assertThat(args).containsSequence("-b:a:0", "128k")     // bitrate clamped
+        assertThat(args).containsSequence("-ar:0", "48000")     // samplerate clamped
+        assertThat(args).containsSequence("-ac:0", "2")         // channels clamped
+    }
+
+
 
 
 
@@ -651,7 +707,8 @@ class MediaPlanTest {
         sample_rate = "48000",
         channels = channels,
         channel_layout = "stereo",
-        bits_per_sample = 0
+        bits_per_sample = 0,
+        bit_rate = 48000
     )
 
     fun mockDisposition(

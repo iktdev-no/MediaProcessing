@@ -182,10 +182,17 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
             listOf("-c:a", codec)
         }
 
-        // bitrate
-        bitrate?.let {
-            args += listOf("-b:a", "${it}k")
+        // bitrate (clamped to source)
+        bitrate?.let { requestedKbps ->
+            val requestedBits = requestedKbps.toLong() * 1000L
+            val sourceBits = stream.bit_rate ?: requestedBits
+            val finalBits = minOf(requestedBits, sourceBits)
+            val finalKbps = (finalBits / 1000L).toInt()
+
+            args += listOf("-b:a", "${finalKbps}k")
         }
+
+
 
         // sample rate
         sampleRate?.let {

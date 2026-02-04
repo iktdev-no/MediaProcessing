@@ -152,7 +152,8 @@ object MockData {
             sample_rate = "48000",
             channels = channels,
             channel_layout = "stereo",
-            bits_per_sample = 16
+            bits_per_sample = 16,
+            bit_rate = 48000
         )
     }
 

@@ -93,6 +93,7 @@ data class AudioStream(
     override val start_time: String,
     override val duration: String?,
     override val duration_ts: Long?,
+    val bit_rate: Long?,
     override val disposition: Disposition,
     override val tags: Tags,
     val profile: String,
