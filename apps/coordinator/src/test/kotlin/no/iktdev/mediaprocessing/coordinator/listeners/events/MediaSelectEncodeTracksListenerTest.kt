@@ -291,6 +291,49 @@ class MediaTracksEncodeSelectorTest {
         assertNull(swe.extendedListIndex)
     }
 
+    @Test
+    @DisplayName("""
+        Når engelsk er dub og japansk er original
+        Hvis avoidDub = true og preferOriginal = true
+        Så:
+            Skal japansk velges og engelsk ignoreres
+    """)
+    fun testEngDubJpnOriginal() {
+        val audio = listOf(
+            // Japansk original stereo
+            dummyAudioStream(
+                index = 0,
+                channels = 2,
+                disposition = dummyDisposition { original = true },
+                tags = dummyTags(language = "jpn")
+            ),
+            // Engelsk dub stereo
+            dummyAudioStream(
+                index = 1,
+                channels = 2,
+                disposition = dummyDisposition { dub = true },
+                tags = dummyTags(language = "eng")
+            )
+        )
+
+        val event = MediaStreamParsedEvent(
+            ParsedMediaStreams(
+                videoStream = listOf(dummyVideoStream(0)),
+                audioStream = audio,
+                subtitleStream = emptyList()
+            )
+        ).newReferenceId()
+
+        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+
+        // Kun japansk skal være med
+        assertEquals(1, result.audioTracks.size)
+
+        val jpn = result.audioTracks[0]
+        assertEquals("jpn", jpn.language)
+        assertEquals(0, jpn.defaultListIndex)
+        assertNull(jpn.extendedListIndex)
+    }
 
 
     // ------------------------------------------------------------

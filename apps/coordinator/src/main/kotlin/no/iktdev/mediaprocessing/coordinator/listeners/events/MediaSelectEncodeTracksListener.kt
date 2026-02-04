@@ -61,7 +61,11 @@ class MediaSelectEncodeTracksListener(
                 preferOriginal = pref.preferOriginal,
                 avoidDub = pref.avoidDub,
                 mode = AudioSelectMode.DEFAULT
-            ) ?: langStreams.minByOrNull { it.channels }!!
+            )
+
+            // Hvis avoidDub = true og default == null → ignorer språket
+            if (default == null) continue
+
 
             val defaultListIndex = audioStreams.indexOf(default)
             val defaultFfmpegIndex = default.index
