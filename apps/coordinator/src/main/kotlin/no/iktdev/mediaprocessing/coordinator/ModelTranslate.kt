@@ -72,26 +72,62 @@ fun CollectProjection.TaskStatus.translate(): TaskStatus {
 }
 
 fun AudioCodecConfig.toDsl(): AudioCodec = when (type) {
+
     AudioCodecType.AAC -> AudioCodec.Aac(
         bitrate = bitrate,
         profile = (profile ?: AacProfile.LC).translate(),
         channels = channels,
         sampleRate = sampleRate
     )
+
+    AudioCodecType.MP3 -> AudioCodec.Mp3(
+        bitrate = bitrate,
+        channels = channels,
+        sampleRate = sampleRate
+    )
+
     AudioCodecType.OPUS -> AudioCodec.Opus(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate,
         application = (application ?: OpusApplication.Audio).translate()
     )
+
+    AudioCodecType.VORBIS -> AudioCodec.Vorbis(
+        bitrate = bitrate,
+        channels = channels,
+        sampleRate = sampleRate
+    )
+
     AudioCodecType.FLAC -> AudioCodec.Flac(
         compressionLevel = compressionLevel,
         channels = channels,
         sampleRate = sampleRate
     )
+
+    AudioCodecType.AC3 -> AudioCodec.Ac3(
+        bitrate = bitrate,
+        channels = channels,
+        sampleRate = sampleRate
+    )
+
+    AudioCodecType.EAC3 -> AudioCodec.Eac3(
+        bitrate = bitrate,
+        channels = channels,
+        sampleRate = sampleRate
+    )
+
+    AudioCodecType.DTS -> AudioCodec.Dts(
+        bitrate = bitrate,
+        channels = channels,
+        sampleRate = sampleRate
+    )
+
+    AudioCodecType.PCM -> AudioCodec.Pcm()
+
     AudioCodecType.COPY -> AudioCodec.Copy
-    else -> TODO("Implement remaining codecs")
 }
+
 
 fun AacProfile.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile {
     return no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile.valueOf(name)
