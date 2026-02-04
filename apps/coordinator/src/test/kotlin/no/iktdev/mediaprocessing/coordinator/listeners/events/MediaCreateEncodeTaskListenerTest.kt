@@ -85,7 +85,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
 
         assertEquals("/tmp/movie.mkv", data.inputFile)
         assertEquals("movie.mp4", data.outputFileName)
-        assertTrue(data.arguments.containsMapAudio(1))
+        assertTrue(data.arguments.containsMapAudio(0))
 
         assertTrue(result is ProcesserEncodeTaskCreatedEvent)
     }
@@ -138,8 +138,8 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
 
         val args = slot.captured.data.arguments
 
+        assertTrue(args.containsMapAudio(0))
         assertTrue(args.containsMapAudio(1))
-        assertTrue(args.containsMapAudio(2))
     }
 
     // ------------------------------------------------------------
@@ -199,10 +199,11 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
 
         val args = slot.captured.data.arguments
 
+        assertTrue(args.containsMapAudio(0))
         assertTrue(args.containsMapAudio(1))
         assertTrue(args.containsMapAudio(2))
         assertTrue(args.containsMapAudio(3))
-        assertTrue(args.containsMapAudio(4))
+
     }
 
     // ------------------------------------------------------------

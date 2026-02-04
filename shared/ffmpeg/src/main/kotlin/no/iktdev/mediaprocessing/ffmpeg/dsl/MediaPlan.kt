@@ -20,8 +20,8 @@ data class MediaPlan(
         val vStream = videoStreams[videoTrack.listIndex]
         val vDecision = videoTrack.codec.determineTranscodeDecision(vStream)
 
-        // FFmpeg mapping bruker ffmpegIndex
-        args += listOf("-map", "0:v:${videoTrack.ffmpegIndex}")
+        // FFmpeg mapping bruker listIndex (ffmpeg sin audio-index)
+        args += listOf("-map", "0:v:${videoTrack.listIndex}")
 
         args += when (vDecision) {
             TranscodeDecision.Copy -> listOf("-c:v", "copy")
@@ -34,7 +34,7 @@ data class MediaPlan(
         // -----------------------------
         // Fjern duplikate spor (samme listIndex, ffmpegIndex og codec-type)
         val uniqueAudioTargets = audioTracks
-            .distinctBy { Triple(it.listIndex, it.ffmpegIndex, it.codec::class) }
+            .distinctBy { Pair(it.listIndex, it.codec::class) }
 
         uniqueAudioTargets.forEachIndexed { outIdx, target ->
 
@@ -42,8 +42,8 @@ data class MediaPlan(
             val aDecision = target.codec.determineTranscodeDecision(aStream)
 
 
-            // FFmpeg mapping bruker ffmpegIndex
-            args += listOf("-map", "0:a:${target.ffmpegIndex}")
+            // FFmpeg mapping bruker listIndex (0:a:X)
+            args += listOf("-map", "0:a:${target.listIndex}")
 
             when (aDecision) {
                 TranscodeDecision.Copy ->
@@ -58,9 +58,9 @@ data class MediaPlan(
                     // injiser output-indeks i alle audio-flagg
                     for (i in built.indices) {
                         if (built[i] == "-c:a") built[i] = "-c:a:$outIdx"
+                        if (built[i] == "-ar") built[i] = "-ar:a:$outIdx"
+                        if (built[i] == "-ac") built[i] = "-ac:a:$outIdx"
                         if (built[i] == "-b:a") built[i] = "-b:a:$outIdx"
-                        if (built[i] == "-ar") built[i] = "-ar:$outIdx"
-                        if (built[i] == "-ac") built[i] = "-ac:$outIdx"
                     }
 
                     args += built

@@ -33,7 +33,12 @@ class MediaPlanTest {
             args
         )
     }
-
+    @DisplayName(
+        """
+        Når video skal reenkodes til HEVC med CRF
+        Hvis input er H.264 og audio er MP3
+        Så forventer vi at ffmpeg-argumentene inneholder korrekt mapping og bitrate
+    """)
     @Test
     fun `video reencode to hevc with crf`() {
         val plan = MediaPlan(
@@ -45,7 +50,13 @@ class MediaPlanTest {
 
         val args = plan.toFfmpegArgs(
             videoStreams = listOf(mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())),
-            audioStreams = listOf(mockAudioStream(codec = "mp3", disposition = mockDisposition(), tags = mockTags()))
+            audioStreams = listOf(mockAudioStream(
+                codec = "mp3",
+                bitRate = 192_000,
+                disposition = mockDisposition(),
+                tags = mockTags()
+            )
+            )
         )
 
         assertEquals(
@@ -57,6 +68,12 @@ class MediaPlanTest {
         )
     }
 
+    @DisplayName(
+        """
+        Når to audio-spor skal transkodes med ulike codecs
+        Hvis første spor skal til AAC 128k og andre til Opus 96k
+        Så skal ffmpeg-argumentene reflektere korrekt mapping og bitrate
+        """)
     @Test
     fun `two audio tracks with different codecs`() {
         val plan = MediaPlan(
@@ -68,10 +85,24 @@ class MediaPlanTest {
         )
 
         val args = plan.toFfmpegArgs(
-            videoStreams = listOf(mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())),
+            videoStreams = listOf(
+                mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())
+            ),
             audioStreams = listOf(
-                mockAudioStream(codec = "aac", channels = 6, disposition = mockDisposition(), tags = mockTags()),
-                mockAudioStream(index = 1, codec = "ac3", disposition = mockDisposition(), tags = mockTags())
+                mockAudioStream(
+                    codec = "aac",
+                    channels = 6,
+                    bitRate = 128_000,
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ),
+                mockAudioStream(
+                    index = 1,
+                    codec = "ac3",
+                    bitRate = 192_000,
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
             )
         )
 
@@ -85,6 +116,13 @@ class MediaPlanTest {
         )
     }
 
+
+    @DisplayName(
+        """
+    Når video skal kopieres og audio skal reenkodes til AAC LC 128k
+    Hvis input-audio er AAC HE med 6 kanaler
+    Så skal ffmpeg-argumentene bruke korrekt mapping og 128k bitrate
+    """)
     @Test
     fun `Video copy, Audio AAC reencode`() {
         val plan = MediaPlan(
@@ -95,9 +133,18 @@ class MediaPlanTest {
         )
 
         val args = plan.toFfmpegArgs(
-            videoStreams = listOf(mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())),
+            videoStreams = listOf(
+                mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())
+            ),
             audioStreams = listOf(
-                mockAudioStream(codec = "aac", channels = 6, profile = AacProfile.HE.ffmpegName, disposition = mockDisposition(), tags = mockTags()),
+                mockAudioStream(
+                    codec = "aac",
+                    channels = 6,
+                    profile = AacProfile.HE.ffmpegName,
+                    bitRate = 128_000, // ← nødvendig for å unngå clamping
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
             )
         )
 
@@ -110,19 +157,52 @@ class MediaPlanTest {
         )
     }
 
+
+    @DisplayName(
+        """
+    Når video skal kopieres og audio skal reenkodes til AAC LC 128k
+    Hvis input-sporet er AAC HE med 6 kanaler og kjent bitrate
+    Så skal ffmpeg-argumentene bruke korrekt mapping og 128k bitrate
+    """
+    )
     @Test
-    @DisplayName("Video copy + Audio AAC reencode (HE→LC, bitrate 128k)")
     fun videoCopyAudioAacReencode() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.H264()),
+            videoTrack = VideoTarget(
+                listIndex = 0,
+                ffmpegIndex = 0,
+                codec = VideoCodec.H264()
+            ),
             audioTracks = mutableListOf(
-                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128, profile = AacProfile.LC)),
+                AudioTarget(
+                    listIndex = 0,
+                    ffmpegIndex = 0,
+                    codec = AudioCodec.Aac(
+                        bitrate = 128,
+                        profile = AacProfile.LC
+                    )
+                )
             )
         )
 
         val args = plan.toFfmpegArgs(
-            videoStreams = listOf(mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())),
-            audioStreams = listOf(mockAudioStream(codec = "aac", channels = 6, profile = AacProfile.HE.ffmpegName, disposition = mockDisposition(), tags = mockTags()))
+            videoStreams = listOf(
+                mockVideoStream(
+                    codec = "h264",
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
+            audioStreams = listOf(
+                mockAudioStream(
+                    codec = "aac",
+                    channels = 6,
+                    profile = AacProfile.HE.ffmpegName,
+                    bitRate = 128_000,   // ← nødvendig for å unngå clamping til 48k
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            )
         )
 
         assertEquals(
@@ -133,6 +213,7 @@ class MediaPlanTest {
             args
         )
     }
+
 
     @Test
     @DisplayName("Video reencode to HEVC with CRF=18 and preset=slow, Audio copy")
@@ -156,22 +237,59 @@ class MediaPlanTest {
         )
     }
 
+    @DisplayName(
+        """
+    Når to audio-spor skal reenkodes med ulike codecs
+    Hvis første spor skal til AAC 128k og andre til Opus 96k
+    Så skal ffmpeg-argumentene bruke korrekt mapping og bitrates
+    """
+    )
     @Test
-    @DisplayName("Two audio tracks: AAC reencode 128k + Opus reencode 96k")
     fun twoAudioTracksDifferentCodecs() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
+            videoTrack = VideoTarget(
+                listIndex = 0,
+                ffmpegIndex = 0,
+                codec = VideoCodec.Copy
+            ),
             audioTracks = mutableListOf(
-                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128)),
-                AudioTarget(listIndex = 1, ffmpegIndex = 1, codec = AudioCodec.Opus(bitrate = 96))
+                AudioTarget(
+                    listIndex = 0,
+                    ffmpegIndex = 0,
+                    codec = AudioCodec.Aac(bitrate = 128)
+                ),
+                AudioTarget(
+                    listIndex = 1,
+                    ffmpegIndex = 1,
+                    codec = AudioCodec.Opus(bitrate = 96)
+                )
             )
         )
 
         val args = plan.toFfmpegArgs(
-            videoStreams = listOf(mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())),
+            videoStreams = listOf(
+                mockVideoStream(
+                    codec = "h264",
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
             audioStreams = listOf(
-                mockAudioStream(codec = "aac", channels = 2, profile = AacProfile.LC.ffmpegName, disposition = mockDisposition(), tags = mockTags()),
-                mockAudioStream(codec = "vorbis", channels = 2, profile = "", disposition = mockDisposition(), tags = mockTags())
+                mockAudioStream(
+                    codec = "aac",
+                    channels = 2,
+                    profile = AacProfile.LC.ffmpegName,
+                    bitRate = 128_000,   // ← nødvendig for å unngå clamping
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ),
+                mockAudioStream(
+                    codec = "vorbis",
+                    channels = 2,
+                    bitRate = 192_000,   // ← nødvendig for å unngå clamping
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
             )
         )
 
@@ -185,27 +303,63 @@ class MediaPlanTest {
         )
     }
 
+
+    @DisplayName(
+        """
+    Når PCM 6-kanals input skal downmixes til AAC stereo 192k
+    Hvis input mangler bitrate må vi mocke en realistisk bit_rate
+    Så skal ffmpeg-argumentene inneholde korrekt mapping, bitrate og -ac:0 2
+    """
+    )
     @Test
-    @DisplayName("PCM input downmix to AAC stereo 192k")
     fun pcmInputDownmixToAacStereo() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
-            audioTracks = mutableListOf(AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 192, channels = 2)))
+            videoTrack = VideoTarget(
+                listIndex = 0,
+                ffmpegIndex = 0,
+                codec = VideoCodec.Copy
+            ),
+            audioTracks = mutableListOf(
+                AudioTarget(
+                    listIndex = 0,
+                    ffmpegIndex = 0,
+                    codec = AudioCodec.Aac(
+                        bitrate = 192,
+                        channels = 2
+                    )
+                )
+            )
         )
 
         val args = plan.toFfmpegArgs(
-            videoStreams = listOf(mockVideoStream(codec = "rawvideo", disposition = mockDisposition(), tags = mockTags())),
-            audioStreams = listOf(mockAudioStream(codec = "pcm_s16le", channels = 6, profile = "", disposition = mockDisposition(), tags = mockTags()))
+            videoStreams = listOf(
+                mockVideoStream(
+                    codec = "rawvideo",
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
+            audioStreams = listOf(
+                mockAudioStream(
+                    codec = "pcm_s16le",
+                    channels = 6,
+                    bitRate = 192_000,   // ← nødvendig for å unngå clamping
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            )
         )
 
         assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k",
+                "-ac:a:0", "2"
             ),
             args
         )
     }
+
 
     @Test
     @DisplayName("FLAC input remux to FLAC (no reencode)")
@@ -361,7 +515,7 @@ class MediaPlanTest {
         )
 
         assertEquals(
-            listOf("-map", "0:v:7", "-c:v", "copy"),
+            listOf("-map", "0:v:1", "-c:v", "copy"),
             args
         )
     }
@@ -406,7 +560,7 @@ class MediaPlanTest {
         assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:5", "-c:a:0", "copy"
+                "-map", "0:a:1", "-c:a:0", "copy"
             ),
             args
         )
@@ -512,7 +666,8 @@ class MediaPlanTest {
             audioStreams = listOf(
                 mockAudioStream(
                     disposition = mockDisposition(),
-                    tags = mockTags()
+                    tags = mockTags(),
+                    bitRate = 192_000
                 )
             )
         )
@@ -528,12 +683,14 @@ class MediaPlanTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
     Når flere audioTargets finnes
     Hvis toFfmpegArgs kalles
     Så:
         Skal output-indekser følge rekkefølgen i audioTracks-listen
-""")
+    """
+    )
     fun testAudioOutputIndexOrder() {
         val plan = MediaPlan(
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
@@ -553,11 +710,13 @@ class MediaPlanTest {
             audioStreams = listOf(
                 mockAudioStream(
                     index = 2,
+                    bitRate = 192_000, // ← nødvendig for å unngå clamping
                     disposition = mockDisposition(),
                     tags = mockTags()
                 ),
                 mockAudioStream(
                     index = 5,
+                    bitRate = 192_000, // ← nødvendig for å unngå clamping
                     disposition = mockDisposition(),
                     tags = mockTags()
                 )
@@ -567,8 +726,8 @@ class MediaPlanTest {
         assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:5", "-c:a:0", "aac", "-b:a:0", "128k",
-                "-map", "0:a:2", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
+                "-map", "0:a:1", "-c:a:0", "aac", "-b:a:0", "128k",
+                "-map", "0:a:0", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
             ),
             args
         )
@@ -624,9 +783,9 @@ class MediaPlanTest {
         // -ac:0 2
 
         assertThat(args).containsSequence("-c:a:0", "aac")
-        assertThat(args).containsSequence("-b:a:0", "128k")     // bitrate clamped
-        assertThat(args).containsSequence("-ar:0", "48000")     // samplerate clamped
-        assertThat(args).containsSequence("-ac:0", "2")         // channels clamped
+        assertThat(args).containsSequence("-b:a:0", "128k")
+        assertThat(args).containsSequence("-ar:a:0", "48000")
+        assertThat(args).containsSequence("-ac:a:0", "2")
     }
 
 
@@ -685,6 +844,7 @@ class MediaPlanTest {
         channels: Int = 2,
         profile: String = "LC",
         disposition: Disposition,
+        bitRate: Long = 48000,
         tags: Tags
     ) = AudioStream(
         index = index,
@@ -708,7 +868,7 @@ class MediaPlanTest {
         channels = channels,
         channel_layout = "stereo",
         bits_per_sample = 0,
-        bit_rate = 48000
+        bit_rate = bitRate
     )
 
     fun mockDisposition(
