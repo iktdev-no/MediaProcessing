@@ -7,7 +7,6 @@ import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
-import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleTags
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
@@ -75,11 +74,6 @@ class MediaCreateExtractTaskListenerTest {
                 _STATISTICS_WRITING_APP = null,
                 _STATISTICS_WRITING_DATE_UTC = null,
                 _STATISTICS_TAGS = null,
-                language = language,
-                filename = null,
-                mimetype = null
-            ),
-            subtitle_tags = SubtitleTags(
                 language = language,
                 filename = null,
                 mimetype = null

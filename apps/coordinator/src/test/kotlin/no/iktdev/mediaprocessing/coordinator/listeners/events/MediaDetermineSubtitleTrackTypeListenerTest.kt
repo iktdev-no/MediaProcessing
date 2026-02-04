@@ -4,7 +4,6 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
-import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleTags
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
@@ -59,8 +58,7 @@ class MediaDetermineSubtitleTrackTypeListenerTest {
                     language = language,
                     filename = null,
                     mimetype = null
-                ),
-                subtitle_tags = SubtitleTags(language = language, filename = null, mimetype = null)
+                )
             )
         }
 

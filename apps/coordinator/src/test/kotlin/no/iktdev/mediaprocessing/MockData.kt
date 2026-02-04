@@ -222,8 +222,7 @@ object MockData {
                 title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
                 NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
                 _STATISTICS_TAGS = null, language = language, filename = null, mimetype = null
-            ),
-            subtitle_tags = SubtitleTags(language = language, filename = null, mimetype = null)
+            )
         )
     }
 

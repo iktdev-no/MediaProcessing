@@ -1,15 +1,20 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
+import no.iktdev.mediaprocessing.Files
 import no.iktdev.mediaprocessing.MockData
 import no.iktdev.mediaprocessing.coordinator.Preference
+import no.iktdev.mediaprocessing.getContent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.SubtitleSelectionMode
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test

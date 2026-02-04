@@ -94,8 +94,7 @@ class MediaSelectExtractTracksListener(
 
             val match = streams.filter { s ->
                 expanded.any { exp ->
-                    s.tags.language?.equals(exp, ignoreCase = true) == true ||
-                            s.subtitle_tags.language?.equals(exp, ignoreCase = true) == true
+                    s.tags.language?.equals(exp, ignoreCase = true) == true
                 }
             }
 
@@ -130,7 +129,7 @@ class MediaSelectExtractTracksListener(
         formatPriority: List<String>
     ): List<SubtitleStream> {
         return this
-            .groupBy { it.tags.language ?: it.subtitle_tags.language ?: "unknown" }
+            .groupBy { it.tags.language ?: "unknown" }
             .mapNotNull { (_, langGroup) ->
                 langGroup
                     .sortedBy { s ->
