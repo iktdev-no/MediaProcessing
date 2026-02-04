@@ -154,4 +154,97 @@ class MediaSelectExtractTracksListenerTest {
         assertEquals(1, result.selectedSubtitleTracks.size)
     }
 
+    @Test
+    @DisplayName("""
+    Når foretrukket språk er 'nor'
+    Og tilgjengelige subtitles er både 'nob' og 'nno'
+    Så:
+      Skal 'nor' matche begge,
+      og ett spor per språk returneres
+""")
+    fun testNorMacroLanguageSelection() {
+        val items = listOf(
+            SubtitleItem(
+                MockData.dummySubtitleStream(0, "nob").copy(codec_name = "srt"),
+                SubtitleType.Dialogue
+            ),
+            SubtitleItem(
+                MockData.dummySubtitleStream(1, "nno").copy(codec_name = "ass"),
+                SubtitleType.Dialogue
+            )
+        )
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+
+        val result = listener(
+            preferredSubtitles = listOf("nor"),
+            formatPriority = listOf("ass", "srt")
+        ).onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        // Vi forventer ett spor per språk: både nob og nno skal være med
+        assertEquals(listOf(0, 1), result.selectedSubtitleTracks)
+    }
+
+    @Test
+    @DisplayName("""
+    Når foretrukket språk er 'nob'
+    Og tilgjengelige subtitles er 'eng' og 'nno'
+    Og 'eng' er originalspråk
+    Så:
+      Skal kun 'eng' velges
+    """)
+    fun testNobPreferenceFallsBackToOriginalEng() {
+        val eng = MockData.dummySubtitleStream(0, "eng").copy(
+            disposition = MockData.dummyDisposition {
+                original = true
+            }
+        )
+        val nno = MockData.dummySubtitleStream(1, "nno")
+
+        val items = listOf(
+            SubtitleItem(eng, SubtitleType.Dialogue),
+            SubtitleItem(nno, SubtitleType.Dialogue)
+        )
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+
+        val result = listener(
+            preferredSubtitles = listOf("nob"), // no match
+            mode = SubtitleSelectionMode.DialogueOnly
+        ).onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        assertEquals(listOf(0), result.selectedSubtitleTracks)
+    }
+
+    @Test
+    @DisplayName("""
+    Når foretrukket språk er 'nor'
+    Og tilgjengelige subtitles inneholder 'nob'
+    Så:
+      Skal 'nor' matche 'nob'
+    """)
+    fun testNorMatchesNob() {
+        val nob = MockData.dummySubtitleStream(0, "nob")
+
+        val items = listOf(
+            SubtitleItem(nob, SubtitleType.Dialogue)
+        )
+
+        val event = MediaTracksDetermineSubtitleTypeEvent(items).newReferenceId()
+
+        val result = listener(
+            preferredSubtitles = listOf("nor")
+        ).onEvent(event, emptyList()) as MediaTracksExtractSelectedEvent
+
+        assertEquals(listOf(0), result.selectedSubtitleTracks)
+    }
+
+
+
+
+
+
+
+
+
 }

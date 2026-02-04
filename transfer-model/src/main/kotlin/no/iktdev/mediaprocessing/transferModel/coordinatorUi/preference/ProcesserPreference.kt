@@ -14,7 +14,9 @@ data class ProcesserPreference(
         fun default(): ProcesserPreference {
             return ProcesserPreference(
                 videoPreference = VideoPreference(VideoCodecConfig.from(VideoCodecType.HEVC), false),
-                audioPreference = AudioPreference(AudioCodecConfig.from(AudioCodecType.AAC)),
+                audioPreference = AudioPreference(
+                    default = AudioCodecConfig.from(AudioCodecType.AAC)
+                ),
             )
         }
     }

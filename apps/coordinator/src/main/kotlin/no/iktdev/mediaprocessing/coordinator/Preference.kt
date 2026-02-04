@@ -21,7 +21,7 @@ class Preference(
     // FULL CONFIG
     // ------------------------------------------------------------
 
-    fun getFullConfig(): no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.PreferenceConfig {
+    fun getFullConfig(): PreferenceConfig {
         val file = coordinatorEnv.preference
 
         if (!file.exists()) {

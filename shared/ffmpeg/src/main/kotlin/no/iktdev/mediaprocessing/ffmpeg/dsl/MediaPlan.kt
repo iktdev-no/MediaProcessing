@@ -14,36 +14,47 @@ data class MediaPlan(
     ): List<String> {
         val args = mutableListOf<String>()
 
-
-        // Video
-        val vStream = videoStreams[videoTrack.index]
+        // -----------------------------
+        // VIDEO
+        // -----------------------------
+        val vStream = videoStreams[videoTrack.listIndex]
         val vDecision = videoTrack.codec.determineTranscodeDecision(vStream)
-        args += listOf("-map", "0:v:${videoTrack.index}")
+
+        // FFmpeg mapping bruker ffmpegIndex
+        args += listOf("-map", "0:v:${videoTrack.ffmpegIndex}")
+
         args += when (vDecision) {
             TranscodeDecision.Copy -> listOf("-c:v", "copy")
             TranscodeDecision.Remux -> listOf("-c:v", videoTrack.codec.codec)
             TranscodeDecision.Reencode -> videoTrack.codec.buildFfmpegArgs(vStream)
         }
 
-        // Audio
-        audioTracks.forEachIndexed { outIdx, target ->
-            val aStream = audioStreams[target.index]
+        // -----------------------------
+        // AUDIO
+        // -----------------------------
+        // Fjern duplikate spor (samme listIndex, ffmpegIndex og codec-type)
+        val uniqueAudioTargets = audioTracks
+            .distinctBy { Triple(it.listIndex, it.ffmpegIndex, it.codec::class) }
+
+        uniqueAudioTargets.forEachIndexed { outIdx, target ->
+
+            val aStream = audioStreams[target.listIndex]
             val aDecision = target.codec.determineTranscodeDecision(aStream)
 
-            if (outIdx > 0) {
-                val otherIsCopy = audioTracks.filter { it -> it.index == target.index && it !== target }.any { it.codec == AudioCodec.Copy }
-                if (otherIsCopy && aDecision == TranscodeDecision.Copy) {
-                    // Hvis en annen audio-track med samme index er satt til copy, kan vi ikke copy denne også
-                    return@forEachIndexed
-                }
-            }
 
-            args += listOf("-map", "0:a:${target.index}")
+            // FFmpeg mapping bruker ffmpegIndex
+            args += listOf("-map", "0:a:${target.ffmpegIndex}")
+
             when (aDecision) {
-                TranscodeDecision.Copy -> args += listOf("-c:a:$outIdx", "copy")
-                TranscodeDecision.Remux -> args += listOf("-c:a:$outIdx", target.codec.codec)
+                TranscodeDecision.Copy ->
+                    args += listOf("-c:a:$outIdx", "copy")
+
+                TranscodeDecision.Remux ->
+                    args += listOf("-c:a:$outIdx", target.codec.codec)
+
                 TranscodeDecision.Reencode -> {
                     val built = target.codec.buildFfmpegArgs(aStream).toMutableList()
+
                     // injiser output-indeks i alle audio-flagg
                     for (i in built.indices) {
                         if (built[i] == "-c:a") built[i] = "-c:a:$outIdx"
@@ -51,10 +62,12 @@ data class MediaPlan(
                         if (built[i] == "-ar") built[i] = "-ar:$outIdx"
                         if (built[i] == "-ac") built[i] = "-ac:$outIdx"
                     }
+
                     args += built
                 }
             }
         }
+
         return args
     }
 
@@ -63,28 +76,27 @@ data class MediaPlan(
         val audioCodecs = audioTracks.map { it.codec }
 
         return when {
-            // MP4: H.264/HEVC + AAC/MP3
             (videoCodec is VideoCodec.H264 || videoCodec is VideoCodec.Hevc) &&
                     audioCodecs.all { it is AudioCodec.Aac || it is AudioCodec.Mp3 } -> "mp4"
 
-            // WEBM: VP8/VP9/AV1 + Opus/Vorbis
             (videoCodec is VideoCodec.Vp8 || videoCodec is VideoCodec.Vp9 || videoCodec is VideoCodec.Av1) &&
                     audioCodecs.all { it is AudioCodec.Opus || it is AudioCodec.Vorbis } -> "webm"
 
-            // Fallback: MKV (støtter nesten alt)
             else -> "mkv"
         }
     }
 }
 
-// Video target: index + codec
+
+data class AudioTarget(
+    val listIndex: Int,
+    val ffmpegIndex: Int,
+    val codec: AudioCodec
+)
+
 data class VideoTarget(
-    val index: Int,
+    val listIndex: Int,
+    val ffmpegIndex: Int,
     val codec: VideoCodec
 )
 
-// Audio target: index + codec
-data class AudioTarget(
-    val index: Int,
-    val codec: AudioCodec
-)

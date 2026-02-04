@@ -90,14 +90,20 @@ class MediaSelectExtractTracksListener(
 
         // 2. Preferred languages
         for (lang in preferredLanguages) {
-            val match = streams.filter {
-                it.tags.language?.equals(lang, ignoreCase = true) == true ||
-                        it.subtitle_tags.language?.equals(lang, ignoreCase = true) == true
+            val expanded = expandLanguage(lang)
+
+            val match = streams.filter { s ->
+                expanded.any { exp ->
+                    s.tags.language?.equals(exp, ignoreCase = true) == true ||
+                            s.subtitle_tags.language?.equals(exp, ignoreCase = true) == true
+                }
             }
+
             if (match.isNotEmpty()) {
                 return match.uniquePerLanguageBestFormat(formatPriority)
             }
         }
+
 
         // 3. Default subtitles
         val defaults = streams.filter { it.disposition?.default == 1 }
@@ -108,6 +114,13 @@ class MediaSelectExtractTracksListener(
         // 4. Fallback: all subtitles
         return streams.uniquePerLanguageBestFormat(formatPriority)
     }
+
+    private fun expandLanguage(code: String): List<String> =
+        when (code.lowercase()) {
+            "nor" -> listOf("nob", "nno")
+            else -> listOf(code)
+        }
+
 
     // ------------------------------------------------------------
     // UNIQUE PER LANGUAGE + FORMAT PRIORITY

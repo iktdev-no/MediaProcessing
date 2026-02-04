@@ -4,6 +4,14 @@ import no.iktdev.eventi.models.Event
 
 data class MediaTracksEncodeSelectedEvent(
     val selectedVideoTrack: Int,
-    val selectedAudioTrack: Int,
-    val selectedAudioExtendedTrack: Int? = null // Optional extended audio track, e.g Dolby Atmos or Enhanced AAC
-): Event()
+    val audioTracks: List<SelectedAudioTracks>
+): Event() {
+    data class SelectedAudioTracks(
+        val language: String,
+        val defaultListIndex: Int,
+        val defaultFfmpegIndex: Int,
+        val extendedListIndex: Int?,
+        val extendedFfmpegIndex: Int?
+    )
+
+}

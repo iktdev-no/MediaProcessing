@@ -23,7 +23,6 @@ class MediaCreateEncodeTaskListener(
         history: List<Event>
     ): Event? {
         val preference = preference.getProcesserPreference()
-        val audioDsl = preference.audioPreference?.codec?.toDsl()
         val videoDsl = preference.videoPreference?.codec?.toDsl()
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
@@ -31,32 +30,51 @@ class MediaCreateEncodeTaskListener(
             if (!startedEvent.data.operation.contains(OperationType.Encode))
                 return null
         }
+
         val selectedEvent = event as? MediaTracksEncodeSelectedEvent ?: return null
         val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
 
         val videoPreference = videoDsl ?: VideoCodec.Hevc()
-        val audioPreference =  audioDsl ?: AudioCodec.Aac(channels = 2)
 
-        val audioTargets = mutableListOf<AudioTarget>(
-            AudioTarget(
-                index = selectedEvent.selectedAudioTrack,
-                codec = audioPreference
+        val audioTargets = mutableListOf<AudioTarget>()
+
+        for (track in selectedEvent.audioTracks) {
+
+            // Default audio
+            audioTargets += AudioTarget(
+                listIndex = track.defaultListIndex,
+                ffmpegIndex = track.defaultFfmpegIndex,
+                codec = preference.audioPreference?.default?.toDsl()
+                    ?: AudioCodec.Aac(channels = 2)
             )
-        )
-        selectedEvent.selectedAudioExtendedTrack?.let {
-            audioTargets.add(AudioTarget(
-                index = it,
-                codec = audioPreference
-            ))
+
+            // Extended audio
+            val extList = track.extendedListIndex
+            val extFfmpeg = track.extendedFfmpegIndex
+
+            if (extList != null && extFfmpeg != null) {
+                audioTargets += AudioTarget(
+                    listIndex = extList,
+                    ffmpegIndex = extFfmpeg,
+                    codec = preference.audioPreference?.extended?.toDsl()
+                        ?: preference.audioPreference?.default?.toDsl()
+                        ?: AudioCodec.Aac(channels = 2)
+                )
+            }
+
         }
 
-
         val plan = MediaPlan(
-            videoTrack = VideoTarget(index = selectedEvent.selectedVideoTrack, codec = videoPreference),
+            videoTrack = VideoTarget(
+                listIndex = selectedEvent.selectedVideoTrack,
+                ffmpegIndex = streams.videoStream[selectedEvent.selectedVideoTrack].index,
+                codec = videoPreference
+            ),
             audioTracks = audioTargets
         )
+
         val args = plan.toFfmpegArgs(streams.videoStream, streams.audioStream)
-        val filename = startedEvent.data.fileUri.let { File(it) }.nameWithoutExtension
+        val filename = File(startedEvent.data.fileUri).nameWithoutExtension
         val extension = plan.toContainer()
 
         val task = EncodeTask(
@@ -67,8 +85,8 @@ class MediaCreateEncodeTaskListener(
             )
         ).derivedOf(event)
 
-
         TaskStore.persist(task)
+
         return ProcesserEncodeTaskCreatedEvent(
             taskCreated = task.taskId
         ).derivedOf(event)

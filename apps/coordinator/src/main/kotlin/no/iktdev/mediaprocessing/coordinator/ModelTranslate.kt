@@ -22,12 +22,12 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.Vi
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType
 import kotlin.reflect.KProperty1
 
-fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto {
+fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): CoordinatorTaskDto {
     val matchingLogs = logs
         .filter { log -> log.ids.contains(taskId) }
         .map { it.logFile }
 
-    return _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto(
+    return CoordinatorTaskDto(
         id = id,
         referenceId = referenceId,
         status = status.name,
@@ -54,98 +54,98 @@ fun Event.extractPayload(): Map<String, Any?>? {
 }
 
 
-fun PersistedEvent.toDto(event: Event): no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent =
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent(
+fun PersistedEvent.toDto(event: Event): SequenceEvent =
+    SequenceEvent(
         eventId = this.eventId,
         referenceId = this.referenceId,
         type = this.event,
         timestamp = this.persistedAt,
-        metadata = _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.MetadataDto(
+        metadata = MetadataDto(
             derivedFromEventIds = event.metadata.derivedFromId,
             createdAt = event.metadata.created
         ),
         payload = event.extractPayload()
     )
 
-fun CollectProjection.TaskStatus.translate(): no.iktdev.mediaprocessing.transferModel.coordinatorUi.TaskStatus {
-    return _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.TaskStatus.valueOf(this.name)
+fun CollectProjection.TaskStatus.translate(): TaskStatus {
+    return TaskStatus.valueOf(this.name)
 }
 
-fun no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecConfig.toDsl(): AudioCodec = when (type) {
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType.AAC -> AudioCodec.Aac(
+fun AudioCodecConfig.toDsl(): AudioCodec = when (type) {
+    AudioCodecType.AAC -> AudioCodec.Aac(
         bitrate = bitrate,
-        profile = (profile ?: _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AacProfile.LC).translate(),
+        profile = (profile ?: AacProfile.LC).translate(),
         channels = channels,
         sampleRate = sampleRate
     )
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType.OPUS -> AudioCodec.Opus(
+    AudioCodecType.OPUS -> AudioCodec.Opus(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate,
-        application = (application ?: _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.OpusApplication.Audio).translate()
+        application = (application ?: OpusApplication.Audio).translate()
     )
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType.FLAC -> AudioCodec.Flac(
+    AudioCodecType.FLAC -> AudioCodec.Flac(
         compressionLevel = compressionLevel,
         channels = channels,
         sampleRate = sampleRate
     )
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType.COPY -> AudioCodec.Copy
+    AudioCodecType.COPY -> AudioCodec.Copy
     else -> TODO("Implement remaining codecs")
 }
 
-fun no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AacProfile.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile {
+fun AacProfile.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile {
     return no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile.valueOf(name)
 }
 
-fun no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.OpusApplication.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.OpusApplication {
+fun OpusApplication.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.OpusApplication {
     return no.iktdev.mediaprocessing.ffmpeg.dsl.OpusApplication.valueOf(name)
 }
 
-fun no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecConfig.toDsl(): VideoCodec = when (type) {
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.HEVC -> VideoCodec.Hevc(
-        preset = (preset ?: _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.Presets.Slow).translate(),
+fun VideoCodecConfig.toDsl(): VideoCodec = when (type) {
+    VideoCodecType.HEVC -> VideoCodec.Hevc(
+        preset = (preset ?: Presets.Slow).translate(),
         crf = crf ?: 18,
         bitrate = bitrate,
         tune = tune
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.H264 -> VideoCodec.H264(
-        preset = (preset ?: _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.Presets.Slow).translate(),
-        profile = (profile ?: _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.H264Profiles.High).translate(),
+    VideoCodecType.H264 -> VideoCodec.H264(
+        preset = (preset ?: Presets.Slow).translate(),
+        profile = (profile ?: H264Profiles.High).translate(),
         level = level ?: 4.2,
         crf = crf ?: 23,
         bitrate = bitrate
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.VP9 -> VideoCodec.Vp9(
+    VideoCodecType.VP9 -> VideoCodec.Vp9(
         crf = crf ?: 32,
         bitrate = bitrate,
         cpuUsed = cpuUsed ?: 4
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.VP8 -> VideoCodec.Vp8(
+    VideoCodecType.VP8 -> VideoCodec.Vp8(
         crf = crf ?: 10,
         bitrate = bitrate
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.AV1 -> VideoCodec.Av1(
+    VideoCodecType.AV1 -> VideoCodec.Av1(
         crf = crf ?: 30,
         cpuUsed = cpuUsed ?: 4
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.VVC -> VideoCodec.Vvc(
-        preset = (preset ?: _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.Presets.Medium).translate(),
+    VideoCodecType.VVC -> VideoCodec.Vvc(
+        preset = (preset ?: Presets.Medium).translate(),
         crf = crf ?: 27,
         bitrate = bitrate
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.XVID -> VideoCodec.Vid(
+    VideoCodecType.XVID -> VideoCodec.Vid(
         bitrate = bitrate,
         qscale = qscale
     )
 
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.RAW -> VideoCodec.Raw
-    _root_ide_package_.no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType.COPY -> VideoCodec.Copy
+    VideoCodecType.RAW -> VideoCodec.Raw
+    VideoCodecType.COPY -> VideoCodec.Copy
 }
-fun no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.Presets.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.Presets.valueOf(name)
-fun no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.H264Profiles.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.H264Profiles.valueOf(name)
+fun Presets.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.Presets.valueOf(name)
+fun H264Profiles.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.H264Profiles.valueOf(name)

@@ -124,13 +124,16 @@ object MockData {
 
     fun dummyAudioStream(
         index: Int,
-        language: String,
-        channels: Int,
-        durationTs: Long = 1000
+        language: String = "eng",
+        channels: Int = 2,
+        durationTs: Long = 1000,
+        codec: String = "aac",
+        disposition: Disposition = dummyDisposition(),
+        tags: Tags = dummyTags(language)
     ): AudioStream {
         return AudioStream(
             index = index,
-            codec_name = "aac",
+            codec_name = codec,
             codec_long_name = "AAC",
             codec_type = "audio",
             codec_tag_string = "",
@@ -142,12 +145,8 @@ object MockData {
             start_time = "0",
             duration = null,
             duration_ts = durationTs,
-            disposition = Disposition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            tags = Tags(
-                title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
-                NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
-                _STATISTICS_TAGS = null, language = language, filename = null, mimetype = null
-            ),
+            disposition = disposition,
+            tags = tags,
             profile = "LC",
             sample_fmt = "fltp",
             sample_rate = "48000",
@@ -157,10 +156,17 @@ object MockData {
         )
     }
 
-    fun dummyVideoStream(index: Int, durationTs: Long = 1000): VideoStream {
+
+    fun dummyVideoStream(
+        index: Int,
+        durationTs: Long = 1000,
+        codec: String = "h264",
+        disposition: Disposition = dummyDisposition(),
+        tags: Tags = dummyTags("eng")
+    ): VideoStream {
         return VideoStream(
             index = index,
-            codec_name = "h264",
+            codec_name = codec,
             codec_long_name = "H.264",
             codec_type = "video",
             codec_tag_string = "",
@@ -172,12 +178,8 @@ object MockData {
             start_time = "0",
             duration = null,
             duration_ts = durationTs,
-            disposition = Disposition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            tags = Tags(
-                title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
-                NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
-                _STATISTICS_TAGS = null, language = "eng", filename = null, mimetype = null
-            ),
+            disposition = disposition,
+            tags = tags,
             profile = "main",
             width = 1920,
             height = 1080,
@@ -198,7 +200,8 @@ object MockData {
         )
     }
 
-    fun dummySubtitleStream(index: Int, language: String?): SubtitleStream {
+
+    fun dummySubtitleStream(index: Int, language: String?, disposition: Disposition? = null): SubtitleStream {
         return SubtitleStream(
             index = index,
             codec_name = "ass",
@@ -213,7 +216,7 @@ object MockData {
             start_time = "0",
             duration = null,
             duration_ts = 1000,
-            disposition = null,
+            disposition = disposition,
             tags = Tags(
                 title = null, BPS = null, DURATION = null, NUMBER_OF_FRAMES = 0,
                 NUMBER_OF_BYTES = null, _STATISTICS_WRITING_APP = null, _STATISTICS_WRITING_DATE_UTC = null,
@@ -227,6 +230,66 @@ object MockData {
         val stream = dummySubtitleStream(index, language)
         return SubtitleItem(stream = stream, type = type)
     }
+
+    fun dummyTags(language: String? = "eng") = Tags(
+        title = null,
+        BPS = null,
+        DURATION = null,
+        NUMBER_OF_FRAMES = 0,
+        NUMBER_OF_BYTES = null,
+        _STATISTICS_WRITING_APP = null,
+        _STATISTICS_WRITING_DATE_UTC = null,
+        _STATISTICS_TAGS = null,
+        language = language,
+        filename = null,
+        mimetype = null
+    )
+
+
+    fun dummyDisposition(
+        block: DispositionBuilder.() -> Unit = {}
+    ): Disposition {
+        val builder = DispositionBuilder().apply(block)
+        return builder.build()
+    }
+
+    class DispositionBuilder {
+        var default: Boolean = false
+        var dub: Boolean = false
+        var original: Boolean = false
+        var comment: Boolean = false
+        var lyrics: Boolean = false
+        var karaoke: Boolean = false
+        var forced: Boolean = false
+        var hearingImpaired: Boolean = false
+        var captions: Boolean = false
+        var visualImpaired: Boolean = false
+        var cleanEffects: Boolean = false
+        var attachedPic: Boolean = false
+        var timedThumbnails: Boolean = false
+
+        fun build() = Disposition(
+            default = default.toInt(),
+            dub = dub.toInt(),
+            original = original.toInt(),
+            comment = comment.toInt(),
+            lyrics = lyrics.toInt(),
+            karaoke = karaoke.toInt(),
+            forced = forced.toInt(),
+            hearing_impaired = hearingImpaired.toInt(),
+            captions = captions.toInt(),
+            visual_impaired = visualImpaired.toInt(),
+            clean_effects = cleanEffects.toInt(),
+            attached_pic = attachedPic.toInt(),
+            timed_thumbnails = timedThumbnails.toInt()
+        )
+
+        private fun Boolean.toInt() = if (this) 1 else 0
+    }
+
+
+
+
 
 
 

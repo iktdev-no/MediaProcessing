@@ -21,64 +21,121 @@ class MediaSelectEncodeTracksListener(
         val useEvent = event as? MediaStreamParsedEvent ?: return null
 
         val videoTrackIndex = getVideoTrackToUse(useEvent.data.videoStream)
-        val audioDefaultTrack = getAudioDefaultTrackToUse(useEvent.data.audioStream)
-        val audioExtendedTrack = getAudioExtendedTrackToUse(
-            useEvent.data.audioStream,
-            selectedDefaultTrack = audioDefaultTrack
-        )
+        val audioTracks = getAudioTracksForAllPreferredLanguages(useEvent.data.audioStream)
 
         return MediaTracksEncodeSelectedEvent(
             selectedVideoTrack = videoTrackIndex,
-            selectedAudioTrack = audioDefaultTrack,
-            selectedAudioExtendedTrack = audioExtendedTrack
+            audioTracks = audioTracks
         ).derivedOf(event)
     }
 
     // ------------------------------------------------------------
-    // AUDIO SELECTION
+    // NEW: MULTI-LANGUAGE AUDIO SELECTION
     // ------------------------------------------------------------
 
+    private fun getAudioTracksForAllPreferredLanguages(
+        audioStreams: List<AudioStream>
+    ): List<MediaTracksEncodeSelectedEvent.SelectedAudioTracks> {
 
+        if (audioStreams.isEmpty()) {
+            return emptyList()
+        }
 
-    private fun getAudioDefaultTrackToUse(audioStreams: List<AudioStream>): Int {
         val pref = preference.getLanguagePreference()
+        val result = mutableListOf<MediaTracksEncodeSelectedEvent.SelectedAudioTracks>()
 
-        val selected = selectBestAudioStream(
-            streams = audioStreams,
-            preferredLanguages = pref.preferredAudio,
-            preferOriginal = pref.preferOriginal,
-            avoidDub = pref.avoidDub,
-            mode = AudioSelectMode.DEFAULT
-        ) ?: audioStreams.firstOrNull()
+        // ------------------------------------------------------------
+        // 1. Forsøk å velge spor for alle foretrukne språk
+        // ------------------------------------------------------------
+        for (lang in pref.preferredAudio) {
 
-        return audioStreams.indexOf(selected)
+            val langStreams = audioStreams.filter {
+                it.tags.language?.equals(lang, ignoreCase = true) == true
+            }
+
+            if (langStreams.isEmpty()) continue
+
+            val default = selectBestAudioStream(
+                streams = langStreams,
+                preferredLanguages = listOf(lang),
+                preferOriginal = pref.preferOriginal,
+                avoidDub = pref.avoidDub,
+                mode = AudioSelectMode.DEFAULT
+            ) ?: langStreams.minByOrNull { it.channels }!!
+
+            val defaultListIndex = audioStreams.indexOf(default)
+            val defaultFfmpegIndex = default.index
+
+            val extended = selectBestAudioStream(
+                streams = langStreams.filter { it.channels > 2 },
+                preferredLanguages = listOf(lang),
+                preferOriginal = pref.preferOriginal,
+                avoidDub = pref.avoidDub,
+                mode = AudioSelectMode.EXTENDED
+            )
+
+            val extendedListIndex = extended?.let { audioStreams.indexOf(it) }
+            val extendedFfmpegIndex = extended?.index
+
+            result.add(
+                MediaTracksEncodeSelectedEvent.SelectedAudioTracks(
+                    language = lang,
+                    defaultListIndex = defaultListIndex,
+                    defaultFfmpegIndex = defaultFfmpegIndex,
+                    extendedListIndex = extendedListIndex,
+                    extendedFfmpegIndex = extendedFfmpegIndex
+                )
+            )
+        }
+
+        // ------------------------------------------------------------
+        // 2. Hvis ingen preferredLanguages ga treff → fallback
+        // ------------------------------------------------------------
+        if (result.isEmpty()) {
+
+            // 2a. Hvis preferOriginal = true → velg original-spor
+            if (pref.preferOriginal) {
+                val originals = audioStreams.filter { it.disposition.original == 1 }
+                if (originals.isNotEmpty()) {
+                    val original = originals.minByOrNull { it.channels }!!
+                    val lang = original.tags.language ?: "und"
+
+                    result.add(
+                        MediaTracksEncodeSelectedEvent.SelectedAudioTracks(
+                            language = lang,
+                            defaultListIndex = audioStreams.indexOf(original),
+                            defaultFfmpegIndex = original.index,
+                            extendedListIndex = null,
+                            extendedFfmpegIndex = null
+                        )
+                    )
+
+                    return result
+                }
+            }
+
+            // 2b. Ellers → velg første tilgjengelige språk
+            val first = audioStreams.first()
+            val lang = first.tags.language ?: "und"
+
+            result.add(
+                MediaTracksEncodeSelectedEvent.SelectedAudioTracks(
+                    language = lang,
+                    defaultListIndex = audioStreams.indexOf(first),
+                    defaultFfmpegIndex = first.index,
+                    extendedListIndex = null,
+                    extendedFfmpegIndex = null
+                )
+            )
+        }
+
+        return result
     }
 
-    private fun getAudioExtendedTrackToUse(
-        audioStreams: List<AudioStream>,
-        selectedDefaultTrack: Int
-    ): Int? {
-        val pref = preference.getLanguagePreference()
-
-        val candidates = audioStreams
-            .filter { it.index != selectedDefaultTrack }
-            .filter { (it.duration_ts ?: 0) > 0 }
-            .filter { it.channels > 2 }
-
-        val selected = selectBestAudioStream(
-            streams = candidates,
-            preferredLanguages = pref.preferredAudio,
-            preferOriginal = pref.preferOriginal,
-            avoidDub = pref.avoidDub,
-            mode = AudioSelectMode.EXTENDED
-        ) ?: return null
-
-        return audioStreams.indexOf(selected)
-    }
 
 
     // ------------------------------------------------------------
-    // CORE AUDIO SELECTION LOGIC
+    // ORIGINAL SELECTION LOGIC (unchanged)
     // ------------------------------------------------------------
 
     private enum class AudioSelectMode { DEFAULT, EXTENDED }
@@ -92,7 +149,6 @@ class MediaSelectEncodeTracksListener(
     ): AudioStream? {
         if (streams.isEmpty()) return null
 
-        // 1. Originalspråk
         if (preferOriginal) {
             val originals = streams.filter { it.disposition.original == 1 }
             if (originals.isNotEmpty()) {
@@ -103,12 +159,10 @@ class MediaSelectEncodeTracksListener(
             }
         }
 
-        // 2. Filtrer bort dub
         val filtered = if (avoidDub) {
             streams.filter { it.disposition.dub != 1 }
         } else streams
 
-        // 3. Foretrukne språk
         for (lang in preferredLanguages) {
             val match = filtered.filter {
                 it.tags.language?.equals(lang, ignoreCase = true) == true
@@ -121,29 +175,14 @@ class MediaSelectEncodeTracksListener(
             }
         }
 
-        // 4. Default-flagget
         val default = filtered.firstOrNull { it.disposition.default == 1 }
         if (default != null) return default
 
-        // 5. Fallback
         return filtered.firstOrNull()
     }
 
-
     // ------------------------------------------------------------
-    // QUALITY SCORE (no bitrate)
-    // ------------------------------------------------------------
-
-    private fun qualityScore(s: AudioStream): Int {
-        val channelsScore = s.channels * 10
-        val bitsScore = s.bits_per_sample
-        val sampleRateScore = s.sample_rate.toIntOrNull()?.div(1000) ?: 0
-
-        return channelsScore + bitsScore + sampleRateScore
-    }
-
-    // ------------------------------------------------------------
-    // VIDEO SELECTION
+    // VIDEO SELECTION (unchanged)
     // ------------------------------------------------------------
 
     private fun getVideoTrackToUse(streams: List<VideoStream>): Int {

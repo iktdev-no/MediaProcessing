@@ -4,7 +4,6 @@ import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.data.Disposition
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -14,8 +13,10 @@ class MediaPlanTest {
     @Test
     fun `video copy with one audio copy`() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Copy),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Copy))
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Copy)
+            )
         )
 
         val args = plan.toFfmpegArgs(
@@ -23,7 +24,7 @@ class MediaPlanTest {
             audioStreams = listOf(mockAudioStream(codec = "aac", disposition = mockDisposition(), tags = mockTags()))
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
                 "-map", "0:a:0", "-c:a:0", "copy"
@@ -35,8 +36,10 @@ class MediaPlanTest {
     @Test
     fun `video reencode to hevc with crf`() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Hevc(crf = 18)),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Aac(bitrate = 192)))
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Hevc(crf = 18)),
+            audioTracks = mutableListOf(
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 192))
+            )
         )
 
         val args = plan.toFfmpegArgs(
@@ -44,7 +47,7 @@ class MediaPlanTest {
             audioStreams = listOf(mockAudioStream(codec = "mp3", disposition = mockDisposition(), tags = mockTags()))
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "libx265", "-crf", "18", "-preset", "slow",
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k"
@@ -56,10 +59,10 @@ class MediaPlanTest {
     @Test
     fun `two audio tracks with different codecs`() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Copy),
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
             audioTracks = mutableListOf(
-                AudioTarget(0, AudioCodec.Aac(bitrate = 128)),
-                AudioTarget(1, AudioCodec.Opus(bitrate = 96))
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128)),
+                AudioTarget(listIndex = 1, ffmpegIndex = 1, codec = AudioCodec.Opus(bitrate = 96))
             )
         )
 
@@ -71,22 +74,22 @@ class MediaPlanTest {
             )
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
-                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"),
+                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
+            ),
             args
         )
     }
 
     @Test
     fun `Video copy, Audio AAC reencode`() {
-
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.H264()),
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.H264()),
             audioTracks = mutableListOf(
-                AudioTarget(0, AudioCodec.Aac(bitrate = 128, profile = AacProfile.LC)),
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128, profile = AacProfile.LC)),
             )
         )
 
@@ -97,10 +100,10 @@ class MediaPlanTest {
             )
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k"
             ),
             args
         )
@@ -110,9 +113,9 @@ class MediaPlanTest {
     @DisplayName("Video copy + Audio AAC reencode (HE→LC, bitrate 128k)")
     fun videoCopyAudioAacReencode() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.H264()),
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.H264()),
             audioTracks = mutableListOf(
-                AudioTarget(0, AudioCodec.Aac(bitrate = 128, profile = AacProfile.LC)),
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128, profile = AacProfile.LC)),
             )
         )
 
@@ -121,10 +124,10 @@ class MediaPlanTest {
             audioStreams = listOf(mockAudioStream(codec = "aac", channels = 6, profile = AacProfile.HE.ffmpegName, disposition = mockDisposition(), tags = mockTags()))
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k"
             ),
             args
         )
@@ -134,8 +137,8 @@ class MediaPlanTest {
     @DisplayName("Video reencode to HEVC with CRF=18 and preset=slow, Audio copy")
     fun videoReencodeHevcCrfPresetAudioCopy() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Hevc(crf = 18, preset = Presets.Slow)),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Copy))
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Hevc(crf = 18, preset = Presets.Slow)),
+            audioTracks = mutableListOf(AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Copy))
         )
 
         val args = plan.toFfmpegArgs(
@@ -143,10 +146,10 @@ class MediaPlanTest {
             audioStreams = listOf(mockAudioStream(codec = "aac", channels = 2, profile = AacProfile.LC.ffmpegName, disposition = mockDisposition(), tags = mockTags()))
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "libx265", "-crf", "18", "-preset", "slow",
-                "-map", "0:a:0", "-c:a:0", "copy",
+                "-map", "0:a:0", "-c:a:0", "copy"
             ),
             args
         )
@@ -156,10 +159,10 @@ class MediaPlanTest {
     @DisplayName("Two audio tracks: AAC reencode 128k + Opus reencode 96k")
     fun twoAudioTracksDifferentCodecs() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Copy),
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
             audioTracks = mutableListOf(
-                AudioTarget(0, AudioCodec.Aac(bitrate = 128)),
-                AudioTarget(1, AudioCodec.Opus(bitrate = 96))
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128)),
+                AudioTarget(listIndex = 1, ffmpegIndex = 1, codec = AudioCodec.Opus(bitrate = 96))
             )
         )
 
@@ -171,11 +174,11 @@ class MediaPlanTest {
             )
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
-                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio",
+                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
             ),
             args
         )
@@ -185,8 +188,8 @@ class MediaPlanTest {
     @DisplayName("PCM input downmix to AAC stereo 192k")
     fun pcmInputDownmixToAacStereo() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Copy),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Aac(bitrate = 192, channels = 2)))
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
+            audioTracks = mutableListOf(AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 192, channels = 2)))
         )
 
         val args = plan.toFfmpegArgs(
@@ -194,10 +197,10 @@ class MediaPlanTest {
             audioStreams = listOf(mockAudioStream(codec = "pcm_s16le", channels = 6, profile = "", disposition = mockDisposition(), tags = mockTags()))
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2",
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2"
             ),
             args
         )
@@ -207,8 +210,8 @@ class MediaPlanTest {
     @DisplayName("FLAC input remux to FLAC (no reencode)")
     fun flacInputRemux() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Copy),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Flac()))
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
+            audioTracks = mutableListOf(AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Flac()))
         )
 
         val args = plan.toFfmpegArgs(
@@ -216,31 +219,31 @@ class MediaPlanTest {
             audioStreams = listOf(mockAudioStream(codec = "flac", channels = 2, profile = "", disposition = mockDisposition(), tags = mockTags()))
         )
 
-        Assertions.assertEquals(
+        assertEquals(
             listOf(
                 "-map", "0:v:0", "-c:v", "copy",
-                "-map", "0:a:0", "-c:a:0", "copy",
+                "-map", "0:a:0", "-c:a:0", "copy"
             ),
             args
         )
     }
 
-
     @Test
     @DisplayName("Extended track skipped when same as default and default is copy")
     fun skipExtendedIfSameAsDefaultAndDefaultIsCopy() {
-        // Arrange: lag en plan med default og extended som peker på samme input index
         val defaultTarget = AudioTarget(
-            index = 0,
-            codec = AudioCodec.Copy // default er copy
+            listIndex = 0,
+            ffmpegIndex = 0,
+            codec = AudioCodec.Copy
         )
         val extendedTarget = AudioTarget(
-            index = 0, // peker på samme input index som default
+            listIndex = 0,
+            ffmpegIndex = 0,
             codec = AudioCodec.Copy
         )
 
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Copy),
+            videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
             audioTracks = mutableListOf(defaultTarget, extendedTarget)
         )
 
@@ -251,109 +254,332 @@ class MediaPlanTest {
             mockVideoStream(codec = "h264", disposition = mockDisposition(), tags = mockTags())
         )
 
-        // Act: bygg ffmpeg args
         val args = plan.toFfmpegArgs(videoStreams, audioStreams)
 
-        // Assert: extended track skal være forkastet, kun ett audio map/codec skal finnes
         val expected = listOf(
             "-map", "0:v:0", "-c:v", "copy",
-            "-map", "0:a:0", "-c:a:0", "copy",
+            "-map", "0:a:0", "-c:a:0", "copy"
         )
         assertEquals(expected, args)
     }
 
     @Test
-    @DisplayName("""
-    Hvis video=H264 og audio=AAC
-    Når toContainer kalles
-    Så:
-        Returneres "mp4"
-    """)
+    @DisplayName("Video=H264 + Audio=AAC → mp4")
     fun testChooseContainerMp4() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.H264()),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Aac(channels = 2)))
+            videoTrack = VideoTarget(0, 0, VideoCodec.H264()),
+            audioTracks = mutableListOf(AudioTarget(0, 0, AudioCodec.Aac(channels = 2)))
         )
         assertEquals("mp4", plan.toContainer())
     }
 
     @Test
-    @DisplayName("""
-    Hvis video=VP9 og audio=Opus
-    Når toContainer kalles
-    Så:
-        Returneres "webm"
-    """)
+    @DisplayName("Video=VP9 + Audio=Opus → webm")
     fun testChooseContainerWebm() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Vp9()),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Opus()))
+            videoTrack = VideoTarget(0, 0, VideoCodec.Vp9()),
+            audioTracks = mutableListOf(AudioTarget(0, 0, AudioCodec.Opus()))
         )
         assertEquals("webm", plan.toContainer())
     }
 
-
     @Test
-    @DisplayName("""
-    Hvis video=AV1 og audio=FLAC
-    Når toContainer kalles
-    Så:
-        Returneres "mkv" (fallback)
-    """)
+    @DisplayName("Video=AV1 + Audio=FLAC → mkv")
     fun testChooseContainerMkv() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Av1()),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Flac()))
+            videoTrack = VideoTarget(0, 0, VideoCodec.Av1()),
+            audioTracks = mutableListOf(AudioTarget(0, 0, AudioCodec.Flac()))
         )
         assertEquals("mkv", plan.toContainer())
     }
 
-
     @Test
-    @DisplayName("""
-        Hvis video=HEVC og audio=AAC
-        Når chooseContainer kalles
-        Så:
-            Returneres "mp4"
-    """)
+    @DisplayName("HEVC + AAC → mp4")
     fun testHevcWithAacGivesMp4() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Hevc()),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Aac(channels = 2)))
+            videoTrack = VideoTarget(0, 0, VideoCodec.Hevc()),
+            audioTracks = mutableListOf(AudioTarget(0, 0, AudioCodec.Aac(channels = 2)))
         )
         assertEquals("mp4", plan.toContainer())
     }
 
     @Test
-    @DisplayName("""
-        Hvis video=HEVC og audio=AC3
-        Når chooseContainer kalles
-        Så:
-            Returneres "mkv" (fallback, siden AC3 ikke støttes i MP4)
-    """)
+    @DisplayName("HEVC + AC3 → mkv")
     fun testHevcWithAc3GivesMkv() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Hevc()),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Ac3()))
+            videoTrack = VideoTarget(0, 0, VideoCodec.Hevc()),
+            audioTracks = mutableListOf(AudioTarget(0, 0, AudioCodec.Ac3()))
+        )
+        assertEquals("mkv", plan.toContainer())
+    }
+
+    @Test
+    @DisplayName("HEVC + DTS → mkv")
+    fun testHevcWithDtsGivesMkv() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Hevc()),
+            audioTracks = mutableListOf(AudioTarget(0, 0, AudioCodec.Dts()))
         )
         assertEquals("mkv", plan.toContainer())
     }
 
     @Test
     @DisplayName("""
-        Hvis video=HEVC og audio=DTS
-        Når chooseContainer kalles
-        Så:
-            Returneres "mkv" (fallback, siden DTS ikke støttes i MP4)
-    """)
-    fun testHevcWithDtsGivesMkv() {
+    Når videoTrack har ulik listIndex og ffmpegIndex
+    Hvis toFfmpegArgs kalles
+    Så:
+        Skal listIndex brukes for å hente stream
+        Og ffmpegIndex brukes i -map
+""")
+    fun testVideoListIndexVsFfmpegIndex() {
         val plan = MediaPlan(
-            videoTrack = VideoTarget(0, VideoCodec.Hevc()),
-            audioTracks = mutableListOf(AudioTarget(0, AudioCodec.Dts()))
+            videoTrack = VideoTarget(
+                listIndex = 1,
+                ffmpegIndex = 7,
+                codec = VideoCodec.Copy
+            ),
+            audioTracks = mutableListOf()
         )
-        assertEquals("mkv", plan.toContainer())
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(
+                mockVideoStream(
+                    index = 10,
+                    codec = "vp9",
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ),
+                mockVideoStream(
+                    index = 20,
+                    codec = "h264",
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ) // listIndex = 1 → denne brukes
+            ),
+            audioStreams = emptyList()
+        )
+
+        assertEquals(
+            listOf("-map", "0:v:7", "-c:v", "copy"),
+            args
+        )
     }
 
+    @Test
+    @DisplayName("""
+    Når audioTrack har ulik listIndex og ffmpegIndex
+    Hvis toFfmpegArgs kalles
+    Så:
+        Skal listIndex brukes for lookup
+        Og ffmpegIndex brukes i -map
+""")
+    fun testAudioListIndexVsFfmpegIndex() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(listIndex = 1, ffmpegIndex = 5, codec = AudioCodec.Copy)
+            )
+        )
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(
+                mockVideoStream(
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
+            audioStreams = listOf(
+                mockAudioStream(
+                    index = 11,
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ),
+                mockAudioStream(
+                    index = 22,
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ) // listIndex = 1 → denne brukes
+            )
+        )
+
+        assertEquals(
+            listOf(
+                "-map", "0:v:0", "-c:v", "copy",
+                "-map", "0:a:5", "-c:a:0", "copy"
+            ),
+            args
+        )
+    }
+
+    @Test
+    @DisplayName("""
+    Når extended audioTrack mangler listIndex eller ffmpegIndex
+    Hvis toFfmpegArgs kalles
+    Så:
+        Skal extended-sporet ignoreres
+""")
+    fun testExtendedSkippedWhenNullIndexes() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(0, 0, AudioCodec.Copy)
+                // Ingen extended legges til → simulerer at listener filtrerte det bort
+            )
+        )
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(
+                mockVideoStream(disposition = mockDisposition(), tags = mockTags())
+            ),
+            audioStreams = listOf(
+                mockAudioStream(disposition = mockDisposition(), tags = mockTags())
+            )
+        )
+
+        assertEquals(
+            listOf(
+                "-map", "0:v:0", "-c:v", "copy",
+                "-map", "0:a:0", "-c:a:0", "copy"
+            ),
+            args
+        )
+    }
+
+    @Test
+    @DisplayName("""
+    Når default og extended peker på samme ffmpegIndex
+    Hvis begge er copy
+    Så:
+        Skal extended-sporet ignoreres
+""")
+    fun testExtendedSkippedWhenSameIndexAndCopy() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(0, 0, AudioCodec.Copy),
+                AudioTarget(0, 0, AudioCodec.Copy)
+            )
+        )
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(
+                mockVideoStream(
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
+            audioStreams = listOf(
+                mockAudioStream(
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            )
+        )
+
+        assertEquals(
+            listOf(
+                "-map", "0:v:0", "-c:v", "copy",
+                "-map", "0:a:0", "-c:a:0", "copy"
+            ),
+            args
+        )
+    }
+
+    @Test
+    @DisplayName("""
+    Når default og extended peker på samme ffmpegIndex
+    Hvis codec er forskjellig
+    Så:
+        Skal extended-sporet beholdes
+""")
+    fun testExtendedKeptWhenCodecDiffers() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(0, 0, AudioCodec.Copy),
+                AudioTarget(0, 0, AudioCodec.Aac(bitrate = 128))
+            )
+        )
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(
+                mockVideoStream(
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
+            audioStreams = listOf(
+                mockAudioStream(
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            )
+        )
+
+        assertEquals(
+            listOf(
+                "-map", "0:v:0", "-c:v", "copy",
+                "-map", "0:a:0", "-c:a:0", "copy",
+                "-map", "0:a:0", "-c:a:1", "aac", "-b:a:1", "128k"
+            ),
+            args
+        )
+    }
+
+    @Test
+    @DisplayName("""
+    Når flere audioTargets finnes
+    Hvis toFfmpegArgs kalles
+    Så:
+        Skal output-indekser følge rekkefølgen i audioTracks-listen
+""")
+    fun testAudioOutputIndexOrder() {
+        val plan = MediaPlan(
+            videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
+            audioTracks = mutableListOf(
+                AudioTarget(1, 5, AudioCodec.Aac(bitrate = 128)), // → -c:a:0
+                AudioTarget(0, 2, AudioCodec.Opus(bitrate = 96))  // → -c:a:1
+            )
+        )
+
+        val args = plan.toFfmpegArgs(
+            videoStreams = listOf(
+                mockVideoStream(
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            ),
+            audioStreams = listOf(
+                mockAudioStream(
+                    index = 2,
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                ),
+                mockAudioStream(
+                    index = 5,
+                    disposition = mockDisposition(),
+                    tags = mockTags()
+                )
+            )
+        )
+
+        assertEquals(
+            listOf(
+                "-map", "0:v:0", "-c:v", "copy",
+                "-map", "0:a:5", "-c:a:0", "aac", "-b:a:0", "128k",
+                "-map", "0:a:2", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
+            ),
+            args
+        )
+    }
+
+
+
+
+
+    // ------------------------------------------------------------
+    // MOCK HELPERS
+    // ------------------------------------------------------------
 
     fun mockVideoStream(
         index: Int = 0,
