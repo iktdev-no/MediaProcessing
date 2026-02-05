@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.ProcesserClient
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -14,8 +15,8 @@ class LogController(
 ) {
 
     @GetMapping
-    fun getLog(@RequestParam path: String): Mono<String> {
-        return processerClient.fetchLog(path)
-    }
+    fun getLog(@RequestParam path: String): Mono<ResponseEntity<String>> =
+        processerClient.fetchLog(path)
+
 }
 
