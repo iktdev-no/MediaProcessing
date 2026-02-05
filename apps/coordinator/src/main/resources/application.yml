@@ -34,7 +34,7 @@ streamit:
   base-url: ${PROCESSER_URL:http://processer:8080}
 
 processer:
-  base-url: http://processer.service:8080
+  base-url: http://processer:8080
 
 executables:
   ffprobe: ffprobe
