@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.controller
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import org.springframework.http.ResponseEntity
@@ -12,6 +13,8 @@ import java.util.*
 class StateController(
     private val localProgress: LocalProgressCache
 ) {
+    val log = KotlinLogging.logger {}
+
 
     @GetMapping("/progress")
     fun allProgress(): Map<UUID, FfmpegDecodedProgress> =
@@ -25,9 +28,12 @@ class StateController(
     @GetMapping("/log")
     fun getLog(@RequestParam path: String): ResponseEntity<String> {
         val file = File(path)
+        log.info { "Attempting to find file $path" }
         return if (file.exists()) {
+            log.info { "Found file $file" }
             ResponseEntity.ok(file.readText())
         } else {
+            log.info { "File $path not found" }
             ResponseEntity.notFound().build()
         }
     }
