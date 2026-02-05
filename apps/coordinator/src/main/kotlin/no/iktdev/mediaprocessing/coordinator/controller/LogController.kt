@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 
 @RestController
-@RequestMapping("/log")
+@RequestMapping("/processer/log")
 class LogController(
     private val processerClient: ProcesserClient
 ) {

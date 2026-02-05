@@ -23,13 +23,12 @@ class SseHub {
     fun broadcast(eventName: String, data: Any) {
         val dead = mutableListOf<SseEmitter>()
 
+        val data = SseEmitter.event()
+            .name(eventName)
+            .data(data)
         emitters.forEach { emitter ->
             try {
-                emitter.send(
-                    SseEmitter.event()
-                        .name(eventName)
-                        .data(data)
-                )
+                emitter.send(data)
             } catch (ex: Exception) {
                 dead.add(emitter)
             }
