@@ -4,6 +4,7 @@ import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.coordinator.translate
 import no.iktdev.mediaprocessing.shared.common.effective
+import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
@@ -24,7 +25,10 @@ class SequenceAggregatorService(
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
 
         // Gruppér først, deserialiser senere
-        val grouped = allEvents.groupBy { it.referenceId }
+        val grouped = allEvents
+                .groupBy { it.referenceId }
+                .mapValues { (_, events) -> events.effectivePersisted() }
+
         val deleted = eventService.getDeletedSequences(grouped.keys)
 
         return grouped
@@ -40,6 +44,7 @@ class SequenceAggregatorService(
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
 
         val grouped = allEvents.groupBy { it.referenceId }
+            .mapValues { (_, events) -> events.effectivePersisted() }
         val deleted = eventService.getDeletedSequences(grouped.keys)
 
         return grouped
