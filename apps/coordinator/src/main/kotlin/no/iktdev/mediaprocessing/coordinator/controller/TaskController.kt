@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 
+import no.iktdev.mediaprocessing.coordinator.CoordinatorService
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.coordinator.toCoordinatorTransferDto
@@ -9,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.dto.map
+import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,7 +24,8 @@ import java.util.*
 @RequestMapping("/tasks")
 class TaskController(
     private val taskService: TaskService,
-    private val eventService: EventService
+    private val eventService: EventService,
+    private val coordinator: CoordinatorService,
 ) {
 
     @GetMapping("/active")
@@ -86,6 +89,11 @@ class TaskController(
     @GetMapping("/{taskId}/reset/force")
     fun resetTaskForce(@PathVariable taskId: UUID): ResponseEntity<ResetTaskResponse> {
         return resetTask(taskId, true)
+    }
+
+    @GetMapping("/progress/all")
+    fun getAllProgress(): List<ProgressUpdate> {
+        return coordinator.getProgress()
     }
 
 }
