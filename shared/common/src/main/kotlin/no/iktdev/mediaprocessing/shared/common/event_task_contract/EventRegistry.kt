@@ -26,6 +26,11 @@ object EventRegistry {
             FileReadyEvent::class.java,
             FileRemovedEvent::class.java,
 
+            FilePrepareForWorkTaskCreatedEvent::class.java,
+            FilePrepareForWorkResultEvent::class.java,
+
+            ValidateFileAndMediaDataEvent::class.java,
+
             ManualAllowCompletionEvent::class.java,
 
             MediaParsedInfoEvent::class.java,

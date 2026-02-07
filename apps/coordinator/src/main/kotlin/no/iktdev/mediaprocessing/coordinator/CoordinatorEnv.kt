@@ -15,9 +15,10 @@ class CoordinatorEnv(
     val streamitAddress = streamIt.address
     val ffprobe = exec.ffprobe
 
-    val cachedContent = File(media.cache)
-    val outgoingContent = File(media.outgoing)
-    val incomingContent = File(media.incoming)
+    val scratchFolder = File(media.scratch)
+    val intermediateFolder  = File(media.intermediate)
+    val outboxFolder = File(media.outbox)
+    val inboxFolder = File(media.inbox)
     val preference: File = File("/data/config/preference.json")
 
 }

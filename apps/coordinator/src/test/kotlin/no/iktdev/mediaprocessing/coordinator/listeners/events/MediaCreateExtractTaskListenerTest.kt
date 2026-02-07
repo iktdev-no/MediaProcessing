@@ -182,7 +182,7 @@ class MediaCreateExtractTaskListenerTest {
         assertNotNull(result)
         assertTrue(result is ProcesserExtractTaskCreatedEvent)
         val created = result as ProcesserExtractTaskCreatedEvent
-        assertTrue(created.tasksCreated.isNotEmpty())
+        assertTrue(created.taskIds.isNotEmpty())
         verify {
             TaskStore.persist(withArg { task ->
                 assertTrue(task is ExtractSubtitleTask)
@@ -246,6 +246,6 @@ class MediaCreateExtractTaskListenerTest {
         // Og: resultatet er et ProcesserExtractTaskCreatedEvent med to taskIds
         assertTrue(result is ProcesserExtractTaskCreatedEvent)
         val created = result as ProcesserExtractTaskCreatedEvent
-        assertEquals(2, created.tasksCreated.size)
+        assertEquals(2, created.taskIds.size)
     }
 }

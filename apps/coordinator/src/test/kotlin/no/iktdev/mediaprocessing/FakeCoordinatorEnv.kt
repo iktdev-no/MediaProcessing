@@ -13,9 +13,10 @@ class FakeCoordinatorEnv(prefFile: File) : CoordinatorEnv(
     streamIt = StreamItConfig(address = "http://localhost"),
     exec = ExecutablesConfig(ffprobe = "/usr/bin/ffprobe"),
     media = MediaPaths(
-        cache = "/tmp/cache",
-        outgoing = "/tmp/outgoing",
-        incoming = "/tmp/incoming"
+        scratch = "/tmp/scratch",
+        intermediate = "/tmp/intermediate",
+        outbox = "/tmp/outbox",
+        inbox = "/tmp/inbox"
     )
 ) {
     override val preference: File = prefFile

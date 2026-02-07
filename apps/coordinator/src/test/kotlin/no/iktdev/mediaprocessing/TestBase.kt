@@ -44,9 +44,10 @@ open class TestBase {
             videoPreference = defaultVideoPreference,
             audioPreference = defaultAudioPreference
         )
-        every { coordinatorEnv.outgoingContent } returns File("./tmp/output")
-        every { coordinatorEnv.incomingContent } returns File("./tmp/input")
-        every { coordinatorEnv.cachedContent } returns File("./tmp/cached")
+        every { coordinatorEnv.outboxFolder } returns File("./tmp/outbox")
+        every { coordinatorEnv.inboxFolder } returns File("./tmp/inbox")
+        every { coordinatorEnv.scratchFolder } returns File("./tmp/scratch")
+        every { coordinatorEnv.intermediateFolder } returns File("./tmp/intermediate")
         every { coordinatorEnv.streamitAddress } returns "http://streamit.lan"
 
         EventRegistry.getEvents().let {

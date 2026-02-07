@@ -46,14 +46,14 @@ class TaskProjection(val events: List<Event>) {
     )
 
     fun projectEncodingPerformedStatus() = projectStatus<ProcesserEncodeTaskCreatedEvent, ProcesserEncodeResultEvent>(
-        createdIds = { it.map { e -> e.taskCreated } },
+        createdIds = { it.map { e -> e.taskId } },
         resultStatus = { it.status },
         resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
     )
 
     fun projectExtractSubtitleStatus(): TaskStatus {
         return projectStatus<ProcesserExtractTaskCreatedEvent, ProcesserExtractResultEvent>(
-            createdIds = { it.flatMap { e -> e.tasksCreated } },
+            createdIds = { it.flatMap { e -> e.taskIds } },
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )

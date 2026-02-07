@@ -7,6 +7,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MediaRe
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
 import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
 
@@ -18,6 +19,8 @@ object TaskRegistry {
 
             EncodeTask::class.java,
             ExtractSubtitleTask::class.java,
+
+            FilePrepareForWorkTask::class.java,
 
             MediaReadTask::class.java,
             MetadataSearchTask::class.java,

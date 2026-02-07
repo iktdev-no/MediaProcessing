@@ -14,9 +14,10 @@ object TestUtils {
             logs = "build/test-logs",
         )
         val mediaPaths = MediaPaths(
-            cache = "build/test-cache",
-            incoming = "build/test-input",
-            outgoing = "build/test-output"
+            scratch = "build/test-scratch",
+            intermediate = "build/test-intermediate",
+            inbox = "build/test-inbox",
+            outbox = "build/test-outbox"
         )
 
         return FileUtil(dirs, mediaPaths)

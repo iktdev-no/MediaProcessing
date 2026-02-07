@@ -123,9 +123,10 @@ class CoordinatorHealthService(
     }
 
     fun getDiskHealth(): List<DiskInfo> {
-        val paths = listOf(coordinatorEnv.incomingContent,
-            coordinatorEnv.cachedContent,
-            coordinatorEnv.outgoingContent)
+        val paths = listOf(coordinatorEnv.inboxFolder,
+            coordinatorEnv.scratchFolder,
+            coordinatorEnv.intermediateFolder,
+            coordinatorEnv.outboxFolder)
             .map { it -> it.absolutePath }
         return getDiskInfoFor(paths)
     }

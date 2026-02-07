@@ -9,7 +9,8 @@ data class StreamItConfig(
 
 @ConfigurationProperties(prefix = "media")
 data class MediaPaths(
-    val cache: String,
-    val outgoing: String,
-    val incoming: String
+    val scratch: String,
+    val intermediate: String,
+    val outbox: String,
+    val inbox: String
 )

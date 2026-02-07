@@ -4,7 +4,6 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskCreatedEvent
 import java.util.UUID
 
-class CoordinatorReadStreamsTaskCreatedEvent(
+class FilePrepareForWorkTaskCreatedEvent(
     taskId: UUID
-): TaskCreatedEvent(taskId = taskId) {
-}
+): TaskCreatedEvent(taskId = taskId)

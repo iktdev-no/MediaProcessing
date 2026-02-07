@@ -76,7 +76,7 @@ class DownloadCoverTaskListener(
     }
 
     class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv) : DownloadClient(
-        outDir = coordinatorEnv.cachedContent,
+        outDir = coordinatorEnv.intermediateFolder,
         connectionFactory = DefaultConnectionFactory(),) {
         override fun onCreate() {
             super.onCreate()

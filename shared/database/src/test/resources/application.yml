@@ -28,9 +28,10 @@ management:
         include: mappings
 
 media:
-  cache: /src/cache
-  outgoing: /src/output
-  incoming: /src/input
+  scratch: build/test-scratch
+  intermediate: build/test-intermediate
+  outbox: build/test-outbox
+  inbox: build/test-inbox
 
 streamit:
   address: http://streamit.service

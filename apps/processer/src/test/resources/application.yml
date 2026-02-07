@@ -33,9 +33,10 @@ management:
       show-details: always
 
 media:
-  cache: build/test-cache
-  outgoing: build/test-output
-  incoming: build/test-input
+  scratch: build/test-scratch
+  intermediate: build/test-intermediate
+  outbox: build/test-outbox
+  inbox: build/test-inbox
 
 executables:
   ffmpeg: ffmpeg

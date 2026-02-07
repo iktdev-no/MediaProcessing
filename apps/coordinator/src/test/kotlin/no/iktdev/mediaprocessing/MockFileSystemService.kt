@@ -31,6 +31,15 @@ class MockFileSystemService : FileSystemService {
         // Simulate successful copy by doing nothing
     }
 
+    override fun copyWithProgress(
+        source: File,
+        destination: File,
+        bufferSize: Int,
+        onProgress: (copied: Long, total: Long) -> Unit
+    ) {
+        TODO("Not yet implemented")
+    }
+
     override fun verifyIdentical(source: File, destination: File) {
         verified += source to destination
 

@@ -26,9 +26,10 @@ logging:
     no.iktdev.eventi: DEBUG
 
 media:
-  cache: /src/cache
-  outgoing: /src/output
-  incoming: /src/input
+  scratch: /src/scratch
+  intermediate: /src/intermediate
+  outbox: /src/outbox
+  inbox: /src/inbox
 
 streamit:
   base-url: ${PROCESSER_URL:http://processer:8080}

@@ -5,6 +5,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
@@ -168,30 +169,5 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     open fun getFileSystemService(): FileSystemService =
         DefaultFileSystemService()
 
-    class DefaultFileSystemService : FileSystemService {
-
-        override fun copy(source: File, destination: File) {
-            if (!source.exists()) {
-                throw FileServiceException.SourceMissing(source)
-            }
-
-            try {
-                source.copyTo(destination, overwrite = true)
-            } catch (e: Exception) {
-                throw FileServiceException.CopyFailed(source, destination, e)
-            }
-        }
-
-        override fun verifyIdentical(source: File, destination: File) {
-            val mismatch = Files.mismatch(source.toPath(), destination.toPath())
-            if (mismatch != -1L) {
-                throw FileServiceException.VerificationFailed(source, destination)
-            }
-        }
-
-        override fun delete(file: File) {
-            file.delete()
-        }
-    }
 
 }
