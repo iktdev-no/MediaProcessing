@@ -5,6 +5,8 @@ import io.mockk.*
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.TestBase
+import no.iktdev.mediaprocessing.defaultFilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
@@ -19,7 +21,7 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 
-class MediaCreateExtractTaskListenerTest {
+class MediaCreateExtractTaskListenerTest: TestBase() {
 
     object FakeTaskStore: no.iktdev.eventi.stores.TaskStore {
         val persisted = mutableListOf<Task>()
@@ -38,9 +40,10 @@ class MediaCreateExtractTaskListenerTest {
     }
 
     @BeforeEach
-    fun setup() {
+    override fun setup() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } just Runs
+        super.setup()
     }
 
     private val listener = MediaCreateExtractTaskListener()
@@ -169,30 +172,35 @@ class MediaCreateExtractTaskListenerTest {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
         ).newReferenceId()
+            .addToHistory()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(subtitleStream = listOf(dummyStream(0, "subrip", "eng")))
         ).derivedOf(startEvent)
-        val selectedEvent = MediaTracksExtractSelectedEvent(selectedSubtitleTracks = listOf(0))
-            .derivedOf(parsedEvent)
+            .addToHistory()
 
-        val history = listOf(startEvent, parsedEvent)
+        val preparedFile = defaultFilePrepareForWorkResultEvent()
+            .derivedOf(parsedEvent)
+            .addToHistory()
+
+        val selectedEvent = MediaTracksExtractSelectedEvent(selectedSubtitleTracks = listOf(0))
+            .derivedOf(preparedFile)
+            .addToHistory()
+
 
         val result = listener.onEvent(selectedEvent, history)
 
-        assertNotNull(result)
-        assertTrue(result is ProcesserExtractTaskCreatedEvent)
+        val slot = slot<ExtractSubtitleTask>()
+        verify { TaskStore.persist(capture(slot)) }
+
+        val data = slot.captured.data
+
         val created = result as ProcesserExtractTaskCreatedEvent
         assertTrue(created.taskIds.isNotEmpty())
-        verify {
-            TaskStore.persist(withArg { task ->
-                assertTrue(task is ExtractSubtitleTask)
-                val data = (task as ExtractSubtitleTask).data
-                assertEquals("/tmp/movie.mkv", data.inputFile)
-                assertEquals("movie-eng.srt", data.outputFileName)
-                assertEquals("eng", data.language)
-                assertEquals(listOf("-map", "0:s:0", "-c:s", "copy"), data.arguments)
-            })
-        }
+        assertEquals("build/test-intermediate/Test.mkv", data.inputFile)
+        assertEquals("Test-eng.srt", data.outputFileName)
+        assertEquals("eng", data.language)
+        assertEquals(listOf("-map", "0:s:0", "-c:s", "copy"), data.arguments)
     }
 
     @Test
@@ -208,6 +216,7 @@ class MediaCreateExtractTaskListenerTest {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
         ).newReferenceId()
+            .addToHistory()
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 subtitleStream = listOf(
@@ -216,10 +225,15 @@ class MediaCreateExtractTaskListenerTest {
                 )
             )
         ).derivedOf(startEvent)
-        val selectedEvent = MediaTracksExtractSelectedEvent(selectedSubtitleTracks = listOf(0, 1))
-            .derivedOf(parsedEvent)
+            .addToHistory()
 
-        val history = listOf(startEvent, parsedEvent)
+        val preparedFile = defaultFilePrepareForWorkResultEvent()
+            .derivedOf(parsedEvent)
+            .addToHistory()
+
+        val selectedEvent = MediaTracksExtractSelectedEvent(selectedSubtitleTracks = listOf(0, 1))
+            .derivedOf(preparedFile)
+
 
         // Når: vi kaller onEvent
         val result = listener.onEvent(selectedEvent, history)
@@ -233,13 +247,13 @@ class MediaCreateExtractTaskListenerTest {
 
         // Sjekk første (SRT)
         val srtTask = slot[0] as ExtractSubtitleTask
-        assertEquals("movie-eng.srt", srtTask.data.outputFileName)
+        assertEquals("Test-eng.srt", srtTask.data.outputFileName)
         assertEquals("eng", srtTask.data.language)
         assertEquals(listOf("-map", "0:s:0", "-c:s", "copy"), srtTask.data.arguments)
 
         // Sjekk andre (ASS)
         val assTask = slot[1] as ExtractSubtitleTask
-        assertEquals("movie-jpn.ass", assTask.data.outputFileName)
+        assertEquals("Test-jpn.ass", assTask.data.outputFileName)
         assertEquals("jpn", assTask.data.language)
         assertEquals(listOf("-map", "0:s:1", "-c:s", "copy"), assTask.data.arguments)
 

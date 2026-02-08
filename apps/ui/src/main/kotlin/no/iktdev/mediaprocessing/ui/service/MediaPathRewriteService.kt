@@ -19,14 +19,17 @@ class MediaPathRewriteService(
         if (active) {
             log.warn { "MediaPathRewriteService is ACTIVE (profiles: ${env.activeProfiles.joinToString()})" }
 
-            if (cfg.cacheRewrite != null)
-                log.warn { " - cache rewrite: ${cfg.cache} → ${cfg.cacheRewrite!!.to}" }
+            if (cfg.scratchRewrite != null)
+                log.warn { " - cache rewrite: ${cfg.scratch} → ${cfg.scratchRewrite!!.to}" }
 
-            if (cfg.outgoingRewrite != null)
-                log.warn { " - outgoing rewrite: ${cfg.outgoing} → ${cfg.outgoingRewrite!!.to}" }
+            if (cfg.intermediateRewrite != null)
+                log.warn { " - intermediate rewrite: ${cfg.intermediate} → ${cfg.intermediateRewrite!!.to}" }
 
-            if (cfg.incomingRewrite != null)
-                log.warn { " - incoming rewrite: ${cfg.incoming} → ${cfg.incomingRewrite!!.to}" }
+            if (cfg.outboxRewrite != null)
+                log.warn { " - outgoing rewrite: ${cfg.outbox} → ${cfg.outboxRewrite!!.to}" }
+
+            if (cfg.inboxRewrite != null)
+                log.warn { " - incoming rewrite: ${cfg.inbox} → ${cfg.inboxRewrite!!.to}" }
 
         } else {
             log.info { "MediaPathRewriteService is INACTIVE (profiles: ${env.activeProfiles.joinToString()})" }
@@ -40,14 +43,17 @@ class MediaPathRewriteService(
         }
 
         val rewritten = when {
-            path.startsWith(cfg.cache) && cfg.cacheRewrite != null ->
-                path.replaceFirst(cfg.cache, cfg.cacheRewrite!!.to)
+            path.startsWith(cfg.scratch) && cfg.scratchRewrite != null ->
+                path.replaceFirst(cfg.scratch, cfg.scratchRewrite!!.to)
 
-            path.startsWith(cfg.outgoing) && cfg.outgoingRewrite != null ->
-                path.replaceFirst(cfg.outgoing, cfg.outgoingRewrite!!.to)
+            path.startsWith(cfg.intermediate) && cfg.intermediateRewrite != null ->
+                path.replaceFirst(cfg.intermediate, cfg.intermediateRewrite!!.to)
 
-            path.startsWith(cfg.incoming) && cfg.incomingRewrite != null ->
-                path.replaceFirst(cfg.incoming, cfg.incomingRewrite!!.to)
+            path.startsWith(cfg.outbox) && cfg.outboxRewrite != null ->
+                path.replaceFirst(cfg.outbox, cfg.outboxRewrite!!.to)
+
+            path.startsWith(cfg.inbox) && cfg.inboxRewrite != null ->
+                path.replaceFirst(cfg.inbox, cfg.inboxRewrite!!.to)
 
             else -> path
         }

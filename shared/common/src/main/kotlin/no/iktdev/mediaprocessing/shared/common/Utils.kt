@@ -4,6 +4,7 @@ import com.ibm.icu.text.Transliterator
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import no.iktdev.eventi.ZDS.toEvent
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
@@ -266,5 +267,30 @@ fun String.cleanForFileSystem(): String {
     // 3. Normaliser whitespace
     return cleaned.replace(Regex("\\s{2,}"), " ").trim()
 }
+
+
+inline fun <reified T : Event> List<Event>.requireEvent(): T {
+    return this.filterIsInstance<T>().firstOrNull()
+        ?: throw SoftDispatchException.MissingEventException(T::class.java)
+}
+
+inline fun <reified T : Event, R> List<Event>.requireEventValue(
+    crossinline extractor: (T) -> R?
+): R {
+    val event = this.filterIsInstance<T>().firstOrNull()
+        ?: throw SoftDispatchException.MissingEventException(T::class.java)
+
+    return extractor(event)
+        ?: throw SoftDispatchException.ForcedListenerEjectionException(
+            "Missing required value in ${T::class.simpleName}",
+            T::class.java
+        )
+}
+
+inline fun <reified T : Event> Event.requireQualifiedEntry(): T {
+    return this as? T
+        ?: throw SoftDispatchException.UnqualifiedEntryEventException(T::class.java)
+}
+
 
 

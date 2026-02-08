@@ -4,6 +4,12 @@ import java.io.File
 
 interface FileSystemService {
     fun copy(source: File, destination: File)
+    fun copyWithProgress(
+        source: File,
+        destination: File,
+        bufferSize: Int = 1024 * 1024,
+        onProgress: (copied: Long, total: Long) -> Unit
+    )
     fun verifyIdentical(original: File, target: File)
     fun delete(file: File)
 }

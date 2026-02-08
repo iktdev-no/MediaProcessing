@@ -6,7 +6,15 @@ export default function SettingsPage() {
     const [section, setSection] = useState("preferences");
 
     return (
-        <Stack direction="row" spacing={3} sx={{ p: 3 }}>
+        <Stack
+            spacing={4}
+            sx={{
+                p: 3,
+                height: "100%",
+                overflowY: "auto",
+                boxSizing: "border-box",
+            }}
+        >
 
             <Box sx={{ flex: 1 }}>
                 <Typography variant="h4" sx={{ mb: 2 }}>

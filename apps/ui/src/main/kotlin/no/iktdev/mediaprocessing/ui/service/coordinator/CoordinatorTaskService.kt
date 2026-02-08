@@ -6,6 +6,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import no.iktdev.mediaprocessing.ui.dto.Paginated
 import no.iktdev.mediaprocessing.ui.dto.UiTask
+import no.iktdev.mediaprocessing.ui.dto.passthrough.ProgressUpdate
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -57,5 +58,12 @@ class CoordinatorTaskService(
             .uri("/tasks/${taskId}/reset/force")
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<ResetTaskResponse>() {})
+
+    fun getAllProgress(): Mono<List<ProgressUpdate>> =
+        coordinatorWebClient.get()
+            .uri("/tasks/progress/all")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<List<ProgressUpdate>>() {})
+
 
 }

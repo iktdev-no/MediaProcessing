@@ -245,6 +245,16 @@ class MediaSelectExtractTracksListenerTest {
     }
 
 
+    fun validate() {
+        val data = Files.MediaStreamParsedEvent.getContent()
+        val event = ZDS.WGson.gson.fromJson(data, MediaStreamParsedEvent::class.java)
+        assertNotNull(event)
+        event.data.subtitleStream.forEach {
+            assertNotNull(it.tags.language)
+        }
+    }
+
+
 
 
 

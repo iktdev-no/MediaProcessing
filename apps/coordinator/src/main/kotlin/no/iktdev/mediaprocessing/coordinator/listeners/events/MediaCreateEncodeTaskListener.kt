@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.events.EventListener
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
@@ -8,6 +9,8 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
+import no.iktdev.mediaprocessing.shared.common.requireEvent
+import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
 import org.springframework.stereotype.Component
@@ -74,21 +77,24 @@ class MediaCreateEncodeTaskListener(
         )
 
         val args = plan.toFfmpegArgs(streams.videoStream, streams.audioStream)
-        val filename = File(startedEvent.data.fileUri).nameWithoutExtension
         val extension = plan.toContainer()
+
+        val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
+
+        val filename = File(preparedFile).nameWithoutExtension
 
         val task = EncodeTask(
             data = EncodeData(
                 arguments = args,
                 outputFileName = "$filename.$extension",
-                inputFile = startedEvent.data.fileUri
+                inputFile = preparedFile
             )
         ).derivedOf(event)
 
         TaskStore.persist(task)
 
         return ProcesserEncodeTaskCreatedEvent(
-            taskCreated = task.taskId
+            taskId = task.taskId
         ).derivedOf(event)
     }
 }

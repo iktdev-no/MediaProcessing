@@ -11,7 +11,6 @@ import {
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react"
 import { useSearchParams } from "react-router-dom"
 import { apiDelete, apiGet } from "../api/client"
-import type { FileAction, IFile, MediaAction } from "../types/files"
 
 import { toast } from "react-toastify"
 import { startProcess } from "../api/media"
@@ -20,6 +19,7 @@ import { ConfirmationDialog } from "../components/ConfirmationDialog"
 import { FileContextMenu } from "../components/FileContextMenu"
 import { FileList } from "../components/FileList"
 import { LoadingToast } from "../components/LoadingToast"
+import type { FileAction, IFile, MediaAction } from "../types/types"
 
 /* ───────────────── Helpers ───────────────── */
 

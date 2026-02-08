@@ -10,6 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
@@ -20,7 +21,6 @@ class CoordinatorClient(
     private val coordinatorWebClient: WebClient,
 ) {
     val log = KotlinLogging.logger {}
-
 
 
     fun connectToSse(

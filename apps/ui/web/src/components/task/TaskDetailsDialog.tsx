@@ -1,13 +1,17 @@
+import type { JSX } from "@emotion/react/jsx-runtime"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import {
     Box,
+    Button,
     Dialog,
     DialogContent,
     IconButton,
     Typography
 } from "@mui/material"
-import type { UiTask } from "../../types/backendTypes"
+import { useState } from "react"
+import type { UiTask } from "../../types/types"
 import { JsonViewer } from "../JsonViewer"
+import { ProcesserLogDialog } from "../ProcesserLogDialog"
 import { TaskActions } from "./TaskActions"
 
 export interface TaskDetailsDialogProps {
@@ -17,7 +21,47 @@ export interface TaskDetailsDialogProps {
     onCopy: () => void
 }
 
+
+function OpenLogButton({
+    task,
+    onOpen
+}: {
+    task: UiTask
+    onOpen: (path: string) => void
+}): JSX.Element | null {
+    if (task.logFiles.length === 0) return null;
+
+    return (
+        <>
+            {task.logFiles.map((log, index) => (
+                <Button
+                    key={log}
+                    variant="contained"
+                    onClick={() => onOpen(log)}
+                >
+                    Logg {index + 1}
+                </Button>
+            ))}
+        </>
+    );
+}
+
+
 export function TaskDetailsDialog({ open, onClose, task, onCopy }: TaskDetailsDialogProps) {
+    const [openLog, setOpenLog] = useState(false);
+    const [selectedLogPath, setSelectedLogPath] = useState<string | null>(null);
+
+    const handleOpenLog = (path: string) => {
+        setSelectedLogPath(path);
+        setOpenLog(true);
+    };
+
+    const handleCloseLog = () => {
+        setOpenLog(false);
+        setSelectedLogPath(null);
+    };
+
+
     const copy = (value: string) => {
         navigator.clipboard.writeText(value)
         onCopy()
@@ -96,6 +140,7 @@ export function TaskDetailsDialog({ open, onClose, task, onCopy }: TaskDetailsDi
                     </Box>
 
                     <TaskActions task={task} reload={onClose} />
+                    <OpenLogButton task={task} onOpen={handleOpenLog} />
                 </Box>
 
                 {/* RIGHT COLUMN — JSON FULL HEIGHT */}
@@ -110,6 +155,12 @@ export function TaskDetailsDialog({ open, onClose, task, onCopy }: TaskDetailsDi
                     <JsonViewer value={task.data} />
                 </Box>
             </DialogContent>
+            <ProcesserLogDialog
+                open={openLog}
+                onClose={handleCloseLog}
+                logPath={selectedLogPath ?? undefined}
+                taskId={selectedLogPath ? undefined : task.taskId}
+            />
         </Dialog>
     )
 }

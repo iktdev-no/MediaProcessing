@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
 import no.iktdev.mediaprocessing.MockData
 import no.iktdev.mediaprocessing.MockData.dummyAudioStream
@@ -9,6 +11,7 @@ import no.iktdev.mediaprocessing.MockData.dummyTags
 import no.iktdev.mediaprocessing.MockData.dummyVideoStream
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
 import org.assertj.core.api.Assertions.assertThat
@@ -61,8 +64,13 @@ class MediaTracksEncodeSelectorTest {
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(videoStream = streams, audioStream = emptyList(), subtitleStream = emptyList())
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
         assertEquals(1, result.selectedVideoTrack)
     }
 
@@ -92,8 +100,13 @@ class MediaTracksEncodeSelectorTest {
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         assertEquals(2, result.audioTracks.size)
 
@@ -128,8 +141,13 @@ class MediaTracksEncodeSelectorTest {
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         assertEquals(2, result.audioTracks.size)
 
@@ -163,8 +181,13 @@ class MediaTracksEncodeSelectorTest {
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         assertEquals(1, result.audioTracks.size)
         assertEquals("eng", result.audioTracks[0].language)
@@ -198,8 +221,13 @@ class MediaTracksEncodeSelectorTest {
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         val jpn = result.audioTracks[0]
         assertEquals(0, jpn.defaultListIndex)
@@ -236,8 +264,13 @@ class MediaTracksEncodeSelectorTest {
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         val jpn = result.audioTracks[0]
         assertEquals(1, jpn.defaultListIndex)
@@ -273,15 +306,20 @@ class MediaTracksEncodeSelectorTest {
         // preferredLanguages = listOf("eng")
         // preferOriginal = true
 
-        val parsed = MediaStreamParsedEvent(
+        val event = MediaStreamParsedEvent(
             ParsedMediaStreams(
                 videoStream = listOf(dummyVideoStream(index = 0)),
                 audioStream = audio,
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(parsed, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         // Vi forventer at svensk original slipper gjennom
         val swe = result.audioTracks.firstOrNull { it.language.startsWith("sw") || it.language == "swe" }
@@ -323,8 +361,13 @@ class MediaTracksEncodeSelectorTest {
                 subtitleStream = emptyList()
             )
         ).newReferenceId()
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
 
-        val result = listener.onEvent(event, emptyList()) as MediaTracksEncodeSelectedEvent
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksEncodeSelectedEvent
 
         // Kun japansk skal være med
         assertEquals(1, result.audioTracks.size)
@@ -347,9 +390,13 @@ class MediaTracksEncodeSelectorTest {
         Når event ikke er av typen MediaStreamParsedEvent
         Hvis onEvent kalles
         Så:
-         Returneres null
+         Kastes det en trygg exception
     """)
     fun testOnEventNonParsedEvent() {
-        assertNull(listener.onEvent(DummyEvent(), emptyList()))
+        assertThrowsExactly(
+            SoftDispatchException.UnqualifiedEntryEventException::class.java
+        ) {
+            listener.onEvent(DummyEvent(), emptyList())
+        }
     }
 }

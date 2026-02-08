@@ -1,4 +1,4 @@
-import type { SSEMessage } from "../types/SSEMessage"
+import type { SSEMessage } from "../types/types"
 
 export async function apiGet<T>(
     path: string,
@@ -124,6 +124,7 @@ export function apiSse(
     const es = new EventSource("/api/sse") // hardkodet
 
     es.onmessage = (event) => {
+        console.log(event);
         const message: SSEMessage = JSON.parse(event.data)
         onEvent(message.name, message.data)
     }

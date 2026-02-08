@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.*
+import no.iktdev.mediaprocessing.defaultFilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.MockData.dummyAudioStream
 import no.iktdev.mediaprocessing.MockData.dummyDisposition
 import no.iktdev.mediaprocessing.MockData.dummyTags
@@ -46,6 +47,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.Encode), fileUri = "/tmp/movie.mkv")
         ).newReferenceId()
+            .addToHistory()
 
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
@@ -60,6 +62,11 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                 )
             )
         ).derivedOf(startEvent)
+            .addToHistory()
+
+        val preparedFile = defaultFilePrepareForWorkResultEvent()
+            .derivedOf(parsedEvent)
+            .addToHistory()
 
         val selectedEvent = MediaTracksEncodeSelectedEvent(
             selectedVideoTrack = 0,
@@ -72,9 +79,9 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                     extendedFfmpegIndex = null
                 )
             )
-        ).derivedOf(parsedEvent)
+        ).derivedOf(preparedFile)
+            .addToHistory()
 
-        val history = listOf(startEvent, parsedEvent)
 
         val result = listener.onEvent(selectedEvent, history)
 
@@ -83,8 +90,8 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
 
         val data = slot.captured.data
 
-        assertEquals("/tmp/movie.mkv", data.inputFile)
-        assertEquals("movie.mp4", data.outputFileName)
+        assertEquals("build/test-intermediate/Test.mkv", data.inputFile)
+        assertEquals("Test.mp4", data.outputFileName)
         assertTrue(data.arguments.containsMapAudio(0))
 
         assertTrue(result is ProcesserEncodeTaskCreatedEvent)
@@ -105,6 +112,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.Encode), fileUri = "/tmp/movie.mkv")
         ).newReferenceId()
+            .addToHistory()
 
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
@@ -115,6 +123,12 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                 )
             )
         ).derivedOf(startEvent)
+            .addToHistory()
+
+        val preparedFile = defaultFilePrepareForWorkResultEvent()
+            .derivedOf(parsedEvent)
+            .addToHistory()
+
 
         val selectedEvent = MediaTracksEncodeSelectedEvent(
             selectedVideoTrack = 0,
@@ -127,9 +141,9 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                     extendedFfmpegIndex = 2
                 )
             )
-        ).derivedOf(parsedEvent)
+        ).derivedOf(preparedFile)
+            .addToHistory()
 
-        val history = listOf(startEvent, parsedEvent)
 
         listener.onEvent(selectedEvent, history)
 
@@ -156,7 +170,9 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
     fun testMultiLanguageDefaultAndExtended() {
         val startEvent = StartProcessingEvent(
             StartData(setOf(OperationType.Encode), fileUri = "/tmp/movie.mkv")
-        ).newReferenceId()
+        )
+            .newReferenceId()
+            .addToHistory()
 
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
@@ -168,7 +184,13 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                     dummyAudioStream(index = 4, channels = 6, tags = dummyTags("jpn"))
                 )
             )
-        ).derivedOf(startEvent)
+        )
+            .derivedOf(startEvent)
+            .addToHistory()
+
+        val preparedFile = defaultFilePrepareForWorkResultEvent()
+            .derivedOf(parsedEvent)
+            .addToHistory()
 
         val selectedEvent = MediaTracksEncodeSelectedEvent(
             selectedVideoTrack = 0,
@@ -188,9 +210,9 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                     extendedFfmpegIndex = 4
                 )
             )
-        ).derivedOf(parsedEvent)
+        ).derivedOf(preparedFile)
+            .addToHistory()
 
-        val history = listOf(startEvent, parsedEvent)
 
         listener.onEvent(selectedEvent, history)
 

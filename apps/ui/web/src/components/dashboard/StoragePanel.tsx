@@ -1,6 +1,6 @@
 import AlbumIcon from '@mui/icons-material/Album'
 import { Box, LinearProgress, Paper, Stack, Typography } from "@mui/material"
-import type { DiskInfo } from '../../types/backendTypes'
+import type { DiskInfo } from '../../types/transfer-model'
 
 export function StoragePanel({ disks }: { disks: DiskInfo[] }) {
     if (!disks) return null

@@ -8,7 +8,8 @@ import { FilterChips } from "../components/FilterChips"
 import { Paginator } from "../components/Paginator"
 import { eventFilterSchema } from "../features/events/eventFilterSchema"
 import { parseEventFilters } from "../features/events/parseEventFilters"
-import type { EventQuery, UiEvent } from "../types/backendTypes"
+import type { EventQuery } from "../types/backendTypes"
+import type { UiEvent } from "../types/types"
 
 export default function EventsPage() {
     const [filters, setFilters] = useState<string[]>([])

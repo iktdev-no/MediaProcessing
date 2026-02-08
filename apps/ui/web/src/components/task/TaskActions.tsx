@@ -4,7 +4,7 @@ import { Box, Button, Typography } from "@mui/material"
 import { useState } from "react"
 import { toast } from "react-toastify"
 import { resetFailedTask } from "../../api/tasks"
-import type { UiTask } from "../../types/backendTypes"
+import type { UiTask } from "../../types/types"
 
 export function TaskActions({ task, reload }: { task: UiTask; reload: () => void }) {
     const [forceMode, setForceMode] = useState(false)

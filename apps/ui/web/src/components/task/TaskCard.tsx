@@ -2,9 +2,11 @@ import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import { Box, Chip, Paper, Typography } from "@mui/material"
 import { useState } from "react"
-import type { UiTask } from "../../types/backendTypes"
+import { useProgress } from "../../context/ProgressProvider"
+import type { UiTask } from "../../types/types"
 import { DetailsButton } from "../DetailsButton"
 import { TaskDetailsDialog } from "./TaskDetailsDialog"
+import { TaskProgress } from "./TaskProgress"
 import { TaskStatusIcon } from "./TaskStatus"
 
 export interface TaskCardProps {
@@ -15,7 +17,13 @@ export interface TaskCardProps {
 }
 
 export function TaskCard({ task, show, onCopy, onReferenceIdClicked }: TaskCardProps) {
+    const live = useProgress().progress.get(task.taskId)
+
     const [open, setOpen] = useState(false)
+
+
+
+
     const updatedAt = task.lastCheckIn ?? task.persistedAt
     const formatted = new Intl.DateTimeFormat("no-NO", {
         dateStyle: "short",
@@ -100,11 +108,17 @@ export function TaskCard({ task, show, onCopy, onReferenceIdClicked }: TaskCardP
                     • {task.taskId}
                 </Typography>
 
+                {/* Progress section */}
+                <TaskProgress task={task} progressUpdate={live} />
+
+
+
 
             </Paper>
 
             {/* Popup */}
             <TaskDetailsDialog open={open} onClose={() => setOpen(false)} task={task} onCopy={onCopy} />
+
         </>
     )
 }

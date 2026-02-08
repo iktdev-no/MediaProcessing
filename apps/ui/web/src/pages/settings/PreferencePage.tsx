@@ -3,7 +3,6 @@ import { useState } from "react";
 import { usePreferences } from "../../features/preferences/usePreferences";
 
 import { AudioTab } from "../../components/preferences/tabs/AudioTab";
-import { FormatTab } from "../../components/preferences/tabs/FormatTab";
 import { LanguageTab } from "../../components/preferences/tabs/LanguageTab";
 import { SubtitleTab } from "../../components/preferences/tabs/SubtitleTab";
 import { VideoTab } from "../../components/preferences/tabs/VideoTab";
@@ -19,7 +18,6 @@ export default function PreferencesPage() {
         { label: "Subtitles", component: <SubtitleTab prefs={prefs} setPrefs={setPrefs} /> },
         { label: "Audio", component: <AudioTab prefs={prefs} setPrefs={setPrefs} /> },
         { label: "Video", component: <VideoTab prefs={prefs} setPrefs={setPrefs} /> },
-        { label: "Formats", component: <FormatTab prefs={prefs} setPrefs={setPrefs} /> }
     ];
 
     return (

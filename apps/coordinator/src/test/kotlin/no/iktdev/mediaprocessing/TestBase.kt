@@ -26,6 +26,7 @@ import java.util.*
 open class TestBase {
     val eventStore = InMemoryEventStore()
 
+    val history = mutableListOf<Event>()
 
     class DummyEvent: Event()
     class DummyTask: Task()
@@ -54,6 +55,7 @@ open class TestBase {
             EventTypeRegistry.register(it)
         }
         eventStore.clear()
+        history.clear()
     }
 
 
@@ -68,5 +70,9 @@ open class TestBase {
 
     }
 
+    fun Event.addToHistory(): Event {
+        history.add(this)
+        return this
+    }
 
 }

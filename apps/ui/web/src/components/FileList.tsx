@@ -5,7 +5,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import MovieIcon from '@mui/icons-material/Movie'
 import SubtitlesIcon from '@mui/icons-material/Subtitles'
 import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
-import type { FileItem, IFile } from "../types/files"
+import type { FileItem, IFile } from '../types/types'
 import { normalDate } from "../util"
 
 export interface FileListProps {

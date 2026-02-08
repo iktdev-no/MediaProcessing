@@ -9,7 +9,7 @@ import {
 import { apiGet } from "../api/client"
 import { subscribe } from "../sse/eventBus"
 import { forceReconnect } from "../sse/SseProvider"
-import type { SystemStatus } from "../types/SystemStatus"
+import type { SystemStatus } from "../types/types"
 
 export type HealthStatus = "healthy" | "unhealthy" | "reconnecting"
 

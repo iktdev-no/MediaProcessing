@@ -2,11 +2,14 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.dsl.SubtitleCodec
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
+import no.iktdev.mediaprocessing.shared.common.requireEventValue
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 import java.io.File
@@ -18,6 +21,8 @@ class MediaCreateExtractTaskListener(): EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
+        val selectedEvent = event.requireQualifiedEntry<MediaTracksExtractSelectedEvent>()
+
 
         val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         if (startedEvent.data.operation.isNotEmpty()) {
@@ -25,8 +30,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
                 return null
         }
 
-        val selectedEvent = event as? MediaTracksExtractSelectedEvent ?: return null
-        val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
+        val streams = history.requireEventValue<MediaStreamParsedEvent, ParsedMediaStreams> { it.data }
 
         val selectedStreams: Map<Int, SubtitleStream> =
             selectedEvent.selectedSubtitleTracks.mapNotNull { streamIndex ->
@@ -35,8 +39,12 @@ class MediaCreateExtractTaskListener(): EventListener() {
             }.toMap()
 
 
+        val preparedFileUri = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
+        val preparedFile = File(preparedFileUri)
+
+
         val entries = selectedStreams.mapNotNull { (idx, stream )->
-            toSubtitleArgumentData(idx, startedEvent.data.fileUri.let { File(it) }, stream)
+            toSubtitleArgumentData(idx, preparedFile, stream)
         }
 
         val createdTaskIds: MutableList<UUID> = mutableListOf()
@@ -48,7 +56,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
         }
 
         return ProcesserExtractTaskCreatedEvent(
-            tasksCreated = createdTaskIds
+            taskIds = createdTaskIds
         ).derivedOf(event)
     }
 
@@ -67,7 +75,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
         val outputFileName = "${inputFile.nameWithoutExtension}-${language}.${extension}"
 
         return ExtractSubtitleData(
-            inputFile = inputFile.absolutePath,
+            inputFile = inputFile.path,
             arguments = args,
             outputFileName = outputFileName,
             language = language

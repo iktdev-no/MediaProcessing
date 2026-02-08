@@ -1,5 +1,8 @@
 package no.iktdev.mediaprocessing.ui
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
@@ -41,14 +44,17 @@ class WebConfig : WebMvcConfigurer {
 
 @ConfigurationProperties(prefix = "media")
 data class MediaConfig(
-    var cache: String = "",
-    var cacheRewrite: Rewrite? = null,
+    var scratch: String = "",
+    var scratchRewrite: Rewrite? = null,
 
-    var outgoing: String = "",
-    var outgoingRewrite: Rewrite? = null,
+    var intermediate: String = "",
+    var intermediateRewrite: Rewrite? = null,
 
-    var incoming: String = "",
-    var incomingRewrite: Rewrite? = null
+    var outbox: String = "",
+    var outboxRewrite: Rewrite? = null,
+
+    var inbox: String = "",
+    var inboxRewrite: Rewrite? = null
 ) {
     data class Rewrite(
         var to: String = ""
@@ -96,3 +102,13 @@ class WebClientConfig(
 
 
 }
+
+@Configuration
+class JacksonConfig {
+    @Bean
+    fun objectMapper(): ObjectMapper =
+        ObjectMapper()
+            .registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+}
+

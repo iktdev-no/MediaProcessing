@@ -20,9 +20,10 @@ logging:
     org.springframework.web.socket.config.WebSocketMessageBrokerStats: INFO
 
 media:
-  cache: /src/cache
-  outgoing: /src/output
-  incoming: /src/input
+  scratch: /src/scratch
+  intermediate: /src/intermediate
+  outbox: /src/outbox
+  inbox: /src/inbox
 
 streamit:
   address: http://streamit.service

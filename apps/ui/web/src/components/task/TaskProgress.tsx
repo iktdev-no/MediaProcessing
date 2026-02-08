@@ -1,19 +1,61 @@
-import { Box, LinearProgress, Typography } from "@mui/material"
-import type { UiTask } from "../../types/backendTypes"
+import { Box, LinearProgress, Typography } from "@mui/material";
+import type { ProgressUpdate, UiTask } from "../../types/types";
+import { formatDuration } from "../../utils/timeUtil";
 
 export interface TaskProgressProps {
-    task: UiTask
+    task: UiTask,
+    progressUpdate: ProgressUpdate | undefined
 }
 
-export function TaskProgress({ task }: TaskProgressProps) {
-    if (typeof task.progress !== "number") {
-        return null
+export function TaskProgress({ task, progressUpdate }: TaskProgressProps) {
+    const progress = progressUpdate?.progress?.progress ?? task.progress ?? -1;
+
+    // Ikke vis noe hvis vi ikke har progress og task ikke er i progress
+    if (progress === -1 && task.status !== "InProgress") {
+        return null;
     }
+
+    // Indeterminate når progress mangler
+    const isIndeterminate = progress === -1;
+
+    // Ferdig?
+    const isDone = task.status === "Completed" || progress >= 100;
 
     return (
         <Box mt={1}>
-            <Typography variant="body2">Progress: {task.progress}%</Typography>
-            <LinearProgress variant="determinate" value={task.progress} />
+            {/* Top row: ETA left, percent right */}
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                }}
+            >
+                {/* ETA (kun hvis vi har det) */}
+                {progressUpdate?.progress?.estimatedCompletionSeconds ? (
+                    <Typography variant="body2">
+                        Forventet ferdig om:{" "}
+                        {formatDuration(progressUpdate.progress.estimatedCompletionSeconds)}
+                    </Typography>
+                ) : (
+                    <span /> // holder layouten stabil
+                )}
+
+                {/* Prosent helt til høyre */}
+                <Typography variant="body2">
+                    {isIndeterminate ? "…" : `${progress}%`}
+                </Typography>
+            </Box>
+
+            {/* Progress bar */}
+            <LinearProgress
+                variant={isIndeterminate ? "indeterminate" : "determinate"}
+                value={isIndeterminate ? undefined : progress}
+                color={isDone ? "success" : "primary"}
+                sx={{ mt: 1 }}
+            />
         </Box>
-    )
+    );
 }
+
+

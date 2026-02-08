@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type PropsWithChildren } from 'react'
 import './App.css'
 
 import { Box } from "@mui/material"
@@ -7,6 +7,7 @@ import { ToastContainer } from 'react-toastify'
 import { Sidebar } from "./components/Sidebar"
 import { TopBar } from "./components/TopBar"
 import { HealthProvider } from './context/HealthProvider'
+import { ProgressProvider } from './context/ProgressProvider'
 import DashboardPage from './pages/DasboardPage'
 import EventsPage from './pages/EventsPage'
 import EventsSequencePage from './pages/EventsSequencePage'
@@ -55,13 +56,23 @@ export function AppLayout({ children }: AppLayoutProps) {
   )
 }
 
+export function AppProviders({ children }: PropsWithChildren) {
+  return (
+    <HealthProvider>
+      <ProgressProvider>
+        {children}
+      </ProgressProvider>
+    </HealthProvider>
+  )
+}
+
 
 
 
 function App() {
   return (
     <BrowserRouter>
-      <HealthProvider>
+      <AppProviders>
         <AppLayout>
           <Routes>
             <Route path="/" element={<DashboardPage />} />
@@ -83,7 +94,7 @@ function App() {
             theme='dark'
           />
         </AppLayout>
-      </HealthProvider>
+      </AppProviders>
     </BrowserRouter>
   )
 }

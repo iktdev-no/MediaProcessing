@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { apiGet } from "../api/client"
 import { getCoordinatorHealth } from "../api/health"
-import type { CoordinatorHealth, DiskInfo, EventRate, SequenceHealth } from "../types/backendTypes"
 
 // MUI
 import {
@@ -19,6 +18,7 @@ import { OverdueSequenceCard } from "../components/dashboard/OverdueSequenceCard
 import { StatusHeader } from "../components/dashboard/StatusHeader"
 import { StoragePanel } from "../components/dashboard/StoragePanel"
 import { TaskOverview } from "../components/dashboard/TaskOverview"
+import type { CoordinatorHealth, DiskInfo, EventRate, SequenceHealth } from "../types/transfer-model"
 
 
 

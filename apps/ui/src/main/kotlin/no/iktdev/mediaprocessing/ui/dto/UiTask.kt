@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ui.dto
 
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.TaskStatus
 import java.time.Instant
 import java.util.*
 
@@ -17,6 +18,7 @@ data class UiTask(
     val lastCheckIn: Instant?,
     val persistedAt: Instant,
     val abandoned: Boolean,
+    val logFiles: List<String> = emptyList(),
 
     // Sanntidsfelter (kun fra SSE)
     val progress: Int? = null,
@@ -38,6 +40,7 @@ data class UiTask(
             lastCheckIn = c.lastCheckIn,
             persistedAt = c.persistedAt,
             abandoned = c.abandoned,
+            logFiles = c.logs
         )
     }
 }

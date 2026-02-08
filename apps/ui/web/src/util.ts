@@ -8,18 +8,26 @@ export const normalDate = new Intl.DateTimeFormat("no-NO", {
 })
 
 
-export function parseDurationMs(iso: string | undefined | null): number {
-    if (!iso) return 0
+export function parseDurationMs(iso: string | number | undefined | null): number {
+    if (iso == null) return 0;
 
-    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
-    if (!match) return 0
+    // If backend sends seconds as number
+    if (typeof iso === "number") {
+        return iso * 1000;
+    }
 
-    const hours = match[1] ? Number(match[1]) : 0
-    const minutes = match[2] ? Number(match[2]) : 0
-    const seconds = match[3] ? Number(match[3]) : 0
+    // If backend sends ISO-8601 duration
+    const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return 0;
 
-    return (hours * 3600 + minutes * 60 + seconds) * 1000
+    const hours = match[1] ? Number(match[1]) : 0;
+    const minutes = match[2] ? Number(match[2]) : 0;
+    const seconds = match[3] ? Number(match[3]) : 0;
+
+    return (hours * 3600 + minutes * 60 + seconds) * 1000;
 }
+
+
 export function formatDurationMs(ms: number): string {
     const minutes = Math.floor(ms / 60000)
     const hours = Math.floor(minutes / 60)

@@ -44,7 +44,7 @@ class MigrateCreateStoreTaskListener(
             log.warn { "One or more tasks have failed in  ${event.referenceId}" }
         }
 
-        val migrateContentProjection = MigrateContentProject(useHistory, coordinatorEnv.outgoingContent)
+        val migrateContentProjection = MigrateContentProject(useHistory, coordinatorEnv.outboxFolder)
 
         val collection = migrateContentProjection.useStore?.name ?:
             throw RuntimeException("No content store configured for migration in ${event.referenceId}")

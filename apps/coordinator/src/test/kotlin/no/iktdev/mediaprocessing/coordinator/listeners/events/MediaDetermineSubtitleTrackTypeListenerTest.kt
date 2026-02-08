@@ -2,9 +2,11 @@
 
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
@@ -160,7 +162,12 @@ class MediaDetermineSubtitleTrackTypeListenerTest {
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(subtitleStream = listOf(testCase.stream))
         ).newReferenceId()
-        val result = listener.onEvent(event, emptyList()) as MediaTracksDetermineSubtitleTypeEvent
+        val filePreparedEvent = FilePrepareForWorkResultEvent(status = TaskStatus.Completed)
+            .derivedOf(event)
+        val result = listener.onEvent(filePreparedEvent, listOf(
+            event,
+            filePreparedEvent
+        )) as MediaTracksDetermineSubtitleTypeEvent
 
         if (testCase.expectedKept) {
             assertEquals(1, result.subtitleTrackItems.size)

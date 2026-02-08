@@ -4,9 +4,9 @@ import { Box, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { continueSequence, getActiveSequences } from "../api/sequence"
 import { SequenceRow } from "../components/sequence/SequenceRow"
-import type { SequenceSummary } from "../types/backendTypes"
 
 import { toast } from "react-toastify"
+import type { SequenceSummary } from "../types/transfer-model"
 
 
 export function SequencePage() {

@@ -167,7 +167,9 @@ export default function TasksPage() {
                         padding: 16,
                         display: "grid",
                         gridTemplateColumns: "1fr",
-                        gap: 12
+                        gap: 12,
+                        alignItems: "start",
+                        alignContent: "start"
                     }}
                 >
                     {data.items.map(task => (

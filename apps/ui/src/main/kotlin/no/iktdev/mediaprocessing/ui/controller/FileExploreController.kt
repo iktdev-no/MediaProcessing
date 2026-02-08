@@ -27,9 +27,10 @@ class FileExploreController(
     fun roots(): ResponseEntity<List<IFile>> {
         return ResponseEntity.ok(
             listOfNotNull(
-                explorer.pathToFile(mediaConfig.incoming),
-                explorer.pathToFile(mediaConfig.cache),
-                explorer.pathToFile(mediaConfig.outgoing)
+                explorer.pathToFile(mediaConfig.inbox),
+                explorer.pathToFile(mediaConfig.scratch),
+                explorer.pathToFile(mediaConfig.intermediate),
+                explorer.pathToFile(mediaConfig.outbox)
             )
         )
     }
@@ -57,9 +58,10 @@ class FileExploreController(
 
         // 2. Sikkerhet: sjekk at path er innenfor allowed roots
         val allowedRoots = listOf(
-            mediaConfig.incoming,
-            mediaConfig.cache,
-            mediaConfig.outgoing
+            mediaConfig.inbox,
+            mediaConfig.scratch,
+            mediaConfig.intermediate,
+            mediaConfig.outbox
         ).map { File(it).absoluteFile }
 
         val canonical = file.canonicalFile

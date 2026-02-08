@@ -1,19 +1,26 @@
 package no.iktdev.mediaprocessing.ui
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import no.iktdev.mediaprocessing.ui.dto.SSEMessage
 import no.iktdev.mediaprocessing.ui.service.CoordinatorClient
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import reactor.core.Disposable
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Component
 class UiSseHub(
     private val coordinator: CoordinatorClient,
+    private val objectMapper: ObjectMapper
 ) {
     private val emitters = CopyOnWriteArrayList<SseEmitter>()
     private var listeners: MutableList<SSEStateListener> = mutableListOf()
     private var currentState: CurrentState = CurrentState.DISCONNECTED
+
+    private var sseSubscription: Disposable? = null
 
     init {
         log.info { "UiSseHub initialized" }
@@ -22,7 +29,7 @@ class UiSseHub(
     @PostConstruct
     fun startSSE() {
         log.info { "Starting connection to SSE" }
-        coordinator.connectToSse(onConnected = {
+        sseSubscription = coordinator.connectToSse(onConnected = {
             currentState = CurrentState.CONNECTED
             log.info { "Connected to SSE" }
             listeners.onEach { l -> l.onConnected() } }, onReconnecting = {
@@ -34,12 +41,26 @@ class UiSseHub(
             listeners.onEach { l -> l.onDisconnected() }
         }).subscribe { event ->
             val eventName = event.event()
-            if (eventName == null) {
-                log.error("Received SSE event with no event name ${event.data()}")
-            } else {
-                broadcast(event, eventName)
+            val raw = event.data()
+
+            if (eventName == null || raw == null) {
+                log.error { "Received unknown event $eventName" }
+                return@subscribe
             }
+
+            val parsed = try {
+                objectMapper.readValue(raw as String, Any::class.java)
+            } catch (ex: Exception) {
+                log.error("Failed to parse SSE Payload $raw", ex)
+            }
+            broadcast(parsed, eventName)
         }
+    }
+
+    @PreDestroy
+    fun shutdown() {
+        log.info { "Shutting down SSE connection" }
+        sseSubscription?.dispose()
     }
 
     fun registerListener(listener: SSEStateListener) {
@@ -63,11 +84,12 @@ class UiSseHub(
 
     fun broadcast(event: Any, name: String) {
         val dead = mutableListOf<SseEmitter>()
+        val msg = SSEMessage(name, event)
+        val data = SseEmitter.event()
+            .data(msg)
         emitters.forEach { emitter ->
             try {
-                val data = SSEMessage(name, event)
-                val builder = SseEmitter.event().data(data)
-                emitter.send(builder)
+                emitter.send(data)
             } catch (ex: Exception) {
                 dead.add(emitter)
             }

@@ -3,10 +3,13 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
+import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.shared.common.requireEvent
 import org.springframework.stereotype.Component
 
 @Component
@@ -24,7 +27,13 @@ class MediaDetermineSubtitleTrackTypeListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event as? MediaStreamParsedEvent ?: return null
+        val prepareEvent = event as? FilePrepareForWorkResultEvent ?: return null // feil type → ignorér
+        if (prepareEvent.status != TaskStatus.Completed) {
+            return null
+        }
+
+        val useEvent = history.requireEvent<MediaStreamParsedEvent>()
+
 
         val collected = useEvent.data.subtitleStream
             .mapToType()

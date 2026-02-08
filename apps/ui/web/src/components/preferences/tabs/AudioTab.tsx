@@ -1,19 +1,13 @@
-import type {
-    AacProfile,
-    AudioCodecType,
-    OpusApplication,
-    PreferenceConfig
-} from "../../../types/transfer-model";
-
 import {
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
+    Alert,
+    Checkbox,
+    FormControlLabel,
     Stack,
-    TextField,
     Typography
 } from "@mui/material";
+import type { PreferenceConfig } from "../../../types/transfer-model";
+import { FieldSection } from "../../FieldSection";
+import { AudioCodecEditor } from "./AudioCodecEditor";
 
 export function AudioTab({
     prefs,
@@ -22,143 +16,92 @@ export function AudioTab({
     prefs: PreferenceConfig;
     setPrefs: (p: PreferenceConfig) => void;
 }) {
+    const audioPref = prefs.processer?.audioPreference;
 
-    if (!prefs.processer || !prefs.processer.audioPreference) {
-        return (<Typography variant="subtitle1">Missing valid Processer preference</Typography>)
+    if (!prefs.processer || !audioPref) {
+        return (
+            <Typography variant="subtitle1">
+                Missing valid Processer preference
+            </Typography>
+        );
     }
 
-    const audioCodec = prefs.processer.audioPreference?.codec;
-
-    if (!audioCodec) {
-        return <Typography>No audio preferences configured.</Typography>;
-    }
-
-    const update = (patch: Partial<typeof audioCodec>) =>
+    const updateDefault = (patch: any) =>
         setPrefs({
             ...prefs,
             processer: {
                 ...prefs.processer,
                 audioPreference: {
-                    codec: { ...audioCodec, ...patch }
+                    ...audioPref,
+                    default: { ...audioPref.default, ...patch }
                 }
             }
         });
 
+    const updateExtended = (patch: any) =>
+        setPrefs({
+            ...prefs,
+            processer: {
+                ...prefs.processer,
+                audioPreference: {
+                    ...audioPref,
+                    extended: audioPref.extended
+                        ? { ...audioPref.extended, ...patch }
+                        : { ...patch }
+                }
+            }
+        });
+
+    const toggleExtended = (enabled: boolean) =>
+        setPrefs({
+            ...prefs,
+            processer: {
+                ...prefs.processer,
+                audioPreference: {
+                    ...audioPref,
+                    extended: enabled ? { ...audioPref.default } : null
+                }
+            }
+        });
+
+    const extended = audioPref.extended;
+    const defaultChannels = audioPref.default.channels ?? 2;
+    const extendedChannels = extended?.channels ?? 2;
+
+
     return (
-        <Stack spacing={3}>
+        <Stack spacing={4}>
             <Typography variant="h5">Audio Encoding</Typography>
 
-            {/* Codec Type */}
-            <FormControl fullWidth>
-                <InputLabel id="audio-codec-label">Codec</InputLabel>
-                <Select
-                    labelId="audio-codec-label"
-                    label="Codec"
-                    value={audioCodec.type}
-                    onChange={e => update({ type: e.target.value as AudioCodecType })}
-                >
-                    {[
-                        "AAC",
-                        "MP3",
-                        "OPUS",
-                        "VORBIS",
-                        "FLAC",
-                        "AC3",
-                        "EAC3",
-                        "DTS",
-                        "PCM",
-                        "COPY"
-                    ].map(c => (
-                        <MenuItem key={c} value={c}>
-                            {c}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+            {/* Default */}
+            <FieldSection title="Default Audio">
+                <AudioCodecEditor codec={audioPref.default} onChange={updateDefault} />
+            </FieldSection>
 
-            {/* Bitrate */}
-            <TextField
-                fullWidth
-                type="number"
-                label="Bitrate (kbps)"
-                value={audioCodec.bitrate ?? ""}
-                onChange={e =>
-                    update({ bitrate: e.target.value ? Number(e.target.value) : null })
+            {/* Toggle extended */}
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={!!extended}
+                        onChange={(e) => toggleExtended(e.target.checked)}
+                    />
                 }
+                label="Enable Extended Audio Encoding (Surround)"
             />
 
-            {/* Channels */}
-            <TextField
-                fullWidth
-                type="number"
-                label="Channels"
-                value={audioCodec.channels ?? ""}
-                onChange={e =>
-                    update({ channels: e.target.value ? Number(e.target.value) : null })
-                }
-            />
+            {/* Extended */}
+            {extended && (
+                <FieldSection title="Extended Audio (Surround)">
+                    <AudioCodecEditor codec={extended} onChange={updateExtended} />
 
-            {/* Sample Rate */}
-            <TextField
-                fullWidth
-                type="number"
-                label="Sample Rate (Hz)"
-                value={audioCodec.sampleRate ?? ""}
-                onChange={e =>
-                    update({ sampleRate: e.target.value ? Number(e.target.value) : null })
-                }
-            />
+                    {extended && extendedChannels < defaultChannels && (
+                        <Alert severity="warning" sx={{ mt: 1 }}>
+                            Extended audio har færre kanaler enn default. Dette kan være uønsket.
+                        </Alert>
+                    )}
 
-            {/* AAC Profile */}
-            {audioCodec.type === "AAC" && (
-                <FormControl fullWidth>
-                    <InputLabel id="aac-profile-label">AAC Profile</InputLabel>
-                    <Select
-                        labelId="aac-profile-label"
-                        label="AAC Profile"
-                        value={audioCodec.profile ?? ""}
-                        onChange={e =>
-                            update({ profile: e.target.value as AacProfile })
-                        }
-                    >
-                        <MenuItem value="LC">LC</MenuItem>
-                        <MenuItem value="HE">HE</MenuItem>
-                        <MenuItem value="HEv2">HEv2</MenuItem>
-                    </Select>
-                </FormControl>
+                </FieldSection>
             )}
-
-            {/* Opus Application */}
-            {audioCodec.type === "OPUS" && (
-                <FormControl fullWidth>
-                    <InputLabel id="opus-app-label">Opus Application</InputLabel>
-                    <Select
-                        labelId="opus-app-label"
-                        label="Opus Application"
-                        value={audioCodec.application ?? ""}
-                        onChange={e =>
-                            update({ application: e.target.value as OpusApplication })
-                        }
-                    >
-                        <MenuItem value="Audio">Audio</MenuItem>
-                        <MenuItem value="Voip">Voip</MenuItem>
-                        <MenuItem value="LowDelay">Low Delay</MenuItem>
-                    </Select>
-                </FormControl>
-            )}
-
-            {/* Compression Level */}
-            <TextField
-                fullWidth
-                type="number"
-                label="Compression Level"
-                value={audioCodec.compressionLevel ?? ""}
-                onChange={e =>
-                    update({
-                        compressionLevel: e.target.value ? Number(e.target.value) : null
-                    })
-                }
-            />
         </Stack>
     );
 }

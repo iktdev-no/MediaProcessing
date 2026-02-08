@@ -20,13 +20,13 @@ class CoordinatorPreferenceService(
 
     fun getFull(): Mono<PreferenceConfig> =
         coordinatorWebClient.get()
-            .uri("/preferences")
+            .uri("/preference")
             .retrieve()
             .bodyToMono(PreferenceConfig::class.java)
 
     fun updateFull(body: PreferenceConfig): Mono<PreferenceConfig> =
         coordinatorWebClient.put()
-            .uri("/preferences")
+            .uri("/preference")
             .bodyValue(body)
             .retrieve()
             .bodyToMono(PreferenceConfig::class.java)
@@ -38,13 +38,13 @@ class CoordinatorPreferenceService(
 
     fun getLanguage(): Mono<LanguagePreference> =
         coordinatorWebClient.get()
-            .uri("/preferences/language")
+            .uri("/preference/language")
             .retrieve()
             .bodyToMono(LanguagePreference::class.java)
 
     fun updateLanguage(body: LanguagePreference): Mono<LanguagePreference> =
         coordinatorWebClient.put()
-            .uri("/preferences/language")
+            .uri("/preference/language")
             .bodyValue(body)
             .retrieve()
             .bodyToMono(LanguagePreference::class.java)
@@ -56,13 +56,13 @@ class CoordinatorPreferenceService(
 
     fun getProcesser(): Mono<ProcesserPreference> =
         coordinatorWebClient.get()
-            .uri("/preferences/processer")
+            .uri("/preference/processer")
             .retrieve()
             .bodyToMono(ProcesserPreference::class.java)
 
     fun updateProcesser(body: ProcesserPreference): Mono<ProcesserPreference> =
         coordinatorWebClient.put()
-            .uri("/preferences/processer")
+            .uri("/preference/processer")
             .bodyValue(body)
             .retrieve()
             .bodyToMono(ProcesserPreference::class.java)

@@ -2,11 +2,15 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
+import no.iktdev.mediaprocessing.shared.common.requireEvent
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
 
 @Component
@@ -18,7 +22,14 @@ class MediaSelectEncodeTracksListener(
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event as? MediaStreamParsedEvent ?: return null
+
+        val prepareEvent = event.requireQualifiedEntry<FilePrepareForWorkResultEvent>()
+        if (prepareEvent.status != TaskStatus.Completed) {
+            return null
+        }
+
+        val useEvent = history.find { it is MediaStreamParsedEvent } as? MediaStreamParsedEvent ?: return null
+
 
         val videoTrackIndex = getVideoTrackToUse(useEvent.data.videoStream)
         val audioTracks = getAudioTracksForAllPreferredLanguages(useEvent.data.audioStream)

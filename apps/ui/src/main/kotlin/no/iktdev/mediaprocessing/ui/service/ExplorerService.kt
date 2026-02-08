@@ -12,7 +12,7 @@ class ExplorerService(
 ) {
 
     fun listHome(): List<IFile> =
-        listAt(mediaConfig.incoming)
+        listAt(mediaConfig.inbox)
 
     fun listAt(path: String): List<IFile> {
         val dir = File(path)

@@ -1,4 +1,5 @@
 import type { PagedUiTask, ResetTaskResponse, TaskQuery } from "../types/backendTypes";
+import type { ProgressUpdate } from "../types/types";
 import { apiGet, buildQuery } from "./client";
 
 export function getTasks(query: TaskQuery) {
@@ -16,4 +17,8 @@ export function resetFailedTask(
     } else {
         return apiGet<ResetTaskResponse>(`/tasks/${taskId}/reset`, opts)
     }
+}
+
+export function getProgress() {
+    return apiGet<ProgressUpdate[]>("/tasks/progress")
 }
