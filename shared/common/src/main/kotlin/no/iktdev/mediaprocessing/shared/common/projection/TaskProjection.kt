@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection.TaskStatus
 import java.util.*
@@ -88,6 +89,14 @@ class TaskProjection(val events: List<Event>) {
             // Ellers → baseStatus (Completed, Failed, Pending, NotInitiated)
             else -> baseStatus
         }
+    }
+
+    fun projectPrepareFileForWorkStatus(): TaskStatus {
+        return projectStatus<FilePrepareForWorkTaskCreatedEvent, FilePrepareForWorkResultEvent>(
+            createdIds = { it.map { e -> e.taskId } },
+            resultStatus = { it.status },
+            resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
+        )
     }
 
     fun projectMigrateContentStatus(): TaskStatus {

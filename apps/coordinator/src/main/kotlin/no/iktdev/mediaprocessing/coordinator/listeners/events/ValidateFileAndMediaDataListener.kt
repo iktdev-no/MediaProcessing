@@ -6,7 +6,6 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.FFprobeFormat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
@@ -71,11 +70,24 @@ class ValidateFileAndMediaDataListener : EventListener() {
         val formatObj = json.getAsJsonObject("format") ?: return null
 
         return try {
-            Gson().fromJson(formatObj, FFprobeFormat::class.java)
+            val parsed = Gson().fromJson(formatObj, FFprobeFormat::class.java)
+
+            // Kritiske felter må være tilstede
+            if (parsed.duration == null ||
+                parsed.size == null ||
+                parsed.bit_rate == null ||
+                parsed.nb_streams == null ||
+                parsed.probe_score == null
+            ) {
+                return null
+            }
+
+            parsed
         } catch (e: Exception) {
             null
         }
     }
+
 
     // ---------------------------------------------------------
     // 1) Functional validation
@@ -114,27 +126,30 @@ class ValidateFileAndMediaDataListener : EventListener() {
         warnings: MutableList<String>
     ): ValidateFileAndMediaDataEvent? {
 
-        val duration = format.duration.toDoubleOrNull() ?: -1.0
+        val duration = format.duration?.toDoubleOrNull() ?: return reject("Invalid duration: ${format.duration}")
         if (duration <= 0.0) return reject("Invalid duration: ${format.duration}")
 
-        val size = format.size.toLongOrNull() ?: -1L
+        val size = format.size?.toLongOrNull() ?: return reject("Invalid file size: ${format.size}")
         if (size <= 0L) return reject("Invalid file size: ${format.size}")
 
-        val bitrate = format.bit_rate.toLongOrNull() ?: -1L
+        val bitrate = format.bit_rate?.toLongOrNull() ?: -1L
         if (bitrate <= 0L) warnings += "Bitrate reported as ${format.bit_rate}"
 
-        if (format.nb_streams <= 0) return reject("No streams detected in container")
+        val streams = format.nb_streams ?: return reject("No streams detected in container")
+        if (streams <= 0) return reject("No streams detected in container")
 
+        val probe = format.probe_score ?: return reject("Invalid probe_score")  // non-null by design
         when {
-            format.probe_score < 25 ->
-                return reject("Low probe_score (${format.probe_score}) indicates corruption")
+            probe < 25 ->
+                return reject("Low probe_score ($probe) indicates corruption")
 
-            format.probe_score < 50 ->
-                warnings += "Low probe_score (${format.probe_score})"
+            probe < 50 ->
+                warnings += "Low probe_score ($probe)"
         }
 
         return null
     }
+
 
     // ---------------------------------------------------------
     // 3) File size consistency validation
@@ -155,7 +170,7 @@ class ValidateFileAndMediaDataListener : EventListener() {
         val actualSize = file.length()
         if (actualSize <= 0L) return reject("Actual file size is zero")
 
-        val ffprobeSize = format.size.toLongOrNull() ?: return reject("Invalid ffprobe size: ${format.size}")
+        val ffprobeSize = format.size?.toLongOrNull() ?: return reject("Invalid ffprobe size: ${format.size}")
 
         // Exact mismatch → warning
         if (ffprobeSize != actualSize) {
@@ -180,7 +195,7 @@ class ValidateFileAndMediaDataListener : EventListener() {
         format: FFprobeFormat,
         warnings: MutableList<String>
     ) {
-        val duration = format.duration.toDoubleOrNull() ?: return
+        val duration = format.duration?.toDoubleOrNull() ?: return
 
         fun checkStreamDuration(type: String, index: Int, dur: String?) {
             if (dur == null || dur == "0.000000") {
