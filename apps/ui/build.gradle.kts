@@ -56,6 +56,7 @@ tasks.register("generateTs") {
 }
 
 tasks.named("build") {
+    dependsOn(":transfer-model:generateTs")
     finalizedBy("generateTs")
 }
 

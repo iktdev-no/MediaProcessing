@@ -81,7 +81,7 @@ jobs:
           - app: coordinator
             enabled: true
           - app: ui
-            enabled: false
+            enabled: true
 
     uses: ./.github/workflows/build-java-app.yml
     with:
