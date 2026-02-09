@@ -37,6 +37,8 @@ jobs:
       - name: Build React frontend
         if: ${{ steps.detect_web.outputs.has_web == 'true' }}
         run: |
+          cd ../../
+          chmod +x ./gradlew
           cd apps/${{ inputs.app }}/web
           npm install
           export CI=false
