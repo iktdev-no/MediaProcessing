@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class ProcesserProperties(
     val coordinatorUrl: String,
     val coordinatorPingOnStartup: Boolean,
-    val allowOverwrite: Boolean
+    val allowOverwrite: Boolean,
+    val enableSegmentedTaskListener: Boolean
 )

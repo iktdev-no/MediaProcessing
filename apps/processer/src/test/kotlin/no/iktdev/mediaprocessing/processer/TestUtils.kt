@@ -2,11 +2,13 @@ package no.iktdev.mediaprocessing.processer
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.config.DirectoryProperties
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.io.File
 
 object TestUtils {
     fun getFileUtil(): FileUtil {
@@ -25,7 +27,8 @@ object TestUtils {
 
     fun getExecutableConfig(): ExecutablesConfig {
         return ExecutablesConfig(
-            ffmpeg = "ffmpeg"
+            ffmpeg = "ffmpeg",
+            ffprobe = "ffprobe"
         )
     }
 
@@ -38,4 +41,10 @@ fun assertSameReferenceId(task: Task, event: Event?) {
         event.referenceId,
         "Expected event to keep same referenceId as task"
     )
+}
+
+fun WorkingFolder() = File("build").using("test-run")
+
+fun WorkingFile(name: String): File {
+    return File("build").using("test-run", name)
 }

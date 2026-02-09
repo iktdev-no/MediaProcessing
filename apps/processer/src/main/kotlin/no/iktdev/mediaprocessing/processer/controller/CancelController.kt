@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.processer.controller
 
 import no.iktdev.mediaprocessing.processer.listeners.SubtitleTaskListener
-import no.iktdev.mediaprocessing.processer.listeners.VideoTaskListener
+import no.iktdev.mediaprocessing.processer.listeners.LinearVideoTaskListener
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 @Controller
 class CancelController {
     @Autowired
-    lateinit var videoTaskListener: VideoTaskListener
+    lateinit var linearVideoTaskListener: LinearVideoTaskListener
     @Autowired
     lateinit var subtitleTaskListener: SubtitleTaskListener
 
@@ -22,8 +22,8 @@ class CancelController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No eventId provided!")
         }
         var canceled: Boolean = false
-        if (videoTaskListener.currentTaskId?.toString() == eventId) {
-            videoTaskListener.currentJob?.cancel()
+        if (linearVideoTaskListener.currentTaskId?.toString() == eventId) {
+            linearVideoTaskListener.currentJob?.cancel()
             canceled = true
         }
         if (subtitleTaskListener.currentTaskId?.toString() == eventId) {

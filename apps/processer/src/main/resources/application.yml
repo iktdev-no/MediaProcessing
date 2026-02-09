@@ -35,9 +35,11 @@ processer:
   coordinator-url: http://coordinator:8080
   coordinator-ping-on-startup: true
   allow-overwrite: false
+  enableSegmentedTaskListener: true
 
 executables:
   ffmpeg: ffmpeg
+  ffprobe: ffprobe
 
 directories:
   logs: /data/logs

@@ -1,93 +1,89 @@
 package no.iktdev.mediaprocessing.processer.listeners
 
-import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
-import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
-import no.iktdev.mediaprocessing.processer.CoordinatorClient
-import no.iktdev.mediaprocessing.processer.LocalProgressCache
-import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
-import no.iktdev.mediaprocessing.processer.config.FileUtil
+import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.processer.strategy.EncodingStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
-import org.springframework.stereotype.Service
+import org.jetbrains.annotations.VisibleForTesting
 import java.io.File
-import java.util.*
 
-@Service
-class VideoTaskListener(
-    private var coordinatorWebClient: CoordinatorClient,
-    private val localProgress: LocalProgressCache,
-    private val executableConfig: ExecutablesConfig,
-    private val fileUtil: FileUtil,
-) : FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
-    private val log = KotlinLogging.logger {}
-
-    override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
+abstract class VideoTaskListener(taskType: TaskType, private val processerProperties: ProcesserProperties): FfmpegTaskListener(taskType) {
 
     override fun supports(task: Task) = task is EncodeTask
 
     override fun accept(task: Task, reporter: TaskReporter): Boolean {
-        val accepts = super.accept(task, reporter)
-        if (accepts) {
-            log.info { "${getWorkerId()} accepts video task ${task.taskId}" }
+        if (!supports(task)) return false
+        task as EncodeTask
+
+        val determinedStrategy = getEncodeStrategy(task)
+        val strategy = if (!processerProperties.enableSegmentedTaskListener && determinedStrategy == EncodingStrategy.Segmented)
+            EncodingStrategy.Linear
+        else determinedStrategy
+
+        return when (strategy) {
+            EncodingStrategy.Segmented ->
+                if (this is SegmentedVideoTaskListener) super.accept(task, reporter) else false
+
+            EncodingStrategy.Linear ->
+                if (this is LinearVideoTaskListener) super.accept(task, reporter) else false
         }
-        return accepts
     }
 
-    override suspend fun onTask(task: Task): Event? {
-        val taskData = task as EncodeTask
-        val cachedOutFile = fileUtil.getTemporaryStoreFile(taskData.data.outputFileName).also {
-            if (!it.parentFile.exists()) {
-                it.parentFile.mkdirs()
-            }
-        }
-        if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
-            reporter?.publishEvent(
-                ProcesserEncodeResultEvent(
-                    status = TaskStatus.Failed
-                ).producedFrom(task)
-            )
-            throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
+
+    @VisibleForTesting
+    internal fun getEncodeStrategy(task: EncodeTask): EncodingStrategy {
+        val args = task.data.arguments ?: emptyList()
+
+        fun containsAll(vararg tokens: String): Boolean =
+            tokens.all { args.contains(it) }
+
+        fun hasFlagWithValue(flag: String, value: String): Boolean {
+            val index = args.indexOf(flag)
+            return index >= 0 && index + 1 < args.size && args[index + 1] == value
         }
 
-        val arguments = MpegArgument()
-            .inputFile(taskData.data.inputFile)
-            .outputFile(cachedOutFile.absolutePath)
-            .args(taskData.data.arguments)
-            .withProgress(true)
+        val touchesVideo = args.any { it.startsWith("-c:v") || it == "-vf" || it == "-filter_complex" }
+        val touchesAudio = args.any { it.startsWith("-c:a") || it == "-af" }
 
-        val logDirectory = fileUtil.getLogDirectory().using("encode")
-        val result = getFfmpeg(
-            listener = listener,
-            logDirectory = logDirectory,
-            execPath = executableConfig.ffmpeg
-        )
-        withHeartbeatRunner {
-            reporter?.updateLastSeen(task.taskId)
-        }
-        result.run(arguments)
-        if (result.result.resultCode != 0) {
-            throw FfmpegFailedException(
-                logFile = result.logFile,
-                "FFmpeg worker returned non zero result code, was ${result.result.resultCode}"
-            )
+        // 1. Pure copy → Linear
+        if (hasFlagWithValue("-c", "copy") ||
+            hasFlagWithValue("-c:v", "copy") ||
+            hasFlagWithValue("-c:a", "copy")
+        ) {
+            return EncodingStrategy.Linear
         }
 
-        return ProcesserEncodeResultEvent(
-            status = TaskStatus.Completed,
-            logFile = result.logFile.absolutePath,
-            data = ProcesserEncodeResultEvent.EncodeResult(
-                cachedOutputFile = cachedOutFile.absolutePath
-            )
-        ).producedFrom(task)
+        // 2. Concat → Linear
+        if (containsAll("-f", "concat"))
+            return EncodingStrategy.Linear
+
+        // 3. Seek-before-input → Linear
+        if (args.contains("-ss") && args.indexOf("-ss") < args.indexOf("-i"))
+            return EncodingStrategy.Linear
+
+        // 4. Trim → Linear
+        if (args.contains("-t") || args.contains("-to"))
+            return EncodingStrategy.Linear
+
+        // 5. Audio-only re-encode → Linear
+        if (touchesAudio && !touchesVideo)
+            return EncodingStrategy.Linear
+
+        // 6. Video re-encode or filtergraph → Segmented
+        if (touchesVideo)
+            return EncodingStrategy.Segmented
+
+        // 7. Default: Linear (safe fallback)
+        return EncodingStrategy.Linear
     }
+
+
 
     override fun createIncompleteStateTaskEvent(
         task: Task,
@@ -103,55 +99,17 @@ class VideoTaskListener(
         return ProcesserEncodeResultEvent(null, logFile, status, error = message).producedFrom(task)
     }
 
-    val listener = object : FFmpeg.Listener {
-        var lastProgress: FfmpegDecodedProgress? = null
-        override fun onStarted(inputFile: String) {
-        }
-
-        override fun onCompleted(inputFile: String, outputFile: String) {
-            currentTask?.let {
-                coordinatorWebClient.reportProgress(
-                    referenceId = it.referenceId.toString(),
-                    taskId = it.taskId.toString(),
-                    percent = FfmpegDecodedProgress(
-                        100,
-                        "",
-                        lastProgress?.duration ?: "",
-                        "0",
-                        estimatedCompletion = "",
-                        estimatedCompletionSeconds = 0
-                    ),
-                    ""
-                )
-            }
-        }
-
-        override fun onProgressChanged(
-            inputFile: String,
-            progress: FfmpegDecodedProgress
-        ) {
-            lastProgress = progress
-            currentTask?.let {
-                localProgress.update(it.taskId, progress)
-                coordinatorWebClient.reportProgress(
-                    referenceId = it.referenceId.toString(),
-                    taskId = it.taskId.toString(),
-                    percent = progress,
-                    ""
-                )
-            }
-
-        }
-    }
-
     override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
-        return VideoFFmpeg(execPath = executableConfig.ffmpeg,
+        return VideoFFmpeg(execPath = execPath,
             logDirectory = logDirectory,
             listener = listener)
     }
 
-    class VideoFFmpeg(override val listener: Listener? = null, private val execPath: String, val logDirectory: File) :
-        FFmpeg(executable = execPath, logDir = logDirectory) {
+    class VideoFFmpeg(
+        override val listener: Listener? = null,
+        private val execPath: String,
+        val logDirectory: File
+    ) : FFmpeg(executable = execPath, logDir = logDirectory) {
 
         override fun onCreate() {
             super.onCreate()
@@ -160,4 +118,5 @@ class VideoTaskListener(
             }
         }
     }
+
 }

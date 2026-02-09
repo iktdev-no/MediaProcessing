@@ -1,176 +1,105 @@
 package no.iktdev.mediaprocessing.processer.listeners
 
-import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
-import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.eventi.tasks.TaskReporter
-import no.iktdev.eventi.tasks.TaskTypeRegistry
-import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.processer.CoordinatorClient
-import no.iktdev.mediaprocessing.processer.LocalProgressCache
-import no.iktdev.mediaprocessing.processer.TestUtils
-import no.iktdev.mediaprocessing.processer.assertSameReferenceId
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
+import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.mediaprocessing.processer.WorkingFile
+import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.processer.strategy.EncodingStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
-import java.util.*
-import kotlin.system.measureTimeMillis
+import java.util.UUID
 
 class VideoTaskListenerTest {
 
-
-    class TestListener(val delay: Long, coordinatorClient: CoordinatorClient) :
-        VideoTaskListener(
-            coordinatorWebClient = coordinatorClient,
-            localProgress = LocalProgressCache(),
-            fileUtil = TestUtils.getFileUtil(),
-            executableConfig = TestUtils.getExecutableConfig(),
-        ) {
-        fun getJob() = currentJob
-
-        private var _result: Event? = null
-        fun getResult(): Event? {
-            return _result
-        }
-
-        override fun onComplete(task: Task, result: Event?) {
-            this._result = result
-        }
-
-        override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
-            return MockFFmpeg(delayMillis = delay, listener = MockFFmpeg.emptyListener())
-        }
-    }
-
-    val overrideReporter = object : TaskReporter {
-        override fun markClaimed(taskId: UUID, workerId: String) {}
-        override fun updateLastSeen(taskId: UUID) {}
-        override fun markCompleted(taskId: UUID) {}
-        override fun markFailed(referenceId: UUID, taskId: UUID) {}
-        override fun markCancelled(referenceId: UUID, taskId: UUID) {}
-        override fun updateProgress(taskId: UUID, progress: Int) {}
-        override fun log(taskId: UUID, message: String) {}
-        override fun publishEvent(event: Event) {
-
-        }
-    }
-
-    @BeforeEach
-    fun setup() {
-        TaskTypeRegistry.register(EncodeTask::class.java)
-    }
-
-    private val coordinatorClient = mockk<CoordinatorClient>(relaxed = true)
-
-    @Test
-    fun `onTask waits for runner to complete`() = runTest {
-        val delay = 1000L
-        val testTask = EncodeTask(
-            EncodeData(
-                inputFile = "input.mp4",
-                outputFileName = "output.mp4",
-                arguments = listOf("-y")
-            )
-        ).newReferenceId()
-
-        val listener = TestListener(delay, coordinatorClient)
-
-        val time = measureTimeMillis {
-            listener.accept(testTask, overrideReporter)
-            listener.getJob()?.join()
-            val event = listener.getResult()
-            assertTrue(event is ProcesserEncodeResultEvent)
-            assertEquals(TaskStatus.Completed, (event as ProcesserEncodeResultEvent).status)
-        }
-
-        assertTrue(time >= delay, "Expected onTask to wait at least $delay ms, waited for $time ms")
-        assertTrue(time <= (delay * 2), "Expected onTask to wait less than ${(delay * 2)} ms, waited for $time ms")
-
-    }
-
-    @Test
-    @DisplayName("""
-        Når en event produseres fra en task
-        Hvis task har en gitt referenceId
-        Så:
-            Skal eventen ha samme referenceId
-        """
+    private val props = ProcesserProperties(
+        coordinatorUrl = "http://localhost",
+        coordinatorPingOnStartup = false,
+        allowOverwrite = true,
+        enableSegmentedTaskListener = true
     )
-    fun producedFrom_keeps_referenceId() {
-        val task = EncodeTask(
-            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", arguments = listOf("-y"))
-        ).newReferenceId()
 
-        val event = ProcesserEncodeResultEvent(
-            status = TaskStatus.Completed
-        ).producedFrom(task)
 
-        assertSameReferenceId(task, event)
+    private val listener = object : VideoTaskListener(TaskType.CPU_INTENSIVE, props) {
+        override fun getWorkerId(): String {
+            return UUID.randomUUID().toString()
+        }
+
+        override suspend fun onTask(task: Task): Event? {
+            return null
+        }
     }
 
-    @Test
-    @DisplayName("""
-        Når en task feiler og createIncompleteStateTaskEvent kalles
-        Hvis task har en referenceId
-        Så:
-            Skal eventen som returneres ha samme referenceId
-    """)
-    fun createIncompleteStateTaskEvent_keeps_referenceId() {
-        val task = EncodeTask(
-            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", arguments = listOf("-y"))
-        ).newReferenceId()
-
-        val listener = VideoTaskListener(
-            coordinatorWebClient = coordinatorClient,
-            localProgress = LocalProgressCache(),
-            fileUtil = TestUtils.getFileUtil(),
-            executableConfig = TestUtils.getExecutableConfig()
-        )
-
-        val event = listener.createIncompleteStateTaskEvent(
-            task = task,
-            status = TaskStatus.Failed,
-            exception = RuntimeException("boom")
-        )
-
-        assertSameReferenceId(task, event)
-    }
-
-    @Test
-    @DisplayName("""
-        Når VideoTaskListener kjører en EncodeTask
-        Hvis task har en referenceId
-        Så:
-            Skal resultat-eventen ha samme referenceId
-        """)
-    fun onTask_keeps_referenceId() = runTest {
-        val task = EncodeTask(
-            EncodeData(
-                inputFile = "input.mp4",
-                outputFileName = "output.mp4",
-                arguments = listOf("-y")
+    private fun taskWithArgs(vararg args: String): EncodeTask {
+        return EncodeTask(
+            data = EncodeData(
+                inputFile = WorkingFile("Test-in.mvk").absolutePath,
+                outputFileName = WorkingFile("Test-out.mp4").absolutePath,
+                arguments = args.toList()
             )
-        ).newReferenceId()
-
-        val listener = TestListener(delay = 10, coordinatorClient)
-
-        listener.accept(task, overrideReporter)
-        listener.getJob()?.join()
-
-        val event = listener.getResult()
-        assertTrue(event is ProcesserEncodeResultEvent)
-        assertSameReferenceId(task, event)
+        ).apply { newReferenceId() }
     }
 
+    @Test
+    @DisplayName("""
+        Når encode-argumentene kun inneholder copy
+        Hvis getEncodeStrategy() kalles
+        Så:
+            Skal Linear returneres
+    """)
+    fun copy_returns_linear() {
+        val task = taskWithArgs("-c", "copy")
+        assertEquals(EncodingStrategy.Linear, listener.getEncodeStrategy(task))
+    }
 
+    @Test
+    @DisplayName("""
+        Når encode-argumentene kun påvirker audio
+        Hvis getEncodeStrategy() kalles
+        Så:
+            Skal Linear returneres
+    """)
+    fun audio_only_returns_linear() {
+        val task = taskWithArgs("-c:a", "aac")
+        assertEquals(EncodingStrategy.Linear, listener.getEncodeStrategy(task))
+    }
 
+    @Test
+    @DisplayName("""
+        Når encode-argumentene påvirker video
+        Hvis getEncodeStrategy() kalles
+        Så:
+            Skal Segmented returneres
+    """)
+    fun video_reencode_returns_segmented() {
+        val task = taskWithArgs("-c:v", "libx264")
+        assertEquals(EncodingStrategy.Segmented, listener.getEncodeStrategy(task))
+    }
 
+    @Test
+    @DisplayName("""
+        Når encode-argumentene inneholder filtergraph
+        Hvis getEncodeStrategy() kalles
+        Så:
+            Skal Segmented returneres
+    """)
+    fun filtergraph_returns_segmented() {
+        val task = taskWithArgs("-vf", "scale=1920:1080")
+        assertEquals(EncodingStrategy.Segmented, listener.getEncodeStrategy(task))
+    }
+
+    @Test
+    @DisplayName("""
+        Når encode-argumentene inneholder concat
+        Hvis getEncodeStrategy() kalles
+        Så:
+            Skal Linear returneres
+    """)
+    fun concat_returns_linear() {
+        val task = taskWithArgs("-f", "concat")
+        assertEquals(EncodingStrategy.Linear, listener.getEncodeStrategy(task))
+    }
 }
