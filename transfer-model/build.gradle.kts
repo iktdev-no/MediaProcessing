@@ -33,6 +33,7 @@ dependencies {
 }
 
 tasks.register("generateTs") {
+    dependsOn("build")
     doLast {
         val classesDir = file("$projectDir/build/classes/kotlin/main")
         val cl = URLClassLoader(arrayOf(classesDir.toURI().toURL()), TsGenerator::class.java.classLoader)
@@ -44,6 +45,7 @@ tasks.register("generateTs") {
         )
     }
 }
+
 
 tasks.named("build") {
     finalizedBy("generateTs")
