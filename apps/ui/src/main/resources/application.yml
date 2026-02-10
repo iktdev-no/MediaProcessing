@@ -37,14 +37,14 @@ mediaprocessing:
       address: http://coordinator:8080
       health: /actuator/health
     processer:
-      address: http://processor:8080
+      address: http://processer:8080
       health: /actuator/health
     converter:
       address: http://converter:8080
       health: /actuator/health
     metadata:
-      address: http://py-metadata:8080
+      address: http://metadata:8080
       health: /health
     watcher:
-      address: http://py-watcher:8080
+      address: http://watcher:8080
       health: /health
