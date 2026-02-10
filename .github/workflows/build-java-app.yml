@@ -61,7 +61,7 @@ jobs:
         run: |
           rm -rf apps/${{ inputs.app }}/src/main/resources/static
           mkdir -p apps/${{ inputs.app }}/src/main/resources/static
-          cp -r apps/${{ inputs.app }}/web/build/* apps/${{ inputs.app }}/src/main/resources/static
+          cp -r apps/${{ inputs.app }}/web/dist/* apps/${{ inputs.app }}/src/main/resources/static
 
       - name: Extract version
         run: |
