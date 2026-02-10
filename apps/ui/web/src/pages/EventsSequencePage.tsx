@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { getEffectiveEventsHistory } from "../api/events"
 import { EventsTable } from "../components/event/EventsTable"
-import type { UiEvent } from "../types/backendTypes"
+import type { UiEvent } from "../types/types"
 
 export default function EventSequencePage() {
     const { referenceId } = useParams<{ referenceId: string }>()

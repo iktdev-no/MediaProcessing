@@ -1,4 +1,4 @@
-import type { CoordinatorHealth } from "../types/backendTypes";
+import type { CoordinatorHealth } from "../types/transfer-model";
 import { apiGet } from "./client";
 
 export function getCoordinatorHealth() {

@@ -1,4 +1,4 @@
-import type { SequenceSummary } from "../types/backendTypes"
+import type { SequenceSummary } from "../types/transfer-model"
 import { apiGet, apiPost } from "./client"
 
 export function getActiveSequences() {

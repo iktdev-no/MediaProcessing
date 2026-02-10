@@ -1,6 +1,6 @@
 import AutorenewIcon from "@mui/icons-material/Autorenew"
 import BuildIcon from "@mui/icons-material/Build"
-import type { Mode } from "../../types/backendTypes"
+import type { Mode } from "../../types/transfer-model"
 
 export function ModeIcon({ mode }: { mode: Mode }) {
     if (mode === "Auto") {

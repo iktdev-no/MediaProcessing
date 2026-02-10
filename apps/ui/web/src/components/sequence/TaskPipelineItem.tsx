@@ -1,5 +1,5 @@
 import { Box } from "@mui/material"
-import type { TaskStatus } from "../../types/backendTypes"
+import type { TaskStatus } from "../../types/transfer-model"
 import { TaskStatusIcon } from "../task/TaskStatus"
 
 export function TaskPipelineItem({

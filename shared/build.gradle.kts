@@ -12,7 +12,3 @@ repositories {
     maven { url = uri("https://reposilite.iktdev.no/releases") }
     maven { url = uri("https://reposilite.iktdev.no/snapshots") }
 }
-
-kotlin {
-    jvmToolchain(21)
-}

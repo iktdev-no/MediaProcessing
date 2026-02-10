@@ -4,15 +4,16 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import ErrorIcon from "@mui/icons-material/Error"
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"
 import { keyframes } from "@mui/material"
-import type { TaskStatus } from "../../types/backendTypes"
+import type { TaskStatus } from "../../types/transfer-model"
 
 const spin = keyframes({
     from: { transform: "rotate(0deg)" },
     to: { transform: "rotate(360deg)" }
 })
 
-export function TaskStatusIcon({ status }: { status: TaskStatus }) {
-    switch (status) {
+export function TaskStatusIcon({ status }: { status: string }) {
+    const taskStatus = status as TaskStatus
+    switch (taskStatus) {
         case "Pending":
             return (
                 <HourglassEmptyIcon

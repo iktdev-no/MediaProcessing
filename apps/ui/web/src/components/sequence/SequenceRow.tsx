@@ -9,7 +9,7 @@ import MovieIcon from '@mui/icons-material/Movie';
 import PlayLessonIcon from '@mui/icons-material/PlayLesson';
 import TransformIcon from '@mui/icons-material/Transform';
 import { Box, Button, IconButton, Paper, Stack, Typography } from "@mui/material";
-import type { SequenceSummary } from "../../types/backendTypes";
+import type { SequenceSummary } from '../../types/transfer-model';
 import { colorFromUuid } from "../../util";
 import { ModeIcon } from "./ModeIcon";
 import { StateIcon } from "./StateIcon";

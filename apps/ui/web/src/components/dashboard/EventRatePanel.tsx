@@ -14,14 +14,14 @@ export function EventRatePanel({ rate }: { rate: EventRate | null }) {
 
     return (
         <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
                 <Paper sx={{ p: 2, border: 1, borderColor: "info.main" }}>
                     <Typography><FlashOnIcon /> Events siste minutt</Typography>
                     <Typography variant="h4">{rate.lastMinute}</Typography>
                 </Paper>
             </Grid>
 
-            <Grid item xs={6}>
+            <Grid size={{ xs: 6 }}>
                 <Paper sx={{ p: 2, border: 1, borderColor: "primary.main" }}>
                     <Typography><TrendingUpIcon /> Events siste 5 min</Typography>
                     <Typography variant="h4">{rate.lastFiveMinutes}</Typography>

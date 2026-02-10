@@ -68,10 +68,6 @@ dependencies {
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
 tasks.test {
     useJUnitPlatform()
 }

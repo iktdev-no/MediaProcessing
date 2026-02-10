@@ -1,4 +1,4 @@
-import type { IFile } from "../types/files"
+import type { IFile } from "../types/types"
 import { apiGet } from "./client"
 
 export function apiListHome() {

@@ -52,7 +52,3 @@ tasks.named("build") {
 tasks.test {
     useJUnitPlatform()
 }
-
-kotlin {
-    jvmToolchain(21)
-}

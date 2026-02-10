@@ -102,7 +102,7 @@ export function ServicesGrid({
 }: ServicesGridProps) {
     return (
         <Grid container spacing={2} sx={{ mt: 4, justifyContent: "center" }}>
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <NodeBox
                     icon={<AutorenewIcon fontSize="large" />}
                     label="Processer"
@@ -110,7 +110,7 @@ export function ServicesGrid({
                 />
             </Grid>
 
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <NodeBox
                     icon={<BuildIcon fontSize="large" />}
                     label="Converter"
@@ -118,7 +118,7 @@ export function ServicesGrid({
                 />
             </Grid>
 
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <NodeBox
                     icon={<StorageIcon fontSize="large" />}
                     label="pyMetadata"
@@ -126,7 +126,7 @@ export function ServicesGrid({
                 />
             </Grid>
 
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <NodeBox
                     icon={<VisibilityIcon fontSize="large" />}
                     label="pyWatcher"
@@ -134,7 +134,7 @@ export function ServicesGrid({
                 />
             </Grid>
 
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <NodeBox
                     icon={<HubIcon fontSize="large" />}
                     label="Coordinator"
@@ -142,7 +142,7 @@ export function ServicesGrid({
                 />
             </Grid>
 
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 12, md: 3 }}>
                 <NodeBox
                     icon={<DnsIcon fontSize="large" />}
                     label="Backend UI"

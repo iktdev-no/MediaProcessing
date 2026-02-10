@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material"
-import type { UiEvent } from "../../types/backendTypes"
+import type { UiEvent } from "../../types/types"
 import { JsonViewer } from "../JsonViewer"
 
 export function EventDialog({

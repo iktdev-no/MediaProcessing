@@ -1,6 +1,6 @@
 import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
 import { useNavigate } from "react-router-dom"
-import type { UiEvent } from "../../types/backendTypes"
+import type { UiEvent } from "../../types/types"
 import { colorFromUuid } from "../../util"
 
 

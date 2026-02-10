@@ -31,7 +31,7 @@ function SequenceList({ sequences }: { sequences: SequenceHealth[] }) {
     return (
         <Grid container spacing={2} sx={{ mt: 2 }}>
             {sequences.map(seq => (
-                <Grid item xs={12} md={6} lg={4} key={seq.referenceId}>
+                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={seq.referenceId}>
                     <OverdueSequenceCard seq={seq} />
                 </Grid>
             ))}

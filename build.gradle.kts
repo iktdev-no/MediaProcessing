@@ -41,8 +41,5 @@ subprojects {
         useJUnitPlatform()
     }
 
-    kotlin {
-        jvmToolchain(21)
-    }
 }
 

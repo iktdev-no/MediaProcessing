@@ -91,10 +91,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
 tasks.bootJar {
     archiveFileName.set("app.jar")
     launchScript()

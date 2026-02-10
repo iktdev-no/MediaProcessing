@@ -76,10 +76,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
 configurations { create("testArtifacts") }
 
 tasks.register<Jar>("testJar") {
