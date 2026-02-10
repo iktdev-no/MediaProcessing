@@ -39,7 +39,7 @@ tasks.register("generateTs") {
 
         TsGenerator.generate(
             packageName = "no.iktdev.mediaprocessing.transferModel.coordinatorUi",
-            output = file("../apps/ui/web/src/types/transfer-model.d.ts"),
+            output = file("../apps/ui/web/src/types/transfer-model.ts"),
             classLoader = cl
         )
     }

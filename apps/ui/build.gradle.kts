@@ -49,7 +49,7 @@ tasks.register("generateTs") {
 
         TsGenerator.generate(
             packageName = "no.iktdev.mediaprocessing.ui.dto",
-            output = file("$projectDir/web/src/types/types.d.ts"),
+            output = file("$projectDir/web/src/types/types.ts"),
             classLoader = cl
         )
     }

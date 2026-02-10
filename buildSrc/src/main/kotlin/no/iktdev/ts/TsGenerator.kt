@@ -38,8 +38,6 @@ object TsGenerator {
                 appendLine()
             }
 
-            // ⭐ CRITICAL FIX FOR CI
-            appendLine("export {}")
         }
 
         output.parentFile.mkdirs()
