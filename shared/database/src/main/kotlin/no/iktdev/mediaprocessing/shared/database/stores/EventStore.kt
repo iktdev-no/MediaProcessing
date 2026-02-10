@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.shared.database.stores
 import mu.KotlinLogging
 import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.ZDS.toEvent
+import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.stores.EventStore
@@ -233,6 +234,17 @@ object EventStore: EventStore {
         val deleteSequenceEvent = DeleteSequenceEvent().usingReferenceId(referenceId)
         persist(deleteSequenceEvent)
         return deleteSequenceEvent.eventId
+    }
+
+    fun deleteEvent(referenceId: UUID, eventId: UUID): UUID {
+        val deleteEvent = DeletedEvent(deletedEventId = eventId).usingReferenceId(referenceId)
+        return try {
+            persist(deleteEvent)
+            deleteEvent.eventId
+        } catch (e: Exception) {
+            log.error("Could not mark $eventId@$referenceId as deleted..", e)
+            throw e
+        }
     }
 
 }

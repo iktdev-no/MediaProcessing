@@ -9,9 +9,12 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeletedEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import java.time.Instant
 import java.util.*
 
@@ -106,6 +109,14 @@ class EventService {
             }
     }
 
+    fun deleteEvent(referenceId: UUID, eventId: UUID): DeleteResult {
+        return try {
+            EventStore.deleteEvent(referenceId, eventId)
+            DeleteResult.Success
+        } catch (e: Exception) {
+            DeleteResult.Failure(e.message ?: "An error occurred")
+        }
+    }
 
 
 }
