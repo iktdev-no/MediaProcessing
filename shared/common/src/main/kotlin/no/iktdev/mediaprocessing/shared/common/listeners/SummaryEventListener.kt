@@ -4,6 +4,7 @@ import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.stores.EventStore
+import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 
 abstract class SummaryEventListener(
     private val eventStore: EventStore
@@ -11,6 +12,7 @@ abstract class SummaryEventListener(
 
     final override fun onEvent(event: Event, history: List<Event>): Event? {
         val fullHistory = eventStore.getPersistedEventsFor(event.referenceId)
+            .effectivePersisted()
         val events = fullHistory.map { it.toEvent() }.filterNotNull()
 
         if (!shouldSummarize(events)) return null
