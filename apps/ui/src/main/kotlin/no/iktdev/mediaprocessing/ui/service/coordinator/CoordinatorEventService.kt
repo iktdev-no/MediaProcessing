@@ -5,6 +5,9 @@ import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorEventDto
 import no.iktdev.mediaprocessing.ui.dto.Paginated
 import no.iktdev.mediaprocessing.ui.dto.UiEvent
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultFailure
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultSuccess
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -41,6 +44,24 @@ class CoordinatorEventService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<List<CoordinatorEventDto>>() {})
             .map { it.map { x -> UiEvent.from(x) } }
+
+    fun deleteEvent(referenceId: UUID, eventId: UUID): Mono<DeleteResult> =
+        coordinatorWebClient.delete()
+            .uri { uri ->
+                uri.path("/events/{referenceId}/{eventId}")
+                    .build(referenceId, eventId)
+            }
+            .retrieve()
+            .toBodilessEntity()
+            .map<DeleteResult> {
+                DeleteResultSuccess()   // nå har den type = "Success"
+            }
+            .onErrorResume { ex ->
+                log.warn(ex) { "Failed to delete event $eventId for reference $referenceId" }
+                Mono.just(DeleteResultFailure(message = ex.message ?: "Unknown error"))
+            }
+
+
 
 
 }

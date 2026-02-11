@@ -1,6 +1,11 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material"
-import type { UiEvent } from "../../types/types"
-import { JsonViewer } from "../JsonViewer"
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import { toast } from "react-toastify";
+import { deleteEvent } from '../../api/events';
+import type { DeleteResult } from '../../types/transfer-model';
+import type { UiEvent } from "../../types/types";
+import { JsonViewer } from "../JsonViewer";
+
 
 export function EventDialog({
     event,
@@ -12,6 +17,18 @@ export function EventDialog({
     onClose: () => void
 }) {
     if (!event) return null
+
+
+    const deleteEventAction = async () => {
+        const response: DeleteResult = await deleteEvent(event.referenceId, event.eventId)
+        if (response.type === 'DeleteResultSuccess') {
+            toast.success(`Event ${event.event} deleted`)
+            onClose()
+        } else if (response.type === 'DeleteResultFailure') {
+            toast.error(`Failed to delete event ${event.event}, ${response.message}`)
+        }
+    }
+
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>
@@ -31,6 +48,15 @@ export function EventDialog({
                     <Typography><strong>Reference:</strong> {event.referenceId}</Typography>
                     <Typography><strong>Event:</strong> {event.event}</Typography>
                     <Typography><strong>Persisted:</strong> {event.persistedAt}</Typography>
+
+                    <Box marginTop={"auto"}>
+                        <Typography variant={"h6"}>Actions</Typography>
+                        <Stack direction={"row"} spacing={1}>
+                            <Button variant="contained" color="error"
+                                startIcon={<DeleteIcon />}
+                                onClick={() => deleteEventAction()}>Delete event</Button>
+                        </Stack>
+                    </Box>
                 </Box>
                 <Box
                     sx={{

@@ -5,7 +5,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import MovieIcon from '@mui/icons-material/Movie'
 import SubtitlesIcon from '@mui/icons-material/Subtitles'
 import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
-import type { FileItem, IFile } from '../types/types'
+import type { IFile } from '../types/types'
 import { normalDate } from "../util"
 
 export interface FileListProps {
@@ -24,27 +24,25 @@ export function FileList({ files, onOpenFolder, onContextMenu }: FileListProps) 
 
 
     const getItemIcon = (file: IFile) => {
-        if (file.type === "Folder") {
+        if (file.type === "FolderItem") {
             return <FolderIcon sx={{ color: "#fbc02d" }} />
-        }
+        } else if (file.type === 'FileItem') {
+            const ext = file.extension.toLowerCase()
+            if (videoExtensions.includes(ext)) {
+                return <MovieIcon sx={{ color: "#42a5f5" }} />
+            }
 
-        const f = file as FileItem
-        const ext = f.extension.toLowerCase()
+            if (subtitleExtensions.includes(ext)) {
+                return <SubtitlesIcon sx={{ color: "#66bb6a" }} />
+            }
 
-        if (videoExtensions.includes(ext)) {
-            return <MovieIcon sx={{ color: "#42a5f5" }} />
-        }
+            if (pictureExtensions.includes(ext)) {
+                return <ImageIcon sx={{ color: "#26a69a" }} />
+            }
 
-        if (subtitleExtensions.includes(ext)) {
-            return <SubtitlesIcon sx={{ color: "#66bb6a" }} />
-        }
-
-        if (pictureExtensions.includes(ext)) {
-            return <ImageIcon sx={{ color: "#26a69a" }} />
-        }
-
-        if (ext === "json") {
-            return <DataObjectIcon sx={{ color: "#ab47bc" }} />
+            if (ext === "json") {
+                return <DataObjectIcon sx={{ color: "#ab47bc" }} />
+            }
         }
 
         return <InsertDriveFileIcon sx={{ color: "#bdbdbd" }} />
@@ -58,7 +56,7 @@ export function FileList({ files, onOpenFolder, onContextMenu }: FileListProps) 
             {files.map((f) => (
                 <ListItemButton
                     key={f.uri}
-                    onClick={() => f.type === "Folder" && onOpenFolder(f)}
+                    onClick={() => f.type === "FolderItem" && onOpenFolder(f)}
                     onContextMenu={(e) => onContextMenu(e, f)}
                 >
                     <ListItemIcon>

@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.ui.dto.requests
 
 sealed interface ContinueResult {
-    data object Success : ContinueResult
-    data class Failure(val message: String) : ContinueResult
+    data object ContinueSuccess : ContinueResult
+    data class ContinueFailure(val message: String) : ContinueResult
 }

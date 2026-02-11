@@ -34,7 +34,7 @@ export function Paginator({
       alignItems="center"
       justifyContent="space-between"
       gap={2}
-      sx={{ mt: 2 }}
+      sx={{ m: 2 }}
     >
       {/* Page size dropdown */}
       <Select

@@ -52,7 +52,7 @@ export default function EventsPage() {
     })
 
     return (
-        <Box sx={{ p: 2, height: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ pb: 1, height: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
             <FilterChips
                 value={filters}
                 onChange={setFilters}

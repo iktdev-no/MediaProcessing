@@ -1,5 +1,9 @@
-import type { SSEMessage } from "../types/types"
+import { toast } from "react-toastify";
+import type { SSEMessage } from "../types/types";
 
+// ------------------------------------------------------------
+// GET
+// ------------------------------------------------------------
 export async function apiGet<T>(
     path: string,
     opts?: {
@@ -22,15 +26,21 @@ export async function apiGet<T>(
             body = await res.text().catch(() => null)
         }
 
-        // If user provided custom error handler → use it
+        // Custom handler?
         if (opts?.onError) {
             opts.onError(status, body)
-            // Return a never-resolving promise so caller doesn't continue
             return Promise.reject({ status, body })
         }
 
-        // Default behavior: throw a normal error
-        const error: any = new Error(`GET ${path} failed with ${status}`)
+        // ⭐ Automatic toast
+        const message =
+            typeof body === "object" && body?.message
+                ? body.message
+                : `GET ${path} failed with ${status}`
+
+        toast.error(message)
+
+        const error: any = new Error(message)
         error.status = status
         error.body = body
         throw error
@@ -39,35 +49,57 @@ export async function apiGet<T>(
     return res.json()
 }
 
-
-export async function apiPost<TRequest, TResponse>(path: string, body: TRequest): Promise<TResponse> {
+// ------------------------------------------------------------
+// POST
+// ------------------------------------------------------------
+export async function apiPost<TRequest, TResponse>(
+    path: string,
+    body: TRequest
+): Promise<TResponse> {
     const res = await fetch(`/api${path}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Accept": "*/*" // ← viktig: ikke tving JSON
+            "Accept": "*/*"
         },
         body: JSON.stringify(body)
     })
 
     if (!res.ok) {
-        // prøv å lese tekst hvis mulig
-        const text = await res.text().catch(() => null)
-        throw new Error(text || `POST ${path} failed with ${res.status}`)
+        let errorBody: any = null
+
+        try {
+            errorBody = await res.json()
+        } catch {
+            errorBody = await res.text().catch(() => null)
+        }
+
+        const message =
+            typeof errorBody === "object" && errorBody?.message
+                ? errorBody.message
+                : `POST ${path} failed with ${res.status}`
+
+        toast.error(message)
+
+        const error: any = new Error(message)
+        error.status = res.status
+        error.body = errorBody
+        throw error
     }
 
-    // sjekk content-type
     const contentType = res.headers.get("content-type") ?? ""
 
     if (contentType.includes("application/json")) {
         return res.json()
     }
 
-    // hvis det ikke er JSON → returner tekst
     const text = await res.text()
     return text as unknown as TResponse
 }
 
+// ------------------------------------------------------------
+// DELETE
+// ------------------------------------------------------------
 export async function apiDelete<TResponse>(
     path: string,
     opts?: {
@@ -94,12 +126,21 @@ export async function apiDelete<TResponse>(
             body = await res.text().catch(() => null)
         }
 
+        // Custom handler?
         if (opts?.onError) {
             opts.onError(status, body)
             return Promise.reject({ status, body })
         }
 
-        const error: any = new Error(`DELETE ${path} failed with ${status}`)
+        // ⭐ Automatic toast
+        const message =
+            typeof body === "object" && body?.message
+                ? body.message
+                : `DELETE ${path} failed with ${status}`
+
+        toast.error(message)
+
+        const error: any = new Error(message)
         error.status = status
         error.body = body
         throw error
@@ -108,35 +149,38 @@ export async function apiDelete<TResponse>(
     const contentType = res.headers.get("content-type") ?? ""
 
     if (contentType.includes("application/json")) {
-        return res.json()
+        return res.json() as Promise<TResponse>
     }
 
     const text = await res.text()
     return text as unknown as TResponse
 }
 
-
-
+// ------------------------------------------------------------
+// SSE
+// ------------------------------------------------------------
 export function apiSse(
     onEvent: (eventName: string, data: any) => void,
     onError?: (err: any) => void
 ): EventSource {
-    const es = new EventSource("/api/sse") // hardkodet
+    const es = new EventSource("/api/sse")
 
     es.onmessage = (event) => {
-        console.log(event);
         const message: SSEMessage = JSON.parse(event.data)
         onEvent(message.name, message.data)
     }
 
     es.onerror = (err) => {
+        toast.error("SSE connection error")
         if (onError) onError(err)
     }
 
     return es
 }
 
-
+// ------------------------------------------------------------
+// Query builder
+// ------------------------------------------------------------
 export function buildQuery(params: Record<string, any>): string {
     const search = new URLSearchParams()
 

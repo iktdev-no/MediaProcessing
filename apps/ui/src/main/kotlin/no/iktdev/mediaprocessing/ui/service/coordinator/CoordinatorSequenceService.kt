@@ -66,10 +66,10 @@ class CoordinatorSequenceService(
                 .bodyToMono(Void::class.java)
                 .block()
 
-            ContinueResult.Success
+            ContinueResult.ContinueSuccess
 
         } catch (ex: Exception) {
-            ContinueResult.Failure(ex.message ?: "Unknown error")
+            ContinueResult.ContinueFailure(ex.message ?: "Unknown error")
         }
     }
     fun deleteSequence(referenceId: UUID): ContinueResult {
@@ -88,10 +88,10 @@ class CoordinatorSequenceService(
                 .bodyToMono(Void::class.java)
                 .block()
 
-            ContinueResult.Success
+            ContinueResult.ContinueSuccess
 
         } catch (ex: Exception) {
-            ContinueResult.Failure(ex.message ?: "Unknown error")
+            ContinueResult.ContinueFailure(ex.message ?: "Unknown error")
         }
     }
 }

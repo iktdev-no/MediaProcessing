@@ -18,6 +18,11 @@ export interface CoordinatorHealth {
   status: CoordinatorHealthStatus;
 }
 
+export interface DeleteResultFailure {
+  type: "DeleteResultFailure";
+  message: string;
+}
+
 
 export type Presets = "Ultrafast" | "Superfast" | "Veryfast" | "Faster" | "Fast" | "Medium" | "Slow" | "Slower" | "Veryslow" | "Placebo"
 
@@ -94,6 +99,8 @@ export type TaskStatus = "NotInitiated" | "Pending" | "InProgress" | "Completed"
 
 export type Mode = "Auto" | "Manual"
 
+export type DeleteResult = DeleteResultFailure | DeleteResultSuccess
+
 export type CoordinatorHealthStatus = "HEALTHY" | "DEGRADED" | "UNHEALTHY"
 
 export type ContextType = "Content" | "Metadata"
@@ -113,6 +120,10 @@ export interface SequenceHealth {
   overdueDuration: string;
   referenceId: string;
   startTime: string;
+}
+
+export interface DeleteResultSuccess {
+  type: "DeleteResultSuccess";
 }
 
 export interface CoordinatorTaskDto {

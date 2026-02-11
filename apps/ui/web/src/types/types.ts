@@ -46,14 +46,19 @@ export interface UiEvent {
   referenceId: string;
 }
 
+export interface ContinueSuccess {
+  type: "ContinueSuccess";
+}
+
+export type ContinueResult = ContinueFailure | ContinueSuccess
 
 export interface StartProcessRequest {
   fileUri: string;
   mediaAction: MediaActionType;
 }
 
-
-export interface Failure {
+export interface ContinueFailure {
+  type: "ContinueFailure";
   message: string;
 }
 
@@ -99,13 +104,7 @@ export interface MediaAction {
 
 export type MediaActionType = "All" | "Encode" | "ExtractSubtitles" | "ConvertSubtitle" | "MetadataSearch"
 
-export interface IFile {
-  actions: FileActions;
-  created: number;
-  name: string;
-  type: FileType;
-  uri: string;
-}
+export type IFile = FileItem | FolderItem
 
 export interface FileAction {
   id: FileActionType;
@@ -114,20 +113,20 @@ export interface FileAction {
 }
 
 export interface FolderItem {
+  type: "FolderItem";
   actions: FileActions;
   created: number;
   name: string;
-  type: FileType;
   uri: string;
 }
 
 export interface FileItem {
+  type: "FileItem";
   actions: FileActions;
   created: number;
   extension: string;
   name: string;
   size: number;
-  type: FileType;
   uri: string;
 }
 

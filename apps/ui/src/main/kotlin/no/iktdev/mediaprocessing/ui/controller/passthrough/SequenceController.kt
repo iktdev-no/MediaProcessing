@@ -35,10 +35,10 @@ class SequenceController(
     @PostMapping("/{referenceId}/continue")
     fun continueSequence(@PathVariable referenceId: UUID): ResponseEntity<String> {
         return when (val result = coordinator.continueSequence(referenceId)) {
-            is ContinueResult.Success ->
+            is ContinueResult.ContinueSuccess ->
                 ResponseEntity.ok("Action accepted!")
 
-            is ContinueResult.Failure ->
+            is ContinueResult.ContinueFailure ->
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.message)
         }
     }
@@ -46,10 +46,10 @@ class SequenceController(
     @PostMapping("/{referenceId}/delete")
     fun deleteSequence(@PathVariable referenceId: UUID): ResponseEntity<String> {
         return when (val result = coordinator.deleteSequence(referenceId)) {
-            is ContinueResult.Success ->
+            is ContinueResult.ContinueSuccess ->
                 ResponseEntity.ok("Action accepted!")
 
-            is ContinueResult.Failure ->
+            is ContinueResult.ContinueFailure ->
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.message)
         }
     }
