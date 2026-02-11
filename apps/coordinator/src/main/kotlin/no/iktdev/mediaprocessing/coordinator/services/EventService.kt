@@ -9,14 +9,12 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeletedEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.Failure
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultFailure
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.Success
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultSuccess
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.time.Instant
 import java.util.*
 
@@ -114,9 +112,9 @@ class EventService {
     fun deleteEvent(referenceId: UUID, eventId: UUID): DeleteResult {
         return try {
             EventStore.deleteEvent(referenceId, eventId)
-            Success()
+            DeleteResultSuccess()
         } catch (e: Exception) {
-            Failure(message = e.message ?: "An error occurred")
+            DeleteResultFailure(message = e.message ?: "An error occurred")
         }
     }
 

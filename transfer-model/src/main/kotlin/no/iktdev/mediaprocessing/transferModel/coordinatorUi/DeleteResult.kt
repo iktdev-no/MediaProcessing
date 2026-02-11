@@ -9,18 +9,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     property = "type"
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = Success::class, name = "Success"),
-    JsonSubTypes.Type(value = Failure::class, name = "Failure")
+    JsonSubTypes.Type(value = DeleteResultSuccess::class, name = "Success"),
+    JsonSubTypes.Type(value = DeleteResultFailure::class, name = "Failure")
 )
 sealed interface DeleteResult {
     val type: String
 }
 
-data class Success(
+data class DeleteResultSuccess(
     override val type: String = "Success"
 ) : DeleteResult
 
-data class Failure(
+data class DeleteResultFailure(
     override val type: String = "Failure",
     val message: String
 ) : DeleteResult

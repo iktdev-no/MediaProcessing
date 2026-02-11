@@ -34,6 +34,26 @@ object TsGenerator {
                         appendLine("export type ${cls.simpleName} = $subTypes")
                     }
 
+                    // 1a) Sealed class → union type alias
+                    cls.isSealed && !cls.java.isInterface -> {
+                        val subTypes = cls.sealedSubclasses
+                            .mapNotNull { it.simpleName }
+                            .joinToString(" | ")
+
+                        println("Generating union type for sealed class: ${cls.simpleName} = $subTypes")
+                        appendLine("export type ${cls.simpleName} = $subTypes")
+                    }
+
+
+                    // ----------------------------------------------------
+                    // 1b) Sealed subtype (data object / data class)
+                    //     → generer interface selv uten properties
+                    // ----------------------------------------------------
+                    cls.isSealedSubtype() -> {
+                        println("Generating sealed subtype interface: ${cls.simpleName}")
+                        append(sealedSubtypeToTs(cls))
+                    }
+
                     // ----------------------------------------------------
                     // 2) Enum → union of string literals
                     // ----------------------------------------------------
@@ -45,7 +65,7 @@ object TsGenerator {
                     // ----------------------------------------------------
                     // 3) Data class → interface
                     // ----------------------------------------------------
-                    cls.hasProperties() -> {
+                    cls.hasProperties() && !cls.isSealed -> {
                         println("Generating interface: ${cls.simpleName}")
                         append(dataClassToTs(cls))
                     }
@@ -76,6 +96,12 @@ object TsGenerator {
     private fun KClass<*>.hasProperties(): Boolean =
         this.memberProperties.isNotEmpty()
 
+    // sealed subtype = har en sealed supertype
+    private fun KClass<*>.isSealedSubtype(): Boolean =
+        this.supertypes
+            .mapNotNull { it.classifier as? KClass<*> }
+            .any { it.isSealed }
+
     // ------------------------------------------------------------
     // Kotlin → TS mapping
     // ------------------------------------------------------------
@@ -86,6 +112,24 @@ object TsGenerator {
 
         return "export type ${cls.simpleName} = $values\n"
     }
+
+    private fun sealedSubtypeToTs(cls: KClass<*>): String {
+        val props = cls.memberProperties
+            .filter { it.name != "type" } // ← FIX: unngå duplisering
+            .joinToString("\n") { prop ->
+                val tsType = kotlinToTsType(prop.returnType.toString())
+                "  ${prop.name}: $tsType;"
+            }
+
+        val propsBlock = if (props.isBlank()) "" else "\n$props"
+
+        return buildString {
+            appendLine("export interface ${cls.simpleName} {")
+            appendLine("  type: \"${cls.simpleName}\";$propsBlock")
+            appendLine("}")
+        }
+    }
+
 
     // NEW: extract default value for "type" discriminator
     private fun getDefaultTypeLiteral(cls: KClass<*>): String? {
