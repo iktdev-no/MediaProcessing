@@ -3,6 +3,7 @@ package no.iktdev.ts
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 object TsGenerator {
 
@@ -21,11 +22,29 @@ object TsGenerator {
 
             classes.forEach { cls ->
                 when {
+                    // ----------------------------------------------------
+                    // 1) Sealed interface → union type alias
+                    // ----------------------------------------------------
+                    cls.isSealed && cls.java.isInterface -> {
+                        val subTypes = cls.sealedSubclasses
+                            .mapNotNull { it.simpleName }
+                            .joinToString(" | ")
+
+                        println("Generating union type for sealed interface: ${cls.simpleName} = $subTypes")
+                        appendLine("export type ${cls.simpleName} = $subTypes")
+                    }
+
+                    // ----------------------------------------------------
+                    // 2) Enum → union of string literals
+                    // ----------------------------------------------------
                     cls.java.isEnum -> {
                         println("Generating enum: ${cls.simpleName}")
                         append(enumToTs(cls))
                     }
 
+                    // ----------------------------------------------------
+                    // 3) Data class → interface
+                    // ----------------------------------------------------
                     cls.hasProperties() -> {
                         println("Generating interface: ${cls.simpleName}")
                         append(dataClassToTs(cls))
@@ -37,7 +56,6 @@ object TsGenerator {
                 }
                 appendLine()
             }
-
         }
 
         output.parentFile.mkdirs()
@@ -69,14 +87,36 @@ object TsGenerator {
         return "export type ${cls.simpleName} = $values\n"
     }
 
+    // NEW: extract default value for "type" discriminator
+    private fun getDefaultTypeLiteral(cls: KClass<*>): String? {
+        val ctor = cls.primaryConstructor ?: return null
+        val param = ctor.parameters.find { it.name == "type" } ?: return null
+
+        return try {
+            val instance = ctor.callBy(emptyMap())
+            val prop = cls.memberProperties.find { it.name == "type" }
+            prop?.getter?.call(instance)?.toString()
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
     private fun dataClassToTs(cls: KClass<*>): String {
-        val typeParams = cls.typeParameters.map { it.name } // generics på klassen
+        val typeParams = cls.typeParameters.map { it.name }
         val generic = if (typeParams.isNotEmpty()) {
             "<" + typeParams.joinToString(", ") + ">"
         } else ""
 
+        val defaultTypeLiteral = getDefaultTypeLiteral(cls)
+
         val props = cls.memberProperties.joinToString("\n") { prop ->
-            val tsType = kotlinToTsType(prop.returnType.toString(), typeParams)
+            val tsType =
+                if (prop.name == "type" && defaultTypeLiteral != null) {
+                    "\"$defaultTypeLiteral\"" // literal type
+                } else {
+                    kotlinToTsType(prop.returnType.toString(), typeParams)
+                }
+
             "  ${prop.name}: $tsType;"
         }
 
@@ -124,7 +164,7 @@ object TsGenerator {
             return if (isNullable) "$base | null" else base
         }
 
-        // Set<T> → T[] (generics-aware)
+        // Set<T> → T[]
         if (clean.startsWith("kotlin.collections.Set") ||
             clean.startsWith("kotlin.collections.MutableSet")) {
 
@@ -140,7 +180,7 @@ object TsGenerator {
             return if (isNullable) "$base | null" else base
         }
 
-        // List<T> → T[] (generics-aware)
+        // List<T> → T[]
         if (clean.startsWith("kotlin.collections.List") ||
             clean.startsWith("kotlin.collections.MutableList")) {
 
