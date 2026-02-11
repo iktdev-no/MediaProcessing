@@ -43,7 +43,7 @@ class EventsController(
         return eventService.getEffectiveHistory(referenceId)
     }
 
-    @DeleteMapping("/delete/{referenceId}/{eventId}")
+    @DeleteMapping("/{referenceId}/{eventId}")
     fun deleteEvent(
         @PathVariable referenceId: UUID,
         @PathVariable eventId: UUID
