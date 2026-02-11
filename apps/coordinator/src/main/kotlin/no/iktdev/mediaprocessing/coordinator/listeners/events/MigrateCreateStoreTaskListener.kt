@@ -63,8 +63,10 @@ class MigrateCreateStoreTaskListener(
                 subtitleContent = subtitleContent,
                 coverContent = coverContent
             )
-        ).derivedOf(event)
+        )
 
+        val createdTaskEvent = MigrateContentToStoreTaskCreatedEvent(storeTask.taskId).derivedOf(useEvent)
+        storeTask.apply { derivedOf(createdTaskEvent) }
 
         if (!CollectProjection(history).isStorePermitted()) {
             log.info { "\uD83D\uDED1 Not storing content and metadata automatically for collection: $collection @ ${useEvent.referenceId}" }
@@ -74,6 +76,6 @@ class MigrateCreateStoreTaskListener(
 
         TaskStore.persist(storeTask)
 
-        return MigrateContentToStoreTaskCreatedEvent(storeTask.taskId).derivedOf(useEvent)
+        return createdTaskEvent
     }
 }

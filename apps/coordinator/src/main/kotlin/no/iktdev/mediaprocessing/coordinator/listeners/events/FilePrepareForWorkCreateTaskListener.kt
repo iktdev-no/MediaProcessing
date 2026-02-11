@@ -52,10 +52,11 @@ class FilePrepareForWorkCreateTaskListener(
         val task = FilePrepareForWorkTask(data = FilePrepareForWorkTask.Data(
             sourceFile = source.absolutePath,
             destinationFile = destination.absolutePath
-        )).derivedOf(event)
+        ))
 
+        val createdTaskEvent = FilePrepareForWorkTaskCreatedEvent(taskId = task.taskId).derivedOf(event)
+        task.apply { derivedOf(createdTaskEvent) }
         TaskStore.persist(task)
-
-        return FilePrepareForWorkTaskCreatedEvent(taskId = task.taskId).derivedOf(event)
+        return createdTaskEvent
     }
 }

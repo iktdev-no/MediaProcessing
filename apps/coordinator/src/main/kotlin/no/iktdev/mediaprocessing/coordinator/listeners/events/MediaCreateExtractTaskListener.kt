@@ -47,17 +47,21 @@ class MediaCreateExtractTaskListener(): EventListener() {
             toSubtitleArgumentData(idx, preparedFile, stream)
         }
 
-        val createdTaskIds: MutableList<UUID> = mutableListOf()
-        entries.forEach { entry ->
-            ExtractSubtitleTask(data = entry).derivedOf(event).also {
-                TaskStore.persist(it)
-                createdTaskIds.add(it.taskId)
-            }
+
+        val tasks = entries.map { entry ->
+            ExtractSubtitleTask(data = entry)
         }
 
-        return ProcesserExtractTaskCreatedEvent(
-            taskIds = createdTaskIds
+        val createdEvent = ProcesserExtractTaskCreatedEvent(
+            taskIds = tasks.map { it -> it.taskId }
         ).derivedOf(event)
+
+        tasks.forEach { task ->
+            task.apply { derivedOf(createdEvent) }
+            TaskStore.persist(task)
+        }
+
+        return createdEvent
     }
 
     fun toSubtitleArgumentData(index: Int, inputFile: File, stream: SubtitleStream): ExtractSubtitleData? {

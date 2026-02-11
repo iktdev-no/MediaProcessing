@@ -51,10 +51,13 @@ class MediaCreateConvertTaskListener: EventListener() {
                 outputDirectory = useFile.parentFile.absolutePath,
                 outputFileName = useFile.nameWithoutExtension,
             )
-        ).derivedOf(event)
-        TaskStore.persist(convertTask)
+        )
 
-        return ConvertTaskCreatedEvent(convertTask.taskId).derivedOf(event)
+        val taskCreatedEvent = ConvertTaskCreatedEvent(convertTask.taskId).derivedOf(event)
+
+        TaskStore.persist(convertTask.apply { derivedOf(taskCreatedEvent) })
+
+        return taskCreatedEvent
 
     }
 }

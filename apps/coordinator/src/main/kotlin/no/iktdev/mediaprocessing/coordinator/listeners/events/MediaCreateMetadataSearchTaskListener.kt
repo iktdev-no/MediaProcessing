@@ -57,9 +57,11 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
                 searchTitles = useEvent.data.parsedSearchTitles,
                 collection = useEvent.data.parsedCollection
             )
-        ).derivedOf(useEvent)
-        TaskStore.persist(task)
+        )
         val finalResult = MetadataSearchTaskCreatedEvent(task.taskId).derivedOf(useEvent)
+        task.apply { derivedOf(finalResult) }
+
+        TaskStore.persist(task)
         scheduleTaskExpiry(task.taskId, finalResult.eventId, task.referenceId)
         return finalResult
     }

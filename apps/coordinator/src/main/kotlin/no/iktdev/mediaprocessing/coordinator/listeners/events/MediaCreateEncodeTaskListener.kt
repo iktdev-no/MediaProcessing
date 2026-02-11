@@ -89,12 +89,15 @@ class MediaCreateEncodeTaskListener(
                 outputFileName = "$filename.$extension",
                 inputFile = preparedFile
             )
-        ).derivedOf(event)
+        )
 
-        TaskStore.persist(task)
-
-        return ProcesserEncodeTaskCreatedEvent(
+        val producerEvent = ProcesserEncodeTaskCreatedEvent(
             taskId = task.taskId
         ).derivedOf(event)
+
+        task.apply { derivedOf(producerEvent) }
+        TaskStore.persist(task)
+
+        return producerEvent
     }
 }

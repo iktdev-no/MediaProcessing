@@ -35,15 +35,19 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
             )
         }
 
-        val downloadTasks = downloadData.map {
+        val tasks = downloadData.map {
             CoverDownloadTask(it)
-                .derivedOf(useEvent)
         }
 
-        downloadTasks.forEach { TaskStore.persist(it) }
-
-        return CoverDownloadTaskCreatedEvent(
-            downloadTasks.map { it.taskId }
+        val createdTasksEvent = CoverDownloadTaskCreatedEvent(
+            tasks.map { it.taskId }
         ).derivedOf(event)
+
+        tasks.forEach { task ->
+            task.apply { derivedOf(createdTasksEvent) }
+            TaskStore.persist(task)
+        }
+
+        return createdTasksEvent
     }
 }
