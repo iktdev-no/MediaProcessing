@@ -28,7 +28,7 @@ class Anii(SourceBase):
                             _title = result.get("name_romaji", None)
                         if _title is not None:
                             givenId = await asyncio.to_thread(self.generate_id, _title)
-                            if givenId:
+                            if givenId and givenId not in idToTitle:
                                 idToTitle[givenId] = _title
                                 results[givenId] = result
                 except IndexError:

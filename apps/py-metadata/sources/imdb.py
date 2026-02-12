@@ -21,7 +21,8 @@ class Imdb(SourceBase):
         for title in self.titles:
             receivedIds = await self.queryIds(title)
             for id, title in receivedIds.items():
-                idToTitle[id] = title
+                if id not in idToTitle: # 👈 dedupe
+                    idToTitle[id] = title
 
         if not idToTitle:
             self.logNoMatch("Imdb", titles=self.titles)

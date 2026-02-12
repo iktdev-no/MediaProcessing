@@ -42,8 +42,9 @@ class Mal(SourceBase):
                 found for found in cappedResult if await asyncio.to_thread(self.isMatchOrPartial, "MAL", title, found.title)
             ]
             for item in usable:
-                log.info(f"malId: {item.mal_id} to {item.title}")
-                idToTitle[item.mal_id] = item.title
+                if item.mal_id not in idToTitle:
+                    log.info(f"malId: {item.mal_id} to {item.title}")
+                    idToTitle[item.mal_id] = item.title
         except Exception as e:
             log.exception(e)
         return idToTitle
