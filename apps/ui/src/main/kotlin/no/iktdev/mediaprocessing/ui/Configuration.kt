@@ -12,11 +12,11 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebConfig : WebMvcConfigurer {
-
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
             .allowedOrigins(
@@ -29,6 +29,13 @@ class WebConfig : WebMvcConfigurer {
             .allowedHeaders("*")
             .allowCredentials(true)
     }
+
+    override fun addViewControllers(registry: ViewControllerRegistry) {
+        // Matcher alle paths uten punktum (dvs. ikke filer som .js, .css, .png)
+        registry.addViewController("/{path:[^\\.]*}")
+            .setViewName("forward:/index.html")
+    }
+
 
     @Value("\${APP_DEPLOYMENT_PORT:8080}")
     private val deploymentPort = 8080

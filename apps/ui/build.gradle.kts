@@ -1,11 +1,14 @@
 import no.iktdev.ts.TsGenerator
 import java.net.URLClassLoader
+import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.Exec
 
 plugins {
     id("java")
     kotlin("jvm")
     kotlin("plugin.spring")
     id("org.springframework.boot")
+    id("com.github.node-gradle.node") version "7.0.2"
 }
 
 group = "no.iktdev.mediaprocessing"
