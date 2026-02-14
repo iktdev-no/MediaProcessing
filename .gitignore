@@ -41,7 +41,7 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-
+**/src/main/resources/static
 .idea/runConfigurations
 /apps/py-metadata/venv/
 /apps/py-watcher/venv/
