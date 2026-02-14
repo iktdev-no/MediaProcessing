@@ -55,7 +55,8 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
         val task = MetadataSearchTask(
             MetadataSearchTask.SearchData(
                 searchTitles = useEvent.data.parsedSearchTitles,
-                collection = useEvent.data.parsedCollection
+                collection = useEvent.data.parsedCollection,
+                mediaType = useEvent.data.mediaType.name.lowercase()
             )
         )
         val finalResult = MetadataSearchTaskCreatedEvent(task.taskId).derivedOf(useEvent)
