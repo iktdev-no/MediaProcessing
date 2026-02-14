@@ -24,9 +24,9 @@ export function FileList({ files, onOpenFolder, onContextMenu }: FileListProps) 
 
 
     const getItemIcon = (file: IFile) => {
-        if (file.type === "FolderItem") {
+        if (file.type === "Folder") {
             return <FolderIcon sx={{ color: "#fbc02d" }} />
-        } else if (file.type === 'FileItem') {
+        } else if (file.type === 'File') {
             const ext = file.extension.toLowerCase()
             if (videoExtensions.includes(ext)) {
                 return <MovieIcon sx={{ color: "#42a5f5" }} />
@@ -56,7 +56,7 @@ export function FileList({ files, onOpenFolder, onContextMenu }: FileListProps) 
             {files.map((f) => (
                 <ListItemButton
                     key={f.uri}
-                    onClick={() => f.type === "FolderItem" && onOpenFolder(f)}
+                    onClick={() => f.type === "Folder" && onOpenFolder(f)}
                     onContextMenu={(e) => onContextMenu(e, f)}
                 >
                     <ListItemIcon>

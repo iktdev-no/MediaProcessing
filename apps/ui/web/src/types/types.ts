@@ -97,6 +97,16 @@ export interface FileActions {
 
 export type FileType = "Folder" | "File"
 
+export interface File {
+  type: "File";
+  actions: FileActions;
+  created: number;
+  extension: string;
+  name: string;
+  size: number;
+  uri: string;
+}
+
 export interface MediaAction {
   id: MediaActionType;
   title: string;
@@ -104,7 +114,7 @@ export interface MediaAction {
 
 export type MediaActionType = "All" | "Encode" | "ExtractSubtitles" | "ConvertSubtitle" | "MetadataSearch"
 
-export type IFile = FileItem | FolderItem
+export type IFile = File | Folder
 
 export interface FileAction {
   id: FileActionType;
@@ -112,21 +122,11 @@ export interface FileAction {
   title: string;
 }
 
-export interface FolderItem {
-  type: "FolderItem";
+export interface Folder {
+  type: "Folder";
   actions: FileActions;
   created: number;
   name: string;
-  uri: string;
-}
-
-export interface FileItem {
-  type: "FileItem";
-  actions: FileActions;
-  created: number;
-  extension: string;
-  name: string;
-  size: number;
   uri: string;
 }
 

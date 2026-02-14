@@ -39,13 +39,13 @@ class ExplorerService(
     fun File.toFileInfo(): IFile {
         val file = this
         return if (file.isDirectory) {
-            FolderItem(
+            Folder(
                 name = file.name,
                 uri = file.absolutePath,
                 created = file.lastModified()
             )
         } else {
-            FileItem(
+            File(
                 name = file.name,
                 uri = file.absolutePath,
                 created = file.lastModified(),

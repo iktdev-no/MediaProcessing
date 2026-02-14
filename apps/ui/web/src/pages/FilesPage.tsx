@@ -78,7 +78,7 @@ export default function FilesPage() {
     const sortedFiles = useMemo(() => {
         const copy = [...files]
         copy.sort((a, b) => {
-            if (a.type !== b.type) return a.type === "FolderItem" ? -1 : 1
+            if (a.type !== b.type) return a.type === "Folder" ? -1 : 1
 
             let res = 0
             switch (sortKey) {
@@ -132,7 +132,7 @@ export default function FilesPage() {
 
     const onFileAction = (action: FileAction, file: IFile) => {
         console.log("FILE ACTION:", action, file)
-        if (action.id === "Open" && file.type === "FolderItem") {
+        if (action.id === "Open" && file.type === "Folder") {
             console.log("OPEN FOLDER:", file)
             load(file.uri)
             closeMenu()

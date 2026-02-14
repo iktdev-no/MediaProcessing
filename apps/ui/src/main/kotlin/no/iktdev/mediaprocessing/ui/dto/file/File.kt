@@ -13,7 +13,7 @@ sealed class IFile {
     abstract val actions: FileActions
 }
 
-data class FileItem(
+data class File(
     override val name: String,
     override val uri: String,
     override val created: Long,
@@ -24,7 +24,7 @@ data class FileItem(
     override val type = FileType.File
 }
 
-data class FolderItem(
+data class Folder(
     override val name: String,
     override val uri: String,
     override val created: Long,
