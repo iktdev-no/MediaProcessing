@@ -153,7 +153,8 @@ class MediaCreateMetadataSearchTaskListenerTest : TestBase() {
         val task = MetadataSearchTask(
             MetadataSearchTask.SearchData(
                 searchTitles = parsed.data.parsedSearchTitles,
-                collection = parsed.data.parsedCollection
+                collection = parsed.data.parsedCollection,
+                mediaType = MediaType.Serie.name.lowercase()
             )
         ).derivedOf(parsed)
 
