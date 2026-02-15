@@ -1,13 +1,12 @@
-import logging, sys
+import logging
 from typing import Dict, List, Optional
+
+import asyncio
+from mal import Anime, AnimeSearch, AnimeSearchResult
 
 from models.enums import MediaType
 from models.metadata import Metadata, Summary
 from .source import SourceBase
-
-from mal import Anime, AnimeSearch, AnimeSearchResult
-import asyncio
-
 
 log = logging.getLogger(__name__)
 
@@ -16,60 +15,62 @@ class Mal(SourceBase):
     def __init__(self, titles: List[str]) -> None:
         super().__init__(titles)
 
-    async def search(self) -> Optional[Metadata]:
-        idToTitle: Dict[str, str] = {}
-
-        for title in self.titles:
-            receivedIds = await self.queryIds(title)
-            for id, title in receivedIds.items():
-                idToTitle[id] = title
-
-        if not idToTitle:
-            self.logNoMatch("MAL", titles=self.titles)
-            return None
-
-        best_match_id, best_match_title = self.findBestMatchAcrossTitles(idToTitle, self.titles)
-
-        return await self.__getMetadata(best_match_id)
+    @property
+    def name(self) -> str:
+        return "mal"
 
     async def queryIds(self, title: str) -> Dict[str, str]:
-        idToTitle: Dict[str, str] = {}
+        """
+        Returnerer {mal_id: tittel} for en gitt søketittel.
+        Ingen fuzzy-scoring her – scoreren tar seg av relevans senere.
+        """
+        id_to_title: Dict[str, str] = {}
 
         try:
+            # MAL API-kall i egen tråd
             search = await asyncio.to_thread(AnimeSearch, title)
-            cappedResult: List[AnimeSearchResult] = search.results[:5]
-            usable = [
-                found for found in cappedResult if await asyncio.to_thread(self.isMatchOrPartial, "MAL", title, found.title)
-            ]
-            for item in usable:
-                if item.mal_id not in idToTitle:
-                    log.info(f"malId: {item.mal_id} to {item.title}")
-                    idToTitle[item.mal_id] = item.title
+
+            # Ta de første 5 resultatene – MAL kan være støyete
+            capped_results: List[AnimeSearchResult] = search.results[:5]
+
+            for item in capped_results:
+                if item.mal_id not in id_to_title:
+                    log.info(f"MAL -> id {item.mal_id} = '{item.title}' for søk '{title}'")
+                    id_to_title[str(item.mal_id)] = item.title
+
         except Exception as e:
             log.exception(e)
-        return idToTitle
 
-    async def __getMetadata(self, id: str) -> Optional[Metadata]:
+        return id_to_title
+
+
+    async def fetchMetadata(self, id: str) -> Optional[Metadata]:
         try:
             anime = await asyncio.to_thread(Anime, id)
+
+            # Bruk felles helper i SourceBase
+            media_type = self.validateMediaTypeOrDrop(anime.type, id, anime.title)
+            if media_type is None:
+                return None
+
             return Metadata(
+                sourceId=str(id),
                 title=anime.title,
-                altTitle=[altName for altName in [anime.title_english, *anime.title_synonyms] if altName],
-                cover=anime.image_url,
-                banner=None,
-                summary=[] if anime.synopsis is None else [
-                    Summary(
-                        language="eng",
-                        summary=anime.synopsis
-                    )
+                altTitle=[
+                    alt_name
+                    for alt_name in [anime.title_english, *anime.title_synonyms]
+                    if alt_name
                 ],
-                type=self.getMediaType(anime.type),
+                cover=anime.image_url,
+                bannerImage=None,
+                summary=[
+                    Summary(language="eng", summary=anime.synopsis)
+                ] if anime.synopsis else [],
+                type=media_type,
                 genres=anime.genres,
                 source="mal",
             )
+
         except Exception as e:
             log.exception(e)
-        return None
-
-    def getMediaType(self, type: str) -> MediaType:
-        return MediaType.MOVIE if type.lower() == 'movie' else MediaType.SERIE
+            return None

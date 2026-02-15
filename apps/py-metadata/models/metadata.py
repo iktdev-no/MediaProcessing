@@ -15,10 +15,11 @@ class Summary:
 
 @dataclass
 class Metadata:
+    sourceId: int
     title: str
     altTitle: List[str]
     cover: str
-    banner: Optional[str]
+    bannerImage: Optional[str]
     type: MediaType
     summary: List[Summary]
     genres: List[str]

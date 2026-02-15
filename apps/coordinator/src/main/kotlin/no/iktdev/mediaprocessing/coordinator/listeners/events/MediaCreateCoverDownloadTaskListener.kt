@@ -25,15 +25,21 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
             return null
         }
 
-        val downloadData = useEvent.results.distinctBy { it.metadata.cover }.map {
-            val data = it.metadata
-            val outputFileName = "${data.title}-${data.source}"
-            CoverDownloadTask.CoverDownloadData(
-                url = it.metadata.cover,
-                source = it.metadata.source,
-                outputFileName = outputFileName
-            )
-        }
+        val downloadData = useEvent.results
+            .mapNotNull { result ->
+                val cover = result.metadata.cover ?: return@mapNotNull null
+                val data = result.metadata
+
+                CoverDownloadTask.CoverDownloadData(
+                    url = cover,
+                    source = data.source,
+                    outputFileName = "${data.title}-${data.source}"
+                )
+            }
+            .distinctBy { it.url }
+
+
+
 
         val tasks = downloadData.map {
             CoverDownloadTask(it)

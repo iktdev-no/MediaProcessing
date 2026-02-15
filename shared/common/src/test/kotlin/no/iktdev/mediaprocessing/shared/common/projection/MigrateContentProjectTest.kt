@@ -90,15 +90,20 @@ class MigrateContentProjectPathTest {
             MetadataSearchResultEvent(
                 results = emptyList(),
                 recommended = MetadataSearchResultEvent.SearchResult(
-                    simpleScore = 10,
-                    prefixScore = 10,
-                    advancedScore = 10,
-                    sourceWeight = 1f,
+                    searchTitles = listOf("Foo"),
+                    similarity = 85,
+                    prefix = 10,
+                    keywordScore = 20.0,
+                    typeScore = 80.0,
+                    completenessScore = 15.0,
+                    sourceScore = 5.0,
+                    totalScore = 215.0,
                     metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                         source = "tmdb",
                         title = "Breaking Bad",
                         alternateTitles = listOf("BB"),
                         cover = "x.jpg",
+                        bannerImage = null,
                         type = MediaType.Serie,
                         summary = emptyList(),
                         genres = emptyList()
@@ -106,6 +111,7 @@ class MigrateContentProjectPathTest {
                 ),
                 status = TaskStatus.Completed
             )
+
         )
 
         val project = MigrateContentProject(events, storage)

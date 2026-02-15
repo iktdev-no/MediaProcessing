@@ -1,35 +1,59 @@
-import asyncio
 import pytest
-import uuid
-from datetime import datetime
 
+from tests.fakes.fake_db import FakeDB
 from worker.search_runner import run_search
 from models.metadata import Metadata, Summary, MediaType
 
-# Dummy Metadata factory
+
+# --- Helpers ----------------------------------------------------
+
 def make_dummy_metadata(source: str, title: str = "Dummy Title") -> Metadata:
     return Metadata(
+        sourceId=1,
         title=title,
         altTitle=[f"{title} alt"],
         cover="http://example.com/cover.jpg",
-        banner=None,
-        type=MediaType.MOVIE,  # bruk en gyldig enum fra din kode
+        bannerImage=None,
+        type=MediaType.MOVIE,
         summary=[Summary(summary="A fake summary", language="en")],
         genres=["Drama", "Action"],
         source=source,
     )
 
+
 # Dummy Source that mimics SourceBase
 class DummySource:
-    def __init__(self, titles, result=None, raise_exc=False):
+    def __init__(self, titles, result=None, raise_exc=False, name=None):
         self.titles = titles
         self._result = result
         self._raise_exc = raise_exc
 
-    async def search(self):
+        # SourceBase fields
+        self.name = name or (result.source if result else "dummy")
+        self.source = self.name
+        self.found_ids = {}
+
+    async def queryIds(self, title):
         if self._raise_exc:
-            raise RuntimeError("Search failed")
+            raise RuntimeError("queryIds failed")
+
+        if not self._result:
+            return {}
+
+        # Return a fake ID for this source
+        return {f"id_{self.name}": title}
+
+    async def fetchMetadata(self, id):
+        if self._raise_exc:
+            raise RuntimeError("fetchMetadata failed")
         return self._result
+
+    async def search(self):
+        # Legacy compatibility
+        return [self._result] if self._result else []
+
+
+# --- Tests ------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_run_search_all_results(monkeypatch):
@@ -38,25 +62,37 @@ async def test_run_search_all_results(monkeypatch):
         DummySource(["foo"], make_dummy_metadata("imdb")),
         DummySource(["foo"], make_dummy_metadata("anii")),
     ]
-    monkeypatch.setattr("worker.search_runner.get_all_sources", lambda titles: sources)
 
-    results = await run_search(["foo"])
+    monkeypatch.setattr(
+        "worker.search_runner.get_all_sources",
+        lambda titles: sources
+    )
+
+    results = await run_search(FakeDB(), ["foo"])
+
     assert len(results) == 3
     assert all(isinstance(r, Metadata) for r in results)
     assert {r.source for r in results} == {"mal", "imdb", "anii"}
+
 
 @pytest.mark.asyncio
 async def test_run_search_filters_none(monkeypatch):
     sources = [
         DummySource(["foo"], make_dummy_metadata("mal")),
-        DummySource(["foo"], None),
+        DummySource(["foo"], None),  # no metadata
         DummySource(["foo"], make_dummy_metadata("imdb")),
     ]
-    monkeypatch.setattr("worker.search_runner.get_all_sources", lambda titles: sources)
 
-    results = await run_search(["foo"])
+    monkeypatch.setattr(
+        "worker.search_runner.get_all_sources",
+        lambda titles: sources
+    )
+
+    results = await run_search(FakeDB(), ["foo"])
+
     assert len(results) == 2
     assert {r.source for r in results} == {"mal", "imdb"}
+
 
 @pytest.mark.asyncio
 async def test_run_search_handles_exception(monkeypatch):
@@ -65,11 +101,13 @@ async def test_run_search_handles_exception(monkeypatch):
         DummySource(["foo"], raise_exc=True),
         DummySource(["foo"], make_dummy_metadata("imdb")),
     ]
-    monkeypatch.setattr("worker.search_runner.get_all_sources", lambda titles: sources)
 
-    results = await run_search(["foo"])
+    monkeypatch.setattr(
+        "worker.search_runner.get_all_sources",
+        lambda titles: sources
+    )
 
-    # Nå skal vi få bare de gyldige Metadata-resultatene
+    results = await run_search(FakeDB(), ["foo"])
+
     assert all(isinstance(r, Metadata) for r in results)
     assert {r.source for r in results} == {"mal", "imdb"}
-

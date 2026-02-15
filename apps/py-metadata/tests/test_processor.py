@@ -1,24 +1,29 @@
-import asyncio
 import uuid
-from utils.time import utc_now
 import pytest
 
 import worker.processor as processor
 from models.task import MetadataSearchTask, MetadataSearchData, TaskStatus
 from models.metadata import Metadata, Summary, MediaType
+from models.event import MetadataResult
+from utils.time import utc_now
+from tests.fakes.fake_db import FakeDB
 
-# --- Helpers ---
+
+# --- Helpers ----------------------------------------------------
+
 def make_dummy_metadata(source="mal", title="Foo"):
     return Metadata(
+        sourceId=1,
         title=title,
         altTitle=[],
         cover="cover.jpg",
-        banner=None,
+        bannerImage=None,
         type=MediaType.MOVIE,
         summary=[Summary(summary="A fake summary", language="en")],
         genres=["Drama"],
         source=source,
     )
+
 
 def make_dummy_task():
     return MetadataSearchTask(
@@ -26,7 +31,11 @@ def make_dummy_task():
         taskId=uuid.uuid4(),
         task="MetadataSearchTask",
         status=TaskStatus.PENDING,
-        data=MetadataSearchData(searchTitles=["Foo"], collection="bar"),
+        data=MetadataSearchData(
+            searchTitles=["Foo"],
+            collection="bar",
+            mediaType=MediaType.MOVIE
+        ),
         claimed=False,
         claimedBy=None,
         consumed=False,
@@ -34,28 +43,25 @@ def make_dummy_task():
         persistedAt=utc_now()
     )
 
-# --- Tests ---
+
+# --- Tests ------------------------------------------------------
 
 @pytest.mark.asyncio
 async def test_process_task_success(monkeypatch):
-    # Async stub for run_search
-    async def good_search(titles):
-        return [make_dummy_metadata("mal"), make_dummy_metadata("imdb")]
+    async def good_search(db, titles):
+        return [
+            make_dummy_metadata("mal", "Foo"),
+            make_dummy_metadata("imdb", "Foo Movie"),
+        ]
 
     monkeypatch.setattr(processor, "run_search", good_search)
 
-    # Matchers return fixed scores
-    class DummyMatcher:
-        def __init__(self, title, m): pass
-        def getScore(self): return 50
-    monkeypatch.setattr(processor, "SimpleMatcher", DummyMatcher)
-    monkeypatch.setattr(processor, "PrefixMatcher", DummyMatcher)
-    monkeypatch.setattr(processor, "AdvancedMatcher", DummyMatcher)
-
-    # Fake DB and mark_failed
-    class FakeDB: pass
     called = {}
-    monkeypatch.setattr(processor, "mark_failed", lambda db, tid: called.setdefault("failed", True))
+    monkeypatch.setattr(
+        processor,
+        "mark_failed",
+        lambda db, tid: called.setdefault("failed", True),
+    )
 
     task = make_dummy_task()
     event = await processor.process_task(FakeDB(), task)
@@ -68,13 +74,17 @@ async def test_process_task_success(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_process_task_no_results(monkeypatch):
-    async def empty_search(titles):
+    async def empty_search(db, titles):
         return []
+
     monkeypatch.setattr(processor, "run_search", empty_search)
 
-    class FakeDB: pass
     called = {}
-    monkeypatch.setattr(processor, "mark_failed", lambda db, tid: called.setdefault("failed", True))
+    monkeypatch.setattr(
+        processor,
+        "mark_failed",
+        lambda db, tid: called.setdefault("failed", True),
+    )
 
     task = make_dummy_task()
     event = await processor.process_task(FakeDB(), task)
@@ -85,13 +95,17 @@ async def test_process_task_no_results(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_process_task_exception(monkeypatch):
-    async def bad_search(titles):
+    async def bad_search(db, titles):
         raise RuntimeError("boom")
+
     monkeypatch.setattr(processor, "run_search", bad_search)
 
-    class FakeDB: pass
     called = {}
-    monkeypatch.setattr(processor, "mark_failed", lambda db, tid: called.setdefault("failed", True))
+    monkeypatch.setattr(
+        processor,
+        "mark_failed",
+        lambda db, tid: called.setdefault("failed", True),
+    )
 
     task = make_dummy_task()
     event = await processor.process_task(FakeDB(), task)
@@ -100,14 +114,71 @@ async def test_process_task_exception(monkeypatch):
     assert "failed" in called
 
 
-
 @pytest.mark.asyncio
-async def test_choose_recommended_prefers_advanced(monkeypatch):
-    # Lag tre SearchResult med ulike scorer
-    m = make_dummy_metadata("mal")
-    r1 = processor.SearchResult(simpleScore=10, prefixScore=10, advancedScore=90, sourceWeight=1.0, metadata=processor.MetadataResult(source="mal", title="Foo", alternateTitles=[], cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
-    r2 = processor.SearchResult(simpleScore=50, prefixScore=50, advancedScore=20, sourceWeight=1.0, metadata=processor.MetadataResult(source="imdb", title="Foo", alternateTitles=[], cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
-    r3 = processor.SearchResult(simpleScore=80, prefixScore=80, advancedScore=80, sourceWeight=1.0, metadata=processor.MetadataResult(source="anii", title="Foo", alternateTitles=[], cover="", bannerImage=None, type=MediaType.MOVIE, summary=[], genres=[]))
+async def test_choose_recommended_prefers_highest_total():
+    r1 = processor.SearchResult(
+        searchTitles=["Foo"],
+        similarity=10,
+        prefix=5,
+        keywordScore=0.0,
+        typeScore=0.0,
+        completenessScore=0.0,
+        sourceScore=0.0,
+        totalScore=300,
+        metadata=MetadataResult(
+            source="mal",
+            title="Foo",
+            alternateTitles=[],
+            cover="",
+            bannerImage=None,
+            type=MediaType.MOVIE,
+            summary=[],
+            genres=[],
+        ),
+    )
+
+    r2 = processor.SearchResult(
+        searchTitles=["Foo"],
+        similarity=20,
+        prefix=5,
+        keywordScore=0.0,
+        typeScore=0.0,
+        completenessScore=0.0,
+        sourceScore=0.0,
+        totalScore=200,
+        metadata=MetadataResult(
+            source="imdb",
+            title="Foo",
+            alternateTitles=[],
+            cover="",
+            bannerImage=None,
+            type=MediaType.MOVIE,
+            summary=[],
+            genres=[],
+        ),
+    )
+
+    r3 = processor.SearchResult(
+        searchTitles=["Foo"],
+        similarity=30,
+        prefix=5,
+        keywordScore=0.0,
+        typeScore=0.0,
+        completenessScore=0.0,
+        sourceScore=0.0,
+        totalScore=250,
+        metadata=MetadataResult(
+            source="anii",
+            title="Foo",
+            alternateTitles=[],
+            cover="",
+            bannerImage=None,
+            type=MediaType.MOVIE,
+            summary=[],
+            genres=[],
+        ),
+    )
 
     recommended = processor.choose_recommended([r1, r2, r3])
-    assert recommended is r1  # høyest advancedScore vinner
+    assert recommended is r1
+

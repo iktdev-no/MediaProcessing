@@ -1,86 +1,98 @@
-
-import logging, re
+import logging
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Dict, Optional
 
-from fuzzywuzzy import fuzz
-
+from models.enums import MediaType
 from models.metadata import Metadata
-import asyncio
-
 
 log = logging.getLogger(__name__)
 
 class SourceBase(ABC):
-    titles: List[str] = []
-    
-
     def __init__(self, titles: List[str]) -> None:
         self.titles = titles
+        self.found_ids: Dict[str, str] = {}   # NYTT
 
-    @abstractmethod
-    async def search(self, ) -> Metadata | None:
+    @property 
+    @abstractmethod 
+    def name(self) -> str: 
+        """Returner navnet på sourcen, f.eks. 'aniiv2'.""" 
         pass
 
     @abstractmethod
-    async def queryIds(self, title: str) -> dict[str, str]:
+    async def queryIds(self, title: str) -> Dict[str, str]:
         pass
 
-    def isMatchOrPartial(self, source: str | None, title, foundTitle) -> bool:
-        titleParts = re.split(r'[^a-zA-Z0-9\s]', foundTitle)
-        clean_foundTitle: str | None = titleParts[0].strip() if titleParts else None
-        directMatch = fuzz.ratio(title, foundTitle)
-        partialMatch = fuzz.ratio(title, clean_foundTitle) if clean_foundTitle is not None else 0
+    @abstractmethod
+    async def fetchMetadata(self, id: str) -> Optional[Metadata]:
+        pass
 
-        if directMatch >= 60:
-            log.info(f"{source} -> Direct Match for '{title}' of '{foundTitle}' on part '{clean_foundTitle}' with direct score: {directMatch} and partial {partialMatch}")
-            return True
-        elif partialMatch >= 80:
-            log.info(f"{source} -> Partial Match for '{title}' of '{foundTitle}' on part '{clean_foundTitle}' with direct score: {directMatch} and partial {partialMatch}")
-            return True
-        else:
-            log.info(f"{source} -> Match failed for '{title}' of '{foundTitle}' on part '{clean_foundTitle}' with direct score: {directMatch} and partial {partialMatch}")
-        return False
+    async def search(self) -> List[Metadata]:
+        id_to_title: Dict[str, str] = {}
+
+        # 1. Query IDs
+        for title in self.titles:
+            try:
+                ids = await self.queryIds(title)
+                for id, found_title in ids.items():
+                    id_to_title[id] = found_title
+            except Exception as e:
+                log.warning(f"{self.__class__.__name__} failed on '{title}': {e}")
+
+        self.found_ids = id_to_title  # ← LAGRE ID-ENE
+
+        if not id_to_title:
+            self.logNoMatch(self.__class__.__name__, self.titles)
+            return []
+
+        # 2. Fetch metadata
+        results: List[Metadata] = []
+        for id in id_to_title.keys():
+            try:
+                meta = await self.fetchMetadata(id)
+                if meta:
+                    results.append(meta)
+            except Exception as e:
+                log.warning(f"Failed to fetch metadata for ID {id}: {e}")
+
+        return results
 
 
-    def getMatchingOnTitleWords(self, idToTitle: dict[str, str], titles: List[str]) -> dict[str, str]:
-        matched_idToTitle = {}
-
-        for title in titles:
-            title_words = set(title.split())
-            for id, stored_title in idToTitle.items():
-                stored_title_words = set(stored_title.split())
-                if title_words & stored_title_words:  # sjekker om det er et felles ord
-                    score = fuzz.token_set_ratio(title, stored_title)
-                    if score >= 75:
-                        matched_idToTitle[id] = (stored_title, score)
-        
-        # Returnerer den originale dict med score 0 hvis ingen titler matcher
-        if not matched_idToTitle:
-            for id, stored_title in idToTitle.items():
-                matched_idToTitle[id] = (stored_title, 0)
-        
-        # Returnerer den originale dict hvis ingen titler matcher
-        return matched_idToTitle if matched_idToTitle else idToTitle
-
-    def findBestMatchAcrossTitles(self, idToTitle: dict[str, str], titles: List[str]) -> Tuple[str, str]:
-        # Få den filtrerte eller originale idToTitle basert på ordmatching
-        filtered_idToTitle = self.getMatchingOnTitleWords(idToTitle, titles)
-        
-        best_match_id = ""
-        best_match_title = ""
-        best_ratio = 0
-
-        for title in titles:
-            for id, stored_title in filtered_idToTitle.items():
-                ratio = fuzz.ratio(title, stored_title[0])
-                if ratio > best_ratio:
-                    best_ratio = ratio
-                    best_match_id = id
-                    best_match_title = stored_title
-
-        return best_match_id, best_match_title
-    
     def logNoMatch(self, source: str, titles: List[str]) -> None:
-        combined_titles = ", ".join(titles)
-        log.info(f"No match in source {source} for titles: {combined_titles}")
+        combined = ", ".join(titles)
+        log.info(f"No match in source {source} for titles: {combined}")
+
+    def parseMediaType(self, raw: str | None) -> Optional[MediaType]:
+        """
+        Robust type-mapper for alle sourcer.
+        Logger outliers og returnerer None hvis type ikke kan utledes.
+        """
+        t = (raw or "").strip().lower()
+
+        if not t:
+            log.warning(f"[{self.name}] Mangler media-type (None eller tom streng)")
+            return None
+
+        if "movie" in t:
+            return MediaType.MOVIE
+
+        known_series = {
+            "tv", "tv series", "tv mini series", "ona", "ova",
+            "special", "music", "series", "short", "video",
+            "episode", "video game"
+        }
+
+        if t in known_series:
+            return MediaType.SERIE
+
+        log.warning(f"[{self.name}] Uventet media-type '{raw}' – kan ikke utledes type")
+        return None
+
+
+    def validateMediaTypeOrDrop(self, raw_type: str | None, id: str, title: str | None) -> Optional[MediaType]:
+        media_type = self.parseMediaType(raw_type)
+        if media_type is None:
+            log.warning(
+                f"[{self.name}] Dropper metadata for id={id} "
+                f"('{title}') fordi media-type '{raw_type}' ikke kan utledes"
+            )
+        return media_type

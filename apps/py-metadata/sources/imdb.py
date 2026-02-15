@@ -1,80 +1,87 @@
 import logging
+import asyncio
+from typing import List, Dict, Optional
+
 from imdb import Cinemagoer
 from imdb.Movie import Movie
-
-from typing import List, Dict, Optional
 
 from models.enums import MediaType
 from models.metadata import Metadata, Summary
 from .source import SourceBase
 
-import asyncio
-
 log = logging.getLogger(__name__)
+
 
 class Imdb(SourceBase):
     def __init__(self, titles: List[str]) -> None:
         super().__init__(titles)
+        self.api = Cinemagoer()
 
-    async def search(self) -> Optional[Metadata]:
-        idToTitle: Dict[str, str] = {}
-        for title in self.titles:
-            receivedIds = await self.queryIds(title)
-            for id, title in receivedIds.items():
-                if id not in idToTitle: # 👈 dedupe
-                    idToTitle[id] = title
+    @property
+    def name(self) -> str:
+        return "imdb"
 
-        if not idToTitle:
-            self.logNoMatch("Imdb", titles=self.titles)
-            return None
 
-        best_match_id, best_match_title = self.findBestMatchAcrossTitles(idToTitle, self.titles)
-
-        return await self.__getMetadata(best_match_id)
-    
     async def queryIds(self, title: str) -> Dict[str, str]:
-        idToTitle: Dict[str, str] = {}
+        """
+        Returnerer {imdb_id: tittel} for en gitt søketittel.
+        Ingen fuzzy scoring – scoreren tar seg av relevans senere.
+        """
+        id_to_title: Dict[str, str] = {}
 
         try:
-            search = await asyncio.to_thread(Cinemagoer().search_movie, title)
-            cappedResult: List[Movie] = search[:5]
-            usable = [
-                found for found in cappedResult if await asyncio.to_thread(self.isMatchOrPartial, "Imdb", title, found.get("title"))
-            ]
-            for item in usable:
-                idToTitle[item.movieID] = item.get("title")
+            search_results = await asyncio.to_thread(self.api.search_movie, title)
+            capped: List[Movie] = search_results[:7]  # IMDb kan være støyete
+
+            for item in capped:
+                imdb_id = item.movieID
+                imdb_title = item.get("title")
+
+                if imdb_id not in id_to_title:
+                    log.info(f"IMDB -> id {imdb_id} = '{imdb_title}' for søk '{title}'")
+                    id_to_title[imdb_id] = imdb_title
+
         except Exception as e:
             log.exception(e)
-        return idToTitle    
 
-    async def __getMetadata(self, id: str) -> Optional[Metadata]:
+        return id_to_title
+
+
+    async def fetchMetadata(self, id: str) -> Optional[Metadata]:
+        """
+        Henter full metadata for en gitt IMDB-id.
+        Kalles av SourceBase.search() for ALLE kandidater.
+        """
         try:
-            result = await asyncio.to_thread(Cinemagoer().get_movie, id)
-            cover = result.get_fullsizeURL()
-            if cover is None or len(cover) == 0:
-                cover = result.get("cover url", None)
-            summary = result.get("plot outline", None)
-            localizedTitles = result.get("localized title")
-            altTitle = localizedTitles if isinstance(localizedTitles, list) else []
+            result = await asyncio.to_thread(self.api.get_movie, id)
+
+            # Felles media-type validering
+            media_type = self.validateMediaTypeOrDrop(result.get("kind"), id, result.get("title"))
+            if media_type is None:
+                return None
+
+            # Cover fallback
+            cover = result.get_fullsizeURL() or result.get("cover url")
+
+            # Synopsis
+            summary = result.get("plot outline")
+
+            # Alternative titler
+            localized_titles = result.get("localized title")
+            alt_titles = localized_titles if isinstance(localized_titles, list) else []
 
             return Metadata(
-                title=result.get("title", None),
-                altTitle=altTitle,
+                sourceId=str(id),
+                title=result.get("title"),
+                altTitle=alt_titles,
                 cover=cover,
-                banner=None,
-                summary=[] if summary is None else [
-                    Summary(
-                        language="eng",
-                        summary=summary
-                    )
-                ],
-                type=self.getMediaType(result.get('kind', '')),
-                genres=result.get('genres', []),
+                bannerImage=None,
+                summary=[Summary(language="eng", summary=summary)] if summary else [],
+                type=media_type,
+                genres=result.get("genres", []),
                 source="imdb",
             )
+
         except Exception as e:
             log.exception(e)
-        return None
-    
-    def getMediaType(self, type: str) -> MediaType:
-        return MediaType.MOVIE if type.lower() == 'movie' else MediaType.SERIE
+            return None

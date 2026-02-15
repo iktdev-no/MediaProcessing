@@ -27,13 +27,34 @@ class MetadataResult(BaseModel):
     summary: List[Summary]
     genres: List[str]
 
-
 class SearchResult(BaseModel):
-    simpleScore: int
-    prefixScore: int
-    advancedScore: int
-    sourceWeight: float
+    # Hva brukeren faktisk søkte på (alle titler)
+    searchTitles: List[str]
+
+    # Dice similarity score (0–100)
+    similarity: int
+
+    # Weak prefix score (0–10)
+    prefix: int
+
+    # Keyword score (kan være negativ)
+    keywordScore: float
+
+    # Type match/mismatch score
+    typeScore: float
+
+    # Completeness score
+    completenessScore: float
+
+    # Source priority score
+    sourceScore: float
+
+    # Total score (float)
+    totalScore: float
+
+    # Metadata som ble matchet
     metadata: MetadataResult
+
 
 
 class MetadataSearchResultEvent(BaseModel):

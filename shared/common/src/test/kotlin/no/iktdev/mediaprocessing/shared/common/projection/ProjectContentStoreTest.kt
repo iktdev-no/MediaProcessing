@@ -279,10 +279,14 @@ class ProjectContentStoreTest {
         val metadata = MetadataSearchResultEvent(
             results = emptyList(),
             recommended = MetadataSearchResultEvent.SearchResult(
-                simpleScore = 0,
-                prefixScore = 0,
-                advancedScore = 0,
-                sourceWeight = 1f,
+                searchTitles = listOf("MainTitle"),
+                similarity = 100,
+                prefix = 10,
+                keywordScore = 20.0,
+                typeScore = 80.0,
+                completenessScore = 15.0,
+                sourceScore = 5.0,
+                totalScore = 230.0,
                 metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = "MainTitle",
@@ -296,6 +300,7 @@ class ProjectContentStoreTest {
             ),
             status = TaskStatus.Completed
         )
+
 
         val store = store(events = listOf(metadata), folders = emptyList())
 
@@ -386,10 +391,14 @@ class ProjectContentStoreTest {
         val metadata = MetadataSearchResultEvent(
             results = emptyList(),
             recommended = MetadataSearchResultEvent.SearchResult(
-                simpleScore = 0,
-                prefixScore = 0,
-                advancedScore = 0,
-                sourceWeight = 1f,
+                searchTitles = listOf("MainTitle"),
+                similarity = 100,
+                prefix = 10,
+                keywordScore = 20.0,
+                typeScore = 80.0,
+                completenessScore = 15.0,
+                sourceScore = 5.0,
+                totalScore = 230.0,
                 metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = "MatchMe",
@@ -403,6 +412,7 @@ class ProjectContentStoreTest {
             ),
             status = TaskStatus.Completed
         )
+
 
         val store = store(
             events = listOf(parsed, metadata),
@@ -442,14 +452,18 @@ class ProjectContentStoreTest {
         val metadata = MetadataSearchResultEvent(
             results = emptyList(),
             recommended = MetadataSearchResultEvent.SearchResult(
-                simpleScore = 0,
-                prefixScore = 0,
-                advancedScore = 0,
-                sourceWeight = 1f,
+                searchTitles = listOf("MainTitle"),
+                similarity = 100,
+                prefix = 10,
+                keywordScore = 20.0,
+                typeScore = 80.0,
+                completenessScore = 15.0,
+                sourceScore = 5.0,
+                totalScore = 230.0,
                 metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
-                    title = "Unrelated",
-                    alternateTitles = listOf("Alt1"),
+                    title = "MainTitle",
+                    alternateTitles = listOf("Alt1", "Alt2"),
                     cover = "cover.jpg",
                     bannerImage = null,
                     type = MediaType.Movie,
@@ -459,6 +473,7 @@ class ProjectContentStoreTest {
             ),
             status = TaskStatus.Completed
         )
+
 
         val store = store(
             events = listOf(parsed, metadata),
@@ -524,10 +539,14 @@ class ProjectContentStoreTest {
         events += MetadataSearchResultEvent(
             results = emptyList(),
             recommended = MetadataSearchResultEvent.SearchResult(
-                simpleScore = 0,
-                prefixScore = 0,
-                advancedScore = 0,
-                sourceWeight = 1f,
+                searchTitles = listOf("MainTitle"),
+                similarity = 100,
+                prefix = 10,
+                keywordScore = 20.0,
+                typeScore = 80.0,
+                completenessScore = 15.0,
+                sourceScore = 5.0,
+                totalScore = 230.0,
                 metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = case.metadataTitles.last(),
@@ -541,6 +560,7 @@ class ProjectContentStoreTest {
             ),
             status = TaskStatus.Completed
         )
+
 
         val store = MockMigrateContentProject(events, case.existingFolders)
 
@@ -576,10 +596,14 @@ class ProjectContentStoreTest {
         events += MetadataSearchResultEvent(
             results = emptyList(),
             recommended = MetadataSearchResultEvent.SearchResult(
-                simpleScore = 0,
-                prefixScore = 0,
-                advancedScore = 0,
-                sourceWeight = 1f,
+                searchTitles = listOf("MainTitle"),
+                similarity = 100,
+                prefix = 10,
+                keywordScore = 20.0,
+                typeScore = 80.0,
+                completenessScore = 15.0,
+                sourceScore = 5.0,
+                totalScore = 230.0,
                 metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "test",
                     title = case.metadataTitles.last(),
@@ -593,6 +617,7 @@ class ProjectContentStoreTest {
             ),
             status = TaskStatus.Completed
         )
+
 
         val store = MockMigrateContentProject(events, case.existingFolders)
 

@@ -154,7 +154,7 @@ class MediaCreateMetadataSearchTaskListenerTest : TestBase() {
             MetadataSearchTask.SearchData(
                 searchTitles = parsed.data.parsedSearchTitles,
                 collection = parsed.data.parsedCollection,
-                mediaType = MediaType.Serie.name.lowercase()
+                mediaType = MediaType.Serie
             )
         ).derivedOf(parsed)
 
