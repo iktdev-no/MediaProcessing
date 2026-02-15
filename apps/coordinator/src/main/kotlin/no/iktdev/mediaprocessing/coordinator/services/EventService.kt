@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
 import no.iktdev.mediaprocessing.coordinator.toDto
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
@@ -108,6 +109,23 @@ class EventService {
                 )
             }
     }
+
+    fun getEventsLineage(referenceId: UUID): List<LineageNode> {
+        val events = EventStore.getPersistedEventsFor(referenceId)
+            .sortedBy { it.persistedAt }
+            .effectivePersisted()
+            .mapNotNull { it.toEvent() }
+
+        return events.map { e ->
+            LineageNode(
+                eventId = e.eventId,
+                eventName = e::class.simpleName ?: "UnknownEvent",
+                parents = e.metadata.derivedFromId?.toList() ?: emptyList(),
+                persistedAt = e.metadata.created
+            )
+        }
+    }
+
 
     fun deleteEvent(referenceId: UUID, eventId: UUID): DeleteResult {
         return try {

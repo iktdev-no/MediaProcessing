@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
@@ -42,6 +43,14 @@ class EventsController(
     ): List<PersistedEvent> {
         return eventService.getEffectiveHistory(referenceId)
     }
+
+    @GetMapping("/{referenceId}/lineage")
+    fun getLineage(
+        @PathVariable referenceId: UUID,
+    ): List<LineageNode> {
+        return eventService.getEventsLineage(referenceId)
+    }
+
 
     @DeleteMapping("/{referenceId}/{eventId}")
     fun deleteEvent(

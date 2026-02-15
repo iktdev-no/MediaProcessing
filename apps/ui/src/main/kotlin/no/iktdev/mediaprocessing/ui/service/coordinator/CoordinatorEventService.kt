@@ -8,6 +8,7 @@ import no.iktdev.mediaprocessing.ui.dto.UiEvent
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultFailure
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultSuccess
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -61,6 +62,11 @@ class CoordinatorEventService(
                 Mono.just(DeleteResultFailure(message = ex.message ?: "Unknown error"))
             }
 
+    fun getLineage(referenceId: UUID): Mono<List<LineageNode>> =
+        coordinatorWebClient.get()
+            .uri("/events/${referenceId}/lineage")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<List<LineageNode>>() {})
 
 
 

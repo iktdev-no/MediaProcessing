@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.ui.controller.passthrough
 
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import no.iktdev.mediaprocessing.ui.dto.Paginated
 import no.iktdev.mediaprocessing.ui.dto.UiEvent
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorEventService
@@ -29,6 +30,14 @@ class EventController(
     ): Mono<List<UiEvent>> {
         return coordinator.getEffectiveHistory(referenceId)
     }
+
+    @GetMapping("/{referenceId}/lineage")
+    fun getLineage(
+        @PathVariable referenceId: UUID,
+    ): Mono<List<LineageNode>> {
+        return coordinator.getLineage(referenceId)
+    }
+
 
     @DeleteMapping("/delete/{referenceId}/{eventId}")
     fun deleteEvent(
