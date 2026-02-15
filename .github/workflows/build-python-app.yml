@@ -45,11 +45,18 @@ jobs:
           if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
 
       # -----------------------------
+      # Add PYTHONPATH so tests can import tests.fakes
+      # -----------------------------
+      - name: Add project root to PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:${{ github.workspace }}/apps/${{ inputs.app }}" >> $GITHUB_ENV
+
+      # -----------------------------
       # Run tests
       # -----------------------------
       - name: Run Python tests
         working-directory: apps/${{ inputs.app }}
         run: python -m pytest -q
+
 
       # -----------------------------
       # Setup Buildx
