@@ -69,10 +69,10 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Run unit tests
-        run: ./gradlew :apps:${{ inputs.app }}:test --info --stacktrace
+        run: ./gradlew :apps:${{ inputs.app }}:test
 
       - name: Build Java module
-        run: ./gradlew :apps:${{ inputs.app }}:bootJar --info --stacktrace
+        run: ./gradlew :apps:${{ inputs.app }}:bootJar
 
       - name: Build Docker image locally
         run: |
