@@ -12,11 +12,16 @@ class MetadataSearchResultEvent(
     status: TaskStatus,
     error: String? = null
 ) : TaskResultEvent(status, error) {
+
     data class SearchResult(
-        val simpleScore: Int,
-        val prefixScore: Int,
-        val advancedScore: Int,
-        val sourceWeight: Float,
+        val searchTitles: List<String>,
+        val similarity: Int,
+        val prefix: Int,
+        val keywordScore: Double,
+        val typeScore: Double,
+        val completenessScore: Double,
+        val sourceScore: Double,
+        val totalScore: Double,
         val metadata: MetadataResult
     ) {
 
@@ -24,13 +29,16 @@ class MetadataSearchResultEvent(
             val source: String,
             val title: String,
             val alternateTitles: List<String> = emptyList(),
-            val cover: String,
+            val cover: String?,
             val bannerImage: String? = null,
             val type: MediaType,
             val summary: List<Summary>,
             val genres: List<String>
         ) {
-            data class Summary(val language: String, val description: String)
+            data class Summary(
+                val language: String,
+                val description: String
+            )
         }
     }
 
