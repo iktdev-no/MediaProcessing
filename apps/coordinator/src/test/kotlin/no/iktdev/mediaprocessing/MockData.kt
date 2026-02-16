@@ -28,41 +28,44 @@ object MockData {
     fun metadataEvent(
         derivedFrom: Event,
         source: String = "potetland",
-        coverUrl: String = "cover.jpg"
+        coverUrl: String = "cover.jpg",
+        recommended: MetadataSearchResultEvent.SearchResult? = null
     ): List<Event> {
 
         val dummyTask = DummyTask().derivedOf(derivedFrom)
         val create = MetadataSearchTaskCreatedEvent(dummyTask.taskId).derivedOf(derivedFrom)
 
-        val result = MetadataSearchResultEvent(
-            results = listOf(
-                MetadataSearchResultEvent.SearchResult(
-                    searchTitles = listOf("MyCollection"),
-                    similarity = 95,
-                    prefix = 10,
-                    keywordScore = 20.0,
-                    typeScore = 80.0,
-                    completenessScore = 15.0,
-                    sourceScore = 5.0,
-                    totalScore = 225.0,
-                    metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
-                        source = source,
-                        title = "MyCollection",
-                        alternateTitles = listOf("Alt1", "Alt2"),
-                        cover = coverUrl,
-                        bannerImage = null,
-                        type = MediaType.Movie,
-                        summary = listOf(
-                            MetadataSearchResultEvent.SearchResult.MetadataResult.Summary(
-                                language = "en",
-                                description = "desc"
-                            )
-                        ),
-                        genres = listOf("Drama")
-                    )
+        val results = listOf(
+            MetadataSearchResultEvent.SearchResult(
+                searchTitles = listOf("MyCollection"),
+                similarity = 95,
+                prefix = 10,
+                keywordScore = 20.0,
+                typeScore = 80.0,
+                completenessScore = 15.0,
+                sourceScore = 5.0,
+                totalScore = 225.0,
+                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
+                    source = source,
+                    title = "MyCollection",
+                    alternateTitles = listOf("Alt1", "Alt2"),
+                    cover = coverUrl,
+                    bannerImage = null,
+                    type = MediaType.Movie,
+                    summary = listOf(
+                        MetadataSearchResultEvent.SearchResult.MetadataResult.Summary(
+                            language = "en",
+                            description = "desc"
+                        )
+                    ),
+                    genres = listOf("Drama")
                 )
-            ),
-            recommended = null,
+            )
+        )
+
+        val result = MetadataSearchResultEvent(
+            results = results,
+            recommended = recommended ?: results.firstOrNull(),
             status = TaskStatus.Completed
         ).producedFrom(dummyTask)
 
