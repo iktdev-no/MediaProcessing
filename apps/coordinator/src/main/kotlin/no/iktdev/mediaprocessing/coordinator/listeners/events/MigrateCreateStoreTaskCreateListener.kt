@@ -14,7 +14,7 @@ import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 
 @Component
-class MigrateCreateStoreTaskListener(
+class MigrateCreateStoreTaskCreateListener(
     private val coordinatorEnv: CoordinatorEnv,
 ): EventListener() {
     private val log = KotlinLogging.logger {}

@@ -4,6 +4,8 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystem
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.resolveConflict
 import java.io.File
 
@@ -25,6 +27,25 @@ open class MigrateContentProject(
         val parsedInfo = events.filterIsInstance<MediaParsedInfoEvent>().lastOrNull() ?: return null
         return parsedInfo.data.parsedFileName.cleanForFileSystem()
     }
+
+    internal fun isMovie(): Boolean {
+        val parsedType = events
+            .getInstanceOf<MediaParsedInfoEvent>()
+            ?.data
+            ?.mediaType
+
+        val metadataType = events
+            .filterIsInstance<MetadataSearchResultEvent>()
+            .lastOrNull()
+            ?.recommended
+            ?.metadata
+            ?.type
+
+        // Velg første ikke-null, og sjekk om den er Movie
+        return (parsedType ?: metadataType) == MediaType.Movie
+    }
+
+
 
     internal fun getDesiredStoreFolder(): File? {
         val desiredCollection = getDesiredCollection()?.cleanForFileSystem() ?: return null
@@ -111,9 +132,17 @@ open class MigrateContentProject(
                 val file = e.data?.outputFile?.let(::File) ?: return@mapNotNull null
                 e to file
             }
-
-        val baseName = getDesiredCollection()?.cleanForFileSystem() ?: return null
+        if (downloaded.isEmpty()) return null
         val store = useStore ?: return null
+
+
+
+        val storeCoverFileName = if (isMovie()) {
+            getFileName()
+        } else {
+            getDesiredCollection()?.cleanForFileSystem() ?: return null
+
+        }
 
         val multiple = downloaded.size > 1
 
@@ -121,10 +150,10 @@ open class MigrateContentProject(
             val ext = cached.extension
             val source = event.data?.source ?: "unknown"
 
-            val filename = if (multiple || store.using("$baseName.$ext").exists()) {
-                "$baseName-$source.$ext"
+            val filename = if (multiple || store.using("$storeCoverFileName.$ext").exists()) {
+                "$storeCoverFileName-$source.$ext"
             } else {
-                "$baseName.$ext"
+                "$storeCoverFileName.$ext"
             }
 
             val storeFile = store.using(filename).resolveConflict()

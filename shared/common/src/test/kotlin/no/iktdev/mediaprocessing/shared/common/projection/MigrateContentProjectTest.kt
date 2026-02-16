@@ -205,7 +205,7 @@ class MigrateContentProjectPathTest {
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "João e Maria",
-                parsedFileName = "ignored",
+                parsedFileName = "João e Maria",
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )

@@ -22,9 +22,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class MigrateCreateStoreTaskListenerTest : TestBase() {
+class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
 
-    private val listener = MigrateCreateStoreTaskListener(coordinatorEnv)
+    private val listener = MigrateCreateStoreTaskCreateListener(coordinatorEnv)
 
     @Test
     @DisplayName(
@@ -126,7 +126,7 @@ class MigrateCreateStoreTaskListenerTest : TestBase() {
             mediaType = MediaType.Serie
         ).derivedOf(started)
 
-        val metadata = metadataEvent(parsed)
+        val metadata = metadataEvent(derivedFrom = parsed, mediaType = MediaType.Serie)
 
         val encode = encodeEvent("/tmp/video.mp4", metadata.last())
 
@@ -204,10 +204,10 @@ class MigrateCreateStoreTaskListenerTest : TestBase() {
     @Test
     @DisplayName(
         """
-        Hvis start hendelsen kun inneholder converter, og vi har gjennomført konvertering
-        Når onEvent kalles med CollectedEvent
-        Så:
-            Opprettes det migrate task
+    Hvis start hendelsen kun inneholder converter, og vi har gjennomført konvertering
+    Når onEvent kalles med CollectedEvent
+    Så:
+        Opprettes det migrate task
     """
     )
     fun createMigrateForConvert() {
@@ -229,7 +229,7 @@ class MigrateCreateStoreTaskListenerTest : TestBase() {
         val migrate = migrateResultEvent(
             collection = "MyCollection",
             videoUri = "file:///video.mp4",
-            coverUri = "file:///cover.jpg",
+            coverUri = null,
             subtitleUris = listOf("file:///sub1.srt", "file://sub1.vtt")
         ).derivedOf(convert.last())
 
@@ -254,17 +254,20 @@ class MigrateCreateStoreTaskListenerTest : TestBase() {
 
         assertThat(result).isNotNull()
 
-        verify(exactly = 1) {
-            TaskStore.persist(withArg { task ->
-                val storeTask = task as MigrateToContentStoreTask
+        // ⭐ FANG ARGUMENTET I SLOT
+        val slot = slot<MigrateToContentStoreTask>()
 
-                assertThat(storeTask.data.collection).isEqualTo("MyCollection")
-                assertThat(storeTask.data.videoContent).isNull()
-                assertThat(storeTask.data.subtitleContent).hasSize(1)
-                assertThat(storeTask.data.coverContent).isEmpty()
-            })
+        verify(exactly = 1) {
+            TaskStore.persist(capture(slot))
         }
 
+        val storeTask = slot.captured
+
+        // ⭐ VANLIGE ASSERTS
+        assertThat(storeTask.data.collection).isEqualTo("MyCollection")
+        assertThat(storeTask.data.videoContent).isNull()
+        assertThat(storeTask.data.subtitleContent).hasSize(1)
+        assertThat(storeTask.data.coverContent).isNull()
     }
 
 

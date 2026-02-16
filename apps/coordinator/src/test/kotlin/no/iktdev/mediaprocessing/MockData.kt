@@ -29,6 +29,7 @@ object MockData {
         derivedFrom: Event,
         source: String = "potetland",
         coverUrl: String = "cover.jpg",
+        mediaType: MediaType = MediaType.Movie,
         recommended: MetadataSearchResultEvent.SearchResult? = null
     ): List<Event> {
 
@@ -51,7 +52,7 @@ object MockData {
                     alternateTitles = listOf("Alt1", "Alt2"),
                     cover = coverUrl,
                     bannerImage = null,
-                    type = MediaType.Movie,
+                    type = mediaType,
                     summary = listOf(
                         MetadataSearchResultEvent.SearchResult.MetadataResult.Summary(
                             language = "en",
