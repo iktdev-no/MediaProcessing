@@ -3,7 +3,9 @@ package no.iktdev.mediaprocessing.ui
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
@@ -108,14 +110,5 @@ class WebClientConfig(
             .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
 
 
-}
-
-@Configuration
-class JacksonConfig {
-    @Bean
-    fun objectMapper(): ObjectMapper =
-        ObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 }
 

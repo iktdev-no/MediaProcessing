@@ -63,25 +63,30 @@ class CoordinatorClient(
             .bodyToMono(object : ParameterizedTypeReference<List<ProgressUpdate>>() {})
 
     fun startProcess(req: no.iktdev.mediaprocessing.ui.dto.requests.StartProcessRequest): Mono<Map<String, String>> {
-        val operations: Set<OperationType> = when (req.mediaAction) {
-            MediaActionType.All -> setOf(
-                OperationType.Encode,
-                OperationType.ExtractSubtitles,
-                OperationType.ConvertSubtitles,
-                OperationType.MetadataSearch
-            )
-            MediaActionType.Encode -> setOf(OperationType.Encode)
-            MediaActionType.ExtractSubtitles -> setOf(OperationType.ExtractSubtitles)
-            MediaActionType.ConvertSubtitle -> setOf(OperationType.ConvertSubtitles)
-            MediaActionType.MetadataSearch -> setOf(OperationType.MetadataSearch)
+        var operationType: Set<OperationType> = emptySet()
+        if (req.mediaAction.any { it == MediaActionType.All }) {
+            operationType = OperationType.entries.toSet()
+        } else {
+            if (req.mediaAction.any { it == MediaActionType.Encode }) {
+                operationType = operationType.plus(OperationType.Encode)
+            }
+            if (req.mediaAction.any { it == MediaActionType.ExtractSubtitles }) {
+                operationType = operationType.plus(OperationType.ExtractSubtitles)
+            }
+            if (req.mediaAction.any { it == MediaActionType.ConvertSubtitle }) {
+                operationType = operationType.plus(OperationType.ConvertSubtitles)
+            }
+            if (req.mediaAction.any { it == MediaActionType.MetadataSearch }) {
+                operationType = operationType.plus(OperationType.MetadataSearch)
+            }
         }
 
 
         val coordinatorRequest = StartProcessRequest(
             fileUri = req.fileUri,
-            operationTypes = operations
+            operationTypes = operationType
         )
-        log.info { "Starting process for fileUri=${req.fileUri} with operations=$operations" }
+        log.info { "Starting process for fileUri=${req.fileUri} with operations=$operationType" }
         return coordinatorWebClient.post()
             .uri("/operations/start")
             .bodyValue(coordinatorRequest)

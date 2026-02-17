@@ -19,17 +19,10 @@ class MediaPathRewriteService(
         if (active) {
             log.warn { "MediaPathRewriteService is ACTIVE (profiles: ${env.activeProfiles.joinToString()})" }
 
-            if (cfg.scratchRewrite != null)
-                log.warn { " - cache rewrite: ${cfg.scratch} → ${cfg.scratchRewrite!!.to}" }
-
-            if (cfg.intermediateRewrite != null)
-                log.warn { " - intermediate rewrite: ${cfg.intermediate} → ${cfg.intermediateRewrite!!.to}" }
-
-            if (cfg.outboxRewrite != null)
-                log.warn { " - outgoing rewrite: ${cfg.outbox} → ${cfg.outboxRewrite!!.to}" }
-
-            if (cfg.inboxRewrite != null)
-                log.warn { " - incoming rewrite: ${cfg.inbox} → ${cfg.inboxRewrite!!.to}" }
+            cfg.scratchRewrite?.let { log.warn { " - cache rewrite: ${cfg.scratch} → ${it.to}" } }
+            cfg.intermediateRewrite?.let { log.warn { " - intermediate rewrite: ${cfg.intermediate} → ${it.to}" } }
+            cfg.outboxRewrite?.let { log.warn { " - outgoing rewrite: ${cfg.outbox} → ${it.to}" } }
+            cfg.inboxRewrite?.let { log.warn { " - incoming rewrite: ${cfg.inbox} → ${it.to}" } }
 
         } else {
             log.info { "MediaPathRewriteService is INACTIVE (profiles: ${env.activeProfiles.joinToString()})" }
@@ -37,32 +30,56 @@ class MediaPathRewriteService(
     }
 
     fun rewrite(path: String): String {
-        // Only active in dev/local
+        val normalizedInput = normalizePath(path)
+
         if (!env.activeProfiles.any { it == "dev" || it == "local" }) {
-            return path
+            return normalizedInput
         }
 
-        val rewritten = when {
-            path.startsWith(cfg.scratch) && cfg.scratchRewrite != null ->
-                path.replaceFirst(cfg.scratch, cfg.scratchRewrite!!.to)
+        val rewritten = rewriteWithSlashSafety(normalizedInput)
+        val normalized = normalizePath(rewritten)
 
-            path.startsWith(cfg.intermediate) && cfg.intermediateRewrite != null ->
-                path.replaceFirst(cfg.intermediate, cfg.intermediateRewrite!!.to)
-
-            path.startsWith(cfg.outbox) && cfg.outboxRewrite != null ->
-                path.replaceFirst(cfg.outbox, cfg.outboxRewrite!!.to)
-
-            path.startsWith(cfg.inbox) && cfg.inboxRewrite != null ->
-                path.replaceFirst(cfg.inbox, cfg.inboxRewrite!!.to)
-
-            else -> path
+        if (normalized != path) {
+            log.info { "Rewriting media path: '$path' → '$normalized'" }
         }
 
-        if (rewritten != path) {
-            log.info { "Rewriting media path: '$path' → '$rewritten'" }
+        return normalized
+    }
+
+    private fun rewriteWithSlashSafety(path: String): String {
+        fun rewriteSegment(from: String, to: String?): String? {
+            if (to == null) return null
+
+            val fromNorm = normalizePath(from).removeSuffix("/")
+            val toNorm = normalizePath(to).removeSuffix("/")
+
+            val fromWithSlash = "$fromNorm/"
+            val toWithSlash = "$toNorm/"
+
+            return if (path.startsWith(fromWithSlash)) {
+                path.replaceFirst(fromWithSlash, toWithSlash)
+            } else null
         }
 
-        return rewritten
+        return rewriteSegment(cfg.scratch, cfg.scratchRewrite?.to)
+            ?: rewriteSegment(cfg.intermediate, cfg.intermediateRewrite?.to)
+            ?: rewriteSegment(cfg.outbox, cfg.outboxRewrite?.to)
+            ?: rewriteSegment(cfg.inbox, cfg.inboxRewrite?.to)
+            ?: path
+    }
+
+    private fun normalizePath(path: String): String {
+        if (path.isBlank()) return path
+
+        var p = path.replace("\\", "/")
+
+        val prefix = if (p.startsWith("//")) "//" else ""
+        p = p.removePrefix("//")
+
+        while ("//" in p) {
+            p = p.replace("//", "/")
+        }
+
+        return prefix + p
     }
 }
-

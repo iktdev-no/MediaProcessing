@@ -20,15 +20,19 @@ logging:
     org.springframework.web.socket.config.WebSocketMessageBrokerStats: INFO
 
 media:
-  cache: /media/remote/mediaprocessingCache
-  cache-rewrite:
-    to: /src/cache
-  outgoing: /media/remote/streamit
-  outgoing-rewrite:
-      to: /src/output
-  incoming: /media/remote/torrent
-  incoming-rewrite:
-    to: /src/input
+  scratch: /media/remote/caches/scratch
+  scratch-rewrite:
+    to: /src/scratch
+  intermediate: /media/remote/caches/intermediate
+  intermediate-rewrite:
+    to: /src/intermediate
+  outbox: /media/remote/streamit
+  outbox-rewrite:
+    to: /src/outbox
+  inbox: /media/remote/torrent
+  inbox-rewrite:
+    to: /src/inbox
+
 
 streamit:
   address: http://streamit.service
