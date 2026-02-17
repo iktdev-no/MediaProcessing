@@ -34,15 +34,15 @@ class ValidateFileAndMediaDataListener : EventListener() {
 
         // 1) Funksjonell validering
         validateFunctional(start.data.operation, parsed)
-            ?.let { return it }
+            ?.let { return it.derivedOf(event) }
 
         // 2) Teknisk validering
         validateTechnical(format, warnings)
-            ?.let { return it }
+            ?.let { return it.derivedOf(event) }
 
         // 3) Filstørrelses-konsistens
         validateFileSizeConsistency(start.data.fileUri, format, warnings)
-            ?.let { return it }
+            ?.let { return it.derivedOf(event) }
 
         // 4) Stream-konsistens
         validateStreamConsistency(parsed, format, warnings)
