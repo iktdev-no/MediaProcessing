@@ -54,7 +54,7 @@ export type ContinueResult = ContinueFailure | ContinueSuccess
 
 export interface StartProcessRequest {
   fileUri: string;
-  mediaAction: MediaActionType;
+  mediaAction: MediaActionType[];
 }
 
 export interface ContinueFailure {

@@ -1,4 +1,4 @@
-import type { TaskQuery } from "../../types/backendTypes"
+import type { TaskQuery } from "../../types/webTypes"
 import { taskFilterSchema } from "./taskFilterSchema"
 
 export function parseTaskFilters(filters: string[], base: TaskQuery): TaskQuery {

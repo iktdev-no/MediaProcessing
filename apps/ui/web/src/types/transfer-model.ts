@@ -199,5 +199,12 @@ export interface DiskInfo {
   usedPercent: number;
 }
 
+export interface LineageNode {
+  eventId: string;
+  eventName: string;
+  parents: string[];
+  persistedAt: string | null;
+}
+
 export type CurrentState = "Continuing" | "OnHold"
 

@@ -1,5 +1,5 @@
-import type { PagedUiTask, ResetTaskResponse, TaskQuery } from "../types/backendTypes";
 import type { ProgressUpdate } from "../types/types";
+import type { PagedUiTask, ResetTaskResponse, TaskQuery } from "../types/webTypes";
 import { apiGet, buildQuery } from "./client";
 
 export function getTasks(query: TaskQuery) {

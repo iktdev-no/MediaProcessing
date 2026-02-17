@@ -1,4 +1,4 @@
-import type { EventQuery } from "../../types/backendTypes"
+import type { EventQuery } from "../../types/webTypes"
 import { eventFilterSchema } from "./eventFilterSchema"
 
 export function parseEventFilters(filters: string[], base: EventQuery): EventQuery {

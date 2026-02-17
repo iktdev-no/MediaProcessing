@@ -123,7 +123,7 @@ export default function FilesPage() {
         console.log("MEDIA ACTION:", action, file)
         closeMenu()
         try {
-            await startProcess({ fileUri: file.uri, mediaAction: action.id })
+            await startProcess({ fileUri: file.uri, mediaAction: [action.id] })
             console.log("Started process:", action.id, "for", file.uri)
         } catch (err) {
             console.error("Failed to start process", err)

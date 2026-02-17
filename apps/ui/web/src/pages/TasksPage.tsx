@@ -16,7 +16,7 @@ import { useToast } from "../components/useToast"
 import { parseTaskFilters } from "../features/tasks/parseTaskFilters"
 import { knownTaskNames, taskFilterSchema } from "../features/tasks/taskFilterSchema"
 import { useAutoRefresh } from "../features/useAutoRefresh"
-import type { PagedUiTask, TaskQuery } from "../types/backendTypes"
+import type { PagedUiTask, TaskQuery } from "../types/webTypes"
 
 const handleBeforeAdd = (token: string, current: string[]) => {
     // Claimed
