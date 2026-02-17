@@ -5,6 +5,7 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.FFprobeFormat
+import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
@@ -16,7 +17,7 @@ import java.io.File
 import java.net.URI
 
 @Component
-class ValidateFileAndMediaDataListener : EventListener() {
+class ValidateFileAndMediaDataListener() : EventListener() {
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
         val parsed = event.requireQualifiedEntry<MediaStreamParsedEvent>()
@@ -162,22 +163,25 @@ class ValidateFileAndMediaDataListener : EventListener() {
     ): ValidateFileAndMediaDataEvent? {
 
         val file = try {
-            File(URI(fileUri))
+            IFile(fileUri)
         } catch (e: Exception) {
-            return reject("Invalid file URI: $fileUri")
+            return reject("Invalid file path: $fileUri")
+        }
+
+        if (!file.exists()) {
+            return reject("File does not exist at $fileUri")
         }
 
         val actualSize = file.length()
         if (actualSize <= 0L) return reject("Actual file size is zero")
 
-        val ffprobeSize = format.size?.toLongOrNull() ?: return reject("Invalid ffprobe size: ${format.size}")
+        val ffprobeSize = format.size?.toLongOrNull()
+            ?: return reject("Invalid ffprobe size: ${format.size}")
 
-        // Exact mismatch → warning
         if (ffprobeSize != actualSize) {
             warnings += "ffprobe size ($ffprobeSize) differs from actual file size ($actualSize)"
         }
 
-        // Large mismatch → reject
         val ratio = actualSize.toDouble() / ffprobeSize.toDouble()
         if (ratio !in 0.95..1.05) {
             return reject("File size mismatch >5% (ffprobe=$ffprobeSize, actual=$actualSize)")
@@ -185,6 +189,7 @@ class ValidateFileAndMediaDataListener : EventListener() {
 
         return null
     }
+
 
     // ---------------------------------------------------------
     // 4) Stream consistency validation

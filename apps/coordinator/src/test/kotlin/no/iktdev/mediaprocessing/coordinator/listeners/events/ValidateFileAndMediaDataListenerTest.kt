@@ -10,6 +10,8 @@ import no.iktdev.mediaprocessing.MockData.dummyVideoStream
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.defaultMediaStreamParsedEvent
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
+import no.iktdev.mediaprocessing.shared.common.dto.files.FakeFile
+import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
@@ -179,6 +181,8 @@ class ValidateFileAndMediaDataListenerTest: TestBase() {
         Returneres Ok med eventuelle warnings
 """)
     fun testValidationOk() {
+        IFile.factory = { path -> FakeFile(path, exists = true, size = 1000) }
+
         val file = File("build/test-intermediate/okfile.mkv")
         file.parentFile.mkdirs()
         file.writeBytes(ByteArray(1000)) // size = 1000
