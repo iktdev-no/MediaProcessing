@@ -30,7 +30,6 @@ abstract class TestBaseWithDatabase() {
     val log = KotlinLogging.logger {}
 
     var validToken: String? = null
-    val mapper = ObjectMapper()
 
 
     @Autowired

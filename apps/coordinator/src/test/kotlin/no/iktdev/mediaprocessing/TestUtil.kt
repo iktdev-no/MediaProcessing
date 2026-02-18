@@ -1,8 +1,7 @@
 package no.iktdev.mediaprocessing
 
 import no.iktdev.eventi.events.EventListener
-import no.iktdev.eventi.events.EventListenerRegistry
-import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.registry.EventListenerRegistry
 import org.assertj.core.api.Assertions.assertThat
 import java.lang.reflect.Field
 

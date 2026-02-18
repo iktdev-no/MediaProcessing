@@ -43,6 +43,7 @@ class SegmentedVideoTaskListenerTest {
     private val fileUtil = mockk<FileUtil>()
 
     private lateinit var listener: SegmentedVideoTaskListener
+    lateinit var reporter: TaskReporter
 
     private val workFolder = WorkingFolder()
 
@@ -58,6 +59,12 @@ class SegmentedVideoTaskListenerTest {
             fileUtil = fileUtil,
             props
         )
+        reporter = mockk<TaskReporter>(relaxed = true)
+
+        every { reporter.markClaimed(any(), any()) } returns no.iktdev.eventi.tasks.Result.Success
+        every { reporter.publishEvent(any()) } returns no.iktdev.eventi.tasks.Result.Success
+        every { reporter.markCompleted(any()) } returns no.iktdev.eventi.tasks.Result.Success
+        every { reporter.updateProgress(any(), any(), any()) } returns no.iktdev.eventi.tasks.Result.Success
     }
 
     @AfterEach
@@ -154,8 +161,10 @@ class SegmentedVideoTaskListenerTest {
             SegmentConcatRunner.ConcatPayload(output, null)
         )
 
-        listener.accept(task, mockk(relaxed = true))
+
+        listener.accept(task, reporter)
         listener.currentJob?.join()
+
 
         coVerify(exactly = 1) { anyConstructed<SegmentEncodeRunner>().run() }
         coVerify(exactly = 1) { anyConstructed<SegmentConcatRunner>().run() }
@@ -224,7 +233,7 @@ class SegmentedVideoTaskListenerTest {
             SegmentConcatRunner.ConcatPayload(output, null)
         )
 
-        listener.accept(task, mockk(relaxed = true))
+        listener.accept(task, reporter)
         listener.currentJob?.join()
 
         coVerify(exactly = 1) { anyConstructed<SegmentConcatRunner>().run() }
@@ -272,7 +281,6 @@ class SegmentedVideoTaskListenerTest {
             )
         ).newReferenceId()
 
-        val reporter = mockk<TaskReporter>(relaxed = true)
 
         val accepted = listener.accept(task, reporter)
 

@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing
 
 import jakarta.annotation.PostConstruct
 import no.iktdev.eventi.ListenerOrder
-import no.iktdev.eventi.events.EventListenerRegistry
+import no.iktdev.eventi.registry.EventListenerRegistry
 import no.iktdev.mediaprocessing.coordinator.CoordinatorApplication
 import no.iktdev.mediaprocessing.coordinator.listeners.events.*
 import no.iktdev.mediaprocessing.shared.database.config.DatasourceConfiguration

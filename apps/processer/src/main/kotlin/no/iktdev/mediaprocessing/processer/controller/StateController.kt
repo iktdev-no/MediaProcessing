@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.processer.controller
 
 import mu.KotlinLogging
+import no.iktdev.eventi.models.Progress
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import org.springframework.http.ResponseEntity
@@ -17,11 +18,11 @@ class StateController(
 
 
     @GetMapping("/progress")
-    fun allProgress(): Map<UUID, FfmpegDecodedProgress> =
+    fun allProgress(): Map<UUID, Progress> =
         localProgress.getAll()
 
     @GetMapping("/progress/{taskId}")
-    fun progress(@PathVariable taskId: UUID): FfmpegDecodedProgress? =
+    fun progress(@PathVariable taskId: UUID): Progress? =
         localProgress.get(taskId)
 
 

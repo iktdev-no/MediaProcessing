@@ -2,8 +2,9 @@ package no.iktdev.mediaprocessing.processer
 
 import jakarta.annotation.PostConstruct
 import mu.KotlinLogging
-import no.iktdev.eventi.events.EventTypeRegistry
-import no.iktdev.eventi.tasks.TaskTypeRegistry
+import no.iktdev.eventi.registry.EventTypeRegistry
+import no.iktdev.eventi.registry.ProgressTypeRegistry
+import no.iktdev.eventi.registry.TaskTypeRegistry
 import no.iktdev.exfl.coroutines.CoroutinesDefault
 import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
@@ -12,6 +13,7 @@ import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.ProgressRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import no.iktdev.mediaprocessing.shared.common.getAppVersion
 import no.iktdev.mediaprocessing.shared.database.DatabaseApplication
@@ -57,6 +59,7 @@ open class ApplicationConfiguration() {
         TaskRegistry.getTasks().let {
             TaskTypeRegistry.register(it)
         }
+        ProgressTypeRegistry.register(ProgressRegistry.getProgresses())
     }
 }
 

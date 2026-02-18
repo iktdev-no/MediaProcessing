@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing
 
 import io.mockk.*
-import no.iktdev.eventi.events.EventTypeRegistry
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
+import no.iktdev.eventi.registry.EventTypeRegistry
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
@@ -40,7 +40,7 @@ open class TestBase {
     @BeforeEach
     open fun setup() {
         mockkObject(TaskStore)
-        every { TaskStore.persist(any()) } just Runs
+        every { TaskStore.persist(any()) } returns true
         every { preference.getProcesserPreference() } returns ProcesserPreference(
             videoPreference = defaultVideoPreference,
             audioPreference = defaultAudioPreference

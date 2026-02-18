@@ -25,16 +25,17 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
 
     object FakeTaskStore: no.iktdev.eventi.stores.TaskStore {
         val persisted = mutableListOf<Task>()
-        override fun persist(task: Task) {
+        override fun persist(task: Task): Boolean {
             persisted.add(task)
+            return true
         }
 
         override fun findByTaskId(taskId: UUID): PersistedTask? { TODO("Not yet implemented") }
         override fun findByReferenceId(referenceId: UUID): List<PersistedTask> { TODO("Not yet implemented") }
         override fun findUnclaimed(referenceId: UUID): List<PersistedTask> { TODO("Not yet implemented") }
         override fun claim(taskId: UUID, workerId: String): Boolean { TODO("Not yet implemented") }
-        override fun heartbeat(taskId: UUID) { TODO("Not yet implemented") }
-        override fun markConsumed(taskId: UUID, status: TaskStatus) { TODO("Not yet implemented") }
+        override fun heartbeat(taskId: UUID): Boolean { TODO("Not yet implemented") }
+        override fun markConsumed(taskId: UUID, status: TaskStatus): Boolean { TODO("Not yet implemented") }
         override fun releaseExpiredTasks(timeout: Duration) { TODO("Not yet implemented") }
         override fun getPendingTasks(): List<PersistedTask> { TODO("Not yet implemented") }
     }
@@ -42,7 +43,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
     @BeforeEach
     override fun setup() {
         mockkObject(TaskStore)
-        every { TaskStore.persist(any()) } just Runs
+        every { TaskStore.persist(any()) } returns true
         super.setup()
     }
 

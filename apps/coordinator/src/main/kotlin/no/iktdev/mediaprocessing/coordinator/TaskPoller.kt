@@ -4,7 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -40,35 +42,86 @@ class TaskPoller(
 
 @Component
 class DefaultTaskReporter() : TaskReporter {
-    override fun markClaimed(taskId: UUID, workerId: String) {
-        TaskStore.claim(taskId, workerId)
+    override fun markClaimed(taskId: UUID, workerId: String): Result {
+        return try {
+            val result = TaskStore.claim(taskId, workerId)
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to claim task $taskId for worker $workerId")
+            }
+        } catch (e: Exception) {
+            Result.Failure("Failed to claim task $taskId for worker $workerId: ${e.message}", e ,false)
+        }
     }
 
-    override fun updateLastSeen(taskId: UUID) {
-        TaskStore.heartbeat(taskId)
+    override fun updateLastSeen(taskId: UUID): Result {
+        return try {
+            val result = TaskStore.heartbeat(taskId)
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to update last seen for task $taskId")
+            }
+        } catch (e: Exception) {
+            Result.Failure("Failed to update last seen for task $taskId: ${e.message}", e ,false)
+        }
     }
 
-    override fun markCompleted(taskId: UUID) {
-        TaskStore.markConsumed(taskId, TaskStatus.Completed)
+    override fun markCompleted(taskId: UUID): Result {
+        return try {
+            val result = TaskStore.markConsumed(taskId, TaskStatus.Completed)
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to mark task $taskId as completed")
+            }
+        } catch (e: Exception) {
+            Result.Failure("Failed to mark task $taskId as completed: ${e.message}", e ,false)
+        }
     }
 
-    override fun markFailed(referenceId: UUID, taskId: UUID) {
-        TaskStore.markConsumed(taskId, TaskStatus.Failed)
+    override fun markFailed(referenceId: UUID, taskId: UUID): Result {
+        return try {
+            val result = TaskStore.markConsumed(taskId, TaskStatus.Failed)
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to mark task $taskId as failed")
+            }
+        } catch (e: Exception) {
+            Result.Failure("Failed to mark task $taskId as failed: ${e.message}", e,false)
+        }
     }
 
-    override fun markCancelled(referenceId: UUID, taskId: UUID) {
-        TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
+    override fun markCancelled(referenceId: UUID, taskId: UUID): Result {
+        return try {
+            val result = TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to mark task $taskId as cancelled")
+            }
+        } catch (e: Exception) {
+            Result.Failure("Failed to mark task $taskId as cancelled: ${e.message}", e,false)
+        }
     }
 
-    override fun updateProgress(taskId: UUID, progress: Int) {
+    override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result {
         // Not to be implemented for this application
+        return Result.Failure("Not implemented", null, false)
     }
 
     override fun log(taskId: UUID, message: String) {
         // Not to be implemented for this application
     }
 
-    override fun publishEvent(event: Event) {
-        EventStore.persist(event)
+    override fun publishEvent(event: Event): Result {
+        return try {
+            EventStore.persist(event)
+            Result.Success
+        } catch (e: Exception) {
+            Result.Failure("Failed to publish event: ${e.message}", e, false)
+        }
     }
 }

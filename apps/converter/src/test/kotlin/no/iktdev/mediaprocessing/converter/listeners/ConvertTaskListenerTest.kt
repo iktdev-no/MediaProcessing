@@ -2,8 +2,10 @@ package no.iktdev.mediaprocessing.converter.listeners
 
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.library.subtitle.classes.Dialog
 import no.iktdev.library.subtitle.classes.DialogType
@@ -105,16 +107,14 @@ class ConvertTaskListenerTest {
 
 
     val overrideReporter = object : TaskReporter {
-        override fun markClaimed(taskId: UUID, workerId: String) {}
-        override fun updateLastSeen(taskId: UUID) {}
-        override fun markCompleted(taskId: UUID) {}
-        override fun markFailed(referenceId: UUID, taskId: UUID) {}
-        override fun markCancelled(referenceId: UUID, taskId: UUID) {}
-        override fun updateProgress(taskId: UUID, progress: Int) {}
+        override fun markClaimed(taskId: UUID, workerId: String): Result { return Result.Success }
+        override fun updateLastSeen(taskId: UUID): Result { return Result.Success }
+        override fun markCompleted(taskId: UUID): Result { return Result.Success }
+        override fun markFailed(referenceId: UUID, taskId: UUID): Result { return Result.Success }
+        override fun markCancelled(referenceId: UUID, taskId: UUID): Result { return Result.Success }
+        override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result { return Result.Success }
         override fun log(taskId: UUID, message: String) {}
-        override fun publishEvent(event: Event) {
-
-        }
+        override fun publishEvent(event: Event): Result { return Result.Success }
     }
 
     // ---------------------------------------------------------------------

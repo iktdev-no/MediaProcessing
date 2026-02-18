@@ -2,6 +2,8 @@ package no.iktdev.mediaprocessing.processer
 
 import jakarta.annotation.PostConstruct
 import mu.KotlinLogging
+import no.iktdev.eventi.models.Progress
+import no.iktdev.eventi.serialization.ZPS.toEnvelope
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
@@ -35,11 +37,11 @@ class CoordinatorClient(
         }
     }
 
-    fun reportProgress(referenceId: String, taskId: String, percent: FfmpegDecodedProgress, message: String?) =
+    fun reportProgress(referenceId: String, taskId: String, payload: Progress) =
         webClient.post()
             .uri("/internal/progress")
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(ProgressUpdate(referenceId, taskId, percent, message))
+            .bodyValue(ProgressUpdate(referenceId, taskId, payload.toEnvelope()))
             .retrieve()
             .toBodilessEntity()
             .doOnSuccess { log.info { "Progress sent" } }

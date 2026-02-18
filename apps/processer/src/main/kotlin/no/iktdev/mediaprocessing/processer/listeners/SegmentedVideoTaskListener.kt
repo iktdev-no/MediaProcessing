@@ -19,6 +19,7 @@ import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
 import no.iktdev.mediaprocessing.processer.segment.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.jetbrains.annotations.VisibleForTesting
 import org.springframework.stereotype.Service
@@ -237,10 +238,9 @@ class SegmentedVideoTaskListener(
 
         val percent = ((done / total) * 100).toInt()
 
-        coordinatorWebClient.reportProgress(
-            referenceId = task.referenceId.toString(),
-            taskId = task.taskId.toString(),
-            percent = FfmpegDecodedProgress(
+        val progress = EncodeProgress(
+            progress = percent,
+            ffmpegDecodedProgress = FfmpegDecodedProgress(
                 progress = percent,
                 time = "",
                 duration = total.toString(),
@@ -248,8 +248,9 @@ class SegmentedVideoTaskListener(
                 estimatedCompletion = "",
                 estimatedCompletionSeconds = 0
             ),
-            ""
+         ""
         )
+        reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 
     val listener = object : FFmpeg.Listener {

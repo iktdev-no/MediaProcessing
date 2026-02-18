@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing.shared.database.stores
 
-import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.serialization.WGson
 import no.iktdev.eventi.stores.TaskStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
@@ -65,12 +65,12 @@ object TaskStore: TaskStore {
 
 
 
-    override fun persist(task: Task) {
-        val asData = ZDS.WGson.toJson(task)
+    override fun persist(task: Task): Boolean {
+        val asData = WGson.toJson(task)
         val taskName = task::class.simpleName ?: run {
             throw RuntimeException("Missing class name for task: $task")
         }
-        withTransaction {
+        return withTransaction {
             TasksTable.insert {
                 it[referenceId] = task.referenceId.toString()
                 it[taskId] = task.taskId.toString()
@@ -79,7 +79,7 @@ object TaskStore: TaskStore {
                 it[data] = asData
                 it[persistedAt] = UtcNow()
             }
-        }
+        }.isSuccess
     }
 
     override fun findByTaskId(taskId: UUID): PersistedTask? {
@@ -145,22 +145,22 @@ object TaskStore: TaskStore {
         }.isSuccess
     }
 
-    override fun heartbeat(taskId: UUID) {
-        withTransaction {
+    override fun heartbeat(taskId: UUID): Boolean {
+        return withTransaction {
             TasksTable.update({ TasksTable.taskId eq taskId.toString() }) {
                 it[lastCheckIn] = UtcNow()
             }
-        }
+        }.isSuccess
     }
 
-    override fun markConsumed(taskId: UUID, status: TaskStatus) {
-        withTransaction {
+    override fun markConsumed(taskId: UUID, status: TaskStatus): Boolean {
+        return withTransaction {
             TasksTable.update({ TasksTable.taskId eq taskId.toString() }) {
                 it[consumed] = true
                 it[TasksTable.status] = status
                 it[lastCheckIn] = UtcNow()
             }
-        }
+        }.isSuccess
     }
 
     override fun releaseExpiredTasks(timeout: Duration) {

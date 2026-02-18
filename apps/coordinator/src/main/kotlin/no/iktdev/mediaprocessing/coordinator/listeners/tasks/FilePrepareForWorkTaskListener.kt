@@ -10,7 +10,9 @@ import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.FileCopyProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
+import no.iktdev.streamit.library.db.tables.progress
 import org.springframework.stereotype.Component
 import java.io.File
 import java.io.FileNotFoundException
@@ -79,7 +81,7 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
         fs.copyWithProgress(source, destinationFile) { copied, total ->
             val percent = (copied.toDouble() / total.toDouble()) * 100.0
             log.debug { "Copy progress: $percent%" }
-            reporter?.updateProgress(useTask.taskId, percent.toInt())
+            reporter?.updateProgress(useTask.referenceId, useTask.taskId, FileCopyProgress(progress = percent.toInt(), source = source.absolutePath, destination = destinationFile.absolutePath))
         }
 
         log.debug { "Verifying identical: ${source.absolutePath} -> ${destinationFile.absolutePath}" }

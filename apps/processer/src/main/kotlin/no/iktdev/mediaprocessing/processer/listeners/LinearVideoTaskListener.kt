@@ -16,6 +16,7 @@ import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.springframework.stereotype.Service
 import java.io.File
@@ -96,10 +97,9 @@ class LinearVideoTaskListener(
 
         override fun onCompleted(inputFile: String, outputFile: String) {
             currentTask?.let {
-                coordinatorWebClient.reportProgress(
-                    referenceId = it.referenceId.toString(),
-                    taskId = it.taskId.toString(),
-                    percent = FfmpegDecodedProgress(
+                val progress = EncodeProgress(
+                    progress = 100,
+                    ffmpegDecodedProgress = FfmpegDecodedProgress(
                         100,
                         "",
                         lastProgress?.duration ?: "",
@@ -109,6 +109,7 @@ class LinearVideoTaskListener(
                     ),
                     ""
                 )
+                reporter?.updateProgress(it.referenceId, it.taskId, progress)
             }
         }
 
@@ -118,13 +119,12 @@ class LinearVideoTaskListener(
         ) {
             lastProgress = progress
             currentTask?.let {
-                localProgress.update(it.taskId, progress)
-                coordinatorWebClient.reportProgress(
-                    referenceId = it.referenceId.toString(),
-                    taskId = it.taskId.toString(),
-                    percent = progress,
+                val progress = EncodeProgress(
+                    progress = progress.progress,
+                    ffmpegDecodedProgress = progress,
                     ""
                 )
+                reporter?.updateProgress(it.referenceId, it.taskId, progress)
             }
 
         }

@@ -3,11 +3,11 @@ package no.iktdev.mediaprocessing.shared.common
 import com.ibm.icu.text.Transliterator
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
-import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.serialization.ZDS.toEvent
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
 import java.io.File

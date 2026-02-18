@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
-import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.mediaprocessing.coordinator.translate
 import no.iktdev.mediaprocessing.shared.common.effective
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted

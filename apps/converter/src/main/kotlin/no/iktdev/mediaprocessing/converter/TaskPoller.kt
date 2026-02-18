@@ -4,7 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -40,37 +42,75 @@ class TaskPoller(
 
 @Component
 class DefaultTaskReporter() : TaskReporter {
-    override fun markClaimed(taskId: UUID, workerId: String) {
-        TaskStore.claim(taskId, workerId)
+    override fun markClaimed(taskId: UUID, workerId: String): Result {
+        return TaskStore.claim(taskId, workerId).let { result ->
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to claim task $taskId for worker $workerId")
+            }
+        }
     }
 
-    override fun updateLastSeen(taskId: UUID) {
-        TaskStore.heartbeat(taskId)
+    override fun updateLastSeen(taskId: UUID): Result {
+        return TaskStore.heartbeat(taskId).let { result ->
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to update heartbeat for task $taskId")
+            }
+        }
     }
 
-    override fun markCompleted(taskId: UUID) {
-        TaskStore.markConsumed(taskId, TaskStatus.Completed)
-
+    override fun markCompleted(taskId: UUID): Result {
+        return TaskStore.markConsumed(taskId, TaskStatus.Completed).let { result ->
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to mark task $taskId as completed")
+            }
+        }
     }
 
-    override fun markFailed(referenceId: UUID, taskId: UUID) {
-        TaskStore.markConsumed(taskId, TaskStatus.Failed)
+    override fun markFailed(referenceId: UUID, taskId: UUID): Result {
+        return TaskStore.markConsumed(taskId, TaskStatus.Failed).let { result ->
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to mark task $taskId as failed")
+            }
+        }
     }
 
-    override fun markCancelled(referenceId: UUID, taskId: UUID) {
-        TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
+    override fun markCancelled(referenceId: UUID, taskId: UUID): Result {
+        return TaskStore.markConsumed(taskId, TaskStatus.Cancelled).let { result ->
+            if (result) {
+                Result.Success
+            } else {
+                Result.Failure("Failed to mark task $taskId as cancelled")
+            }
+        }
     }
 
-
-    override fun updateProgress(taskId: UUID, progress: Int) {
+    override fun updateProgress(
+        referenceId: UUID,
+        taskId: UUID,
+        payload: Progress
+    ): Result {
         // Not to be implemented for this application
+        return Result.Failure("Progress updates not supported")
     }
 
     override fun log(taskId: UUID, message: String) {
         // Not to be implemented for this application
     }
 
-    override fun publishEvent(event: Event) {
-        EventStore.persist(event)
+    override fun publishEvent(event: Event): Result {
+        return try {
+            EventStore.persist(event)
+            Result.Success
+        } catch (e: Exception) {
+            Result.Failure("Failed to publish event: ${e.message}")
+        }
     }
 }

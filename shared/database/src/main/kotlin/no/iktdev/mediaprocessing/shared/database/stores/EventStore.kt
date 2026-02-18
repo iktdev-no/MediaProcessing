@@ -1,11 +1,10 @@
 package no.iktdev.mediaprocessing.shared.database.stores
 
 import mu.KotlinLogging
-import no.iktdev.eventi.ZDS
-import no.iktdev.eventi.ZDS.toEvent
-import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.serialization.WGson
+import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
@@ -121,13 +120,15 @@ object EventStore: EventStore {
 
 
     override fun persist(event: Event) {
-        val asData = ZDS.WGson.toJson(event)
+        val referenceId = event.referenceId.toString()
+
+        val asData = WGson.toJson(event)
         val eventName = event::class.simpleName ?: run {
             throw RuntimeException("Missing class name for event: $event")
         }
         withTransaction {
             EventsTable.insert {
-                it[EventsTable.referenceId] = event.referenceId.toString()
+                it[EventsTable.referenceId] = referenceId
                 it[EventsTable.eventId] = event.eventId.toString()
                 it[EventsTable.event] = eventName
                 it[EventsTable.data] = asData

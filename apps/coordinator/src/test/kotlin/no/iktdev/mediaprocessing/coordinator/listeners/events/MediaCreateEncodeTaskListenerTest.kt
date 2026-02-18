@@ -24,7 +24,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
     @BeforeEach
     override fun setup() {
         mockkObject(TaskStore)
-        every { TaskStore.persist(any()) } just Runs
+        every { TaskStore.persist(any()) } returns true
 
         every { preference.getProcesserPreference() } returns ProcesserPreference(
             videoPreference = defaultVideoPreference,

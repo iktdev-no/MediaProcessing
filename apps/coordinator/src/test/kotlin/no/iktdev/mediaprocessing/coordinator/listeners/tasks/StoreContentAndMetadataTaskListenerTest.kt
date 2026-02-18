@@ -2,8 +2,10 @@ package no.iktdev.mediaprocessing.coordinator.listeners.tasks
 
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
@@ -37,16 +39,17 @@ class StoreContentAndMetadataTaskListenerTest {
         var completed = false
         var failed = false
 
-        override fun markClaimed(taskId: UUID, workerId: String) {}
-        override fun updateLastSeen(taskId: UUID) {}
-        override fun markCompleted(taskId: UUID) { completed = true }
-        override fun markFailed(referenceId: UUID, taskId: UUID) { failed = true }
-        override fun markCancelled(referenceId: UUID, taskId: UUID) {}
-        override fun updateProgress(taskId: UUID, progress: Int) {}
+        override fun markClaimed(taskId: UUID, workerId: String): Result { return Result.Success }
+        override fun updateLastSeen(taskId: UUID): Result { return Result.Success }
+        override fun markCompleted(taskId: UUID): Result { completed = true; return Result.Success }
+        override fun markFailed(referenceId: UUID, taskId: UUID): Result { failed = true; return Result.Success }
+        override fun markCancelled(referenceId: UUID, taskId: UUID): Result { return Result.Success }
+        override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result { return Result.Success }
         override fun log(taskId: UUID, message: String) {}
 
-        override fun publishEvent(event: Event) {
+        override fun publishEvent(event: Event): Result {
             events.add(event)
+            return Result.Success
         }
     }
 

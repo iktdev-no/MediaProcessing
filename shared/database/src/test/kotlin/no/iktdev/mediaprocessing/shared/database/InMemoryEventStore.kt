@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing.shared.database
 
 import no.iktdev.eventi.MyTime
-import no.iktdev.eventi.ZDS.toPersisted
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.serialization.ZDS.toPersisted
 import no.iktdev.eventi.stores.EventStore
 import java.time.Instant
 import java.util.*

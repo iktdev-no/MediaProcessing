@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common.listeners
 
-import no.iktdev.eventi.ZDS.toEvent
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 

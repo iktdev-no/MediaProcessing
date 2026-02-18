@@ -5,7 +5,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -40,42 +42,123 @@ class TaskPoller(
 
 
 @Component
-class DefaultTaskReporter() : TaskReporter {
+class DefaultTaskReporter(
+    private var coordinatorWebClient: CoordinatorClient,
+    private val localProgress: LocalProgressCache,
+) : TaskReporter {
     private val log = KotlinLogging.logger {}
 
-    override fun markClaimed(taskId: UUID, workerId: String) {
+    override fun markClaimed(taskId: UUID, workerId: String): Result {
         log.info { "$workerId claiming task $taskId" }
-        TaskStore.claim(taskId, workerId)
+        return try {
+            val result = TaskStore.claim(taskId, workerId)
+            if (result) {
+                log.info { "Successfully claimed task $taskId for worker $workerId" }
+                Result.Success
+            } else {
+                log.warn { "Failed to claim task $taskId for worker $workerId" }
+                Result.Failure("Failed to claim task $taskId for worker $workerId")
+            }
+        } catch (e: Exception) {
+            log.error(e) { "Failed to claim task $taskId for worker $workerId" }
+            Result.Failure("Failed to claim task $taskId for worker $workerId: ${e.message}", e ,false)
+        }
     }
 
-    override fun updateLastSeen(taskId: UUID) {
-        TaskStore.heartbeat(taskId)
+    override fun updateLastSeen(taskId: UUID): Result {
+        return try {
+            val status = TaskStore.heartbeat(taskId)
+            if (status) {
+                log.info { "Updated heartbeat for task $taskId" }
+                Result.Success
+            } else {
+                log.warn { "Failed to update heartbeat for task $taskId" }
+                Result.Failure("Failed to update heartbeat for task $taskId")
+            }
+        } catch (e: Exception) {
+            log.error(e) { "Failed to update heartbeat for task $taskId" }
+            Result.Failure("Failed to update heartbeat for task $taskId: ${e.message}",e ,false)
+        }
     }
 
-    override fun markCompleted(taskId: UUID) {
+    override fun markCompleted(taskId: UUID): Result {
         log.info { "Marking task $taskId as completed" }
-        TaskStore.markConsumed(taskId, TaskStatus.Completed)
+        return try {
+            val result = TaskStore.markConsumed(taskId, TaskStatus.Completed)
+            if (result) {
+                log.info { "Successfully marked task $taskId as completed" }
+                Result.Success
+            } else {
+                log.warn { "Failed to mark task $taskId as completed" }
+                Result.Failure("Failed to mark task $taskId as completed")
+            }
+        } catch (e: Exception) {
+            log.error(e) { "Failed to mark task $taskId as completed" }
+            Result.Failure("Failed to mark task $taskId as completed: ${e.message}", e, false)
+        }
     }
 
-    override fun markFailed(referenceId: UUID, taskId: UUID) {
+    override fun markFailed(referenceId: UUID, taskId: UUID): Result {
         log.info { "Marking task $taskId as failed" }
-        TaskStore.markConsumed(taskId, TaskStatus.Failed)
+        return try {
+            val result = TaskStore.markConsumed(taskId, TaskStatus.Failed)
+            if (result) {
+                log.info { "Successfully marked task $taskId as failed" }
+                Result.Success
+            } else {
+                log.warn { "Failed to mark task $taskId as failed" }
+                Result.Failure("Failed to mark task $taskId as failed")
+            }
+        } catch (e: Exception) {
+            log.error(e) { "Failed to mark task $taskId as failed" }
+            Result.Failure("Failed to mark task $taskId as failed: ${e.message}", e, false)
+        }
     }
 
-    override fun markCancelled(referenceId: UUID, taskId: UUID) {
+    override fun markCancelled(referenceId: UUID, taskId: UUID): Result {
         log.info { "Margin task $taskId as cancelled"}
-        TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
+        return try {
+            val result = TaskStore.markConsumed(taskId, TaskStatus.Cancelled)
+            if (result) {
+                log.info { "Successfully marked task $taskId as cancelled" }
+                Result.Success
+            } else {
+                log.warn { "Failed to mark task $taskId as cancelled" }
+                Result.Failure("Failed to mark task $taskId as cancelled")
+            }
+        } catch (e: Exception) {
+            log.error(e) { "Failed to mark task $taskId as cancelled" }
+            Result.Failure("Failed to mark task $taskId as cancelled: ${e.message}", e, false)
+        }
     }
 
-    override fun updateProgress(taskId: UUID, progress: Int) {
+    override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result {
         // Not to be implemented for this application
+        return try {
+            localProgress.update(taskId, progress = payload)
+            coordinatorWebClient.reportProgress(
+                referenceId = referenceId.toString(),
+                taskId = taskId.toString(),
+                payload = payload,
+            )
+            Result.Success
+        } catch (e: Exception) {
+            log.error(e) { "Failed to update progress for task $taskId" }
+            Result.Failure("Failed to update progress for task $taskId: ${e.message}", e, false)
+        }
     }
 
     override fun log(taskId: UUID, message: String) {
         // Not to be implemented for this application
     }
 
-    override fun publishEvent(event: Event) {
-        EventStore.persist(event)
+    override fun publishEvent(event: Event): Result {
+        return try {
+            EventStore.persist(event)
+            Result.Success
+        } catch (e: Exception) {
+            log.error(e) { "Failed to publish event ${event.eventId} for reference ${event.referenceId}" }
+            Result.Failure("Failed to publish event ${event.eventId} for reference ${event.referenceId}: ${e.message}", e, false)
+        }
     }
 }

@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
-import no.iktdev.eventi.ZDS
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.serialization.WGson
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
 import no.iktdev.mediaprocessing.Files
 import no.iktdev.mediaprocessing.MockData
@@ -247,7 +247,7 @@ class MediaSelectExtractTracksListenerTest {
 
     fun validate() {
         val data = Files.MediaStreamParsedEvent.getContent()
-        val event = ZDS.WGson.gson.fromJson(data, MediaStreamParsedEvent::class.java)
+        val event = WGson.gson.fromJson(data, MediaStreamParsedEvent::class.java)
         assertNotNull(event)
         event.data.subtitleStream.forEach {
             assertNotNull(it.tags.language)
