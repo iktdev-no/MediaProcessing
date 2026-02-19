@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.processer
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.registry.TaskListenerRegistry
@@ -126,7 +127,7 @@ class VideoTaskPollerImplementationTest {
         store.persist(task)
 
         poller.pollOnce()
-
+        yield()
         assertTrue { TaskListenerRegistry.getListeners().size == 2 }
         assertTrue(linear.accepted.contains(task.taskId))
         assertFalse(segmented.accepted.contains(task.taskId))
@@ -145,8 +146,8 @@ class VideoTaskPollerImplementationTest {
         ).apply { newReferenceId() }
 
         store.persist(task)
-
         poller.pollOnce()
+        yield()
 
         assertTrue { TaskListenerRegistry.getListeners().size == 2 }
         assertTrue(segmented.accepted.contains(task.taskId))
@@ -163,6 +164,7 @@ class VideoTaskPollerImplementationTest {
         store.persist(MockTestTask().newReferenceId())
 
         poller.pollOnce()
+        yield()
 
         assertTrue(linear.accepted.isEmpty())
         assertTrue(segmented.accepted.isEmpty())
