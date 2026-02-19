@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.processer.listeners
 
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Progress
@@ -15,7 +14,9 @@ import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.TestUtils
 import no.iktdev.mediaprocessing.processer.assertSameReferenceId
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
-import no.iktdev.mediaprocessing.processer.strategy.EncodingStrategy
+import no.iktdev.mediaprocessing.processer.getCoordinatorClient
+import no.iktdev.mediaprocessing.processer.getProcesserProperties
+import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
@@ -30,12 +31,6 @@ import kotlin.system.measureTimeMillis
 
 class LinearVideoTaskListenerTest {
 
-    private val props = ProcesserProperties(
-        coordinatorUrl = "http://localhost",
-        coordinatorPingOnStartup = false,
-        allowOverwrite = true,
-        enableSegmentedTaskListener = true
-    )
 
     class TestListenerLinear(val delay: Long, coordinatorClient: CoordinatorClient, processerProperties: ProcesserProperties) :
         LinearVideoTaskListener(
@@ -79,7 +74,6 @@ class LinearVideoTaskListenerTest {
         TaskTypeRegistry.register(EncodeTask::class.java)
     }
 
-    private val coordinatorClient = mockk<CoordinatorClient>(relaxed = true)
 
     @Test
     fun `onTask waits for runner to complete`() = runTest {
@@ -92,7 +86,7 @@ class LinearVideoTaskListenerTest {
             )
         ).newReferenceId()
 
-        val listener = TestListenerLinear(delay, coordinatorClient, props)
+        val listener = TestListenerLinear(delay, getCoordinatorClient(), getProcesserProperties())
 
         val time = measureTimeMillis {
             listener.accept(testTask, overrideReporter)
@@ -140,11 +134,11 @@ class LinearVideoTaskListenerTest {
         ).newReferenceId()
 
         val listener = LinearVideoTaskListener(
-            coordinatorWebClient = coordinatorClient,
+            coordinatorWebClient = getCoordinatorClient(),
             localProgress = LocalProgressCache(),
             fileUtil = TestUtils.getFileUtil(),
             executableConfig = TestUtils.getExecutableConfig(),
-            processerProperties = props
+            processerProperties = getProcesserProperties()
         )
 
         val event = listener.createIncompleteStateTaskEvent(
@@ -172,7 +166,7 @@ class LinearVideoTaskListenerTest {
             )
         ).apply { newReferenceId() }
 
-        val listener = TestListenerLinear(delay = 10, coordinatorClient, props)
+        val listener = TestListenerLinear(delay = 10, getCoordinatorClient(), getProcesserProperties())
 
         listener.accept(task, overrideReporter)
         listener.getJob()?.join()
@@ -190,7 +184,7 @@ class LinearVideoTaskListenerTest {
         Skal Linear returneres
 """)
     fun strategy_returns_linear_for_audio_only() {
-        val listener = TestListenerLinear(delay = 0, coordinatorClient, props)
+        val listener = TestListenerLinear(delay = 0, getCoordinatorClient(), getProcesserProperties())
 
         val task = EncodeTask(
             EncodeData(
@@ -202,7 +196,7 @@ class LinearVideoTaskListenerTest {
 
         val strategy = listener.getEncodeStrategy(task)
 
-        assertEquals(EncodingStrategy.Linear, strategy)
+        assertEquals(VideoStrategy.Linear, strategy)
     }
 
     @Test
@@ -213,7 +207,7 @@ class LinearVideoTaskListenerTest {
         Skal listeneren akseptere tasken
 """)
     fun linear_listener_accepts_when_strategy_is_linear() {
-        val listener = TestListenerLinear(delay = 0, coordinatorClient, props)
+        val listener = TestListenerLinear(delay = 0, getCoordinatorClient(), getProcesserProperties())
 
         val task = EncodeTask(
             EncodeData(
@@ -236,7 +230,7 @@ class LinearVideoTaskListenerTest {
         Skal listeneren IKKE akseptere tasken
 """)
     fun linear_listener_rejects_when_strategy_is_segmented() {
-        val listener = TestListenerLinear(delay = 0, coordinatorClient, props)
+        val listener = TestListenerLinear(delay = 0, getCoordinatorClient(), getProcesserProperties())
 
         val task = EncodeTask(
             EncodeData(

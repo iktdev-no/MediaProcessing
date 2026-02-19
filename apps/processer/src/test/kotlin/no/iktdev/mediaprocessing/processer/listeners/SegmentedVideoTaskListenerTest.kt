@@ -18,7 +18,7 @@ import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import no.iktdev.mediaprocessing.processer.segment.*
-import no.iktdev.mediaprocessing.processer.strategy.EncodingStrategy
+import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.junit.jupiter.api.*
@@ -268,7 +268,7 @@ class SegmentedVideoTaskListenerTest {
 
         val strategy = listener.getEncodeStrategy(task)
 
-        assertEquals(EncodingStrategy.Segmented, strategy)
+        assertEquals(VideoStrategy.Segmented, strategy)
     }
 
     @Test

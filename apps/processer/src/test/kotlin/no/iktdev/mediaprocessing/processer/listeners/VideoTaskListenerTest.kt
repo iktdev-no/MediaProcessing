@@ -5,7 +5,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.processer.WorkingFile
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
-import no.iktdev.mediaprocessing.processer.strategy.EncodingStrategy
+import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.junit.jupiter.api.Assertions.*
@@ -24,6 +24,7 @@ class VideoTaskListenerTest {
 
 
     private val listener = object : VideoTaskListener(TaskType.CPU_INTENSIVE, props) {
+        override val listenerStrategy: VideoStrategy = VideoStrategy.None
         override fun getWorkerId(): String {
             return UUID.randomUUID().toString()
         }
@@ -52,7 +53,7 @@ class VideoTaskListenerTest {
     """)
     fun copy_returns_linear() {
         val task = taskWithArgs("-c", "copy")
-        assertEquals(EncodingStrategy.Linear, listener.getEncodeStrategy(task))
+        assertEquals(VideoStrategy.Linear, listener.getEncodeStrategy(task))
     }
 
     @Test
@@ -64,7 +65,7 @@ class VideoTaskListenerTest {
     """)
     fun audio_only_returns_linear() {
         val task = taskWithArgs("-c:a", "aac")
-        assertEquals(EncodingStrategy.Linear, listener.getEncodeStrategy(task))
+        assertEquals(VideoStrategy.Linear, listener.getEncodeStrategy(task))
     }
 
     @Test
@@ -76,7 +77,7 @@ class VideoTaskListenerTest {
     """)
     fun video_reencode_returns_segmented() {
         val task = taskWithArgs("-c:v", "libx264")
-        assertEquals(EncodingStrategy.Segmented, listener.getEncodeStrategy(task))
+        assertEquals(VideoStrategy.Segmented, listener.getEncodeStrategy(task))
     }
 
     @Test
@@ -88,7 +89,7 @@ class VideoTaskListenerTest {
     """)
     fun filtergraph_returns_segmented() {
         val task = taskWithArgs("-vf", "scale=1920:1080")
-        assertEquals(EncodingStrategy.Segmented, listener.getEncodeStrategy(task))
+        assertEquals(VideoStrategy.Segmented, listener.getEncodeStrategy(task))
     }
 
     @Test
@@ -100,6 +101,6 @@ class VideoTaskListenerTest {
     """)
     fun concat_returns_linear() {
         val task = taskWithArgs("-f", "concat")
-        assertEquals(EncodingStrategy.Linear, listener.getEncodeStrategy(task))
+        assertEquals(VideoStrategy.Linear, listener.getEncodeStrategy(task))
     }
 }

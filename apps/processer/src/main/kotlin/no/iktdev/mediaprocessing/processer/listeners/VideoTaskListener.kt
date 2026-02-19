@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.listeners
 
+import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
@@ -7,37 +8,59 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
-import no.iktdev.mediaprocessing.processer.strategy.EncodingStrategy
+import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
 import org.jetbrains.annotations.VisibleForTesting
 import java.io.File
 
 abstract class VideoTaskListener(taskType: TaskType, private val processerProperties: ProcesserProperties): FfmpegTaskListener(taskType) {
+    private val log = KotlinLogging.logger {}
+
+    abstract val listenerStrategy: VideoStrategy
 
     override fun supports(task: Task) = task is EncodeTask
 
     override fun accept(task: Task, reporter: TaskReporter): Boolean {
-        if (!supports(task)) return false
+        if (!supports(task)) {
+            log.debug { "${getWorkerId()} ignored ${task.taskId}: supports() returned false (task=${task::class.simpleName})" }
+            return false
+        }
+
         task as EncodeTask
 
         val determinedStrategy = getEncodeStrategy(task)
-        val strategy = if (!processerProperties.enableSegmentedTaskListener && determinedStrategy == EncodingStrategy.Segmented)
-            EncodingStrategy.Linear
-        else determinedStrategy
+        val effectiveStrategy =
+            if (!processerProperties.enableSegmentedTaskListener &&
+                determinedStrategy == VideoStrategy.Segmented
+            ) VideoStrategy.Linear
+            else determinedStrategy
 
-        return when (strategy) {
-            EncodingStrategy.Segmented ->
-                if (this is SegmentedVideoTaskListener) super.accept(task, reporter) else false
-
-            EncodingStrategy.Linear ->
-                if (this is LinearVideoTaskListener) super.accept(task, reporter) else false
+        // Log strategy decision
+        log.debug {
+            "${getWorkerId()} evaluating ${task.taskId}: " +
+                    "determined=$determinedStrategy, effective=$effectiveStrategy, listenerStrategy=$listenerStrategy"
         }
+
+        // If this listener does not match the effective strategy → ignore
+        if (listenerStrategy != effectiveStrategy) {
+            log.debug {
+                "${getWorkerId()} ignored ${task.taskId}: " +
+                        "listenerStrategy=$listenerStrategy does not match effectiveStrategy=$effectiveStrategy"
+            }
+            return false
+        }
+
+        // Accept
+        log.debug { "${getWorkerId()} will accept ${task.taskId} using $listenerStrategy strategy" }
+        return super.accept(task, reporter)
     }
 
 
+
+
     @VisibleForTesting
-    internal fun getEncodeStrategy(task: EncodeTask): EncodingStrategy {
+    internal fun getEncodeStrategy(task: EncodeTask): VideoStrategy {
         val args = task.data.arguments ?: emptyList()
 
         fun containsAll(vararg tokens: String): Boolean =
@@ -56,31 +79,31 @@ abstract class VideoTaskListener(taskType: TaskType, private val processerProper
             hasFlagWithValue("-c:v", "copy") ||
             hasFlagWithValue("-c:a", "copy")
         ) {
-            return EncodingStrategy.Linear
+            return VideoStrategy.Linear
         }
 
         // 2. Concat → Linear
         if (containsAll("-f", "concat"))
-            return EncodingStrategy.Linear
+            return VideoStrategy.Linear
 
         // 3. Seek-before-input → Linear
         if (args.contains("-ss") && args.indexOf("-ss") < args.indexOf("-i"))
-            return EncodingStrategy.Linear
+            return VideoStrategy.Linear
 
         // 4. Trim → Linear
         if (args.contains("-t") || args.contains("-to"))
-            return EncodingStrategy.Linear
+            return VideoStrategy.Linear
 
         // 5. Audio-only re-encode → Linear
         if (touchesAudio && !touchesVideo)
-            return EncodingStrategy.Linear
+            return VideoStrategy.Linear
 
         // 6. Video re-encode or filtergraph → Segmented
         if (touchesVideo)
-            return EncodingStrategy.Segmented
+            return VideoStrategy.Segmented
 
         // 7. Default: Linear (safe fallback)
-        return EncodingStrategy.Linear
+        return VideoStrategy.Linear
     }
 
 

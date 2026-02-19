@@ -15,6 +15,7 @@ import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
@@ -31,6 +32,8 @@ class LinearVideoTaskListener(
     private val processerProperties: ProcesserProperties
 ) : VideoTaskListener(TaskType.CPU_INTENSIVE, processerProperties) {
     private val log = KotlinLogging.logger {}
+
+    override val listenerStrategy: VideoStrategy = VideoStrategy.Linear
 
     override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
 

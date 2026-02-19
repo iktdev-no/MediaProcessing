@@ -1,3 +1,3 @@
 package no.iktdev.mediaprocessing.processer.strategy
 
-enum class EncodingStrategy { Linear, Segmented }
+enum class VideoStrategy { Linear, Segmented, None }

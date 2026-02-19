@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
@@ -18,6 +19,7 @@ import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
 import no.iktdev.mediaprocessing.processer.segment.*
+import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
@@ -34,11 +36,20 @@ class SegmentedVideoTaskListener(
     private val fileUtil: FileUtil,
     private val processerProperties: ProcesserProperties
 ) : VideoTaskListener(TaskType.CPU_INTENSIVE, processerProperties) {
-
     private val log = KotlinLogging.logger {}
+
+    override val listenerStrategy: VideoStrategy = VideoStrategy.Segmented
 
     override fun getWorkerId() =
         "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
+
+    override fun accept(task: Task, reporter: TaskReporter): Boolean {
+        val accepts = super.accept(task, reporter)
+        if (accepts) {
+            log.info { "${getWorkerId()} accepts video task ${task.taskId}" }
+        }
+        return accepts
+    }
 
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as EncodeTask
