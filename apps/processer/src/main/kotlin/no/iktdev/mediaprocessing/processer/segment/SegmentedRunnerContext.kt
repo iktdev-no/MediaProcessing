@@ -7,6 +7,7 @@ data class SegmentedRunnerContext(
     val task: EncodeTask,
     val input: File,
     val output: File,
+    val intermediateStore: File,
     val logDirectory: File,
     val checkpointFile: File,
     val taskStartTime: Long,

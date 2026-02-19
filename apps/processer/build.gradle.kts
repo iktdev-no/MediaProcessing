@@ -62,6 +62,9 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    jvmArgs("-Xint")
+    jvmArgs("-Dkotlinx.coroutines.debug")
+    jvmArgs("-Dkotlinx.coroutines.scheduler.corePoolSize=1")
 }
 
 tasks.bootJar {

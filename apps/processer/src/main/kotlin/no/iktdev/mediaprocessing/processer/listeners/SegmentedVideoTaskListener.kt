@@ -60,7 +60,7 @@ class SegmentedVideoTaskListener(
         val totalDuration = probeDuration(ctx.input)
 
         // 2) Plan segments
-        val segments = planSegments(ctx.input, totalDuration, ctx.logDirectory)
+        val segments = planSegments(input =  ctx.input, totalDuration = totalDuration, logDirectory =  ctx.logDirectory, intermediateStore = ctx.intermediateStore)
 
         // 3) Load checkpoints
         val checkpointStore = SegmentCheckpointStore(ctx.checkpointFile)
@@ -96,6 +96,8 @@ class SegmentedVideoTaskListener(
 
     private fun createContext(taskData: EncodeTask): SegmentedRunnerContext {
         val input = File(taskData.data.inputFile)
+        val intermediateStore = fileUtil.getTemporaryStoreFolder(taskData.data.outputFileName)
+            .apply { mkdirs() }
         val output = fileUtil.getTemporaryStoreFile(taskData.data.outputFileName)
             .apply { parentFile.mkdirs() }
 
@@ -103,13 +105,14 @@ class SegmentedVideoTaskListener(
             .using("encode_segment", taskData.taskId.toString())
 
         val baseOutputFileName = File(taskData.data.outputFileName).nameWithoutExtension
-        val checkpointFile = output.parentFile
+        val checkpointFile = intermediateStore
             .using("$baseOutputFileName - CHECKPOINTS.json")
 
         return SegmentedRunnerContext(
             task = taskData,
             input = input,
             output = output,
+            intermediateStore = intermediateStore,
             logDirectory = logDirectory,
             checkpointFile = checkpointFile,
             taskStartTime = System.currentTimeMillis(),
@@ -129,9 +132,9 @@ class SegmentedVideoTaskListener(
         }
     }
 
-    private fun planSegments(input: File, totalDuration: Double, logDirectory: File): List<Segment> {
+    private fun planSegments(input: File, totalDuration: Double, logDirectory: File, intermediateStore: File): List<Segment> {
         val planner = SegmentPlanner(segmentLength = 60.0)
-        return planner.plan(input, totalDuration, logDirectory)
+        return planner.plan(input, totalDuration, intermediateStore)
     }
 
     private suspend fun processAllSegments(
@@ -181,7 +184,7 @@ class SegmentedVideoTaskListener(
             logDirectory = ctx.logDirectory
         )
 
-        val runner = SegmentEncodeRunner(segment, ctx.input, ctx.args, ffmpeg)
+        val runner = SegmentEncodeRunner(segment = segment, input = ctx.input, args =  ctx.args, ffmpegInstance =  ffmpeg)
         when (val result = runner.run()) {
             is RunnerResult.Success -> {
                 checkpointStore.markCompleted(segment.index)

@@ -12,7 +12,12 @@ class FileUtil(
     private val mediaPaths: MediaPaths
 ) {
     fun getTemporaryStoreFile(fileName: String): File =
-        File(mediaPaths.intermediate).using(fileName)
+        getTemporaryStoreFolder(fileName).using(fileName)
+
+    fun getTemporaryStoreFolder(fileName: String): File {
+        val temporaryStore = File(mediaPaths.intermediate).using(File(fileName).nameWithoutExtension)
+        return temporaryStore
+    }
 
     fun getLogDirectory(): File {
         return File(dirs.logs)

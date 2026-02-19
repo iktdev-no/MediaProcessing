@@ -97,6 +97,7 @@ class SegmentedVideoTaskListenerTest {
             output = workFolder.using("out", "out.mp4"),
             logDirectory = File(workFolder, "logs").apply { mkdirs() },
             checkpointFile = workFolder.using("out", "checkpoints.json"),
+            intermediateStore = workFolder.using("intermediate"),
             taskStartTime = 0,
             args = listOf("-c:v", "libx264")
         )
@@ -131,29 +132,36 @@ class SegmentedVideoTaskListenerTest {
         val task = fakeEncodeTask()
 
         val output = workFolder.using("out", "out.mp4").apply { parentFile.mkdirs() }
-        val checkpointFile = workFolder.using("out", "out - CHECKPOINTS.json")
+
+        // This is the correct intermediate folder according to FileUtil
+        val intermediate = workFolder.using("intermediate", "out").apply { mkdirs() }
 
         every { fileUtil.getTemporaryStoreFile(any()) } returns output
+        every { fileUtil.getTemporaryStoreFolder(any()) } returns intermediate
         every { fileUtil.getLogDirectory() } returns File(workFolder, "logs").apply { mkdirs() }
+
+        val checkpointFile = intermediate.using("out - CHECKPOINTS.json")
 
         mockkConstructor(ProbeRunner::class)
         coEvery { anyConstructed<ProbeRunner>().run() } returns RunnerResult.Success(fakeProbePayload(180.0))
 
-        val s0 = Segment(0, 0.0, 60.0, workFolder.using("seg0.mp4"))
-        val s1 = Segment(1, 60.0, 60.0, workFolder.using("seg1.mp4"))
-        val s2 = Segment(2, 120.0, 60.0, workFolder.using("seg2.mp4"))
+        // FIXED: segments must live inside the SAME intermediate folder
+        val s0 = Segment(0, 0.0, 60.0, intermediate.using("seg0.mp4"))
+        val s1 = Segment(1, 60.0, 60.0, intermediate.using("seg1.mp4"))
+        val s2 = Segment(2, 120.0, 60.0, intermediate.using("seg2.mp4"))
 
         mockkConstructor(SegmentPlanner::class)
         every { anyConstructed<SegmentPlanner>().plan(any(), any(), any()) } returns listOf(s0, s1, s2)
 
         checkpointFile.writeText("""{"completed":[0,1]}""")
 
+        // FIXED: write completed segment files to the correct folder
         s0.output.apply { parentFile.mkdirs(); writeText("done") }
         s1.output.apply { parentFile.mkdirs(); writeText("done") }
 
         mockkConstructor(SegmentEncodeRunner::class)
         coEvery { anyConstructed<SegmentEncodeRunner>().run() } returns RunnerResult.Success(
-            SegmentEncodeRunner.SegmentEncodePayload(2, WorkingFile("seg2.mp4"))
+            SegmentEncodeRunner.SegmentEncodePayload(2, s2.output)
         )
 
         mockkConstructor(SegmentConcatRunner::class)
@@ -161,14 +169,13 @@ class SegmentedVideoTaskListenerTest {
             SegmentConcatRunner.ConcatPayload(output, null)
         )
 
-
         listener.accept(task, reporter)
         listener.currentJob?.join()
-
 
         coVerify(exactly = 1) { anyConstructed<SegmentEncodeRunner>().run() }
         coVerify(exactly = 1) { anyConstructed<SegmentConcatRunner>().run() }
     }
+
 
     // ---------------------------------------------------------
     // TEST 2 — Stale file handling
@@ -210,7 +217,9 @@ class SegmentedVideoTaskListenerTest {
 
         val output = workFolder.using("out", "out.mp4").apply { parentFile.mkdirs() }
 
+        every { fileUtil.getTemporaryStoreFolder(any()) } returns workFolder.using("intermediate")
         every { fileUtil.getTemporaryStoreFile(any()) } returns output
+
         every { fileUtil.getLogDirectory() } returns File(workFolder, "logs").apply { mkdirs() }
 
         mockkConstructor(ProbeRunner::class)
@@ -218,14 +227,14 @@ class SegmentedVideoTaskListenerTest {
 
         mockkConstructor(SegmentPlanner::class)
         every { anyConstructed<SegmentPlanner>().plan(any(), any(), any()) } returns listOf(
-            Segment(0, 0.0, 60.0, workFolder.using("seg0.mp4")),
-            Segment(1, 60.0, 60.0, workFolder.using("seg1.mp4"))
+            Segment(0, 0.0, 60.0, workFolder.using("intermediate", "seg0.mp4")),
+            Segment(1, 60.0, 60.0, workFolder.using("intermediate", "seg1.mp4"))
         )
 
         mockkConstructor(SegmentEncodeRunner::class)
         coEvery { anyConstructed<SegmentEncodeRunner>().run() } returnsMany listOf(
-            RunnerResult.Success(SegmentEncodeRunner.SegmentEncodePayload(0, workFolder.using("seg0.mp4"))),
-            RunnerResult.Success(SegmentEncodeRunner.SegmentEncodePayload(1, workFolder.using("seg1.mp4")))
+            RunnerResult.Success(SegmentEncodeRunner.SegmentEncodePayload(0, workFolder.using("intermediate", "seg0.mp4"))),
+            RunnerResult.Success(SegmentEncodeRunner.SegmentEncodePayload(1, workFolder.using("intermediate", "seg1.mp4")))
         )
 
         mockkConstructor(SegmentConcatRunner::class)
