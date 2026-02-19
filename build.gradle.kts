@@ -43,3 +43,6 @@ subprojects {
 
 }
 
+tasks.test {
+    maxParallelForks = Runtime.getRuntime().availableProcessors()
+}

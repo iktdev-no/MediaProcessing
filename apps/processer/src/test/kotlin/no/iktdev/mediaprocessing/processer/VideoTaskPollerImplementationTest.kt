@@ -16,6 +16,8 @@ import no.iktdev.mediaprocessing.shared.database.InMemoryTaskStore
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.io.File
+import java.nio.charset.Charset
 import java.time.Duration
 import java.util.UUID
 
@@ -127,6 +129,19 @@ class VideoTaskPollerImplementationTest {
         store.persist(task)
 
         poller.pollOnce()
+        println("---- DEBUG ----")
+        println("Task: $task")
+        println("Task ID: ${task.taskId}")
+        println("Listeners: ${TaskListenerRegistry.getListeners()}")
+        println("Linear accepted: ${linear.accepted}")
+        println("Segmented accepted: ${segmented.accepted}")
+        println("Working dir: ${File(".").absolutePath}")
+        println("User dir: ${System.getProperty("user.dir")}")
+        println("OS: ${System.getProperty("os.name")}")
+        println("Charset: ${Charset.defaultCharset()}")
+        println("Temp dir: ${System.getProperty("java.io.tmpdir")}")
+        println("---------------")
+
         yield()
         assertTrue { TaskListenerRegistry.getListeners().size == 2 }
         assertTrue(linear.accepted.contains(task.taskId))
