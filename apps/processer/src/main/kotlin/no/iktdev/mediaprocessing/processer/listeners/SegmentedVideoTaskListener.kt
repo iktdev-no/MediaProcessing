@@ -102,8 +102,9 @@ class SegmentedVideoTaskListener(
         val logDirectory = fileUtil.getLogDirectory()
             .using("encode_segment", taskData.taskId.toString())
 
+        val baseOutputFileName = File(taskData.data.outputFileName).nameWithoutExtension
         val checkpointFile = output.parentFile
-            .using("checkpoints.json")
+            .using("$baseOutputFileName - CHECKPOINTS.json")
 
         return SegmentedRunnerContext(
             task = taskData,

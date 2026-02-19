@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.runners.segment
 
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.processer.runners.Runner
@@ -16,17 +17,20 @@ class SegmentConcatRunner(
     override suspend fun run(): RunnerResult<ConcatPayload> {
 
         // 1) Build concat list file
-        val listFile = File(output.parentFile, "concat_list.txt")
+        val baseOutputName = output.nameWithoutExtension
+        val listFile = output.parentFile.using("$baseOutputName - CONCAT_LIST.txt")
         listFile.writeText(
             segments.joinToString("\n") { "file '${it.output.absolutePath}'" }
         )
 
         // 2) Build ffmpeg args
         val args = MpegArgument()
+            .preArgs("-y", "-f", "concat", "-safe", "0")
             .inputFile(listFile.absolutePath)
+            .args("-c", "copy")
             .outputFile(output.absolutePath)
-            .args(listOf("-y", "-f", "concat", "-safe", "0", "-c", "copy"))
             .withProgress(false)
+
 
         // 3) Run ffmpeg
         ffmpegInstance.run(args)

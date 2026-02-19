@@ -153,7 +153,7 @@ class SegmentConcatRunnerTest {
 
         runner.run()
 
-        val listFile = File(output.parentFile, "concat_list.txt")
+        val listFile = File(output.parentFile, "out - CONCAT_LIST.txt")
         assertTrue(listFile.exists())
 
         val text = listFile.readText().trim()
@@ -200,7 +200,7 @@ class SegmentConcatRunnerTest {
 
         // input
         assertTrue("-i" in built)
-        val listFile = File(output.parentFile, "concat_list.txt")
+        val listFile = File(output.parentFile, "out - CONCAT_LIST.txt")
         assertTrue(listFile.absolutePath in built)
 
         // concat flags

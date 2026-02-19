@@ -14,6 +14,7 @@ class MpegArgument {
         private set
     private var overwrite: Boolean = false
     private var progress: Boolean = false
+    private var preSuppliedArgs: List<String> = emptyList()
     private var suppliedArgs: List<String> = emptyList()
     var outputCacheFile: Boolean = true
         private set
@@ -34,8 +35,20 @@ class MpegArgument {
         this.progress = withProgress
     }
 
+    fun preArgs(args: List<String>) = apply {
+        this.preSuppliedArgs = args
+    }
+
+    fun preArgs(vararg args: String) = apply {
+        this.preSuppliedArgs = args.toList()
+    }
+
     fun args(args: List<String>) = apply {
         this.suppliedArgs = args
+    }
+
+    fun args(vararg args: String) = apply {
+        this.suppliedArgs = args.toList()
     }
 
     fun useCacheFile(useCacheFile: Boolean) = apply {
@@ -75,15 +88,13 @@ class MpegArgument {
             args.add("-y")
         }
         args.addAll(defaultArguments)
+        args.addAll(preSuppliedArgs)
         args.addAll(listOf("-i", inFile))
         args.addAll(suppliedArgs)
         args.add(outFile)
         if (progress) {
             args.addAll(listOf("-progress", "pipe:1"))
         }
-
-
-
         return args
     }
 }

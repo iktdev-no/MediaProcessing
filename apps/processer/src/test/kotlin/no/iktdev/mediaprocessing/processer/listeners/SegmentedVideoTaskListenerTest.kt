@@ -131,7 +131,7 @@ class SegmentedVideoTaskListenerTest {
         val task = fakeEncodeTask()
 
         val output = workFolder.using("out", "out.mp4").apply { parentFile.mkdirs() }
-        val checkpointFile = workFolder.using("out", "checkpoints.json")
+        val checkpointFile = workFolder.using("out", "out - CHECKPOINTS.json")
 
         every { fileUtil.getTemporaryStoreFile(any()) } returns output
         every { fileUtil.getLogDirectory() } returns File(workFolder, "logs").apply { mkdirs() }
