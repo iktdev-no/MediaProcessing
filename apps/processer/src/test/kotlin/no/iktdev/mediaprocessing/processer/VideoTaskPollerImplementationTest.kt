@@ -129,19 +129,6 @@ class VideoTaskPollerImplementationTest {
         store.persist(task)
 
         poller.pollOnce()
-        println("---- DEBUG ----")
-        println("Task: $task")
-        println("Task ID: ${task.taskId}")
-        println("Listeners: ${TaskListenerRegistry.getListeners()}")
-        println("Linear accepted: ${linear.accepted}")
-        println("Segmented accepted: ${segmented.accepted}")
-        println("Working dir: ${File(".").absolutePath}")
-        println("User dir: ${System.getProperty("user.dir")}")
-        println("OS: ${System.getProperty("os.name")}")
-        println("Charset: ${Charset.defaultCharset()}")
-        println("Temp dir: ${System.getProperty("java.io.tmpdir")}")
-        println("---------------")
-
         yield()
         assertTrue { TaskListenerRegistry.getListeners().size == 2 }
         assertTrue(linear.accepted.contains(task.taskId))
