@@ -2,9 +2,9 @@ package no.iktdev.mediaprocessing.ui.controller.passthrough
 
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.ui.dto.UiTask
 import no.iktdev.mediaprocessing.ui.dto.Paginated
-import no.iktdev.mediaprocessing.ui.dto.passthrough.ProgressUpdate
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorTaskService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
