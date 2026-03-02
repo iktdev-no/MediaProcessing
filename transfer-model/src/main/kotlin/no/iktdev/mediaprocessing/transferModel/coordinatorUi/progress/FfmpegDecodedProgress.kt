@@ -1,8 +1,6 @@
-package no.iktdev.mediaprocessing.ui.dto.passthrough
+package no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress
 
-
-data class FfmpegDecodedProgress(
-    val progress: Int = -1,
+class FfmpegDecodedProgress(
     val time: String,
     val duration: String,
     val speed: String,
@@ -10,4 +8,3 @@ data class FfmpegDecodedProgress(
     val estimatedCompletion: String = "Unknown",
 ) {
 }
-
