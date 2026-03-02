@@ -7,9 +7,10 @@ import {
 } from "react";
 import { getProgress } from "../api/tasks"; // ← ny klientfunksjon
 import { subscribe } from "../sse/eventBus";
-import type { ProgressUpdate } from "../types/types";
+import type { Progress } from "../types/transfer-model";
 
-type ProgressMap = Map<string, ProgressUpdate>
+
+type ProgressMap = Map<string, Progress>
 
 type ProgressContextType = {
     progress: ProgressMap
@@ -56,7 +57,7 @@ export function ProgressProvider({ children }: PropsWithChildren) {
     useEffect(() => {
         getProgress()
             .then(list => {
-                const map = new Map<string, ProgressUpdate>()
+                const map = new Map<string, Progress>()
                 for (const item of list) {
                     map.set(item.taskId, item)
                 }
@@ -69,7 +70,7 @@ export function ProgressProvider({ children }: PropsWithChildren) {
 
     // 4) Subscribe to SSE updates
     useEffect(() => {
-        const unsubscribe = subscribe("progress", (data: ProgressUpdate) => {
+        const unsubscribe = subscribe("progress", (data: Progress) => {
             setProgress(prev => {
                 const updated = new Map(prev)
                 updated.set(data.taskId, data)

@@ -1,14 +1,15 @@
 import { Box, LinearProgress, Typography } from "@mui/material";
-import type { ProgressUpdate, UiTask } from "../../types/types";
+import type { Progress } from "../../types/transfer-model";
+import type { UiTask } from "../../types/types";
 import { formatDuration } from "../../utils/timeUtil";
 
 export interface TaskProgressProps {
     task: UiTask,
-    progressUpdate: ProgressUpdate | undefined
+    progressUpdate: Progress | undefined
 }
 
 export function TaskProgress({ task, progressUpdate }: TaskProgressProps) {
-    const progress = progressUpdate?.progress?.progress ?? task.progress ?? -1;
+    const progress = progressUpdate?.progress ?? task.progress ?? -1;
 
     // Ikke vis noe hvis vi ikke har progress og task ikke er i progress
     if (progress === -1 && task.status !== "InProgress") {
@@ -32,10 +33,10 @@ export function TaskProgress({ task, progressUpdate }: TaskProgressProps) {
                 }}
             >
                 {/* ETA (kun hvis vi har det) */}
-                {progressUpdate?.progress?.estimatedCompletionSeconds ? (
+                {(progressUpdate?.type === "EncodeProgress" && progressUpdate?.additionalInfo) ? (
                     <Typography variant="body2">
                         Forventet ferdig om:{" "}
-                        {formatDuration(progressUpdate.progress.estimatedCompletionSeconds)}
+                        {formatDuration(progressUpdate.additionalInfo.estimatedCompletionSeconds)}
                     </Typography>
                 ) : (
                     <span /> // holder layouten stabil

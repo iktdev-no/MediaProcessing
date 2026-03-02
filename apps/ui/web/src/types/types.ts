@@ -66,22 +66,6 @@ export interface DeleteRequest {
   uri: string;
 }
 
-export interface FfmpegDecodedProgress {
-  duration: string;
-  estimatedCompletion: string;
-  estimatedCompletionSeconds: number;
-  progress: number;
-  speed: string;
-  time: string;
-}
-
-export interface ProgressUpdate {
-  message: string | null;
-  progress: FfmpegDecodedProgress;
-  referenceId: string;
-  taskId: string;
-}
-
 
 export interface Paginated<T> {
   items: T[];

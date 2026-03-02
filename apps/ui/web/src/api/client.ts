@@ -159,6 +159,8 @@ export async function apiDelete<TResponse>(
 // ------------------------------------------------------------
 // SSE
 // ------------------------------------------------------------
+let errorToastShown = false;
+
 export function apiSse(
     onEvent: (eventName: string, data: any) => void,
     onError?: (err: any) => void
@@ -171,7 +173,10 @@ export function apiSse(
     }
 
     es.onerror = (err) => {
-        toast.error("SSE connection error")
+        if (!errorToastShown) {
+            toast.error("SSE connection lost");
+            errorToastShown = true; // ← vis kun én gang
+        }
         if (onError) onError(err)
     }
 

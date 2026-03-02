@@ -126,6 +126,40 @@ export interface DeleteResultSuccess {
   type: "DeleteResultSuccess";
 }
 
+export type Progress = EncodeProgress | FileCopyProgress | SimpleProgress
+
+export interface FileCopyProgress {
+  type: "FileCopyProgress";
+  destination: string;
+  source: string;
+  progress: number;
+  referenceId: string;
+  taskId: string;
+}
+
+export interface FfmpegDecodedProgress {
+  duration: string;
+  estimatedCompletion: string;
+  estimatedCompletionSeconds: number;
+  speed: string;
+  time: string;
+}
+
+export interface EncodeProgress {
+  type: "EncodeProgress";
+  additionalInfo: FfmpegDecodedProgress;
+  progress: number;
+  referenceId: string;
+  taskId: string;
+}
+
+export interface SimpleProgress {
+  type: "SimpleProgress";
+  progress: number;
+  referenceId: string;
+  taskId: string;
+}
+
 export interface CoordinatorTaskDto {
   abandoned: boolean;
   claimed: boolean;

@@ -3,8 +3,8 @@ package no.iktdev.mediaprocessing.ui.service.coordinator
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
-import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import no.iktdev.mediaprocessing.ui.dto.Paginated
 import no.iktdev.mediaprocessing.ui.dto.UiTask
 import org.springframework.core.ParameterizedTypeReference
@@ -59,11 +59,11 @@ class CoordinatorTaskService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<ResetTaskResponse>() {})
 
-    fun getAllProgress(): Mono<List<ProgressUpdate>> =
+    fun getAllProgress(): Mono<List<Progress>> =
         coordinatorWebClient.get()
             .uri("/tasks/progress/all")
             .retrieve()
-            .bodyToMono(object : ParameterizedTypeReference<List<ProgressUpdate>>() {})
+            .bodyToMono(object : ParameterizedTypeReference<List<Progress>>() {})
 
 
 }

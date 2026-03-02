@@ -1,4 +1,4 @@
-import type { ProgressUpdate } from "../types/types";
+import type { Progress } from "../types/transfer-model";
 import type { PagedUiTask, ResetTaskResponse, TaskQuery } from "../types/webTypes";
 import { apiGet, buildQuery } from "./client";
 
@@ -20,5 +20,5 @@ export function resetFailedTask(
 }
 
 export function getProgress() {
-    return apiGet<ProgressUpdate[]>("/tasks/progress")
+    return apiGet<Progress[]>("/tasks/progress")
 }

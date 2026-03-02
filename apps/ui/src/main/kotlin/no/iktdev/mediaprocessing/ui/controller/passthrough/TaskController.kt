@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.ui.controller.passthrough
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import no.iktdev.mediaprocessing.ui.dto.UiTask
 import no.iktdev.mediaprocessing.ui.dto.Paginated
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorTaskService
@@ -56,7 +57,7 @@ class TaskController(
     fun getActiveTasks() = coordinator.getActiveTasks()
 
     @GetMapping("/progress")
-    fun getAllProgress(): Mono<List<ProgressUpdate>> {
+    fun getAllProgress(): Mono<List<Progress>> {
         return coordinator.getAllProgress()
     }
 
