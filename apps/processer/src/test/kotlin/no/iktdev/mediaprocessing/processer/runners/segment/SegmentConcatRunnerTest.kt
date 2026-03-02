@@ -7,9 +7,11 @@ import org.junit.jupiter.api.Assertions.*
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.processer.WorkingFile
+import no.iktdev.mediaprocessing.processer.WorkingFolder
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.segment.Segment
 import org.junit.jupiter.api.*
@@ -71,13 +73,14 @@ class SegmentConcatRunnerTest {
     fun success_case_returns_success_payload() = runTest {
         val seg0 = fakeSegment(0)
         val seg1 = fakeSegment(1)
-        val output = WorkingFile("out.mp4")
+        val output = WorkingFolder().using("out.mp4")
         val logFile = WorkingFile("concat.log").apply { writeText("log") }
 
         val ffmpeg = fakeFFmpeg(0, logFile)
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0, seg1),
+            intermediateStore = WorkingFolder(),
             output = output,
             ffmpegInstance = ffmpeg
         )
@@ -107,12 +110,13 @@ class SegmentConcatRunnerTest {
     """)
     fun failure_case_returns_reject() = runTest {
         val seg0 = fakeSegment(0)
-        val output = WorkingFile("out.mp4")
+        val output = WorkingFolder().using("out.mp4")
 
         val ffmpeg = fakeFFmpeg(127)
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0),
+            intermediateStore = WorkingFolder(),
             output = output,
             ffmpegInstance = ffmpeg
         )
@@ -141,12 +145,13 @@ class SegmentConcatRunnerTest {
     fun concat_list_file_is_generated_correctly() = runTest {
         val seg0 = fakeSegment(0)
         val seg1 = fakeSegment(1)
-        val output = WorkingFile("out.mp4")
+        val output = WorkingFolder().using("out.mp4")
 
         val ffmpeg = fakeFFmpeg(0)
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0, seg1),
+            intermediateStore = WorkingFolder(),
             output = output,
             ffmpegInstance = ffmpeg
         )
@@ -181,7 +186,7 @@ class SegmentConcatRunnerTest {
     fun verifies_correct_ffmpeg_arguments() = runTest {
         val seg0 = fakeSegment(0)
         val seg1 = fakeSegment(1)
-        val output = WorkingFile("out.mp4")
+        val output = WorkingFolder().using("out.mp4")
 
         val ffmpeg = fakeFFmpeg(0)
 
@@ -190,6 +195,7 @@ class SegmentConcatRunnerTest {
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0, seg1),
+            intermediateStore = WorkingFolder(),
             output = output,
             ffmpegInstance = ffmpeg
         )

@@ -10,5 +10,6 @@ data class EncodeTask(
 data class EncodeData(
     val arguments: List<String>,
     val outputFileName: String,
+    val outputFolderName: String? = null,
     val inputFile: String
 )

@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
+import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -33,6 +34,8 @@ class MediaCreateEncodeTaskListener(
             if (!startedEvent.data.operation.contains(OperationType.Encode))
                 return null
         }
+
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName
 
         val selectedEvent = event as? MediaTracksEncodeSelectedEvent ?: return null
         val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
@@ -87,6 +90,7 @@ class MediaCreateEncodeTaskListener(
             data = EncodeData(
                 arguments = args,
                 outputFileName = "$filename.$extension",
+                outputFolderName = parsedInfo,
                 inputFile = preparedFile
             )
         )

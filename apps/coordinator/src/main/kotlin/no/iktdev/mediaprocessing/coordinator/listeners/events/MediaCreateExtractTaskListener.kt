@@ -8,6 +8,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.SubtitleCodec
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
+import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -30,6 +31,9 @@ class MediaCreateExtractTaskListener(): EventListener() {
                 return null
         }
 
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName
+
+
         val streams = history.requireEventValue<MediaStreamParsedEvent, ParsedMediaStreams> { it.data }
 
         val selectedStreams: Map<Int, SubtitleStream> =
@@ -44,7 +48,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
 
 
         val entries = selectedStreams.mapNotNull { (idx, stream )->
-            toSubtitleArgumentData(idx, preparedFile, stream)
+            toSubtitleArgumentData(idx, preparedFile, parsedInfo ,stream,)
         }
 
 
@@ -64,7 +68,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
         return createdEvent
     }
 
-    fun toSubtitleArgumentData(index: Int, inputFile: File, stream: SubtitleStream): ExtractSubtitleData? {
+    fun toSubtitleArgumentData(index: Int, inputFile: File, outputFolderName: String?, stream: SubtitleStream): ExtractSubtitleData? {
         val codec = SubtitleCodec.getCodec(stream.codec_name) ?: return null
         val extension = codec.getExtension()
 
@@ -82,6 +86,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
             inputFile = inputFile.path,
             arguments = args,
             outputFileName = outputFileName,
+            outputFolderName = outputFolderName,
             language = language
         )
 

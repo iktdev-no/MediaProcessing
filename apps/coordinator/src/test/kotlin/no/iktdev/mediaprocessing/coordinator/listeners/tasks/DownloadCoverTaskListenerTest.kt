@@ -26,7 +26,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
         fun getJob() = currentJob
 
         lateinit var client: DownloadClient
-        override fun getDownloadClient(): DownloadClient = client
+        override fun getDownloadClient(subfolder: String?): DownloadClient = client
 
         private var _result: Event? = null
         fun getResult(): Event? = _result

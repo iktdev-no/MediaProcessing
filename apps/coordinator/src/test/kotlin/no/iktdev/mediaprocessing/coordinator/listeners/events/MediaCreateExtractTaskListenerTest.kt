@@ -98,7 +98,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         val stream = dummyStream(0, "subrip", "eng")
         val inputFile = File("/tmp/movie.mkv")
 
-        val result = listener.toSubtitleArgumentData(0, inputFile, stream)
+        val result = listener.toSubtitleArgumentData(0, inputFile, "subby", stream)
 
         assertNotNull(result)
         assertEquals("movie-eng.srt", result!!.outputFileName)
@@ -118,7 +118,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         val stream = dummyStream(1, "pgssub", "eng")
         val inputFile = File("/tmp/movie.mkv")
 
-        val result = listener.toSubtitleArgumentData(1, inputFile, stream)
+        val result = listener.toSubtitleArgumentData(1, inputFile, "subby",stream)
 
         assertNull(result)
     }
@@ -135,7 +135,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         val stream = dummyStream(2, "subrip", null)
         val inputFile = File("/tmp/movie.mkv")
 
-        val result = listener.toSubtitleArgumentData(2, inputFile, stream)
+        val result = listener.toSubtitleArgumentData(2, inputFile, "subby", stream)
 
         assertNull(result)
     }
@@ -153,7 +153,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         val stream = dummyStream(3, "ass", "jpn")
         val inputFile = File("/tmp/anime.mkv")
 
-        val result = listener.toSubtitleArgumentData(3, inputFile, stream)
+        val result = listener.toSubtitleArgumentData(3, inputFile, "subby", stream)
 
         assertNotNull(result)
         assertEquals("anime-jpn.ass", result!!.outputFileName)

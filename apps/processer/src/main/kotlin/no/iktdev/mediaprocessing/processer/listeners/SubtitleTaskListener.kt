@@ -40,11 +40,13 @@ class SubtitleTaskListener(
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as ExtractSubtitleTask
 
-        val cachedOutFile = fileUtil.getTemporaryStoreFile(taskData.data.outputFileName).also {
-            if (!it.parentFile.exists()) {
-                it.parentFile.mkdirs()
+        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName ?: taskData.data.outputFileName).using(taskData.data.language)
+            .also { if (!it.exists()) {
+                it.mkdirs()
             }
         }
+
+        val cachedOutFile = cacheOutputFolder.using(taskData.data.outputFileName)
 
         if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
             reporter?.publishEvent(

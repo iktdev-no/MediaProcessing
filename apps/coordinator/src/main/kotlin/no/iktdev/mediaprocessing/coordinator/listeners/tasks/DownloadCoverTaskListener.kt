@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverD
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
 import no.iktdev.mediaprocessing.shared.common.notExist
 import org.springframework.stereotype.Component
+import java.io.File
 import java.util.*
 
 @Component
@@ -33,7 +34,7 @@ class DownloadCoverTaskListener(
         log.info { "Downloading cover from ${pickedTask.data.url}" }
         val taskData = pickedTask.data
 
-        val downloadClient = getDownloadClient()
+        val downloadClient = getDownloadClient(pickedTask.data.outputFolderName)
         val downloadResult = try {
             downloadClient.download(taskData.url, taskData.outputFileName)
         } catch (e: Exception) {
@@ -71,12 +72,22 @@ class DownloadCoverTaskListener(
         return CoverDownloadResultEvent(null, status, error = message)
     }
 
-    open fun getDownloadClient(): DownloadClient {
-        return DefaultDownloadClient(coordinatorEnv)
+    open fun getDownloadClient(subfolder: String?): DownloadClient {
+        val rootDir = coordinatorEnv.intermediateFolder.apply { mkdirs() }
+
+        val targetDir =
+            if (subfolder.isNullOrBlank()) {
+                rootDir
+            } else {
+                rootDir.resolve(subfolder).apply { mkdirs() }
+            }
+
+        return DefaultDownloadClient(coordinatorEnv, targetDir)
     }
 
-    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv) : DownloadClient(
-        outDir = coordinatorEnv.intermediateFolder,
+
+    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv, outputDir: File) : DownloadClient(
+        outDir = outputDir,
         connectionFactory = DefaultConnectionFactory(),) {
         override fun onCreate() {
             super.onCreate()

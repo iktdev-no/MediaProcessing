@@ -10,6 +10,7 @@ import java.io.File
 
 class SegmentConcatRunner(
     private val segments: List<Segment>,
+    private val intermediateStore: File,
     private val output: File,
     private val ffmpegInstance: FFmpeg
 ) : Runner() {
@@ -18,7 +19,7 @@ class SegmentConcatRunner(
 
         // 1) Build concat list file
         val baseOutputName = output.nameWithoutExtension
-        val listFile = output.parentFile.using("$baseOutputName - CONCAT_LIST.txt")
+        val listFile = intermediateStore.using("$baseOutputName - CONCAT_LIST.txt")
         listFile.writeText(
             segments.joinToString("\n") { "file '${it.output.absolutePath}'" }
         )

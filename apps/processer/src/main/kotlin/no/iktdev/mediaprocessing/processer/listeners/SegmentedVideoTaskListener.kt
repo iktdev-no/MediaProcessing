@@ -96,10 +96,12 @@ class SegmentedVideoTaskListener(
 
     private fun createContext(taskData: EncodeTask): SegmentedRunnerContext {
         val input = File(taskData.data.inputFile)
-        val intermediateStore = fileUtil.getTemporaryStoreFolder(taskData.data.outputFileName)
-            .apply { mkdirs() }
-        val output = fileUtil.getTemporaryStoreFile(taskData.data.outputFileName)
-            .apply { parentFile.mkdirs() }
+
+        val intermediateStore = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName ?: taskData.data.outputFileName)
+            .apply { if (!this.exists()) mkdirs() }
+
+        val output = intermediateStore.using(taskData.data.outputFileName)
+            .apply { if (!this.parentFile.exists()) parentFile.mkdirs() }
 
         val logDirectory = fileUtil.getLogDirectory()
             .using("encode_segment", taskData.taskId.toString())
@@ -134,7 +136,10 @@ class SegmentedVideoTaskListener(
 
     private fun planSegments(input: File, totalDuration: Double, logDirectory: File, intermediateStore: File): List<Segment> {
         val planner = SegmentPlanner(segmentLength = 60.0)
-        return planner.plan(input, totalDuration, intermediateStore)
+        val subfolder = intermediateStore.using("segments").also {
+            if (it.exists()) { it.mkdirs() }
+        }
+        return planner.plan(input, totalDuration, subfolder)
     }
 
     private suspend fun processAllSegments(
@@ -206,7 +211,7 @@ class SegmentedVideoTaskListener(
             logDirectory = ctx.logDirectory
         )
 
-        val runner = SegmentConcatRunner(segments, ctx.output, ffmpeg)
+        val runner = SegmentConcatRunner(segments, ctx.intermediateStore, ctx.output, ffmpeg)
         when (val result = runner.run()) {
             is RunnerResult.Success -> Unit
             is RunnerResult.Reject -> throw IllegalStateException(result.reason)
