@@ -48,7 +48,7 @@ class LinearVideoTaskListener(
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as EncodeTask
 
-        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName ?: taskData.data.outputFileName)
+        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName)
             .also { if (!it.exists()) {
                 it.mkdirs()
             }

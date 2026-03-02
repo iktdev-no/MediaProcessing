@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
@@ -18,6 +19,8 @@ import java.util.*
 
 @Component
 class MediaCreateExtractTaskListener(): EventListener() {
+    private val log = KotlinLogging.logger {}
+
     override fun onEvent(
         event: Event,
         history: List<Event>
@@ -31,7 +34,10 @@ class MediaCreateExtractTaskListener(): EventListener() {
                 return null
         }
 
-        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
+            log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
+            return null
+        }
 
 
         val streams = history.requireEventValue<MediaStreamParsedEvent, ParsedMediaStreams> { it.data }
@@ -68,7 +74,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
         return createdEvent
     }
 
-    fun toSubtitleArgumentData(index: Int, inputFile: File, outputFolderName: String?, stream: SubtitleStream): ExtractSubtitleData? {
+    fun toSubtitleArgumentData(index: Int, inputFile: File, outputFolderName: String, stream: SubtitleStream): ExtractSubtitleData? {
         val codec = SubtitleCodec.getCodec(stream.codec_name) ?: return null
         val extension = codec.getExtension()
 

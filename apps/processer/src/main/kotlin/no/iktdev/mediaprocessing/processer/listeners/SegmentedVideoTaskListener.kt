@@ -97,7 +97,7 @@ class SegmentedVideoTaskListener(
     private fun createContext(taskData: EncodeTask): SegmentedRunnerContext {
         val input = File(taskData.data.inputFile)
 
-        val intermediateStore = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName ?: taskData.data.outputFileName)
+        val intermediateStore = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName)
             .apply { if (!this.exists()) mkdirs() }
 
         val output = intermediateStore.using(taskData.data.outputFileName)

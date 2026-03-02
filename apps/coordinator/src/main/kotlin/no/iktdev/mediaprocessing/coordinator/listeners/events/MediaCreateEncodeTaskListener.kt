@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
@@ -22,6 +23,8 @@ class MediaCreateEncodeTaskListener(
     private val preference: Preference
 ) : EventListener() {
 
+    private val log = KotlinLogging.logger {}
+
     override fun onEvent(
         event: Event,
         history: List<Event>
@@ -35,7 +38,10 @@ class MediaCreateEncodeTaskListener(
                 return null
         }
 
-        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
+            log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
+            return null
+        }
 
         val selectedEvent = event as? MediaTracksEncodeSelectedEvent ?: return null
         val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null

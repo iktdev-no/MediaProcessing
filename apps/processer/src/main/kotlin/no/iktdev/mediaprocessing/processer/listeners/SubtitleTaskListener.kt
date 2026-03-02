@@ -40,7 +40,7 @@ class SubtitleTaskListener(
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as ExtractSubtitleTask
 
-        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName ?: taskData.data.outputFileName).using(taskData.data.language)
+        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName).using(taskData.data.language)
             .also { if (!it.exists()) {
                 it.mkdirs()
             }

@@ -11,7 +11,7 @@ data class ExtractSubtitleData(
     val inputFile: String,
     val arguments: List<String>,
     val outputFileName: String,
-    val outputFolderName: String? = null,
+    val outputFolderName: String,
     val language: String,
 ) {
 

@@ -27,7 +27,10 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
             return null
         }
 
-        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
+            log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
+            return null
+        }
 
         val downloadData = useEvent.recommended?.let { recommended ->
             val cover = recommended.metadata.cover ?: return@let null

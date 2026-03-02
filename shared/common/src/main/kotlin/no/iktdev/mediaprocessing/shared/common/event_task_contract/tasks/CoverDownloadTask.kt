@@ -8,7 +8,7 @@ data class CoverDownloadTask(
     data class CoverDownloadData(
         val url: String,
         val source: String,
-        val outputFolderName: String? = null,
+        val outputFolderName: String,
         val outputFileName: String
     )
 }
