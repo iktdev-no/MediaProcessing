@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.CoordinatorService
 import no.iktdev.mediaprocessing.coordinator.services.EventService
+import no.iktdev.mediaprocessing.coordinator.services.ProgressTranslatorService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.coordinator.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
@@ -12,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.dto.map
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,6 +28,7 @@ class TaskController(
     private val taskService: TaskService,
     private val eventService: EventService,
     private val coordinator: CoordinatorService,
+    private val progressTranslatorService: ProgressTranslatorService
 ) {
 
     @GetMapping("/active")
@@ -92,8 +95,8 @@ class TaskController(
     }
 
     @GetMapping("/progress/all")
-    fun getAllProgress(): List<ProgressUpdate> {
-        return coordinator.getProgress()
+    fun getAllProgress(): List<Progress> {
+        return coordinator.getProgress().map { progressTranslatorService.translate(it) }
     }
 
 }
