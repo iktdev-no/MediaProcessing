@@ -32,9 +32,13 @@ def get_heartbeat():
     return worker_heartbeat
 
 
-async def run_worker(db: Database, paths, extensions, shutdown_flag_ref):
+async def run_worker(db: Database, paths, extensions, shutdown_flag_ref, loop):
     global observers
-    observers = [start_observer(db, p, extensions, insert_event) for p in paths]
+    observers = [
+        start_observer(db, p, extensions, insert_event, loop)
+        for p in paths
+    ]
+
 
 
     try:
@@ -86,7 +90,8 @@ def main():
             db,
             paths_config.watch_paths,
             paths_config.extensions,
-            lambda: shutdown_flag
+            lambda: shutdown_flag,
+            loop
         ))
 
     except Exception as e:

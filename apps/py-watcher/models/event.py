@@ -31,6 +31,10 @@ class FileReadyEvent(Event):
 class FileRemovedEvent(Event):
     data: FileInfo
 
+class FileChangedEvent(Event):
+    data: FileInfo
+
+
 # --- Helper-funksjoner ---
 def create_event(event_cls, file_name: str, file_uri: str, reference_id: Optional[str] = None) -> Event:
     return event_cls(

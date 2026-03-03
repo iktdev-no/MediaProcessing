@@ -18,6 +18,10 @@ def test_handle_deleted_returns_event_for_valid_extension(tmp_path):
     file_path = tmp_path / "test.csv"
     file_path.write_text("dummy")
 
+    # Filen må være "kjent" først
+    handler.handle_created(str(file_path))
+
     ev = handler.handle_deleted(str(file_path))
+
     assert isinstance(ev, FileRemovedEvent)
     assert ev.data.fileName == "test.csv"
