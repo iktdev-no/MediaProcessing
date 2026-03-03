@@ -81,6 +81,7 @@ class SegmentedVideoTaskListenerTest {
             data = EncodeData(
                 inputFile = workFolder.using("input.mp4").absolutePath,
                 outputFileName = "out.mp4",
+                outputFolderName = "out",
                 arguments = listOf("-c:v", "libx264")
             )
         )
@@ -271,6 +272,7 @@ class SegmentedVideoTaskListenerTest {
             data = EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "out.mp4",
+                outputFolderName = "out",
                 arguments = listOf("-c:v", "libx264")
             )
         ).apply { newReferenceId() }
@@ -286,6 +288,7 @@ class SegmentedVideoTaskListenerTest {
             data = EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "out.mp4",
+                outputFolderName = "out",
                 arguments = listOf("-c:v", "libx264")
             )
         ).newReferenceId()

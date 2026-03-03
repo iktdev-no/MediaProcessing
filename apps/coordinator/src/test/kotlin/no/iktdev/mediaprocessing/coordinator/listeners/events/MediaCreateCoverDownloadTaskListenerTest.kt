@@ -2,10 +2,13 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.slot
 import io.mockk.verify
+import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
+import no.iktdev.mediaprocessing.defaultMediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
+import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
 import org.assertj.core.api.Assertions.assertThat
@@ -19,9 +22,13 @@ class MediaCreateCoverDownloadTaskListenerTest: TestBase() {
     @Test
     fun success1() {
         val started = defaultStartEvent()
-        val metadata = metadataEvent(started, coverUrl = "http://example.com/fancy.jpg")
+            .addToHistory()
 
-        val history = listOf(started, *metadata.toTypedArray())
+        val parsed = mediaParsedEvent("Baking Bread", "Baking Bread - S01E01 - Flour", MediaType.Serie)
+            .derivedOf(started)
+            .addToHistory()
+
+        val metadata = metadataEvent(started, coverUrl = "http://example.com/fancy.jpg")
 
         val result = listener.onEvent(metadata.last(), history)
         assertThat(result is CoverDownloadTaskCreatedEvent)

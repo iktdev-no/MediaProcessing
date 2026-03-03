@@ -101,6 +101,7 @@ class VideoTaskPollerImplementationTest {
                     "-map","0:a:0","-c:a:0","copy"
                 ),
                 outputFileName = "Potato masters - S01E01 - Personal Rule.mp4",
+                outputFolderName = "Potato masters - S01E01 - Personal Rule",
                 inputFile = "/src/scratch/Potato masters - S01E01 - Personal Rule.mkv"
             ),
         ).apply { newReferenceId() }
@@ -114,6 +115,7 @@ class VideoTaskPollerImplementationTest {
                     "-map","0:a:0","-c:a:0","copy"
                 ),
                 outputFileName = "Potato masters - S01E01 - Personal Rule.mp4",
+                outputFolderName = "Potato masters - S01E01 - Personal Rule",
                 inputFile = "/src/scratch/Potato masters - S01E01 - Personal Rule.mkv"
             ),
         ).apply { newReferenceId() }

@@ -5,6 +5,7 @@ import io.mockk.*
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.defaultFilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
@@ -12,6 +13,7 @@ import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
+import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -175,9 +177,13 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         ).newReferenceId()
             .addToHistory()
 
+        val parsed = mediaParsedEvent("Baking Bread", "Baking Bread - S01E01 - Flour", MediaType.Serie)
+            .derivedOf(startEvent)
+            .addToHistory()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(subtitleStream = listOf(dummyStream(0, "subrip", "eng")))
-        ).derivedOf(startEvent)
+        ).derivedOf(parsed)
             .addToHistory()
 
         val preparedFile = defaultFilePrepareForWorkResultEvent()
@@ -218,6 +224,11 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
             StartData(setOf(OperationType.ExtractSubtitles), fileUri = "/tmp/movie.mkv")
         ).newReferenceId()
             .addToHistory()
+
+        val parsed = mediaParsedEvent("Baking Bread", "Baking Bread - S01E01 - Flour", MediaType.Serie)
+            .derivedOf(startEvent)
+            .addToHistory()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 subtitleStream = listOf(
@@ -225,7 +236,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
                     dummyStream(1, "ass", "jpn")
                 )
             )
-        ).derivedOf(startEvent)
+        ).derivedOf(parsed)
             .addToHistory()
 
         val preparedFile = defaultFilePrepareForWorkResultEvent()

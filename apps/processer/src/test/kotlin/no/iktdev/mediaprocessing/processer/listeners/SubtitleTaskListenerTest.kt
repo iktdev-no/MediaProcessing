@@ -70,6 +70,7 @@ class SubtitleTaskListenerTest {
             ExtractSubtitleData(
                 inputFile = "input.mp4",
                 outputFileName = "output.srt",
+                outputFolderName = "output",
                 arguments = listOf("-y"),
                 language = "eng"
             )
@@ -104,6 +105,8 @@ class SubtitleTaskListenerTest {
             ExtractSubtitleData(
                 inputFile = "input.mp4",
                 outputFileName = "output.srt",
+                outputFolderName = "output",
+
                 arguments = listOf("-y"),
                 language = "eng"
             )
@@ -127,6 +130,8 @@ class SubtitleTaskListenerTest {
         val task = ExtractSubtitleTask(
             ExtractSubtitleData(
                 inputFile = "input.mp4",
+                outputFolderName = "output",
+
                 outputFileName = "output.srt",
                 arguments = listOf("-y"),
                 language = "eng"
@@ -158,6 +163,7 @@ class SubtitleTaskListenerTest {
         val task = ExtractSubtitleTask(
             ExtractSubtitleData(
                 inputFile = "input.mp4",
+                outputFolderName = "output",
                 outputFileName = "output.srt",
                 arguments = listOf("-y"),
                 language = "eng"

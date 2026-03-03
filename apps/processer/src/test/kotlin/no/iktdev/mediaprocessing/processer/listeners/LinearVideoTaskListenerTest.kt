@@ -82,6 +82,7 @@ class LinearVideoTaskListenerTest {
             EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "output.mp4",
+                outputFolderName = "output",
                 arguments = listOf("-y")
             )
         ).newReferenceId()
@@ -111,7 +112,7 @@ class LinearVideoTaskListenerTest {
     )
     fun producedFrom_keeps_referenceId() {
         val task = EncodeTask(
-            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", arguments = listOf("-y"))
+            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", outputFolderName = "output", arguments = listOf("-y"))
         ).newReferenceId()
 
         val event = ProcesserEncodeResultEvent(
@@ -130,7 +131,7 @@ class LinearVideoTaskListenerTest {
     """)
     fun createIncompleteStateTaskEvent_keeps_referenceId() {
         val task = EncodeTask(
-            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", arguments = listOf("-y"))
+            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", outputFolderName = "output", arguments = listOf("-y"))
         ).newReferenceId()
 
         val listener = LinearVideoTaskListener(
@@ -162,6 +163,7 @@ class LinearVideoTaskListenerTest {
             EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "output.mp4",
+                outputFolderName = "output",
                 arguments = listOf("-y")
             )
         ).apply { newReferenceId() }
@@ -190,6 +192,7 @@ class LinearVideoTaskListenerTest {
             EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "out.mp4",
+                outputFolderName = "output",
                 arguments = listOf("-c:a", "aac")
             )
         ).apply { newReferenceId() }
@@ -213,6 +216,7 @@ class LinearVideoTaskListenerTest {
             EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "out.mp4",
+                outputFolderName = "output",
                 arguments = listOf("-c:a", "aac") // audio-only → linear
             )
         ).apply { newReferenceId() }
@@ -236,6 +240,7 @@ class LinearVideoTaskListenerTest {
             EncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "out.mp4",
+                outputFolderName = "output",
                 arguments = listOf("-c:v", "libx264") // video → segmented
             )
         ).apply { newReferenceId() }

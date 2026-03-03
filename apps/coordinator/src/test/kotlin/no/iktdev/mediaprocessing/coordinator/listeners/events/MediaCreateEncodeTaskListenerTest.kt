@@ -6,10 +6,12 @@ import no.iktdev.mediaprocessing.MockData.dummyAudioStream
 import no.iktdev.mediaprocessing.MockData.dummyDisposition
 import no.iktdev.mediaprocessing.MockData.dummyTags
 import no.iktdev.mediaprocessing.MockData.dummyVideoStream
+import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.ffmpeg.data.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
+import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
 import org.junit.jupiter.api.Assertions.*
@@ -49,6 +51,10 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         ).newReferenceId()
             .addToHistory()
 
+        val parsed = mediaParsedEvent("Baking Bread", "Baking Bread - S01E01 - Flour", MediaType.Serie)
+            .derivedOf(startEvent)
+            .addToHistory()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 videoStream = listOf(dummyVideoStream(index = 0)),
@@ -61,7 +67,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                     )
                 )
             )
-        ).derivedOf(startEvent)
+        ).derivedOf(parsed)
             .addToHistory()
 
         val preparedFile = defaultFilePrepareForWorkResultEvent()
@@ -114,6 +120,10 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         ).newReferenceId()
             .addToHistory()
 
+        val parsed = mediaParsedEvent("Baking Bread", "Baking Bread - S01E01 - Flour", MediaType.Serie)
+            .derivedOf(startEvent)
+            .addToHistory()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 videoStream = listOf(dummyVideoStream(index = 0)),
@@ -122,7 +132,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                     dummyAudioStream(index = 2, channels = 6, tags = dummyTags("eng"))
                 )
             )
-        ).derivedOf(startEvent)
+        ).derivedOf(parsed)
             .addToHistory()
 
         val preparedFile = defaultFilePrepareForWorkResultEvent()
@@ -174,6 +184,10 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
             .newReferenceId()
             .addToHistory()
 
+        val parsed = mediaParsedEvent("Baking Bread", "Baking Bread - S01E01 - Flour", MediaType.Serie)
+            .derivedOf(startEvent)
+            .addToHistory()
+
         val parsedEvent = MediaStreamParsedEvent(
             data = ParsedMediaStreams(
                 videoStream = listOf(dummyVideoStream(index = 0)),
@@ -185,7 +199,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
                 )
             )
         )
-            .derivedOf(startEvent)
+            .derivedOf(parsed)
             .addToHistory()
 
         val preparedFile = defaultFilePrepareForWorkResultEvent()

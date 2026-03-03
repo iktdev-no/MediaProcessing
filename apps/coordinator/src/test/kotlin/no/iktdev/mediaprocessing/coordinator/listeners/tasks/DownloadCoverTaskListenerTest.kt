@@ -66,6 +66,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
             CoverDownloadTask.CoverDownloadData(
                 url = "http://example.com/fancy.jpg",
                 outputFileName = "potatoland",
+                outputFolderName = "potatoland",
                 source = "fancy"
             )
         ).newReferenceId()
@@ -104,6 +105,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
             CoverDownloadTask.CoverDownloadData(
                 url = "http://example.com/fancy.jpg",
                 outputFileName = "potatoland",
+                outputFolderName = "potatoland",
                 source = "fancy"
             )
         ).newReferenceId()
@@ -154,6 +156,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
             CoverDownloadTask.CoverDownloadData(
                 url = "http://example.com/img.jpg",
                 outputFileName = "expected",
+                outputFolderName = "expected",
                 source = "unit-test"
             )
         ).newReferenceId()
@@ -185,6 +188,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
             CoverDownloadTask.CoverDownloadData(
                 url = "http://example.com/img.jpg",
                 outputFileName = "x",
+                outputFolderName = "x",
                 source = "unit-test"
             )
         ).newReferenceId()

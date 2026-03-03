@@ -39,6 +39,7 @@ class VideoTaskListenerTest {
             data = EncodeData(
                 inputFile = WorkingFile("Test-in.mvk").absolutePath,
                 outputFileName = WorkingFile("Test-out.mp4").absolutePath,
+                outputFolderName = "Test-out",
                 arguments = args.toList()
             )
         ).apply { newReferenceId() }
