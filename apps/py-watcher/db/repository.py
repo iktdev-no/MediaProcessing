@@ -10,7 +10,7 @@ def insert_event(db: Database, event: Event) -> None:
     """Persistér et Event til Events-tabellen."""
     db.validate()
     sql = """
-    INSERT INTO Events(reference_id, event_id, event, data, persisted_at)
+    INSERT INTO EVENTS(REFERENCE_ID, EVENT_ID, EVENT, DATA, PERSISTED_AT)
     VALUES (%s, %s, %s, %s, NOW())
     """
     with db.conn.cursor() as cursor:
@@ -29,15 +29,15 @@ def get_open_added_events(db: Database) -> List[FileAddedEvent]:
     """
     db.validate()
     sql = """
-    SELECT e.reference_id, e.event_id, e.event, e.data
-    FROM Events e
-    WHERE e.event = 'FileAddedEvent'
+    SELECT e.REFERENCE_ID, e.EVENT_ID, e.EVENT, e.DATA
+    FROM EVENTS e
+    WHERE e.EVENT = 'FileAddedEvent'
       AND NOT EXISTS (
-          SELECT 1 FROM Events r
-          WHERE r.reference_id = e.reference_id
-            AND r.event IN ('FileReadyEvent', 'FileRemovedEvent')
+          SELECT 1 FROM EVENTS r
+          WHERE r.REFERENCE_ID = e.REFERENCE_ID
+            AND r.EVENT IN ('FileReadyEvent', 'FileRemovedEvent')
       )
-    ORDER BY e.persisted_at ASC
+    ORDER BY e.PERSISTED_AT ASC
     """
     events: List[FileAddedEvent] = []
     with db.conn.cursor(dictionary=True) as cursor:
@@ -45,10 +45,10 @@ def get_open_added_events(db: Database) -> List[FileAddedEvent]:
         rows = cursor.fetchall()
         for row in rows:
             # Bruk Pydantic v2 sin model_validate_json
-            event = FileAddedEvent.model_validate_json(row["data"])
+            event = FileAddedEvent.model_validate_json(row["DATA"])
             # Overstyr referenceId og eventId fra kolonnene (sannhetskilde)
-            event.referenceId = row["reference_id"]
-            event.eventId = row["event_id"]
+            event.referenceId = row["REFERENCE_ID"]
+            event.eventId = row["EVENT_ID"]
             events.append(event)
 
     logger.info(f"🔎 Fant {len(events)} åpne FileAddedEvent uten Ready/Removed")
