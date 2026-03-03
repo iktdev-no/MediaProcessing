@@ -20,9 +20,13 @@ class SegmentConcatRunner(
         // 1) Build concat list file
         val baseOutputName = output.nameWithoutExtension
         val listFile = intermediateStore.using("$baseOutputName - CONCAT_LIST.txt")
-        listFile.writeText(
-            segments.joinToString("\n") { "file '${it.output.absolutePath}'" }
-        )
+        val lines = segments.map { segment ->
+            val escaped = segment.output.absolutePath.replace("'", "\\'")
+            "file '$escaped'"
+        }
+
+        listFile.writeText(lines.joinToString("\n"))
+
 
         // 2) Build ffmpeg args
         val args = MpegArgument()
