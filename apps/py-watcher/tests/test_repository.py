@@ -21,10 +21,10 @@ class FakeDB:
 def test_get_open_added_events_returns_typed_objects():
     ev = create_event(FileAddedEvent, "test.csv", "/tmp/test.csv", reference_id="ref123")
     row = {
-        "reference_id": ev.referenceId,
-        "event_id": ev.eventId,
-        "event": "FileAddedEvent",
-        "data": ev.model_dump_json()
+        "REFERENCE_ID": ev.referenceId,  # Endret til uppercase for å matche case-sensitivitet
+        "EVENT_ID": ev.eventId,          # Endret til uppercase for å matche case-sensitivitet
+        "EVENT": "FileAddedEvent",
+        "DATA": ev.model_dump_json()
     }
     db = FakeDB([row])
     events = get_open_added_events(db)
