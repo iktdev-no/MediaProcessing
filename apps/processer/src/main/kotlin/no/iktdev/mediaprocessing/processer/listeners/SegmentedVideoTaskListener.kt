@@ -137,7 +137,7 @@ class SegmentedVideoTaskListener(
     private fun planSegments(input: File, totalDuration: Double, logDirectory: File, intermediateStore: File): List<Segment> {
         val planner = SegmentPlanner(segmentLength = 60.0)
         val subfolder = intermediateStore.using("segments").also {
-            if (it.exists()) { it.mkdirs() }
+            if (!it.exists()) { it.mkdirs() }
         }
         return planner.plan(input, totalDuration, subfolder)
     }
