@@ -1,6 +1,8 @@
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial  # Importerer partial funksjonen
 from utils.file_handler import FileHandler
 from utils.readiness import check_ready
 from utils.logger import logger
@@ -17,7 +19,9 @@ class Handler(FileSystemEventHandler):
         ev = self.file_handler.handle_created(event.src_path)
         if ev:
             self.insert_event(self.db, ev)
-            asyncio.create_task(check_ready(self.db, ev.referenceId, ev.data.fileName, ev.data.fileUri, self.insert_event))
+            # Bruk run_in_executor for å starte check_ready i den aktive begivenhetsslinga
+            loop = asyncio.get_running_loop()
+            loop.run_in_executor(None, partial(check_ready, self.db, ev.referenceId, ev.data.fileName, ev.data.fileUri, self.insert_event))
             logger.info(f"➕ FileAddedEvent persisted for {ev.data.fileName}")
 
     def on_deleted(self, event):
@@ -35,4 +39,3 @@ def start_observer(db, path, extensions, insert_event):
     observer.start()
     logger.info(f"👀 Watching path: {path}")
     return observer
-
