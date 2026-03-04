@@ -22,8 +22,10 @@ class Handler(FileSystemEventHandler):
                 ev.referenceId,
                 ev.data.fileName,
                 ev.data.fileUri,
-                self.insert_event
+                self.insert_event,
+                derived_from_event_id=ev.eventId
             )
+
             if ready_event:
                 # Marker at filen nå er klar for Changed-events
                 self.file_handler.mark_ready(ev.referenceId)
@@ -47,9 +49,7 @@ class Handler(FileSystemEventHandler):
         if ev:
             self.insert_event(self.db, ev)
             logger.info(f"✏️ Changed: {ev.data.fileName}")
-            # Only schedule readiness for Added
-            if isinstance(ev, FileAddedEvent):
-                self._schedule_ready_check(ev)
+
 
     def on_deleted(self, event):
         if event.is_directory:
