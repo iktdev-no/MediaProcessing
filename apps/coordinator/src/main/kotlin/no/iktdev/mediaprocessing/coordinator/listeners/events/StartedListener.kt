@@ -26,6 +26,6 @@ class StartedListener : EventListener() {
                     OperationType.MetadataSearch
                 )
             )
-        )
+        ).derivedOf(useEvent)
     }
 }
