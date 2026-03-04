@@ -89,19 +89,32 @@ class TaskProjection(val events: List<Event>) {
             ?.data?.operation
             ?: emptySet()
 
-        val hasExtractAndConvert =
-            operations.contains(OperationType.ExtractSubtitles) &&
-                    operations.contains(OperationType.ConvertSubtitles)
+        val convertPlanned = operations.contains(OperationType.ConvertSubtitles)
+        val extractPlanned = operations.contains(OperationType.ExtractSubtitles)
 
-        val hasCreatedConvert =
-            events.filterIsInstance<ConvertTaskCreatedEvent>().isNotEmpty()
+        val pipelineMode = convertPlanned && extractPlanned
+        val standaloneMode = convertPlanned && !extractPlanned
+
+        val extractStarted =
+            events.any { it is ProcesserExtractTaskCreatedEvent } ||
+                    events.any { it is ProcesserExtractResultEvent }
+
+        val convertCreated =
+            events.any { it is ConvertTaskCreatedEvent }
 
         return when {
-            !operations.contains(OperationType.ConvertSubtitles) -> baseStatus
-            hasExtractAndConvert && !hasCreatedConvert -> TaskStatus.Pending
+            !convertPlanned -> baseStatus
+
+            pipelineMode && extractStarted && !convertCreated ->
+                TaskStatus.Pending
+
+            standaloneMode && !convertCreated ->
+                baseStatus
+
             else -> baseStatus
         }
     }
+
 
     // 7: Prepare file for work (én taskId)
     fun projectPrepareFileForWorkStatus() =

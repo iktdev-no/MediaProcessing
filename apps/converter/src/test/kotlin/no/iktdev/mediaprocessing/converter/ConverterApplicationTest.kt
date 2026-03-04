@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import no.iktdev.eventi.models.Task
-import no.iktdev.mediaprocessing.shared.common.TestBase
+import no.iktdev.mediaprocessing.shared.common.AppTestBase
 import no.iktdev.mediaprocessing.shared.database.config.DatasourceConfiguration
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
@@ -26,7 +26,7 @@ import javax.sql.DataSource
 )
 @TestPropertySource(properties = ["spring.flyway.enabled=true"])
 @ExtendWith(SpringExtension::class)
-class ConverterApplicationTest : TestBase() {
+class ConverterApplicationTest : AppTestBase() {
 
     data class TestTask(
         val success: Boolean

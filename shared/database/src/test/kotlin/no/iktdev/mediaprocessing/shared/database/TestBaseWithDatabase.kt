@@ -1,8 +1,6 @@
 package no.iktdev.mediaprocessing.shared.database
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.database.config.DatasourceConfiguration
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
