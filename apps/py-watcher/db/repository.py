@@ -5,18 +5,19 @@ from db.database import Database
 from models.event import FileAddedEvent
 from utils.logger import logger
 from models.event import Event, FileAddedEvent
+from utils.time import utc_now
 
 def insert_event(db: Database, event: Event) -> None:
     """Persistér et Event til Events-tabellen."""
     db.validate()
     sql = """
     INSERT INTO EVENTS(REFERENCE_ID, EVENT_ID, EVENT, DATA, PERSISTED_AT)
-    VALUES (%s, %s, %s, %s, NOW())
+    VALUES (%s, %s, %s, %s, %s)
     """
     with db.conn.cursor() as cursor:
         cursor.execute(
             sql,
-            (event.referenceId, event.eventId, event.__class__.__name__, event.model_dump_json())
+            (event.referenceId, event.eventId, event.__class__.__name__, event.model_dump_json(), utc_now())
         )
         db.conn.commit()
     logger.info(f"📦 Event persisted: {event.__class__.__name__} ({event.referenceId})")
