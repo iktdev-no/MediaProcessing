@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
+import no.iktdev.mediaprocessing.shared.common.getName
 import org.springframework.stereotype.Component
 
 @ListenerOrder(4)
@@ -32,18 +33,36 @@ class MediaParseStreamsListener: EventListener() {
             return null
         }
 
-        val streams = parseStreams(event.data)
+        val streams = parseStreams(event.data) ?: run {
+            log.warn { "${this::class.getName()} will produce null, due to missing or faulty data" }
+            return null
+        }
         return MediaStreamParsedEvent(
             data = streams
         ).derivedOf(event)
     }
 
 
-    fun parseStreams(data: JsonObject?): ParsedMediaStreams {
+    fun parseStreams(data: JsonObject?): ParsedMediaStreams? {
         val ignoreCodecs = listOf("png", "mjpeg")
         val gson = Gson()
         return try {
-            val jStreams = data!!.getAsJsonArray("streams")
+            if (data == null) {
+                log.warn { "parseStreams called with null data, returning empty ParsedMediaStreams" }
+                return null
+            }
+
+            if (!data.has("streams") || !data.get("streams").isJsonArray) {
+                log.warn { "No 'streams' array present in data or it's not an array; returning empty ParsedMediaStreams. data: $data" }
+                return null
+            }
+
+            val jStreams = data.getAsJsonArray("streams")
+            if (jStreams.size() == 0) {
+                log.debug { "'streams' array is empty; returning empty ParsedMediaStreams" }
+                return null
+            }
+
 
             val videoStreams = mutableListOf<VideoStream>()
             val audioStreams = mutableListOf<AudioStream>()
