@@ -38,11 +38,6 @@ class MediaCreateEncodeTaskListener(
                 return null
         }
 
-        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
-            log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
-            return null
-        }
-
         val selectedEvent = event as? MediaTracksEncodeSelectedEvent ?: return null
         val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
 
@@ -91,6 +86,11 @@ class MediaCreateEncodeTaskListener(
         val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
 
         val filename = File(preparedFile).nameWithoutExtension
+
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
+            log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
+            return null
+        }
 
         val task = EncodeTask(
             data = EncodeData(
