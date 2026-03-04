@@ -96,7 +96,7 @@ class MediaParseStreamsListenerTest {
         """.trimIndent()
 
         val parsed = listener.parseStreams(JsonParser.parseString(json).asJsonObject)
-
+        assertNotNull(parsed!!)
         assertEquals(1, parsed.videoStream.size)
         assertEquals("h264", parsed.videoStream[0].codec_name)
 
@@ -139,7 +139,7 @@ class MediaParseStreamsListenerTest {
         }
     """.trimIndent()
 
-        val parsed = listener.parseStreams(JsonParser.parseString(json).asJsonObject)
+        val parsed = listener.parseStreams(JsonParser.parseString(json).asJsonObject)!!
 
         assertEquals(1, parsed.videoStream.size)
         assertEquals("h264", parsed.videoStream[0].codec_name)
@@ -168,7 +168,7 @@ class MediaParseStreamsListenerTest {
         }
     """.trimIndent()
 
-        val parsed = listener.parseStreams(JsonParser.parseString(json).asJsonObject)
+        val parsed = listener.parseStreams(JsonParser.parseString(json).asJsonObject)!!
         assertTrue(parsed.videoStream.isEmpty())
     }
 
@@ -177,12 +177,13 @@ class MediaParseStreamsListenerTest {
     Hvis JSON mangler streams array
     Når parseStreams kalles
     Så:
-        Kastes Exception
+        Skal det returneres null uten å kaste en exception
     """)
-    fun testParseStreamsThrowsOnInvalidJson() {
+    fun testParseStreamsDoesNotThrowButReturnsNullOnInvalidJson() {
         val json = """{}"""
-        assertThrows(Exception::class.java) {
-            listener.parseStreams(JsonParser.parseString(json).asJsonObject)
+        assertDoesNotThrow {
+            val result = listener.parseStreams(JsonParser.parseString(json).asJsonObject)
+            assertNull(result)
         }
     }
 }
