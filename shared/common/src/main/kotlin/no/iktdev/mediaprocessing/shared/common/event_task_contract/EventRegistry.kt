@@ -25,6 +25,7 @@ object EventRegistry {
 
             FileAddedEvent::class.java,
             FileReadyEvent::class.java,
+            FileChangedEvent::class.java,
             FileRemovedEvent::class.java,
 
             FilePrepareForWorkTaskCreatedEvent::class.java,

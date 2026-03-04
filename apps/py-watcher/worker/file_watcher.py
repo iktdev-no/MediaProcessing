@@ -16,16 +16,20 @@ class Handler(FileSystemEventHandler):
         self.loop = loop
 
     def _schedule_ready_check(self, ev: FileAddedEvent):
-        asyncio.run_coroutine_threadsafe(
-            check_ready(
+        async def run_and_mark():
+            ready_event = await check_ready(
                 self.db,
                 ev.referenceId,
                 ev.data.fileName,
                 ev.data.fileUri,
                 self.insert_event
-            ),
-            self.loop
-        )
+            )
+            if ready_event:
+                # Marker at filen nå er klar for Changed-events
+                self.file_handler.mark_ready(ev.referenceId)
+
+        asyncio.run_coroutine_threadsafe(run_and_mark(), self.loop)
+
 
     def on_created(self, event):
         if event.is_directory:
