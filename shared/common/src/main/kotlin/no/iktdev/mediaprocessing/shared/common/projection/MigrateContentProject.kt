@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.exfl.using
-import no.iktdev.mediaprocessing.shared.common.cleanForFileSystem
+import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -10,22 +10,17 @@ import no.iktdev.mediaprocessing.shared.common.resolveConflict
 import java.io.File
 
 open class MigrateContentProject(
+    val collection: String,
     val events: List<Event>,
-    val storageArea: File
+    val outbox: File
 ) {
 
-    val useStore: File? = getDesiredStoreFolder()
+    val useStore: File = outbox.using(collection)
 
-    open fun getFoldersInStore(): List<String> {
-        return storageArea
-            .listFiles { file -> file.isDirectory }
-            ?.map { it.name }
-            ?: emptyList()
-    }
 
     internal fun getFileName(): String? {
         val parsedInfo = events.filterIsInstance<MediaParsedInfoEvent>().lastOrNull() ?: return null
-        return parsedInfo.data.parsedFileName.cleanForFileSystem()
+        return parsedInfo.data.parsedFileName.cleanForFileSystemUse()
     }
 
     internal fun isMovie(): Boolean {
@@ -45,44 +40,6 @@ open class MigrateContentProject(
         return (parsedType ?: metadataType) == MediaType.Movie
     }
 
-
-
-    internal fun getDesiredStoreFolder(): File? {
-        val desiredCollection = getDesiredCollection()?.cleanForFileSystem() ?: return null
-        val assuredStore = storageArea.using(desiredCollection)
-
-        val existingCollectionNames = getFoldersInStore()
-        if (existingCollectionNames.isEmpty()) {
-            return assuredStore
-        }
-
-        val titles = getMetadataTitles().map { it.cleanForFileSystem() }
-
-        val matchedExisting = titles
-            .firstOrNull { it in existingCollectionNames }
-            ?.let { storageArea.using(it) }
-
-        return matchedExisting ?: assuredStore
-    }
-
-    internal fun getMetadataTitles(): List<String> {
-        val metadataEvent = events
-            .filterIsInstance<MetadataSearchResultEvent>()
-            .lastOrNull()
-            ?.recommended
-            ?.metadata
-            ?: return emptyList()
-
-        return metadataEvent.alternateTitles + metadataEvent.title
-    }
-
-    internal fun getDesiredCollection(): String? {
-        return events
-            .filterIsInstance<MediaParsedInfoEvent>()
-            .lastOrNull()
-            ?.data
-            ?.parsedCollection
-    }
 
     fun getVideoStoreFile(): CachedToStore? {
         val encoded = events.filterIsInstance<ProcesserEncodeResultEvent>().lastOrNull()
@@ -132,35 +89,38 @@ open class MigrateContentProject(
                 val file = e.data?.outputFile?.let(::File) ?: return@mapNotNull null
                 e to file
             }
+
         if (downloaded.isEmpty()) return null
-        val store = useStore ?: return null
 
+        val store = useStore
 
-
+        // Bestem base-navn for cover
         val storeCoverFileName = if (isMovie()) {
-            getFileName()
+            getFileName() ?: return null
         } else {
-            getDesiredCollection()?.cleanForFileSystem() ?: return null
-
+            collection.cleanForFileSystemUse()
         }
 
         val multiple = downloaded.size > 1
 
-        return downloaded.mapNotNull { (event, cached) ->
+        return downloaded.map { (event, cached) ->
             val ext = cached.extension
             val source = event.data?.source ?: "unknown"
 
-            val filename = if (multiple || store.using("$storeCoverFileName.$ext").exists()) {
-                "$storeCoverFileName-$source.$ext"
+            // Hvis flere cover eller filen finnes → legg til -source
+            val baseName = if (multiple || store.using("$storeCoverFileName.$ext").exists()) {
+                "$storeCoverFileName-$source"
             } else {
-                "$storeCoverFileName.$ext"
+                storeCoverFileName
             }
 
+            val filename = "$baseName.$ext"
             val storeFile = store.using(filename).resolveConflict()
 
             CachedToStore(cachedFile = cached, storeFile = storeFile)
         }
     }
+
 
     data class CachedToStore(val cachedFile: File, val storeFile: File)
     data class CachedToStoreLanguage(val cts: CachedToStore, val language: String)

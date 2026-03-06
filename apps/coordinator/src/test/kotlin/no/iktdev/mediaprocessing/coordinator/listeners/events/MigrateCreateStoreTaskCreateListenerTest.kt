@@ -11,8 +11,11 @@ import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
+import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -37,27 +40,33 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
     )
     fun `creates migrate-to-store task`() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
-        val metadata = metadataEvent(parsed)
+        val metadata = metadataEvent(parsed).also { x -> x.forEach { it.addToHistory() } }
 
         val encode = encodeEvent("/tmp/video.mp4", metadata.last())
+            .also { x -> x.forEach { it.addToHistory() } }
+
 
         val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .also { x -> x.forEach { it.addToHistory() } }
 
         val coverDownload = coverEvent("/tmp/cover.jpg", metadata.last())
+            .also { x -> x.forEach { it.addToHistory() } }
 
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = extract.last()
-        )
+        ).also { x -> x.forEach { it.addToHistory() } }
 
         val migrate = migrateResultEvent(
             collection = "MyCollection",
@@ -65,6 +74,7 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
             coverUri = "file:///cover.jpg",
             subtitleUris = listOf("file:///sub1.srt", "file://sub1.vtt")
         ).derivedOf(convert.last())
+            .addToHistory()
 
         val collected = CollectedEvent(
             setOf(
@@ -78,20 +88,16 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
                 migrate.eventId
             )
         ).derivedOf(migrate)
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            *metadata.toTypedArray(),
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-            *convert.toTypedArray(),
-            *coverDownload.toTypedArray(),
-            migrate,
-            collected
-        )
+        val summaryEvent = SummarizeContentListener(coordinatorEnv)
+            .onEvent(collected, history)?.also { it.addToHistory() }!!
 
-        val result = listener.onEvent(collected, history)
+        val persistContent = PersistContentEvent()
+            .derivedOf(summaryEvent)
+            .addToHistory()
+
+        val result = listener.onEvent(persistContent, history)
 
         assertThat(result).isNotNull()
 
@@ -119,28 +125,35 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
     )
     fun success1() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "Baking Bread",
             fileName = "Baking Bread - S01E01 - Flour",
             mediaType = MediaType.Serie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(derivedFrom = parsed, mediaType = MediaType.Serie)
+            .addToHistory()
 
         val encode = encodeEvent("/tmp/video.mp4", metadata.last())
+            .addToHistory()
 
         val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
 
         val coverDownload = coverEvent("/tmp/cover.jpg", metadata.last())
+            .addToHistory()
         val coverDownload2 = coverEvent("/tmp/cover.jpg", metadata.last(), "potet")
+            .addToHistory()
 
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = extract.last()
-        )
+        ).addToHistory()
 
 
         val collected = CollectedEvent(
@@ -155,20 +168,16 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
                 *coverDownload2.map { it.eventId }.toTypedArray(),
             )
         ).derivedOf(coverDownload.last())
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            *metadata.toTypedArray(),
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-            *convert.toTypedArray(),
-            *coverDownload.toTypedArray(),
-            *coverDownload2.toTypedArray(),
-            collected,
-        )
+        val summaryEvent = SummarizeContentListener(coordinatorEnv)
+            .onEvent(collected, history)?.addToHistory()!!
 
-        val result = listener.onEvent(collected, history)
+        val persistContent = PersistContentEvent()
+            .derivedOf(summaryEvent)
+            .addToHistory()
+
+        val result = listener.onEvent(persistContent, history)
 
         assertThat(result).isNotNull()
 
@@ -203,28 +212,30 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
 
     @Test
     @DisplayName(
-        """
-    Hvis start hendelsen kun inneholder converter, og vi har gjennomført konvertering
-    Når onEvent kalles med CollectedEvent
-    Så:
-        Opprettes det migrate task
     """
+        Hvis start hendelsen kun inneholder converter, og vi har gjennomført konvertering
+        Når onEvent kalles med CollectedEvent
+        Så:
+            Opprettes det migrate task
+        """
     )
     fun createMigrateForConvert() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Subtitle
         ).derivedOf(started)
+            .addToHistory()
 
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = started
-        )
+        ).addToHistory()
 
         val migrate = migrateResultEvent(
             collection = "MyCollection",
@@ -232,6 +243,7 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
             coverUri = null,
             subtitleUris = listOf("file:///sub1.srt", "file://sub1.vtt")
         ).derivedOf(convert.last())
+            .addToHistory()
 
         val collected = CollectedEvent(
             setOf(
@@ -242,15 +254,16 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
             )
         ).derivedOf(migrate)
 
-        val history = listOf(
-            started,
-            parsed,
-            *convert.toTypedArray(),
-            migrate,
-            collected
-        )
 
-        val result = listener.onEvent(collected, history)
+        val summaryEvent = SummarizeContentListener(coordinatorEnv)
+            .onEvent(collected, history)?.addToHistory()!!
+
+        val persistContent = PersistContentEvent()
+            .derivedOf(summaryEvent)
+            .addToHistory()
+
+
+        val result = listener.onEvent(persistContent, history)
 
         assertThat(result).isNotNull()
 
@@ -305,4 +318,5 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
             )
         )
     )
+
 }

@@ -59,9 +59,5 @@ class StoreProjection(val events: List<Event>) {
         )
     }
 
-    fun getCollection(): String? {
-        val migrated = events.filterIsInstance<MigrateContentToStoreTaskResultEvent>().lastOrNull { it.status == TaskStatus.Completed } ?: return null
-        return if (migrated.status == TaskStatus.Completed) migrated.migrateData?.collection else null
-    }
 
 }

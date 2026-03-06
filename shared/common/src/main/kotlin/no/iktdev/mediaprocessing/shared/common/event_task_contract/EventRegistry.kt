@@ -8,6 +8,7 @@ object EventRegistry {
         return listOf(
             CollectedEvent::class.java,
             CompletedEvent::class.java,
+            ContinuationSummaryEvent::class.java,
 
             ConvertTaskCreatedEvent::class.java,
             ConvertTaskResultEvent::class.java,
@@ -33,7 +34,6 @@ object EventRegistry {
 
             ValidateFileAndMediaDataEvent::class.java,
 
-            ManualAllowCompletionEvent::class.java,
 
             MediaParsedInfoEvent::class.java,
             MediaStreamParsedEvent::class.java,
@@ -52,6 +52,10 @@ object EventRegistry {
 
             ProcesserExtractResultEvent::class.java,
             ProcesserExtractTaskCreatedEvent::class.java,
+
+            PersistContentEvent::class.java,
+            OnHoldSignalEvent::class.java,
+            ReleaseHoldSignalEvent::class.java,
 
             StartProcessingEvent::class.java,
 

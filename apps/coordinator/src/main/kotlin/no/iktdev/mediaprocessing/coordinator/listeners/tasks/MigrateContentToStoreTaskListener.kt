@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
+import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import no.iktdev.mediaprocessing.shared.common.silentTry
 import org.springframework.stereotype.Component
@@ -92,7 +93,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateVideo(
         fs: FileSystemService,
-        content: MigrateToContentStoreTask.Data.SingleContent?
+        content: ContentMigrationPlan.SingleContent?
     ): MigrateContentToStoreTaskResultEvent.FileMigration {
 
         if (content == null) {
@@ -112,7 +113,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateSubtitle(
         fs: FileSystemService,
-        subs: List<MigrateToContentStoreTask.Data.SingleSubtitle>
+        subs: List<ContentMigrationPlan.SingleSubtitle>
     ): List<MigrateContentToStoreTaskResultEvent.SubtitleMigration> {
 
         if (subs.isEmpty()) {
@@ -141,7 +142,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateCover(
         fs: FileSystemService,
-        covers: List<MigrateToContentStoreTask.Data.SingleContent>
+        covers: List<ContentMigrationPlan.SingleContent>
     ): List<MigrateContentToStoreTaskResultEvent.FileMigration> {
 
         if (covers.isEmpty()) {

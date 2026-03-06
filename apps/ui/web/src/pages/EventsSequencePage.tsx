@@ -40,6 +40,7 @@ export default function EventSequencePage() {
                     events={effective}
                     loading={loading}
                     onShowDetails={ev => setSelected(ev)}
+                    onShowLineage={ev => { }}
                 />
             </Paper>
             <EventDialog

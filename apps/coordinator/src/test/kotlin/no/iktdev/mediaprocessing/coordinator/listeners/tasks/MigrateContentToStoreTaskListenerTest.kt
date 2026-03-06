@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
+import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,7 +71,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateVideo_success() {
         val fs = MockFileSystemService().also { listener.fs = it }
-        val content = MigrateToContentStoreTask.Data.SingleContent("/tmp/source", "/tmp/dest")
+        val content = ContentMigrationPlan.SingleContent("/tmp/source", "/tmp/dest")
 
         val result = listener.migrateVideo(fs, content)
 
@@ -91,7 +92,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateVideo_copyFails() {
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
-        val content = MigrateToContentStoreTask.Data.SingleContent("/tmp/source", "/tmp/dest")
+        val content = ContentMigrationPlan.SingleContent("/tmp/source", "/tmp/dest")
 
         assertThrows<FileServiceException.CopyFailed> {
             listener.migrateVideo(fs, content)
@@ -109,7 +110,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateVideo_mismatch() {
         val fs = MockFileSystemService().apply { identical = false }.also { listener.fs = it }
-        val content = MigrateToContentStoreTask.Data.SingleContent("/tmp/source", "/tmp/dest")
+        val content = ContentMigrationPlan.SingleContent("/tmp/source", "/tmp/dest")
 
         assertThrows<FileServiceException.VerificationFailed> {
             listener.migrateVideo(fs, content)
@@ -166,7 +167,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateSubtitle_success() {
         val fs = MockFileSystemService().also { listener.fs = it }
-        val sub = MigrateToContentStoreTask.Data.SingleSubtitle("en", "/tmp/a", "/tmp/b")
+        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", "/tmp/b")
 
         val result = listener.migrateSubtitle(fs, listOf(sub))
 
@@ -184,7 +185,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateSubtitle_mismatch() {
         val fs = MockFileSystemService().apply { identical = false }.also { listener.fs = it }
-        val sub = MigrateToContentStoreTask.Data.SingleSubtitle("en", "/tmp/a", "/tmp/b")
+        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", "/tmp/b")
 
         assertThrows<FileServiceException.VerificationFailed> {
             listener.migrateSubtitle(fs, listOf(sub))
@@ -202,7 +203,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateSubtitle_copyFails() {
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
-        val sub = MigrateToContentStoreTask.Data.SingleSubtitle("en", "/tmp/a", "/tmp/b")
+        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", "/tmp/b")
 
         assertThrows<FileServiceException.CopyFailed> {
             listener.migrateSubtitle(fs, listOf(sub))
@@ -224,7 +225,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateCover_success() {
         val fs = MockFileSystemService().also { listener.fs = it }
-        val cover = MigrateToContentStoreTask.Data.SingleContent("/tmp/c", "/tmp/c2")
+        val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
 
         val result = listener.migrateCover(fs, listOf(cover))
 
@@ -242,7 +243,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateCover_mismatch() {
         val fs = MockFileSystemService().apply { identical = false }.also { listener.fs = it }
-        val cover = MigrateToContentStoreTask.Data.SingleContent("/tmp/c", "/tmp/c2")
+        val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
 
         assertThrows<FileServiceException.VerificationFailed> {
             listener.migrateCover(fs, listOf(cover))
@@ -260,7 +261,7 @@ class MigrateContentToStoreTaskListenerTest {
     )
     fun migrateCover_copyFails() {
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
-        val cover = MigrateToContentStoreTask.Data.SingleContent("/tmp/c", "/tmp/c2")
+        val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
 
         assertThrows<FileServiceException.CopyFailed> {
             listener.migrateCover(fs, listOf(cover))
@@ -285,14 +286,14 @@ class MigrateContentToStoreTaskListenerTest {
         val reporter = FakeTaskReporter()
 
         val task = MigrateToContentStoreTask(
-            MigrateToContentStoreTask.Data(
+            ContentMigrationPlan(
                 "col",
-                videoContent = MigrateToContentStoreTask.Data.SingleContent("/tmp/v", "/tmp/v2"),
+                videoContent = ContentMigrationPlan.SingleContent("/tmp/v", "/tmp/v2"),
                 subtitleContent = listOf(
-                    MigrateToContentStoreTask.Data.SingleSubtitle("en", "/tmp/s", "/tmp/s2")
+                    ContentMigrationPlan.SingleSubtitle("en", "/tmp/s", "/tmp/s2")
                 ),
                 coverContent = listOf(
-                    MigrateToContentStoreTask.Data.SingleContent("/tmp/c", "/tmp/c2")
+                    ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
                 )
             )
         ).newReferenceId()
@@ -321,9 +322,9 @@ class MigrateContentToStoreTaskListenerTest {
         val reporter = FakeTaskReporter()
 
         val task = MigrateToContentStoreTask(
-            MigrateToContentStoreTask.Data(
+            ContentMigrationPlan(
                 "col",
-                videoContent = MigrateToContentStoreTask.Data.SingleContent("/tmp/v", "/tmp/v2"),
+                videoContent = ContentMigrationPlan.SingleContent("/tmp/v", "/tmp/v2"),
                 subtitleContent = emptyList(),
                 coverContent = emptyList()
             )
@@ -353,9 +354,9 @@ class MigrateContentToStoreTaskListenerTest {
         val reporter = FakeTaskReporter()
 
         val task = MigrateToContentStoreTask(
-            MigrateToContentStoreTask.Data(
+            ContentMigrationPlan(
                 "col",
-                videoContent = MigrateToContentStoreTask.Data.SingleContent("/tmp/v", "/tmp/v2"),
+                videoContent = ContentMigrationPlan.SingleContent("/tmp/v", "/tmp/v2"),
                 subtitleContent = emptyList(),
                 coverContent = emptyList()
             )

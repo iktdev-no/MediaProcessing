@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.mediaprocessing.shared.common.cleanForFileSystem
+import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent.ParsedData
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -47,7 +47,7 @@ class MigrateContentProjectPathTest {
             )
         )
 
-        val project = MigrateContentProject(events, storage)
+        val project = MigrateContentProject("Breaking Bad", events, storage)
 
         val video = project.getVideoStoreFile()
         assertNotNull(video)
@@ -114,7 +114,7 @@ class MigrateContentProjectPathTest {
 
         )
 
-        val project = MigrateContentProject(events, storage)
+        val project = MigrateContentProject("Breaking Bad", events, storage)
 
         assertEquals(
             existing.absolutePath,
@@ -124,16 +124,16 @@ class MigrateContentProjectPathTest {
 
     @Test
     fun cleanForFileSystem_transliteration() {
-        assertEquals("Senor de los Cielos", "Señor de los Cielos".cleanForFileSystem())
-        assertEquals("Amelie (2001)", "Amélie (2001)".cleanForFileSystem())
-        assertEquals("Ubermensch", "Übermensch".cleanForFileSystem())
-        assertEquals("Lodz, Polska", "Łódź, Polska".cleanForFileSystem())
+        assertEquals("Senor de los Cielos", "Señor de los Cielos".cleanForFileSystemUse())
+        assertEquals("Amelie (2001)", "Amélie (2001)".cleanForFileSystemUse())
+        assertEquals("Ubermensch", "Übermensch".cleanForFileSystemUse())
+        assertEquals("Lodz, Polska", "Łódź, Polska".cleanForFileSystemUse())
     }
 
     @Test
     fun cleanForFileSystem_removesSpecialCharacters() {
-        assertEquals("Hello World!", "Hello@World!".cleanForFileSystem())
-        assertEquals("Spider-Man No Way Home!", "Spider-Man: No Way Home!".cleanForFileSystem())
+        assertEquals("Hello World!", "Hello@World!".cleanForFileSystemUse())
+        assertEquals("Spider-Man No Way Home!", "Spider-Man: No Way Home!".cleanForFileSystemUse())
     }
     @Test
     fun videoStoreFile_usesSanitizedName() {
@@ -155,12 +155,12 @@ class MigrateContentProjectPathTest {
             status = TaskStatus.Completed
         )
 
-        val store = MigrateContentProject(listOf(parsed, encode), temp)
+        val store = MigrateContentProject("Señor de los Cielos", listOf(parsed, encode), temp)
         val result = store.getVideoStoreFile()
 
         assertNotNull(result)
         assertEquals("Amelie (2001).mp4", result!!.storeFile.name)
-        assertEquals("Senor de los Cielos", result.storeFile.parentFile.name)
+        assertEquals("Señor de los Cielos", result.storeFile.parentFile.name)
     }
 
     @Test
@@ -185,7 +185,7 @@ class MigrateContentProjectPathTest {
             )
         )
 
-        val store = MigrateContentProject(listOf(parsed, extract), temp)
+        val store = MigrateContentProject("Señor de los Cielos", listOf(parsed, extract), temp)
         val results = store.getSubtitleStoreFiles()
 
         assertNotNull(results)
@@ -194,7 +194,7 @@ class MigrateContentProjectPathTest {
         assertEquals("Nina Epica.srt", file.name)
         assertEquals("spa", file.parentFile.name)
         assertEquals("sub", file.parentFile.parentFile.name)
-        assertEquals("Senor de los Cielos", file.parentFile.parentFile.parentFile.name)
+        assertEquals("Señor de los Cielos", file.parentFile.parentFile.parentFile.name)
     }
 
     @Test
@@ -219,7 +219,7 @@ class MigrateContentProjectPathTest {
             status = TaskStatus.Completed
         )
 
-        val store = MigrateContentProject(listOf(parsed, cover), temp)
+        val store = MigrateContentProject("João e Maria", listOf(parsed, cover), temp)
         val results = store.getCoverStoreFiles()
 
         assertNotNull(results)

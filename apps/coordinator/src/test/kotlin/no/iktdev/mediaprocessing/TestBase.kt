@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.database.InMemoryEventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -59,11 +60,12 @@ open class TestBase {
     }
 
 
-    fun defaultStartEvent(): StartProcessingEvent {
+    fun defaultStartEvent(flow: StartFlow = StartFlow.Auto): StartProcessingEvent {
         val start = StartProcessingEvent(
             data = StartData(
                 operation = setOf(OperationType.Encode, OperationType.ExtractSubtitles, OperationType.ConvertSubtitles, OperationType.MetadataSearch),
-                fileUri = "file:///unit/${UUID.randomUUID()}.mkv"
+                fileUri = "file:///unit/${UUID.randomUUID()}.mkv",
+                flow = flow
             )
         ).apply { newReferenceId() }
         return start
@@ -72,6 +74,12 @@ open class TestBase {
 
     fun Event.addToHistory(): Event {
         history.add(this)
+        eventStore.persist(this)
+        return this
+    }
+
+    fun List<Event>.addToHistory(): List<Event> {
+        this.forEach { event -> event.addToHistory() }
         return this
     }
 

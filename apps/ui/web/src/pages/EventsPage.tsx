@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 import { getEvents } from "../api/events"
 import { EventDialog } from "../components/event/EventDialog"
+import { LineageDialog } from "../components/event/EventLinageDialog"
 import { EventsTable } from "../components/event/EventsTable"
 import { FilterChips } from "../components/FilterChips"
 import { Paginator } from "../components/Paginator"
@@ -46,6 +47,16 @@ export default function EventsPage() {
 
     const [selected, setSelected] = useState<UiEvent | null>(null)
 
+    const [lineageOpen, setLineageOpen] = useState(false);
+    const [lineageEvent, setLineageEvent] = useState<UiEvent | null>(null);
+
+
+    function onShowLineage(ev: UiEvent) {
+        setLineageEvent(ev);
+        setLineageOpen(true);
+    }
+
+
     const { data, isLoading } = useQuery({
         queryKey: ["events", parsedQuery],
         queryFn: () => getEvents(parsedQuery)
@@ -70,6 +81,7 @@ export default function EventsPage() {
                 events={data?.items ?? []}
                 loading={isLoading}
                 onShowDetails={ev => setSelected(ev)}
+                onShowLineage={ev => onShowLineage(ev)}
             />
 
             {data && (
@@ -93,6 +105,13 @@ export default function EventsPage() {
                 open={!!selected}
                 onClose={() => setSelected(null)}
             />
+            <LineageDialog
+                open={lineageOpen}
+                onClose={() => setLineageOpen(false)}
+                referenceId={lineageEvent?.referenceId ?? null}
+                selectedEventId={lineageEvent?.eventId ?? null}
+            />
+
         </Box>
     )
 }

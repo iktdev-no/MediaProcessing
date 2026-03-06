@@ -4,69 +4,79 @@ import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.mediaprocessing.coordinator.translate
 import no.iktdev.mediaprocessing.shared.common.effective
-import no.iktdev.mediaprocessing.shared.common.effectivePersisted
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
+import no.iktdev.mediaprocessing.shared.common.projection.SignalProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CurrentState
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.Mode
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceSummary
 import org.springframework.stereotype.Service
 import java.time.Instant
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 @Service
 class SequenceAggregatorService(
     private val eventService: EventService
 ) {
-
     fun getActiveSequences(): List<SequenceSummary> {
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
-
-        // Gruppér først, deserialiser senere
-        val grouped = allEvents
-                .groupBy { it.referenceId }
-                .mapValues { (_, events) -> events.effectivePersisted() }
-
-        val deleted = eventService.getDeletedSequences(grouped.keys)
-
-        return grouped
-            .filterNot { (referenceId, _) -> referenceId in deleted }
-            .values
-            // aktive = ingen CollectedEvent
-            .filter { events -> events.none { it.event == CompletedEvent::class.java.simpleName } }
-            .mapNotNull { events -> buildSummary(events) }
-            .sortedByDescending { it.lastEventTime }
+        return getSequenceSummary(allEvents,
+            { group: List<PersistedEvent> ->
+                group.none { it.event == CompletedEvent::class.java.simpleName }
+            }
+        )
     }
 
     fun getRecentSequences(limit: Int): List<SequenceSummary> {
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
+        return getSequenceSummary(allEvents).take(limit)
+    }
 
-        val grouped = allEvents.groupBy { it.referenceId }
-            .mapValues { (_, events) -> events.effectivePersisted() }
+    fun getSequenceSummary(
+        events: List<PersistedEvent>,
+        vararg groupFilters: (List<PersistedEvent>) -> Boolean
+    ): List<SequenceSummary> {
+
+        val grouped = events
+            .groupBy { it.referenceId }
+            // filtrer grupper før composeSummary
+            .filter { (_, group) -> groupFilters.all { filter -> filter(group) } }
+            // bygg summary
+            .mapNotNull { (id, group) ->
+                composeSummary(group)?.let { summary -> id to summary }
+            }
+            .toMap()
+
         val deleted = eventService.getDeletedSequences(grouped.keys)
 
         return grouped
             .filterNot { (referenceId, _) -> referenceId in deleted }
             .values
-            .mapNotNull { events -> buildSummary(events) }
             .sortedByDescending { it.lastEventTime }
-            .take(limit)
     }
 
-    private fun buildSummary(events: List<PersistedEvent>): SequenceSummary? {
-        val last = events.maxByOrNull { it.persistedAt } ?: return null
 
-        // Deserialiser kun eventene for denne sekvensen
-        val domainEvents = events.mapNotNull { it.toEvent() }
-            .effective()
 
+
+
+    fun composeSummary(persisted: List<PersistedEvent>): SequenceSummary? {
+        val last = persisted.maxByOrNull { it.persistedAt } ?: return null
+        val events = persisted.mapNotNull { it.toEvent() }
+        val signals = SignalProjection(events)
+
+        val domainEvents = events.effective()
         val projection = CollectProjection(domainEvents)
 
-        val state = if (events.any { it.event == CollectedEvent::class.java.simpleName }) {
-            if (projection.isStorePermitted()) CurrentState.Continuing else CurrentState.OnHold
-        } else CurrentState.Continuing
+        val state = if (signals.isReleased) {
+            CurrentState.Continuing
+        } else if (signals.isOnHold) {
+            CurrentState.OnHold
+        } else {
+            CurrentState.Continuing
+        }
 
         return SequenceSummary(
             referenceId = last.referenceId.toString(),

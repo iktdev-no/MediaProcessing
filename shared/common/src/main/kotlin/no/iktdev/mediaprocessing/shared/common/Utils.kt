@@ -257,7 +257,7 @@ fun <T : Any> KClass<T>.getName(): String =
 
 
 private val transliterator = Transliterator.getInstance("Any-Latin; Latin-ASCII")
-fun String.cleanForFileSystem(): String {
+fun String.cleanForFileSystemUse(): String {
     // 1. Full translitterering (Æ→AE, Ø→O, Å→AA, Ł→L, Þ→Th, etc.)
     val ascii = transliterator.transliterate(this)
 

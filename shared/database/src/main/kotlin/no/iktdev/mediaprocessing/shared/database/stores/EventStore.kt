@@ -167,7 +167,7 @@ object EventStore: EventStore {
 
     fun createManuallyContinueEvent(referenceId: UUID): UUID? {
         return try {
-            val continueEvent = ManualAllowCompletionEvent().apply {
+            val continueEvent = ReleaseHoldSignalEvent().apply {
                 usingReferenceId(referenceId)
             }
             persist(continueEvent)

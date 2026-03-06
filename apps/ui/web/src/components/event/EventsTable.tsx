@@ -7,11 +7,13 @@ import { colorFromUuid } from "../../util"
 export function EventsTable({
     events,
     loading,
-    onShowDetails
+    onShowDetails,
+    onShowLineage
 }: {
     events: UiEvent[]
     loading: boolean
     onShowDetails: (ev: UiEvent) => void
+    onShowLineage: (ev: UiEvent) => void
 }) {
     const navigate = useNavigate();
     return (
@@ -60,6 +62,13 @@ export function EventsTable({
                                     onClick={() => onShowDetails(ev)}
                                 >
                                     Vis data
+                                </Button>
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    onClick={() => onShowLineage(ev)}
+                                >
+                                    Vis lineage
                                 </Button>
                             </TableCell>
                         </TableRow>
