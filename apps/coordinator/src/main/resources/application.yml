@@ -24,6 +24,7 @@ logging:
     Exposed: OFF
     org.springframework.web.socket.config.WebSocketMessageBrokerStats: WARN
     no.iktdev.eventi: DEBUG
+    no.iktdev.mediaprocessing: DEBUG
 
 media:
   scratch: /src/scratch
