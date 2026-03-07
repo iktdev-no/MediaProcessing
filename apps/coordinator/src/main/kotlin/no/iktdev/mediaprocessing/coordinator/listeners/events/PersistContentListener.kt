@@ -22,10 +22,10 @@ class PersistContentListener(
         event.requireQualifiedEntry<ContinuationSummaryEvent>()
 
         val allSignals = history.filterIsInstance<SignalEvent>()
-            .sortedBy { it.metadata.created }
+
         val relevantSignals = allSignals.filter {
-            it is OnHoldSignalEvent || it is ReleaseHoldSignalEvent
-        }
+            it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)
+        }.sortedByDescending { it.metadata.created }
 
 
         // 6. Finn siste signal basert på createdAt
