@@ -7,10 +7,15 @@ import no.iktdev.eventi.registry.EventTypeRegistry
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.model.ContentExport
+import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
+import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.InMemoryEventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
@@ -69,8 +74,44 @@ open class TestBase {
             )
         ).apply { newReferenceId() }
         return start
-
     }
+
+    fun defaultSummaryEvent() = ContinuationSummaryEvent(
+        data = ContentExport(
+            "Baking Bread",
+            episodeInfo = ContentExport.EpisodeInfo(1, 1, "Flour"),
+            metadata = ContentExport.MetadataExport(
+                "Baking Bread",
+                listOf("Bread in the making"),
+                listOf("Comedy", "Baking"),
+                "Baking Bread.jpg",
+                summary = emptyList(),
+                mediaType = MediaType.Serie,
+                source = "The Cook book"
+            ),
+            media = ContentExport.MediaExport(
+                videoFile = "Baking Bread - S01E01 - Flour.mp4",
+                subtitles = listOf(
+                    ContentExport.MediaExport.Subtitle(
+                        subtitleFile = "Baking Bread - S01E01 - Flour.ass",
+                        language = "eng",
+                    )
+                )
+            )
+        ),
+        plan = ContentMigrationPlan(
+            collection = "Baking Bread",
+            videoContent = ContentMigrationPlan.SingleContent("cached:///bakingbread/Baking Bread - S01E01 - Flour.mp4", "store:///Baking bread/Baking Bread - S01E01 - Flour.mp4"),
+            coverContent = ContentMigrationPlan.SingleContent("cached:///bakingbread/Baking Bread.jpg", "store:///Baking bread/Baking Bread.jpg"),
+            subtitleContent = listOf(
+                ContentMigrationPlan.SingleSubtitle(
+                    language = "eng",
+                    cachedUri = "cached:///bakingbread/Baking Bread - S01E01 - Flour.ass",
+                    storeUri = "store:///Baking bread/sub/eng/Baking Bread - S01E01 - Flour.mp4"
+                )
+            )
+        )
+    )
 
     fun Event.addToHistory(): Event {
         history.add(this)

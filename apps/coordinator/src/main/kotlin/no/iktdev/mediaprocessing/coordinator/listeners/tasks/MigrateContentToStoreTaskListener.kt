@@ -33,7 +33,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
         val video = migrateVideo(fs, picked.data.videoContent)
         val subs = migrateSubtitle(fs, picked.data.subtitleContent ?: emptyList())
-        val covers = migrateCover(fs, picked.data.coverContent ?: emptyList())
+        val covers = migrateCover(fs, picked.data.coverContent)
 
         deleteCache(fs, picked)
 
@@ -69,7 +69,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     private fun deleteCache(fs: FileSystemService, task: MigrateToContentStoreTask) {
         task.data.videoContent?.cachedUri?.let { silentTry { fs.delete(File(it)) } }
         task.data.subtitleContent?.forEach { silentTry { fs.delete(File(it.cachedUri)) } }
-        task.data.coverContent?.forEach { silentTry { fs.delete(File(it.cachedUri)) } }
+        task.data.coverContent?.let { silentTry { fs.delete(File(it.cachedUri)) } }
     }
 
     // -------------------------------------------------------------------------
@@ -142,19 +142,10 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateCover(
         fs: FileSystemService,
-        covers: List<ContentMigrationPlan.SingleContent>
-    ): List<MigrateContentToStoreTaskResultEvent.FileMigration> {
+        cover: ContentMigrationPlan.SingleContent?
+    ): MigrateContentToStoreTaskResultEvent.FileMigration {
 
-        if (covers.isEmpty()) {
-            return listOf(
-                MigrateContentToStoreTaskResultEvent.FileMigration(
-                    storedUri = null,
-                    status = MigrateStatus.NotPresent
-                )
-            )
-        }
-
-        return covers.map { cover ->
+        return cover?.let { cover ->
             val source = File(cover.cachedUri)
             val dest = File(cover.storeUri)
 
@@ -164,7 +155,10 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
                 storedUri = dest.absolutePath,
                 status = MigrateStatus.Completed
             )
-        }
+        } ?: MigrateContentToStoreTaskResultEvent.FileMigration(
+            storedUri = null,
+            status = MigrateStatus.NotPresent
+        )
     }
 
     open fun getFileSystemService(): FileSystemService =

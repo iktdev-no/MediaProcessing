@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Collec
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -107,31 +108,29 @@ class StoreContentAndMetadataListenerTest : TestBase() {
         ).derivedOf(startedEvent)
             .addToHistory()
 
-        val migrate = migrateEvent(
+
+        val processEncodeResultEvent = ProcesserEncodeResultEvent(
             status = TaskStatus.Completed,
-            collection = "Baking Bread",
-            videoUri = "file:///Baking Bread/Baking Bread - S01E01 - Flour.mp4",
-            coverUri = "file:///Baking Bread/Baking Bread.jpg",
-            subtitleUris = listOf("file:///Baking Bread/en/Baking Bread - S01E01 - Flour.srt")
+            data = ProcesserEncodeResultEvent.EncodeResult(
+                cachedOutputFile = "cache:///Baking Bread/Baking Bread - S01E01 - Flour.mp4"
+            )
         ).derivedOf(parsed)
             .addToHistory()
 
-        val collected = CollectedEvent(setOf(
-            startedEvent.eventId,
-            parsed.eventId,
-            migrate.eventId)
+
+        val collected = CollectedEvent(
+            history.map { it -> it.eventId }.toSet()
         )
-            .derivedOf(migrate)
+            .derivedOf(processEncodeResultEvent)
             .addToHistory()
 
-        val summaryEvent = SummarizeContentListener(coordinatorEnv)
-            .onEvent(collected, history)?.addToHistory()!!
+        val summaryEvent = defaultSummaryEvent().derivedOf(collected).addToHistory()!!
 
         val persistContent = PersistContentEvent()
             .derivedOf(summaryEvent)
             .addToHistory()
 
-        val result = listener.onEvent(migrate, history)
+        val result = listener.onEvent(persistContent, history)
         assertThat(result).isInstanceOf(StoreContentAndMetadataTaskCreatedEvent::class.java)
 
         val slot = slot<StoreContentAndMetadataTask>()
@@ -141,11 +140,11 @@ class StoreContentAndMetadataListenerTest : TestBase() {
         }
 
         val storeTask = slot.captured
-        assertThat(storeTask.data.collection).isEqualTo("MyCollection")
+        assertThat(storeTask.data.collection).isEqualTo("Baking Bread")
         assertThat(storeTask.data.metadata.mediaType).isEqualTo(MediaType.Serie)
         assertThat(storeTask.data.media?.videoFile).isEqualTo("Baking Bread - S01E01 - Flour.mp4")
-        assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("Baking Bread - S01E01 - Flour.srt")
-        assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("en")
+        assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("Baking Bread - S01E01 - Flour.ass")
+        assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("eng")
 
     }
 
@@ -175,14 +174,14 @@ class StoreContentAndMetadataListenerTest : TestBase() {
                         status = MigrateStatus.Completed
                     )
                 },
-                coverMigrate = listOfNotNull(
+                coverMigrate =
                     coverUri?.let {
                         MigrateContentToStoreTaskResultEvent.FileMigration(
                             storedUri = it,
                             status = MigrateStatus.Completed
                         )
                     }
-                )
+
             )
         )
     }

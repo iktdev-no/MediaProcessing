@@ -16,6 +16,11 @@ class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = Eve
         val projection = CollectProjection(fullHistory)
         if (projection.startedWith == null) return false
         if (!projection.isWorkflowComplete()) return false
+        if (projection.getTaskStatus().any { it == CollectProjection.TaskStatus.Failed }) {
+            val referenceId = fullHistory.first().referenceId
+            log.warn { "One or more tasks have failed in sequence referenceId=$referenceId" }
+            return false
+        }
         return true
     }
 

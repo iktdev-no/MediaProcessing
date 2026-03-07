@@ -247,7 +247,7 @@ class SummarizeContentListenerTest : TestBase() {
         val summary = result as ContinuationSummaryEvent
 
         assertNotNull(summary.plan.videoContent)
+        assertNotNull(summary.plan.coverContent)
         assertEquals(1, summary.plan.subtitleContent?.size)
-        assertEquals(1, summary.plan.coverContent?.size)
     }
 }

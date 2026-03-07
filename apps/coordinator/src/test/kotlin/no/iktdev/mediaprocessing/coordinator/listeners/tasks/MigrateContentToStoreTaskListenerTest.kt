@@ -227,9 +227,9 @@ class MigrateContentToStoreTaskListenerTest {
         val fs = MockFileSystemService().also { listener.fs = it }
         val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
 
-        val result = listener.migrateCover(fs, listOf(cover))
+        val result = listener.migrateCover(fs, cover)
 
-        assertEquals(MigrateStatus.Completed, result.first().status)
+        assertEquals(MigrateStatus.Completed, result.status)
     }
 
     @Test
@@ -246,7 +246,7 @@ class MigrateContentToStoreTaskListenerTest {
         val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
 
         assertThrows<FileServiceException.VerificationFailed> {
-            listener.migrateCover(fs, listOf(cover))
+            listener.migrateCover(fs, cover)
         }
     }
 
@@ -264,7 +264,7 @@ class MigrateContentToStoreTaskListenerTest {
         val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
 
         assertThrows<FileServiceException.CopyFailed> {
-            listener.migrateCover(fs, listOf(cover))
+            listener.migrateCover(fs, cover)
         }
     }
 
@@ -292,9 +292,9 @@ class MigrateContentToStoreTaskListenerTest {
                 subtitleContent = listOf(
                     ContentMigrationPlan.SingleSubtitle("en", "/tmp/s", "/tmp/s2")
                 ),
-                coverContent = listOf(
+                coverContent =
                     ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
-                )
+
             )
         ).newReferenceId()
 
@@ -326,7 +326,7 @@ class MigrateContentToStoreTaskListenerTest {
                 "col",
                 videoContent = ContentMigrationPlan.SingleContent("/tmp/v", "/tmp/v2"),
                 subtitleContent = emptyList(),
-                coverContent = emptyList()
+                coverContent = null
             )
         ).newReferenceId()
 
@@ -358,7 +358,7 @@ class MigrateContentToStoreTaskListenerTest {
                 "col",
                 videoContent = ContentMigrationPlan.SingleContent("/tmp/v", "/tmp/v2"),
                 subtitleContent = emptyList(),
-                coverContent = emptyList()
+                coverContent = null
             )
         ).newReferenceId()
 

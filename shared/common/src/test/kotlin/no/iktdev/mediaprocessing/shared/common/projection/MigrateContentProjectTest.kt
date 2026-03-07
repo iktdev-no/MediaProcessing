@@ -220,12 +220,11 @@ class MigrateContentProjectPathTest {
         )
 
         val store = MigrateContentProject("João e Maria", listOf(parsed, cover), temp)
-        val results = store.getCoverStoreFiles()
+        val result = store.getCoverStoreFiles()
 
-        assertNotNull(results)
-        val file = results!!.first().storeFile
-
-        assertEquals("Joao e Maria.jpg", file.name)
+        assertNotNull(result)
+        assertNotNull(result!!.storeFile)
+        assertEquals("Joao e Maria.jpg", result.storeFile.name)
     }
 
 

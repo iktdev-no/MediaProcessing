@@ -82,44 +82,35 @@ open class MigrateContentProject(
         }
     }
 
-    fun getCoverStoreFiles(): List<CachedToStore>? {
-        val downloaded = events
+    fun getCoverStoreFiles(): CachedToStore? {
+        // Finn siste cover-download
+        val last = events
             .filterIsInstance<CoverDownloadResultEvent>()
-            .mapNotNull { e ->
-                val file = e.data?.outputFile?.let(::File) ?: return@mapNotNull null
-                e to file
-            }
+            .lastOrNull() ?: return null
 
-        if (downloaded.isEmpty()) return null
+        val cached = last.data?.outputFile?.let(::File) ?: return null
 
         val store = useStore
 
         // Bestem base-navn for cover
-        val storeCoverFileName = if (isMovie()) {
+        val baseName = if (isMovie()) {
             getFileName() ?: return null
         } else {
             collection.cleanForFileSystemUse()
         }
 
-        val multiple = downloaded.size > 1
+        val ext = cached.extension
+        val filename = "$baseName.$ext"
 
-        return downloaded.map { (event, cached) ->
-            val ext = cached.extension
-            val source = event.data?.source ?: "unknown"
+        // Generer destinasjonsfil (uten conflict-resolving)
+        val storeFile = store.using(filename)
 
-            // Hvis flere cover eller filen finnes → legg til -source
-            val baseName = if (multiple || store.using("$storeCoverFileName.$ext").exists()) {
-                "$storeCoverFileName-$source"
-            } else {
-                storeCoverFileName
-            }
-
-            val filename = "$baseName.$ext"
-            val storeFile = store.using(filename).resolveConflict()
-
-            CachedToStore(cachedFile = cached, storeFile = storeFile)
-        }
+        return CachedToStore(
+            cachedFile = cached,
+            storeFile = storeFile
+        )
     }
+
 
 
     data class CachedToStore(val cachedFile: File, val storeFile: File)

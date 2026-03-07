@@ -108,7 +108,7 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
                 assertThat(storeTask.data.collection).isEqualTo("MyCollection")
                 assertThat(storeTask.data.videoContent).isNotNull()
                 assertThat(storeTask.data.subtitleContent).hasSize(2)
-                assertThat(storeTask.data.coverContent).hasSize(1)
+                assertThat(storeTask.data.coverContent).isNotNull
             })
         }
 
@@ -200,11 +200,8 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
                 .map { File(it.storeUri).nameWithoutExtension }
         ).containsOnly("Baking Bread - S01E01 - Flour")
 
-        assertThat(storeTask.data.coverContent).hasSize(2)
-        assertThat(File(storeTask.data.coverContent!!.first().storeUri).name)
-            .isEqualTo("Baking Bread-test.jpg")
-        assertThat(File(storeTask.data.coverContent!!.last().storeUri).name)
-            .isEqualTo("Baking Bread-potet.jpg")
+        assertThat(File(storeTask.data.coverContent!!.storeUri).name)
+            .isEqualTo("Baking Bread.jpg")
 
 
     }
@@ -308,14 +305,14 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
                     status = MigrateStatus.Completed
                 )
             },
-            coverMigrate = listOfNotNull(
+            coverMigrate =
                 coverUri?.let {
                     MigrateContentToStoreTaskResultEvent.FileMigration(
                         storedUri = it,
                         status = MigrateStatus.Completed
                     )
                 }
-            )
+
         )
     )
 

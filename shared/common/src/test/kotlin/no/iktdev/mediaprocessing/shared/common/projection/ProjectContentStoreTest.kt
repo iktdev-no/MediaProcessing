@@ -172,16 +172,14 @@ class ProjectContentStoreTest {
         val store = MigrateContentProject("MyShow",events, temp)
 
         // Act
-        val results = store.getCoverStoreFiles()
+        val result = store.getCoverStoreFiles()
 
         // Assert
-        assertEquals(1, results?.size)
-        val entry = results?.first()
-        assertNotNull(entry)
+        assertNotNull(result)
 
-        assertEquals("MyShow.jpg", entry!!.storeFile.name)
-        assertEquals("MyShow", entry!!.storeFile.parentFile.name)
-        assertEquals(temp, entry!!.storeFile.parentFile.parentFile)
+        assertEquals("MyShow.jpg", result!!.storeFile.name)
+        assertEquals("MyShow", result!!.storeFile.parentFile.name)
+        assertEquals(temp, result!!.storeFile.parentFile.parentFile)
     }
 
 

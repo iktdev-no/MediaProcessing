@@ -4,7 +4,7 @@ data class ContentMigrationPlan(
     val collection: String,
     val videoContent: SingleContent? = null,
     val subtitleContent: List<SingleSubtitle>? = null, // Both extracted and converted
-    val coverContent: List<SingleContent>? = null
+    val coverContent: SingleContent? = null
 ) {
     data class SingleContent(
         val cachedUri: String,

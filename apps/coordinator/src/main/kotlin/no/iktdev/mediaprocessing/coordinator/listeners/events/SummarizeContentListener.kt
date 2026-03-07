@@ -11,7 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
 import no.iktdev.mediaprocessing.shared.common.projection.MigrateContentProject
-import no.iktdev.mediaprocessing.shared.common.projection.StoreProjection
+import no.iktdev.mediaprocessing.shared.common.projection.SummaryProjection
 import org.springframework.stereotype.Component
 
 @Component
@@ -29,12 +29,11 @@ class SummarizeContentListener(
         val useHistory = (history.filter { event.eventIds.contains(it.eventId) })
         val collection = CollectionProjection(useHistory, coordinatorEnv.outboxFolder).getCollection()
 
+        val projection = SummaryProjection(collection, useHistory, coordinatorEnv.outboxFolder)
+        val migrationPlan = projection.createMigrationPlan()
 
-        val projection = StoreProjection(useHistory)
 
-        val migrationPlan = createMigrationPlan(collection, useHistory)
-
-        val metadata = projection.projectMetadata()
+        val metadata = projection.projectMetadata(migrationPlan)
         if (metadata == null) {
             log.error { "Metadata is null @ ${event.referenceId}" }
             return null
@@ -43,7 +42,7 @@ class SummarizeContentListener(
 
         val exportInfo = ContentExport(
             collection = collection,
-            media = projection.projectMediaFiles(),
+            media = projection.projectMediaFiles(migrationPlan),
             episodeInfo = projection.projectEpisodeInfo(),
             metadata = metadata
         )
@@ -53,44 +52,5 @@ class SummarizeContentListener(
             data = exportInfo,
             plan = migrationPlan,
         ).derivedOf(event)
-    }
-
-    private fun createMigrationPlan(collection: String, useHistory: List<Event>): ContentMigrationPlan {
-        val referenceId = useHistory.first().referenceId
-        val collectProjection = CollectProjection(useHistory)
-        log.info { collectProjection.prettyPrint() }
-
-        val statusAcceptable = collectProjection.getTaskStatus().none { it == CollectProjection.TaskStatus.Failed }
-        if (!statusAcceptable) {
-            log.warn { "One or more tasks have failed in sequence referenceId=$referenceId" }
-        }
-
-        val migrateContentProjection = MigrateContentProject(collection,useHistory, coordinatorEnv.outboxFolder)
-
-        val collection = migrateContentProjection.useStore?.name
-            ?: throw RuntimeException("No content store configured for migration in referenceId=${referenceId}")
-
-        val videContent = migrateContentProjection.getVideoStoreFile()?.let {
-            ContentMigrationPlan.SingleContent(
-                it.cachedFile.absolutePath,
-                it.storeFile.absolutePath
-            )
-        }
-        val subtitleContent = migrateContentProjection.getSubtitleStoreFiles()?.map {
-            ContentMigrationPlan.SingleSubtitle(
-                it.language,
-                it.cts.cachedFile.absolutePath,
-                it.cts.storeFile.absolutePath,
-            )
-        }
-        val coverContent = migrateContentProjection.getCoverStoreFiles()?.map {
-            ContentMigrationPlan.SingleContent(it.cachedFile.absolutePath, it.storeFile.absolutePath)
-        }
-        return ContentMigrationPlan(
-            collection = collection,
-            videoContent = videContent,
-            subtitleContent = subtitleContent,
-            coverContent = coverContent
-        )
     }
 }

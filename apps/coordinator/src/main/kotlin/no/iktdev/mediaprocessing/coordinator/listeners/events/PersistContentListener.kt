@@ -14,7 +14,7 @@ class PersistContentListener(
 ) : PolicyGateEventListener(eventStore) {
 
     override fun isRequiredPrecursorEventPresent(fullHistory: List<Event>): Boolean {
-        return fullHistory.getInstanceOf<CollectedEvent>() != null
+        return fullHistory.getInstanceOf<ContinuationSummaryEvent>() != null
     }
 
     override fun isOnHold(signalHistory: List<SignalEvent>): Boolean {

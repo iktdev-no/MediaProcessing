@@ -37,9 +37,9 @@ class PersistContentListenerTest : TestBase() {
     )
     fun manualFlow_firstEvent_setsHold() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
+        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
 
-        val result = listener().onEvent(collected, history)
+        val result = listener().onEvent(summaryEvent, history)
 
         assertNotNull(result)
         assertTrue(result is OnHoldSignalEvent)
@@ -77,10 +77,10 @@ class PersistContentListenerTest : TestBase() {
     )
     fun manualFlow_onHold_releaseHold() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
-        OnHoldSignalEvent("manual").derivedOf(collected).addToHistory()
+        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
+        OnHoldSignalEvent("manual").derivedOf(summaryEvent).addToHistory()
 
-        val release = ReleaseHoldSignalEvent("ok").derivedOf(collected)
+        val release = ReleaseHoldSignalEvent("ok").derivedOf(summaryEvent)
         val result = listener().onEvent(release, history)
 
         assertNotNull(result)
@@ -98,10 +98,10 @@ class PersistContentListenerTest : TestBase() {
     )
     fun manualFlow_afterRelease_passthrough() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
-        ReleaseHoldSignalEvent("ok").derivedOf(collected).addToHistory()
+        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
+        ReleaseHoldSignalEvent("ok").derivedOf(summaryEvent).addToHistory()
 
-        val nextEvent = PersistContentEvent().derivedOf(collected)
+        val nextEvent = PersistContentEvent().derivedOf(summaryEvent)
         val result = listener().onEvent(nextEvent, history)
 
         assertNotNull(result)
@@ -119,11 +119,11 @@ class PersistContentListenerTest : TestBase() {
     )
     fun manualFlow_afterRelease_neverReintroduceHold() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
-        ReleaseHoldSignalEvent("ok").derivedOf(collected).addToHistory()
+        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
+        ReleaseHoldSignalEvent("ok").derivedOf(summaryEvent).addToHistory()
 
         repeat(3) {
-            val event = PersistContentEvent().derivedOf(collected)
+            val event = PersistContentEvent().derivedOf(summaryEvent)
             val result = listener().onEvent(event, history)
             assertTrue(result is PersistContentEvent)
         }
@@ -140,14 +140,14 @@ class PersistContentListenerTest : TestBase() {
     )
     fun manualFlow_doesNotGenerateMultipleOnHold() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
+        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
 
-        val first = listener().onEvent(collected, history)
+        val first = listener().onEvent(summaryEvent, history)
         assertTrue(first is OnHoldSignalEvent)
 
         (first as SignalEvent).addToHistory()
 
-        val second = listener().onEvent(collected, history)
+        val second = listener().onEvent(summaryEvent, history)
         assertNull(second)
     }
 
@@ -162,9 +162,10 @@ class PersistContentListenerTest : TestBase() {
     )
     fun autoFlow_passthrough() {
         val start = defaultStartEvent(StartFlow.Auto).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
+        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
 
-        val result = listener().onEvent(collected, history)
+
+        val result = listener().onEvent(summaryEvent, history)
 
         assertNotNull(result)
         assertTrue(result is PersistContentEvent)

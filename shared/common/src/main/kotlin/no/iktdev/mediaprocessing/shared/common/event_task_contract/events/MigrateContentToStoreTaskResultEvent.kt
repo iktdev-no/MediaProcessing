@@ -14,7 +14,7 @@ class MigrateContentToStoreTaskResultEvent(
         val collection: String,
         val videoMigrate: FileMigration,
         val subtitleMigrate: List<SubtitleMigration>,
-        val coverMigrate: List<FileMigration>,
+        val coverMigrate: FileMigration?,
     )
 
     data class FileMigration(
