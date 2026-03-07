@@ -20,22 +20,23 @@ class PersistContentListener(
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
         event.requireQualifiedEntry<ContinuationSummaryEvent>()
-        val useHistory = history.sortedByDescending { it.metadata.created }
+        val useHistory = history.sortedBy { it.metadata.created }
 
         val allSignals = useHistory.filterIsInstance<SignalEvent>()
 
-        val relevantSignals = allSignals.filter {
-            it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)
-        }.sortedByDescending { it.metadata.created }
+        val relevantSignals = allSignals
+            .filter { it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class) }
+            .sortedBy { it.metadata.created }
 
-
-        // 6. Finn siste signal basert på createdAt
         val lastSignal = relevantSignals.maxByOrNull { it.metadata.created }
+
 
         // 7. Branching
         if (lastSignal == null) {
             return super.onEvent(event, useHistory)
         }
+
+        log.debug("Last signal is ${lastSignal::class.java.name}")
 
         if (lastSignal is OnHoldSignalEvent) {
             return null
