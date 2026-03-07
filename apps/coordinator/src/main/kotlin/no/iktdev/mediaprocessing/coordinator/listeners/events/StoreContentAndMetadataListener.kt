@@ -43,7 +43,7 @@ class StoreContentAndMetadataListener: EventListener() {
 
 
         val task = StoreContentAndMetadataTask(useEvent.data)
-        val createdTaskEvent = StoreContentAndMetadataTaskCreatedEvent(task.taskId).derivedOf(useEvent)
+        val createdTaskEvent = StoreContentAndMetadataTaskCreatedEvent(task.taskId).derivedOf(event)
         task.apply { derivedOf(createdTaskEvent) }
 
         TaskStore.persist(task)

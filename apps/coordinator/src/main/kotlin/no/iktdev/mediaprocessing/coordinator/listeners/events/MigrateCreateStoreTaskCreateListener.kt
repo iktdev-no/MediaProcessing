@@ -24,7 +24,8 @@ class MigrateCreateStoreTaskCreateListener(): EventListener() {
         val useEvent = history.requireEvent<ContinuationSummaryEvent>()
 
         val storeTask = MigrateToContentStoreTask(useEvent.plan)
-        val createdTaskEvent = MigrateContentToStoreTaskCreatedEvent(storeTask.taskId).derivedOf(useEvent)
+        val createdTaskEvent = MigrateContentToStoreTaskCreatedEvent(storeTask.taskId)
+            .derivedOf(event)
         storeTask.apply { derivedOf(createdTaskEvent) }
 
         TaskStore.persist(storeTask)
