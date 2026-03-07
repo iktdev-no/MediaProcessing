@@ -19,31 +19,70 @@ class PersistContentListener(
 
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
-        event.requireQualifiedEntry<ContinuationSummaryEvent>()
-        log.debug("${this.javaClass.name} Received ${event::class.java.name} Preparing to validate")
 
-        val relevantSignals = history.getInstancesOf<SignalEvent>()
-            .filter { it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)
-            }
+        // 1. Logg innkommende event
+        log.warn("PERSIST DEBUG >>> Incoming event: ${event::class.simpleName} " +
+                "eventId=${event.eventId} ref=${event.referenceId} createdAt=${event.metadata.created} " +
+                "derivedFrom=${event.metadata.derivedFromId}")
 
-        val lastSignal = relevantSignals.lastOrNull()
+        // 2. Dump hele historikken
+        log.warn("PERSIST DEBUG >>> History dump (${history.size} events) for ref=${event.referenceId}:")
+        history.forEachIndexed { idx, e ->
+            log.warn("  [$idx] ${e::class.simpleName} eventId=${e.eventId} ref=${e.referenceId} " +
+                    "createdAt=${e.metadata.created} derivedFrom=${e.metadata.derivedFromId}")
+        }
+
+        // 3. Entry check
+        try {
+            event.requireQualifiedEntry<ContinuationSummaryEvent>()
+            log.warn("PERSIST DEBUG >>> Passed requireQualifiedEntry")
+        } catch (e: Exception) {
+            log.error("PERSIST DEBUG >>> requireQualifiedEntry FAILED: ${e.message}")
+            throw e
+        }
+
+        // 4. Finn ALLE signaler
+        val allSignals = history.filterIsInstance<SignalEvent>()
+        log.warn("PERSIST DEBUG >>> All signals (${allSignals.size}):")
+        allSignals.forEach {
+            log.warn("   - ${it::class.simpleName} eventId=${it.eventId} createdAt=${it.metadata.created}")
+        }
+
+        // 5. Filtrer relevante signaler
+        val relevantSignals = allSignals.filter {
+            it is OnHoldSignalEvent || it is ReleaseHoldSignalEvent
+        }
+
+        log.warn("PERSIST DEBUG >>> Relevant signals (${relevantSignals.size}):")
+        relevantSignals.forEach {
+            log.warn("   - ${it::class.simpleName} eventId=${it.eventId} createdAt=${it.metadata.created}")
+        }
+
+        // 6. Finn siste signal basert på createdAt
+        val lastSignal = relevantSignals.maxByOrNull { it.metadata.created }
+        log.warn("PERSIST DEBUG >>> lastSignal = ${lastSignal?.javaClass?.simpleName} " +
+                "eventId=${lastSignal?.eventId} createdAt=${lastSignal?.metadata?.created}")
+
+        // 7. Branching
         if (lastSignal == null) {
-            log.info { "No signals found ${event.referenceId}, processing using default implementation" }
+            log.warn("PERSIST DEBUG >>> No signals found → using default implementation")
             return super.onEvent(event, history)
         }
 
         if (lastSignal is OnHoldSignalEvent) {
-            log.debug("{} is onHolding {}", event.referenceId, lastSignal.referenceId)
+            log.warn("PERSIST DEBUG >>> OnHold detected → returning null")
             return null
         }
 
         if (lastSignal is ReleaseHoldSignalEvent) {
-            log.debug("{} is onRelease {}", event.referenceId, lastSignal.referenceId)
+            log.warn("PERSIST DEBUG >>> ReleaseHold detected → passthrough to super")
             return super.onEvent(event, history)
         }
 
+        log.warn("PERSIST DEBUG >>> Unknown signal type → returning null")
         return null
     }
+
 
     override fun isRequiredPrecursorEventPresent(history: List<Event>): Boolean {
         val precursorIsPresent =  history.getInstanceOf<ContinuationSummaryEvent>() != null
