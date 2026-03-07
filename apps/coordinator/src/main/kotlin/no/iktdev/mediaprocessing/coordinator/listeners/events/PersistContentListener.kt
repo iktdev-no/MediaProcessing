@@ -19,72 +19,29 @@ class PersistContentListener(
 
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
-        val shorthand = event.referenceId.toString().split("-").first()
-
-        // 1. Logg innkommende event
-        log.warn("[$shorthand] PERSIST DEBUG >>> Incoming event: ${event::class.simpleName} " +
-                "eventId=${event.eventId} ref=${event.referenceId} createdAt=${event.metadata.created} " +
-                "derivedFrom=${event.metadata.derivedFromId}")
-
-        // 2. Dump hele historikken
-        var loggHistory = "[$shorthand] PERSIST DEBUG >>> History dump (${history.size} events) for ref=${event.referenceId}:\n"
-        history.forEachIndexed { idx, e ->
-            loggHistory += "\t[$idx] ${e::class.simpleName} eventId=${e.eventId} ref=${e.referenceId} " +
-                    "createdAt=${e.metadata.created} derivedFrom=${e.metadata.derivedFromId}\n"
-        }
-        log.warn(loggHistory)
-
-        // 3. Entry check
-        try {
-            event.requireQualifiedEntry<ContinuationSummaryEvent>()
-            log.warn("[$shorthand] PERSIST DEBUG >>> Passed requireQualifiedEntry")
-        } catch (e: Exception) {
-            log.error("[$shorthand] PERSIST DEBUG >>> requireQualifiedEntry FAILED: ${e.message}")
-            throw e
-        }
-
-        // 4. Finn ALLE signaler
         val allSignals = history.filterIsInstance<SignalEvent>()
-        val loggBlock = StringBuilder()
-        loggBlock.append("[$shorthand] PERSIST DEBUG >>> All signals (${allSignals.size}):\n")
-        allSignals.forEach {
-            loggBlock.append("\t- ${it::class.simpleName} eventId=${it.eventId} createdAt=${it.metadata.created}\n")
-        }
-        log.warn(loggBlock.toString())
-
-        // 5. Filtrer relevante signaler
+            .sortedBy { it.metadata.created }
         val relevantSignals = allSignals.filter {
             it is OnHoldSignalEvent || it is ReleaseHoldSignalEvent
         }
 
-        var relevantSignalsLogg = "[$shorthand] PERSIST DEBUG >>> Relevant signals (${relevantSignals.size}):\n"
-        relevantSignals.forEach {
-            relevantSignalsLogg += "\t- ${it::class.simpleName} eventId=${it.eventId} createdAt=${it.metadata.created}\n"
-        }
-        log.warn(relevantSignalsLogg)
 
         // 6. Finn siste signal basert på createdAt
         val lastSignal = relevantSignals.maxByOrNull { it.metadata.created }
-        log.warn("[$shorthand] PERSIST DEBUG >>> lastSignal = ${lastSignal?.javaClass?.simpleName} " +
-                "eventId=${lastSignal?.eventId} createdAt=${lastSignal?.metadata?.created}")
 
         // 7. Branching
         if (lastSignal == null) {
-            log.warn("[$shorthand] PERSIST DEBUG >>> No signals found → using default implementation")
             return super.onEvent(event, history)
         }
 
         if (lastSignal is OnHoldSignalEvent) {
-            log.warn("[$shorthand] PERSIST DEBUG >>> OnHold detected → returning null")
             return null
         }
 
         if (lastSignal is ReleaseHoldSignalEvent) {
-            log.warn("[$shorthand] PERSIST DEBUG >>> ReleaseHold detected → passthrough to super")
             return super.onEvent(event, history)
         }
 
-        log.warn("[$shorthand] PERSIST DEBUG >>> Unknown signal type → returning null")
         return null
     }
 
