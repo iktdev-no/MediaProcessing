@@ -1,11 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.SignalEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class PersistContentListenerTest : TestBase() {
 
@@ -22,8 +24,10 @@ class PersistContentListenerTest : TestBase() {
     )
     fun missingSummary_returnsNull() {
         val start = defaultStartEvent().addToHistory()
-        val result = listener().onEvent(start, history)
-        assertNull(result)
+
+        assertThrows<SoftDispatchException.UnqualifiedEntryEventException> {
+            listener().onEvent(start, history)
+        }
     }
 
     @Test
@@ -94,9 +98,9 @@ class PersistContentListenerTest : TestBase() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
         val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
 
-        val result = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
-
-        assertNull(result)
+        assertThrows<SoftDispatchException.UnqualifiedEntryEventException> {
+            listener().onEvent(PersistContentEvent().derivedOf(summary), history)
+        }
     }
 
     @Test

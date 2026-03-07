@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.listeners
 
+import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.SignalEvent
@@ -26,10 +27,6 @@ abstract class PolicyGateEventListener(
             return null
         }
 
-        if (isOnHold(history.getInstancesOf<SignalEvent>())) {
-            return null
-        }
-
         return handlePolicy(event, history, signalHistory)
     }
 
@@ -41,7 +38,6 @@ abstract class PolicyGateEventListener(
     }
 
     abstract fun isRequiredPrecursorEventPresent(history: List<Event>): Boolean
-    abstract fun isOnHold(signalHistory: List<SignalEvent>): Boolean
     abstract fun hasPassed(history: List<Event>): Boolean
 
     abstract fun handlePolicy(event: Event, history: List<Event>, signalHistory: List<SignalEvent>): Event?
