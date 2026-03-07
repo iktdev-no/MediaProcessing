@@ -11,5 +11,9 @@ RUN echo "$APP_VERSION"
 RUN echo "$MODULE_NAME"
 RUN echo "${MODULE_NAME}"
 
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+
 COPY "./apps/${MODULE_NAME}/build/libs/app.jar" "/usr/share/app/app.jar"
 

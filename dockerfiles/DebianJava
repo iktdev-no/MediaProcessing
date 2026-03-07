@@ -8,4 +8,8 @@ COPY ./apps/${MODULE_NAME}/build/libs/app.jar /usr/share/app/app.jar
 
 RUN echo "$PASS_APP_VERSION"
 
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+
 ENV APP_VERSION=${PASS_APP_VERSION}

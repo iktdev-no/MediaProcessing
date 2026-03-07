@@ -16,6 +16,10 @@ COPY ./apps/${MODULE_NAME}/ .
 
 RUN mkdir -p /app/logs
 
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+
 # Start applikasjonen
 CMD ["python3", "-u", "app.py"]
 
