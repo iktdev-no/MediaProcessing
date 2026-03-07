@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.tasks
 
+import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
@@ -20,6 +21,9 @@ import java.util.*
 
 @Component
 class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
+
+    val log = KotlinLogging.logger {}
+
 
     override fun getWorkerId(): String =
         "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
@@ -69,7 +73,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     private fun deleteCache(fs: FileSystemService, task: MigrateToContentStoreTask) {
         task.data.videoContent?.cachedUri?.let { silentTry { fs.delete(File(it)) } }
         task.data.subtitleContent?.forEach { silentTry { fs.delete(File(it.cachedUri)) } }
-        task.data.coverContent?.let { silentTry { fs.delete(File(it.cachedUri)) } }
+        // task.data.coverContent?.let { silentTry { fs.delete(File(it.cachedUri)) } } // NOTE: Covers takes up little to no space, if this is to be enabled, we will need to move it back into subfolder!
     }
 
     // -------------------------------------------------------------------------
@@ -149,6 +153,13 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
             val source = File(cover.cachedUri)
             val dest = File(cover.storeUri)
 
+            if (dest.exists()) {
+                log.info { "Cover already exists under ${dest.parentFile.absolutePath}" }
+                return MigrateContentToStoreTaskResultEvent.FileMigration(
+                    storedUri = dest.absolutePath,
+                    status = MigrateStatus.Skipped
+                )
+            }
             migrateFile(fs, source, dest)
 
             MigrateContentToStoreTaskResultEvent.FileMigration(

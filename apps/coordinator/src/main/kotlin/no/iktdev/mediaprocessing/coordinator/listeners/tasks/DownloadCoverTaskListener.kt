@@ -34,7 +34,8 @@ class DownloadCoverTaskListener(
         log.info { "Downloading cover from ${pickedTask.data.url}" }
         val taskData = pickedTask.data
 
-        val downloadClient = getDownloadClient(pickedTask.data.outputFolderName)
+        val downloadClient = getDownloadClient() // getDownloadClient(pickedTask.data.outputFolderName) we skip this for now, to avoid downloading the same cover again and again
+
         val downloadResult = try {
             downloadClient.download(taskData.url, taskData.outputFileName)
         } catch (e: Exception) {
@@ -72,7 +73,7 @@ class DownloadCoverTaskListener(
         return CoverDownloadResultEvent(null, status, error = message)
     }
 
-    open fun getDownloadClient(subfolder: String?): DownloadClient {
+    open fun getDownloadClient(subfolder: String? = null): DownloadClient {
         val rootDir = coordinatorEnv.intermediateFolder.apply { mkdirs() }
 
         val targetDir =
@@ -86,7 +87,7 @@ class DownloadCoverTaskListener(
     }
 
 
-    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv, outputDir: File) : DownloadClient(
+    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv, val outputDir: File) : DownloadClient(
         outDir = outputDir,
         connectionFactory = DefaultConnectionFactory(),) {
         override fun onCreate() {

@@ -37,6 +37,17 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
     }
 
     open suspend fun download(useUrl: String, useBaseName: String): DownloadResult {
+        // 1. Sjekk om fil allerede finnes
+        val existing = outDir.listFiles { _, name ->
+            name.startsWith("$useBaseName.")
+        }?.firstOrNull()
+
+        if (existing != null) {
+            log.info { "File already exists: ${existing.absolutePath}, skipping download" }
+            return DownloadResult(true, existing, null)
+        }
+
+
         return try {
             val connection = connectionFactory.open(URI(useUrl))
             val metadata = connection.getMetadata()
