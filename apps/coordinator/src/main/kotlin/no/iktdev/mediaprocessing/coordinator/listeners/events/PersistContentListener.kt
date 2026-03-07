@@ -20,8 +20,9 @@ class PersistContentListener(
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
         event.requireQualifiedEntry<ContinuationSummaryEvent>()
+        val useHistory = history.sortedByDescending { it.metadata.created }
 
-        val allSignals = history.filterIsInstance<SignalEvent>()
+        val allSignals = useHistory.filterIsInstance<SignalEvent>()
 
         val relevantSignals = allSignals.filter {
             it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)
@@ -33,7 +34,7 @@ class PersistContentListener(
 
         // 7. Branching
         if (lastSignal == null) {
-            return super.onEvent(event, history)
+            return super.onEvent(event, useHistory)
         }
 
         if (lastSignal is OnHoldSignalEvent) {
@@ -41,7 +42,7 @@ class PersistContentListener(
         }
 
         if (lastSignal is ReleaseHoldSignalEvent) {
-            return super.onEvent(event, history)
+            return super.onEvent(event, useHistory)
         }
 
         return null
