@@ -11,7 +11,7 @@ abstract class PolicyGateEventListener(
     private val eventStore: EventStore
 ) : EventListener() {
 
-    final override fun onEvent(event: Event, history: List<Event>): Event? {
+    override fun onEvent(event: Event, history: List<Event>): Event? {
         val fullHistory = eventStore.getPersistedEventsFor(event.referenceId)
             .effectivePersisted()
             .mapNotNull { it.toEvent() }

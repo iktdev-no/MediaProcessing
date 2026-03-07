@@ -170,4 +170,95 @@ class PersistContentListenerTest : TestBase() {
         assertNotNull(result)
         assertTrue(result is PersistContentEvent)
     }
+
+
+    @Test
+    @DisplayName(
+        """
+        Når PersistContentListener mottar et event
+        Hvis PersistContentEvent allerede finnes i historikken
+        Så:
+            skal det ikke produseres en ny PersistContentEvent
+        """
+    )
+    fun manualFlow_doesNotProducePersistContentTwice() {
+        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+
+        // Slipp hold
+        ReleaseHoldSignalEvent("ok").derivedOf(summary).addToHistory()
+
+        // Første PersistContentEvent produseres
+        val first = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
+        assertTrue(first is PersistContentEvent)
+
+        // Legg den til historikken
+        (first as PersistContentEvent).addToHistory()
+
+        // Neste event → skal IKKE produsere ny PersistContentEvent
+        val second = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
+        assertNull(second)
+    }
+
+    @Test
+    @DisplayName(
+        """
+        Når PersistContentListener mottar et event
+        Hvis PersistContentEvent allerede finnes i historikken
+        Så:
+            skal ikke passthrough produsere en ny PersistContentEvent
+        """
+    )
+    fun autoFlow_doesNotProducePersistContentTwice() {
+        val start = defaultStartEvent(StartFlow.Auto).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+
+        // Første passthrough
+        val first = listener().onEvent(summary, history)
+        assertTrue(first is PersistContentEvent)
+
+        // Legg til historikken
+        (first as PersistContentEvent).addToHistory()
+
+        // Nytt event → skal ikke produsere ny PersistContentEvent
+        val second = listener().onEvent(summary, history)
+        assertNull(second)
+    }
+
+    @Test
+    @DisplayName(
+        """
+        Når PersistContentListener mottar flere events i manual flow
+        Hvis PersistContentEvent allerede finnes i historikken
+        Så:
+            skal ingen nye PersistContentEvent produseres
+        """
+    )
+    fun manualFlow_noNewPersistContentAfterFirst() {
+        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+
+        // Sett hold
+        val hold = listener().onEvent(summary, history)
+        assertTrue(hold is OnHoldSignalEvent)
+        (hold as SignalEvent).addToHistory()
+
+        // Slipp hold
+        val release = ReleaseHoldSignalEvent("ok").derivedOf(summary)
+        val releaseResult = listener().onEvent(release, history)
+        assertTrue(releaseResult is ReleaseHoldSignalEvent)
+        (releaseResult as ReleaseHoldSignalEvent).addToHistory()
+
+        // Første PersistContentEvent
+        val first = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
+        assertTrue(first is PersistContentEvent)
+        (first as PersistContentEvent).addToHistory()
+
+        // Nå skal INGEN nye PersistContentEvent produseres
+        repeat(3) {
+            val next = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
+            assertNull(next)
+        }
+    }
+
 }

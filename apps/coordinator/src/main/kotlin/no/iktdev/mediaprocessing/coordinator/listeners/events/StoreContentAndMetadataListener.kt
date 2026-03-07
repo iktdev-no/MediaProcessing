@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
@@ -22,6 +23,7 @@ class StoreContentAndMetadataListener: EventListener() {
     ): Event? {
 
         (history + listOf(event)).getInstanceOf<PersistContentEvent>() ?: return null
+        val migrateEvent = event as? MigrateContentToStoreTaskResultEvent ?: return null
 
         val useEvent = history.getInstanceOf<ContinuationSummaryEvent>() ?: return null
 

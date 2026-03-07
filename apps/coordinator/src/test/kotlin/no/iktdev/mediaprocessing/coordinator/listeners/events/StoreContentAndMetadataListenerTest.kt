@@ -130,7 +130,19 @@ class StoreContentAndMetadataListenerTest : TestBase() {
             .derivedOf(summaryEvent)
             .addToHistory()
 
-        val result = listener.onEvent(persistContent, history)
+        val migratedEvent = MigrateContentToStoreTaskResultEvent(
+            migrateData = MigrateContentToStoreTaskResultEvent.MigrateData(
+                collection = "Baking Bread",
+                videoMigrate = MigrateContentToStoreTaskResultEvent.FileMigration("store://Baking Bread/Baking Bread - S01E01 - Flour.mp4",
+                    MigrateStatus.Completed),
+                subtitleMigrate = emptyList(),
+                coverMigrate = MigrateContentToStoreTaskResultEvent.FileMigration("store://Baking Bread/Baking Bread.jpg",
+                    MigrateStatus.Completed),
+            ),
+            status =  TaskStatus.Completed
+        ).derivedOf(persistContent)
+
+        val result = listener.onEvent(migratedEvent, history)
         assertThat(result).isInstanceOf(StoreContentAndMetadataTaskCreatedEvent::class.java)
 
         val slot = slot<StoreContentAndMetadataTask>()

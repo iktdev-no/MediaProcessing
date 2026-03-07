@@ -13,6 +13,12 @@ class PersistContentListener(
     eventStore: no.iktdev.eventi.stores.EventStore = EventStore
 ) : PolicyGateEventListener(eventStore) {
 
+    override fun onEvent(event: Event, history: List<Event>): Event? {
+        if (history.any { it is PersistContentEvent })
+            return null
+        return super.onEvent(event, history)
+    }
+
     override fun isRequiredPrecursorEventPresent(fullHistory: List<Event>): Boolean {
         return fullHistory.getInstanceOf<ContinuationSummaryEvent>() != null
     }
@@ -81,7 +87,10 @@ class PersistContentListener(
         event: Event,
         fullHistory: List<Event>,
         signalHistory: List<SignalEvent>
-    ): Event {
+    ): Event? {
+        if (fullHistory.any { it is PersistContentEvent }) {
+            return null
+        }
         return PersistContentEvent().derivedOf(event)
     }
 }
