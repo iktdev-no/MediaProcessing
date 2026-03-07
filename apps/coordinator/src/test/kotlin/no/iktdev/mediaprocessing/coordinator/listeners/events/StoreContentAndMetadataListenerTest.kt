@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.slot
 import io.mockk.verify
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.TestBase
@@ -19,6 +20,7 @@ import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class StoreContentAndMetadataListenerTest : TestBase() {
 
@@ -34,13 +36,10 @@ class StoreContentAndMetadataListenerTest : TestBase() {
     """
     )
     fun `ignores non migrate events`() {
-        val startedEvent = defaultStartEvent()
-        val event = DummyEvent().derivedOf(startedEvent)
-        val history = emptyList<Event>()
+        val startedEvent = defaultStartEvent().addToHistory()
+        val event = DummyEvent().derivedOf(startedEvent).addToHistory()
 
-        val result = listener.onEvent(event, history)
-
-        assertThat(result).isNull()
+        assertThrows<SoftDispatchException.MissingEventException> { listener.onEvent(event, history) }
     }
 
     @Test
@@ -53,13 +52,12 @@ class StoreContentAndMetadataListenerTest : TestBase() {
     """
     )
     fun `returns null when no collected event exists`() {
-        val startedEvent = defaultStartEvent()
-        val event = migrateEvent().derivedOf(startedEvent)
-        val history = listOf(DummyEvent().derivedOf(startedEvent))
+        val startedEvent = defaultStartEvent().addToHistory()
+        val event = migrateEvent().derivedOf(startedEvent).addToHistory()
 
-        val result = listener.onEvent(event, history)
-
-        assertThat(result).isNull()
+        assertThrows<SoftDispatchException.MissingEventException> {
+            listener.onEvent(event, history)
+        }
     }
 
     @Test
@@ -79,9 +77,9 @@ class StoreContentAndMetadataListenerTest : TestBase() {
         // Historikken inneholder kun collected-eventet, ingen metadata eller parsed info
         val history = listOf(startedEvent, collected)
 
-        val result = listener.onEvent(event, history)
-
-        assertThat(result).isNull()
+        assertThrows<SoftDispatchException.MissingEventException> {
+            listener.onEvent(event, history)
+        }
     }
 
     @Test

@@ -28,7 +28,8 @@ class StoreContentAndMetadataListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        if (history.getInstanceOf<StartProcessingEvent>()!!.data.operation.isOnly(OperationType.MetadataSearch)) {
+        val startEvent = history.requireEvent<StartProcessingEvent>()
+        if (startEvent.data.operation.isOnly(OperationType.MetadataSearch)) {
             event.requireQualifiedEntry<PersistContentEvent>()
         } else {
             history.requireEvent<PersistContentEvent>()
