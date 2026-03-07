@@ -20,6 +20,7 @@ class PersistContentListener(
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
         event.requireQualifiedEntry<ContinuationSummaryEvent>()
+        log.debug("${this.javaClass.name} Received ${event::class.java.name} Preparing to validate")
 
         val relevantSignals = history.getInstancesOf<SignalEvent>()
             .filter { it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)
