@@ -14,6 +14,10 @@ data class StartData(
     val fileUri: String,
 )
 
+fun Set<OperationType>.isOnly(operation: OperationType): Boolean {
+    return this.size == 1 && this.single() == operation
+}
+
 enum class StartFlow {
     Auto,
     Manual

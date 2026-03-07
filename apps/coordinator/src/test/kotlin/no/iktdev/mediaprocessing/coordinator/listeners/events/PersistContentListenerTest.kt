@@ -15,12 +15,12 @@ class PersistContentListenerTest : TestBase() {
     @DisplayName(
         """
         Når PersistContentListener mottar et event
-        Hvis CollectedEvent mangler i historikken
+        Hvis ContinuationSummaryEvent mangler i historikken
         Så:
             skal null returneres
         """
     )
-    fun missingCollectedEvent_returnsNull() {
+    fun missingSummary_returnsNull() {
         val start = defaultStartEvent().addToHistory()
         val result = listener().onEvent(start, history)
         assertNull(result)
@@ -29,39 +29,36 @@ class PersistContentListenerTest : TestBase() {
     @Test
     @DisplayName(
         """
-        Når PersistContentListener mottar første event i manual flow
+        Når PersistContentListener mottar første SummaryEvent i manual flow
         Hvis sekvensen ikke er OnHold
         Så:
             skal OnHoldSignalEvent returneres
         """
     )
-    fun manualFlow_firstEvent_setsHold() {
+    fun manualFlow_firstSummary_setsHold() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
 
-        val result = listener().onEvent(summaryEvent, history)
+        val result = listener().onEvent(summary, history)
 
-        assertNotNull(result)
         assertTrue(result is OnHoldSignalEvent)
     }
 
     @Test
     @DisplayName(
         """
-        Når PersistContentListener mottar et event
+        Når PersistContentListener mottar SummaryEvent
         Hvis sekvensen er OnHold
-        Og eventet ikke er ReleaseHoldSignalEvent
         Så:
             skal null returneres
         """
     )
-    fun manualFlow_onHold_blocksEvents() {
+    fun manualFlow_onHold_blocksSummary() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val collected = CollectedEvent(setOf(start.eventId)).derivedOf(start).addToHistory()
-        OnHoldSignalEvent("manual").derivedOf(collected).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+        OnHoldSignalEvent("manual").derivedOf(summary).addToHistory()
 
-        val nextEvent = PersistContentEvent().derivedOf(collected)
-        val result = listener().onEvent(nextEvent, history)
+        val result = listener().onEvent(summary, history)
 
         assertNull(result)
     }
@@ -69,196 +66,138 @@ class PersistContentListenerTest : TestBase() {
     @Test
     @DisplayName(
         """
-        Når PersistContentListener mottar ReleaseHoldSignalEvent
-        Hvis sekvensen er OnHold
-        Så:
-            skal ReleaseHoldSignalEvent returneres
-        """
-    )
-    fun manualFlow_onHold_releaseHold() {
-        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
-        OnHoldSignalEvent("manual").derivedOf(summaryEvent).addToHistory()
-
-        val release = ReleaseHoldSignalEvent("ok").derivedOf(summaryEvent)
-        val result = listener().onEvent(release, history)
-
-        assertNotNull(result)
-        assertTrue(result is ReleaseHoldSignalEvent)
-    }
-
-    @Test
-    @DisplayName(
-        """
-        Når PersistContentListener mottar et event etter ReleaseHoldSignalEvent
-        Hvis StartFlow er Manual
+        Når PersistContentListener mottar SummaryEvent
+        Hvis siste signal er ReleaseHold
         Så:
             skal PersistContentEvent returneres
         """
     )
-    fun manualFlow_afterRelease_passthrough() {
-        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
-        ReleaseHoldSignalEvent("ok").derivedOf(summaryEvent).addToHistory()
-
-        val nextEvent = PersistContentEvent().derivedOf(summaryEvent)
-        val result = listener().onEvent(nextEvent, history)
-
-        assertNotNull(result)
-        assertTrue(result is PersistContentEvent)
-    }
-
-    @Test
-    @DisplayName(
-        """
-        Når PersistContentListener mottar flere events etter ReleaseHoldSignalEvent
-        Hvis StartFlow er Manual
-        Så:
-            skal OnHoldSignalEvent aldri genereres på nytt
-        """
-    )
-    fun manualFlow_afterRelease_neverReintroduceHold() {
-        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
-        ReleaseHoldSignalEvent("ok").derivedOf(summaryEvent).addToHistory()
-
-        repeat(3) {
-            val event = PersistContentEvent().derivedOf(summaryEvent)
-            val result = listener().onEvent(event, history)
-            assertTrue(result is PersistContentEvent)
-        }
-    }
-
-    @Test
-    @DisplayName(
-        """
-        Når PersistContentListener mottar flere events i manual flow
-        Hvis OnHoldSignalEvent allerede finnes i historikken
-        Så:
-            skal det ikke genereres flere OnHoldSignalEvent
-        """
-    )
-    fun manualFlow_doesNotGenerateMultipleOnHold() {
-        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
-        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
-
-        val first = listener().onEvent(summaryEvent, history)
-        assertTrue(first is OnHoldSignalEvent)
-
-        (first as SignalEvent).addToHistory()
-
-        val second = listener().onEvent(summaryEvent, history)
-        assertNull(second)
-    }
-
-    @Test
-    @DisplayName(
-        """
-        Når PersistContentListener mottar event i Auto flow
-        Hvis precursor finnes
-        Så:
-            skal PersistContentEvent returneres
-        """
-    )
-    fun autoFlow_passthrough() {
-        val start = defaultStartEvent(StartFlow.Auto).addToHistory()
-        val summaryEvent = defaultSummaryEvent().derivedOf(start).addToHistory()
-
-
-        val result = listener().onEvent(summaryEvent, history)
-
-        assertNotNull(result)
-        assertTrue(result is PersistContentEvent)
-    }
-
-
-    @Test
-    @DisplayName(
-        """
-        Når PersistContentListener mottar et event
-        Hvis PersistContentEvent allerede finnes i historikken
-        Så:
-            skal det ikke produseres en ny PersistContentEvent
-        """
-    )
-    fun manualFlow_doesNotProducePersistContentTwice() {
+    fun manualFlow_afterRelease_summaryProducesPersist() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
         val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
-
-        // Slipp hold
         ReleaseHoldSignalEvent("ok").derivedOf(summary).addToHistory()
 
-        // Første PersistContentEvent produseres
-        val first = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
-        assertTrue(first is PersistContentEvent)
+        val result = listener().onEvent(summary, history)
 
-        // Legg den til historikken
-        (first as PersistContentEvent).addToHistory()
-
-        // Neste event → skal IKKE produsere ny PersistContentEvent
-        val second = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
-        assertNull(second)
+        assertTrue(result is PersistContentEvent)
     }
 
     @Test
     @DisplayName(
         """
-        Når PersistContentListener mottar et event
-        Hvis PersistContentEvent allerede finnes i historikken
+        Når PersistContentListener mottar PersistContentEvent som input
         Så:
-            skal ikke passthrough produsere en ny PersistContentEvent
+            skal null returneres
         """
     )
-    fun autoFlow_doesNotProducePersistContentTwice() {
+    fun persistContentEvent_asInput_isIgnored() {
+        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+
+        val result = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
+
+        assertNull(result)
+    }
+
+    @Test
+    @DisplayName(
+        """
+        Når PersistContentListener mottar SummaryEvent etter PersistContentEvent
+        Så:
+            skal null returneres (hasPassed)
+        """
+    )
+    fun manualFlow_afterPersistContent_hasPassed() {
+        val start = defaultStartEvent(StartFlow.Manual).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+        ReleaseHoldSignalEvent("ok").derivedOf(summary).addToHistory()
+        PersistContentEvent().derivedOf(summary).addToHistory()
+
+        val result = listener().onEvent(summary, history)
+
+        assertNull(result)
+    }
+
+    @Test
+    @DisplayName(
+        """
+        Når PersistContentListener mottar SummaryEvent i Auto flow
+        Så:
+            skal PersistContentEvent returneres
+        """
+    )
+    fun autoFlow_summaryProducesPersist() {
         val start = defaultStartEvent(StartFlow.Auto).addToHistory()
         val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
 
-        // Første passthrough
-        val first = listener().onEvent(summary, history)
-        assertTrue(first is PersistContentEvent)
+        val result = listener().onEvent(summary, history)
 
-        // Legg til historikken
-        (first as PersistContentEvent).addToHistory()
-
-        // Nytt event → skal ikke produsere ny PersistContentEvent
-        val second = listener().onEvent(summary, history)
-        assertNull(second)
+        assertTrue(result is PersistContentEvent)
     }
 
     @Test
     @DisplayName(
         """
-        Når PersistContentListener mottar flere events i manual flow
-        Hvis PersistContentEvent allerede finnes i historikken
+        Når PersistContentListener mottar SummaryEvent i Auto flow
+        Hvis PersistContentEvent allerede finnes
         Så:
-            skal ingen nye PersistContentEvent produseres
+            skal null returneres
         """
     )
-    fun manualFlow_noNewPersistContentAfterFirst() {
+    fun autoFlow_afterPersistContent_hasPassed() {
+        val start = defaultStartEvent(StartFlow.Auto).addToHistory()
+        val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
+        PersistContentEvent().derivedOf(summary).addToHistory()
+
+        val result = listener().onEvent(summary, history)
+
+        assertNull(result)
+    }
+
+    @Test
+    @DisplayName(
+        """
+    Når PersistContentListener produserer PersistContentEvent
+    Så:
+        skal derivedFromId inneholde ContinuationSummaryEvent.eventId
+        og ikke inneholde noen signal-eventId
+    """
+    )
+    fun persistContentEvent_isDerivedFromSummary_notSignals() {
         val start = defaultStartEvent(StartFlow.Manual).addToHistory()
         val summary = defaultSummaryEvent().derivedOf(start).addToHistory()
 
         // Sett hold
-        val hold = listener().onEvent(summary, history)
-        assertTrue(hold is OnHoldSignalEvent)
-        (hold as SignalEvent).addToHistory()
+        OnHoldSignalEvent("manual").derivedOf(summary).addToHistory()
 
         // Slipp hold
-        val release = ReleaseHoldSignalEvent("ok").derivedOf(summary)
-        val releaseResult = listener().onEvent(release, history)
-        assertTrue(releaseResult is ReleaseHoldSignalEvent)
-        (releaseResult as ReleaseHoldSignalEvent).addToHistory()
+        ReleaseHoldSignalEvent("ok").derivedOf(summary).addToHistory()
 
-        // Første PersistContentEvent
-        val first = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
-        assertTrue(first is PersistContentEvent)
-        (first as PersistContentEvent).addToHistory()
+        // Nå kommer SummaryEvent igjen → policy skal produsere PersistContentEvent
+        val result = listener().onEvent(summary, history)
+        assertNotNull(result)
+        assertTrue(result is PersistContentEvent)
 
-        // Nå skal INGEN nye PersistContentEvent produseres
-        repeat(3) {
-            val next = listener().onEvent(PersistContentEvent().derivedOf(summary), history)
-            assertNull(next)
-        }
+        val persist = result as PersistContentEvent
+
+        // derivedFromId skal være et sett som inneholder summary.eventId
+        assertTrue(
+            persist.metadata.derivedFromId!!.contains(summary.eventId),
+            "PersistContentEvent skal være derived fra SummaryEvent"
+        )
+
+        // Og settet skal IKKE inneholde signal-eventId’er
+        val signalIds = history
+            .filterIsInstance<SignalEvent>()
+            .map { it.eventId }
+            .toSet()
+
+        val persistDerivedEventIds = persist.metadata.derivedFromId
+        assertTrue(
+            persistDerivedEventIds!!.intersect(signalIds).isEmpty(),
+            "PersistContentEvent skal ikke være derived fra signaler"
+        )
     }
+
 
 }

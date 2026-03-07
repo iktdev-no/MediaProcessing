@@ -4,6 +4,7 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.SignalEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.listeners.PolicyGateEventListener
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
@@ -14,56 +15,50 @@ class PersistContentListener(
 ) : PolicyGateEventListener(eventStore) {
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
-        if (history.any { it is PersistContentEvent })
+        if (event !is ContinuationSummaryEvent) return null
+        val relevantSignals = history.getInstancesOf<SignalEvent>()
+            .filter { it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)  }
+
+        val lastSignal = relevantSignals.lastOrNull() ?: return super.onEvent(event, history)
+
+        if (lastSignal is OnHoldSignalEvent) {
             return null
-        return super.onEvent(event, history)
+        }
+
+        if (lastSignal is ReleaseHoldSignalEvent) {
+            return super.onEvent(event, history)
+        }
+
+        return null
     }
 
-    override fun isRequiredPrecursorEventPresent(fullHistory: List<Event>): Boolean {
-        return fullHistory.getInstanceOf<ContinuationSummaryEvent>() != null
+    override fun isRequiredPrecursorEventPresent(history: List<Event>): Boolean {
+        return history.getInstanceOf<ContinuationSummaryEvent>() != null
     }
 
     override fun isOnHold(signalHistory: List<SignalEvent>): Boolean {
         return signalHistory.lastOrNull() is OnHoldSignalEvent
     }
 
-    override fun handleOnHold(
-        event: Event,
-        fullHistory: List<Event>,
-        signalHistory: List<SignalEvent>
-    ): Event? {
-        // Eneste måte å slippe hold på er ReleaseHoldSignalEvent
-        if (event is ReleaseHoldSignalEvent) {
-            return event // allerede riktig type, bare returner
-        }
-        return null
-    }
-
-    override fun allowPassthrough(
-        event: Event,
-        fullHistory: List<Event>,
-        signalHistory: List<SignalEvent>
-    ): Boolean {
-        val start = fullHistory.getInstanceOf<StartProcessingEvent>() ?: return false
-        return start.data.flow == StartFlow.Auto
+    override fun hasPassed(history: List<Event>): Boolean {
+        return history.any { it is PersistContentEvent }
     }
 
     override fun handlePolicy(
         event: Event,
-        fullHistory: List<Event>,
+        history: List<Event>,
         signalHistory: List<SignalEvent>
     ): Event? {
-        val start = fullHistory.getInstanceOf<StartProcessingEvent>() ?: return null
+        val start = history.getInstanceOf<StartProcessingEvent>() ?: return null
 
         return when (start.data.flow) {
-            StartFlow.Auto -> null
-            StartFlow.Manual -> handleManualFlow(event, fullHistory, signalHistory)
+            StartFlow.Auto -> handleAutoFlow(event, history)
+            StartFlow.Manual -> handleManualFlow(event, signalHistory)
         }
     }
 
     private fun handleManualFlow(
         event: Event,
-        fullHistory: List<Event>,
         signalHistory: List<SignalEvent>
     ): Event? {
 
@@ -83,14 +78,7 @@ class PersistContentListener(
         return null
     }
 
-    override fun producePassthroughEvent(
-        event: Event,
-        fullHistory: List<Event>,
-        signalHistory: List<SignalEvent>
-    ): Event? {
-        if (fullHistory.any { it is PersistContentEvent }) {
-            return null
-        }
+    private fun handleAutoFlow(event: Event, history: List<Event>): Event {
         return PersistContentEvent().derivedOf(event)
     }
 }
