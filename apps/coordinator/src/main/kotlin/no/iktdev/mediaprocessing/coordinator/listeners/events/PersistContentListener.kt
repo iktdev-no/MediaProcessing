@@ -19,6 +19,8 @@ class PersistContentListener(
 
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
+        event.requireQualifiedEntry<ContinuationSummaryEvent>()
+
         val allSignals = history.filterIsInstance<SignalEvent>()
             .sortedBy { it.metadata.created }
         val relevantSignals = allSignals.filter {
