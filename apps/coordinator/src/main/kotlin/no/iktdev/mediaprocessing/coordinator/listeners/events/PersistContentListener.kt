@@ -6,6 +6,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.listeners.PolicyGateEventListener
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
 
@@ -15,7 +16,8 @@ class PersistContentListener(
 ) : PolicyGateEventListener(eventStore) {
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
-        if (event !is ContinuationSummaryEvent) return null
+        event.requireQualifiedEntry<ContinuationSummaryEvent>()
+
         val relevantSignals = history.getInstancesOf<SignalEvent>()
             .filter { it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)  }
 
