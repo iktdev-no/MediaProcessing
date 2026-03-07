@@ -5,7 +5,11 @@ spring:
   web:
     resources:
       add-mappings: true
-
+  http:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
 
 management:
   endpoints:

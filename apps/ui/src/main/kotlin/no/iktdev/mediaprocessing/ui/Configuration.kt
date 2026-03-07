@@ -40,7 +40,7 @@ class WebConfig : WebMvcConfigurer {
     }
 
 
-    @Value("\${APP_DEPLOYMENT_PORT:8080}")
+    @Value("\${server.port}")
     private val deploymentPort = 8080
 
     @Bean

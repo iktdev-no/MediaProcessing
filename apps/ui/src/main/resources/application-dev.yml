@@ -2,6 +2,14 @@ spring:
   output:
     ansi:
       enabled: always
+  http:
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+
+server:
+  port: 6085
 
 management:
   endpoints:
