@@ -10,6 +10,9 @@ spring:
       enabled: true
       charset: UTF-8
       force: true
+  webflux:
+    multipart:
+      headers-charset: UTF-8
 
 management:
   endpoints:
