@@ -33,7 +33,6 @@ dependencies {
 
     // Coroutines / utilities
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
     implementation("com.github.pgreze:kotlin-process:1.4.1")
 
     // Custom libs

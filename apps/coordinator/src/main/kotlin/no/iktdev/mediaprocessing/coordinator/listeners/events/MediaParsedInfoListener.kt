@@ -4,8 +4,11 @@ import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
 import java.io.File
 
@@ -16,7 +19,10 @@ class MediaParsedInfoListener : EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        val started = event as? StartProcessingEvent ?: return null
+        val started = event.requireQualifiedEntry<StartProcessingEvent>()
+        if (started.data.operation.isOnly(OperationType.ConvertSubtitles)) {
+            return null
+        }
         val file = File(started.data.fileUri)
 
         val filename = file.guessDesiredFileName()

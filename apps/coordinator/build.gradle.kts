@@ -39,7 +39,6 @@ dependencies {
 
     // Coroutines / utilities
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("com.github.vishna:watchservice-ktx:master-SNAPSHOT")
 
     // Internal modules
     implementation(project(":transfer-model"))

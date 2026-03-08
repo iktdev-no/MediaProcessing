@@ -25,6 +25,7 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.Au
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioPreference
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecConfig
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import java.io.File
 import java.util.*
@@ -64,6 +65,10 @@ open class TestBase {
         history.clear()
     }
 
+    @AfterEach
+    fun teardown() {
+        unmockkAll()
+    }
 
     fun defaultStartEvent(flow: StartFlow = StartFlow.Auto): StartProcessingEvent {
         val start = StartProcessingEvent(

@@ -305,7 +305,7 @@ class MigrateContentToStoreTaskListenerTest {
 
         assertTrue(reporter.completed)
         assertEquals(TaskStatus.Completed, event.status)
-        assertEquals(3, fs.deleted.size)
+        assertEquals(2, fs.deleted.size) // NOTE: We dont delete cover any longer
     }
 
     @Test
