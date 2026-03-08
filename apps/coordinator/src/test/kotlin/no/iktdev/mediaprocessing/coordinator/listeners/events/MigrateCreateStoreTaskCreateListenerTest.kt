@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import io.mockk.slot
 import io.mockk.verify
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.MockData.coverEvent
 import no.iktdev.mediaprocessing.MockData.encodeEvent
@@ -13,7 +14,11 @@ import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -264,7 +269,6 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
 
         assertThat(result).isNotNull()
 
-        // ⭐ FANG ARGUMENTET I SLOT
         val slot = slot<MigrateToContentStoreTask>()
 
         verify(exactly = 1) {
@@ -279,6 +283,68 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
         assertThat(storeTask.data.subtitleContent).hasSize(1)
         assertThat(storeTask.data.coverContent).isNull()
     }
+
+    @Test
+    @DisplayName(
+        """
+        Hvis start hendelsen kun inneholder converter, og vi har gjennomført konvertering
+        Når onEvent kalles med CollectedEvent
+        Så:
+            Opprettes det migrate task
+        """
+    )
+    fun createMigrateForConvertOnly() {
+        val workFolder = File("build").using("subby", "eng")
+
+        val started = StartProcessingEvent(
+            data = StartData(
+                operation = setOf(OperationType.ConvertSubtitles),
+                flow = StartFlow.Manual,
+                fileUri = workFolder.using("subby.srt").absolutePath,
+            )
+        ).newReferenceId()
+            .addToHistory()
+
+        val convert = convertEvent(
+            language = "eng",
+            baseName = "subby",
+            outputFiles = listOf(workFolder.using("subby.vtt").absolutePath),
+            derivedFrom = started
+        ).addToHistory()
+
+
+        val collected = CollectedEvent(
+                history.map { it.eventId }.toSet()
+        ).derivedOf(convert.last())
+            .addToHistory()
+
+        val summaryEvent = SummarizeContentListener(coordinatorEnv)
+            .onEvent(collected, history)?.addToHistory()!!
+
+        val persistContent = PersistContentEvent()
+            .derivedOf(summaryEvent)
+            .addToHistory()
+
+
+        val result = listener.onEvent(persistContent, history)
+
+        assertThat(result).isNotNull()
+
+        val slot = slot<MigrateToContentStoreTask>()
+
+        verify(exactly = 1) {
+            TaskStore.persist(capture(slot))
+        }
+
+        val storeTask = slot.captured
+
+        // ⭐ VANLIGE ASSERTS
+        assertThat(storeTask.data.collection).isEqualTo("subby")
+        assertThat(storeTask.data.videoContent).isNull()
+        assertThat(storeTask.data.subtitleContent).hasSize(1)
+        assertThat(storeTask.data.coverContent).isNull()
+    }
+
 
 
     // ---------------------------------------------------------

@@ -2,6 +2,8 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.every
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -249,5 +251,41 @@ class SummarizeContentListenerTest : TestBase() {
         assertNotNull(summary.plan.videoContent)
         assertNotNull(summary.plan.coverContent)
         assertEquals(1, summary.plan.subtitleContent?.size)
+    }
+
+    @Test
+    fun summarizeOnlyConvertedPresent() {
+        val workFolder = File("build").using("subby", "eng")
+        val outbox = File("./tmp/outbox")
+        outbox.mkdirs()
+        every { coordinatorEnv.outboxFolder } returns outbox
+        val started = StartProcessingEvent(
+            data = StartData(
+                operation = setOf(OperationType.ConvertSubtitles),
+                flow = StartFlow.Manual,
+                fileUri = outbox.using("subby", "subby.srt").absolutePath,
+            )
+        ).newReferenceId()
+            .addToHistory()
+        val convert = convertEvent(
+            language = "eng",
+            baseName = "subby",
+            outputFiles = listOf(workFolder.using("subby.vtt").absolutePath),
+            derivedFrom = started
+        ).addToHistory()
+
+        val collected = CollectedEvent(
+            eventIds = history.map { it.eventId }.toSet()
+        ).derivedOf(convert.last())
+
+        val result = listener().onEvent(collected, history)
+        assertNotNull(result)
+
+        val summary = result as ContinuationSummaryEvent
+
+        assertNull(summary.plan.videoContent)
+        assertNull(summary.plan.coverContent)
+        assertEquals(1, summary.plan.subtitleContent?.size)
+
     }
 }

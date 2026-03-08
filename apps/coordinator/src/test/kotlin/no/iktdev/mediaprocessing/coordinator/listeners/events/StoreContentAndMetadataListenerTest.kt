@@ -5,22 +5,33 @@ import io.mockk.verify
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.model.ContentExport
+import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+import no.iktdev.streamit.library.db.tables.subtitle
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.io.File
 
 class StoreContentAndMetadataListenerTest : TestBase() {
 
@@ -151,12 +162,114 @@ class StoreContentAndMetadataListenerTest : TestBase() {
 
         val storeTask = slot.captured
         assertThat(storeTask.data.collection).isEqualTo("Baking Bread")
-        assertThat(storeTask.data.metadata.mediaType).isEqualTo(MediaType.Serie)
+        assertThat(storeTask.data.metadata!!.mediaType).isEqualTo(MediaType.Serie)
         assertThat(storeTask.data.media?.videoFile).isEqualTo("Baking Bread - S01E01 - Flour.mp4")
         assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("Baking Bread - S01E01 - Flour.ass")
         assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("eng")
 
     }
+
+
+    @Test
+    @DisplayName(
+        """
+        Hvis historikken inneholder gyldig collection og kun subtitle som media
+        Når onEvent kalles
+        Så:
+            Opprettes StoreContentAndMetadataTask og det returneres et StoreContentAndMetadataTaskCreatedEvent
+    """
+    )
+    fun createTaskForWhenOnlyStoringSubtitles() {
+        val workFolder = File("build").using("subby", "eng")
+
+        val started = StartProcessingEvent(
+            data = StartData(
+                operation = setOf(OperationType.ConvertSubtitles),
+                flow = StartFlow.Manual,
+                fileUri = workFolder.using("subby.srt").absolutePath,
+            )
+        ).newReferenceId()
+            .addToHistory()
+
+        val convert = convertEvent(
+            language = "eng",
+            baseName = "subby",
+            outputFiles = listOf(workFolder.using("subby.vtt").absolutePath),
+            derivedFrom = started
+        ).addToHistory()
+
+
+        val collected = CollectedEvent(
+            history.map { it -> it.eventId }.toSet()
+        )
+            .derivedOf(convert.last())
+            .addToHistory()
+
+        val summaryEvent = ContinuationSummaryEvent(
+            data = ContentExport(
+                "subby",
+                null,
+                ContentExport.MediaExport(
+                    videoFile = null,
+                    subtitles = listOf(
+                        ContentExport.MediaExport.Subtitle(
+                            subtitleFile = "subby.vtt",
+                            language = "eng"
+                        )
+                    )
+                ),
+                null
+            ),
+            plan = ContentMigrationPlan(
+                collection = "subby",
+                videoContent = null,
+                coverContent = null,
+                subtitleContent = listOf(
+                    ContentMigrationPlan.SingleSubtitle(
+                        "eng",
+                        "cached:///work/subby/subby.vtt",
+                        "store:///subby/sub/eng/subby.vtt"
+                    )
+                )
+            )
+        ).derivedOf(collected)
+            .addToHistory()
+
+        val persistContent = PersistContentEvent()
+            .derivedOf(summaryEvent)
+            .addToHistory()
+
+        val migratedEvent = MigrateContentToStoreTaskResultEvent(
+            migrateData = MigrateContentToStoreTaskResultEvent.MigrateData(
+                collection = "subby",
+                videoMigrate = MigrateContentToStoreTaskResultEvent.FileMigration(null,
+                    MigrateStatus.NotPresent),
+                subtitleMigrate = emptyList(),
+                coverMigrate = MigrateContentToStoreTaskResultEvent.FileMigration(null,
+                    MigrateStatus.NotPresent),
+            ),
+            status =  TaskStatus.Completed
+        ).derivedOf(persistContent)
+
+        val result = listener.onEvent(migratedEvent, history)
+        assertThat(result).isInstanceOf(StoreContentAndMetadataTaskCreatedEvent::class.java)
+
+        val slot = slot<StoreContentAndMetadataTask>()
+
+        verify(exactly = 1) {
+            TaskStore.persist(capture(slot))
+        }
+
+        val storeTask = slot.captured
+        assertThat(storeTask.data.collection).isEqualTo("subby")
+        assertThat(storeTask.data.metadata).isNull()
+        assertThat(storeTask.data.media?.videoFile).isNull()
+        assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("subby.vtt")
+        assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("eng")
+
+    }
+
+
 
     // ---------------------------------------------------------
     // Helpers

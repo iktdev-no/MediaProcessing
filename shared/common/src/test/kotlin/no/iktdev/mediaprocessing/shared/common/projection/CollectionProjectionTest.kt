@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.exfl.using
+import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class CollectionProjectionTest {
+class CollectionProjectionTest: TestBase() {
 
     private fun tempOutbox(folders: List<String>): File {
         val root = File("/tmp").using("collectionProjectionTest")
@@ -31,7 +32,9 @@ class CollectionProjectionTest {
     )
     @Test
     fun noParsedCollection_throws() {
-        val proj = CollectionProjection(emptyList(), tempOutbox(emptyList()))
+        val start = defaultStartEvent()
+            .addToHistory()
+        val proj = CollectionProjection(history, tempOutbox(emptyList()))
         assertThrows(NoSuchElementException::class.java) {
             proj.getCollection()
         }
@@ -48,6 +51,8 @@ class CollectionProjectionTest {
     )
     @Test
     fun parsedCollectionUsedWhenNoFolders() {
+        val start = defaultStartEvent()
+            .addToHistory()
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "My Show",
@@ -55,9 +60,10 @@ class CollectionProjectionTest {
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        )
+        ).derivedOf(start)
+            .addToHistory()
 
-        val proj = CollectionProjection(listOf(parsed), tempOutbox(emptyList()))
+        val proj = CollectionProjection(history, tempOutbox(emptyList()))
         assertEquals("My Show".cleanForFileSystemUse(), proj.getCollection())
     }
 
@@ -72,6 +78,8 @@ class CollectionProjectionTest {
     )
     @Test
     fun metadataMatchesExistingFolder() {
+        val start = defaultStartEvent()
+            .addToHistory()
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "Fallback",
@@ -79,7 +87,8 @@ class CollectionProjectionTest {
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        )
+        ).derivedOf(start)
+            .addToHistory()
 
         val metadata = MetadataSearchResultEvent(
             results = emptyList(),
@@ -105,9 +114,10 @@ class CollectionProjectionTest {
             ),
             status = TaskStatus.Completed
         )
+            .addToHistory()
 
         val proj = CollectionProjection(
-            listOf(parsed, metadata),
+            history,
             tempOutbox(listOf("MatchMe", "Other"))
         )
 
@@ -125,6 +135,8 @@ class CollectionProjectionTest {
     )
     @Test
     fun fallbackWhenNoMetadataMatch() {
+        val start = defaultStartEvent()
+            .addToHistory()
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "Fallback",
@@ -132,7 +144,8 @@ class CollectionProjectionTest {
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        )
+        ).derivedOf(start)
+            .addToHistory()
 
         val metadata = MetadataSearchResultEvent(
             results = emptyList(),
@@ -158,9 +171,10 @@ class CollectionProjectionTest {
             ),
             status = TaskStatus.Completed
         )
+            .derivedOf(parsed)
+            .addToHistory()
 
-        val proj = CollectionProjection(
-            listOf(parsed, metadata),
+        val proj = CollectionProjection(history,
             tempOutbox(listOf("A", "B"))
         )
 
@@ -178,6 +192,8 @@ class CollectionProjectionTest {
     )
     @Test
     fun unicodeMatching() {
+        val start = defaultStartEvent()
+            .addToHistory()
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "ÆØÅ Show",
@@ -185,12 +201,13 @@ class CollectionProjectionTest {
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        )
+        ).derivedOf(start)
+            .addToHistory()
 
         val cleaned = "ÆØÅ Show".cleanForFileSystemUse()
 
         val proj = CollectionProjection(
-            listOf(parsed),
+            history,
             tempOutbox(listOf(cleaned))
         )
 
@@ -207,6 +224,8 @@ class CollectionProjectionTest {
     )
     @Test
     fun caseSensitiveMismatch() {
+        val start = defaultStartEvent()
+            .addToHistory()
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "Fallback",
@@ -214,7 +233,8 @@ class CollectionProjectionTest {
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        )
+        ).derivedOf(start)
+            .addToHistory()
 
         val metadata = MetadataSearchResultEvent(
             results = emptyList(),
@@ -239,10 +259,11 @@ class CollectionProjectionTest {
                 )
             ),
             status = TaskStatus.Completed
-        )
+        ).derivedOf(parsed)
+            .addToHistory()
 
         val proj = CollectionProjection(
-            listOf(parsed, metadata),
+            history,
             tempOutbox(listOf("MatchMe"))
         )
 

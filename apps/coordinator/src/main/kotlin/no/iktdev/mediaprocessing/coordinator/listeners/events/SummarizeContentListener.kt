@@ -32,9 +32,9 @@ class SummarizeContentListener(
         val projection = SummaryProjection(collection, useHistory, coordinatorEnv.outboxFolder)
         val migrationPlan = projection.createMigrationPlan()
 
-
+        val mediaProjection = projection.projectMediaFiles(migrationPlan)
         val metadata = projection.projectMetadata(migrationPlan)
-        if (metadata == null) {
+        if (metadata == null && !canAllowMetadataNull(mediaProjection)) {
             log.error { "Metadata is null @ ${event.referenceId}" }
             return null
         }
@@ -42,7 +42,7 @@ class SummarizeContentListener(
 
         val exportInfo = ContentExport(
             collection = collection,
-            media = projection.projectMediaFiles(migrationPlan),
+            media = mediaProjection,
             episodeInfo = projection.projectEpisodeInfo(),
             metadata = metadata
         )
@@ -53,4 +53,12 @@ class SummarizeContentListener(
             plan = migrationPlan,
         ).derivedOf(event)
     }
+
+    fun canAllowMetadataNull(mediaProjection: ContentExport.MediaExport?): Boolean {
+        if (mediaProjection == null) return false
+        if (mediaProjection.videoFile != null) return false
+        if (mediaProjection.subtitles.isNotEmpty()) return true
+        return false
+    }
+
 }

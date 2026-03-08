@@ -4,6 +4,9 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import java.io.File
 
@@ -13,6 +16,11 @@ class CollectionProjection(
 ) {
 
     fun getCollection(): String {
+        val started = history.getInstanceOf<StartProcessingEvent>() ?: throw IllegalStateException("No start processing events found")
+        if (started.data.operation.isOnly(OperationType.ConvertSubtitles)) {
+            return getCollectionAltFlowConvert(started)
+        }
+
         val collectionCandidates = mutableListOf<String>()
         history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedCollection?.let { collection ->
             collectionCandidates.add(collection)
@@ -42,6 +50,14 @@ class CollectionProjection(
         }
         return collectionCandidates.first().cleanForFileSystemUse()
     }
+
+    fun getCollectionAltFlowConvert(started: StartProcessingEvent): String {
+        val useFile = started.data.fileUri.let { File(it) }
+        val collection = useFile.parentFile.parentFile.name
+        return collection
+    }
+
+
 
     fun compareNames(a: String, b: String): Boolean {
         return normalizeForComparison(a) == normalizeForComparison(b)

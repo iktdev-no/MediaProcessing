@@ -10,8 +10,13 @@ import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
@@ -362,5 +367,93 @@ class CollectEventsListenerTest : TestBase() {
         assertThat(third).isNull()
     }
 
+    @Test
+    @DisplayName("""
+        Når ConvertSubtitles er eneste operasjon
+        Hvis StartFlow er Manual og konvertering fullføres
+        Så:
+            Skal lytteren samle resultatet og returnere CollectedEvent
+    """)
+    fun convertOnlyShouldCollectOnManual() {
+        val started = StartProcessingEvent(
+            data = StartData(
+                operation = setOf(OperationType.ConvertSubtitles),
+                flow = StartFlow.Manual,
+                fileUri = "/tmp/sub1.srt",
+            )
+        ).newReferenceId()
+            .addToHistory()
+        val convert = convertEvent(
+            language = "en",
+            baseName = "sub1",
+            outputFiles = listOf("/tmp/sub1.vtt"),
+            derivedFrom = started
+        ).addToHistory()
+        eventStore.setHistory(history)
+
+        val result = listener.onEvent(convert.last(), history)
+        assertNotNull(result)
+        assertThat(result).isInstanceOf(CollectedEvent::class.java)
+
+    }
+
+    @Test
+    @DisplayName("""
+        Når ConvertSubtitles er eneste operasjon
+        Hvis StartFlow er Auto og konvertering fullføres
+        Så:
+            Skal lytteren samle resultatet og returnere CollectedEvent
+    """)
+    fun convertOnlyShouldCollectOnAuto() {
+        val started = StartProcessingEvent(
+            data = StartData(
+                operation = setOf(OperationType.ConvertSubtitles),
+                flow = StartFlow.Auto,
+                fileUri = "/tmp/sub1.srt",
+            )
+        ).newReferenceId()
+            .addToHistory()
+        val convert = convertEvent(
+            language = "en",
+            baseName = "sub1",
+            outputFiles = listOf("/tmp/sub1.vtt"),
+            derivedFrom = started
+        ).addToHistory()
+        eventStore.setHistory(history)
+
+        val result = listener.onEvent(convert.last(), history)
+        assertNotNull(result)
+        assertThat(result).isInstanceOf(CollectedEvent::class.java)
+
+    }
+
+    @Test
+    @DisplayName("""
+        Når ConvertSubtitles ikke er eneste operasjon
+        Hvis flere operasjoner er angitt i StartEvent
+        Så:
+            Skal lytteren ikke samle resultatet og returnere null
+    """)
+
+    fun convertWithMoreOperationsShouldNotCollect() {
+        val started = StartProcessingEvent(
+            data = StartData(
+                operation = setOf(OperationType.ConvertSubtitles, OperationType.ExtractSubtitles),
+                flow = StartFlow.Auto,
+                fileUri = "/tmp/sub1.srt",
+            )
+        ).newReferenceId()
+            .addToHistory()
+        val convert = convertEvent(
+            language = "en",
+            baseName = "sub1",
+            outputFiles = listOf("/tmp/sub1.vtt"),
+            derivedFrom = started
+        ).addToHistory()
+        eventStore.setHistory(history)
+
+        val result = listener.onEvent(convert.last(), history)
+        assertNull(result)
+    }
 
 }

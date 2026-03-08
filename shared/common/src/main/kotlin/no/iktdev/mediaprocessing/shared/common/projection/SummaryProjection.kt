@@ -8,8 +8,11 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Conver
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
@@ -61,6 +64,11 @@ class SummaryProjection(
      * Returns the basename for either a cover or movie (video) file
      */
     fun getFileName(): String {
+        val startedEvent = events.getInstanceOf<StartProcessingEvent>() ?: throw IllegalStateException("No start processing event")
+        if (startedEvent.data.operation.isOnly(OperationType.ConvertSubtitles)) {
+            return startedEvent.data.fileUri.let { File(it) }.nameWithoutExtension
+        }
+
         val parsed = events.getInstanceOf<MediaParsedInfoEvent>() ?: throw IllegalStateException("No media event configured for migration plan found")
         return parsed.data.parsedFileName.cleanForFileSystemUse()
     }

@@ -6,7 +6,7 @@ data class ContentExport(
     val collection: String,
     val episodeInfo: EpisodeInfo? = null,
     val media: MediaExport? = null,
-    val metadata: MetadataExport
+    val metadata: MetadataExport?
 ) {
 
     data class MetadataExport(
