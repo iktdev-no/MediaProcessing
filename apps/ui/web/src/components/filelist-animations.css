@@ -1,0 +1,27 @@
+.filefade-enter {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+.filefade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.filefade-exit {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: transparent;
+}
+
+.filefade-exit-active {
+    opacity: 0;
+    transform: translateY(4px);
+    background-color: rgba(255, 0, 0, 0.15);
+    /* lys rød bakgrunn */
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease,
+        background-color 180ms ease;
+}
