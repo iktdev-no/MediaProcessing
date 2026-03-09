@@ -40,7 +40,7 @@ class MediaCreateConvertTaskListener: EventListener() {
         }
 
         val convertTask = if (startedEvent.data.operation.isOnly(OperationType.ConvertSubtitles)) {
-            createTaskFromDirect(startedEvent)
+            createTaskFromDirect(event)
         } else {
             try {
                 createTaskFromNormalFlow(event)
@@ -81,7 +81,8 @@ class MediaCreateConvertTaskListener: EventListener() {
         )
     }
 
-    fun createTaskFromDirect(startEvent: StartProcessingEvent): ConvertTask {
+    fun createTaskFromDirect(event: Event): ConvertTask {
+        val startEvent = event.requireQualifiedEntry<StartProcessingEvent>()
         validateInputExtension(startEvent)
         val sourceFile = startEvent.data.fileUri.let { File(it) }
         val language = sourceFile.parentFile.nameWithoutExtension // We always expect the parent file to be eks "eng", might be smart to validate that name is max 3
