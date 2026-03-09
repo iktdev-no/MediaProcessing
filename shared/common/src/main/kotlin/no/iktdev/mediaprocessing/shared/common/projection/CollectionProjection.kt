@@ -53,7 +53,7 @@ class CollectionProjection(
 
     fun getCollectionAltFlowConvert(started: StartProcessingEvent): String {
         val useFile = started.data.fileUri.let { File(it) }
-        val collection = useFile.parentFile.parentFile.name
+        val collection = useFile.parentFile.parentFile.parentFile.name // "language->sub->collection"
         return collection
     }
 
