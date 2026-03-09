@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.dto.files.FakeFile
+import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -26,12 +27,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     private val listener = MediaCreateConvertTaskListener()
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en ProcesserExtractResultEvent mottas
         Hvis historikken inneholder StartProcessingEvent med Convert og filen eksisterer
         Så:
             Skal det opprettes ConvertTask og returneres ConvertTaskCreatedEvent
-    """)
+    """
+    )
     fun verifyConvertTaskCreatedOnValidHistory() {
         val tempFile = File.createTempFile("test", ".srt")
         tempFile.writeText("dummy subtitle")
@@ -39,7 +42,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = tempFile.absolutePath,
-                operation = setOf(OperationType.ConvertSubtitles)
+                operation = setOf(OperationType.ExtractSubtitles, OperationType.ConvertSubtitles)
             )
         ).newReferenceId()
             .addToHistory()
@@ -62,12 +65,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en ProcesserExtractResultEvent mottas
         Hvis StartProcessingEvent mangler i historikken
         Så:
             Skal onEvent returnere null og TaskStore.persist ikke kalles
-    """)
+    """
+    )
     fun verifyNullWhenNoStartEvent() {
         val tempFile = File.createTempFile("test", ".srt")
         val extractEvent = ProcesserExtractResultEvent(
@@ -86,12 +91,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en ProcesserExtractResultEvent mottas
         Hvis StartProcessingEvent finnes men operation ikke inneholder Convert
         Så:
             Skal onEvent returnere null
-    """)
+    """
+    )
     fun verifyNullWhenOperationNotConvert() {
         val tempFile = File.createTempFile("test", ".srt")
         val startEvent = StartProcessingEvent(
@@ -117,12 +124,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en ProcesserExtractResultEvent mottas
         Hvis status ikke er Completed
         Så:
             Skal onEvent returnere null
-    """)
+    """
+    )
     fun verifyNullWhenStatusNotCompleted() {
         val tempFile = File.createTempFile("test", ".srt")
         val startEvent = StartProcessingEvent(
@@ -141,24 +150,26 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         ).derivedOf(startEvent)
             .addToHistory()
 
-        val result = listener.onEvent(extractEvent, history)
+        assertThrows<SoftDispatchException.ForcedListenerEjectionException> { listener.onEvent(extractEvent, history) }
 
-        assertNull(result)
         verify(exactly = 0) { TaskStore.persist(any()) }
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en ProcesserExtractResultEvent mottas
         Hvis data mangler (er null)
         Så:
             Skal onEvent returnere null
-    """)
+    """
+    )
     fun verifyNullWhenDataIsNull() {
+
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = "video.mp4",
-                operation = setOf(OperationType.ConvertSubtitles)
+                operation = setOf(OperationType.ExtractSubtitles, OperationType.ConvertSubtitles)
             )
         ).newReferenceId()
             .addToHistory()
@@ -175,18 +186,22 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en sekvens starter med inputfil som er av subtitle
         Hvis formatet er støttet
         Så:
             Skal onEvent returnere opprettet task
-    """)
+    """
+    )
     fun verifyConvertCreatedIfOnlyConvert() {
+        IFile.factory = { path -> FakeFile(path, exists = true) }
+
         val inFile = File("inbox").using("eng", "nonexistent.srt")
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = inFile.absolutePath,
-                operation = setOf(OperationType.ConvertSubtitles)
+                operation = setOf(OperationType.ExtractSubtitles, OperationType.ConvertSubtitles)
             )
         ).newReferenceId()
             .addToHistory()
@@ -207,55 +222,54 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     }
 
     @Test
-    @DisplayName("""
-        Når en ProcesserExtractResultEvent mottas
-        Hvis historikken inneholder StartEvent med Convert og File.exists() returnerer true
-        Så:
-            Skal det opprettes ConvertTask og returneres ConvertTaskCreatedEvent
-    """)
+    @DisplayName(
+        """
+    Når en ProcesserExtractResultEvent mottas
+    Hvis historikken inneholder StartEvent med Convert og IFile.exists() returnerer true
+    Så:
+        Skal det opprettes ConvertTask og returneres ConvertTaskCreatedEvent
+"""
+    )
     fun verifyConvertTaskCreatedWithMockedFileExists() {
-        // Intercept File konstruktør og mock exists()
-        mockStatic(Files::class.java).use { filesMock ->
 
-            filesMock.`when`<Boolean> {
-                Files.exists(any<Path>())
-            }.thenReturn(true)
-
-            val startEvent = StartProcessingEvent(
-                data = StartData(
-                    fileUri = "/tmp/video.srt",
-                    operation = setOf(OperationType.ConvertSubtitles, OperationType.ExtractSubtitles)
-                )
-            ).newReferenceId()
-                .addToHistory()
-
-            val extractEvent = ProcesserExtractResultEvent(
-                status = TaskStatus.Completed,
-                data = ProcesserExtractResultEvent.ExtractResult(
-                    cachedOutputFile = "/tmp/video.srt",
-                    language = "en"
-                )
-            ).derivedOf(startEvent)
-                .addToHistory()
-
-            val result = listener.onEvent(extractEvent, history)
-
-            assertNotNull(result)
-            assertTrue(result is ConvertTaskCreatedEvent)
-
-            filesMock.verify {
-                Files.exists(any<Path>())
-            }
+        // Override IFile.factory for denne testen
+        IFile.factory = { path ->
+            FakeFile(path, exists = true)
         }
+
+        val startEvent = StartProcessingEvent(
+            data = StartData(
+                fileUri = "/tmp/video.srt",
+                operation = setOf(OperationType.ConvertSubtitles, OperationType.ExtractSubtitles)
+            )
+        ).newReferenceId()
+            .addToHistory()
+
+        val extractEvent = ProcesserExtractResultEvent(
+            status = TaskStatus.Completed,
+            data = ProcesserExtractResultEvent.ExtractResult(
+                cachedOutputFile = "/tmp/video.srt",
+                language = "en"
+            )
+        ).derivedOf(startEvent)
+            .addToHistory()
+
+        val result = listener.onEvent(extractEvent, history)
+
+        assertNotNull(result)
+        assertTrue(result is ConvertTaskCreatedEvent)
     }
 
+
     @Test
-    @DisplayName("""
-    Når en StartProcessingEvent mottas
-    Hvis operation kun er ConvertSubtitles
-    Så:
-        Skal direct flow brukes og ConvertTaskCreatedEvent returneres
-""")
+    @DisplayName(
+        """
+        Når en StartProcessingEvent mottas
+        Hvis operation kun er ConvertSubtitles
+        Så:
+            Skal direct flow brukes og ConvertTaskCreatedEvent returneres
+    """
+    )
     fun verifyDirectFlowWithoutExtractEvent() {
         val inFile = File("inbox").using("eng", "file.srt")
 
@@ -275,12 +289,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
     Når en StartProcessingEvent mottas
     Hvis operation kun er ConvertSubtitles men filen har ugyldig extension
     Så:
         Skal onEvent returnere null og ingen task opprettes
-""")
+"""
+    )
     fun verifyDirectFlowInvalidExtension() {
         val inFile = File("inbox").using("eng", "file.txt")
 
@@ -302,12 +318,14 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
 
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
     Når en ProcesserExtractResultEvent mottas
     Hvis operation inneholder ConvertSubtitles sammen med andre operasjoner
     Så:
         Skal normal flow fortsatt opprette ConvertTask
-""")
+"""
+    )
     fun verifyNormalFlowWithMultipleOperations() {
         val tempFile = File.createTempFile("test", ".srt").apply { writeText("dummy") }
 
@@ -338,8 +356,6 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
 
         verify(exactly = 1) { TaskStore.persist(any()) }
     }
-
-
 
 
 }

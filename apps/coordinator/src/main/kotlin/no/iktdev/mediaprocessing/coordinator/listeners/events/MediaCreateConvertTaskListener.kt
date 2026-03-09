@@ -5,6 +5,7 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
@@ -45,7 +46,7 @@ class MediaCreateConvertTaskListener: EventListener() {
             try {
                 createTaskFromNormalFlow(event)
             } catch (e: Exception) {
-                return null
+                throw e
             }
         }
 
@@ -65,10 +66,11 @@ class MediaCreateConvertTaskListener: EventListener() {
         val result = extractEvent.data ?: run {
             throw SoftDispatchException.ForcedListenerEjectionException("Extract event is missing data required to proceed", event::class.java)
         }
-        if (!Files.exists(Path.of(result.cachedOutputFile))) {
+        val useFile = IFile(result.cachedOutputFile)
+        if (!useFile.exists()) {
             throw SoftDispatchException.ForcedListenerEjectionException("Extract event's output file is missing", event::class.java)
         }
-        val useFile = File(result.cachedOutputFile)
+
 
         return ConvertTask(
             data = ConvertTask.Data(

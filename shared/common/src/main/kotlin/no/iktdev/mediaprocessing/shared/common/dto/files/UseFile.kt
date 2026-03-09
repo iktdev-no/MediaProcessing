@@ -12,11 +12,17 @@ class UseFile(path: String) : IFile {
     override val name: String
         get() = file.name
 
+    override val nameWithoutExtension: String
+        get() = name.substringAfterLast('.', missingDelimiterValue = "")
+
     override val parent: String?
         get() = file.parent
 
     override val absolutePath: String
         get() = file.absolutePath
+
+    override val parentFile: IFile
+        get() = IFile(parent!!)
 
     override fun exists(): Boolean =
         file.exists()

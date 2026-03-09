@@ -4,7 +4,10 @@ interface IFile {
     val path: String
     val name: String
     val parent: String?
+    val parentFile: IFile
     val absolutePath: String
+
+    val nameWithoutExtension: String
 
     fun exists(): Boolean
     fun isFile(): Boolean

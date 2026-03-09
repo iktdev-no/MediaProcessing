@@ -19,6 +19,12 @@ class FakeFile(
     override val absolutePath: String
         get() = path
 
+    override val nameWithoutExtension: String
+        get() = name.substringAfterLast('.', missingDelimiterValue = "")
+
+    override val parentFile: IFile
+        get() = IFile(parent!!)
+
     override fun exists(): Boolean = exists
 
     override fun isFile(): Boolean = !directory
