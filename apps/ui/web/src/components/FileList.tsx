@@ -5,8 +5,11 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import MovieIcon from '@mui/icons-material/Movie'
 import SubtitlesIcon from '@mui/icons-material/Subtitles'
 import { List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
+import { CSSTransition, TransitionGroup } from "react-transition-group"
 import type { IFile } from '../types/types'
 import { normalDate } from "../util"
+import "./filelist-animations.css"; // vi lager denne straks
+
 
 export interface FileListProps {
     files: IFile[]
@@ -53,21 +56,26 @@ export function FileList({ files, onOpenFolder, onContextMenu }: FileListProps) 
 
     return (
         <List sx={{ bgcolor: "background.paper" }}>
-            {files.map((f) => (
-                <ListItemButton
-                    key={f.uri}
-                    onClick={() => f.type === "Folder" && onOpenFolder(f)}
-                    onContextMenu={(e) => onContextMenu(e, f)}
-                >
-                    <ListItemIcon>
-                        {getItemIcon(f)}
-                    </ListItemIcon>
-                    <ListItemText
-                        primary={f.name}
-                        secondary={normalDate.format(new Date(f.created))}
-                    />
-                </ListItemButton>
-            ))}
+            <TransitionGroup>
+                {files.map((f) => (
+                    <CSSTransition
+                        key={f.uri}
+                        timeout={180}
+                        classNames="filefade"
+                    >
+                        <ListItemButton
+                            onClick={() => f.type === "Folder" && onOpenFolder(f)}
+                            onContextMenu={(e) => onContextMenu(e, f)}
+                        >
+                            <ListItemIcon>{getItemIcon(f)}</ListItemIcon>
+                            <ListItemText
+                                primary={f.name}
+                                secondary={normalDate.format(new Date(f.created))}
+                            />
+                        </ListItemButton>
+                    </CSSTransition>
+                ))}
+            </TransitionGroup>
         </List>
     )
 }

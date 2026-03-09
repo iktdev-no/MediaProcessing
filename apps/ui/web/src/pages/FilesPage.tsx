@@ -159,6 +159,7 @@ export default function FilesPage() {
             })
             console.log("Deleted:", item)
             toast.success(`Deleted ${item.uri}`)
+            setFiles(prev => prev.filter(f => f.uri !== item.uri))
         } catch (err) {
             toast.error(`Faield to delete ${item.uri}`)
             console.error("Delete failed", err)
