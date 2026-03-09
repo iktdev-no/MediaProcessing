@@ -294,7 +294,7 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
         """
     )
     fun createMigrateForConvertOnly() {
-        val workFolder = File("build").using("subby", "eng")
+        val workFolder = File("build").using("subby", "sub", "eng")
 
         val started = StartProcessingEvent(
             data = StartData(
