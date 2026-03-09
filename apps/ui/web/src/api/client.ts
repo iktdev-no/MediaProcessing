@@ -126,13 +126,13 @@ export async function apiDelete<TResponse>(
             body = await res.text().catch(() => null)
         }
 
-        // Custom handler?
+        // ⭐ If caller handles error → do NOT toast
         if (opts?.onError) {
             opts.onError(status, body)
-            return Promise.reject({ status, body })
+            throw { status, body }
         }
 
-        // ⭐ Automatic toast
+        // ⭐ Automatic toast only when no handler is provided
         const message =
             typeof body === "object" && body?.message
                 ? body.message
@@ -146,15 +146,9 @@ export async function apiDelete<TResponse>(
         throw error
     }
 
-    const contentType = res.headers.get("content-type") ?? ""
-
-    if (contentType.includes("application/json")) {
-        return res.json() as Promise<TResponse>
-    }
-
-    const text = await res.text()
-    return text as unknown as TResponse
+    return res.json().catch(() => null)
 }
+
 
 // ------------------------------------------------------------
 // SSE

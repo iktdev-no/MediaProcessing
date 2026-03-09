@@ -5,12 +5,19 @@ enum class FileType {
     File
 }
 
+enum class FileAccessMode {
+    READ_WRITE,
+    READ_ONLY,
+    NO_ACCESS
+}
+
 sealed class IFile {
     abstract val name: String
     abstract val uri: String
     abstract val created: Long
     abstract val type: FileType
     abstract val actions: FileActions
+    abstract val accessMode: FileAccessMode
 }
 
 data class File(
@@ -19,7 +26,8 @@ data class File(
     override val created: Long,
     val extension: String,
     override val actions: FileActions,
-    val size: Long
+    val size: Long,
+    override val accessMode: FileAccessMode
 ) : IFile() {
     override val type = FileType.File
 }
@@ -31,6 +39,8 @@ data class Folder(
     override val actions: FileActions = FileActions(emptyList(), listOf(
         FileAction(id = FileActionType.Delete, requiresConfirmation = true)
     )),
+    override val accessMode: FileAccessMode
+
 ) : IFile() {
     override val type = FileType.Folder
 }

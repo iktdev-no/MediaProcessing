@@ -74,6 +74,8 @@ export interface Paginated<T> {
   total: number;
 }
 
+export type FileAccessMode = "READ_WRITE" | "READ_ONLY" | "NO_ACCESS"
+
 export interface FileActions {
   fileActions: FileAction[];
   mediaActions: MediaAction[];
@@ -83,6 +85,7 @@ export type FileType = "Folder" | "File"
 
 export interface File {
   type: "File";
+  accessMode: FileAccessMode;
   actions: FileActions;
   created: number;
   extension: string;
@@ -108,6 +111,7 @@ export interface FileAction {
 
 export interface Folder {
   type: "Folder";
+  accessMode: FileAccessMode;
   actions: FileActions;
   created: number;
   name: string;

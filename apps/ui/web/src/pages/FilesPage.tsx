@@ -37,6 +37,10 @@ export default function FilesPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    const [visible, setVisible] = useState<Record<string, boolean>>({})
+
+    const [collapseVisible, setCollapseVisible] = useState<Record<string, boolean>>({})
+
     const [sortKey, setSortKey] = useState<SortKey>("name")
     const [sortDir, setSortDir] = useState<SortDir>("asc")
 
@@ -58,7 +62,9 @@ export default function FilesPage() {
                     path === "/" ? "/files/roots" : `/files/explore?path=${encodeURIComponent(path)}`
                 const data = await apiGet<IFile[]>(endpoint)
                 setFiles(data)
-
+                const map = Object.fromEntries(data.map(f => [f.uri, true]))
+                setVisible(map)
+                setCollapseVisible(map)
                 if (push) setSearchParams({ path })
             } catch {
                 setError("Kunne ikke laste mappe")
@@ -149,19 +155,42 @@ export default function FilesPage() {
         closeMenu()
     }
 
+    const FILE_FADE_DURATION = getCssDurationVar("--filefade-duration")
+    function getCssDurationVar(name: string): number {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+        return raw.endsWith("ms")
+            ? parseFloat(raw)
+            : raw.endsWith("s")
+                ? parseFloat(raw) * 1000
+                : Number(raw)
+    }
+
+
     const onDelete = async (item: IFile | null) => {
         if (!item) return
         setLoading(true)
 
         try {
             await apiDelete("/files/delete", {
-                body: { uri: item.uri }
+                body: { uri: item.uri },
+                onError: () => { }
             })
             console.log("Deleted:", item)
             toast.success(`Deleted ${item.uri}`)
-            setFiles(prev => prev.filter(f => f.uri !== item.uri))
+            // 1. Trigger CSS slide/fade/rød animasjon
+            setVisible(prev => ({ ...prev, [item.uri]: false }))
+
+            // 2. Etter CSS-animasjonen → Collapse får lov å kollapse høyden
+            setTimeout(() => {
+                setCollapseVisible(prev => ({ ...prev, [item.uri]: false }))
+            }, FILE_FADE_DURATION)
+
+            // 3. Etter Collapse → fjern elementet fra DOM
+            setTimeout(() => {
+                setFiles(prev => prev.filter(f => f.uri !== item.uri))
+            }, FILE_FADE_DURATION * 2)
         } catch (err) {
-            toast.error(`Faield to delete ${item.uri}`)
+            toast.error(`Failed to delete ${item.uri}`)
             console.error("Delete failed", err)
         } finally {
             setLoading(false)
@@ -213,9 +242,13 @@ export default function FilesPage() {
                 {/* File list */}
                 <FileList
                     files={sortedFiles}
+                    visible={visible}
                     onOpenFolder={(file) => load(file.uri)}
                     onContextMenu={openMenu}
+                    collapseVisible={collapseVisible}
+                    FILE_FADE_DURATION={FILE_FADE_DURATION}
                 />
+
             </Box>
 
             {/* Context menu */}

@@ -85,7 +85,7 @@ function App() {
             <Route path="/events/sequence/:referenceId" element={<EventsSequencePage />} />
           </Routes>
           <ToastContainer
-            position='bottom-left'
+            position='bottom-right'
             autoClose={3000}
             hideProgressBar={true}
             newestOnTop={true}

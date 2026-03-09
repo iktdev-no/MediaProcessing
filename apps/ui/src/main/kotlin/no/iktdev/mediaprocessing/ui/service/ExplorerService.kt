@@ -38,11 +38,17 @@ class ExplorerService(
 
     fun File.toFileInfo(): IFile {
         val file = this
+        val access = determineAccessMode(file)
         return if (file.isDirectory) {
             Folder(
                 name = file.name,
                 uri = file.absolutePath,
-                created = file.lastModified()
+                created = file.lastModified(),
+                actions = FileActions(
+                    mediaActions = emptyList(),
+                    fileActions = getFileActions(file, access),
+                ),
+                accessMode = access
             )
         } else {
             File(
@@ -51,13 +57,27 @@ class ExplorerService(
                 created = file.lastModified(),
                 extension = file.extension,
                 actions = FileActions(
-                    mediaActions = getMediaActionsForFile(file), fileActions = listOf(
-                        FileAction(id = FileActionType.Delete, requiresConfirmation = true)
-                    )
+                    mediaActions = getMediaActionsForFile(file),
+                    fileActions = getFileActions(file, access),
                 ),
-                size = file.length()
+                size = file.length(),
+                accessMode = access
             )
         }
+    }
+
+    fun getFileActions(file: File, accessMode: FileAccessMode): List<FileAction> {
+        val actions = mutableListOf<FileAction>()
+        if (accessMode == FileAccessMode.NO_ACCESS) return actions
+
+        if (file.isDirectory) {
+            actions.add(FileAction(id = FileActionType.Open, requiresConfirmation = false))
+        }
+        if (accessMode == FileAccessMode.READ_WRITE) {
+            actions.add(FileAction(id = FileActionType.Delete, requiresConfirmation = true))
+        }
+
+        return actions
     }
 
 
@@ -89,6 +109,30 @@ class ExplorerService(
 
         // 4. Everything else → no media actions
         return emptyList()
+    }
+
+    fun determineAccessMode(file: File): FileAccessMode {
+        if (!file.exists()) {
+            return FileAccessMode.NO_ACCESS
+        }
+
+        // If we cannot read the file at all → no access
+        if (!file.canRead()) {
+            return FileAccessMode.NO_ACCESS
+        }
+
+        // For deletion, write access must exist on the parent directory
+        val parent = file.parentFile
+        val parentWritable = parent?.canWrite() ?: false
+
+        // File itself must also be writable for RW
+        val fileWritable = file.canWrite()
+
+        return if (fileWritable && parentWritable) {
+            FileAccessMode.READ_WRITE
+        } else {
+            FileAccessMode.READ_ONLY
+        }
     }
 
 
