@@ -49,14 +49,22 @@ export function SequencePage() {
     }
 
     return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ m: 2, height: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography variant="h5" gutterBottom>
                 Active Sequences
             </Typography>
 
-            {sequences.map(seq => (
-                <SequenceRow key={seq.referenceId} seq={seq} onContinue={onContinue} onDelete={onDelete} onOpenSequence={onNavigateToSequence} />
-            ))}
+            <Box
+                sx={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflow: "auto",
+                    pb: 5,
+                }}>
+                {sequences.map(seq => (
+                    <SequenceRow key={seq.referenceId} seq={seq} onContinue={onContinue} onDelete={onDelete} onOpenSequence={onNavigateToSequence} />
+                ))}
+            </Box>
         </Box>
 
     )

@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
-import no.iktdev.mediaprocessing.coordinator.CoordinatorService
+import no.iktdev.mediaprocessing.coordinator.services.ProgressManagerService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressTranslatorService
 import no.iktdev.mediaprocessing.coordinator.services.SseHub
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
@@ -12,22 +12,20 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 @RestController
 @RequestMapping("/internal")
 class InternalProcesserController(
-    private val coordinator: CoordinatorService,
+    private val progressManager: ProgressManagerService,
     private val hub: SseHub,
-    private val progressTranslatorService: ProgressTranslatorService
 ) {
 
     @PostMapping("/progress")
     fun receiveProgress(@RequestBody update: ProgressUpdate): ResponseEntity<Void> {
-        coordinator.updateProgress(update)
-        val kv = progressTranslatorService.translate(update)
-        hub.broadcast("progress", kv)
+        val progress = progressManager.onReceivedProgressUpdate(update)
+        hub.broadcast("progress", progress)
         return ResponseEntity.ok().build()
     }
 
     @GetMapping("/progress")
     fun getAllProgress(): List<Progress> {
-        return coordinator.getProgress().map { progressTranslatorService.translate(it) }
+        return progressManager.getProgress()
     }
 
     @GetMapping("/sse")

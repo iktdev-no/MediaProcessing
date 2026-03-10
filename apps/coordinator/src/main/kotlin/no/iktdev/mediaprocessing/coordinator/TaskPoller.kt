@@ -108,8 +108,11 @@ class DefaultTaskReporter() : TaskReporter {
     }
 
     override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result {
-        // Not to be implemented for this application
-        return Result.Failure("Not implemented", null, false)
+        return try {
+            throw error("Updating task $taskId with payload $payload")
+        } catch (e: Exception) {
+            Result.Failure("Failed to update progress for task $taskId: ${e.message}", e, false)
+        }
     }
 
     override fun log(taskId: UUID, message: String) {

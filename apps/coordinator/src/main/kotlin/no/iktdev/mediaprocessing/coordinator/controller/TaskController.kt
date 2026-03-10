@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 
-import no.iktdev.mediaprocessing.coordinator.CoordinatorService
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressTranslatorService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
