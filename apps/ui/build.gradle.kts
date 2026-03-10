@@ -77,3 +77,27 @@ tasks.jar {
     archiveFileName.set("app.jar")
     archiveBaseName.set("app")
 }
+
+// --- React build tasks (using system npm) ---
+
+tasks.register<Exec>("npmInstallWeb") {
+    workingDir = file("$projectDir/web")
+    commandLine("npm", "install")
+}
+
+tasks.register<Exec>("npmBuildWeb") {
+    dependsOn("npmInstallWeb")
+    workingDir = file("$projectDir/web")
+    commandLine("npm", "run", "build")
+}
+
+tasks.register<Copy>("copyWebToStatic") {
+    dependsOn("npmBuildWeb")
+    from("$projectDir/web/dist")
+    into("$projectDir/src/main/resources/static")
+}
+
+// Ensure Spring Boot includes the built frontend
+tasks.named("processResources") {
+    dependsOn("copyWebToStatic")
+}

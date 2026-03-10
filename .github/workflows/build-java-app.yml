@@ -47,21 +47,21 @@ jobs:
       - name: Set executable
         run: chmod +x ./gradlew
 
-      - name: Build React frontend
-        if: ${{ steps.detect_web.outputs.has_web == 'true' }}
-        env:
-          CI: false
-        run: |
-          cd apps/${{ inputs.app }}/web
-          npm ci
-          npm run build
-
-      - name: Copy React build into Spring Boot resources
-        if: ${{ steps.detect_web.outputs.has_web == 'true' }}
-        run: |
-          rm -rf apps/${{ inputs.app }}/src/main/resources/static
-          mkdir -p apps/${{ inputs.app }}/src/main/resources/static
-          cp -r apps/${{ inputs.app }}/web/dist/* apps/${{ inputs.app }}/src/main/resources/static
+#      - name: Build React frontend
+#        if: ${{ steps.detect_web.outputs.has_web == 'true' }}
+#        env:
+#          CI: false
+#        run: |
+#          cd apps/${{ inputs.app }}/web
+#          npm ci
+#          npm run build
+#
+#      - name: Copy React build into Spring Boot resources
+#        if: ${{ steps.detect_web.outputs.has_web == 'true' }}
+#        run: |
+#          rm -rf apps/${{ inputs.app }}/src/main/resources/static
+#          mkdir -p apps/${{ inputs.app }}/src/main/resources/static
+#          cp -r apps/${{ inputs.app }}/web/dist/* apps/${{ inputs.app }}/src/main/resources/static
 
       - name: Extract version
         run: |
