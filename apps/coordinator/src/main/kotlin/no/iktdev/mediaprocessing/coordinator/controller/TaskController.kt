@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 
 import no.iktdev.mediaprocessing.coordinator.services.EventService
+import no.iktdev.mediaprocessing.coordinator.services.ProgressManagerService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressTranslatorService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.coordinator.toCoordinatorTransferDto
@@ -26,8 +27,7 @@ import java.util.*
 class TaskController(
     private val taskService: TaskService,
     private val eventService: EventService,
-    private val coordinator: CoordinatorService,
-    private val progressTranslatorService: ProgressTranslatorService
+    private val progressManagerService: ProgressManagerService
 ) {
 
     @GetMapping("/active")
@@ -95,7 +95,7 @@ class TaskController(
 
     @GetMapping("/progress/all")
     fun getAllProgress(): List<Progress> {
-        return coordinator.getProgress().map { progressTranslatorService.translate(it) }
+        return progressManagerService.getProgress()
     }
 
 }
