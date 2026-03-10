@@ -5,8 +5,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import no.iktdev.eventi.events.EventDispatcher
+import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.EventPollerImplementation
 import no.iktdev.eventi.events.SequenceDispatchQueue
+import no.iktdev.eventi.models.DispatchResult
+import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.annotation.DependsOn
@@ -37,7 +40,15 @@ class EventPollerAdministrator(
 
 
 val sequenceDispatcher = SequenceDispatchQueue(8)
-val dispatcher = EventDispatcher(eventStore = EventStore)
+
+class OverrideDispatcher(): EventDispatcher(eventStore = EventStore) {
+    override fun onDispatched(event: Event, listener: EventListener, result: DispatchResult, message: String?) {
+        super.onDispatched(event, listener, result, message)
+
+    }
+}
+
+val dispatcher = OverrideDispatcher()
 
 @Component
 @DependsOn("ExposedInit")

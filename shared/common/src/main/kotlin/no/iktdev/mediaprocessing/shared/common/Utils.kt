@@ -274,6 +274,11 @@ inline fun <reified T : Event> List<Event>.requireEvent(): T {
         ?: throw SoftDispatchException.MissingEventException(T::class.java)
 }
 
+inline fun <reified T : Event> List<Event>.isEntryEvent(reason: String? = null): T {
+    return this.filterIsInstance<T>().firstOrNull()
+        ?: throw SoftDispatchException.SkipListenerException(reason, T::class.java)
+}
+
 inline fun <reified T : Event, R> List<Event>.requireEventValue(
     crossinline extractor: (T) -> R?
 ): R {
