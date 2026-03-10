@@ -23,17 +23,23 @@ class SseHub {
     fun broadcast(eventName: String, data: Any) {
         val dead = mutableListOf<SseEmitter>()
 
-        val data = SseEmitter.event()
-            .name(eventName)
-            .data(data)
         emitters.forEach { emitter ->
             try {
-                emitter.send(data)
+                emitter.send(
+                    SseEmitter.event()
+                        .name(eventName)
+                        .data(data)
+                )
             } catch (ex: Exception) {
+                // Debug: klienten er borte
+                println("SSE client disconnected: ${ex.message}")
                 dead.add(emitter)
             }
         }
 
-        emitters.removeAll(dead.toSet())
+        if (dead.isNotEmpty()) {
+            emitters.removeAll(dead.toSet())
+        }
     }
+
 }

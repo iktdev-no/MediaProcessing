@@ -18,6 +18,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.FileSystemException
 import java.util.UUID
+import kotlin.math.floor
 
 @Component
 class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
@@ -78,11 +79,28 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
             ).producedFrom(useTask)
         }
 
+        var lastProgress = -1
+
         fs.copyWithProgress(source, destinationFile) { copied, total ->
-            val percent = (copied.toDouble() / total.toDouble()) * 100.0
-            log.debug { "Copy progress: $percent%" }
-            reporter?.updateProgress(useTask.referenceId, useTask.taskId, FileCopyProgress(progress = percent.toInt(), source = source.absolutePath, destination = destinationFile.absolutePath))
+            val percent = (copied * 100 / total).toInt()
+
+            if (percent > lastProgress) {
+                lastProgress = percent
+                if (percent == 0 || percent == 50 || percent == 100) {
+                    log.info { "Copy progress: $percent%" }
+                }
+                reporter?.updateProgress(
+                    useTask.referenceId,
+                    useTask.taskId,
+                    FileCopyProgress(
+                        progress = percent,
+                        source = source.absolutePath,
+                        destination = destinationFile.absolutePath
+                    )
+                )
+            }
         }
+
 
         log.debug { "Verifying identical: ${source.absolutePath} -> ${destinationFile.absolutePath}" }
         fs.verifyIdentical(source, destinationFile)

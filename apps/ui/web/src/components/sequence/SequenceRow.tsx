@@ -34,12 +34,15 @@ export function SequencePipeline({ seq }: { seq: SequenceSummary }) {
 export function SequenceRow({
     seq,
     onContinue,
-    onDelete
+    onDelete,
+    onOpenSequence
 }: {
     seq: SequenceSummary
     onContinue: (refId: string) => void
     onDelete: (refId: string) => void
+    onOpenSequence: (refId: string) => void
 }) {
+
     return (
         <Paper
             sx={{
@@ -55,7 +58,8 @@ export function SequenceRow({
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography
                     variant="subtitle1"
-                    sx={{ color: colorFromUuid(seq.referenceId), fontWeight: 700 }}
+                    sx={{ color: colorFromUuid(seq.referenceId), fontWeight: 700, cursor: 'pointer' }}
+                    onClick={() => onOpenSequence(seq.referenceId)}
                 >
                     {seq.referenceId}
                 </Typography>

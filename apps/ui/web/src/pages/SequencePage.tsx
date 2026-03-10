@@ -5,11 +5,13 @@ import { useEffect, useState } from "react"
 import { continueSequence, getActiveSequences } from "../api/sequence"
 import { SequenceRow } from "../components/sequence/SequenceRow"
 
+import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import type { SequenceSummary } from "../types/transfer-model"
 
 
 export function SequencePage() {
+    const navigate = useNavigate();
     const [sequences, setSequences] = useState<SequenceSummary[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -31,6 +33,10 @@ export function SequencePage() {
         }
     }
 
+    const onNavigateToSequence = (referenceId: string) => {
+        navigate(`/events/sequence/${referenceId}`)
+    }
+
     const onDelete = async (refId: string) => {
         try {
             await fetch(`/api/sequences/${refId}/delete`, { method: "POST" })
@@ -49,7 +55,7 @@ export function SequencePage() {
             </Typography>
 
             {sequences.map(seq => (
-                <SequenceRow key={seq.referenceId} seq={seq} onContinue={onContinue} onDelete={onDelete} />
+                <SequenceRow key={seq.referenceId} seq={seq} onContinue={onContinue} onDelete={onDelete} onOpenSequence={onNavigateToSequence} />
             ))}
         </Box>
 
