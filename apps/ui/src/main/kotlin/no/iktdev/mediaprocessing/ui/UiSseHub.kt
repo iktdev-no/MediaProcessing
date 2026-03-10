@@ -44,7 +44,7 @@ class UiSseHub(
             val raw = event.data()
 
             if (eventName == null || raw == null) {
-                log.error { "Received unknown event $eventName" }
+                log.error { "Received unknown event $eventName, with data:\n$raw" }
                 return@subscribe
             }
 
