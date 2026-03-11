@@ -71,11 +71,24 @@ export function FilterChips({
     }
 
     const prettyLabel = (token: string) => {
-        if (token.startsWith("key:")) {
-            return `${keyLabel}: ${token.substring(4)}`
+        // key:value
+        if (token.includes(":")) {
+            const [key, value] = token.split(":")
+            if (value) {
+                return `${key}: ${value}`
+            }
+            return `${key}:`
         }
+
+        // event name (fra suggestions)
+        if (suggestions.includes(token)) {
+            return `Event: ${token}`
+        }
+
+        // fallback
         return token
     }
+
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>

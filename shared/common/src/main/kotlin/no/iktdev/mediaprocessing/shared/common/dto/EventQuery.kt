@@ -9,6 +9,7 @@ data class EventQuery(
     val eventId: String? = null,
     val from: Instant? = null,
     val to: Instant? = null,
+    val eventTypes: List<String>? = null,
     override val sort: String = "persistedAt",
     override val order: Sort = Sort.DESC,
     override val page: Int = 0,
@@ -27,7 +28,7 @@ data class EventQuery(
         params.add("order", order.name)
         params.add("page", page.toString())
         params.add("pageSize", pageSize.toString())
-
+        eventTypes?.forEach { params.add("eventTypes", it) }
         return params
     }
 }

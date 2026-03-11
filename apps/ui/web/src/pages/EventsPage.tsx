@@ -18,7 +18,8 @@ export default function EventsPage() {
         page: 0,
         pageSize: 50,
         sort: "persistedAt",
-        order: "DESC"
+        order: "DESC",
+        eventTypes: undefined
     })
 
     // 👇 Her definerer du handleBeforeAdd

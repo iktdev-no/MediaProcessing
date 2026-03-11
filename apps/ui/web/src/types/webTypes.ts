@@ -27,6 +27,7 @@ export interface EventQuery {
     to?: string
     sort?: string
     order?: "ASC" | "DESC"
+    eventTypes: string[] | undefined
     page: number
     pageSize: number
 }

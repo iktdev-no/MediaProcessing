@@ -46,8 +46,12 @@ object EventStore: EventStore {
                     where { EventsTable.eventId like "%$id%" }
                 }
 
-                query.key?.let { keys ->
-                    where { EventsTable.event.likeAny(keys)}
+                query.eventTypes?.let { types ->
+                    where { EventsTable.event.likeAny(types) }
+                }
+
+                query.key?.takeIf { it.isNotEmpty() }?.let { keys ->
+                    where { EventsTable.data.likeAny(keys) }
                 }
 
                 query.from?.let { from ->

@@ -73,7 +73,35 @@ class MediaParsedInfoListener : EventListener() {
         Regex("(?i)(bluray|laserdisc|dvd|web|uhd|hd|htds|imax).*", RegexOption.IGNORE_CASE).replace(this, " ")
 
     fun String.noUnderscores() = this.replace("_", " ")
-    fun String.noYear() = Regex("\\b\\d{4}\\b").replace(this.takeIf { !it.matches(Regex("^\\d{4}")) } ?: this, "")
+
+
+    fun String.noYear(): String {
+        val trimmed = this.trim()
+
+        // 1. Hvis hele tittelen er et årstall → behold
+        if (trimmed.matches(Regex("^\\d{4}$"))) {
+            return trimmed
+        }
+
+        var cleaned = this
+
+        // 2. Fjern årstall i parentes (uansett verdi)
+        cleaned = cleaned.replace(Regex("\\(\\s*\\d{4}\\s*\\)"), " ")
+
+        // 3. Fjern kun "ekte" årstall (1900–2099) som står løst
+        cleaned = cleaned.replace(Regex("\\b(19|20)\\d{2}\\b"), " ")
+
+        // 4. Fremtidsårstall (2100+) beholdes automatisk
+
+        // 5. Rydd opp whitespace
+        cleaned = cleaned.replace(Regex("\\s{2,}"), " ").trim()
+
+        return cleaned
+    }
+
+
+
+
     fun String.noDots() = Regex("(?<!\\b(?:Dr|Mr|Ms|Mrs|Lt|Capt|Prof|St|Ave))\\.").replace(this, " ")
     fun String.noExtraSpaces() = Regex("\\s{2,}").replace(this, " ")
     fun String.fullTrim() = this.trim('.', ',', ' ', '_', '-')
