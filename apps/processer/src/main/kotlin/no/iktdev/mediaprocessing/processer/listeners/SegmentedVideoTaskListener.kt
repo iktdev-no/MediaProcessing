@@ -54,6 +54,10 @@ class SegmentedVideoTaskListener(
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as EncodeTask
 
+        withHeartbeatRunner {
+            reporter?.updateLastSeen(task.taskId)
+        }
+
         val ctx = createContext(taskData)
 
         // 1) Probe
