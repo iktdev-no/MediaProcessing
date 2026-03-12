@@ -67,7 +67,10 @@ export default function EventsPage() {
         <Box sx={{ pb: 1, height: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
             <FilterChips
                 value={filters}
-                onChange={setFilters}
+                onChange={(next) => {
+                    setFilters(next);
+                    setQuery(q => ({ ...q, page: 0 }));
+                }}
                 onBeforeAdd={handleBeforeAdd}
                 suggestions={[
                     ...eventFilterSchema.eventIds,
