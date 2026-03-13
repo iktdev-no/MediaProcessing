@@ -38,7 +38,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         override fun claim(taskId: UUID, workerId: String): Boolean { TODO("Not yet implemented") }
         override fun heartbeat(taskId: UUID): Boolean { TODO("Not yet implemented") }
         override fun markConsumed(taskId: UUID, status: TaskStatus): Boolean { TODO("Not yet implemented") }
-        override fun releaseExpiredTasks(timeout: Duration) { TODO("Not yet implemented") }
+        override fun releaseExpiredTasks() { TODO("Not yet implemented") }
         override fun getPendingTasks(): List<PersistedTask> { TODO("Not yet implemented") }
     }
 
