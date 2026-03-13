@@ -19,6 +19,11 @@ import java.util.*
 class EventController(
     private val coordinator: CoordinatorEventService,
 ) {
+    @GetMapping("/names")
+    fun getExpectedEventNames(): Mono<List<String>> {
+        return coordinator.getEventNames()
+    }
+
     @GetMapping()
     fun getEvents(query: EventQuery): Mono<Paginated<UiEvent>> {
         return coordinator.getPagedEvents(query)

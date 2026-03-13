@@ -22,6 +22,12 @@ import java.util.*
 class TaskController(
     private val coordinator: CoordinatorTaskService,
 ) {
+
+    @GetMapping("/names")
+    fun getExpectedTaskNames(): Mono<List<String>> {
+        return coordinator.getTaskNames()
+    }
+
     @GetMapping()
     fun getTasks(query: TaskQuery): Mono<Paginated<UiTask>> {
         return coordinator.getPagedTasks(query)

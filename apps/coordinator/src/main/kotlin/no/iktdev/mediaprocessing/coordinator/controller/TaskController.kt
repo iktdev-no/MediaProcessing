@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.dto.map
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
@@ -29,6 +30,11 @@ class TaskController(
     private val eventService: EventService,
     private val progressManagerService: ProgressManagerService
 ) {
+
+    @GetMapping("/names")
+    fun getTaskNames(): List<String> {
+        return TaskRegistry.getTasks().map { it.simpleName }
+    }
 
     @GetMapping("/active")
     fun getActiveTasks(): List<CoordinatorTaskDto> {

@@ -65,5 +65,10 @@ class CoordinatorTaskService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<List<Progress>>() {})
 
-
+    fun getTaskNames(): Mono<List<String>> {
+        return coordinatorWebClient.get()
+            .uri("/tasks/names")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<List<String>>() {})
+    }
 }

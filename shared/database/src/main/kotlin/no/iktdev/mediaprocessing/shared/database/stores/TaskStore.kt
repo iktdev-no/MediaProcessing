@@ -5,6 +5,7 @@ import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.WGson
 import no.iktdev.eventi.stores.TaskStore
+import no.iktdev.eventi.tasks.GlobalTaskPolicy
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
@@ -13,10 +14,11 @@ import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
-import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.time.Duration
+import kotlin.time.toJavaDuration
 
 object TaskStore: TaskStore {
 
@@ -163,9 +165,9 @@ object TaskStore: TaskStore {
         }.isSuccess
     }
 
-    override fun releaseExpiredTasks(timeout: Duration) {
-        val now = UtcNow()
-        val expirationTime = now.minus(timeout)
+
+    override fun releaseExpiredTasks() {
+        val expirationTime = GlobalTaskPolicy.policy.abandonTimeout().ago()
         withTransaction {
             TasksTable.update({
                 (TasksTable.claimed eq true) and
@@ -178,6 +180,23 @@ object TaskStore: TaskStore {
                 it[lastCheckIn] = null
             }
         }
+    }
+
+    fun releaseExpiredTask(taskId: UUID): Boolean {
+        val expirationTime = GlobalTaskPolicy.policy.abandonTimeout().ago()
+        return withTransaction {
+            TasksTable.update({
+                (TasksTable.claimed eq true) and
+                        (TasksTable.consumed eq false) and
+                        (TasksTable.lastCheckIn.isNotNull()) and
+                        (TasksTable.lastCheckIn less expirationTime) and
+                        (TasksTable.taskId eq taskId.toString())
+            }) {
+                it[claimed] = false
+                it[claimedBy] = null
+                it[lastCheckIn] = null
+            }
+        }.isSuccess
     }
 
     fun resetTaskById(taskId: UUID): Result<Int> {
@@ -208,7 +227,7 @@ object TaskStore: TaskStore {
     }
 
     fun findAbandonedTasks(): List<PersistedTask> {
-        val cutoff = Instant.now().minus(15, ChronoUnit.MINUTES)
+        val cutoff = GlobalTaskPolicy.policy.abandonTimeout().ago()
         return withTransaction {
             TasksTable.getWhere {
                 (TasksTable.lastCheckIn less cutoff or TasksTable.lastCheckIn.isNull()) and
@@ -226,5 +245,6 @@ object TaskStore: TaskStore {
         }.getOrDefault(emptyList())
     }
 
+    fun Duration.ago(): Instant = UtcNow().minus(this.toJavaDuration())
 
 }

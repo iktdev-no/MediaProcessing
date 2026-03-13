@@ -68,6 +68,11 @@ class CoordinatorEventService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<List<LineageNode>>() {})
 
-
+    fun getEventNames(): Mono<List<String>> {
+        return coordinatorWebClient.get()
+            .uri("/events/names")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<List<String>>() {})
+    }
 
 }

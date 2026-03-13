@@ -1,10 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.registry.EventTypeRegistry
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
 import org.springframework.web.bind.annotation.*
@@ -16,6 +18,11 @@ import java.util.*
 class EventsController(
     private val eventService: EventService
 ) {
+
+    @GetMapping("/names")
+    fun getEventNames(): List<String> {
+        return EventRegistry.getEvents().map { it.simpleName }
+    }
 
     @GetMapping()
     fun getEvents(query: EventQuery): Paginated<PersistedEvent> {
