@@ -34,7 +34,8 @@ object TaskLifecycleRules {
     private fun stalledCutoffFor(taskName: String): Instant {
         return when (taskName) {
             MediaReadTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
-            EncodeTask::class.getName() -> Instant.now().minus(6, ChronoUnit.HOURS)
+            LinearEncodeTask::class.getName() -> Instant.now().minus(6, ChronoUnit.HOURS)
+            SegmentedEncodeTask::class.getName() -> Instant.now().minus(6, ChronoUnit.HOURS)
             ExtractSubtitleTask::class.getName() -> Instant.now().minus(15, ChronoUnit.MINUTES)
             ConvertTask::class.getName() -> Instant.now().minus(6, ChronoUnit.MINUTES)
             MetadataSearchTask::class.getName() -> Instant.now().minus(10, ChronoUnit.MINUTES)

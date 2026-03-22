@@ -5,7 +5,7 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
@@ -16,8 +16,6 @@ import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 
 @Component
 class MediaCreateConvertTaskListener: EventListener() {

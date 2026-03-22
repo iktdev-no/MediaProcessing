@@ -5,7 +5,7 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.FFprobeFormat
-import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
@@ -13,8 +13,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartP
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
-import java.io.File
-import java.net.URI
 
 @Component
 class ValidateFileAndMediaDataListener() : EventListener() {

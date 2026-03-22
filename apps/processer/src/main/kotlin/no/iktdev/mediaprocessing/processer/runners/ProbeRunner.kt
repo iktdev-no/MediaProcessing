@@ -5,10 +5,10 @@ import no.iktdev.mediaprocessing.ffmpeg.FFprobe
 import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.data.FFprobeFormat
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
-import java.io.File
+import no.iktdev.files.IFile
 
 class ProbeRunner(
-    val file: File,
+    val file: IFile,
     val executable: String
 ) : Runner() {
 
