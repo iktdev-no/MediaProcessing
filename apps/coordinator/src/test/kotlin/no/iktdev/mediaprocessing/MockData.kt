@@ -5,6 +5,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.TestBase.DummyTask
 import no.iktdev.mediaprocessing.ffmpeg.data.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
@@ -76,7 +77,7 @@ object MockData {
 
     fun encodeEvent(cachedFile: String, derivedFrom: Event, status: TaskStatus = TaskStatus.Completed,): List<Event> {
         val dummyTask = DummyTask().derivedOf(derivedFrom)
-        val create = ProcesserEncodeTaskCreatedEvent(dummyTask.taskId)
+        val create = ProcesserEncodeTaskCreatedEvent(dummyTask.taskId, taskType = LinearEncodeTask::class.simpleName!!)
             .derivedOf(derivedFrom)
 
         val result = ProcesserEncodeResultEvent(
@@ -180,15 +181,17 @@ object MockData {
         durationTs: Long = 1000,
         codec: String = "h264",
         disposition: Disposition = dummyDisposition(),
-        tags: Tags = dummyTags("eng")
+        tags: Tags = dummyTags("eng"),
+        codec_tag_string: String = "",
+        codec_tag: String = ""
     ): VideoStream {
         return VideoStream(
             index = index,
             codec_name = codec,
             codec_long_name = "H.264",
             codec_type = "video",
-            codec_tag_string = "",
-            codec_tag = "",
+            codec_tag_string = codec_tag_string,
+            codec_tag = codec_tag,
             r_frame_rate = "25/1",
             avg_frame_rate = "25/1",
             time_base = "1/1000",

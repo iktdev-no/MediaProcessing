@@ -35,12 +35,6 @@ object TestUtils {
         return FileUtil(dirs, mediaPaths)
     }
 
-    fun getExecutableConfig(): ExecutablesConfig {
-        return ExecutablesConfig(
-            ffmpeg = "ffmpeg",
-            ffprobe = "ffprobe"
-        )
-    }
 
 }
 
@@ -53,11 +47,6 @@ fun assertSameReferenceId(task: Task, event: Event?) {
     )
 }
 
-fun WorkingFolder() = File("build").using("test-run")
-
-fun WorkingFile(name: String): File {
-    return File("build").using("test-run", name)
-}
 
 fun getTaskReporter(): TaskReporter {
     val reporter = mockk<TaskReporter>(relaxed = true)

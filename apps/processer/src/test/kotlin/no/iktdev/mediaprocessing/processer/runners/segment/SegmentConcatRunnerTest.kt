@@ -8,45 +8,39 @@ import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.exfl.using
+import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
-import no.iktdev.mediaprocessing.processer.WorkingFile
-import no.iktdev.mediaprocessing.processer.WorkingFolder
+import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.segment.Segment
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import org.junit.jupiter.api.*
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SegmentConcatRunnerTest {
-
-    private val testRoot = File("build/test-run")
-
-    @BeforeEach
-    fun clean() {
-        if (testRoot.exists()) testRoot.deleteRecursively()
-        testRoot.mkdirs()
-    }
+class SegmentConcatRunnerTest: TestBase() {
 
     // ---------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------
 
-    private fun fakeSegment(index: Int, name: String = "seg$index.mp4") =
+    private fun fakeSegment(index: Int, folder: IFile): Segment =
         Segment(
             index = index,
             start = index * 10.0,
             duration = 10.0,
-            output = WorkingFile(name).apply {
+            output = folder.using("seg$index.mp4").apply {
                 parentFile.mkdirs()
                 writeText("dummy")
             }
         )
 
-    private fun fakeFFmpeg(resultCode: Int, logFile: File = WorkingFile("ffmpeg.log")): FFmpeg {
+
+    private fun fakeFFmpeg(resultCode: Int, logFile: IFile = workFolder.using("ffmpeg.log")): FFmpeg {
         val ff = mockk<FFmpeg>(relaxed = true)
 
-        coEvery { ff.run(any()) } returns Unit
+        coEvery { ff.run(any<FfmpegDsl>()) } returns Unit
 
         every { ff.result } returns ProcessResult(
             resultCode = resultCode,
@@ -71,16 +65,17 @@ class SegmentConcatRunnerTest {
             Skal RunnerResult.Success returneres med output og logFile
     """)
     fun success_case_returns_success_payload() = runTest {
-        val seg0 = fakeSegment(0)
-        val seg1 = fakeSegment(1)
-        val output = WorkingFolder().using("out.mp4")
-        val logFile = WorkingFile("concat.log").apply { writeText("log") }
+        val segmentFolder = workFolder.using("segment")
+        val seg0 = fakeSegment(0, segmentFolder)
+        val seg1 = fakeSegment(1, segmentFolder)
+        val output = workFolder.using("out.mp4")
+        val logFile = workFolder.using("concat.log").apply { writeText("log") }
 
         val ffmpeg = fakeFFmpeg(0, logFile)
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0, seg1),
-            intermediateStore = WorkingFolder(),
+            intermediateStore = workFolder,
             output = output,
             ffmpegInstance = ffmpeg
         )
@@ -109,14 +104,16 @@ class SegmentConcatRunnerTest {
             Skal RunnerResult.Reject returneres med riktig feilmelding
     """)
     fun failure_case_returns_reject() = runTest {
-        val seg0 = fakeSegment(0)
-        val output = WorkingFolder().using("out.mp4")
+        val segmentFolder = workFolder.using("segment")
+
+        val seg0 = fakeSegment(0, segmentFolder)
+        val output = workFolder.using("out.mp4")
 
         val ffmpeg = fakeFFmpeg(127)
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0),
-            intermediateStore = WorkingFolder(),
+            intermediateStore = workFolder,
             output = output,
             ffmpegInstance = ffmpeg
         )
@@ -143,22 +140,24 @@ class SegmentConcatRunnerTest {
             Skal concat_list.txt inneholde alle segment-filene i riktig format
     """)
     fun concat_list_file_is_generated_correctly() = runTest {
-        val seg0 = fakeSegment(0)
-        val seg1 = fakeSegment(1)
-        val output = WorkingFolder().using("out.mp4")
+        val segmentFolder = workFolder.using("segment")
+
+        val seg0 = fakeSegment(0, segmentFolder)
+        val seg1 = fakeSegment(1, segmentFolder)
+        val output = workFolder.using("out.mp4")
 
         val ffmpeg = fakeFFmpeg(0)
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0, seg1),
-            intermediateStore = WorkingFolder(),
+            intermediateStore = workFolder,
             output = output,
             ffmpegInstance = ffmpeg
         )
 
         runner.run()
 
-        val listFile = File(output.parentFile, "out - CONCAT_LIST.txt")
+        val listFile = workFolder.using("out - CONCAT_LIST.txt")
         assertTrue(listFile.exists())
 
         val text = listFile.readText().trim()
@@ -184,18 +183,20 @@ class SegmentConcatRunnerTest {
             Skal MpegArgument inneholde korrekt input, output og concat-argumenter
     """)
     fun verifies_correct_ffmpeg_arguments() = runTest {
-        val seg0 = fakeSegment(0)
-        val seg1 = fakeSegment(1)
-        val output = WorkingFolder().using("out.mp4")
+        val segmentFolder = workFolder.using("segment")
+
+        val seg0 = fakeSegment(0, segmentFolder)
+        val seg1 = fakeSegment(1, segmentFolder)
+        val output = workFolder.using("out.mp4")
 
         val ffmpeg = fakeFFmpeg(0)
 
-        val slotArgs = slot<MpegArgument>()
+        val slotArgs = slot<FfmpegDsl>()
         coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
 
         val runner = SegmentConcatRunner(
             segments = listOf(seg0, seg1),
-            intermediateStore = WorkingFolder(),
+            intermediateStore = workFolder,
             output = output,
             ffmpegInstance = ffmpeg
         )
@@ -206,7 +207,7 @@ class SegmentConcatRunnerTest {
 
         // input
         assertTrue("-i" in built)
-        val listFile = File(output.parentFile, "out - CONCAT_LIST.txt")
+        val listFile = output.parentFile.using("out - CONCAT_LIST.txt")
         assertTrue(listFile.absolutePath in built)
 
         // concat flags
@@ -218,7 +219,7 @@ class SegmentConcatRunnerTest {
         assertTrue("copy" in built)
 
         // output
-        val outputUsed = slotArgs.captured.getOutputFileUsed()
+        val outputUsed = slotArgs.captured.outputFile()
         assertTrue(outputUsed in built)
     }
 }

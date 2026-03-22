@@ -3,21 +3,35 @@ package no.iktdev.mediaprocessing.ffmpeg
 import com.github.pgreze.process.ProcessResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
+import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 import kotlin.system.measureTimeMillis
 import kotlin.test.assertFalse
 
 class FFmpegTest {
 
-    class MockFFmpeg(override val listener: Listener, val delayMillis: Long = 500, private val simulateSuccess: Boolean = true) : FFmpeg(executable = "", logDir = File("/null")) {
-        override suspend fun run(argument: MpegArgument) {
-            inputFile = argument.inputFile!!
-            listener.onStarted(argument.inputFile!!)
+    class MockFFmpeg(
+        override val listener: Listener?,
+        private val simulateSuccess: Boolean = true,
+        private val delayMillis: Long
+    ) : FFmpeg(
+        executable = "",
+        logDir = IFile("/null")
+    ) {
+        override suspend fun run(command: FfmpegDsl) {
+            val input = command.toInstructions().findPrimaryInput()
+            inputFile = input
+            logFile = IFile("/null/log.txt")
+
+            listener?.onStarted(input)
+
+            // Simuler litt arbeid
             delay(delayMillis)
 
             result = ProcessResult(
@@ -25,11 +39,12 @@ class FFmpegTest {
                 output = listOf("Simulated ffmpeg output")
             )
 
-            if (simulateSuccess) {
-                listener.onCompleted(inputFile, argument.outputFile!!)
-            } else {
-                listener.onError(inputFile, "Simulated error")
+            if (!simulateSuccess) {
+                listener?.onError(input, "Simulated error")
+                return
             }
+
+            listener?.onCompleted(input, command.outputFile())
         }
     }
 
@@ -37,11 +52,19 @@ class FFmpegTest {
     @Test
     @DisplayName("Test FFmpeg Mock Success")
     fun scenarioSuccess() = runBlocking {
-        val arguments = MpegArgument()
-            .inputFile("input.mp4")
-            .outputFile("output.mp4")
-            .args(listOf("-y"))
-            .withProgress(true)
+        val dsl = ffmpeg {
+            input("input.mp4") {
+                video(0) {
+                    map = true
+                    codec = VideoCodec.Copy
+                }
+            }
+            output("output.mp4") {
+                overwrite = true
+                progress = false
+                useWorkFile = false
+            }
+        }
 
         val listener = object : FFmpeg.Listener {
             var completed: Boolean = false
@@ -64,7 +87,7 @@ class FFmpegTest {
         assertFalse(listener.completed, "Expected onCompleted to be false before run")
 
         val elapsed = measureTimeMillis {
-            runner.run(arguments)
+            runner.run(dsl)
             assertTrue(listener.completed, "Expected onCompleted to be called")
         }
 

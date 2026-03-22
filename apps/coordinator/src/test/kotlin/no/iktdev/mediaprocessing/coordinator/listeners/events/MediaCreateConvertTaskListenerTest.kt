@@ -2,12 +2,11 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.verify
 import no.iktdev.eventi.events.SoftDispatchException
-import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.exfl.using
+import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.shared.common.dto.files.FakeFile
-import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -16,11 +15,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.mockStatic
-import org.mockito.kotlin.any
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 
 class MediaCreateConvertTaskListenerTest : TestBase() {
 

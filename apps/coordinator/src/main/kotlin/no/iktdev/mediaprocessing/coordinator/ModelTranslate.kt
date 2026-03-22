@@ -6,6 +6,8 @@ import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import no.iktdev.mediaprocessing.ffmpeg.model.SelectedAudioTracks
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
@@ -185,3 +187,12 @@ fun VideoCodecConfig.toDsl(): VideoCodec = when (type) {
 }
 fun Presets.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.Presets.valueOf(name)
 fun H264Profiles.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.H264Profiles.valueOf(name)
+
+fun MediaTracksEncodeSelectedEvent.SelectedAudioTracks.toFFmpegVersion(): SelectedAudioTracks {
+    return SelectedAudioTracks(
+        defaultListIndex = this.defaultListIndex,
+        defaultFfmpegIndex = this.defaultFfmpegIndex,
+        extendedListIndex = this.extendedListIndex,
+        extendedFfmpegIndex = this.extendedFfmpegIndex,
+    )
+}

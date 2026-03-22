@@ -3,17 +3,16 @@ package no.iktdev.mediaprocessing.ffmpeg
 import com.github.pgreze.process.ProcessResult
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
-import no.iktdev.exfl.using
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegProgressDecoder
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import java.io.File
-import java.io.FileOutputStream
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-open class FFmpeg(val executable: String, val logDir: File) {
+open class FFmpeg(val executable: String, val logDir: IFile) {
     open val listener: Listener? = null
 
     private var progress: FfmpegDecodedProgress? = null
@@ -28,7 +27,7 @@ open class FFmpeg(val executable: String, val logDir: File) {
         .format(formatter)
 
     //endregion
-    lateinit var logFile: File
+    lateinit var logFile: IFile
 
     lateinit var result: ProcessResult
         protected set
@@ -37,30 +36,31 @@ open class FFmpeg(val executable: String, val logDir: File) {
     open fun onCreate() {}
 
     protected lateinit var inputFile: String
-    open suspend fun run(argument: MpegArgument) {
-        inputFile = if (argument.inputFile == null) throw RuntimeException("Input file is required") else  argument.inputFile!!
+    open suspend fun run(command: FfmpegDsl) {
+        inputFile = command.toInstructions().findPrimaryInput()
         logFile = logDir.using("$formattedDateTime-${File(inputFile).nameWithoutExtension}.log")
-        listener?.onStarted(argument.inputFile!!)
-        result = execute(argument.build()) {
+        listener?.onStarted(inputFile)
+        val arguments = command.build()
+        result = execute(arguments) {
             onNewOutput(it)
         }
         onNewOutput("Received exit code: ${result.resultCode}")
         if (result.resultCode != 0) {
             listener?.onError(inputFile, result.output.joinToString("\n"))
         } else {
-            val success = moveAndVerify(argument)
-            if (!success) {
-                listener?.onError(inputFile, "Could not find output file at ${argument.outputFile}")
-            } else {
-                listener?.onCompleted(inputFile, argument.outputFile!!)
+
+            if (command.isUsingWorkFile()) {
+                val success = moveAndVerify(command)
+                if (!success) {
+                    listener?.onError(inputFile, "Could not find output file at ${command.outputWorkFile()}")
+                }
             }
+            listener?.onCompleted(inputFile, command.outputFile())
         }
     }
 
-    private fun moveAndVerify(argument: MpegArgument): Boolean {
-        return if (argument.outputCacheFile) {
-            File(argument.getOutputFileUsed()).renameTo(File(argument.outputFile!!))
-        } else File(argument.outputFile!!).exists()
+    private fun moveAndVerify(command: FfmpegDsl): Boolean {
+        return File(command.outputWorkFile()).renameTo(File(command.outputFile()))
     }
 
     private suspend fun execute(arguments: List<String>, output: (String) -> Unit): ProcessResult {
@@ -92,9 +92,7 @@ open class FFmpeg(val executable: String, val logDir: File) {
     }
 
     open fun writeToLog(line: String) {
-        FileOutputStream(logFile, true).bufferedWriter(Charsets.UTF_8).use {
-            it.appendLine(line)
-        }
+        logFile.appendLine(line)
     }
 
     interface Listener {

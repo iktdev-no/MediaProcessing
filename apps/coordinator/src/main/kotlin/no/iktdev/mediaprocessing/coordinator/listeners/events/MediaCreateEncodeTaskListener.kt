@@ -2,19 +2,30 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
-import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.requireAs
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
-import no.iktdev.mediaprocessing.ffmpeg.dsl.*
+import no.iktdev.mediaprocessing.coordinator.toFFmpegVersion
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
+import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.LinearMediaPlan
+import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.SegmentedMediaPlan
+import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
+import no.iktdev.mediaprocessing.ffmpeg.util.AudioTargeting
+import no.iktdev.mediaprocessing.ffmpeg.util.getBestEncodeStrategy
+import no.iktdev.mediaprocessing.ffmpeg.util.getMediaPlanner
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.model.task.data.EncodeDataBase
+import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
+import no.iktdev.mediaprocessing.shared.common.model.task.data.SegmentEncodeData
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.springframework.stereotype.Component
 import java.io.File
 
@@ -29,60 +40,35 @@ class MediaCreateEncodeTaskListener(
         event: Event,
         history: List<Event>
     ): Event? {
-        val preference = preference.getProcesserPreference()
-        val videoDsl = preference.videoPreference?.codec?.toDsl()
+        val selectedEvent = event.requireAs<MediaTracksEncodeSelectedEvent>()
 
-        val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
-        if (startedEvent.data.operation.isNotEmpty()) {
-            if (!startedEvent.data.operation.contains(OperationType.Encode))
-                return null
+        val processerPreference = preference.getProcesserPreference()
+        val videoPreference = processerPreference.videoPreference?.codec?.toDsl() ?: VideoCodec.Hevc()
+
+        val startedEvent = history.requireEvent<StartProcessingEvent>()
+        if (startedEvent.data.operation.none { it == OperationType.Encode }) {
+            return null
         }
 
-        val selectedEvent = event as? MediaTracksEncodeSelectedEvent ?: return null
-        val streams = history.filterIsInstance<MediaStreamParsedEvent>().firstOrNull()?.data ?: return null
+        val streams = history.getInstanceOf<MediaStreamParsedEvent>()?.data ?: return null
 
-        val videoPreference = videoDsl ?: VideoCodec.Hevc()
+        val audioTargets = AudioTargeting(streams.audioStream).getAudioTargets(
+            selectedEvent.audioTracks.map { it.toFFmpegVersion() },
+            processerPreference.audioPreference?.default?.toDsl() ?: AudioCodec.Aac(),
+            processerPreference.audioPreference?.extended?.toDsl(),
 
-        val audioTargets = mutableListOf<AudioTarget>()
-
-        for (track in selectedEvent.audioTracks) {
-
-            // Default audio
-            audioTargets += AudioTarget(
-                listIndex = track.defaultListIndex,
-                ffmpegIndex = track.defaultFfmpegIndex,
-                codec = preference.audioPreference?.default?.toDsl()
-                    ?: AudioCodec.Aac(channels = 2)
             )
+        val useVideoStream = streams.videoStream[selectedEvent.selectedVideoTrack]
 
-            // Extended audio
-            val extList = track.extendedListIndex
-            val extFfmpeg = track.extendedFfmpegIndex
-
-            if (extList != null && extFfmpeg != null) {
-                audioTargets += AudioTarget(
-                    listIndex = extList,
-                    ffmpegIndex = extFfmpeg,
-                    codec = preference.audioPreference?.extended?.toDsl()
-                        ?: preference.audioPreference?.default?.toDsl()
-                        ?: AudioCodec.Aac(channels = 2)
-                )
-            }
-
-        }
-
-        val plan = MediaPlan(
-            videoTrack = VideoTarget(
-                listIndex = selectedEvent.selectedVideoTrack,
-                ffmpegIndex = streams.videoStream[selectedEvent.selectedVideoTrack].index,
-                codec = videoPreference
-            ),
-            audioTracks = audioTargets
+        val videoTarget = VideoTarget(
+            listIndex = selectedEvent.selectedVideoTrack,
+            ffmpegIndex = streams.videoStream[selectedEvent.selectedVideoTrack].index,
+            codec = videoPreference
         )
 
-        val args = plan.toFfmpegArgs(streams.videoStream, streams.audioStream)
-        val extension = plan.toContainer()
+        val planner = getMediaPlanner(getBestEncodeStrategy(videoPreference, useVideoStream), videoTarget, audioTargets)
 
+        val extension = planner.toContainer()
         val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
 
         val filename = File(preparedFile).nameWithoutExtension
@@ -92,17 +78,34 @@ class MediaCreateEncodeTaskListener(
             return null
         }
 
-        val task = EncodeTask(
-            data = EncodeData(
-                arguments = args,
-                outputFileName = "$filename.$extension",
-                outputFolderName = parsedInfo,
-                inputFile = preparedFile
-            )
+        val baseData = EncodeDataBase(
+            outputFileName = "$filename.$extension",
+            outputFolderName = parsedInfo,
+            inputFile = preparedFile
         )
 
+        val task = when (planner) {
+            is SegmentedMediaPlan -> {
+                val videoInstructs =
+                    planner.toVideoInstructions(inputFile = baseData.inputFile, outputFile = baseData.outputFileName)
+                val audioInstructs = planner.toAudioInstructions(inputFile = baseData.inputFile)
+                val data = baseData.toSegmented(videoInstructs, audioInstructs)
+                SegmentedEncodeTask(data)
+            }
+
+            is LinearMediaPlan -> {
+                val arguments =
+                    planner.toInstructions(inputFile = baseData.inputFile, outputFile = baseData.outputFileName)
+                val data = baseData.toLinear(arguments)
+                LinearEncodeTask(data)
+            }
+
+            else -> throw RuntimeException("Unsupported planner type: ${planner::class.simpleName}")
+        }
+
         val producerEvent = ProcesserEncodeTaskCreatedEvent(
-            taskId = task.taskId
+            taskId = task.taskId,
+            task::class.simpleName!!
         ).derivedOf(event)
 
         task.apply { derivedOf(producerEvent) }
@@ -110,4 +113,27 @@ class MediaCreateEncodeTaskListener(
 
         return producerEvent
     }
+
+    fun EncodeDataBase.toLinear(instruct: FFmpegInstructions): LinearEncodeData {
+        return LinearEncodeData(
+            instructions = instruct,
+            outputFileName = this.outputFileName,
+            outputFolderName = this.outputFolderName,
+            inputFile = this.inputFile
+        )
+    }
+
+    fun EncodeDataBase.toSegmented(
+        videoInstruction: FFmpegInstructions,
+        audioInstructs: List<FFmpegInstructions>
+    ): SegmentEncodeData {
+        return SegmentEncodeData(
+            videoInstruction = videoInstruction,
+            audioInstructions = audioInstructs,
+            outputFileName = this.outputFileName,
+            outputFolderName = this.outputFolderName,
+            inputFile = this.inputFile
+        )
+    }
+
 }

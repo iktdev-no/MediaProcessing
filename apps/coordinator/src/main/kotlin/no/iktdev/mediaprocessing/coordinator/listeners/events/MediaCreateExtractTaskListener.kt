@@ -6,6 +6,7 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.dsl.SubtitleCodec
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
@@ -88,9 +89,21 @@ class MediaCreateExtractTaskListener(): EventListener() {
         // outputfilnavn basert på index og extension
         val outputFileName = "${inputFile.nameWithoutExtension}-${language}.${extension}"
 
+        val command = ffmpeg {
+            input(inputFile.absolutePath) {
+                subtitle(index) {
+                    this.language = language
+                }
+            }
+            output(outputFileName) {
+                overwrite = true
+                progress = false
+            }
+        }
+
         return ExtractSubtitleData(
             inputFile = inputFile.path,
-            arguments = args,
+            instructions = command.toInstructions(),
             outputFileName = outputFileName,
             outputFolderName = outputFolderName,
             language = language

@@ -1,35 +1,33 @@
 package no.iktdev.mediaprocessing.processer.runners.segment
 
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.processer.runners.Runner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.segment.Segment
-import java.io.File
 
 class SegmentEncodeRunner(
     private val segment: Segment,
-    private val input: File,
-    private val args: List<String>,
+    private val videoInstructions: FFmpegInstructions,
     private val ffmpegInstance: FFmpeg
 ) : Runner() {
 
 
     override suspend fun run(): RunnerResult<SegmentEncodePayload> {
 
-        val segmentArgs = MpegArgument()
-            .inputFile(input.absolutePath)
-            .outputFile(segment.output.absolutePath)
-            .args(
-                listOf(
-                    "-y",
-                    "-ss", segment.start.toString(),
-                    "-t", segment.duration.toString()
-                ) + args
-            )
-            .withProgress(true)
+        val dsl = ffmpeg {
+            fromInstructions(videoInstructions)
+            segment(segment.start, segment.duration)
+            output(segment.output.absolutePath) {
+                overwrite = true
+                progress = true
+                useWorkFile = false
+            }
+        }
 
-        ffmpegInstance.run(segmentArgs)
+        ffmpegInstance.run(dsl)
         val result = ffmpegInstance.result
 
         return if (result.resultCode == 0) {
@@ -48,7 +46,7 @@ class SegmentEncodeRunner(
 
     data class SegmentEncodePayload(
         val index: Int,
-        val output: File
+        val output: IFile
     )
 
 }

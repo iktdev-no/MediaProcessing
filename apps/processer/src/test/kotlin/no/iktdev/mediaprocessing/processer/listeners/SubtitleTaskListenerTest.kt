@@ -9,8 +9,14 @@ import no.iktdev.eventi.registry.TaskTypeRegistry
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
+import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.TestUtils
 import no.iktdev.mediaprocessing.processer.assertSameReferenceId
+import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
@@ -19,15 +25,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-class SubtitleTaskListenerTest {
+class SubtitleTaskListenerTest: TestBase() {
 
-    class TestListener(val delay: Long): SubtitleTaskListener(
+    class TestListener(val delay: Long, executablesConfig: ExecutablesConfig): SubtitleTaskListener(
         fileUtil = TestUtils.getFileUtil(),
-        executableConfig = TestUtils.getExecutableConfig(),
+        executableConfig = executablesConfig,
     ) {
         fun getJob() = currentJob
 
@@ -39,7 +44,7 @@ class SubtitleTaskListenerTest {
             this._result = result
         }
 
-        override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
+        override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: IFile): FFmpeg {
             return MockFFmpeg(delayMillis = delay, listener =  MockFFmpeg.emptyListener())
         }
     }
@@ -71,12 +76,22 @@ class SubtitleTaskListenerTest {
                 inputFile = "input.mp4",
                 outputFileName = "output.srt",
                 outputFolderName = "output",
-                arguments = listOf("-y"),
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply { file("input.mp4") {
+                        subtitle(0) {
+                            map = true
+                            language = "eng"
+                        }
+                    } },
+                    output = OutputSection("output.srt").apply {
+                        overwrite = true
+                    },
+                ),
                 language = "eng"
             )
         ).newReferenceId()
 
-        val listener = TestListener(delay)
+        val listener = TestListener(delay, mockExecConfig)
 
         val time = measureTimeMillis {
             val accepted = listener.accept(testTask, overrideReporter)
@@ -106,8 +121,20 @@ class SubtitleTaskListenerTest {
                 inputFile = "input.mp4",
                 outputFileName = "output.srt",
                 outputFolderName = "output",
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply {
+                        file("input.mp4") {
+                            subtitle(0) {
+                                map = true
+                                language = "eng"
+                            }
+                        }
+                    },
+                    output = OutputSection("output.srt").apply {
+                        overwrite = true
+                    }
+                ),
 
-                arguments = listOf("-y"),
                 language = "eng"
             )
         ).newReferenceId()
@@ -131,16 +158,28 @@ class SubtitleTaskListenerTest {
             ExtractSubtitleData(
                 inputFile = "input.mp4",
                 outputFolderName = "output",
-
                 outputFileName = "output.srt",
-                arguments = listOf("-y"),
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply {
+                        file("input.mp4") {
+                            subtitle(0) {
+                                map = true
+                                language = "eng"
+                            }
+                        }
+                    },
+                    output = OutputSection("output.srt").apply {
+                        overwrite = true
+                    }
+                ),
+
                 language = "eng"
             )
         ).newReferenceId()
 
         val listener = SubtitleTaskListener(
             fileUtil = TestUtils.getFileUtil(),
-            executableConfig = TestUtils.getExecutableConfig()
+            executableConfig = mockExecConfig
         )
 
         val event = listener.createIncompleteStateTaskEvent(
@@ -165,12 +204,25 @@ class SubtitleTaskListenerTest {
                 inputFile = "input.mp4",
                 outputFolderName = "output",
                 outputFileName = "output.srt",
-                arguments = listOf("-y"),
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply {
+                        file("input.mp4") {
+                            subtitle(0) {
+                                map = true
+                                language = "eng"
+                            }
+                        }
+                    },
+                    output = OutputSection("output.srt").apply {
+                        overwrite = true
+                    }
+                ),
+
                 language = "eng"
             )
         ).newReferenceId()
 
-        val listener = TestListener(delay = 10)
+        val listener = TestListener(delay = 10, mockExecConfig)
 
         listener.accept(task, overrideReporter)
         listener.getJob()?.join()

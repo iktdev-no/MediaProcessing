@@ -2,12 +2,12 @@ package no.iktdev.mediaprocessing.processer.listeners
 
 import com.github.pgreze.process.ProcessResult
 import kotlinx.coroutines.delay
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
-import java.io.File
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 
-class MockFFmpeg(override val listener: Listener, val delayMillis: Long = 500, private val simulateSuccess: Boolean = true) : FFmpeg(executable = "", logDir = File("/null")) {
+class MockFFmpeg(override val listener: Listener, val delayMillis: Long = 500, private val simulateSuccess: Boolean = true) : FFmpeg(executable = "", logDir = IFile("/null")) {
 
     companion object {
         fun emptyListener() = object : Listener {
@@ -18,10 +18,10 @@ class MockFFmpeg(override val listener: Listener, val delayMillis: Long = 500, p
         }
     }
 
-    override suspend fun run(argument: MpegArgument) {
-        logFile = File("build/test-log/file.json")
-        inputFile = argument.inputFile!!
-        listener.onStarted(argument.inputFile!!)
+    override suspend fun run(command: FfmpegDsl) {
+        logFile = IFile("build/test-log/file.json")
+        inputFile = command.toInstructions().findPrimaryInput()
+        listener.onStarted(inputFile)
         delay(delayMillis)
 
         result = ProcessResult(
@@ -30,7 +30,7 @@ class MockFFmpeg(override val listener: Listener, val delayMillis: Long = 500, p
         )
 
         if (simulateSuccess) {
-            listener.onCompleted(inputFile, argument.outputFile!!)
+            listener.onCompleted(inputFile, command.outputFile())
         } else {
             listener.onError(inputFile, "Simulated error")
         }

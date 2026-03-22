@@ -12,12 +12,12 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
 
         // CRF (Constant Rate Factor) styrer kvalitet vs bitrate.
         // Lavere tall = bedre kvalitet, høyere tall = lavere bitrate.
-        override var crf: Int = 18,
-        override val bitrate: Int? = null,
+        crf: Int = 18,
+        bitrate: Int? = null,
 
         // Tune kan brukes for spesifikke scenarier (film, animation, grain).
         var tune: String? = null,
-    ) : VideoCodec("libx265") {
+    ) : VideoCodec(codec = "libx265", crf = crf, bitrate = bitrate) {
 
         override fun determineTranscodeDecision(stream: VideoStream): TranscodeDecision {
             val superDecision = super.determineTranscodeDecision(stream)
@@ -43,12 +43,14 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
                 else -> TranscodeDecision.Reencode
             }
         }
-        override fun buildFfmpegArgs(stream: VideoStream): List<String> {
-            val args = super.buildFfmpegArgs(stream).toMutableList()
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = super.buildFfmpegArgs(s).toMutableList()
             args += listOf("-preset", preset.presetName)
             tune?.let { args += listOf("-tune", it) }
             return args
         }
+
     }
 
 
@@ -66,9 +68,9 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
         var level: Double = 4.2,
 
         // CRF: styrer kvalitet vs bitrate (samme som for HEVC).
-        override var crf: Int = 23,
-        override val bitrate: Int? = null
-    ) : VideoCodec("libx264") {
+        crf: Int = 23,
+        bitrate: Int? = null
+    ) : VideoCodec(codec = "libx264", crf = crf, bitrate = bitrate) {
         override fun determineTranscodeDecision(stream: VideoStream): TranscodeDecision {
             val superDecision = super.determineTranscodeDecision(stream)
             if (superDecision == TranscodeDecision.Reencode) return superDecision
@@ -81,26 +83,28 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
                 else -> TranscodeDecision.Copy
             }
         }
-        override fun buildFfmpegArgs(stream: VideoStream): List<String> {
-            val args = super.buildFfmpegArgs(stream).toMutableList()
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = super.buildFfmpegArgs(s).toMutableList()
             args += listOf("-preset", preset.presetName)
             args += listOf("-profile:v", profile.profileName)
             args += listOf("-level", level.toString())
             return args
         }
+
     }
 
 
     // VP9 encoder (libvpx-vp9)
     class Vp9(
         // CRF: styrer kvalitet vs bitrate for VP9.
-        override var crf: Int = 32,
+        crf: Int = 32,
 
         // Bitrate: kan settes eksplisitt i kbps hvis du vil ha CBR/VBR.
-        override var bitrate: Int? = null,
+        bitrate: Int? = null,
 
         var cpuUsed: Int = 4 // Tradeoff mellom hastighet og komprimering.
-    ) : VideoCodec("libvpx-vp9") {
+    ) : VideoCodec(codec = "libvpx-vp9", crf = crf, bitrate = bitrate) {
         override fun determineTranscodeDecision(stream: VideoStream): TranscodeDecision {
             val superDecision = super.determineTranscodeDecision(stream)
             if (superDecision == TranscodeDecision.Reencode) return superDecision
@@ -110,8 +114,9 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
 
             return if (containerOk) TranscodeDecision.Copy else TranscodeDecision.Remux
         }
-        override fun buildFfmpegArgs(stream: VideoStream): List<String> {
-            val args = super.buildFfmpegArgs(stream).toMutableList()
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = super.buildFfmpegArgs(s).toMutableList()
             args += listOf("-cpu-used", cpuUsed.toString())
             return args
         }
@@ -120,20 +125,20 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
 
     // VP8 encoder (libvpx)
     class Vp8(
-        override var crf: Int = 10,
-        override var bitrate: Int? = null
-    ) : VideoCodec("libvpx")
+        crf: Int = 10,
+        bitrate: Int? = null
+    ) : VideoCodec(codec = "libvpx", crf = crf, bitrate = bitrate)
 
 
     // AV1 encoder (libaom-av1)
     class Av1(
         // CRF: styrer kvalitet vs bitrate for AV1.
-        override var crf: Int = 30,
+        crf: Int = 30,
 
         // cpuUsed: tradeoff mellom hastighet og komprimering.
         // Lav verdi = treg, men effektiv; høy verdi = rask, men mindre effektiv.
         var cpuUsed: Int = 4
-    ) : VideoCodec("libaom-av1") {
+    ) : VideoCodec(codec = "libaom-av1", crf = crf) {
         override fun determineTranscodeDecision(stream: VideoStream): TranscodeDecision {
             val superDecision = super.determineTranscodeDecision(stream)
             if (superDecision == TranscodeDecision.Reencode) return superDecision
@@ -146,8 +151,9 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
                 else -> TranscodeDecision.Copy
             }
         }
-        override fun buildFfmpegArgs(stream: VideoStream): List<String> {
-            val args = super.buildFfmpegArgs(stream).toMutableList()
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = super.buildFfmpegArgs(s).toMutableList()
             args += listOf("-cpu-used", cpuUsed.toString())
             return args
         }
@@ -158,11 +164,12 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
     class Vvc(
         // Preset: encoding speed vs compression tradeoff.
         var preset: Presets = Presets.Medium,
-        override var crf: Int = 27,
-        override val bitrate: Int? = null
-    ) : VideoCodec("libvvc") {
-        override fun buildFfmpegArgs(stream: VideoStream): List<String> {
-            val args = super.buildFfmpegArgs(stream).toMutableList()
+        crf: Int = 27,
+        bitrate: Int? = null
+    ) : VideoCodec(codec = "libvvc", crf = crf, bitrate = bitrate) {
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = super.buildFfmpegArgs(s).toMutableList()
             args += listOf("-preset", preset.presetName)
             return args
         }
@@ -172,13 +179,19 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
     // Xvid (MPEG-4 Part 2)
     class Vid(
         // Bitrate: typisk parameter for Xvid, ofte brukt i kbps.
-        override var bitrate: Int? = null,
+        bitrate: Int? = null,
         var qscale: Int? = null // Xvid bruker qscale i stedet for CRF
-    ) : VideoCodec("libxvid") {
-        override fun buildFfmpegArgs(stream: VideoStream): List<String> {
-            val args = mutableListOf("-c:v", codec)
+    ) : VideoCodec(codec = "libxvid", bitrate = bitrate) {
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = mutableListOf<String>()
+
+            // enten qscale eller bitrate
+            args += listOf("-c:v$s", codec)
+
             bitrate?.let { args += listOf("-b:v", "${it}k") }
             qscale?.let { args += listOf("-qscale:v", it.toString()) }
+
             return args
         }
     }
@@ -194,24 +207,27 @@ sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val b
     object Copy : VideoCodec("copy")
 
     open fun determineTranscodeDecision(stream: VideoStream): TranscodeDecision {
-        return if (this.isSame(stream.codec_name)) {
-            TranscodeDecision.Copy
-        } else {
-            when (this) {
-                is Copy -> TranscodeDecision.Copy
-                else -> TranscodeDecision.Reencode
-            }
+        val isSameCodec = this.isSame(stream.codec_name)
+        if (isSameCodec) {
+            return TranscodeDecision.Copy
         }
+        val mode = when (this) {
+            is Copy -> TranscodeDecision.Copy
+            else -> TranscodeDecision.Reencode
+        }
+        return mode
     }
 
-    open fun buildFfmpegArgs(stream: VideoStream): List<String> {
-        val args = mutableListOf("-c:v", codec)
+    open fun buildFfmpegArgs(suffix: String? = null): List<String> {
+        val s = suffix ?: ""
+        val args = mutableListOf("-c:v$s", codec)
 
         crf?.let { args += listOf("-crf", it.toString()) }
         bitrate?.let { args += listOf("-b:v", "${it}k") }
 
         return args
     }
+
 }
 
 fun VideoCodec.isSame(name: String): Boolean {

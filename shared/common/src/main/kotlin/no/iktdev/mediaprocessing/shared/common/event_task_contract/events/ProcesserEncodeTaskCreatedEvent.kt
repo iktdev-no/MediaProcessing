@@ -4,5 +4,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskCreatedEv
 import java.util.UUID
 
 class ProcesserEncodeTaskCreatedEvent(
-    taskId: UUID
+    taskId: UUID,
+    val taskType: String
 ): TaskCreatedEvent(taskId = taskId) {}

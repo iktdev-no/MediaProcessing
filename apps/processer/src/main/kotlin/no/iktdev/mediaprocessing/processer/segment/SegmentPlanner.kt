@@ -1,11 +1,11 @@
 package no.iktdev.mediaprocessing.processer.segment;
 
-import java.io.File;
+import no.iktdev.files.IFile
 
 class SegmentPlanner(
         private val segmentLength: Double = 60.0
 ) {
-    fun plan(input: File, totalDuration: Double, outputDir: File): List<Segment> {
+    fun plan(totalDuration: Double, outputDir: IFile): List<Segment> {
         val segments = mutableListOf<Segment>()
         var start = 0.0
         var index = 0
@@ -16,7 +16,7 @@ class SegmentPlanner(
                     index = index,
                     start = start,
                     duration = dur,
-                    output = File(outputDir, "segment_${index}.mkv")
+                    output = outputDir.using("segment_${index}.mkv")
             )
             start += dur
             index++

@@ -11,33 +11,42 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
+import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.TestUtils
 import no.iktdev.mediaprocessing.processer.assertSameReferenceId
+import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
 import no.iktdev.mediaprocessing.processer.getCoordinatorClient
 import no.iktdev.mediaprocessing.processer.getProcesserProperties
-import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
+import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-class LinearVideoTaskListenerTest {
+class LinearVideoTaskListenerTest : TestBase() {
 
 
-    class TestListenerLinear(val delay: Long, coordinatorClient: CoordinatorClient, processerProperties: ProcesserProperties) :
+    class TestListenerLinear(
+        val delay: Long,
+        coordinatorClient: CoordinatorClient,
+        processerProperties: ProcesserProperties,
+        executablesConfig: ExecutablesConfig
+    ) :
         LinearVideoTaskListener(
             coordinatorWebClient = coordinatorClient,
             localProgress = LocalProgressCache(),
             fileUtil = TestUtils.getFileUtil(),
-            executableConfig = TestUtils.getExecutableConfig(),
+            executableConfig = executablesConfig,
             processerProperties = processerProperties
         ) {
         fun getJob() = currentJob
@@ -51,7 +60,7 @@ class LinearVideoTaskListenerTest {
             this._result = result
         }
 
-        override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
+        override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: IFile): FFmpeg {
             return MockFFmpeg(delayMillis = delay, listener = MockFFmpeg.emptyListener())
         }
     }
@@ -71,23 +80,28 @@ class LinearVideoTaskListenerTest {
 
     @BeforeEach
     fun setup() {
-        TaskTypeRegistry.register(EncodeTask::class.java)
+        TaskTypeRegistry.register(LinearEncodeTask::class.java)
     }
 
 
     @Test
     fun `onTask waits for runner to complete`() = runTest {
         val delay = 1000L
-        val testTask = EncodeTask(
-            EncodeData(
+        val testTask = LinearEncodeTask(
+            LinearEncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "output.mp4",
                 outputFolderName = "output",
-                arguments = listOf("-y")
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply { file("input.mp4") {} },
+                    output = OutputSection("output.mp4").apply {
+                        overwrite = true
+                    },
+                ),
             )
         ).newReferenceId()
 
-        val listener = TestListenerLinear(delay, getCoordinatorClient(), getProcesserProperties())
+        val listener = TestListenerLinear(delay, getCoordinatorClient(), getProcesserProperties(), mockExecConfig)
 
         val time = measureTimeMillis {
             listener.accept(testTask, overrideReporter)
@@ -103,7 +117,8 @@ class LinearVideoTaskListenerTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en event produseres fra en task
         Hvis task har en gitt referenceId
         Så:
@@ -111,8 +126,18 @@ class LinearVideoTaskListenerTest {
         """
     )
     fun producedFrom_keeps_referenceId() {
-        val task = EncodeTask(
-            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", outputFolderName = "output", arguments = listOf("-y"))
+        val task = LinearEncodeTask(
+            LinearEncodeData(
+                inputFile = "input.mp4",
+                outputFileName = "output.mp4",
+                outputFolderName = "output",
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply { file("input.mp4") {} },
+                    output = OutputSection("output.mp4").apply {
+                        overwrite = true
+                    },
+                ),
+            )
         ).newReferenceId()
 
         val event = ProcesserEncodeResultEvent(
@@ -123,22 +148,34 @@ class LinearVideoTaskListenerTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når en task feiler og createIncompleteStateTaskEvent kalles
         Hvis task har en referenceId
         Så:
             Skal eventen som returneres ha samme referenceId
-    """)
+    """
+    )
     fun createIncompleteStateTaskEvent_keeps_referenceId() {
-        val task = EncodeTask(
-            EncodeData(inputFile = "input.mp4", outputFileName = "output.mp4", outputFolderName = "output", arguments = listOf("-y"))
+        val task = LinearEncodeTask(
+            LinearEncodeData(
+                inputFile = "input.mp4",
+                outputFileName = "output.mp4",
+                outputFolderName = "output",
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply { file("input.mp4") {} },
+                    output = OutputSection("output.mp4").apply {
+                        overwrite = true
+                    },
+                ),
+            )
         ).newReferenceId()
 
         val listener = LinearVideoTaskListener(
             coordinatorWebClient = getCoordinatorClient(),
             localProgress = LocalProgressCache(),
             fileUtil = TestUtils.getFileUtil(),
-            executableConfig = TestUtils.getExecutableConfig(),
+            executableConfig = mockExecConfig,
             processerProperties = getProcesserProperties()
         )
 
@@ -152,23 +189,30 @@ class LinearVideoTaskListenerTest {
     }
 
     @Test
-    @DisplayName("""
+    @DisplayName(
+        """
         Når VideoTaskListener kjører en EncodeTask
         Hvis task har en referenceId
         Så:
             Skal resultat-eventen ha samme referenceId
-        """)
+        """
+    )
     fun onTask_keeps_referenceId() = runTest {
-        val task = EncodeTask(
-            EncodeData(
+        val task = LinearEncodeTask(
+            LinearEncodeData(
                 inputFile = "input.mp4",
                 outputFileName = "output.mp4",
                 outputFolderName = "output",
-                arguments = listOf("-y")
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply { file("input.mp4") {} },
+                    output = OutputSection("output.mp4").apply {
+                        overwrite = true
+                    },
+                ),
             )
         ).apply { newReferenceId() }
 
-        val listener = TestListenerLinear(delay = 10, getCoordinatorClient(), getProcesserProperties())
+        val listener = TestListenerLinear(delay = 10, getCoordinatorClient(), getProcesserProperties(), mockExecConfig)
 
         listener.accept(task, overrideReporter)
         listener.getJob()?.join()
@@ -177,79 +221,6 @@ class LinearVideoTaskListenerTest {
         assertTrue(event is ProcesserEncodeResultEvent)
         assertSameReferenceId(task, event)
     }
-
-    @Test
-    @DisplayName("""
-    Når encode-argumentene kun påvirker audio (f.eks. -c:a aac)
-    Hvis getEncodeStrategy() kalles
-    Så:
-        Skal Linear returneres
-""")
-    fun strategy_returns_linear_for_audio_only() {
-        val listener = TestListenerLinear(delay = 0, getCoordinatorClient(), getProcesserProperties())
-
-        val task = EncodeTask(
-            EncodeData(
-                inputFile = "input.mp4",
-                outputFileName = "out.mp4",
-                outputFolderName = "output",
-                arguments = listOf("-c:a", "aac")
-            )
-        ).apply { newReferenceId() }
-
-        val strategy = listener.getEncodeStrategy(task)
-
-        assertEquals(VideoStrategy.Linear, strategy)
-    }
-
-    @Test
-    @DisplayName("""
-    Når encode-strategien er Linear
-    Hvis accept() kalles på LinearVideoTaskListener
-    Så:
-        Skal listeneren akseptere tasken
-""")
-    fun linear_listener_accepts_when_strategy_is_linear() {
-        val listener = TestListenerLinear(delay = 0, getCoordinatorClient(), getProcesserProperties())
-
-        val task = EncodeTask(
-            EncodeData(
-                inputFile = "input.mp4",
-                outputFileName = "out.mp4",
-                outputFolderName = "output",
-                arguments = listOf("-c:a", "aac") // audio-only → linear
-            )
-        ).apply { newReferenceId() }
-
-        val accepted = listener.accept(task, overrideReporter)
-
-        assertTrue(accepted)
-    }
-
-    @Test
-    @DisplayName("""
-    Når encode-strategien er Segmented
-    Hvis accept() kalles på LinearVideoTaskListener
-    Så:
-        Skal listeneren IKKE akseptere tasken
-""")
-    fun linear_listener_rejects_when_strategy_is_segmented() {
-        val listener = TestListenerLinear(delay = 0, getCoordinatorClient(), getProcesserProperties())
-
-        val task = EncodeTask(
-            EncodeData(
-                inputFile = "input.mp4",
-                outputFileName = "out.mp4",
-                outputFolderName = "output",
-                arguments = listOf("-c:v", "libx264") // video → segmented
-            )
-        ).apply { newReferenceId() }
-
-        val accepted = listener.accept(task, overrideReporter)
-
-        assertTrue(!accepted)
-    }
-
 
 
 }

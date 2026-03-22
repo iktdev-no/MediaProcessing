@@ -5,14 +5,14 @@ import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.mediaprocessing.ffmpeg.data.FFinfoOutput
-import no.iktdev.mediaprocessing.processer.WorkingFile
+import no.iktdev.mediaprocessing.processer.TestBase
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProbeRunnerTest {
+class ProbeRunnerTest: TestBase() {
 
     private val testRoot = File("build/test-run")
 
@@ -68,7 +68,7 @@ class ProbeRunnerTest {
             Skal video- og audiostreams parses korrekt
     """)
     fun parses_valid_streams_and_format() = runTest {
-        val file = WorkingFile("video.mp4")
+        val file = workFolder.using("video.mp4")
 
         mockFFprobeReturning(
             ffinfoStreamsAndFormat(
@@ -114,7 +114,7 @@ class ProbeRunnerTest {
             Skal RunnerResult.Reject returneres
     """)
     fun rejects_when_streams_missing() = runTest {
-        val file = WorkingFile("video.mp4")
+        val file = workFolder.using("video.mp4")
 
         mockFFprobeReturning(
             ffinfoOutput("""{ "format": {} }""")
@@ -142,7 +142,7 @@ class ProbeRunnerTest {
             Skal RunnerResult.Reject returneres
     """)
     fun rejects_when_format_missing() = runTest {
-        val file = WorkingFile("video.mp4")
+        val file = workFolder.using("video.mp4")
 
         mockFFprobeReturning(
             ffinfoOutput("""{ "streams": [] }""")
@@ -170,7 +170,7 @@ class ProbeRunnerTest {
             Skal streamen ignoreres
     """)
     fun ignores_streams_without_codec_name() = runTest {
-        val file = WorkingFile("video.mp4")
+        val file = workFolder.using("video.mp4")
 
         mockFFprobeReturning(
             ffinfoStreamsAndFormat(
@@ -203,7 +203,7 @@ class ProbeRunnerTest {
             Skal streamen ignoreres
     """)
     fun ignores_unknown_codec_type() = runTest {
-        val file = WorkingFile("video.mp4")
+        val file = workFolder.using("video.mp4")
 
         mockFFprobeReturning(
             ffinfoStreamsAndFormat(

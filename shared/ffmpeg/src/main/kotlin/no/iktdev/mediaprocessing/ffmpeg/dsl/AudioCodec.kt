@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ffmpeg.dsl
 
 import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
+import no.iktdev.mediaprocessing.ffmpeg.model.AudioClamp
 
 sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open var sampleRate: Int? = null, open var channels: Int? = null) {
 
@@ -31,16 +32,15 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
             }
         }
 
-        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
-            val args = super.buildFfmpegArgs(stream, trackIndex).toMutableList()
-
-            // AAC-spesifikt: profile
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val args = super.buildFfmpegArgs(suffix).toMutableList()
             if (profile != AacProfile.LC) {
-                args += listOf("-profile:a", profile.ffmpegName)
+                val s = suffix ?: ""
+                args += listOf("-profile:a$s", profile.ffmpegName)
             }
-
             return args
         }
+
     }
 
     // MP3 (MPEG Layer III)
@@ -74,12 +74,13 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
             }
         }
 
-        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
-            val args = super.buildFfmpegArgs(stream, trackIndex).toMutableList()
-            // Opus-spesifikt: application mode
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val args = super.buildFfmpegArgs(suffix).toMutableList()
+            val s = suffix ?: ""
             args += listOf("-application", application.ffmpegName)
             return args
         }
+
     }
 
     // Vorbis (åpen kildekode, brukt i Ogg)
@@ -95,14 +96,13 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
         override var channels: Int? = null, // = 2,
         override var sampleRate: Int? = null, // = 48000
     ) : AudioCodec("flac") {
-        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
-            val args = mutableListOf<String>()
-            args += if (trackIndex != null) listOf("-c:a:$trackIndex", "flac")
-            else listOf("-c:a", "flac")
-
-            compressionLevel?.let { args += listOf("-compression_level", compressionLevel.toString()) }
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            val args = mutableListOf("-c:a$s", "flac")
+            compressionLevel?.let { args += listOf("-compression_level$s", it.toString()) }
             return args
         }
+
     }
 
     // AC3 (Dolby Digital)
@@ -127,10 +127,11 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
     ) : AudioCodec("dts")
 
     class Pcm : AudioCodec("pcm_s16le") {
-        override fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int?): List<String> {
-            val idx = trackIndex?.let { ":$it" } ?: ""
-            return listOf("-c:a$idx", "pcm_s16le")
+        override fun buildFfmpegArgs(suffix: String?): List<String> {
+            val s = suffix ?: ""
+            return listOf("-c:a$s", "pcm_s16le")
         }
+
 
         override fun determineTranscodeDecision(stream: AudioStream) = TranscodeDecision.Reencode
     }
@@ -172,41 +173,92 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
      * - Hopper over felter som er null.
      * - Validerer mot input-stream (ikke høyere enn input).
      */
-    open fun buildFfmpegArgs(stream: AudioStream, trackIndex: Int? = null): List<String> {
+    open fun buildFfmpegArgs(suffix: String? = null): List<String> {
+        val s = suffix ?: ""
         val args = mutableListOf<String>()
 
         // codec
-        args += if (trackIndex != null) {
-            listOf("-c:a:$trackIndex", codec)
-        } else {
-            listOf("-c:a", codec)
+        args += listOf("-c:a$s", codec)
+
+        // bitrate
+        bitrate?.let { kbps ->
+            args += listOf("-b:a$s", "${kbps}k")
         }
-
-        // bitrate (clamped to source)
-        bitrate?.let { requestedKbps ->
-            val requestedBits = requestedKbps.toLong() * 1000L
-            val sourceBits = stream.bit_rate ?: requestedBits
-            val finalBits = minOf(requestedBits, sourceBits)
-            val finalKbps = (finalBits / 1000L).toInt()
-
-            args += listOf("-b:a", "${finalKbps}k")
-        }
-
-
 
         // sample rate
-        sampleRate?.let {
-            val effective = it.coerceAtMost(stream.sample_rate.toInt())
-            args += listOf("-ar", effective.toString())
+        sampleRate?.let { sr ->
+            args += listOf("-ar$s", sr.toString())
         }
 
         // channels
-        channels?.let {
-            val effective = it.coerceAtMost(stream.channels)
-            args += listOf("-ac", effective.toString())
+        channels?.let { ch ->
+            args += listOf("-ac$s", ch.toString())
         }
 
         return args
+    }
+
+
+    fun setClamped(clamp: AudioClamp) {
+        this.channels = clamp.channels ?: this.channels
+        this.bitrate = clamp.bitrate ?: this.bitrate
+        this.sampleRate = clamp.sampleRate ?: this.sampleRate
+    }
+
+    fun copy(): AudioCodec = when (this) {
+        is Aac -> Aac(
+            bitrate = this.bitrate,
+            profile = this.profile,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Mp3 -> Mp3(
+            bitrate = this.bitrate,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Opus -> Opus(
+            bitrate = this.bitrate,
+            channels = this.channels,
+            sampleRate = this.sampleRate,
+            application = this.application
+        )
+
+        is Vorbis -> Vorbis(
+            bitrate = this.bitrate,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Flac -> Flac(
+            compressionLevel = this.compressionLevel,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Ac3 -> Ac3(
+            bitrate = this.bitrate,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Eac3 -> Eac3(
+            bitrate = this.bitrate,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Dts -> Dts(
+            bitrate = this.bitrate,
+            channels = this.channels,
+            sampleRate = this.sampleRate
+        )
+
+        is Pcm -> Pcm()
+
+        Copy -> Copy
     }
 
 }

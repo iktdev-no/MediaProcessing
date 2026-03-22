@@ -5,8 +5,12 @@ import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
-import no.iktdev.mediaprocessing.processer.WorkingFile
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
+import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.segment.Segment
 import org.junit.jupiter.api.*
@@ -14,7 +18,7 @@ import org.junit.jupiter.api.Assertions.*
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class SegmentEncodeRunnerTest {
+class SegmentEncodeRunnerTest: TestBase() {
 
     private val testRoot = File("build/test-run")
 
@@ -29,7 +33,7 @@ class SegmentEncodeRunnerTest {
             index = index,
             start = 10.0,
             duration = 5.0,
-            output = WorkingFile("seg$index.mp4")
+            output = workFolder.using("seg$index.mp4")
         )
 
     private fun fakeFFmpeg(resultCode: Int): FFmpeg {
@@ -56,13 +60,29 @@ class SegmentEncodeRunnerTest {
 
     fun success_case_returns_success_payload() = runTest {
         val segment = fakeSegment(2)
-        val input = WorkingFile("input.mp4").apply { writeText("dummy") }
+        val input = workFolder.using("input.mp4").apply { writeText("dummy") }
         val ffmpeg = fakeFFmpeg(0)
+
+        val instruct = FFmpegInstructions(
+            inputs = InputSection().apply {
+                file(input.absolutePath) {
+                    video(0) {
+                        map = true
+                        codec = VideoCodec.H264()
+                    }
+                }
+            },
+            output = OutputSection(segment.output.name).apply {
+                overwrite = true
+                useWorkFile = false
+            }
+        )
+
+
 
         val runner = SegmentEncodeRunner(
             segment = segment,
-            input = input,
-            args = listOf("-c:v", "libx264"),
+            videoInstructions = instruct,
             ffmpegInstance = ffmpeg
         )
 
@@ -87,13 +107,28 @@ class SegmentEncodeRunnerTest {
     """)
     fun failure_case_returns_reject() = runTest {
         val segment = fakeSegment(1)
-        val input = WorkingFile("input.mp4").apply { writeText("dummy") }
+        val input = workFolder.using("input.mp4").apply { writeText("dummy") }
         val ffmpeg = fakeFFmpeg(127)
+
+        val instruct = FFmpegInstructions(
+            inputs = InputSection().apply {
+                file(input.absolutePath) {
+                    video(0) {
+                        map = true
+                        codec = VideoCodec.H264()
+                    }
+                }
+            },
+            output = OutputSection(segment.output.name).apply {
+                overwrite = true
+                useWorkFile = false
+            },
+        )
+
 
         val runner = SegmentEncodeRunner(
             segment = segment,
-            input = input,
-            args = listOf("-c:v", "libx264"),
+            videoInstructions = instruct,
             ffmpegInstance = ffmpeg
         )
 
@@ -116,16 +151,31 @@ class SegmentEncodeRunnerTest {
 """)
     fun verifies_correct_ffmpeg_arguments() = runTest {
         val segment = fakeSegment(0)
-        val input = WorkingFile("input.mp4").apply { writeText("dummy") }
+        val input = workFolder.using("input.mp4").apply { writeText("dummy") }
         val ffmpeg = fakeFFmpeg(0)
 
-        val slotArgs = slot<MpegArgument>()
+        val slotArgs = slot<FfmpegDsl>()
         coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
+
+        val instruct = FFmpegInstructions(
+            inputs = InputSection().apply {
+                file(input.absolutePath) {
+                    video(0) {
+                        map = true
+                        codec = VideoCodec.H264()
+                    }
+                }
+            },
+            output = OutputSection(segment.output.name).apply {
+                overwrite = true
+                useWorkFile = false
+            },
+        )
+
 
         val runner = SegmentEncodeRunner(
             segment = segment,
-            input = input,
-            args = listOf("-c:v", "libx264"),
+            videoInstructions = instruct,
             ffmpegInstance = ffmpeg
         )
 
@@ -144,11 +194,15 @@ class SegmentEncodeRunnerTest {
         assertTrue("5.0" in built)
 
         // user args
-        assertTrue("-c:v" in built)
+        assertTrue(
+            built.contains("-c:v:0") || built.contains("-c:v"),
+            "Expected either -c:v:0 or -c:v in FFmpeg arguments"
+        )
+
         assertTrue("libx264" in built)
 
         // output
-        val outputUsed = slotArgs.captured.getOutputFileUsed()
+        val outputUsed = slotArgs.captured.outputFile()
         assertTrue(outputUsed in built)
     }
 

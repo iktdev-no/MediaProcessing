@@ -8,9 +8,11 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.defaultFilePrepareForWorkResultEvent
+import no.iktdev.mediaprocessing.ffmpeg.assertContainsAllWithOffset
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.data.Tags
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -105,7 +107,11 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertNotNull(result)
         assertEquals("movie-eng.srt", result!!.outputFileName)
         assertEquals("eng", result.language)
-        assertEquals(listOf("-map", "0:s:0", "-c:s", "copy"), result.arguments)
+        val args = ffmpeg { fromInstructions(result.instructions) }.build()
+        assertContainsAllWithOffset(
+            listOf("-map", "0:s:0", "-c:s:0", "copy"),
+            args, 6, 1
+        )
     }
 
     @Test
@@ -160,7 +166,10 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertNotNull(result)
         assertEquals("anime-jpn.ass", result!!.outputFileName)
         assertEquals("jpn", result.language)
-        assertEquals(listOf("-map", "0:s:3", "-c:s", "copy"), result.arguments)
+        val args = ffmpeg { fromInstructions(result.instructions) }.build()
+        assertContainsAllWithOffset(
+            listOf("-map", "0:s:3", "-c:s:0", "copy"),
+            args, 6, 1)
     }
 
     @Test
@@ -207,7 +216,9 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertEquals("build/test-intermediate/Test.mkv", data.inputFile)
         assertEquals("Test-eng.srt", data.outputFileName)
         assertEquals("eng", data.language)
-        assertEquals(listOf("-map", "0:s:0", "-c:s", "copy"), data.arguments)
+        val args = ffmpeg { fromInstructions(data.instructions) }.build()
+        assertContainsAllWithOffset(
+            listOf("-map", "0:s:0", "-c:s:0", "copy"), args, 6, 1)
     }
 
     @Test
@@ -261,13 +272,16 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         val srtTask = slot[0] as ExtractSubtitleTask
         assertEquals("Test-eng.srt", srtTask.data.outputFileName)
         assertEquals("eng", srtTask.data.language)
-        assertEquals(listOf("-map", "0:s:0", "-c:s", "copy"), srtTask.data.arguments)
+        val args1 = srtTask.data.instructions.let { ffmpeg { fromInstructions(it) }.build() }
+        assertContainsAllWithOffset(
+            listOf("-map", "0:s:0", "-c:s:0", "copy"), args1, 6, 1)
 
         // Sjekk andre (ASS)
         val assTask = slot[1] as ExtractSubtitleTask
         assertEquals("Test-jpn.ass", assTask.data.outputFileName)
         assertEquals("jpn", assTask.data.language)
-        assertEquals(listOf("-map", "0:s:1", "-c:s", "copy"), assTask.data.arguments)
+        val args2 = assTask.data.instructions.let { ffmpeg { fromInstructions(it) }.build() }
+        assertContainsAllWithOffset(listOf("-map", "0:s:1", "-c:s:0", "copy"), args2, 6, 1)
 
         // Og: resultatet er et ProcesserExtractTaskCreatedEvent med to taskIds
         assertTrue(result is ProcesserExtractTaskCreatedEvent)

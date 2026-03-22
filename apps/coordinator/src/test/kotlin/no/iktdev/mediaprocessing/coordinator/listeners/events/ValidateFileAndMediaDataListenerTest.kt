@@ -4,21 +4,19 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.mediaprocessing.MockData
+import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.MockData.dummyAudioStream
 import no.iktdev.mediaprocessing.MockData.dummyVideoStream
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.defaultMediaStreamParsedEvent
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
-import no.iktdev.mediaprocessing.shared.common.dto.files.FakeFile
-import no.iktdev.mediaprocessing.shared.common.dto.files.IFile
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
-import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -181,14 +179,18 @@ class ValidateFileAndMediaDataListenerTest: TestBase() {
         Returneres Ok med eventuelle warnings
 """)
     fun testValidationOk() {
-        IFile.factory = { path -> FakeFile(path, exists = true, size = 1000) }
+        IFile.factory = { path ->
+            when (path) {
+                "build/test-intermediate/okfile.mkv" ->
+                    FakeFile(path, exists = true, size = 1000)
+                else ->
+                    FakeFile(path, exists = false, size = 0)
+            }
+        }
 
-        val file = File("build/test-intermediate/okfile.mkv")
-        file.parentFile.mkdirs()
-        file.writeBytes(ByteArray(1000)) // size = 1000
 
         val start = StartProcessingEvent(
-            StartData(operation = setOf(OperationType.Encode), fileUri = file.toURI().toString())
+            StartData(operation = setOf(OperationType.Encode), fileUri = "build/test-intermediate/okfile.mkv")
         ).newReferenceId()
             .addToHistory()
 

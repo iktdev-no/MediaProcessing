@@ -1,17 +1,16 @@
 package no.iktdev.mediaprocessing.processer.runners.segment
 
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.processer.runners.Runner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.segment.Segment
-import java.io.File
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 
 class SegmentConcatRunner(
     private val segments: List<Segment>,
-    private val intermediateStore: File,
-    private val output: File,
+    private val intermediateStore: IFile,
+    private val output: IFile,
     private val ffmpegInstance: FFmpeg
 ) : Runner() {
 
@@ -25,20 +24,23 @@ class SegmentConcatRunner(
             "file '$escaped'"
         }
 
-
         listFile.writeText(lines.joinToString("\n"))
 
-        // 2) Build ffmpeg args
-        val args = MpegArgument()
-            .preArgs("-y", "-f", "concat", "-safe", "0")
-            .inputFile(listFile.absolutePath)
-            .args("-c", "copy")
-            .outputFile(output.absolutePath)
-            .withProgress(false)
+        val dsl = ffmpeg {
+            concatFile(listFile.absolutePath) {
+            }
+
+            // output
+            output(output.absolutePath) {
+                overwrite = true
+                progress = false
+                useWorkFile = false
+            }
+        }
 
 
         // 3) Run ffmpeg
-        ffmpegInstance.run(args)
+        ffmpegInstance.run(dsl)
         val result = ffmpegInstance.result
 
         return if (result.resultCode == 0) {
@@ -54,7 +56,7 @@ class SegmentConcatRunner(
     }
 
     data class ConcatPayload(
-        val output: File,
-        val logFile: File?
+        val output: IFile,
+        val logFile: IFile?
     )
 }

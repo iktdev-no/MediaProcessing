@@ -13,5 +13,4 @@ data class MediaTracksEncodeSelectedEvent(
         val extendedListIndex: Int?,
         val extendedFfmpegIndex: Int?
     )
-
 }

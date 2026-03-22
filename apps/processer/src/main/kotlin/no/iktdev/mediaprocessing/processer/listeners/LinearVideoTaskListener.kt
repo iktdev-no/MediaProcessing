@@ -6,21 +6,18 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
-import no.iktdev.mediaprocessing.processer.strategy.VideoStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.EncodeTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import org.springframework.stereotype.Service
-import java.io.File
 import java.util.*
 
 @Service
@@ -30,12 +27,13 @@ class LinearVideoTaskListener(
     private val executableConfig: ExecutablesConfig,
     private val fileUtil: FileUtil,
     private val processerProperties: ProcesserProperties
-) : VideoTaskListener(TaskType.CPU_INTENSIVE, processerProperties) {
+) : VideoTaskListener(TaskType.CPU_INTENSIVE, executableConfig) {
     private val log = KotlinLogging.logger {}
 
-    override val listenerStrategy: VideoStrategy = VideoStrategy.Linear
 
     override fun getWorkerId() = "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"
+    override fun supports(task: Task): Boolean =
+        task is LinearEncodeTask
 
     override fun accept(task: Task, reporter: TaskReporter): Boolean {
         val accepts = super.accept(task, reporter)
@@ -46,16 +44,22 @@ class LinearVideoTaskListener(
     }
 
     override suspend fun onTask(task: Task): Event? {
-        val taskData = task as EncodeTask
+        val taskData = task as LinearEncodeTask
 
         val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName)
             .also { if (!it.exists()) {
                 it.mkdirs()
             }
+            }
+
+        val dsl = ffmpeg {
+            fromInstructions(taskData.data.instructions)
+            outputDirectory(cacheOutputFolder)
         }
+
         val cachedOutFile = cacheOutputFolder.using(taskData.data.outputFileName)
 
-        if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
+        if (cachedOutFile.exists() && !dsl.overwrite()) {
             reporter?.publishEvent(
                 ProcesserEncodeResultEvent(
                     status = TaskStatus.Failed
@@ -64,22 +68,15 @@ class LinearVideoTaskListener(
             throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
         }
 
-        val arguments = MpegArgument()
-            .inputFile(taskData.data.inputFile)
-            .outputFile(cachedOutFile.absolutePath)
-            .args(taskData.data.arguments)
-            .withProgress(true)
-
         val logDirectory = fileUtil.getLogDirectory().using("encode_linear")
         val result = getFfmpeg(
             listener = listener,
             logDirectory = logDirectory,
-            execPath = executableConfig.ffmpeg
         )
         withHeartbeatRunner {
             reporter?.updateLastSeen(task.taskId)
         }
-        result.run(arguments)
+        result.run(dsl)
         if (result.result.resultCode != 0) {
             throw FfmpegFailedException(
                 logFile = result.logFile,

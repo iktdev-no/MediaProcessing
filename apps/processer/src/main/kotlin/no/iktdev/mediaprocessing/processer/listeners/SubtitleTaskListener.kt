@@ -6,22 +6,21 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.arguments.MpegArgument
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import org.springframework.stereotype.Service
-import java.io.File
 import java.util.*
 
 @Service
 class SubtitleTaskListener(
     private val executableConfig: ExecutablesConfig,
     private val fileUtil: FileUtil
-) : FfmpegTaskListener(TaskType.CPU_INTENSIVE) {
+) : FfTaskListener(TaskType.CPU_INTENSIVE, executableConfig) {
     private val log = KotlinLogging.logger {}
 
 
@@ -40,15 +39,20 @@ class SubtitleTaskListener(
     override suspend fun onTask(task: Task): Event? {
         val taskData = task as ExtractSubtitleTask
 
-        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName).using(taskData.data.language)
+        val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName).using("subtitles", taskData.data.language)
             .also { if (!it.exists()) {
                 it.mkdirs()
             }
         }
 
+        val dsl = ffmpeg {
+            fromInstructions(taskData.data.instructions)
+            outputDirectory(cacheOutputFolder)
+        }
+
         val cachedOutFile = cacheOutputFolder.using(taskData.data.outputFileName)
 
-        if (cachedOutFile.exists() && taskData.data.arguments.firstOrNull() != "-y") {
+        if (cachedOutFile.exists() && !dsl.overwrite()) {
             reporter?.publishEvent(
                 ProcesserExtractResultEvent(
                     status = TaskStatus.Failed
@@ -57,17 +61,13 @@ class SubtitleTaskListener(
             throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
         }
 
-        val arguments = MpegArgument()
-            .inputFile(taskData.data.inputFile)
-            .outputFile(cachedOutFile.absolutePath)
-            .args(taskData.data.arguments)
 
         val logDirectory = fileUtil.getLogDirectory().using("subtitles")
-        val result = getFfmpeg(execPath = executableConfig.ffmpeg, logDirectory = logDirectory)
+        val result = getFfmpeg(logDirectory = logDirectory)
         withHeartbeatRunner {
             reporter?.updateLastSeen(task.taskId)
         }
-        result.run(arguments)
+        result.run(dsl)
         if (result.result.resultCode != 0) {
             throw FfmpegFailedException(
                 logFile = result.logFile,
@@ -98,11 +98,11 @@ class SubtitleTaskListener(
         return ProcesserExtractResultEvent(null, status, error = message, logFile = logFile).producedFrom(task)
     }
 
-    override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: File): FFmpeg {
+    override fun buildFfmpeg(listener: FFmpeg.Listener?, execPath: String, logDirectory: IFile): FFmpeg {
         return SubtitleFFmpeg(listener, executableConfig.ffmpeg, logDirectory)
     }
 
-    class SubtitleFFmpeg(override val listener: Listener? = null, private val executablePath: String, val logDirectory: File) :
+    class SubtitleFFmpeg(override val listener: Listener? = null, private val executablePath: String, val logDirectory: IFile) :
         FFmpeg(executable = executablePath, logDir = logDirectory) {
 
         override fun onCreate() {

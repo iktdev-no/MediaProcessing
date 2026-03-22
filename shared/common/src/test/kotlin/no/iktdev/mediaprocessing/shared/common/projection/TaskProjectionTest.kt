@@ -2,6 +2,9 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.shared.common.AppTestBase
 import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
@@ -238,13 +241,17 @@ class TaskProjectionTest : TestBase() {
             )
         ).newReferenceId().addToHistory()
 
+        val extractSourceFile = "file:///unit/${UUID.randomUUID()}.mkv"
         val extract = ExtractSubtitleTask(
             data = ExtractSubtitleData(
-                inputFile = "file:///unit/${UUID.randomUUID()}.mkv",
+                inputFile = extractSourceFile,
                 outputFolderName = "unit",
                 outputFileName = "unit",
                 language = "eng",
-                arguments = emptyList()
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply {  },
+                    output = OutputSection(extractSourceFile).apply {  },
+                )
             )
         ).derivedOf(start)
 
@@ -288,13 +295,17 @@ class TaskProjectionTest : TestBase() {
             )
         ).newReferenceId().addToHistory()
 
+        val extractSourceFile = "file:///unit/${UUID.randomUUID()}.mkv"
         val extract = ExtractSubtitleTask(
             data = ExtractSubtitleData(
-                inputFile = "file:///unit/${UUID.randomUUID()}.mkv",
+                inputFile = extractSourceFile,
                 outputFolderName = "unit",
                 outputFileName = "unit",
                 language = "eng",
-                arguments = emptyList()
+                instructions = FFmpegInstructions(
+                    inputs = InputSection().apply {  },
+                    output = OutputSection(extractSourceFile).apply {  },
+                )
             )
         ).derivedOf(start)
 
