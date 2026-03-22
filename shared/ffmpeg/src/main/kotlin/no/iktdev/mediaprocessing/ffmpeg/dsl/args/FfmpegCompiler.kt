@@ -18,21 +18,19 @@ class FfmpegCompiler(
 ) {
 
     fun compile(): List<String> {
-        val all = inputs.all()
-        require(all.isNotEmpty()) { "At least one input is required" }
+        val inputFiles = inputs.files()
+        val concatFile = inputs.concatInput
 
-        return when (val first = all.first()) {
-            is ConcatInputConfig -> {
-                require(all.size == 1) { "Concat input cannot be mixed with other inputs" }
-                compileConcat(first)
-            }
-            is InputConfig -> {
-                val normal = all.filterIsInstance<InputConfig>()
-                require(normal.size == all.size) { "Cannot mix concat and normal inputs" }
-                compileNormal(normal)
-            }
-            else -> error("Unknown input type: $first")
+        require(inputFiles.isNotEmpty() || concatFile != null) { "At least one input is required" }
+
+        if (concatFile != null) {
+            return compileConcat(concatFile)
         }
+        if (inputFiles.isNotEmpty()) {
+            return compileNormal(inputFiles)
+        }
+
+        error("No inputs found")
     }
 
     // ---------------------------------------------------------

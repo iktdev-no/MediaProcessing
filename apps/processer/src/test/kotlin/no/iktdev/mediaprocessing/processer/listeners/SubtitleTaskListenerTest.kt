@@ -6,6 +6,7 @@ import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.registry.TaskTypeRegistry
+import no.iktdev.eventi.serialization.WGson
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -230,5 +232,66 @@ class SubtitleTaskListenerTest: TestBase() {
         val event = listener.getResult()
         assertTrue(event is ProcesserExtractResultEvent)
         assertSameReferenceId(task, event)
+    }
+
+    @Test
+    @DisplayName("""
+        Når en oppgave kommer med instruksjoner
+        Hvis input fil er sat,
+        Så:
+            Skal vi kunne finne filen via instruksjonen
+    """)
+    fun verifies_input_file_is_found() {
+        val testData = """
+            {
+                "data": {
+                    "inputFile": "/src/scratch/Potato.mkv",
+                    "instructions": {
+                        "inputs": {
+                            "inputs": [
+                                {
+                                    "streams": [
+                                        {
+                                            "language": "eng",
+                                            "forced": false,
+                                            "codec": "copy",
+                                            "type": "SUBTITLE",
+                                            "streamIndex": 0,
+                                            "map": true
+                                        }
+                                    ],
+                                    "path": "/src/scratch/Potato.mkv"
+                                }
+                            ]
+                        },
+                        "output": {
+                            "path": "Potato-eng.ass",
+                            "overwrite": true,
+                            "progress": false,
+                            "useWorkFile": true
+                        }
+                    },
+                    "outputFileName": "Potato-eng.ass",
+                    "outputFolderName": "Potato",
+                    "language": "eng"
+                },
+                "referenceId": "44b4fa95-ac5a-4350-8f3a-9ab8e28a85b0",
+                "taskId": "f6c89fd8-add7-47ed-b2fe-70c84d0518ad",
+                "metadata": {
+                    "created": "2026-03-22T17:58:34.168356696Z",
+                    "derivedFromId": [
+                        "25b8ad2a-f571-4af3-acff-2405145dace5"
+                    ]
+                }
+            }
+        """.trimIndent()
+
+        val task = WGson.gson.fromJson(testData, ExtractSubtitleTask::class.java)
+        assertDoesNotThrow {
+            task.data.instructions.findPrimaryInput()
+        }
+
+
+
     }
 }

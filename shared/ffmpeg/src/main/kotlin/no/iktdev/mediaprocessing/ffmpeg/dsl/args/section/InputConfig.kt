@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.ffmpeg.dsl.args.section
 
 class InputConfig(
-    path: String
-): BaseInputConfig(path = path) {
+    val path: String
+) {
     val streams: MutableList<StreamConfig> = mutableListOf()
 
     fun video(index: Int, block: VideoStreamConfig.() -> Unit) {
@@ -21,26 +21,26 @@ class InputConfig(
 
 class InputSection {
 
-    internal val inputs: MutableList<BaseInputConfig> = mutableListOf()
+    private val inputs: MutableList<InputConfig> = mutableListOf()
+    fun files(): List<InputConfig> {
+        return inputs.toList()
+    }
+
+    var concatInput: ConcatInputConfig? = null
+        private set
 
     fun file(path: String, block: InputConfig.() -> Unit) {
-        ensureNotConcat()
+        concatInput = null
         inputs += InputConfig(path).apply(block)
     }
 
     fun concat(listFile: String, block: ConcatInputConfig.() -> Unit) {
         inputs.clear()
         ensureEmpty()
-        inputs += ConcatInputConfig(listFile).apply(block)
+        concatInput = ConcatInputConfig(listFile).apply(block)
     }
 
-    fun all(): List<BaseInputConfig> = inputs.toList()
 
-    private fun ensureNotConcat() {
-        if (inputs.any { it is ConcatInputConfig }) {
-            error("Cannot mix concat input with normal file inputs")
-        }
-    }
 
     private fun ensureEmpty() {
         if (inputs.isNotEmpty()) {
@@ -52,6 +52,5 @@ class InputSection {
 
 class ConcatInputConfig(
     val listFile: String
-): BaseInputConfig(path = listFile) {}
+) {}
 
-open class BaseInputConfig(val path: String) {}

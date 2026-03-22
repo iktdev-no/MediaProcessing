@@ -3,10 +3,10 @@ package no.iktdev.mediaprocessing.ffmpeg.dsl.args.section
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 
-sealed class StreamConfig(
+open class StreamConfig(
     val type: StreamType,
     val streamIndex: Int,
-    open var map: Boolean = false
+    var map: Boolean = false
     ) {
     /**
      * If true, this stream will emit an explicit -map for this input/stream.

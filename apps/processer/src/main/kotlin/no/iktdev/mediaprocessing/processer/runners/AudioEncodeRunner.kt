@@ -44,12 +44,10 @@ class AudioEncodeRunner(
     }
 
     fun getAudioMetadata(): AudioStreamConfig {
-        val allInputs = audioInstruction.inputs.all()
+        val allInputs = audioInstruction.inputs.files()
 
         // 1) Concat mode? → Ikke lov
-        if (allInputs.any { it is ConcatInputConfig }) {
-            throw IllegalStateException("AudioEncodeRunner does not support concat inputs")
-        }
+        require(audioInstruction.inputs.concatInput == null) { "Concat not allowed in AudioEncodeRunner" }
 
         // 2) Normal mode → hent InputConfig
         val inputConfigs = allInputs.filterIsInstance<InputConfig>()
