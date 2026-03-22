@@ -54,7 +54,9 @@ class SegmentedVideoTaskListener(
 
         val ctx = SegmentedContextFactory(fileUtil).createContext(taskData)
 
-        val progressListener = SegmentedProgressListener(task, reporter)
+        val progressListener = SegmentedProgressListener(task, reporter) { taskId, progress ->
+            localProgress.update(taskId, progress)
+        }
 
         val videoProcessor = SegmentedVideoProcessor(this, progressListener)
 
@@ -120,32 +122,5 @@ class SegmentedVideoTaskListener(
         }
 
         return merged
-    }
-
-    private fun reportGlobalProgress(
-        task: Task,
-        segments: List<Segment>,
-        checkpointStore: CheckpointStore
-    ) {
-        val cp = checkpointStore.load()
-
-        val total = segments.sumOf { it.duration }
-        val done = segments.filter { it.index in cp.completed }.sumOf { it.duration }
-
-        val percent = ((done / total) * 100).toInt()
-
-        val progress = EncodeProgress(
-            progress = percent,
-            ffmpegDecodedProgress = FfmpegDecodedProgress(
-                progress = percent,
-                time = "",
-                duration = total.toString(),
-                speed = "",
-                estimatedCompletion = "",
-                estimatedCompletionSeconds = 0
-            ),
-         ""
-        )
-        reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 }

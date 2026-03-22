@@ -1,13 +1,16 @@
 package no.iktdev.mediaprocessing.processer.segment
 
+import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
+import java.util.UUID
 
 class SegmentedProgressListener(
     private val task: Task,
-    private val reporter: TaskReporter?
+    private val reporter: TaskReporter?,
+    val cache: (taskId: UUID, progress: Progress) -> Unit
 ) {
 
     private val VIDEO_WEIGHT = 0.70
@@ -44,6 +47,7 @@ class SegmentedProgressListener(
             ),
             message = message
         )
+        cache(task.taskId, progress)
         reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 }
