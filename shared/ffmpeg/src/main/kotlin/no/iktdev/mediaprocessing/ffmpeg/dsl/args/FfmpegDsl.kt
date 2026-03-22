@@ -62,11 +62,15 @@ class FfmpegDsl {
     // ---------------------------------------------------------
     // HELPERS
     // ---------------------------------------------------------
-    fun outputFile(): String =
-        outputSection?.path ?: error("Output must be defined")
+    fun outputFile(): String {
+        val fileName = outputSection?.path ?: error("Output must be defined")
+        return storeDirectory?.using(fileName)?.absolutePath ?: fileName
+    }
 
-    fun outputWorkFile(): String =
-        outputSection?.workFile ?: error("Output must be defined")
+    fun outputWorkFile(): String {
+        val fileName = outputSection?.workFile ?: error("Output must be defined")
+        return storeDirectory?.using(fileName)?.absolutePath ?: fileName
+    }
 
     fun outputFileUsed(): String {
         val fileName = outputSection?.resolvedName() ?: error("Output must be defined")

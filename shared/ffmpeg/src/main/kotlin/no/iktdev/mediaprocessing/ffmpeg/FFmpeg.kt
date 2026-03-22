@@ -9,6 +9,7 @@ import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegProgressDecoder
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
+import org.jetbrains.annotations.VisibleForTesting
 import java.io.File
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -64,11 +65,16 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
         }
     }
 
-    private fun moveAndVerify(command: FfmpegDsl): Boolean {
-        return File(command.outputWorkFile()).renameTo(File(command.outputFile()))
+    open fun moveAndVerify(command: FfmpegDsl): Boolean {
+        return if (command.isUsingWorkFile()) {
+            IFile(command.outputWorkFile()).renameTo(IFile(command.outputFile()))
+        } else {
+            true
+        }
     }
 
-    private suspend fun execute(arguments: List<String>, output: (String) -> Unit): ProcessResult {
+    @VisibleForTesting
+    internal open suspend fun execute(arguments: List<String>, output: (String) -> Unit): ProcessResult {
         return process(executable, *arguments.toTypedArray(),
             stdout = Redirect.CAPTURE,
             stderr = Redirect.CAPTURE,

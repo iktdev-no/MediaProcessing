@@ -20,7 +20,11 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("org.assertj:assertj-core:3.4.1")
+
     testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation("org.assertj:assertj-core:3.24.2")
     implementation(project(":shared:files"))
 
     testImplementation(project(":shared:files", configuration = "testArtifacts"))

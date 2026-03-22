@@ -55,5 +55,6 @@ interface IFile {
         return IFile(Paths.get(this.path).resolve(child).toString())
     }
 
+    fun renameTo(dest: IFile): Boolean
 
 }

@@ -5,7 +5,7 @@ import java.io.PrintWriter
 import java.nio.file.Paths
 
 class FakeFile(
-    override val path: String,
+    override var path: String,
     private var exists: Boolean = true,
     private var size: Long = 0,
     private var directory: Boolean = false,
@@ -14,18 +14,28 @@ class FakeFile(
     private var modified: Long = System.currentTimeMillis()
 ) : IFile {
 
-    companion object {
-        var fileRegistry: MutableMap<String, IFile> = mutableMapOf()
+    init {
+        // Register this instance if not already present
+        fileRegistry.putIfAbsent(path, this)
+    }
 
-        fun getOrCreate(path: String): IFile =
+    companion object {
+        val fileRegistry: MutableMap<String, FakeFile> = mutableMapOf()
+
+        fun wipe() = fileRegistry.clear()
+
+        fun getOrCreate(path: String): FakeFile =
             fileRegistry.getOrPut(path) { FakeFile(path) }
     }
 
+    /** Always return the canonical instance for this path */
+    private fun ref(): FakeFile = fileRegistry[path] ?: this
+
     override val name: String
-        get() = path.substringAfterLast('/', path)
+        get() = path.substringAfterLast('/')
 
     override val parent: String?
-        get() = path.substringBeforeLast('/', missingDelimiterValue = "").ifEmpty { null }
+        get() = path.substringBeforeLast('/', "").ifEmpty { null }
 
     override val absolutePath: String
         get() = path
@@ -36,128 +46,120 @@ class FakeFile(
     override val parentFile: IFile
         get() = parent?.let { IFile(it) } ?: FakeFile("")
 
-    override fun exists(): Boolean = exists
-    fun changeExist(state: Boolean) {
-        exists = state
+    // --- State accessors always use registry instance ---
+    override fun exists(): Boolean = ref().exists
+    fun changeExist(exists: Boolean) {
+        val r = ref()
+        r.exists = exists
+    }
+    override fun isFile(): Boolean = !ref().directory
+    override fun isDirectory(): Boolean = ref().directory
+    override fun length(): Long = ref().size
+    override fun readText(): String = ref().content
+    override fun lastModified(): Long = ref().modified
+
+    override fun writeText(text: String) {
+        val r = ref()
+        r.exists = true
+        r.content = text
+        r.size = text.toByteArray().size.toLong()
+        r.modified = System.currentTimeMillis()
     }
 
-    override fun isFile(): Boolean = !directory
+    override fun appendLine(text: String) {
+        val r = ref()
+        r.exists = true
+        r.content += "$text\n"
+        r.size = r.content.toByteArray().size.toLong()
+        r.modified = System.currentTimeMillis()
+    }
 
-    override fun isDirectory(): Boolean = directory
-
-    override fun length(): Long = size
-
-    override fun delete(): Boolean {
-        exists = false
-        content = ""
+    override fun mkdir(): Boolean {
+        val r = ref()
+        r.exists = true
+        r.directory = true
         return true
     }
 
-    override fun listFiles(): List<IFile> = children.toList()
+    override fun mkdirs(): Boolean = mkdir()
+
+    override fun delete(): Boolean {
+        val r = ref()
+        r.exists = false
+        r.content = ""
+        r.size = 0
+        return true
+    }
+
+    override fun deleteRecursively(): Boolean {
+        val prefix = absolutePath
+        fileRegistry.values
+            .filter { it.absolutePath.startsWith(prefix) }
+            .forEach {
+                it.exists = false
+                it.content = ""
+                it.size = 0
+            }
+        return true
+    }
+
+    override fun listFiles(): List<IFile> =
+        fileRegistry.values
+            .filter { it.absolutePath.startsWith("$absolutePath/") }
+            .map { it }
+
+    override fun walk(): Sequence<IFile> =
+        fileRegistry.values
+            .filter { it.absolutePath.startsWith(absolutePath) }
+            .asSequence()
+
+    override fun printWriter(): PrintWriter =
+        object : PrintWriter(object : java.io.Writer() {
+            override fun write(str: String) {
+                if (str.isEmpty()) return
+                val r = ref()
+                r.exists = true
+                r.content += str
+                r.size = r.content.toByteArray().size.toLong()
+                r.modified = System.currentTimeMillis()
+            }
+
+            override fun write(cbuf: CharArray?, off: Int, len: Int) {
+                if (cbuf != null && len > 0) write(String(cbuf, off, len))
+            }
+
+            override fun write(c: Int) = write(c.toChar().toString())
+            override fun flush() {}
+            override fun close() {}
+        }) {}
+
 
     override fun toJavaFile(): File =
         throw UnsupportedOperationException("FakeFile does not support toJavaFile()")
 
-    override fun readText(): String = content
-
-    override fun writeText(text: String) {
-        exists = true
-        content = text
-        size = content.length.toLong()
-        modified = System.currentTimeMillis()
-    }
-
-    override fun appendLine(text: String) {
-        exists = true
-        content += "$text\n"
-        size = content.toByteArray().size.toLong()
-        modified = System.currentTimeMillis()
-    }
-
-    override fun mkdir(): Boolean {
-        exists = true
-        directory = true
-        return true
-    }
-
-    override fun mkdirs(): Boolean {
-        exists = true
-        directory = true
-        return true
-    }
-
-
-    override fun lastModified(): Long = modified
-    fun setLastModified(value: Long) {
-        modified = value
-    }
-
-
-    override fun printWriter(): PrintWriter {
-        return object : PrintWriter(object : java.io.Writer() {
-
-            override fun write(str: String) {
-                if (str.isEmpty()) return
-                exists = true
-                content += str
-                size = content.toByteArray().size.toLong()
-                modified = System.currentTimeMillis()
-            }
-
-            override fun write(cbuf: CharArray?, off: Int, len: Int) {
-                if (cbuf == null || len <= 0) return
-                val str = String(cbuf, off, len)
-                write(str)
-            }
-
-            override fun write(c: Int) {
-                write(c.toChar().toString())
-            }
-
-            override fun flush() { /* no-op */ }
-            override fun close() { /* no-op */ }
-
-        }) {}
-    }
-
-
-
-    override fun walk(): Sequence<IFile> =
-        fileRegistry.values
-            .filter { it.absolutePath.startsWith(this.absolutePath) }
-            .asSequence()
-
-
-    override fun deleteRecursively(): Boolean {
-        val prefix = this.absolutePath
-
-        fileRegistry.values
-            .filter { it.absolutePath.startsWith(prefix) }
-            .forEach {
-                if (it is FakeFile) {
-                    it.exists = false
-                    it.content = ""
-                }
-            }
-
-        return true
-    }
-
-
     override fun using(vararg paths: String): IFile {
-        val newPath = Paths.get(this.absolutePath, *paths).normalize().toString()
+        val newPath = Paths.get(absolutePath, *paths).normalize().toString()
+        return getOrCreate(newPath)
+    }
 
-        // Return existing instance if present
-        fileRegistry[newPath]?.let { return it }
+    override fun renameTo(dest: IFile): Boolean {
+        val src = ref()
+        if (!src.exists) return false
 
-        // Create new FakeFile and register it
-        val child = FakeFile(newPath)
-        fileRegistry[newPath] = child
+        val oldPath = src.path
+        val destPath = dest.absolutePath
 
-        // Mark parent as directory
-        this.directory = true
+        // Remove any existing dest
+        fileRegistry.remove(destPath)
 
-        return child
+        // Move registry entry
+        fileRegistry[destPath] = src
+        src.path = destPath
+
+        // Mark old path as deleted (but do NOT modify src)
+        fileRegistry[oldPath] = FakeFile(oldPath, exists = false, content = "", size = 0)
+
+        return true
     }
 
 

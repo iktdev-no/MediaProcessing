@@ -86,4 +86,8 @@ class UseFile(path: String) : IFile {
         return file.deleteRecursively()
     }
 
+    override fun renameTo(dest: IFile): Boolean {
+        return file.renameTo(dest.toJavaFile())
+    }
+
 }
