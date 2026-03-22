@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
-import no.iktdev.eventi.models.requireAs
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
 import no.iktdev.mediaprocessing.coordinator.toFFmpegVersion
@@ -25,6 +24,7 @@ import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
 import no.iktdev.mediaprocessing.shared.common.model.task.data.SegmentEncodeData
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 import java.io.File
@@ -40,7 +40,7 @@ class MediaCreateEncodeTaskListener(
         event: Event,
         history: List<Event>
     ): Event? {
-        val selectedEvent = event.requireAs<MediaTracksEncodeSelectedEvent>()
+        val selectedEvent = event.requireQualifiedEntry<MediaTracksEncodeSelectedEvent>()
 
         val processerPreference = preference.getProcesserPreference()
         val videoPreference = processerPreference.videoPreference?.codec?.toDsl() ?: VideoCodec.Hevc()
