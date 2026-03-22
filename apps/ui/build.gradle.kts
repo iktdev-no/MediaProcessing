@@ -40,9 +40,13 @@ dependencies {
     implementation(libs.exfl)
     implementation(project(":shared:common"))
     implementation(project(":transfer-model"))
+    implementation(project(":shared:files"))
+
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(project(":shared:files", configuration = "testArtifacts"))
+
 }
 
 tasks.register("generateTs") {

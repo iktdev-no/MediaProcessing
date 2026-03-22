@@ -36,6 +36,8 @@ dependencies {
     // Internal modules
     implementation(project(":shared:common"))
     implementation(project(":shared:database"))
+    implementation(project(":shared:files"))
+
 
     // --- TESTING ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -43,6 +45,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
     testImplementation(project(":shared:database", configuration = "testArtifacts"))
+    testImplementation(project(":shared:files", configuration = "testArtifacts"))
+
 
     val exposedVersion = "0.61.0"
     testImplementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

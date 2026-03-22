@@ -13,6 +13,8 @@ findProject(":shared")?.name = "shared"
 findProject(":shared:ffmpeg")?.name = "ffmpeg"
 findProject(":shared:common")?.name = "common"
 findProject(":transfer-model")?.name = "transfer-model"
+findProject(":shared:files")?.name = "files"
+
 
 include("apps")
 include("apps:ui")
@@ -27,3 +29,4 @@ include("shared:ffmpeg")
 include("shared:database")
 include("shared:database")
 include("transfer-model")
+include("shared:files")

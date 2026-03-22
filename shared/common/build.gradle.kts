@@ -53,6 +53,7 @@ dependencies {
 
     // Internal modules
     implementation(project(":shared:ffmpeg"))
+    implementation(project(":shared:files"))
     implementation(libs.eventi)
 
     // ICU

@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":shared:ffmpeg"))
     implementation(project(":shared:common"))
     implementation(project(":shared:database"))
+    implementation(project(":shared:files"))
 
     // Jackson (versjon styres av Spring Boot BOM)
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -80,6 +81,9 @@ dependencies {
     // Internal test artifacts
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
     testImplementation(project(":shared:database", configuration = "testArtifacts"))
+    testImplementation(project(":shared:files", configuration = "testArtifacts"))
+    testImplementation(project(":shared:ffmpeg", configuration = "testArtifacts"))
+
 
     // Exposed test
     val exposedVersion = "0.61.0"

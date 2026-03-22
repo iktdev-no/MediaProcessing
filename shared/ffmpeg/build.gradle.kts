@@ -21,9 +21,25 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("org.assertj:assertj-core:3.4.1")
     testImplementation(kotlin("test"))
+    implementation(project(":shared:files"))
+
+    testImplementation(project(":shared:files", configuration = "testArtifacts"))
+
+
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
+configurations { create("testArtifacts") }
+
+tasks.register<Jar>("testJar") {
+    dependsOn("testClasses")
+    from(sourceSets.test.get().output)
+    archiveClassifier.set("tests")
+}
+
+artifacts {
+    add("testArtifacts", tasks.named("testJar"))
+}

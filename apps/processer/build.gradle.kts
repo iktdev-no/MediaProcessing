@@ -44,6 +44,8 @@ dependencies {
     implementation(project(":shared:database"))
     implementation(project(":shared:ffmpeg"))
     implementation(project(":transfer-model"))
+    implementation(project(":shared:files"))
+
 
     // --- TESTING ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -54,6 +56,7 @@ dependencies {
     // Test artifacts
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
     testImplementation(project(":shared:database", configuration = "testArtifacts"))
+    testImplementation(project(":shared:files", configuration = "testArtifacts"))
 
     val exposedVersion = "0.61.0"
     testImplementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
