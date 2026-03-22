@@ -83,6 +83,9 @@ class SegmentedAudioProcessorTest: TestBase() {
             it.mkdirs()
             val file = it.using("track_0.mka")
             file.asFake()?.changeExist(false)
+
+            val file2 = it.using("track_0.work.mka")
+            file2.asFake()?.changeExist(false)
         }
 
 

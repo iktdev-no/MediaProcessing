@@ -47,19 +47,25 @@ class SegmentedAudioProcessor(
             // --- CASE 1: Checkpoint says done ---
             if (index in checkpoint.completed) {
                 if (!outputFile.exists()) {
-                    throw IllegalStateException(
-                        "Audio checkpoint says track $index is done, but file missing: ${outputFile.absolutePath}"
+                    val workFile = instruct.output?.workFile?.let { outStore.using(it) }
+                    if (workFile != null && workFile.exists()) {
+                        log.warn { "Final audio file missing but work file exists. Re-running encoding for track $index." }
+                        workFile.delete()
+                    } else {
+                        throw IllegalStateException(
+                            "Audio checkpoint says track $index is done, but file missing: ${outputFile.absolutePath}"
+                        )
+                    }
+                } else {
+                    outputs += AudioEncodeRunner.AudioEncodePayload(
+                        outputFile,
+                        runner.getAudioMetadata()
                     )
+
+                    val doneTracks = checkpoint.completed.size
+                    progressListener.onAudioProgress(doneTracks, totalTracks)
+                    return@forEachIndexed
                 }
-
-                outputs += AudioEncodeRunner.AudioEncodePayload(
-                    outputFile,
-                    runner.getAudioMetadata()
-                )
-
-                val doneTracks = checkpoint.completed.size
-                progressListener.onAudioProgress(doneTracks, totalTracks)
-                return@forEachIndexed
             }
 
             // --- CASE 2: File exists but checkpoint does NOT say done → stale file ---
