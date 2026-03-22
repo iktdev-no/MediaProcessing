@@ -10,7 +10,7 @@ import java.util.UUID
 class SegmentedProgressListener(
     private val task: Task,
     private val reporter: TaskReporter?,
-    val cache: (taskId: UUID, progress: Progress) -> Unit
+    val cache: ((taskId: UUID, progress: Progress) -> Unit)? = null
 ) {
 
     private val VIDEO_WEIGHT = 0.70
@@ -47,7 +47,7 @@ class SegmentedProgressListener(
             ),
             message = message
         )
-        cache(task.taskId, progress)
+        cache?.invoke(task.taskId, progress)
         reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 }
