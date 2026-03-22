@@ -8,14 +8,14 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
     // AAC (Advanced Audio Coding)
     class Aac(
         // Bitrate i kbps (typisk 128–256 for stereo)
-        override var bitrate: Int? = null,
+        bitrate: Int? = null,
         // Profile: LC (Low Complexity), HE (High Efficiency), HEv2
         var profile: AacProfile = AacProfile.LC,
         // Antall kanaler (1 = mono, 2 = stereo)
-        override var channels: Int? = null, // = 2,
+        channels: Int? = null, // = 2,
         // Sample rate i Hz (typisk 44100 eller 48000)
-        override var sampleRate: Int? = null
-    ) : AudioCodec("aac") {
+        sampleRate: Int? = null
+    ) : AudioCodec(codec = "aac", bitrate = bitrate, sampleRate = sampleRate, channels = channels) {
         override fun determineTranscodeDecision(stream: AudioStream): TranscodeDecision {
             val superDecision = super.determineTranscodeDecision(stream)
             if (superDecision == TranscodeDecision.Reencode) return superDecision
@@ -45,19 +45,19 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
 
     // MP3 (MPEG Layer III)
     class Mp3(
-        override var bitrate: Int? = null, // = 192,
-        override var channels: Int? = null, // = 2,
-        override var sampleRate: Int? = null // = 44100
-    ) : AudioCodec("libmp3lame")
+        bitrate: Int? = null, // = 192,
+        channels: Int? = null, // = 2,
+        sampleRate: Int? = null // = 44100
+    ) : AudioCodec(codec = "libmp3lame", bitrate = bitrate, channels = channels, sampleRate = sampleRate) {}
 
     // Opus (moderne, lav latency, bra for streaming)
     class Opus(
-        override var bitrate: Int? = null, // = 128,
-        override var channels: Int? = null, // = 2,
-        override var sampleRate: Int? = null, // = 48000,
+        bitrate: Int? = null, // = 128,
+        channels: Int? = null, // = 2,
+        sampleRate: Int? = null, // = 48000,
         // Application mode: audio, voip, lowdelay
         var application: OpusApplication = OpusApplication.Audio
-    ) : AudioCodec("opus") {
+    ) : AudioCodec(codec = "opus", bitrate = bitrate, channels = channels, sampleRate = sampleRate) {
         override fun determineTranscodeDecision(stream: AudioStream): TranscodeDecision {
             val base = super.determineTranscodeDecision(stream)
             if (base == TranscodeDecision.Reencode) return base
@@ -85,17 +85,17 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
 
     // Vorbis (åpen kildekode, brukt i Ogg)
     class Vorbis(
-        override var bitrate: Int? = null, // = 128,
-        override var channels: Int? = null, // = 2,
-        override var sampleRate: Int? = null, // = 44100
-    ) : AudioCodec("libvorbis")
+        bitrate: Int? = null, // = 128,
+        channels: Int? = null, // = 2,
+        sampleRate: Int? = null, // = 44100
+    ) : AudioCodec(codec = "libvorbis", bitrate = bitrate, channels = channels, sampleRate = sampleRate)
 
     // FLAC (lossless)
     class Flac(
         var compressionLevel: Int? = null, // = 5,
-        override var channels: Int? = null, // = 2,
-        override var sampleRate: Int? = null, // = 48000
-    ) : AudioCodec("flac") {
+        channels: Int? = null, // = 2,
+        sampleRate: Int? = null, // = 48000
+    ) : AudioCodec(codec = "flac", channels = channels, sampleRate = sampleRate) {
         override fun buildFfmpegArgs(suffix: String?): List<String> {
             val s = suffix ?: ""
             val args = mutableListOf("-c:a$s", "flac")
@@ -107,31 +107,30 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
 
     // AC3 (Dolby Digital)
     class Ac3(
-        override var bitrate: Int? = null, // = 384,
-        override var channels: Int? = null, // = 6,
-        override var sampleRate: Int? = null, // = 48000
-    ) : AudioCodec("ac3")
+        bitrate: Int? = null, // = 384,
+        channels: Int? = null, // = 6,
+        sampleRate: Int? = null, // = 48000
+    ) : AudioCodec(codec = "ac3", bitrate = bitrate, channels = channels, sampleRate = sampleRate)
 
     class Eac3(
-        override var bitrate: Int? = null,
-        override var channels: Int? = null,
-        override var sampleRate: Int? = null,
-    ) : AudioCodec("eac3")
-
-
+        bitrate: Int? = null,
+        channels: Int? = null,
+        sampleRate: Int? = null,
+    ) : AudioCodec(codec = "eac3", bitrate =  bitrate, channels = channels, sampleRate = sampleRate)
 
     class Dts(
-        override var bitrate: Int? = null,
-        override var channels: Int? = null, // = 6,
-        override var sampleRate: Int? = null, // = 48000
-    ) : AudioCodec("dts")
+        bitrate: Int? = null,
+        channels: Int? = null, // = 6,
+        sampleRate: Int? = null, // = 48000
+    ) : AudioCodec(codec = "dts", bitrate = bitrate, channels = channels, sampleRate = sampleRate)
 
-    class Pcm : AudioCodec("pcm_s16le") {
+    class Pcm(
+
+    ): AudioCodec(codec = "pcm_s16le") {
         override fun buildFfmpegArgs(suffix: String?): List<String> {
             val s = suffix ?: ""
             return listOf("-c:a$s", "pcm_s16le")
         }
-
 
         override fun determineTranscodeDecision(stream: AudioStream) = TranscodeDecision.Reencode
     }

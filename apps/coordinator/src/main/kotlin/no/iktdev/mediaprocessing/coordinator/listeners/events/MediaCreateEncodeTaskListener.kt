@@ -36,8 +36,7 @@ class MediaCreateEncodeTaskListener(
 
     private val log = KotlinLogging.logger {}
 
-    override fun onEvent(
-        event: Event,
+    override fun onEvent(event: Event,
         history: List<Event>
     ): Event? {
         val selectedEvent = event.requireQualifiedEntry<MediaTracksEncodeSelectedEvent>()
