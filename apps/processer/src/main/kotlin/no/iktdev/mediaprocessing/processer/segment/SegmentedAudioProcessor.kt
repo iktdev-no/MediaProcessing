@@ -28,7 +28,7 @@ class SegmentedAudioProcessor(
 
             val outStore = ctx.intermediateStore
                 .using("audio")
-                .apply { parentFile.mkdirs() }
+                .apply { mkdirs() }
 
             val ffmpeg = ffProvider.getFfmpeg(
                 logDirectory = ctx.logDirectory
