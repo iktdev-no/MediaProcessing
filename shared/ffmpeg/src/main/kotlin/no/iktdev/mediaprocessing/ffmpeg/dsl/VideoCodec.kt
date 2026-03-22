@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.ffmpeg.dsl
 
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
 
-sealed class VideoCodec(val codec: String, open val crf: Int? = null, open val bitrate: Int? = null) {
+open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int? = null) {
 
     // HEVC / H.265 encoder (libx265)
     class Hevc(

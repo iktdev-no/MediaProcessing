@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.ffmpeg.dsl
 import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioClamp
 
-sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open var sampleRate: Int? = null, open var channels: Int? = null) {
+open class AudioCodec(val codec: String, open var bitrate: Int? = null, open var sampleRate: Int? = null, open var channels: Int? = null) {
 
     // AAC (Advanced Audio Coding)
     class Aac(
@@ -258,6 +258,7 @@ sealed class AudioCodec(val codec: String, open var bitrate: Int? = null, open v
         is Pcm -> Pcm()
 
         Copy -> Copy
+        else -> error("Unsupported audio codec $this")
     }
 
 }

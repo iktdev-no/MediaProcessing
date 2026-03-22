@@ -107,10 +107,10 @@ class FfmpegCompiler(
         args: MutableList<String>
     ) {
         val onlySubtitles =
-            inputs.all { input -> input.streams.all { it is SubtitleStreamConfig } && inputs.size == 1 }
+            inputs.all { input -> input.allStreams().all { it is SubtitleStreamConfig } && inputs.size == 1 }
 
         inputs.forEachIndexed { inputIndex, input ->
-            input.streams.forEach { stream ->
+            input.allStreams().forEach { stream ->
 
                 if (stream is AudioStreamConfig) {
                     val key = StreamKey(inputIndex, StreamType.AUDIO, stream.streamIndex)
@@ -148,7 +148,7 @@ class FfmpegCompiler(
     )
 
     private fun compileMapping(inputs: List<InputConfig>, args: MutableList<String>): MappingInfo {
-        val anyExplicitMap = inputs.any { it.streams.any { s -> s.map } }
+        val anyExplicitMap = inputs.any { it.allStreams().any { s -> s.map } }
 
         val videoMap = mutableMapOf<StreamKey, Int>()
         val audioMap = mutableMapOf<StreamKey, Int>()
@@ -160,7 +160,7 @@ class FfmpegCompiler(
 
         if (anyExplicitMap) {
             inputs.forEachIndexed { inputIndex, input ->
-                input.streams.forEach { stream ->
+                input.allStreams().forEach { stream ->
                     if (stream.map) {
                         val key = StreamKey(inputIndex, stream.type, stream.streamIndex)
                         when (stream.type) {
@@ -194,7 +194,7 @@ class FfmpegCompiler(
         args: MutableList<String>
     ) {
         inputs.forEachIndexed { inputIndex, input ->
-            input.streams.forEach { stream ->
+            input.allStreams().forEach { stream ->
                 val key = StreamKey(inputIndex, stream.type, stream.streamIndex)
 
                 // Finn suffix basert på mapping

@@ -7,13 +7,7 @@ open class StreamConfig(
     val type: StreamType,
     val streamIndex: Int,
     var map: Boolean = false
-    ) {
-    /**
-     * If true, this stream will emit an explicit -map for this input/stream.
-     * If no streams anywhere have map = true, compiler will emit NO -map at all,
-     * and FFmpeg will use its default auto-mapping (inkl. default audio).
-     */
-}
+    )
 
 class VideoStreamConfig(
     streamIndex: Int,

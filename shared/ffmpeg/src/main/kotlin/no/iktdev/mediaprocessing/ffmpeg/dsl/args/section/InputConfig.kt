@@ -3,18 +3,24 @@ package no.iktdev.mediaprocessing.ffmpeg.dsl.args.section
 class InputConfig(
     val path: String
 ) {
-    val streams: MutableList<StreamConfig> = mutableListOf()
+    val videoStreams: MutableList<VideoStreamConfig> = mutableListOf()
+    val audioStreams: MutableList<AudioStreamConfig> = mutableListOf()
+    val subtitleStreams: MutableList<SubtitleStreamConfig> = mutableListOf()
+
+    fun allStreams(): List<StreamConfig> {
+        return videoStreams + audioStreams + subtitleStreams
+    }
 
     fun video(index: Int, block: VideoStreamConfig.() -> Unit) {
-        streams += VideoStreamConfig(index).apply(block)
+        videoStreams += VideoStreamConfig(index).apply(block)
     }
 
     fun audio(index: Int, block: AudioStreamConfig.() -> Unit) {
-        streams += AudioStreamConfig(index).apply(block)
+        audioStreams += AudioStreamConfig(index).apply(block)
     }
 
     fun subtitle(index: Int, block: SubtitleStreamConfig.() -> Unit) {
-        streams += SubtitleStreamConfig(index).apply(block)
+        subtitleStreams += SubtitleStreamConfig(index).apply(block)
     }
 
 }

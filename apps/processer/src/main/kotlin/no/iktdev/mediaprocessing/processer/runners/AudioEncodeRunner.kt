@@ -57,8 +57,7 @@ class AudioEncodeRunner(
 
         // 3) Hent audio streams
         val audioStreams = inputConfigs
-            .flatMap { it.streams }
-            .filterIsInstance<AudioStreamConfig>()
+            .flatMap { it.audioStreams }
 
         if (audioStreams.size != 1) {
             throw IllegalStateException("Audio instruction expects exactly 1 audio stream, but found ${audioStreams.size}")
