@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.ffmpeg
 import com.github.pgreze.process.ProcessResult
 import com.github.pgreze.process.Redirect
 import com.github.pgreze.process.process
+import mu.KotlinLogging
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegProgressDecoder
@@ -13,6 +14,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 open class FFmpeg(val executable: String, val logDir: IFile) {
+    private val log = KotlinLogging.logger {}
+
     open val listener: Listener? = null
 
     private var progress: FfmpegDecodedProgress? = null
@@ -47,6 +50,8 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
         onNewOutput("Received exit code: ${result.resultCode}")
         if (result.resultCode != 0) {
             listener?.onError(inputFile, result.output.joinToString("\n"))
+            log.error { "Exitcode was ${result.resultCode}, ffmpeg was attempted with the following arguments: $arguments" }
+            log.info { "Log file can be found at $logFile" }
         } else {
 
             if (command.isUsingWorkFile()) {

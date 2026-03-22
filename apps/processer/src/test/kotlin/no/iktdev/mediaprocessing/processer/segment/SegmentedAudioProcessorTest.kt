@@ -144,6 +144,56 @@ class SegmentedAudioProcessorTest: TestBase() {
 
     @Test
     @DisplayName("""
+    Når audio-spor ikke er ferdig i checkpoint
+    Hvis output-filen eksisterer (stale)
+    Så:
+        Skal stale fil slettes og sporet encodes på nytt
+""")
+    fun `stale audio file is deleted and re-encoded`() = runTest {
+        val intermediate = workFolder.using("intermediate").apply { mkdirs() }
+        val audioFolder = intermediate.using("audio").apply { mkdirs() }
+
+        // Lag en stale fil
+        val outFile = audioFolder.using("track_0.mka").apply { writeText("stale") }
+        assertTrue(outFile.exists())
+
+        // Ingen checkpoint → completed = []
+        val ctx = fakeContext().copy(
+            intermediateStore = intermediate,
+            audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json").apply {
+                writeText("""{"completed":[]}""")
+            },
+            audioInstructions = listOf(fakeAudioInstruction(workFolder.using("input.mka"), "track_0.mka"))
+        )
+
+        // Mock runner → return success
+        mockkConstructor(AudioEncodeRunner::class)
+        coEvery { anyConstructed<AudioEncodeRunner>().run() } returns
+                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(outFile, fakeMeta(0)))
+
+        val ffProvider = mockk<FfProvider>(relaxed = true)
+        val progress = mockk<SegmentedProgressListener>(relaxed = true)
+
+        val processor = SegmentedAudioProcessor(ffProvider, progress)
+
+        val result = processor.encodeAudioStreams(ctx)
+
+        // Stale file skal være slettet før encoding
+        assertFalse(outFile.readText() == "stale")
+
+        // Runner skal ha blitt kjørt
+        coVerify { anyConstructed<AudioEncodeRunner>().run() }
+
+        // Progress skal rapporteres
+        verify { progress.onAudioProgress(1, 1) }
+
+        // Resultat skal returneres
+        assertEquals(1, result.size)
+    }
+
+
+    @Test
+    @DisplayName("""
     Når audio-spor ikke er ferdig
     Hvis AudioEncodeRunner returnerer Reject
     Så:

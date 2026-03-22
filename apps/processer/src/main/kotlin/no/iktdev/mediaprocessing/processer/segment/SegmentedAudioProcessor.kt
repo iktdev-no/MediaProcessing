@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.segment
 
+import mu.KotlinLogging
 import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.context.CheckpointStore
 import no.iktdev.mediaprocessing.processer.context.FfProvider
@@ -13,6 +14,7 @@ class SegmentedAudioProcessor(
     private val ffProvider: FfProvider,
     private val progressListener: SegmentedProgressListener
 ) {
+    private val log = KotlinLogging.logger {}
 
     suspend fun encodeAudioStreams(
         ctx: SegmentedRunnerContext
@@ -40,27 +42,42 @@ class SegmentedAudioProcessor(
                 ffmpegInstance = ffmpeg
             )
 
-            // Allerede ferdig?
+            val outputFile = runner.resolveExpectedFullPath()
+
+            // --- CASE 1: Checkpoint says done ---
             if (index in checkpoint.completed) {
-                val useFile = runner.resolveExpectedFullPath()
-                if (!useFile.exists()) {
+                if (!outputFile.exists()) {
                     throw IllegalStateException(
-                        "Audio checkpoint says track $index is done, but file missing: ${useFile.absolutePath}"
+                        "Audio checkpoint says track $index is done, but file missing: ${outputFile.absolutePath}"
                     )
                 }
-                outputs.add(AudioEncodeRunner.AudioEncodePayload(useFile, runner.getAudioMetadata()))
+
+                outputs += AudioEncodeRunner.AudioEncodePayload(
+                    outputFile,
+                    runner.getAudioMetadata()
+                )
+
                 val doneTracks = checkpoint.completed.size
                 progressListener.onAudioProgress(doneTracks, totalTracks)
                 return@forEachIndexed
             }
 
+            // --- CASE 2: File exists but checkpoint does NOT say done → stale file ---
+            if (outputFile.exists()) {
+                log.warn { "Audio track $index exists but is not checkpointed. Deleting stale file: ${outputFile.absolutePath}" }
+                outputFile.delete()
+            }
+
+            // --- CASE 3: Run encoding ---
             when (val result = runner.run()) {
                 is RunnerResult.Success -> {
                     checkpointStore.markCompleted(index)
                     outputs += result.payload
+
                     val doneTracks = checkpointStore.load().completed.size
                     progressListener.onAudioProgress(doneTracks, totalTracks)
                 }
+
                 is RunnerResult.Reject -> {
                     throw FfmpegFailedException(ffmpeg.logFile, result.reason)
                 }
@@ -69,6 +86,7 @@ class SegmentedAudioProcessor(
 
         return outputs
     }
+
 
     suspend fun mergeAudioIntoVideo(
         ctx: SegmentedRunnerContext,
