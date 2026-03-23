@@ -35,7 +35,7 @@ class MediaPlanTest {
 
         Assertions.assertEquals(
             listOf(
-                "-map", "0:v:0", "-map", "0:a:0", "-c:v:0", "copy", "-c:a:0", "copy"
+                "-map", "0:v:0", "-map", "0:a:0", "-metadata:s:a:0", "handler_name=Audio -1ch", "-c:v:0", "copy", "-c:a:0", "copy"
             ),
             args.drop(defaultOffset).dropLast(1)
         )
@@ -53,7 +53,7 @@ class MediaPlanTest {
         val plan = LinearMediaPlan(
             videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Hevc(crf = 18)),
             audioTracks = mutableListOf(
-                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 192))
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 192, channels = 2))
             )
         )
         val instruct = plan.toInstructions("Mock.mkv", "Out.mp4")
@@ -64,7 +64,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(expected =
             listOf(
                 "-map", "0:v:0", "-c:v:0", "libx265", "-crf", "18", "-preset", "slow",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
             ),
             args, defaultOffset, 1)
 
@@ -82,8 +82,8 @@ class MediaPlanTest {
         val plan = LinearMediaPlan(
             videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
             audioTracks = mutableListOf(
-                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128)),
-                AudioTarget(listIndex = 1, ffmpegIndex = 1, codec = AudioCodec.Opus(bitrate = 96))
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Aac(bitrate = 128, channels = 2)),
+                AudioTarget(listIndex = 1, ffmpegIndex = 1, codec = AudioCodec.Opus(bitrate = 96, channels = 2))
             )
         )
 
@@ -93,8 +93,8 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
-                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch",
+                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio", "-ac:1", "2", "-metadata:s:a:1", "handler_name=Audio 2ch"
             ),
             args, defaultOffset, 1
         )
@@ -122,7 +122,8 @@ class MediaPlanTest {
                     ffmpegIndex = 1,
                     codec = AudioCodec.Aac(
                         bitrate = 128,
-                        profile = AacProfile.LC
+                        profile = AacProfile.LC,
+                        channels = 2
                     )
                 )
             )
@@ -134,7 +135,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
             ),
             args, defaultOffset, 1)
 
@@ -160,7 +161,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "libx265", "-crf", "18", "-preset", "slow",
-                "-map", "0:a:0", "-c:a:0", "copy"
+                "-map", "0:a:0", "-c:a:0", "copy", "-metadata:s:a:0", "handler_name=Audio -1ch"
             ),
             args, defaultOffset,1
         )
@@ -185,12 +186,12 @@ class MediaPlanTest {
                 AudioTarget(
                     listIndex = 0,
                     ffmpegIndex = 0,
-                    codec = AudioCodec.Aac(bitrate = 128)
+                    codec = AudioCodec.Aac(bitrate = 128, channels = 2)
                 ),
                 AudioTarget(
                     listIndex = 1,
                     ffmpegIndex = 1,
-                    codec = AudioCodec.Opus(bitrate = 96)
+                    codec = AudioCodec.Opus(bitrate = 96, channels = 2)
                 )
             )
         )
@@ -201,8 +202,8 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
-                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch",
+                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-ac:1", "2", "-application", "audio", "-metadata:s:a:1", "handler_name=Audio 2ch"
             ),
             args.drop(defaultOffset).dropLast(1)
         )
@@ -322,7 +323,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:1", "-c:a:0", "copy"
+                "-map", "0:a:1", "-c:a:0", "copy", "-metadata:s:a:0", "handler_name=Audio -1ch"
             ),
             args, defaultOffset, 1
         )
@@ -341,8 +342,8 @@ class MediaPlanTest {
         val plan = LinearMediaPlan(
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = mutableListOf(
-                AudioTarget(1, 5, AudioCodec.Aac(bitrate = 128)), // → -c:a:0
-                AudioTarget(0, 2, AudioCodec.Opus(bitrate = 96))  // → -c:a:1
+                AudioTarget(1, 5, AudioCodec.Aac(bitrate = 128, channels = 2)), // → -c:a:0
+                AudioTarget(0, 2, AudioCodec.Opus(bitrate = 96, channels = 2))  // → -c:a:1
             )
         )
 
@@ -352,8 +353,8 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:1", "-c:a:0", "aac", "-b:a:0", "128k",
-                "-map", "0:a:0", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
+                "-map", "0:a:1", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch",
+                "-map", "0:a:0", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio", "-ac:1", "2", "-metadata:s:a:1", "handler_name=Audio 2ch"
             ),
             args, defaultOffset,1
         )
@@ -406,7 +407,7 @@ class MediaPlanTest {
         val plan = LinearMediaPlan(
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = listOf(
-                AudioTarget(0, 0, AudioCodec.Aac(bitrate = 128))
+                AudioTarget(0, 0, AudioCodec.Aac(bitrate = 128, channels = 2))
             )
         )
 
@@ -416,7 +417,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
             ),
             args, defaultOffset,1
         )
@@ -458,7 +459,7 @@ class MediaPlanTest {
         val plan = SegmentedMediaPlan(
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = listOf(
-                AudioTarget(0, 0, AudioCodec.Aac(bitrate = 192))
+                AudioTarget(0, 0, AudioCodec.Aac(bitrate = 192, channels = 2))
             )
         )
 
@@ -475,7 +476,7 @@ class MediaPlanTest {
             val args = ffmpeg { fromInstructions(instruct) }.build()
             assertContainsAllWithOffset(
                 listOf(
-                    "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k"
+                    "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
                 ),
                 args, defaultOffset, 1
             )
@@ -530,12 +531,12 @@ class MediaPlanTest {
         val args1 = ffmpeg { fromInstructions(audioInstructs[1]) }.build()
 
         assertContainsAllWithOffset(
-            listOf("-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2"),
+            listOf("-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"),
             args0, defaultOffset, 1
         )
 
         assertContainsAllWithOffset(
-            listOf("-map", "0:a:0", "-c:a:0", "aac",  "-b:a:0", "384k", "-ac:0", "6"),
+            listOf("-map", "0:a:0", "-c:a:0", "aac",  "-b:a:0", "384k", "-ac:0", "6", "-metadata:s:a:0", "handler_name=Audio 6ch"),
             args1, defaultOffset, 1
         )
     }

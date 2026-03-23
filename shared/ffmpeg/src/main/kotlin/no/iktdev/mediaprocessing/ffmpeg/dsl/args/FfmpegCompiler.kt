@@ -108,6 +108,7 @@ class FfmpegCompiler(
                     val key = StreamKey(inputIndex, AUDIO, stream.streamIndex)
                     val outIndex = mapping.audioOutIndexMap[key] ?: stream.streamIndex
 
+                    // --- existing metadata ---
                     stream.language?.let { args += listOf("-metadata:s:a:$outIndex", "language=$it") }
                     stream.title?.let { args += listOf("-metadata:s:a:$outIndex", "title=$it") }
                     if (stream.default) args += listOf("-disposition:a:$outIndex", "default")
@@ -116,6 +117,19 @@ class FfmpegCompiler(
                     if (stream.descriptive) args += listOf("-metadata:s:a:$outIndex", "audesc=1")
                     if (stream.hearingImpaired) args += listOf("-metadata:s:a:$outIndex", "hearing_impaired=1")
                     if (stream.original) args += listOf("-metadata:s:a:$outIndex", "original=1")
+
+                    // --- NEW: unique handler_name to prevent MP4 bin_data ---
+                    val lang = stream.language ?: "Audio"
+                    val ch = stream.codec?.channels ?: stream.codec?.channels ?: -1
+                    val chLabel = when (ch) {
+                        1 -> "1ch"
+                        2 -> "2ch"
+                        6 -> "6ch"
+                        else -> "${ch}ch"
+                    }
+
+                    val handlerName = "$lang $chLabel"
+                    args += listOf("-metadata:s:a:$outIndex", "handler_name=$handlerName")
                 }
 
                 if (stream is SubtitleStreamConfig) {
@@ -130,6 +144,7 @@ class FfmpegCompiler(
             }
         }
     }
+
 
     private data class MappingInfo(
         val anyExplicitMap: Boolean,

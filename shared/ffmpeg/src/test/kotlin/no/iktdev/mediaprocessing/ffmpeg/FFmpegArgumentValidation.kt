@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ffmpeg
 
 import org.junit.jupiter.api.Assertions
+import kotlin.test.DefaultAsserter.fail
 
 fun assertContainsAllWithOffset(
     expected: List<String>,
@@ -9,14 +10,36 @@ fun assertContainsAllWithOffset(
     dropEnd: Int = 0
 ) {
     val slice = actual.drop(dropStart).dropLast(dropEnd)
-    // Sjekk at alle forventede elementer finnes i slice (uavhengig av rekkefølge)
-    for (exp in expected) {
-        Assertions.assertTrue(
-            slice.contains(exp),
-            "Expected element '$exp' not found in actual slice: $slice"
-        )
+
+    val missing = expected.filterNot { slice.contains(it) }
+    val unexpected = slice.filterNot { expected.contains(it) }
+
+    if (missing.isNotEmpty() || unexpected.isNotEmpty()) {
+        val msg = buildString {
+            appendLine("❌ assertContainsAllWithOffset failed")
+            appendLine("Expected size: ${expected.size}, actual slice size: ${slice.size}")
+            appendLine()
+
+            if (missing.isNotEmpty()) {
+                appendLine("Missing elements:")
+                missing.forEach { appendLine("  - $it") }
+                appendLine()
+            }
+
+            if (unexpected.isNotEmpty()) {
+                appendLine("Unexpected elements in slice:")
+                unexpected.forEach { appendLine("  + $it") }
+                appendLine()
+            }
+
+            appendLine("Full slice:")
+            appendLine(slice.joinToString(prefix = "[", postfix = "]"))
+        }
+
+        fail(msg)
     }
-    // Sjekk at størrelsen matcher
+
+    // Size check
     Assertions.assertEquals(
         expected.size,
         slice.size,
