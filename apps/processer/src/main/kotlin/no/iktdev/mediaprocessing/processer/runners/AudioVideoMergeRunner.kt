@@ -30,7 +30,7 @@ class AudioVideoMergeRunner(
                 input(encoded.output.absolutePath) {
                     audio(0) {
                         map = true
-                        codec = AudioCodec.Copy
+                        codec = AudioCodec.Copy // encoded.meta.codec ?: error("Codec missing in meta")
 
                         // metadata
                         language = encoded.meta.language

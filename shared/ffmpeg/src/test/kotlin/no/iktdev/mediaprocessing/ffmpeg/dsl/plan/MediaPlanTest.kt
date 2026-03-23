@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class MediaPlanTest {
+    val defaultOffset = 6
 
     @Test
     fun `video copy with one audio copy`() {
@@ -36,7 +37,7 @@ class MediaPlanTest {
             listOf(
                 "-map", "0:v:0", "-map", "0:a:0", "-c:v:0", "copy", "-c:a:0", "copy"
             ),
-            args.drop(5).dropLast(1)
+            args.drop(defaultOffset).dropLast(1)
         )
     }
 
@@ -65,7 +66,7 @@ class MediaPlanTest {
                 "-map", "0:v:0", "-c:v:0", "libx265", "-crf", "18", "-preset", "slow",
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k"
             ),
-            args, 5, 1)
+            args, defaultOffset, 1)
 
     }
 
@@ -95,7 +96,7 @@ class MediaPlanTest {
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
                 "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
             ),
-            args, 5, 1
+            args, defaultOffset, 1
         )
     }
 
@@ -135,7 +136,7 @@ class MediaPlanTest {
                 "-map", "0:v:0", "-c:v:0", "copy",
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k"
             ),
-            args, 5, 1)
+            args, defaultOffset, 1)
 
     }
 
@@ -161,7 +162,7 @@ class MediaPlanTest {
                 "-map", "0:v:0", "-c:v:0", "libx265", "-crf", "18", "-preset", "slow",
                 "-map", "0:a:0", "-c:a:0", "copy"
             ),
-            args, 5 ,1
+            args, defaultOffset,1
         )
     }
 
@@ -203,7 +204,7 @@ class MediaPlanTest {
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k",
                 "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
             ),
-            args.drop(5).dropLast(1)
+            args.drop(defaultOffset).dropLast(1)
         )
     }
 
@@ -293,7 +294,7 @@ class MediaPlanTest {
 
         assertContainsAllWithOffset(
             listOf("-map", "0:v:1", "-c:v:0", "copy"),
-            args, 5, 1
+            args, defaultOffset, 1
         )
     }
 
@@ -323,7 +324,7 @@ class MediaPlanTest {
                 "-map", "0:v:0", "-c:v:0", "copy",
                 "-map", "0:a:1", "-c:a:0", "copy"
             ),
-            args, 5, 1
+            args, defaultOffset, 1
         )
     }
 
@@ -354,7 +355,7 @@ class MediaPlanTest {
                 "-map", "0:a:1", "-c:a:0", "aac", "-b:a:0", "128k",
                 "-map", "0:a:0", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio"
             ),
-            args, 5 ,1
+            args, defaultOffset,1
         )
     }
 
@@ -417,7 +418,7 @@ class MediaPlanTest {
                 "-map", "0:v:0", "-c:v:0", "copy",
                 "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k"
             ),
-            args, 5 ,1
+            args, defaultOffset,1
         )
     }
 
@@ -440,7 +441,7 @@ class MediaPlanTest {
             assertContainsAllWithOffset(listOf(
                 "-map", "0:v:0", "-c:v:0", "libx265",  "-crf", "18", "-preset", "slow"
             ),
-                ffmpeg { fromInstructions(it) }.build(), 5, 1)
+                ffmpeg { fromInstructions(it) }.build(), defaultOffset, 1)
         }
     }
 
@@ -465,7 +466,7 @@ class MediaPlanTest {
             assertContainsAllWithOffset(listOf(
                 "-map", "0:v:0", "-c:v:0", "copy"
             ),
-                ffmpeg { fromInstructions(it) }.build(), 5, 1)
+                ffmpeg { fromInstructions(it) }.build(), defaultOffset, 1)
         }
 
         val audioInstructs = plan.toAudioInstructions("Mock.mkv")
@@ -476,7 +477,7 @@ class MediaPlanTest {
                 listOf(
                     "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k"
                 ),
-                args, 5, 1
+                args, defaultOffset, 1
             )
         }
     }
@@ -530,12 +531,12 @@ class MediaPlanTest {
 
         assertContainsAllWithOffset(
             listOf("-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2"),
-            args0, 5, 1
+            args0, defaultOffset, 1
         )
 
         assertContainsAllWithOffset(
             listOf("-map", "0:a:0", "-c:a:0", "aac",  "-b:a:0", "384k", "-ac:0", "6"),
-            args1, 5, 1
+            args1, defaultOffset, 1
         )
     }
 

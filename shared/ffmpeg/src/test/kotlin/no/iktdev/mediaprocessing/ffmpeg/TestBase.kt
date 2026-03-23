@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import java.io.File
+import kotlin.test.DefaultAsserter.fail
 
 open class TestBase {
     val workFolder = FakeFile("build").using("tests")
@@ -66,6 +67,18 @@ open class TestBase {
         fun setup(): Unit {
             IFile.factory = { path -> FakeFile(path) }
         }
+    }
+
+    fun assertContainsSequence(sequence: List<String>, args: List<String>) {
+        val windowSize = sequence.size
+
+        for (i in 0..args.size - windowSize) {
+            if (args.subList(i, i + windowSize) == sequence) {
+                return // success
+            }
+        }
+
+        fail("Expected sequence $sequence not found in args: $args")
     }
 
 }

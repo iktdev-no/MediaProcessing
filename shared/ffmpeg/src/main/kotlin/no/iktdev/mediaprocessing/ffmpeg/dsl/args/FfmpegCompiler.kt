@@ -23,14 +23,8 @@ class FfmpegCompiler(
 
         require(inputFiles.isNotEmpty() || concatFile != null) { "At least one input is required" }
 
-        if (concatFile != null) {
-            return compileConcat(concatFile)
-        }
-        if (inputFiles.isNotEmpty()) {
-            return compileNormal(inputFiles)
-        }
-
-        error("No inputs found")
+        if (concatFile != null) return compileConcat(concatFile)
+        return compileNormal(inputFiles)
     }
 
     // ---------------------------------------------------------
@@ -43,6 +37,9 @@ class FfmpegCompiler(
         // global flags
         if (out.overwrite) args += "-y"
         args += listOf("-nostdin", "-nostats", "-hide_banner")
+
+        // strip data streams
+        args += "-dn"
 
         // segment trimming
         segment?.start?.let { args += listOf("-ss", it.toString()) }
@@ -78,15 +75,10 @@ class FfmpegCompiler(
         if (out.overwrite) args += "-y"
         args += listOf("-nostdin", "-nostats", "-hide_banner")
 
-        // concat demuxer
         args += listOf("-f", "concat", "-safe", "0", "-i", concat.listFile)
-
-        // always copy
         args += listOf("-c", "copy")
 
-        // output
         compileOutput(args)
-
         return args
     }
 
@@ -113,7 +105,7 @@ class FfmpegCompiler(
             input.allStreams().forEach { stream ->
 
                 if (stream is AudioStreamConfig) {
-                    val key = StreamKey(inputIndex, StreamType.AUDIO, stream.streamIndex)
+                    val key = StreamKey(inputIndex, AUDIO, stream.streamIndex)
                     val outIndex = mapping.audioOutIndexMap[key] ?: stream.streamIndex
 
                     stream.language?.let { args += listOf("-metadata:s:a:$outIndex", "language=$it") }
@@ -128,7 +120,7 @@ class FfmpegCompiler(
 
                 if (stream is SubtitleStreamConfig) {
                     if (onlySubtitles) return@forEach
-                    val key = StreamKey(inputIndex, StreamType.SUBTITLE, stream.streamIndex)
+                    val key = StreamKey(inputIndex, SUBTITLE, stream.streamIndex)
                     val outIndex = mapping.subtitleOutIndexMap[key] ?: stream.streamIndex
 
                     stream.language?.let { args += listOf("-metadata:s:s:$outIndex", "language=$it") }
@@ -138,7 +130,6 @@ class FfmpegCompiler(
             }
         }
     }
-
 
     private data class MappingInfo(
         val anyExplicitMap: Boolean,
@@ -161,24 +152,28 @@ class FfmpegCompiler(
         if (anyExplicitMap) {
             inputs.forEachIndexed { inputIndex, input ->
                 input.allStreams().forEach { stream ->
-                    if (stream.map) {
-                        val key = StreamKey(inputIndex, stream.type, stream.streamIndex)
-                        when (stream.type) {
-                            VIDEO -> {
-                                videoMap[key] = nextV
-                                args += listOf("-map", "$inputIndex:v:${stream.streamIndex}")
-                                nextV++
-                            }
-                            AUDIO -> {
-                                audioMap[key] = nextA
-                                args += listOf("-map", "$inputIndex:a:${stream.streamIndex}")
-                                nextA++
-                            }
-                            SUBTITLE -> {
-                                subMap[key] = nextS
-                                args += listOf("-map", "$inputIndex:s:${stream.streamIndex}")
-                                nextS++
-                            }
+                    if (!stream.map) return@forEach
+
+                    when (stream.type) {
+                        VIDEO -> {
+                            val key = StreamKey(inputIndex, VIDEO, stream.streamIndex)
+                            videoMap[key] = nextV
+                            args += listOf("-map", "$inputIndex:v:${stream.streamIndex}")
+                            nextV++
+                        }
+
+                        AUDIO -> {
+                            val key = StreamKey(inputIndex, AUDIO, stream.streamIndex)
+                            audioMap[key] = nextA
+                            args += listOf("-map", "$inputIndex:a:${stream.streamIndex}")
+                            nextA++
+                        }
+
+                        SUBTITLE -> {
+                            val key = StreamKey(inputIndex, SUBTITLE, stream.streamIndex)
+                            subMap[key] = nextS
+                            args += listOf("-map", "$inputIndex:s:${stream.streamIndex}")
+                            nextS++
                         }
                     }
                 }
@@ -195,39 +190,34 @@ class FfmpegCompiler(
     ) {
         inputs.forEachIndexed { inputIndex, input ->
             input.allStreams().forEach { stream ->
-                val key = StreamKey(inputIndex, stream.type, stream.streamIndex)
 
-                // Finn suffix basert på mapping
-                val suffix: String? = if (mapping.anyExplicitMap) {
-                    when (stream) {
-                        is VideoStreamConfig ->
-                            ":${mapping.videoOutIndexMap[key] ?: 0}"
+                val suffix: String? =
+                    if (mapping.anyExplicitMap) {
+                        when (stream) {
+                            is VideoStreamConfig ->
+                                ":${mapping.videoOutIndexMap[StreamKey(inputIndex, VIDEO, stream.streamIndex)] ?: 0}"
 
-                        is AudioStreamConfig ->
-                            ":${mapping.audioOutIndexMap[key] ?: 0}"
+                            is AudioStreamConfig ->
+                                ":${mapping.audioOutIndexMap[StreamKey(inputIndex, AUDIO, stream.streamIndex)] ?: 0}"
 
-                        is SubtitleStreamConfig ->
-                            ":${mapping.subtitleOutIndexMap[key] ?: 0}"
+                            is SubtitleStreamConfig ->
+                                ":${mapping.subtitleOutIndexMap[StreamKey(inputIndex, SUBTITLE, stream.streamIndex)] ?: 0}"
 
-                        else -> null
-                    }
-                } else null
+                            else -> null
+                        }
+                    } else null
 
                 when (stream) {
-
-                    // 🎥 VIDEO
                     is VideoStreamConfig -> {
                         val codec = stream.codec ?: return@forEach
                         args += codec.buildFfmpegArgs(suffix)
                     }
 
-                    // 🔊 AUDIO
                     is AudioStreamConfig -> {
                         val codec = stream.codec ?: return@forEach
                         args += codec.buildFfmpegArgs(suffix)
                     }
 
-                    // 💬 SUBTITLE
                     is SubtitleStreamConfig -> {
                         val codec = stream.codec ?: return@forEach
                         args += listOf("-c:s${suffix ?: ""}", codec)
@@ -236,6 +226,4 @@ class FfmpegCompiler(
             }
         }
     }
-
-
 }
