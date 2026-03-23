@@ -173,11 +173,16 @@ class SegmentEncodeRunnerTest: TestBase() {
         )
 
 
-        val runner = SegmentEncodeRunner(
-            segment = segment,
-            videoInstructions = instruct,
-            ffmpegInstance = ffmpeg
+        val runner = spyk(
+            SegmentEncodeRunner(
+                segment = segment,
+                videoInstructions = instruct,
+                ffmpegInstance = ffmpeg
+            )
         )
+
+        every { runner.useWorkFileForSegments() } returns false
+
 
         runner.run()
 

@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import org.jetbrains.annotations.VisibleForTesting
 
 class SegmentedVideoProcessor(

@@ -14,6 +14,9 @@ class SegmentEncodeRunner(
     private val ffmpegInstance: FFmpeg
 ) : Runner() {
 
+    fun useWorkFileForSegments(): Boolean {
+        return true
+    }
 
     override suspend fun run(): RunnerResult<SegmentEncodePayload> {
 
@@ -23,7 +26,7 @@ class SegmentEncodeRunner(
             output(segment.output.absolutePath) {
                 overwrite = true
                 progress = true
-                useWorkFile = false
+                useWorkFile = useWorkFileForSegments()
             }
         }
 
