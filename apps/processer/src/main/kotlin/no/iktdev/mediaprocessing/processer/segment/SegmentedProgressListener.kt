@@ -13,7 +13,8 @@ class SegmentedProgressListener(
     val cache: ((taskId: UUID, progress: Progress) -> Unit)? = null
 ) {
 
-    private val VIDEO_WEIGHT = 0.70
+    private val VIDEO_WEIGHT = 0.65
+    private val CONCAT_WEIGHT = 0.05
     private val AUDIO_WEIGHT = 0.25
     private val MERGE_WEIGHT = 0.05
 
@@ -23,14 +24,19 @@ class SegmentedProgressListener(
         report(global.toInt(), "Encoding video segments")
     }
 
+    fun onConcatProgress(local: Double) {
+        val global = (VIDEO_WEIGHT + local * CONCAT_WEIGHT) * 100
+        report(global.toInt(), "Concatenating video segments")
+    }
+
     fun onAudioProgress(doneTracks: Int, totalTracks: Int) {
         val local = doneTracks.toDouble() / totalTracks
-        val global = (VIDEO_WEIGHT + local * AUDIO_WEIGHT) * 100
+        val global = (VIDEO_WEIGHT + CONCAT_WEIGHT + local * AUDIO_WEIGHT) * 100
         report(global.toInt(), "Encoding audio tracks")
     }
 
     fun onMergeProgress(local: Double) {
-        val global = (VIDEO_WEIGHT + AUDIO_WEIGHT + local * MERGE_WEIGHT) * 100
+        val global = (VIDEO_WEIGHT + CONCAT_WEIGHT + AUDIO_WEIGHT + local * MERGE_WEIGHT) * 100
         report(global.toInt(), "Merging audio and video")
     }
 
@@ -51,3 +57,4 @@ class SegmentedProgressListener(
         reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 }
+

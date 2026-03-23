@@ -115,6 +115,9 @@ class SegmentedVideoProcessor(
         segments: List<Segment>,
         ctx: SegmentedRunnerContext
     ): IFile {
+        progressListener.onConcatProgress(0.0)
+
+
         val ffmpeg = ffProvider.getFfmpeg(
             logDirectory = ctx.logDirectory
         )
@@ -131,6 +134,7 @@ class SegmentedVideoProcessor(
         val runner = SegmentConcatRunner(segments, ctx.intermediateStore, noAudioMidfix, ffmpeg)
         return when (val result = runner.run()) {
             is RunnerResult.Success -> {
+                progressListener.onConcatProgress(1.0)
                 result.payload.output
             }
             is RunnerResult.Reject -> throw IllegalStateException(result.reason)

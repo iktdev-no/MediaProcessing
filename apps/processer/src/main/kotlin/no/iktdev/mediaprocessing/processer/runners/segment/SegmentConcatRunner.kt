@@ -33,7 +33,6 @@ class SegmentConcatRunner(
             // output
             output(output.absolutePath) {
                 overwrite = true
-                progress = false
                 useWorkFile = false
             }
         }
