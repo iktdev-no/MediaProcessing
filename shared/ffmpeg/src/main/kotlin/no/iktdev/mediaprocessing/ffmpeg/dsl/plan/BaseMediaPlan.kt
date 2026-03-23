@@ -13,9 +13,9 @@ open class BaseMediaPlan(
 
     @VisibleForTesting
     internal fun getUsableAudioTargetedTracks(): List<AudioTarget> {
-        val uniqueAudioTargets = audioTracks
-            .distinctBy { Pair(it.listIndex, it.codec::class) }
-        return uniqueAudioTargets
+        return audioTracks.distinctBy {
+            Triple(it.ffmpegIndex, it.codec::class, it.codec.channels)
+        }
     }
 
 

@@ -481,11 +481,63 @@ class MediaPlanTest {
         }
     }
 
+    @Test
+    @DisplayName(
+        """
+    Når default og extended audio har samme codec-type (AAC)
+    Hvis default er 2ch og extended er 6ch
+    Så:
+        Skal begge tracks anses som unike
+        Og toAudioInstructions skal returnere 2 instruksjoner
+    """
+    )
+    fun `aac default 2ch and extended 6ch produce two unique audio tracks`() {
+        val plan = SegmentedMediaPlan(
+            videoTrack = VideoTarget(
+                listIndex = 0,
+                ffmpegIndex = 0,
+                codec = VideoCodec.Copy
+            ),
+            audioTracks = listOf(
+                AudioTarget(
+                    listIndex = 0,
+                    ffmpegIndex = 2,
+                    codec = AudioCodec.Aac(
+                        channels = 2,
+                        bitrate = 128
+                    )
+                ),
+                AudioTarget(
+                    listIndex = 0,
+                    ffmpegIndex = 2,
+                    codec = AudioCodec.Aac(
+                        channels = 6,
+                        bitrate = 384
+                    )
+                )
+            )
+        )
 
-    // ------------------------------------------------------------
-    // MOCK HELPERS
-    // ------------------------------------------------------------
+        // --- WHEN ---
+        val audioInstructs = plan.toAudioInstructions("Mock.mkv")
 
+        // --- THEN ---
+        assertEquals(2, audioInstructs.size, "Forventet to unike audio-instruksjoner")
+
+        // Verifiser at begge instruksjonene har korrekt mapping og codec
+        val args0 = ffmpeg { fromInstructions(audioInstructs[0]) }.build()
+        val args1 = ffmpeg { fromInstructions(audioInstructs[1]) }.build()
+
+        assertContainsAllWithOffset(
+            listOf("-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2"),
+            args0, 5, 1
+        )
+
+        assertContainsAllWithOffset(
+            listOf("-map", "0:a:0", "-c:a:0", "aac",  "-b:a:0", "384k", "-ac:0", "6"),
+            args1, 5, 1
+        )
+    }
 
 
 
