@@ -6,6 +6,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.exfl.using
+import no.iktdev.files.FakeFile
 import no.iktdev.files.IFile
 import no.iktdev.files.UseFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
@@ -20,6 +21,7 @@ import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.processer.runners.AudioVideoMergeRunner
 import no.iktdev.mediaprocessing.processer.runners.ProbeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
@@ -215,6 +217,16 @@ class SegmentedVideoTaskListenerTest: TestBase() {
         coEvery { anyConstructed<SegmentConcatRunner>().run() } returns
                 RunnerResult.Success(SegmentConcatRunner.ConcatPayload(output, null))
 
+        val concat = workFolder.using("out", "out.noaudio.mp4")
+        concat.asFake()!!.changeExist(false)
+        val final = workFolder.using("out", "out.mp4")
+        final.asFake()!!.changeExist(false)
+
+        mockkConstructor(AudioVideoMergeRunner::class)
+
+        coEvery { anyConstructed<AudioVideoMergeRunner>().run() } returns
+                RunnerResult.Success(AudioVideoMergeRunner.MergePayload(final))
+
         // --- Kjør jobben ---
         listener.accept(task, reporter)
         listener.currentJob?.join()
@@ -263,6 +275,16 @@ class SegmentedVideoTaskListenerTest: TestBase() {
         coEvery { anyConstructed<SegmentConcatRunner>().run() } returns RunnerResult.Success(
             SegmentConcatRunner.ConcatPayload(output, null)
         )
+
+        val concat = workFolder.using("intermediate", "out.noaudio.mp4")
+        concat.asFake()!!.changeExist(false)
+        val final = workFolder.using("intermediate", "out.mp4")
+        final.asFake()!!.changeExist(false)
+
+        mockkConstructor(AudioVideoMergeRunner::class)
+
+        coEvery { anyConstructed<AudioVideoMergeRunner>().run() } returns
+                RunnerResult.Success(AudioVideoMergeRunner.MergePayload(final))
 
         listener.accept(task, reporter)
         listener.currentJob?.join()

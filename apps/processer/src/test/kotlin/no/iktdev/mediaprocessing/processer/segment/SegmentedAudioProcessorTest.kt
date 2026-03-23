@@ -300,9 +300,15 @@ class SegmentedAudioProcessorTest: TestBase() {
             intermediateStore = intermediate
         )
 
+        val fakeConcat = ctx.output.parentFile.using("Concat.mp4")
+
+        val finalOutput = ctx.intermediateStore
+            .using(ctx.task.data.outputFileName)
+            .apply { asFake()!!.changeExist(false) }
+
         val processor = SegmentedAudioProcessor(ffProvider, progress)
 
-        val result = processor.mergeAudioIntoVideo(ctx, listOf(audioPayload))
+        val result = processor.mergeAudioIntoVideo(ctx, listOf(audioPayload), fakeConcat)
 
         coVerify { anyConstructed<AudioVideoMergeRunner>().run() }
 
@@ -338,10 +344,17 @@ class SegmentedAudioProcessorTest: TestBase() {
             intermediateStore = intermediate
         )
 
+        val fakeConcat = ctx.output.parentFile.using("Concat.mp4")
+
+        val finalOutput = ctx.intermediateStore
+            .using(ctx.task.data.outputFileName)
+            .apply { asFake()!!.changeExist(false) }
+
         val processor = SegmentedAudioProcessor(ffProvider, progress)
 
+
         assertThrows<IllegalStateException> {
-            processor.mergeAudioIntoVideo(ctx, listOf(audioPayload))
+            processor.mergeAudioIntoVideo(ctx, listOf(audioPayload), fakeConcat)
         }
     }
 

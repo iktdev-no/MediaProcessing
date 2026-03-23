@@ -114,14 +114,25 @@ class SegmentedVideoProcessor(
     suspend fun concatSegments(
         segments: List<Segment>,
         ctx: SegmentedRunnerContext
-    ) {
+    ): IFile {
         val ffmpeg = ffProvider.getFfmpeg(
             logDirectory = ctx.logDirectory
         )
 
-        val runner = SegmentConcatRunner(segments, ctx.intermediateStore, ctx.output, ffmpeg)
-        when (val result = runner.run()) {
-            is RunnerResult.Success -> Unit
+        val noAudioMidfix = ctx.output.let { file ->
+            val ext =  "noaudio." + file.extension()
+            file.parentFile.using("${file.nameWithoutExtension}.$ext")
+        }
+
+        if (noAudioMidfix.exists()) {
+            return noAudioMidfix
+        }
+
+        val runner = SegmentConcatRunner(segments, ctx.intermediateStore, noAudioMidfix, ffmpeg)
+        return when (val result = runner.run()) {
+            is RunnerResult.Success -> {
+                result.payload.output
+            }
             is RunnerResult.Reject -> throw IllegalStateException(result.reason)
         }
     }

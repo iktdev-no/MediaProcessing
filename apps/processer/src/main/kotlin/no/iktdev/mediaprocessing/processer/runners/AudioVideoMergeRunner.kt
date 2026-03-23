@@ -49,7 +49,7 @@ class AudioVideoMergeRunner(
             output(output.absolutePath) {
                 overwrite = true
                 progress = false
-                useWorkFile = false
+                useWorkFile = true
             }
         }
 

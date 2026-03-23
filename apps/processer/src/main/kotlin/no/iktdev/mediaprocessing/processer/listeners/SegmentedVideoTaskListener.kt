@@ -79,15 +79,18 @@ class SegmentedVideoTaskListener(
         )
 
         // 5) Concat
-        videoProcessor.concatSegments(segments, ctx)
+        val concatted = videoProcessor.concatSegments(segments, ctx)
 
         val audioProcessor = SegmentedAudioProcessor(this, progressListener)
         // 6) Encode audio (restart-sikkert)
         val audioTrackFiles = audioProcessor.encodeAudioStreams(ctx)
 
         // 7) Merge video + audio
-        val finalOutput = audioProcessor.mergeAudioIntoVideo(ctx, audioTrackFiles)
+        val finalOutput = audioProcessor.mergeAudioIntoVideo(ctx, audioTrackFiles, concatted)
 
+        if (finalOutput.absolutePath != ctx.output.absolutePath) {
+            error("Mismatch between actual out and expected out in context: ${finalOutput.absolutePath} != ${ctx.output.absolutePath}")
+        }
 
         // 8) Collect logs
         val mergedLog = collectLogs(ctx.logDirectory, ctx.taskStartTime)

@@ -96,7 +96,8 @@ class SegmentedAudioProcessor(
 
     suspend fun mergeAudioIntoVideo(
         ctx: SegmentedRunnerContext,
-        audioFiles: List<AudioEncodeRunner.AudioEncodePayload>
+        audioFiles: List<AudioEncodeRunner.AudioEncodePayload>,
+        concatted: IFile
     ): IFile {
 
         progressListener.onMergeProgress(0.0)
@@ -110,11 +111,16 @@ class SegmentedAudioProcessor(
         )
 
         val runner = AudioVideoMergeRunner(
-            videoFile = ctx.output,
+            videoFile = concatted,
             audioFiles = audioFiles,
             output = finalOutput,
             ffmpegInstance = ffmpeg
         )
+
+        if (finalOutput.exists()) {
+            progressListener.onMergeProgress(1.0)
+            return finalOutput
+        }
 
         return when (val result = runner.run()) {
             is RunnerResult.Success -> {
