@@ -78,7 +78,10 @@ data class AudioCodecConfig(
                 )
 
                 AudioCodecType.COPY -> AudioCodecConfig(
-                    type = codecType
+                    type = codecType,
+                    sampleRate = null,
+                    channels = null,
+                    bitrate = null
                 )
             }
     }

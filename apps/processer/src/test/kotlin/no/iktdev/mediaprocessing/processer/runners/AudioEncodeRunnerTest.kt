@@ -80,7 +80,7 @@ class AudioEncodeRunnerTest : TestBase() {
                 file(input.absolutePath) {
                     audio(0) {
                         map = true
-                        codec = AudioCodec.Copy
+                        codec = AudioCodec.Copy()
                     }
                 }
             },
@@ -131,7 +131,7 @@ class AudioEncodeRunnerTest : TestBase() {
                 file(input.absolutePath) {
                     audio(0) {
                         map = true
-                        codec = AudioCodec.Copy
+                        codec = AudioCodec.Copy()
                     }
                 }
             },
@@ -184,7 +184,7 @@ class AudioEncodeRunnerTest : TestBase() {
                 file(input.absolutePath) {
                     audio(0) {
                         map = true
-                        codec = AudioCodec.Copy
+                        codec = AudioCodec.Copy()
                     }
                 }
             },

@@ -127,7 +127,7 @@ class VideoTaskPollerImplementationTest : TestBase() {
                             file("/src/scratch/Potato masters - S01E01 - Personal Rule.mkv") {
                                 audio(0) {
                                     map = true
-                                    codec = AudioCodec.Copy
+                                    codec = AudioCodec.Copy()
                                 }
                             }
                         },
@@ -157,7 +157,7 @@ class VideoTaskPollerImplementationTest : TestBase() {
                             }
                             audio(0) {
                                 map = true
-                                codec = AudioCodec.Copy
+                                codec = AudioCodec.Copy()
                             }
                         }
                     },

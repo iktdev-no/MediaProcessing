@@ -26,7 +26,7 @@ class MediaPlanTest {
         val plan = LinearMediaPlan(
             videoTrack = VideoTarget(listIndex = 0, ffmpegIndex = 0, codec = VideoCodec.Copy),
             audioTracks = mutableListOf(
-                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Copy)
+                AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Copy())
             )
         )
 
@@ -151,7 +151,7 @@ class MediaPlanTest {
                 ffmpegIndex = 0,
                 codec = VideoCodec.Hevc(crf = 18, preset = Presets.Slow)
             ),
-            audioTracks = mutableListOf(AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Copy))
+            audioTracks = mutableListOf(AudioTarget(listIndex = 0, ffmpegIndex = 0, codec = AudioCodec.Copy()))
         )
 
         val instruct = plan.toInstructions("Mock.mkv", "Out.mp4")
@@ -313,7 +313,7 @@ class MediaPlanTest {
         val plan = LinearMediaPlan(
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = mutableListOf(
-                AudioTarget(listIndex = 1, ffmpegIndex = 5, codec = AudioCodec.Copy)
+                AudioTarget(listIndex = 1, ffmpegIndex = 5, codec = AudioCodec.Copy())
             )
         )
 
@@ -374,7 +374,7 @@ class MediaPlanTest {
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = listOf(
                 AudioTarget(0, 0, AudioCodec.Aac(bitrate = 128)),
-                AudioTarget(1, 1, AudioCodec.Copy)
+                AudioTarget(1, 1, AudioCodec.Copy())
             )
         )
 

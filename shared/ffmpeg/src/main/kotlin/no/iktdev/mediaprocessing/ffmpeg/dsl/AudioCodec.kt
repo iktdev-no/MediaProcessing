@@ -137,13 +137,17 @@ open class AudioCodec(val codec: String, open var bitrate: Int? = null, open var
 
 
     // Kopier eksisterende audio uten reenkoding
-    object Copy : AudioCodec("copy")
+    class Copy(
+        bitrate: Int? = null,
+        channels: Int? = null,
+        sampleRate: Int? = null,
+    ) : AudioCodec(codec = "copy", bitrate = bitrate, channels = channels, sampleRate = sampleRate)
 
     var forceCopy: Boolean = false
 
     open fun determineTranscodeDecision(stream: AudioStream): TranscodeDecision {
         // 1) Hvis vi eksplisitt vil kopiere
-        if (forceCopy || this == Copy) return TranscodeDecision.Copy
+        if (forceCopy || this == Copy::class) return TranscodeDecision.Copy
 
         // 2) Hvis codec er identisk og ingen parametre er satt → Copy
         val sameCodec = this.isSame(stream.codec_name)
@@ -257,7 +261,7 @@ open class AudioCodec(val codec: String, open var bitrate: Int? = null, open var
 
         is Pcm -> Pcm()
 
-        Copy -> Copy
+        is Copy -> Copy(channels = this.channels, sampleRate = this.sampleRate)
         else -> error("Unsupported audio codec $this")
     }
 
@@ -274,7 +278,7 @@ fun AudioCodec.isSame(name: String): Boolean {
         "eac3", "ec3", "dolbydigitalplus", "ddp" -> AudioCodec.Eac3()
         "dts", "dca" -> AudioCodec.Dts()   // ← lagt til her
         "pcm_s16le", "pcm" -> AudioCodec.Pcm()
-        "copy" -> AudioCodec.Copy
+        "copy" -> AudioCodec.Copy()
         else -> throw IllegalArgumentException("Unsupported audio codec: $name")
     }
     return (this.codec == codecObject.codec)

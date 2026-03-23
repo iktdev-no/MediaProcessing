@@ -127,7 +127,11 @@ fun AudioCodecConfig.toDsl(): AudioCodec = when (type) {
 
     AudioCodecType.PCM -> AudioCodec.Pcm()
 
-    AudioCodecType.COPY -> AudioCodec.Copy
+    AudioCodecType.COPY -> AudioCodec.Copy(
+        bitrate = bitrate,
+        channels = channels,
+        sampleRate = sampleRate
+    )
 }
 
 

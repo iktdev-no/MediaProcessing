@@ -29,7 +29,7 @@ class SegmentedAudioProcessorTest: TestBase() {
     private fun fakeMeta(index: Int): AudioStreamConfig {
         return AudioStreamConfig(
             streamIndex = index,
-            codec = AudioCodec.Copy,
+            codec = AudioCodec.Copy(),
             language = "eng",
             title = "Track $index",
             default = index == 0
