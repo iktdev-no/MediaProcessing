@@ -101,6 +101,9 @@ class FfmpegCompiler(
         val onlySubtitles =
             inputs.all { input -> input.allStreams().all { it is SubtitleStreamConfig } && inputs.size == 1 }
 
+        val audioStreamConfigs = inputs.flatMap { it.allStreams() }.filterIsInstance<AudioStreamConfig>()
+        val audioDefaultOrFirst = audioStreamConfigs.find { it.default } ?: audioStreamConfigs.firstOrNull()
+
         inputs.forEachIndexed { inputIndex, input ->
             input.allStreams().forEach { stream ->
 
@@ -126,6 +129,12 @@ class FfmpegCompiler(
                         2 -> "2ch"
                         6 -> "6ch"
                         else -> "${ch}ch"
+                    }
+
+                    if (stream.streamIndex == audioDefaultOrFirst?.streamIndex) {
+                        args += listOf("-disposition:a:$outIndex", "default")
+                    } else {
+                        args += listOf("-disposition:a:$outIndex", "0")
                     }
 
                     val handlerName = "$lang $chLabel"

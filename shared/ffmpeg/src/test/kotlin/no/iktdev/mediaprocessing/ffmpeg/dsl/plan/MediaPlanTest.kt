@@ -35,7 +35,7 @@ class MediaPlanTest {
 
         Assertions.assertEquals(
             listOf(
-                "-map", "0:v:0", "-map", "0:a:0", "-metadata:s:a:0", "handler_name=Audio -1ch", "-c:v:0", "copy", "-c:a:0", "copy"
+                "-map", "0:v:0", "-map", "0:a:0", "-disposition:a:0", "default", "-metadata:s:a:0", "handler_name=Audio -1ch", "-c:v:0", "copy", "-c:a:0", "copy",
             ),
             args.drop(defaultOffset).dropLast(1)
         )
@@ -64,7 +64,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(expected =
             listOf(
                 "-map", "0:v:0", "-c:v:0", "libx265", "-crf", "18", "-preset", "slow",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default"
             ),
             args, defaultOffset, 1)
 
@@ -93,8 +93,8 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch",
-                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio", "-ac:1", "2", "-metadata:s:a:1", "handler_name=Audio 2ch"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default",
+                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio", "-ac:1", "2", "-metadata:s:a:1", "handler_name=Audio 2ch", "-disposition:a:1", "0"
             ),
             args, defaultOffset, 1
         )
@@ -135,7 +135,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default"
             ),
             args, defaultOffset, 1)
 
@@ -161,7 +161,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "libx265", "-crf", "18", "-preset", "slow",
-                "-map", "0:a:0", "-c:a:0", "copy", "-metadata:s:a:0", "handler_name=Audio -1ch"
+                "-map", "0:a:0", "-c:a:0", "copy", "-metadata:s:a:0", "handler_name=Audio -1ch", "-disposition:a:0", "default"
             ),
             args, defaultOffset,1
         )
@@ -202,8 +202,8 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch",
-                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-ac:1", "2", "-application", "audio", "-metadata:s:a:1", "handler_name=Audio 2ch"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default",
+                "-map", "0:a:1", "-c:a:1", "opus", "-b:a:1", "96k", "-ac:1", "2", "-application", "audio", "-metadata:s:a:1", "handler_name=Audio 2ch", "-disposition:a:1", "0"
             ),
             args.drop(defaultOffset).dropLast(1)
         )
@@ -323,7 +323,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:1", "-c:a:0", "copy", "-metadata:s:a:0", "handler_name=Audio -1ch"
+                "-map", "0:a:1", "-c:a:0", "copy", "-metadata:s:a:0", "handler_name=Audio -1ch", "-disposition:a:0", "default"
             ),
             args, defaultOffset, 1
         )
@@ -353,8 +353,8 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:1", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch",
-                "-map", "0:a:0", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio", "-ac:1", "2", "-metadata:s:a:1", "handler_name=Audio 2ch"
+                "-map", "0:a:1", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default",
+                "-map", "0:a:0", "-c:a:1", "opus", "-b:a:1", "96k", "-application", "audio", "-ac:1", "2", "-metadata:s:a:1", "handler_name=Audio 2ch", "-disposition:a:1", "0"
             ),
             args, defaultOffset,1
         )
@@ -417,7 +417,7 @@ class MediaPlanTest {
         assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-c:v:0", "copy",
-                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
+                "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default"
             ),
             args, defaultOffset,1
         )
@@ -476,7 +476,7 @@ class MediaPlanTest {
             val args = ffmpeg { fromInstructions(instruct) }.build()
             assertContainsAllWithOffset(
                 listOf(
-                    "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"
+                    "-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "192k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default"
                 ),
                 args, defaultOffset, 1
             )
@@ -531,12 +531,12 @@ class MediaPlanTest {
         val args1 = ffmpeg { fromInstructions(audioInstructs[1]) }.build()
 
         assertContainsAllWithOffset(
-            listOf("-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch"),
+            listOf("-map", "0:a:0", "-c:a:0", "aac", "-b:a:0", "128k", "-ac:0", "2", "-metadata:s:a:0", "handler_name=Audio 2ch", "-disposition:a:0", "default"),
             args0, defaultOffset, 1
         )
 
         assertContainsAllWithOffset(
-            listOf("-map", "0:a:0", "-c:a:0", "aac",  "-b:a:0", "384k", "-ac:0", "6", "-metadata:s:a:0", "handler_name=Audio 6ch"),
+            listOf("-map", "0:a:0", "-c:a:0", "aac",  "-b:a:0", "384k", "-ac:0", "6", "-metadata:s:a:0", "handler_name=Audio 6ch", "-disposition:a:0", "default"),
             args1, defaultOffset, 1
         )
     }
