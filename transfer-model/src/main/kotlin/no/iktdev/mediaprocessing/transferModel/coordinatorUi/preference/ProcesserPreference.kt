@@ -16,6 +16,7 @@ data class ProcesserPreference(
                 videoPreference = VideoPreference(VideoCodecConfig.from(VideoCodecType.HEVC), false),
                 audioPreference = AudioPreference(
                     default = AudioCodecConfig.from(AudioCodecType.AAC)
+                        .copy(channels = 2, bitrate = 128, sampleRate = 48000)
                 ),
             )
         }

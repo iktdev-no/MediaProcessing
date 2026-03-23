@@ -207,11 +207,11 @@ object TaskStore: TaskStore {
                         (TasksTable.status eq TaskStatus.Failed) and
                         (TasksTable.taskId eq taskId.toString())
             }) {
+                it[status] = TaskStatus.Pending
                 it[claimed] = false
                 it[claimedBy] = null
                 it[consumed] = false
                 it[lastCheckIn] = null
-                it[status] = TaskStatus.Pending
             }
         }
     }

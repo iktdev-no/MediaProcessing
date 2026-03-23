@@ -30,7 +30,9 @@ class TaskService(
     }
 
     fun resetFailedTask(taskId: UUID): Boolean {
-        val resetSuccess = TaskStore.resetTaskById(taskId).isSuccess
+        val resetSuccess = TaskStore.resetTaskById(taskId).let {
+            it.isSuccess && it.getOrThrow() == 1
+        }
         return resetSuccess
     }
 
