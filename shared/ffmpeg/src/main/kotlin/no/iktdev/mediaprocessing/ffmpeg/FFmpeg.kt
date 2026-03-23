@@ -52,7 +52,7 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
         if (result.resultCode != 0) {
             listener?.onError(inputFile, result.output.joinToString("\n"))
             log.error { "Exitcode was ${result.resultCode}, ffmpeg was attempted with the following arguments: $arguments" }
-            log.info { "Log file can be found at $logFile" }
+            log.info { "Log file can be found at ${logFile.absolutePath}" }
         } else {
 
             if (command.isUsingWorkFile()) {
