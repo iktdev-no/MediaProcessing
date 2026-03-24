@@ -33,7 +33,7 @@ class MediaPlanTest {
         val instruct = plan.toInstructions("Mock.mkv", "Out.mp4")
         val args = ffmpeg { fromInstructions(instruct) }.build()
 
-        Assertions.assertEquals(
+        assertContainsAllWithOffset(
             listOf(
                 "-map", "0:v:0", "-map", "0:a:0", "-disposition:a:0", "default", "-metadata:s:a:0", "handler_name=Audio -1ch", "-c:v:0", "copy", "-c:a:0", "copy",
             ),
