@@ -34,6 +34,7 @@ class SegmentedMediaPlan(videoTrack: VideoTarget, audioTracks: List<AudioTarget>
                     audio(target.listIndex) {
                         map = true
                         codec = target.codec
+                        language = target.meta?.language
                     }
                 }
 

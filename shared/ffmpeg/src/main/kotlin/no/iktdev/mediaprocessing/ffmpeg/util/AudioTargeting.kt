@@ -4,6 +4,7 @@ import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioClamp
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioTarget
+import no.iktdev.mediaprocessing.ffmpeg.model.AudioTargetMeta
 import no.iktdev.mediaprocessing.ffmpeg.model.SelectedAudioTracks
 
 class AudioTargeting(private val audioStreams: List<AudioStream>) {
@@ -30,7 +31,10 @@ class AudioTargeting(private val audioStreams: List<AudioStream>) {
             targets += AudioTarget(
                 listIndex = track.defaultListIndex,
                 ffmpegIndex = track.defaultFfmpegIndex,
-                codec = defaultCodec
+                codec = defaultCodec,
+                meta = AudioTargetMeta(
+                    language = defaultStream.tags.language
+                )
             )
 
 
@@ -49,7 +53,10 @@ class AudioTargeting(private val audioStreams: List<AudioStream>) {
                 targets += AudioTarget(
                     listIndex = track.extendedListIndex,
                     ffmpegIndex = track.extendedFfmpegIndex,
-                    codec = extCodec
+                    codec = extCodec,
+                    meta = AudioTargetMeta(
+                        language = extStream.tags.language
+                    )
                 )
             }
         }

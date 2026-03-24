@@ -6,8 +6,13 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 data class AudioTarget(
     val listIndex: Int,
     val ffmpegIndex: Int,
-    val codec: AudioCodec
+    val codec: AudioCodec,
+    val meta: AudioTargetMeta? = null
 )
+
+data class AudioTargetMeta(
+    val language: String? = null,
+) {}
 
 data class VideoTarget(
     val listIndex: Int,
