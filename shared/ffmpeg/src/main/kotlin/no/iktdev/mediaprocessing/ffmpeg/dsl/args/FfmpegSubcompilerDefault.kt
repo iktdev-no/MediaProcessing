@@ -153,7 +153,7 @@ class FfmpegSubcompilerDefault(
     )
 
     private fun compileMapping(inputs: List<InputConfig>, args: MutableList<String>): MappingInfo {
-        val anyExplicitMap = inputs.any { it.allStreams().any { s -> s.map } }
+        val anyExplicitMap = true // inputs.any { it.allStreams().any { s -> s.map } }
 
         val videoMap = mutableMapOf<StreamKey, Int>()
         val audioMap = mutableMapOf<StreamKey, Int>()
