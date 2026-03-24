@@ -109,7 +109,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertEquals("eng", result.language)
         val args = ffmpeg { fromInstructions(result.instructions) }.build()
         assertContainsAllWithOffset(
-            listOf("-map", "0:s:0", "-c:s:0", "copy"),
+            listOf("-map_chapters", "-1", "-map", "0:s:0", "-c:s:0", "copy"),
             args, 7, 1
         )
     }
@@ -168,7 +168,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertEquals("jpn", result.language)
         val args = ffmpeg { fromInstructions(result.instructions) }.build()
         assertContainsAllWithOffset(
-            listOf("-map", "0:s:3", "-c:s:0", "copy"),
+            listOf("-map_chapters", "-1", "-map", "0:s:3", "-c:s:0", "copy"),
             args, 7, 1)
     }
 
@@ -218,7 +218,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertEquals("eng", data.language)
         val args = ffmpeg { fromInstructions(data.instructions) }.build()
         assertContainsAllWithOffset(
-            listOf("-map", "0:s:0", "-c:s:0", "copy"), args, 7, 1)
+            listOf("-map_chapters", "-1", "-map", "0:s:0", "-c:s:0", "copy"), args, 7, 1)
     }
 
     @Test
@@ -274,14 +274,14 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         assertEquals("eng", srtTask.data.language)
         val args1 = srtTask.data.instructions.let { ffmpeg { fromInstructions(it) }.build() }
         assertContainsAllWithOffset(
-            listOf("-map", "0:s:0", "-c:s:0", "copy"), args1, 7, 1)
+            listOf("-map_chapters", "-1", "-map", "0:s:0", "-c:s:0", "copy"), args1, 7, 1)
 
         // Sjekk andre (ASS)
         val assTask = slot[1] as ExtractSubtitleTask
         assertEquals("Test-jpn.ass", assTask.data.outputFileName)
         assertEquals("jpn", assTask.data.language)
         val args2 = assTask.data.instructions.let { ffmpeg { fromInstructions(it) }.build() }
-        assertContainsAllWithOffset(listOf("-map", "0:s:1", "-c:s:0", "copy"), args2, 7, 1)
+        assertContainsAllWithOffset(listOf("-map_chapters", "-1", "-map", "0:s:1", "-c:s:0", "copy"), args2, 7, 1)
 
         // Og: resultatet er et ProcesserExtractTaskCreatedEvent med to taskIds
         assertTrue(result is ProcesserExtractTaskCreatedEvent)
