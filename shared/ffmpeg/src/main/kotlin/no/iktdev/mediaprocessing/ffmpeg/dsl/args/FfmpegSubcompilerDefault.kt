@@ -33,6 +33,8 @@ class FfmpegSubcompilerDefault(
         compileCodecs(inputFiles, mappingInfo, args)
         compileDisposition(inputFiles, mappingInfo, args)   // <-- NYTT OG KRITISK
 
+        args += listOf("-map_chapters", "-1")
+
         return args
     }
 

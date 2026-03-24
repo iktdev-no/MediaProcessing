@@ -45,7 +45,7 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
         logFile = logDir.using("$formattedDateTime-${File(inputFile).nameWithoutExtension}.log")
         listener?.onStarted(inputFile)
         val arguments = command.build()
-        log.debug("Running ffmpeg with the following arguments\n${arguments.joinToString("\n")}")
+        log.debug("Running ffmpeg with the following arguments\n${arguments.joinToString(" ")}")
         result = execute(arguments) {
             onNewOutput(it)
         }
