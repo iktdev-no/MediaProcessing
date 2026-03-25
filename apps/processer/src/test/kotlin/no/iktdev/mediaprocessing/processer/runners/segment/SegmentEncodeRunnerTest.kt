@@ -12,7 +12,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
-import no.iktdev.mediaprocessing.processer.segment.Segment
+import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import java.io.File

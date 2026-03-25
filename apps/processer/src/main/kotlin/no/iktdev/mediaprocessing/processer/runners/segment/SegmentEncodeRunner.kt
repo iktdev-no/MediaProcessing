@@ -6,7 +6,7 @@ import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.processer.runners.Runner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
-import no.iktdev.mediaprocessing.processer.segment.Segment
+import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 
 class SegmentEncodeRunner(
     private val segment: Segment,

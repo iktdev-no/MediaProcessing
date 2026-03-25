@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.processer.segment
+package no.iktdev.mediaprocessing.processer.processors.segment
 
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -7,15 +7,13 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
-import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.AudioStreamConfig
-import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.context.FfProvider
 import no.iktdev.mediaprocessing.processer.listeners.FfTaskListener
+import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
 import no.iktdev.mediaprocessing.processer.runners.AudioEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.AudioVideoMergeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
@@ -50,7 +48,7 @@ class SegmentedAudioProcessorTest: TestBase() {
 
         val outFile = audioFolder.using("track_0.mka").apply { writeText("dummy") }
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate,
             audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json").apply {
                 writeText("""{"completed":[0]}""")
@@ -89,7 +87,7 @@ class SegmentedAudioProcessorTest: TestBase() {
         }
 
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate,
             audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json").apply {
                 writeText("""{"completed":[0]}""")
@@ -122,9 +120,9 @@ class SegmentedAudioProcessorTest: TestBase() {
 
         mockkConstructor(AudioEncodeRunner::class)
         coEvery { anyConstructed<AudioEncodeRunner>().run() } returns
-                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(outFile, fakeMeta(0)))
+                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(outFile, null,fakeMeta(0)))
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate,
             audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json"),
             audioInstructions = listOf(fakeAudioInstruction(workFolder.using("input.mka"), "track_0.mka"))
@@ -161,7 +159,7 @@ class SegmentedAudioProcessorTest: TestBase() {
         assertTrue(outFile.exists())
 
         // Ingen checkpoint → completed = []
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate,
             audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json").apply {
                 writeText("""{"completed":[]}""")
@@ -172,7 +170,7 @@ class SegmentedAudioProcessorTest: TestBase() {
         // Mock runner → return success
         mockkConstructor(AudioEncodeRunner::class)
         coEvery { anyConstructed<AudioEncodeRunner>().run() } returns
-                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(outFile, fakeMeta(0)))
+                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(outFile, null,fakeMeta(0)))
 
         val ffProvider = mockk<FfProvider>(relaxed = true)
         val progress = mockk<SegmentedProgressListener>(relaxed = true)
@@ -221,7 +219,7 @@ class SegmentedAudioProcessorTest: TestBase() {
         val ffProvider = mockk<FfProvider>(relaxed = true)
         every { ffProvider.getFfmpeg(any(), any()) } returns fakeFfmpeg
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate,
             audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json"),
             audioInstructions = listOf(fakeAudioInstruction(workFolder.using("input.mka"), "track_0.mka"))
@@ -247,9 +245,9 @@ class SegmentedAudioProcessorTest: TestBase() {
 
         mockkConstructor(AudioEncodeRunner::class)
         coEvery { anyConstructed<AudioEncodeRunner>().run() } returns
-                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(intermediate.using("dummy.mka"), fakeMeta(0)))
+                RunnerResult.Success(AudioEncodeRunner.AudioEncodePayload(intermediate.using("dummy.mka"), null, fakeMeta(0)))
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate,
             audioCheckpointFile = intermediate.using("AUDIO_CHECKPOINTS.json"),
             audioInstructions = listOf(
@@ -296,7 +294,7 @@ class SegmentedAudioProcessorTest: TestBase() {
         val ffProvider = mockk<FfProvider>(relaxed = true)
         val progress = mockk<SegmentedProgressListener>(relaxed = true)
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate
         )
 
@@ -340,7 +338,7 @@ class SegmentedAudioProcessorTest: TestBase() {
         val ffProvider = mockk<FfProvider>(relaxed = true)
         val progress = mockk<SegmentedProgressListener>(relaxed = true)
 
-        val ctx = fakeContext().copy(
+        val ctx = fakeSegmentContext().copy(
             intermediateStore = intermediate
         )
 

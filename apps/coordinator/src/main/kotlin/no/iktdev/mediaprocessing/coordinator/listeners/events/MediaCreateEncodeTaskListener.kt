@@ -6,22 +6,19 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
 import no.iktdev.mediaprocessing.coordinator.toFFmpegVersion
-import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.LinearMediaPlan
-import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.SegmentedMediaPlan
+import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.SimpleMediaPlan
+import no.iktdev.mediaprocessing.ffmpeg.model.EncodeStrategy
 import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
 import no.iktdev.mediaprocessing.ffmpeg.util.AudioTargeting
 import no.iktdev.mediaprocessing.ffmpeg.util.getBestEncodeStrategy
-import no.iktdev.mediaprocessing.ffmpeg.util.getMediaPlanner
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
-import no.iktdev.mediaprocessing.shared.common.model.task.data.EncodeDataBase
 import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
-import no.iktdev.mediaprocessing.shared.common.model.task.data.SegmentEncodeData
+import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
@@ -65,7 +62,8 @@ class MediaCreateEncodeTaskListener(
             codec = videoPreference
         )
 
-        val planner = getMediaPlanner(getBestEncodeStrategy(videoPreference, useVideoStream), videoTarget, audioTargets)
+        val encodeStrategy = getBestEncodeStrategy(videoPreference, useVideoStream)
+        val planner = SimpleMediaPlan(videoTarget, audioTargets)
 
         val extension = planner.toContainer()
         val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
@@ -77,29 +75,30 @@ class MediaCreateEncodeTaskListener(
             return null
         }
 
-        val baseData = EncodeDataBase(
-            outputFileName = "$filename.$extension",
-            outputFolderName = parsedInfo,
-            inputFile = preparedFile
-        )
+        val outputFileName = "$filename.$extension"
+        val outputFolderName = parsedInfo
+        val inputFile = preparedFile
 
-        val task = when (planner) {
-            is SegmentedMediaPlan -> {
+        val encodeData = when (planner) {
+            is SimpleMediaPlan -> {
                 val videoInstructs =
-                    planner.toVideoInstructions(inputFile = baseData.inputFile, outputFile = baseData.outputFileName)
-                val audioInstructs = planner.toAudioInstructions(inputFile = baseData.inputFile)
-                val data = baseData.toSegmented(videoInstructs, audioInstructs)
-                SegmentedEncodeTask(data)
-            }
-
-            is LinearMediaPlan -> {
-                val arguments =
-                    planner.toInstructions(inputFile = baseData.inputFile, outputFile = baseData.outputFileName)
-                val data = baseData.toLinear(arguments)
-                LinearEncodeTask(data)
+                    planner.toVideoInstructions(inputFile = inputFile, outputFile = outputFileName)
+                val audioInstructs = planner.toAudioInstructions(inputFile = inputFile)
+                DefaultEncodeData(
+                    inputFile = inputFile,
+                    outputFileName = outputFileName,
+                    outputFolderName = outputFolderName,
+                    videoInstruction = videoInstructs,
+                    audioInstructions = audioInstructs,
+                )
             }
 
             else -> throw RuntimeException("Unsupported planner type: ${planner::class.simpleName}")
+        }
+
+        val task = when (encodeStrategy) {
+            EncodeStrategy.Linear -> LinearEncodeTask(encodeData)
+            EncodeStrategy.Segmented -> SegmentedEncodeTask(encodeData)
         }
 
         val producerEvent = ProcesserEncodeTaskCreatedEvent(
@@ -111,28 +110,6 @@ class MediaCreateEncodeTaskListener(
         TaskStore.persist(task)
 
         return producerEvent
-    }
-
-    fun EncodeDataBase.toLinear(instruct: FFmpegInstructions): LinearEncodeData {
-        return LinearEncodeData(
-            instructions = instruct,
-            outputFileName = this.outputFileName,
-            outputFolderName = this.outputFolderName,
-            inputFile = this.inputFile
-        )
-    }
-
-    fun EncodeDataBase.toSegmented(
-        videoInstruction: FFmpegInstructions,
-        audioInstructs: List<FFmpegInstructions>
-    ): SegmentEncodeData {
-        return SegmentEncodeData(
-            videoInstruction = videoInstruction,
-            audioInstructions = audioInstructs,
-            outputFileName = this.outputFileName,
-            outputFolderName = this.outputFolderName,
-            inputFile = this.inputFile
-        )
     }
 
 }

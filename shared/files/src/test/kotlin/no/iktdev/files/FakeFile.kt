@@ -9,15 +9,17 @@ class FakeFile(
     private var exists: Boolean = true,
     private var size: Long = 0,
     private var directory: Boolean = false,
-    private val children: MutableList<IFile> = mutableListOf(),
     private var content: String = "",
     private var modified: Long = System.currentTimeMillis()
 ) : IFile {
 
     init {
-        // Register this instance if not already present
+        if (!directory) {
+            directory = !path.substringAfterLast('/').contains('.')
+        }
         fileRegistry.putIfAbsent(path, this)
     }
+
 
     companion object {
         val fileRegistry: MutableMap<String, FakeFile> = mutableMapOf()
@@ -25,7 +27,9 @@ class FakeFile(
         fun wipe() = fileRegistry.clear()
 
         fun getOrCreate(path: String): FakeFile =
-            fileRegistry.getOrPut(path) { FakeFile(path) }
+            fileRegistry.getOrPut(path) {
+                FakeFile(path)
+            }
     }
 
     /** Always return the canonical instance for this path */
@@ -74,6 +78,14 @@ class FakeFile(
         r.modified = System.currentTimeMillis()
     }
 
+    fun setDirectory() {
+        ref().directory = true
+    }
+
+    fun setFile() {
+        ref().directory = false
+    }
+
     override fun mkdir(): Boolean {
         val r = ref()
         r.exists = true
@@ -81,7 +93,9 @@ class FakeFile(
         return true
     }
 
-    override fun mkdirs(): Boolean = mkdir()
+    override fun mkdirs(): Boolean {
+        return mkdir()
+    }
 
     override fun delete(): Boolean {
         val r = ref()
@@ -162,5 +176,14 @@ class FakeFile(
         return true
     }
 
+    override fun equals(other: Any?): Boolean {
+        return if (other is FakeFile) {
+            this.absolutePath == other.absolutePath
+        } else if (other is IFile) {
+            other is IFile && this.absolutePath == other.absolutePath
+        } else {
+            super.equals(other)
+        }
+    }
 
 }

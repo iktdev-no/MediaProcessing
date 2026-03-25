@@ -1,7 +1,6 @@
-package no.iktdev.mediaprocessing.processer.segment
+package no.iktdev.mediaprocessing.processer.processors.segment
 
 import mu.KotlinLogging
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.context.CheckpointStore
 import no.iktdev.mediaprocessing.processer.context.FfProvider
 import no.iktdev.mediaprocessing.processer.listeners.FfTaskListener.FfmpegFailedException
@@ -10,7 +9,8 @@ import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import no.iktdev.files.IFile
-import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.processer.context.SegmentedRunnerContext
+import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
 import org.jetbrains.annotations.VisibleForTesting
 
 class SegmentedVideoProcessor(

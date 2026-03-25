@@ -5,8 +5,6 @@ import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.tasks.TaskReporter
-import no.iktdev.exfl.using
-import no.iktdev.files.FakeFile
 import no.iktdev.files.IFile
 import no.iktdev.files.UseFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
@@ -21,14 +19,17 @@ import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.processer.context.SegmentedRunnerContext
+import no.iktdev.mediaprocessing.processer.processors.segment.Segment
+import no.iktdev.mediaprocessing.processer.processors.segment.SegmentPlanner
+import no.iktdev.mediaprocessing.processer.processors.segment.SegmentedContextFactory
 import no.iktdev.mediaprocessing.processer.runners.AudioVideoMergeRunner
 import no.iktdev.mediaprocessing.processer.runners.ProbeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentConcatRunner
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
-import no.iktdev.mediaprocessing.processer.segment.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
-import no.iktdev.mediaprocessing.shared.common.model.task.data.SegmentEncodeData
+import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 
@@ -101,7 +102,7 @@ class SegmentedVideoTaskListenerTest: TestBase() {
         val input = workFolder.using("input.mp4").absolutePath
 
         val task = SegmentedEncodeTask(
-            data = SegmentEncodeData(
+            data = DefaultEncodeData(
                 inputFile = input,
                 outputFileName = "out.mp4",
                 outputFolderName = "out",

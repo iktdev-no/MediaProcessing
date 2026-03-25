@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.processer.segment
+package no.iktdev.mediaprocessing.processer.processors.segment
 
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -6,12 +6,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import kotlinx.coroutines.test.runTest
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.context.CheckpointStore
 import no.iktdev.mediaprocessing.processer.context.FfProvider
 import no.iktdev.mediaprocessing.processer.listeners.FfTaskListener
+import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import org.junit.jupiter.api.Assertions.*
@@ -56,7 +56,7 @@ class SegmentedVideoProcessorTest: TestBase() {
             checkpointStore = CheckpointStore(workFolder.resolve("cp.json")),
             checkpoint = checkpoint,
             segments = listOf(segment),
-            ctx = fakeContext()
+            ctx = fakeSegmentContext()
         )
 
         // Assert
@@ -94,7 +94,7 @@ class SegmentedVideoProcessorTest: TestBase() {
             checkpointStore = mockk(relaxed = true),
             checkpoint = checkpoint,
             segments = listOf(segment),
-            ctx = fakeContext()
+            ctx = fakeSegmentContext()
         )
 
         // Assert
@@ -136,7 +136,7 @@ class SegmentedVideoProcessorTest: TestBase() {
             checkpointStore = store,
             checkpoint = checkpoint,
             segments = listOf(segment),
-            ctx = fakeContext()
+            ctx = fakeSegmentContext()
         )
 
         // Assert
@@ -176,7 +176,7 @@ class SegmentedVideoProcessorTest: TestBase() {
         val progress = mockk<SegmentedProgressListener>(relaxed = true)
         val processor = SegmentedVideoProcessor(ffProvider, progress)
 
-        val ctx = fakeContext()
+        val ctx = fakeSegmentContext()
 
         // Act + Assert
         assertThrows<FfTaskListener.FfmpegFailedException> {

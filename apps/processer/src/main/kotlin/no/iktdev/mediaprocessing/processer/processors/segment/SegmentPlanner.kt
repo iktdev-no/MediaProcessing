@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.processer.segment;
+package no.iktdev.mediaprocessing.processer.processors.segment
 
 import no.iktdev.files.IFile
 

@@ -4,19 +4,16 @@ import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
-import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.AudioStreamConfig
-import no.iktdev.mediaprocessing.ffmpeg.util.getAudioMetadata
 
-class AudioEncodeRunner(
-    private val audioInstruction: FFmpegInstructions,
+class VideoEncodeRunner(
+    private val videoInstructions: FFmpegInstructions,
     private val outputDirectory: IFile,
     private val outputFile: IFile,
     private val ffmpegInstance: FFmpeg
 ): Runner() {
-    override suspend fun run(): RunnerResult<AudioEncodePayload> {
-
+    override suspend fun run(): RunnerResult<VideoEncodeResult> {
         val dsl = ffmpeg {
-            fromInstructions(audioInstruction)
+            fromInstructions(videoInstructions)
             outputDirectory(outputDirectory)
         }
 
@@ -27,20 +24,18 @@ class AudioEncodeRunner(
         }
 
         return if (result.resultCode == 0) {
-            RunnerResult.Success(AudioEncodePayload(outputFile,
+            RunnerResult.Success(VideoEncodeResult(
+                output = outputFile,
                 logFile = ffmpegInstance.logFile,
-                audioInstruction.getAudioMetadata()))
+            ))
         } else {
-            RunnerResult.Reject("Audio encode failed with code ${result.resultCode}")
+            RunnerResult.Reject("Video encode failed with code ${result.resultCode}")
         }
     }
-    data class AudioEncodePayload(
+
+    data class VideoEncodeResult(
         val output: IFile,
-        val logFile: IFile? = null,
-        val meta: AudioStreamConfig
+        val logFile: IFile? = null
     )
-
-
-
 
 }

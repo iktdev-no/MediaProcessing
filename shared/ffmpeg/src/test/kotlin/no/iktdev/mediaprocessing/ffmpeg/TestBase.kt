@@ -15,6 +15,7 @@ import kotlin.test.DefaultAsserter.fail
 
 open class TestBase {
     val workFolder = FakeFile("build").using("tests")
+        .apply { mkdirs() }
 
     val logDirectory = File(workFolder.parent, "logs")
 

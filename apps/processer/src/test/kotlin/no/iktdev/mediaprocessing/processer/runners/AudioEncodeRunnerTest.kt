@@ -72,7 +72,10 @@ class AudioEncodeRunnerTest : TestBase() {
     )
     fun success_case_returns_success_payload() = runTest {
         val input = fakeInput()
-        val output = fakeOutput()
+        val output = fakeOutput().apply {
+            this.parentFile.asFake()!!.setDirectory()
+            this.asFake()!!.setDirectory()
+        }
         val ffmpeg = fakeFFmpeg(0)
 
         val instruct = FFmpegInstructions(
@@ -94,7 +97,8 @@ class AudioEncodeRunnerTest : TestBase() {
         val runner = AudioEncodeRunner(
             audioInstruction = instruct,
             outputDirectory = output.parentFile,
-            ffmpegInstance = ffmpeg
+            ffmpegInstance = ffmpeg,
+            outputFile = output
         )
 
         val result = runner.run()
@@ -123,7 +127,10 @@ class AudioEncodeRunnerTest : TestBase() {
     )
     fun failure_case_returns_reject() = runTest {
         val input = fakeInput()
-        val output = fakeOutput()
+        val output = fakeOutput().apply {
+            this.parentFile.asFake()!!.setDirectory()
+            this.asFake()!!.setDirectory()
+        }
         val ffmpeg = fakeFFmpeg(127)
 
         val instruct = FFmpegInstructions(
@@ -145,7 +152,8 @@ class AudioEncodeRunnerTest : TestBase() {
         val runner = AudioEncodeRunner(
             audioInstruction = instruct,
             outputDirectory = output.parentFile,
-            ffmpegInstance = ffmpeg
+            ffmpegInstance = ffmpeg,
+            outputFile = output
         )
 
         val result = runner.run()
@@ -173,7 +181,10 @@ class AudioEncodeRunnerTest : TestBase() {
     )
     fun verifies_correct_ffmpeg_arguments() = runTest {
         val input = fakeInput()
-        val output = fakeOutput()
+        val output = fakeOutput().apply {
+            this.parentFile.asFake()!!.setDirectory()
+            this.asFake()!!.setDirectory()
+        }
         val ffmpeg = fakeFFmpeg(0)
 
         val slotArgs = slot<FfmpegDsl>()
@@ -198,7 +209,8 @@ class AudioEncodeRunnerTest : TestBase() {
         val runner = AudioEncodeRunner(
             audioInstruction = instruct,
             outputDirectory = output.parentFile,
-            ffmpegInstance = ffmpeg
+            ffmpegInstance = ffmpeg,
+            outputFile = output
         )
 
         runner.run()

@@ -1,8 +1,8 @@
-package no.iktdev.mediaprocessing.processer.segment
+package no.iktdev.mediaprocessing.processer.processors.segment
 
-import no.iktdev.exfl.using
-import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.processer.config.FileUtil
+import no.iktdev.mediaprocessing.processer.context.SegmentedRunnerContext
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import java.io.File
 

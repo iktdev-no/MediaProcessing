@@ -40,10 +40,11 @@ class SubtitleTaskListener(
         val taskData = task as ExtractSubtitleTask
 
         val cacheOutputFolder = fileUtil.getTemporaryStoreFolder(taskData.data.outputFolderName).using("subtitles", taskData.data.language)
-            .also { if (!it.exists()) {
-                it.mkdirs()
+            .apply {
+                if (!this.exists()) {
+                    mkdirs()
+                }
             }
-        }
 
         val dsl = ffmpeg {
             fromInstructions(taskData.data.instructions)

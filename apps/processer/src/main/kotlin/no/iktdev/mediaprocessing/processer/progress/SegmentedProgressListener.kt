@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.processer.segment
+package no.iktdev.mediaprocessing.processer.progress
 
 import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.Task
@@ -10,8 +10,8 @@ import java.util.UUID
 class SegmentedProgressListener(
     private val task: Task,
     private val reporter: TaskReporter?,
-    val cache: ((taskId: UUID, progress: Progress) -> Unit)? = null
-) {
+    cache: ((taskId: UUID, progress: Progress) -> Unit)? = null
+): ProgressListener(task = task, reporter = reporter, cache = cache) {
 
     private val VIDEO_WEIGHT = 0.65
     private val CONCAT_WEIGHT = 0.05
@@ -40,7 +40,7 @@ class SegmentedProgressListener(
         report(global.toInt(), "Merging audio and video")
     }
 
-    private fun report(percent: Int, message: String) {
+    override fun report(percent: Int, message: String) {
         val progress = EncodeProgress(
             progress = percent,
             ffmpegDecodedProgress = FfmpegDecodedProgress(
@@ -57,4 +57,3 @@ class SegmentedProgressListener(
         reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 }
-

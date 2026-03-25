@@ -8,12 +8,13 @@ import no.iktdev.mediaprocessing.MockData.dummyTags
 import no.iktdev.mediaprocessing.MockData.dummyVideoStream
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.ffmpeg.data.*
+import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
+import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
 import org.junit.jupiter.api.Assertions.*
@@ -35,6 +36,21 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
             videoPreference = defaultVideoPreference,
             audioPreference = defaultAudioPreference
         )
+    }
+
+    // ------------------------------------------------------------
+    // HELPERS
+    // ------------------------------------------------------------
+
+    private fun List<String>.containsMapAudio(index: Int): Boolean =
+        windowed(2).any { it[0] == "-map" && it[1] == "0:a:$index" }
+
+
+    private fun assertAudioMapped(data: DefaultEncodeData, vararg indices: Int) {
+        val audioArgs = data.audioInstructions.map { ffmpeg { fromInstructions(it) }.build() }
+        indices.forEach { idx ->
+            assertTrue(audioArgs.any { it.containsMapAudio(idx) }, "Expected audio map for index $idx")
+        }
     }
 
     // ------------------------------------------------------------
@@ -102,20 +118,16 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
 
         val result = listener.onEvent(selectedEvent, history)
 
-        // Nå har vi tasken direkte
         val task = persistedTask ?: fail("Task was not persisted")
         val data = task.data
 
         assertEquals("build/test-intermediate/Test.mkv", data.inputFile)
         assertEquals("Test.mp4", data.outputFileName)
 
-        val args = ffmpeg { fromInstructions(data.instructions) }.build()
-
-        assertTrue(args.containsMapAudio(0))
+        assertAudioMapped(data, 0)
 
         assertTrue(result is ProcesserEncodeTaskCreatedEvent)
     }
-
 
     // ------------------------------------------------------------
     // SINGLE LANGUAGE WITH EXTENDED
@@ -174,10 +186,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         val slot = slot<LinearEncodeTask>()
         verify { TaskStore.persist(capture(slot)) }
 
-        val args = slot.captured.data.instructions.let { ffmpeg { fromInstructions(it) } }.build()
-
-        assertTrue(args.containsMapAudio(0))
-        assertTrue(args.containsMapAudio(1))
+        assertAudioMapped(slot.captured.data, 0, 1)
     }
 
     // ------------------------------------------------------------
@@ -247,12 +256,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         val slot = slot<LinearEncodeTask>()
         verify { TaskStore.persist(capture(slot)) }
 
-        val args = slot.captured.data.instructions.let { ffmpeg { fromInstructions(it) } }.build()
-
-        assertTrue(args.containsMapAudio(0))
-        assertTrue(args.containsMapAudio(1))
-        assertTrue(args.containsMapAudio(2))
-        assertTrue(args.containsMapAudio(3))
+        assertAudioMapped(slot.captured.data, 0, 1, 2, 3)
 
     }
 
@@ -396,13 +400,4 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         // Two audio argument lists
         assertEquals(2, data.audioInstructions.size)
     }
-
-
-
-    // ------------------------------------------------------------
-    // HELPERS
-    // ------------------------------------------------------------
-
-    private fun List<String>.containsMapAudio(index: Int): Boolean =
-        windowed(2).any { it[0] == "-map" && it[1] == "0:a:$index" }
 }

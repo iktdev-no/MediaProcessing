@@ -11,10 +11,12 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.AudioStreamConfig
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioTrack
 import no.iktdev.mediaprocessing.processer.TestBase
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 class AudioVideoMergeRunnerTest : TestBase() {
+
 
     // ---------------------------------------------------------
     // Helpers
@@ -83,7 +85,7 @@ class AudioVideoMergeRunnerTest : TestBase() {
         assertTrue(result is RunnerResult.Success<*>)
         val payload = (result as RunnerResult.Success<AudioVideoMergeRunner.MergePayload>).payload
 
-        assertEquals(output, payload.output)
+        assertEquals(output.absolutePath, payload.output.absolutePath)
         coVerify(exactly = 1) { ffmpeg.run(any<FfmpegDsl>()) }
     }
 

@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.processer.runners.segment
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.runners.Runner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
-import no.iktdev.mediaprocessing.processer.segment.Segment
+import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 

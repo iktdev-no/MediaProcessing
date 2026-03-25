@@ -1,9 +1,8 @@
 package no.iktdev.mediaprocessing.shared.common.model.task.data
 
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
-import no.iktdev.mediaprocessing.ffmpeg.model.AudioTrack
 
-class SegmentEncodeData(
+class DefaultEncodeData(
     val videoInstruction: FFmpegInstructions,
     val audioInstructions: List<FFmpegInstructions>,
     outputFileName: String,

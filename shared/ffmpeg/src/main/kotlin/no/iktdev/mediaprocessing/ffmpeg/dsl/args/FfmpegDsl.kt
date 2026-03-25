@@ -46,6 +46,9 @@ class FfmpegDsl {
     }
 
     fun outputDirectory(dir: IFile) {
+        if (dir.isFile()) {
+            error("The output directory is a file, why?")
+        }
         this.storeDirectory = dir
     }
 

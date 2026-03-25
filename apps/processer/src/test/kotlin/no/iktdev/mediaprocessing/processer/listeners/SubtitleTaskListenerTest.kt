@@ -9,6 +9,7 @@ import no.iktdev.eventi.registry.TaskTypeRegistry
 import no.iktdev.eventi.serialization.WGson
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.TestUtils
@@ -72,6 +73,9 @@ class SubtitleTaskListenerTest: TestBase() {
 
     @Test
     fun `onTask waits for runner to complete`() = runTest {
+        val expectedStorage = FakeFile("build/test-intermediate/output/subtitles/eng")
+            .apply { setDirectory() }
+
         val delay = 1000L
         val testTask = ExtractSubtitleTask(
             ExtractSubtitleData(
@@ -201,6 +205,8 @@ class SubtitleTaskListenerTest: TestBase() {
             Skal resultat-eventen ha samme referenceId
         """)
     fun onTask_keeps_referenceId() = runTest {
+        val expectedStorage = FakeFile("build/test-intermediate/output/subtitles/eng")
+            .apply { setDirectory() }
         val task = ExtractSubtitleTask(
             ExtractSubtitleData(
                 inputFile = "input.mp4",

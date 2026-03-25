@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioTarget
 import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
 
-class SegmentedMediaPlan(videoTrack: VideoTarget, audioTracks: List<AudioTarget>) :
+class SimpleMediaPlan(videoTrack: VideoTarget, audioTracks: List<AudioTarget>) :
     BaseMediaPlan(videoTrack, audioTracks) {
 
     fun toVideoInstructions(inputFile: String, outputFile: String): FFmpegInstructions {

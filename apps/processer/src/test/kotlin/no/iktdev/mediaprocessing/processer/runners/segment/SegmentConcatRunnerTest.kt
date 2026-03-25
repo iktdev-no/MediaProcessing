@@ -7,16 +7,13 @@ import org.junit.jupiter.api.Assertions.*
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import no.iktdev.exfl.using
-import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
-import no.iktdev.mediaprocessing.processer.segment.Segment
+import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import org.junit.jupiter.api.*
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SegmentConcatRunnerTest: TestBase() {

@@ -19,7 +19,7 @@ import no.iktdev.mediaprocessing.processer.listeners.SegmentedVideoTaskListener
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
-import no.iktdev.mediaprocessing.shared.common.model.task.data.SegmentEncodeData
+import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import no.iktdev.mediaprocessing.shared.database.InMemoryTaskStore
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -104,7 +104,7 @@ class VideoTaskPollerImplementationTest : TestBase() {
 
     private fun buildTestSequenceEncodeTask(): SegmentedEncodeTask {
         return SegmentedEncodeTask(
-            data = SegmentEncodeData(
+            data = DefaultEncodeData(
                 videoInstruction = FFmpegInstructions(
                     inputs = InputSection().apply {
                         file("/src/scratch/Potato masters - S01E01 - Personal Rule.mkv") {
@@ -145,8 +145,8 @@ class VideoTaskPollerImplementationTest : TestBase() {
 
     private fun buildTestLinearEncodeTask(): LinearEncodeTask {
         return LinearEncodeTask(
-            data = LinearEncodeData(
-                instructions = FFmpegInstructions(
+            data = DefaultEncodeData(
+                videoInstruction = FFmpegInstructions(
                     inputs = InputSection().apply {
                         file("/src/scratch/Potato masters - S01E01 - Personal Rule.mkv") {
                             video(0) {
@@ -165,6 +165,22 @@ class VideoTaskPollerImplementationTest : TestBase() {
                         overwrite = true
                         useWorkFile = true
                     }
+                ),
+                audioInstructions = listOf(
+                    FFmpegInstructions(
+                        inputs = InputSection().apply {
+                            file("/src/scratch/Potato masters - S01E01 - Personal Rule.mkv") {
+                                audio(0) {
+                                    map = true
+                                    codec = AudioCodec.Copy()
+                                }
+                            }
+                        },
+                        output = OutputSection("Potato masters - S01E01 - Personal Rule.mp4").apply {
+                            overwrite = true
+                            useWorkFile = true
+                        }
+                    )
                 ),
                 outputFileName = "Potato masters - S01E01 - Personal Rule.mp4",
                 outputFolderName = "Potato masters - S01E01 - Personal Rule",

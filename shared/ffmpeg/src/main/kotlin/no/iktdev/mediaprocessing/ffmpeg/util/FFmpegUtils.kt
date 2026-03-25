@@ -1,17 +1,13 @@
 package no.iktdev.mediaprocessing.ffmpeg.util
 
-import no.iktdev.mediaprocessing.ffmpeg.data.AudioStream
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
-import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.TranscodeDecision
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.BaseMediaPlan
-import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.LinearMediaPlan
-import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.SegmentedMediaPlan
-import no.iktdev.mediaprocessing.ffmpeg.model.AudioClamp
-import no.iktdev.mediaprocessing.ffmpeg.model.AudioTarget
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.AudioStreamConfig
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputConfig
 import no.iktdev.mediaprocessing.ffmpeg.model.EncodeStrategy
-import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
 
 enum class FfmpegCodecs(val ffmpegName: String) {
     hevc("libx265"),
@@ -51,9 +47,31 @@ fun getBestEncodeStrategy(codec: VideoCodec, stream: VideoStream): EncodeStrateg
     }
 }
 
-fun getMediaPlanner(strategy: EncodeStrategy, videoTarget: VideoTarget, audioTargets: List<AudioTarget>): BaseMediaPlan {
-    return when (strategy) {
-        EncodeStrategy.Segmented -> SegmentedMediaPlan(videoTrack = videoTarget, audioTracks = audioTargets)
-        EncodeStrategy.Linear -> LinearMediaPlan(videoTrack = videoTarget, audioTracks = audioTargets)
+fun FFmpegInstructions.resolveExpectedFullPath(store: IFile): IFile {
+    val useFileName = this.output?.path ?: throw IllegalStateException("Output is missing on instruction")
+    return store.using(useFileName)
+}
+
+fun FFmpegInstructions.getAudioMetadata(): AudioStreamConfig {
+    val audioInstruction = this
+    val allInputs = audioInstruction.inputs.files()
+
+    // 1) Concat mode? → Ikke lov
+    require(audioInstruction.inputs.concatInput == null) { "Concat not allowed in AudioEncodeRunner" }
+
+    // 2) Normal mode → hent InputConfig
+    val inputConfigs = allInputs.filterIsInstance<InputConfig>()
+    if (inputConfigs.size != 1) {
+        throw IllegalStateException("Audio instruction expects exactly 1 input file, but found ${inputConfigs.size}")
     }
+
+    // 3) Hent audio streams
+    val audioStreams = inputConfigs
+        .flatMap { it.audioStreams }
+
+    if (audioStreams.size != 1) {
+        throw IllegalStateException("Audio instruction expects exactly 1 audio stream, but found ${audioStreams.size}")
+    }
+
+    return audioStreams.first()
 }
