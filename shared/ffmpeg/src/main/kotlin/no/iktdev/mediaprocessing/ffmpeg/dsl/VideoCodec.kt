@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ffmpeg.dsl
 
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
+import no.iktdev.mediaprocessing.ffmpeg.util.CodecNameToFfmpegCodec
 
 open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int? = null) {
 
@@ -207,7 +208,8 @@ open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int?
     object Copy : VideoCodec("copy")
 
     open fun determineTranscodeDecision(stream: VideoStream): TranscodeDecision {
-        val isSameCodec = this.isSame(stream.codec_name)
+        val ffmpegKnownCodec = CodecNameToFfmpegCodec(stream.codec_name)
+        val isSameCodec = this.isSame(ffmpegKnownCodec.ffmpegName)
         if (isSameCodec) {
             return TranscodeDecision.Copy
         }
