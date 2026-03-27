@@ -2,8 +2,10 @@ package no.iktdev.mediaprocessing.processer.processors.linear
 
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Task
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
+import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.context.FfProvider
 import no.iktdev.mediaprocessing.processer.context.LinearRunnerContext
 import no.iktdev.mediaprocessing.processer.listeners.FfTaskListener.FfmpegFailedException
@@ -27,6 +29,13 @@ class LinearVideoProcessor(
         if (noAudioMidfix.exists()) {
             log.info("Found existing video file ${noAudioMidfix.absolutePath}, returning this instead")
             return VideoEncodeRunner.VideoEncodeResult(noAudioMidfix)
+        }
+
+        val cachedOut = IFile(OutputSection(noAudioMidfix.absolutePath).workFile)
+        if (cachedOut.exists()) {
+            log.info("Found existing video file ${cachedOut.absolutePath}, as this is incomplete and we are restarting, this will be deleted")
+            val deleted = cachedOut.delete()
+            log.warn { "File ${noAudioMidfix.absolutePath} was ${if (deleted) "deleted" else "not deleted..."}" }
         }
 
         val ffmpeg = ffProvider.getFfmpeg(logDirectory = ctx.logDirectory, listener = listener)

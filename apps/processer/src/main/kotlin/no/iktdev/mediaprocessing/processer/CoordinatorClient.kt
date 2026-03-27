@@ -24,18 +24,38 @@ class CoordinatorClient(
             log.info { "Coordinator ping on startup is disabled" }
             return
         }
-        try {
-            val result = webClient.get()
-                .uri("/actuator/health")
-                .retrieve()
-                .bodyToMono(String::class.java)
-                .block()
 
-            log.info { "Coordinator reachable. Health: $result" }
-        } catch (e: Exception) {
-            log.error(e) { "Coordinator NOT reachable at startup" }
+        val maxAttempts = 3
+        var attempt = 1
+        var delayMs = 500L
+
+        while (attempt <= maxAttempts) {
+            try {
+                log.info { "Pinging coordinator (attempt $attempt/$maxAttempts)..." }
+
+                val result = webClient.get()
+                    .uri("/actuator/health")
+                    .retrieve()
+                    .bodyToMono(String::class.java)
+                    .block()
+
+                log.info { "Coordinator reachable. Health: $result" }
+                return
+            } catch (e: Exception) {
+                log.warn(e) { "Coordinator ping failed on attempt $attempt" }
+
+                if (attempt == maxAttempts) {
+                    log.error { "Coordinator NOT reachable after $maxAttempts attempts" }
+                    return
+                }
+
+                Thread.sleep(delayMs)
+                delayMs *= 2
+                attempt++
+            }
         }
     }
+
 
     fun reportProgress(referenceId: String, taskId: String, payload: Progress) =
         webClient.post()
