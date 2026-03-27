@@ -30,7 +30,7 @@ open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int?
             val validTag = stream.codec_tag_string.equals("hev1", ignoreCase = true) ||
                     stream.codec_tag_string.equals("hvc1", ignoreCase = true)
 
-            val profileOk = stream.profile.lowercase() in listOf("main", "main10")
+            val profileOk = stream.profile.replace(" ", "").lowercase() in listOf("main", "main10")
             val levelOk = stream.level <= 153 // 5.1 ≈ 153
 
             return when {
@@ -76,7 +76,7 @@ open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int?
             val superDecision = super.determineTranscodeDecision(stream)
             if (superDecision == TranscodeDecision.Reencode) return superDecision
 
-            val profileOk = stream.profile.lowercase() in listOf("baseline", "main", "high", "high10")
+            val profileOk = stream.profile.replace(" ", "").lowercase() in listOf("baseline", "main", "high", "high10")
             val levelOk = stream.level <= 51 // 5.1 typisk maks for bred støtte
 
             return when {

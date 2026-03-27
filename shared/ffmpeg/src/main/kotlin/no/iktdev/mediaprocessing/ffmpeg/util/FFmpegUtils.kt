@@ -25,14 +25,43 @@ enum class FfmpegCodecs(val ffmpegName: String) {
 
 
 fun CodecNameToFfmpegCodec(name: String): FfmpegCodecs {
-    return when (name.lowercase()) {
-        "hevc", "hevec", "h265", "h.265", "libx265" -> FfmpegCodecs.hevc
-        "h.264", "h264", "libx264" -> FfmpegCodecs.h264
-        "vp9", "vp-9", "libvpx-vp9" -> FfmpegCodecs.vp9
-        "av1", "libaom-av1" -> FfmpegCodecs.av1
-        "mpeg4", "mp4", "libxvid" -> FfmpegCodecs.vid
-        "vvc", "h.266", "libvvc" -> FfmpegCodecs.vvc
-        "vp8", "libvpx" -> FfmpegCodecs.vp8
+    val nz = name
+        .lowercase()
+        .replace(" ", "")
+        .replace(".", "")
+        .replace("-", "")
+
+    return when (nz) {
+        // HEVC / H.265
+        "hevc", "hevec", "h265", "libx265", "x265",
+        "hev1", "hvc1",
+        "hevcvideotoolbox", "hevcnvenc", "hevcqsv" ->
+            FfmpegCodecs.hevc
+
+        // H.264
+        "h264", "libx264", "x264" ->
+            FfmpegCodecs.h264
+
+        // VP9
+        "vp9", "libvpxvp9" ->
+            FfmpegCodecs.vp9
+
+        // VP8
+        "vp8", "libvpx" ->
+            FfmpegCodecs.vp8
+
+        // AV1
+        "av1", "libaomav1" ->
+            FfmpegCodecs.av1
+
+        // MPEG4 / Xvid
+        "mpeg4", "mp4", "libxvid", "xvid" ->
+            FfmpegCodecs.vid
+
+        // VVC / H.266
+        "vvc", "h266", "libvvc" ->
+            FfmpegCodecs.vvc
+
         else -> throw IllegalArgumentException("Unsupported codec: $name")
     }
 }
