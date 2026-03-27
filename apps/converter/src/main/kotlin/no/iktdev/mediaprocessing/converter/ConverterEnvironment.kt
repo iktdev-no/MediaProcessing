@@ -1,10 +1,10 @@
 package no.iktdev.mediaprocessing.converter
 
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.reader.BaseReader
-import java.io.File
 
 interface ConverterEnvironment {
-    fun canRead(file: File): Boolean
-    fun getReader(file: File): BaseReader?
-    fun createExporter(input: File, outputDir: File, name: String): Exporter
+    fun canRead(file: IFile): Boolean
+    fun getReader(file: IFile): BaseReader?
+    fun createExporter(input: IFile, outputDir: IFile, name: String): Exporter
 }

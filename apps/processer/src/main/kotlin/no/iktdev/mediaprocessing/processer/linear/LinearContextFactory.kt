@@ -4,7 +4,6 @@ import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.context.LinearRunnerContext
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
-import java.io.File
 
 class LinearContextFactory(private val fileUtil: FileUtil) {
     fun createContext(taskData: LinearEncodeTask): LinearRunnerContext {
@@ -19,7 +18,7 @@ class LinearContextFactory(private val fileUtil: FileUtil) {
         val logDirectory = fileUtil.getLogDirectory()
             .using("encode_segment", taskData.taskId.toString())
 
-        val baseOutputFileName = File(taskData.data.outputFileName).nameWithoutExtension
+        val baseOutputFileName = IFile(taskData.data.outputFileName).nameWithoutExtension
         val videoCheckpointFile = intermediateStore
             .using("VIDEO_CHECKPOINTS.json")
         val audioCheckpointFile = intermediateStore

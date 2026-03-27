@@ -2,22 +2,22 @@ package no.iktdev.mediaprocessing.converter
 
 import kotlinx.coroutines.delay
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
-import java.io.File
 
 class MockConverter(
     val delayMillis: Long = 0,
     private val simulatedResult: List<String>? =  null,
     private val taskResultStatus: TaskStatus = TaskStatus.Completed,
     private val throwException: Boolean = false,
-    val mockEnv: ConverterEnvironment = MockConverterEnvironment(),
+    mockEnv: ConverterEnvironment = MockConverterEnvironment(),
     listener: ConvertListener
 ) : Converter(env = mockEnv, listener = listener) {
 
-    override fun getSubtitleReader(useFile: File): BaseReader? {
+    override fun getSubtitleReader(useFile: IFile): BaseReader? {
         TODO("Not yet implemented")
     }
 

@@ -6,6 +6,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
@@ -15,8 +16,6 @@ import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import no.iktdev.mediaprocessing.shared.common.silentTry
 import org.springframework.stereotype.Component
-import java.io.File
-import java.nio.file.Files
 import java.util.*
 
 @Component
@@ -71,8 +70,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     }
 
     private fun deleteCache(fs: FileSystemService, task: MigrateToContentStoreTask) {
-        task.data.videoContent?.cachedUri?.let { silentTry { fs.delete(File(it)) } }
-        task.data.subtitleContent?.forEach { silentTry { fs.delete(File(it.cachedUri)) } }
+        task.data.videoContent?.cachedUri?.let { silentTry { fs.delete(IFile(it)) } }
+        task.data.subtitleContent?.forEach { silentTry { fs.delete(IFile(it.cachedUri)) } }
         // task.data.coverContent?.let { silentTry { fs.delete(File(it.cachedUri)) } } // NOTE: Covers takes up little to no space, if this is to be enabled, we will need to move it back into subfolder!
     }
 
@@ -80,7 +79,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     // MIGRATION HELPERS
     // -------------------------------------------------------------------------
 
-    private fun migrateFile(fs: FileSystemService, source: File, destination: File) {
+    private fun migrateFile(fs: FileSystemService, source: IFile, destination: IFile) {
         if (destination.exists()) {
             try {
                 fs.verifyIdentical(source, destination)
@@ -104,8 +103,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
             return MigrateContentToStoreTaskResultEvent.FileMigration(null, MigrateStatus.NotPresent)
         }
 
-        val source = File(content.cachedUri)
-        val dest = File(content.storeUri)
+        val source = IFile(content.cachedUri)
+        val dest = IFile(content.storeUri)
 
         migrateFile(fs, source, dest)
 
@@ -131,8 +130,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
         }
 
         return subs.map { sub ->
-            val source = File(sub.cachedUri)
-            val dest = File(sub.storeUri)
+            val source = IFile(sub.cachedUri)
+            val dest = IFile(sub.storeUri)
 
             migrateFile(fs, source, dest)
 
@@ -150,8 +149,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     ): MigrateContentToStoreTaskResultEvent.FileMigration {
 
         return cover?.let { cover ->
-            val source = File(cover.cachedUri)
-            val dest = File(cover.storeUri)
+            val source = IFile(cover.cachedUri)
+            val dest = IFile(cover.storeUri)
 
             if (dest.exists()) {
                 log.info { "Cover already exists under ${dest.parentFile.absolutePath}" }

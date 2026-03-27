@@ -1,14 +1,15 @@
 package no.iktdev.mediaprocessing.shared.common.parsing
 
+import no.iktdev.files.IFile
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class FileNameParserTest {
 
     @Test
     fun testParsing() {
-        val file = File("/src/input/Fancy.Thomas.S03.1080p.AMAZING.WEB-VALUE.DDP5AN.1.H.264/Fancy.Thomas.S03E03.Enemy.1080p.AMAZING.WEB-VALUE.DDP5AN.1.H.264.mkv")
+        val file =
+            IFile("/src/input/Fancy.Thomas.S03.1080p.AMAZING.WEB-VALUE.DDP5AN.1.H.264/Fancy.Thomas.S03E03.Enemy.1080p.AMAZING.WEB-VALUE.DDP5AN.1.H.264.mkv")
         val fnp = FileNameParser(file.nameWithoutExtension)
         assertThat(fnp.guessDesiredTitle()).isEqualTo("Fancy Thomas")
         assertThat(fnp.guessDesiredFileName()).isEqualTo("Fancy Thomas S03E03 Enemy")
@@ -73,7 +74,7 @@ class FileNameParserTest {
 
     @Test
     fun findTitleWithYear() {
-        val input = "Dette er (en) tekst med (flere) paranteser som (potet) inneholder (år) som (2024) (2025).";
+        val input = "Dette er (en) tekst med (flere) paranteser som (potet) inneholder (år) som (2024) (2025)."
         val result = FileNameParser(input).guessSearchableTitle().first()
         assertThat(result).isEqualTo("Dette er tekst med paranteser som inneholder som (2024) (2025)")
     }

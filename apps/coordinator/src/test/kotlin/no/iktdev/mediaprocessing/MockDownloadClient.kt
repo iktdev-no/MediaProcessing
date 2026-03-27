@@ -1,17 +1,17 @@
 package no.iktdev.mediaprocessing
 
 import kotlinx.coroutines.delay
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 
 class MockDownloadClient(
     private val delayMillis: Long = 0,
     private val throwException: Boolean = false,
-    private val mockFile: File? = null
+    private val mockFile: IFile? = null
 ) : DownloadClient(
-    outDir = File("/null"),
+    outDir = IFile("/null"),
     connectionFactory = object : ConnectionFactory {
         override fun open(uri: URI): HttpURLConnection {
             throw UnsupportedOperationException("MockDownloadClient does not open real connections")

@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.every
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.exfl.using
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
@@ -10,7 +10,6 @@ import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class SummarizeContentListenerTest : TestBase() {
 
@@ -75,7 +74,7 @@ class SummarizeContentListenerTest : TestBase() {
             )
         ).derivedOf(started).addToHistory()
 
-        val encode = ProcesserEncodeResultEvent(
+        ProcesserEncodeResultEvent(
             data = ProcesserEncodeResultEvent.EncodeResult(
                 cachedOutputFile = "/tmp/cache/video.mp4"
             ),
@@ -104,7 +103,7 @@ class SummarizeContentListenerTest : TestBase() {
     )
     @Test
     fun summaryEvent_isReturned() {
-        val outbox = File("./tmp/outbox")
+        val outbox = IFile("./tmp/outbox")
         outbox.mkdirs()
         every { coordinatorEnv.outboxFolder } returns outbox
 
@@ -176,7 +175,7 @@ class SummarizeContentListenerTest : TestBase() {
     )
     @Test
     fun migrationPlan_containsAllFiles() {
-        val outbox = File("./tmp/outbox")
+        val outbox = IFile("./tmp/outbox")
         outbox.mkdirs()
         every { coordinatorEnv.outboxFolder } returns outbox
         val started = defaultStartEvent().newReferenceId()
@@ -255,8 +254,8 @@ class SummarizeContentListenerTest : TestBase() {
 
     @Test
     fun summarizeOnlyConvertedPresent() {
-        val workFolder = File("build").using("subby", "eng")
-        val outbox = File("./tmp/outbox")
+        val workFolder = IFile("build").using("subby", "eng")
+        val outbox = IFile("./tmp/outbox")
         outbox.mkdirs()
         every { coordinatorEnv.outboxFolder } returns outbox
         val started = StartProcessingEvent(

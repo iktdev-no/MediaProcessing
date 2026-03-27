@@ -3,8 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
-import no.iktdev.mediaprocessing.MockData
 import no.iktdev.mediaprocessing.MockData.dummyAudioStream
 import no.iktdev.mediaprocessing.MockData.dummyDisposition
 import no.iktdev.mediaprocessing.MockData.dummyTags
@@ -14,16 +14,14 @@ import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class MediaTracksEncodeSelectorTest {
 
     private fun testPreference(): Preference {
-        val tmp = File.createTempFile("pref", ".json")
+        val tmp = IFile("pref.json")
         tmp.writeText(
             """
             {
@@ -57,8 +55,8 @@ class MediaTracksEncodeSelectorTest {
     """)
     fun testVideoTrackSelection() {
         val streams = listOf(
-            MockData.dummyVideoStream(0, 1000),
-            MockData.dummyVideoStream(1, 5000)
+            dummyVideoStream(0, 1000),
+            dummyVideoStream(1, 5000)
         )
 
         val event = MediaStreamParsedEvent(
@@ -87,15 +85,15 @@ class MediaTracksEncodeSelectorTest {
     """)
     fun testMultiLanguageSelection() {
         val audio = listOf(
-            MockData.dummyAudioStream(0, "eng", 2),
-            MockData.dummyAudioStream(1, "eng", 6),
-            MockData.dummyAudioStream(2, "jpn", 2),
-            MockData.dummyAudioStream(3, "jpn", 6)
+            dummyAudioStream(0, "eng", 2),
+            dummyAudioStream(1, "eng", 6),
+            dummyAudioStream(2, "jpn", 2),
+            dummyAudioStream(3, "jpn", 6)
         )
 
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(
-                videoStream = listOf(MockData.dummyVideoStream(0)),
+                videoStream = listOf(dummyVideoStream(0)),
                 audioStream = audio,
                 subtitleStream = emptyList()
             )
@@ -130,13 +128,13 @@ class MediaTracksEncodeSelectorTest {
     """)
     fun testExtendedMissing() {
         val audio = listOf(
-            MockData.dummyAudioStream(0, "jpn", 2),
-            MockData.dummyAudioStream(1, "eng", 2)
+            dummyAudioStream(0, "jpn", 2),
+            dummyAudioStream(1, "eng", 2)
         )
 
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(
-                videoStream = listOf(MockData.dummyVideoStream(0)),
+                videoStream = listOf(dummyVideoStream(0)),
                 audioStream = audio,
                 subtitleStream = emptyList()
             )
@@ -171,12 +169,12 @@ class MediaTracksEncodeSelectorTest {
     """)
     fun testMissingLanguageIgnored() {
         val audio = listOf(
-            MockData.dummyAudioStream(0, "eng", 2)
+            dummyAudioStream(0, "eng", 2)
         )
 
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(
-                videoStream = listOf(MockData.dummyVideoStream(0)),
+                videoStream = listOf(dummyVideoStream(0)),
                 audioStream = audio,
                 subtitleStream = emptyList()
             )
@@ -202,13 +200,13 @@ class MediaTracksEncodeSelectorTest {
     """)
     fun testPreferOriginal() {
         val audio = listOf(
-            MockData.dummyAudioStream(
+            dummyAudioStream(
                 0, "jpn", 2,
                 disposition = dummyDisposition { original = true }
             ),
-            MockData.dummyAudioStream(1, "jpn", 6),
-            MockData.dummyAudioStream(2, "eng", 2),
-            MockData.dummyAudioStream(
+            dummyAudioStream(1, "jpn", 6),
+            dummyAudioStream(2, "eng", 2),
+            dummyAudioStream(
                 3, "eng", 6,
                 disposition = dummyDisposition { original = true }
             )
@@ -216,7 +214,7 @@ class MediaTracksEncodeSelectorTest {
 
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(
-                videoStream = listOf(MockData.dummyVideoStream(0)),
+                videoStream = listOf(dummyVideoStream(0)),
                 audioStream = audio,
                 subtitleStream = emptyList()
             )
@@ -245,21 +243,21 @@ class MediaTracksEncodeSelectorTest {
     """)
     fun testAvoidDub() {
         val audio = listOf(
-            MockData.dummyAudioStream(
+            dummyAudioStream(
                 0, "jpn", 2,
                 disposition = dummyDisposition { dub = true }
             ),
-            MockData.dummyAudioStream(1, "jpn", 2),
-            MockData.dummyAudioStream(
+            dummyAudioStream(1, "jpn", 2),
+            dummyAudioStream(
                 2, "jpn", 6,
                 disposition = dummyDisposition { dub = true }
             ),
-            MockData.dummyAudioStream(3, "jpn", 6)
+            dummyAudioStream(3, "jpn", 6)
         )
 
         val event = MediaStreamParsedEvent(
             ParsedMediaStreams(
-                videoStream = listOf(MockData.dummyVideoStream(0)),
+                videoStream = listOf(dummyVideoStream(0)),
                 audioStream = audio,
                 subtitleStream = emptyList()
             )

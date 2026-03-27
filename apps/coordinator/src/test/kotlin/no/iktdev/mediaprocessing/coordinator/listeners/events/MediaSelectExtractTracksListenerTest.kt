@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.serialization.WGson
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
 import no.iktdev.mediaprocessing.Files
 import no.iktdev.mediaprocessing.MockData
@@ -13,12 +14,9 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaT
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.SubtitleSelectionMode
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class MediaSelectExtractTracksListenerTest {
 
@@ -30,7 +28,7 @@ class MediaSelectExtractTracksListenerTest {
         formatPriority: List<String> = listOf("ass", "srt", "vtt", "smi"),
         mode: SubtitleSelectionMode = SubtitleSelectionMode.DialogueOnly
     ): Preference {
-        val tmp = File.createTempFile("pref", ".json")
+        val tmp = IFile("pref.json")
         tmp.writeText(
             """
             {

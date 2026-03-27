@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.converter.convert
 
 import kotlinx.coroutines.test.runTest
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.classes.Dialog
 import no.iktdev.library.subtitle.classes.DialogType
 import no.iktdev.library.subtitle.classes.Time
@@ -12,7 +13,6 @@ import no.iktdev.mediaprocessing.shared.common.model.SubtitleFormat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class Converter2Test {
 
@@ -31,25 +31,25 @@ class Converter2Test {
     }
 
     class FakeExporter(
-        private val srtFile: File? = null,
-        private val smiFile: File? = null,
-        private val vttFile: File? = null,
-        private val filesForWrite: List<File> = emptyList(),
+        private val srtFile: IFile? = null,
+        private val smiFile: IFile? = null,
+        private val vttFile: IFile? = null,
+        private val filesForWrite: List<IFile> = emptyList(),
         private val shouldThrow: Boolean = false
     ) : Exporter {
 
-        override fun write(dialogs: List<Dialog>): MutableList<File> {
+        override fun write(dialogs: List<Dialog>): MutableList<IFile> {
             if (shouldThrow) throw RuntimeException("export failed")
             return filesForWrite.toMutableList()
         }
 
-        override fun writeSrt(dialogs: List<Dialog>): File =
+        override fun writeSrt(dialogs: List<Dialog>): IFile =
             srtFile ?: error("srtFile not set in FakeExporter")
 
-        override fun writeSmi(dialogs: List<Dialog>): File =
+        override fun writeSmi(dialogs: List<Dialog>): IFile =
             smiFile ?: error("smiFile not set in FakeExporter")
 
-        override fun writeVtt(dialogs: List<Dialog>): File =
+        override fun writeVtt(dialogs: List<Dialog>): IFile =
             vttFile ?: error("vttFile not set in FakeExporter")
     }
 
@@ -80,11 +80,11 @@ class Converter2Test {
         var exporter: Exporter? = null
     ) : ConverterEnvironment {
 
-        override fun canRead(file: File): Boolean = canReadValue
+        override fun canRead(file: IFile): Boolean = canReadValue
 
-        override fun getReader(file: File): BaseReader? = reader
+        override fun getReader(file: IFile): BaseReader? = reader
 
-        override fun createExporter(input: File, outputDir: File, name: String): Exporter {
+        override fun createExporter(input: IFile, outputDir: IFile, name: String): Exporter {
             return exporter ?: error("FakeEnv.exporter must be set before calling createExporter")
         }
     }
@@ -157,7 +157,7 @@ class Converter2Test {
         val env = FakeEnv(
             canReadValue = true,
             reader = FakeReader(dialogs),
-            exporter = FakeExporter(srtFile = File("/fake/out.srt"))
+            exporter = FakeExporter(srtFile = IFile("/fake/out.srt"))
         )
 
         val listener = FakeListener()
@@ -193,7 +193,7 @@ class Converter2Test {
         val env = FakeEnv(
             canReadValue = true,
             reader = FakeReader(dialogs),
-            exporter = FakeExporter(srtFile = File("/fake/out.srt"), shouldThrow = true)
+            exporter = FakeExporter(srtFile = IFile("/fake/out.srt"), shouldThrow = true)
         )
 
         val listener = FakeListener()
@@ -226,7 +226,7 @@ class Converter2Test {
         val env = FakeEnv(
             canReadValue = true,
             reader = FakeReader(dialogs),
-            exporter = FakeExporter(srtFile = File("/fake/out.srt"), vttFile = File("/fake/out.vtt"))
+            exporter = FakeExporter(srtFile = IFile("/fake/out.srt"), vttFile = IFile("/fake/out.vtt"))
         )
 
         val listener = FakeListener()

@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.processer.runners
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import com.github.pgreze.process.ProcessResult
 import io.mockk.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
@@ -12,11 +12,10 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.TestBase
-import no.iktdev.mediaprocessing.processer.runners.RunnerResult
-import no.iktdev.mediaprocessing.processer.processors.segment.Segment
-import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Assertions.*
-import java.io.File
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
 
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -3,22 +3,14 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import io.mockk.slot
 import io.mockk.verify
 import no.iktdev.eventi.events.SoftDispatchException
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
-import no.iktdev.mediaprocessing.coordinator.listeners.tasks.FilePrepareForWorkTaskListener
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.capture
-import org.mockito.kotlin.verify
-import java.io.File
 
 class FilePrepareForWorkCreateTaskListenerTest: TestBase() {
 
@@ -95,7 +87,7 @@ class FilePrepareForWorkCreateTaskListenerTest: TestBase() {
 """)
     fun testCreatesTaskSuccessfully() {
         // Arrange
-        val sourceFile = File("build/test-intermediate/input.mkv")
+        val sourceFile = IFile("build/test-intermediate/input.mkv")
         sourceFile.parentFile.mkdirs()
         sourceFile.writeText("dummy")   // sørg for at filen finnes
 

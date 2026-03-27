@@ -4,6 +4,7 @@ import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.parse.MovieParsing
 import no.iktdev.mediaprocessing.coordinator.parse.SerieParsing
 import no.iktdev.mediaprocessing.coordinator.parse.evaluateMediaType
@@ -14,7 +15,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
-import java.io.File
 
 @ListenerOrder(2)
 @Component
@@ -27,7 +27,7 @@ class MediaParsedInfoListener : EventListener() {
         if (started.data.operation.isOnly(OperationType.ConvertSubtitles)) {
             return null
         }
-        val file = File(started.data.fileUri)
+        val file = IFile(started.data.fileUri)
         val mediaType = file.evaluateMediaType()
 
         val parser = when (mediaType) {

@@ -1,10 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.parse
 
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
-import java.io.File
 
 
-fun File.evaluateMediaType(): MediaType {
+fun IFile.evaluateMediaType(): MediaType {
     val name = this.nameWithoutExtension.lowercase()
 
     // Serie-mønstre: dekker alle vanlige shorthand og varianter

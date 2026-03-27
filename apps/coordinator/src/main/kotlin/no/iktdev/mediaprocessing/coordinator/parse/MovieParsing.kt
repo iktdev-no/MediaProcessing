@@ -1,13 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.parse
 
-import java.io.File
+import no.iktdev.files.IFile
 
 class MovieParsing : BaseParsing() {
 
     private val yearRegex = Regex("\\b(19|20)\\d{2}\\b")
     private val underscoreYearRegex = Regex(".*_((19|20)\\d{2})_.*")
 
-    override fun extractCollection(file: File): String {
+    override fun extractCollection(file: IFile): String {
         val raw = file.nameWithoutExtension
 
         // Start med å rydde vekk brackets, parens, tags, oppløsning osv
@@ -22,7 +22,7 @@ class MovieParsing : BaseParsing() {
         return base.fullTrim()
     }
 
-    override fun extractFilename(file: File): String {
+    override fun extractFilename(file: IFile): String {
         val raw = file.nameWithoutExtension
         val collection = extractCollection(file)
 
@@ -46,7 +46,7 @@ class MovieParsing : BaseParsing() {
         }
     }
 
-    override fun extractTitles(file: File): List<String> {
+    override fun extractTitles(file: IFile): List<String> {
         val collection = extractCollection(file)
         val filename = extractFilename(file)
 

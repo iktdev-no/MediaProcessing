@@ -4,11 +4,10 @@ import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
-import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 
 abstract class VideoTaskListener(taskType: TaskType, execConfig: ExecutablesConfig) :
@@ -20,6 +19,10 @@ abstract class VideoTaskListener(taskType: TaskType, execConfig: ExecutablesConf
         private var sharedListeners: MutableList<VideoTaskListener> = mutableListOf()
         fun addListener(listener: VideoTaskListener) {
             sharedListeners.add(listener)
+        }
+
+        fun removeListeners() {
+            sharedListeners.clear()
         }
 
         var useSharedBusyState: Boolean = false

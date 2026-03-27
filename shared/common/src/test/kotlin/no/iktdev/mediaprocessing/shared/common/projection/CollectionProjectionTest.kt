@@ -1,22 +1,21 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
-import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.exfl.using
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class CollectionProjectionTest: TestBase() {
 
-    private fun tempOutbox(folders: List<String>): File {
-        val root = File("/tmp").using("collectionProjectionTest")
+    private fun tempOutbox(folders: List<String>): IFile {
+        val root = IFile("/tmp").using("collectionProjectionTest")
         root.mkdirs()
         folders.forEach { name -> root.using(name).mkdirs() }
         return root

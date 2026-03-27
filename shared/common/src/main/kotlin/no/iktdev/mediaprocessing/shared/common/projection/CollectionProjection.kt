@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
@@ -8,11 +9,10 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Operat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
-import java.io.File
 
 class CollectionProjection(
     val history: List<Event>,
-    val outbox: File
+    val outbox: IFile
 ) {
 
     fun getCollection(): String {
@@ -35,9 +35,8 @@ class CollectionProjection(
         }
 
         val stores = outbox
-            .listFiles { file -> file.isDirectory }
-            ?.map { it.name }
-            ?: emptyList()
+            .listFiles().filter { it.isDirectory() }
+            .map { it.name }
 
         // Finn første kandidat som matcher en eksisterende mappe
         for (candidate in collectionCandidates) {
@@ -52,7 +51,7 @@ class CollectionProjection(
     }
 
     fun getCollectionAltFlowConvert(started: StartProcessingEvent): String {
-        val useFile = started.data.fileUri.let { File(it) }
+        val useFile = started.data.fileUri.let { IFile(it) }
         val collection = useFile.parentFile.parentFile.parentFile.name // "language->sub->collection"
         return collection
     }

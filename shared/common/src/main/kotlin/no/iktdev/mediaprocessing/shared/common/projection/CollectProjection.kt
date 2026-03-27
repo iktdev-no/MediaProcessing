@@ -1,13 +1,13 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
-import java.io.File
 
 class CollectProjection(val events: List<Event>) {
 
-    val useFile: File? by lazy { projectUseFile() }
+    val useFile: IFile? by lazy { projectUseFile() }
     val startedWith: StartProjection? by lazy { projectStartedWith() }
     var readStreamsTaskStatus: TaskStatus = TaskStatus.NotInitiated
         private set
@@ -83,10 +83,10 @@ class CollectProjection(val events: List<Event>) {
 
 
 
-    private fun projectUseFile(): File? {
+    private fun projectUseFile(): IFile? {
         val added = events.filterIsInstance<FileAddedEvent>().firstOrNull()?.data
         val startEvent = projectStartedWith()
-        return added?.fileUri?.let { File(it) } ?: if (startedWith != null) {
+        return added?.fileUri?.let { IFile(it) } ?: if (startedWith != null) {
             startEvent?.inputFile
         } else null
 
@@ -95,7 +95,7 @@ class CollectProjection(val events: List<Event>) {
     private fun projectStartedWith(): StartProjection? {
         val startEvent = events.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
         return StartProjection(
-            inputFile = startEvent.data.fileUri.let { File(it) },
+            inputFile = startEvent.data.fileUri.let { IFile(it) },
             mode = startEvent.data.flow,
             tasks = startEvent.data.operation
         )
@@ -108,8 +108,8 @@ class CollectProjection(val events: List<Event>) {
         val coverDownloadResultEvents = events.filterIsInstance<CoverDownloadResultEvent>()
             .filter { it.status == no.iktdev.eventi.models.store.TaskStatus.Completed }
         val coverFile =
-            coverDownloadResultEvents.find { it -> it.data?.source == metadataEvent.recommended?.metadata?.source }?.data?.outputFile
-                ?.let { File(it) }
+            coverDownloadResultEvents.find { it.data?.source == metadataEvent.recommended?.metadata?.source }?.data?.outputFile
+                ?.let { IFile(it) }
         val result = metadataEvent.recommended ?: return null
         return MetadataProjection(
             title = result.metadata.title,
@@ -130,7 +130,7 @@ class CollectProjection(val events: List<Event>) {
         val extreactEvents = events.filterIsInstance<ProcesserExtractResultEvent>()
         val extractedFiles =
             if (extreactEvents.all { it.status == no.iktdev.eventi.models.store.TaskStatus.Completed }) {
-                extreactEvents.mapNotNull { it.data?.cachedOutputFile?.let { filePath -> File(filePath) } }
+                extreactEvents.mapNotNull { it.data?.cachedOutputFile?.let { filePath -> IFile(filePath) } }
             } else {
                 emptyList()
             }
@@ -138,12 +138,12 @@ class CollectProjection(val events: List<Event>) {
         val convertedEvents = events.filterIsInstance<ConvertTaskResultEvent>()
         val convertedFiles =
             if (convertedEvents.all { it.status == no.iktdev.eventi.models.store.TaskStatus.Completed }) {
-                convertedEvents.flatMap { it.data?.outputFiles?.map { filePath -> File(filePath) } ?: emptyList() }
+                convertedEvents.flatMap { it.data?.outputFiles?.map { filePath -> IFile(filePath) } ?: emptyList() }
             } else {
                 emptyList()
             }
 
-        val encodedFile = encodeEvent.data?.cachedOutputFile?.let { File(it) }
+        val encodedFile = encodeEvent.data?.cachedOutputFile?.let { IFile(it) }
 
         return ProcessedMediaProjection(
             encodedFile = encodedFile,
@@ -163,7 +163,7 @@ class CollectProjection(val events: List<Event>) {
 
 
     data class StartProjection(
-        val inputFile: File,
+        val inputFile: IFile,
         val mode: StartFlow,
         val tasks: Set<OperationType>
     )
@@ -175,7 +175,7 @@ class CollectProjection(val events: List<Event>) {
         val summary: List<MetadataSearchResultEvent.SearchResult.MetadataResult.Summary>,
         val mediaType: MediaType,
         val genres: List<String>,
-        val cover: File?,
+        val cover: IFile?,
         val source: String
     )
 
@@ -186,9 +186,9 @@ class CollectProjection(val events: List<Event>) {
     )
 
     data class ProcessedMediaProjection(
-        val encodedFile: File?,
-        val extractedFiles: List<File>,
-        val convertedFiles: List<File>
+        val encodedFile: IFile?,
+        val extractedFiles: List<IFile>,
+        val convertedFiles: List<IFile>
     )
 
 

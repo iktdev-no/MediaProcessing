@@ -6,7 +6,9 @@ import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.MockFileSystemService
+import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
@@ -20,7 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 
-class MigrateContentToStoreTaskListenerTest {
+class MigrateContentToStoreTaskListenerTest: TestBase() {
 
     // -------------------------------------------------------------------------
     // Fake Reporter
@@ -70,8 +72,9 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateVideo_success() {
+        val destFile = FakeFile("/tmp/dest", exists = false)
         val fs = MockFileSystemService().also { listener.fs = it }
-        val content = ContentMigrationPlan.SingleContent("/tmp/source", "/tmp/dest")
+        val content = ContentMigrationPlan.SingleContent("/tmp/source", destFile.absolutePath)
 
         val result = listener.migrateVideo(fs, content)
 
@@ -91,8 +94,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateVideo_copyFails() {
+        val destFile = FakeFile("/tmp/dest", exists = false)
+
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
-        val content = ContentMigrationPlan.SingleContent("/tmp/source", "/tmp/dest")
+        val content = ContentMigrationPlan.SingleContent("/tmp/source", destFile.absolutePath)
 
         assertThrows<FileServiceException.CopyFailed> {
             listener.migrateVideo(fs, content)
@@ -109,8 +114,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateVideo_mismatch() {
+        val destFile = FakeFile("/tmp/dest", exists = false)
+
         val fs = MockFileSystemService().apply { identical = false }.also { listener.fs = it }
-        val content = ContentMigrationPlan.SingleContent("/tmp/source", "/tmp/dest")
+        val content = ContentMigrationPlan.SingleContent("/tmp/source", destFile.absolutePath)
 
         assertThrows<FileServiceException.VerificationFailed> {
             listener.migrateVideo(fs, content)
@@ -184,8 +191,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateSubtitle_mismatch() {
+        val destFile = FakeFile("/tmp/b", exists = false)
+
         val fs = MockFileSystemService().apply { identical = false }.also { listener.fs = it }
-        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", "/tmp/b")
+        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", destFile.absolutePath)
 
         assertThrows<FileServiceException.VerificationFailed> {
             listener.migrateSubtitle(fs, listOf(sub))
@@ -202,8 +211,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateSubtitle_copyFails() {
+        val destFile = FakeFile("/tmp/b", exists = false)
+
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
-        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", "/tmp/b")
+        val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", destFile.absolutePath)
 
         assertThrows<FileServiceException.CopyFailed> {
             listener.migrateSubtitle(fs, listOf(sub))
@@ -224,8 +235,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateCover_success() {
+        val destFile = FakeFile("/tmp/c2", exists = false)
+
         val fs = MockFileSystemService().also { listener.fs = it }
-        val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
+        val cover = ContentMigrationPlan.SingleContent("/tmp/c", destFile.absolutePath)
 
         val result = listener.migrateCover(fs, cover)
 
@@ -242,8 +255,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateCover_mismatch() {
+        val destFile = FakeFile("/tmp/c2", exists = false)
+
         val fs = MockFileSystemService().apply { identical = false }.also { listener.fs = it }
-        val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
+        val cover = ContentMigrationPlan.SingleContent("/tmp/c", destFile.absolutePath)
 
         assertThrows<FileServiceException.VerificationFailed> {
             listener.migrateCover(fs, cover)
@@ -260,8 +275,10 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun migrateCover_copyFails() {
+        val destFile = FakeFile("/tmp/c2", exists = false)
+
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
-        val cover = ContentMigrationPlan.SingleContent("/tmp/c", "/tmp/c2")
+        val cover = ContentMigrationPlan.SingleContent("/tmp/c", destFile.absolutePath)
 
         assertThrows<FileServiceException.CopyFailed> {
             listener.migrateCover(fs, cover)
@@ -318,13 +335,15 @@ class MigrateContentToStoreTaskListenerTest {
         """
     )
     fun accept_failure() = runTest {
+        val destFile = FakeFile("/tmp/v2", exists = false)
+
         val fs = MockFileSystemService().apply { copyShouldFail = true }.also { listener.fs = it }
         val reporter = FakeTaskReporter()
 
         val task = MigrateToContentStoreTask(
             ContentMigrationPlan(
                 "col",
-                videoContent = ContentMigrationPlan.SingleContent("/tmp/v", "/tmp/v2"),
+                videoContent = ContentMigrationPlan.SingleContent("/tmp/v", destFile.absolutePath),
                 subtitleContent = emptyList(),
                 coverContent = null
             )

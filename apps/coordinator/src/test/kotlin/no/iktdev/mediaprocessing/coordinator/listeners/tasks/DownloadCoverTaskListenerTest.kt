@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.MockDownloadClient
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
@@ -16,7 +17,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDo
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -74,7 +74,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
         listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
             this.client = MockDownloadClient(
                 delayMillis = delay,
-                mockFile = File("/tmp/fancy.jpg")
+                mockFile = IFile("/tmp/fancy.jpg")
             )
         }
 
@@ -132,7 +132,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
         """
     )
     fun onTask_returns_null_for_unsupported_task() = runTest {
-        val event = listener.onTask(TestBase.DummyTask()) // fake unsupported task
+        val event = listener.onTask(DummyTask()) // fake unsupported task
         assertNull(event)
     }
 
@@ -146,7 +146,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
         """
     )
     fun onTask_produces_correct_output_path() = runTest {
-        val mockFile = File("/tmp/expected.jpg")
+        val mockFile = IFile("/tmp/expected.jpg")
 
         listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
             this.client = MockDownloadClient(mockFile = mockFile)
@@ -181,7 +181,7 @@ class DownloadCoverTaskListenerTest: TestBase() {
         val delay = 500L
 
         listener = DownloadCoverTaskListenerTestImplementation(coordinatorEnv).apply {
-            this.client = MockDownloadClient(delayMillis = delay, mockFile = File("/tmp/x.jpg"))
+            this.client = MockDownloadClient(delayMillis = delay, mockFile = IFile("/tmp/x.jpg"))
         }
 
         val task = CoverDownloadTask(

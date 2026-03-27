@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.converter
 
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.reader.BaseReader
-import java.io.File
 
 class MockConverterEnvironment(
     var canReadValue: Boolean = true,
@@ -9,11 +9,11 @@ class MockConverterEnvironment(
     var exporter: Exporter? = null
 ) : ConverterEnvironment {
 
-    override fun canRead(file: File): Boolean = canReadValue
+    override fun canRead(file: IFile): Boolean = canReadValue
 
-    override fun getReader(file: File): BaseReader? = reader
+    override fun getReader(file: IFile): BaseReader? = reader
 
-    override fun createExporter(input: File, outputDir: File, name: String): Exporter {
+    override fun createExporter(input: IFile, outputDir: IFile, name: String): Exporter {
         return exporter ?: error("FakeEnv.exporter must be set before calling createExporter")
     }
 }

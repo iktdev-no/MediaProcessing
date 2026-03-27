@@ -1,18 +1,18 @@
 package no.iktdev.mediaprocessing
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.registry.EventTypeRegistry
+import no.iktdev.files.FakeFile
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -26,8 +26,8 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.Au
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecConfig
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import java.io.File
 import java.util.*
 
 open class TestBase {
@@ -52,10 +52,10 @@ open class TestBase {
             videoPreference = defaultVideoPreference,
             audioPreference = defaultAudioPreference
         )
-        every { coordinatorEnv.outboxFolder } returns File("./tmp/outbox")
-        every { coordinatorEnv.inboxFolder } returns File("./tmp/inbox")
-        every { coordinatorEnv.scratchFolder } returns File("./tmp/scratch")
-        every { coordinatorEnv.intermediateFolder } returns File("./tmp/intermediate")
+        every { coordinatorEnv.outboxFolder } returns IFile("./tmp/outbox")
+        every { coordinatorEnv.inboxFolder } returns IFile("./tmp/inbox")
+        every { coordinatorEnv.scratchFolder } returns IFile("./tmp/scratch")
+        every { coordinatorEnv.intermediateFolder } returns IFile("./tmp/intermediate")
         every { coordinatorEnv.streamitAddress } returns "http://streamit.lan"
 
         EventRegistry.getEvents().let {
@@ -63,6 +63,7 @@ open class TestBase {
         }
         eventStore.clear()
         history.clear()
+        FakeFile.wipe()
     }
 
     @AfterEach
@@ -127,6 +128,15 @@ open class TestBase {
     fun List<Event>.addToHistory(): List<Event> {
         this.forEach { event -> event.addToHistory() }
         return this
+    }
+
+    companion object {
+        @JvmStatic
+        @BeforeAll
+        fun setupAtStart() {
+            IFile.factory = { path -> FakeFile(path) }
+            FakeFile.wipe()
+        }
     }
 
 }

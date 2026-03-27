@@ -2,31 +2,23 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.exfl.using
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
-import java.io.File
+
 
 class SummaryProjection(
     val collection: String,
     val events: List<Event>,
-    val outbox: File
+    val outbox: IFile
 ) {
 
-    val useStore: File = outbox.using(collection)
+    val useStore: IFile = outbox.using(collection)
 
     fun projectMetadata(plan: ContentMigrationPlan): ContentExport.MetadataExport? {
         val metadata = CollectProjection(events).metadata
@@ -35,7 +27,7 @@ class SummaryProjection(
                 title = metadata.title,
                 alternativeTitles = metadata.alternativeTitles,
                 genres = metadata.genres,
-                cover = plan.coverContent?.storeUri?.let { File(it).name },
+                cover = plan.coverContent?.storeUri?.let { IFile(it).name },
                 summary = metadata.summary,
                 mediaType = metadata.mediaType,
                 source = metadata.source
@@ -66,7 +58,7 @@ class SummaryProjection(
     fun getFileName(): String {
         val startedEvent = events.getInstanceOf<StartProcessingEvent>() ?: throw IllegalStateException("No start processing event")
         if (startedEvent.data.operation.isOnly(OperationType.ConvertSubtitles)) {
-            return startedEvent.data.fileUri.let { File(it) }.nameWithoutExtension
+            return startedEvent.data.fileUri.let { IFile(it) }.nameWithoutExtension
         }
 
         val parsed = events.getInstanceOf<MediaParsedInfoEvent>() ?: throw IllegalStateException("No media event configured for migration plan found")
@@ -75,14 +67,14 @@ class SummaryProjection(
 
     fun getCoverMigration(): ContentMigrationPlan.SingleContent? {
         val useCover = events.getInstancesOf<CoverDownloadResultEvent>()
-            .filter { it -> it.status == TaskStatus.Completed }
+            .filter { it.status == TaskStatus.Completed }
             .lastOrNull { it.data != null } ?: return null
 
-        val cachedFile = useCover.data!!.outputFile.let(::File)
+        val cachedFile = IFile(useCover.data!!.outputFile)
 
         val useName = (if (isMovie()) getFileName() else {
             collection.cleanForFileSystemUse()
-        }).let { name -> "$name.${cachedFile.extension}" }
+        }).let { name -> "$name.${cachedFile.extension()}" }
 
         val storeFile = useStore.using(useName)
         return ContentMigrationPlan.SingleContent(
@@ -93,9 +85,9 @@ class SummaryProjection(
 
     fun getVideoMigration(): ContentMigrationPlan.SingleContent? {
         val cachedFile = events.getInstancesOf<ProcesserEncodeResultEvent>()
-            .lastOrNull()?.data?.cachedOutputFile?.let(::File) ?: return null
+            .lastOrNull()?.data?.cachedOutputFile?.let { IFile(it) } ?: return null
 
-        val filename = getFileName().let { "$it.${cachedFile.extension}" }
+        val filename = getFileName().let { "$it.${cachedFile.extension()}" }
         val storeFile = useStore.using(filename)
 
         return ContentMigrationPlan.SingleContent(
@@ -112,11 +104,11 @@ class SummaryProjection(
         val allSubtitleFiles = events.flatMap { event ->
             when (event) {
                 is ProcesserExtractResultEvent ->
-                    event.data?.let { listOf(it.language to File(it.cachedOutputFile)) } ?: emptyList()
+                    event.data?.let { listOf(it.language to IFile(it.cachedOutputFile)) } ?: emptyList()
 
                 is ConvertTaskResultEvent ->
                     event.data?.outputFiles
-                        ?.map { event.data.language to File(it) }
+                        ?.map { event.data.language to IFile(it) }
                         ?: emptyList()
 
                 else -> emptyList()
@@ -131,7 +123,7 @@ class SummaryProjection(
         // Bygg resultat
         return grouped.flatMap { (language, files) ->
             files.map { cached ->
-                val filename = "$baseName.${cached.extension}"
+                val filename = "$baseName.${cached.extension()}"
                 val storeFile = store.using("sub", language, filename)
 
                 ContentMigrationPlan.SingleSubtitle(
@@ -165,16 +157,16 @@ class SummaryProjection(
     }
 
     fun getCover(plan: ContentMigrationPlan): String? {
-        return plan.coverContent?.storeUri?.let { x -> File(x).name }
+        return plan.coverContent?.storeUri?.let { x -> IFile(x).name }
     }
 
     fun getVideoFile(plan: ContentMigrationPlan): String? {
-        return plan.videoContent?.storeUri?.let { x -> File(x).name }
+        return plan.videoContent?.storeUri?.let { x -> IFile(x).name }
     }
 
     fun getSubtitleFile(plan: ContentMigrationPlan): List<ContentExport.MediaExport.Subtitle> {
         return plan.subtitleContent?.map { it ->
-            ContentExport.MediaExport.Subtitle(subtitleFile = it.storeUri.let { File(it).name }, language = it.language)
+            ContentExport.MediaExport.Subtitle(subtitleFile = it.storeUri.let { IFile(it).name }, language = it.language)
         } ?: emptyList()
     }
 
@@ -196,6 +188,6 @@ class SummaryProjection(
         return (parsedType ?: metadataType) == MediaType.Movie
     }
 
-    data class CachedToStore(val cachedFile: File, val storeFile: File)
+    data class CachedToStore(val cachedFile: IFile, val storeFile: IFile)
     data class CachedToStoreLanguage(val cts: CachedToStore, val language: String)
 }

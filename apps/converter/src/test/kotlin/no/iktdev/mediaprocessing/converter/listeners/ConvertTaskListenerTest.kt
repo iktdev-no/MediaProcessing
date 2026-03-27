@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.classes.Dialog
 import no.iktdev.library.subtitle.classes.DialogType
 import no.iktdev.library.subtitle.classes.Time
@@ -23,7 +24,6 @@ import no.iktdev.mediaprocessing.shared.common.model.SubtitleFormat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -81,11 +81,11 @@ class ConvertTaskListenerTest {
     }
 
     class FakeExporter(
-        private val files: List<File>,
+        private val files: List<IFile>,
         private val shouldThrow: Boolean = false
     ) : Exporter {
 
-        override fun write(dialogs: List<Dialog>): MutableList<File> {
+        override fun write(dialogs: List<Dialog>): MutableList<IFile> {
             if (shouldThrow) throw RuntimeException("export failed")
             return files.toMutableList()
         }
@@ -160,7 +160,7 @@ class ConvertTaskListenerTest {
         val task = makeTask()
         val event = listener.onTask(task)
 
-        val time = measureTimeMillis {
+        measureTimeMillis {
             val accepted = listener.accept(task, overrideReporter)
             assertTrue(accepted, "Task listener did not accept the task.")
             listener.getJob()?.join()
@@ -186,7 +186,7 @@ class ConvertTaskListenerTest {
         val env = MockConverterEnvironment(
             canReadValue = true,
             reader = FakeReader(dialogs),
-            exporter = FakeExporter(listOf(File("/fake/out.srt")))
+            exporter = FakeExporter(listOf(IFile("/fake/out.srt")))
         )
 
         listener.apply {

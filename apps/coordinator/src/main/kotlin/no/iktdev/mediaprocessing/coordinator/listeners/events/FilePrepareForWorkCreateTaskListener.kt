@@ -3,17 +3,16 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
-import java.io.File
 import java.io.FileNotFoundException
 
 @Component
@@ -41,7 +40,7 @@ class FilePrepareForWorkCreateTaskListener(
                 return null
         }
 
-        val source = File(startedEvent.data.fileUri).absoluteFile
+        val source = IFile(startedEvent.data.fileUri)
         val destination = env.scratchFolder.using(source.name)
 
         if (!source.exists()) {

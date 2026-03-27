@@ -6,19 +6,16 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.FileCopyProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
-import no.iktdev.streamit.library.db.tables.progress
 import org.springframework.stereotype.Component
-import java.io.File
-import java.io.FileNotFoundException
 import java.nio.file.FileSystemException
-import java.util.UUID
-import kotlin.math.floor
+import java.util.*
 
 @Component
 class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
@@ -52,12 +49,12 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
     override suspend fun onTask(task: Task): Event? {
         val useTask = task as FilePrepareForWorkTask
 
-        val source = File(useTask.data.sourceFile).absoluteFile
+        val source = IFile(useTask.data.sourceFile)
 
         if (!source.exists()) {
             throw FileServiceException.SourceMissing(source)
         }
-        val destinationFile = File(useTask.data.destinationFile).absoluteFile
+        val destinationFile = IFile(useTask.data.destinationFile)
 
         val fs = getFileSystemService()
 
@@ -110,7 +107,7 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
         ).producedFrom(useTask)
     }
 
-    open fun getFileSystemService(): FileSystemService =
+    fun getFileSystemService(): FileSystemService =
         DefaultFileSystemService()
 
 

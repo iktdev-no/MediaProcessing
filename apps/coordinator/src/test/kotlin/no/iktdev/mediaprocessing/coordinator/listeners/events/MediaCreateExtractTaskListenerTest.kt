@@ -1,10 +1,14 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.slot
+import io.mockk.verify
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.defaultFilePrepareForWorkResultEvent
@@ -21,8 +25,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
-import java.time.Duration
 import java.util.*
 
 class MediaCreateExtractTaskListenerTest: TestBase() {
@@ -100,7 +102,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
     """)
     fun testSrtSubtitle() {
         val stream = dummyStream(0, "subrip", "eng")
-        val inputFile = File("/tmp/movie.mkv")
+        val inputFile = IFile("/tmp/movie.mkv")
 
         val result = listener.toSubtitleArgumentData(0, inputFile, "subby", stream)
 
@@ -124,7 +126,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
     """)
     fun testUnsupportedCodec() {
         val stream = dummyStream(1, "pgssub", "eng")
-        val inputFile = File("/tmp/movie.mkv")
+        val inputFile = IFile("/tmp/movie.mkv")
 
         val result = listener.toSubtitleArgumentData(1, inputFile, "subby",stream)
 
@@ -141,7 +143,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
     """)
     fun testMissingLanguage() {
         val stream = dummyStream(2, "subrip", null)
-        val inputFile = File("/tmp/movie.mkv")
+        val inputFile = IFile("/tmp/movie.mkv")
 
         val result = listener.toSubtitleArgumentData(2, inputFile, "subby", stream)
 
@@ -159,7 +161,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
     """)
     fun testAssSubtitle() {
         val stream = dummyStream(3, "ass", "jpn")
-        val inputFile = File("/tmp/anime.mkv")
+        val inputFile = IFile("/tmp/anime.mkv")
 
         val result = listener.toSubtitleArgumentData(3, inputFile, "subby", stream)
 

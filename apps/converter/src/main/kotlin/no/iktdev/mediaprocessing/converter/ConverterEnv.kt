@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.converter
 
-import no.iktdev.exfl.using
-import java.io.File
+import no.iktdev.files.IFile
 
 class ConverterEnv {
     companion object {
@@ -9,7 +8,7 @@ class ConverterEnv {
         val syncDialogs = System.getenv("SYNC_DIALOGS").toBoolean()
         val outFormats: List<String> = System.getenv("OUT_FORMATS")?.split(",")?.toList() ?: emptyList()
 
-        val logDirectory = if (!System.getenv("LOG_DIR").isNullOrBlank()) File(System.getenv("LOG_DIR")) else
-            File("data").using("logs", "convert")
+        val logDirectory = if (!System.getenv("LOG_DIR").isNullOrBlank()) IFile(System.getenv("LOG_DIR")) else
+            IFile("data").using("logs", "convert")
     }
 }

@@ -1,15 +1,15 @@
 package no.iktdev.mediaprocessing
 
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.coordinator.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
-import java.io.File
 
 // ------------------------------------------------------------
 // Fake CoordinatorEnv for testing
 // ------------------------------------------------------------
-class FakeCoordinatorEnv(prefFile: File) : CoordinatorEnv(
+class FakeCoordinatorEnv(prefFile: IFile) : CoordinatorEnv(
     streamIt = StreamItConfig(address = "http://localhost"),
     exec = ExecutablesConfig(ffprobe = "/usr/bin/ffprobe"),
     media = MediaPaths(
@@ -19,5 +19,5 @@ class FakeCoordinatorEnv(prefFile: File) : CoordinatorEnv(
         inbox = "/tmp/inbox"
     )
 ) {
-    override val preference: File = prefFile
+    override val preference: IFile = prefFile
 }

@@ -4,17 +4,17 @@ import com.google.gson.JsonParser
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.data.FFinfoOutput
 import no.iktdev.mediaprocessing.processer.TestBase
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProbeRunnerTest: TestBase() {
 
-    private val testRoot = File("build/test-run")
+    private val testRoot = IFile("build").using("test-run")
 
     @BeforeEach
     fun clean() {

@@ -2,6 +2,8 @@ package no.iktdev.files
 
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.PrintWriter
 
 class UseFile(path: String) : IFile {
@@ -90,4 +92,17 @@ class UseFile(path: String) : IFile {
         return file.renameTo(dest.toJavaFile())
     }
 
+    override fun setWritable(state: Boolean): Boolean {
+        return file.setWritable(state)
+    }
+
+    override fun canRead() = file.canRead()
+
+    override fun copyTo(dest: IFile, overwrite: Boolean, bufferSize: Int): IFile {
+        file.copyTo(dest.toJavaFile(), overwrite, bufferSize)
+        return dest
+    }
+
+    override fun openInputStream(): InputStream  = file.inputStream()
+    override fun openOutputStream(): OutputStream  = file.outputStream()
 }

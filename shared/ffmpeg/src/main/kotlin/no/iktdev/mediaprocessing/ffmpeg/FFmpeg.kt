@@ -10,7 +10,7 @@ import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegProgressDecoder
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import org.jetbrains.annotations.VisibleForTesting
-import java.io.File
+
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -42,7 +42,7 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
     protected lateinit var inputFile: String
     open suspend fun run(command: FfmpegDsl) {
         inputFile = command.toInstructions().findPrimaryInput()
-        logFile = logDir.using("$formattedDateTime-${File(inputFile).nameWithoutExtension}.log")
+        logFile = logDir.using("$formattedDateTime-${IFile(inputFile).nameWithoutExtension}.log")
         listener?.onStarted(inputFile)
         val arguments = command.build()
         log.debug("Running ffmpeg with the following arguments\n${arguments.joinToString(" ")}")

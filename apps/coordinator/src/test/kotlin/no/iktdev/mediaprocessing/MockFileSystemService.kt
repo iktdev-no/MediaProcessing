@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing
 
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
-import java.io.File
 
 class MockFileSystemService : FileSystemService {
 
@@ -13,11 +13,11 @@ class MockFileSystemService : FileSystemService {
     var sourceExists = true
 
     // Tracking
-    val copied = mutableListOf<Pair<File, File>>()
-    val verified = mutableListOf<Pair<File, File>>()
-    val deleted = mutableListOf<File>()
+    val copied = mutableListOf<Pair<IFile, IFile>>()
+    val verified = mutableListOf<Pair<IFile, IFile>>()
+    val deleted = mutableListOf<IFile>()
 
-    override fun copy(source: File, destination: File) {
+    override fun copy(source: IFile, destination: IFile) {
         copied += source to destination
 
         if (!sourceExists) {
@@ -32,23 +32,23 @@ class MockFileSystemService : FileSystemService {
     }
 
     override fun copyWithProgress(
-        source: File,
-        destination: File,
+        source: IFile,
+        destination: IFile,
         bufferSize: Int,
         onProgress: (copied: Long, total: Long) -> Unit
     ) {
         // Do Nothing for now
     }
 
-    override fun verifyIdentical(source: File, destination: File) {
-        verified += source to destination
+    override fun verifyIdentical(original: IFile, target: IFile) {
+        verified += original to target
 
         if (!identical) {
-            throw FileServiceException.VerificationFailed(source, destination)
+            throw FileServiceException.VerificationFailed(original, target)
         }
     }
 
-    override fun delete(file: File) {
+    override fun delete(file: IFile) {
         if (deleteShouldFail) {
             throw RuntimeException("delete failed")
         }

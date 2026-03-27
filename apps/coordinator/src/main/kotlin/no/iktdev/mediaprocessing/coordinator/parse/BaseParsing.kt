@@ -1,8 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.parse
 
-import no.iktdev.mediaprocessing.coordinator.listeners.events.MediaParsedInfoListener
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import java.io.File
 
 abstract class BaseParsing {
     fun String.noResolutionAndAfter() = Regex("[0-9]+[pk].*", RegexOption.IGNORE_CASE).replace(this, "")
@@ -40,8 +39,8 @@ abstract class BaseParsing {
             .trim()
     }
 
-    abstract fun extractCollection(file: File): String
-    abstract fun extractTitles(file: File): List<String>
-    abstract fun extractFilename(file: File): String
-    open fun extractEpisodeInfo(file: File): MediaParsedInfoEvent.ParsedData.EpisodeInfo? = null
+    abstract fun extractCollection(file: IFile): String
+    abstract fun extractTitles(file: IFile): List<String>
+    abstract fun extractFilename(file: IFile): String
+    open fun extractEpisodeInfo(file: IFile): MediaParsedInfoEvent.ParsedData.EpisodeInfo? = null
 }

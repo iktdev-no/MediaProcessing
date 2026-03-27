@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.ui.service
 
-import no.iktdev.mediaprocessing.shared.common.notExist
 import no.iktdev.mediaprocessing.ui.MediaConfig
 import no.iktdev.mediaprocessing.ui.dto.file.*
+import no.iktdev.mediaprocessing.ui.notExist
 import org.springframework.stereotype.Service
 import java.io.File
 

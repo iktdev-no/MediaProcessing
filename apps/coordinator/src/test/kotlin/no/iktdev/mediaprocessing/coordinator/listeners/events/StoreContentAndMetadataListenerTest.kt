@@ -5,33 +5,20 @@ import io.mockk.verify
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.exfl.using
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-import no.iktdev.streamit.library.db.tables.subtitle
-
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.io.File
 
 class StoreContentAndMetadataListenerTest : TestBase() {
 
@@ -128,7 +115,7 @@ class StoreContentAndMetadataListenerTest : TestBase() {
 
 
         val collected = CollectedEvent(
-            history.map { it -> it.eventId }.toSet()
+            history.map { it.eventId }.toSet()
         )
             .derivedOf(processEncodeResultEvent)
             .addToHistory()
@@ -180,7 +167,7 @@ class StoreContentAndMetadataListenerTest : TestBase() {
     """
     )
     fun createTaskForWhenOnlyStoringSubtitles() {
-        val workFolder = File("build").using("subby", "eng")
+        val workFolder = IFile("build").using("subby", "eng")
 
         val started = StartProcessingEvent(
             data = StartData(

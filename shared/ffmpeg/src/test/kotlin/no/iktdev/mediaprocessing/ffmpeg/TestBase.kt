@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.ffmpeg
 
 import no.iktdev.files.FakeFile
-import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
@@ -10,14 +9,13 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import java.io.File
 import kotlin.test.DefaultAsserter.fail
 
 open class TestBase {
     val workFolder = FakeFile("build").using("tests")
         .apply { mkdirs() }
 
-    val logDirectory = File(workFolder.parent, "logs")
+    val logDirectory = workFolder.using("logs")
 
 
     fun fakeVideoInstruction(input: IFile, outputName: String = "video.mkv") =

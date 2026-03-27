@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.export.Export
 import no.iktdev.library.subtitle.reader.BaseReader
 import no.iktdev.library.subtitle.reader.Reader
@@ -19,7 +20,6 @@ import no.iktdev.mediaprocessing.converter.convert.Converter2
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import org.springframework.stereotype.Component
-import java.io.File
 import java.util.*
 
 @Component
@@ -103,13 +103,13 @@ open class ConvertTaskListener(): TaskListener(TaskType.CPU_INTENSIVE) {
     }
 
     class DefaultConverterEnvironment : ConverterEnvironment {
-        override fun canRead(file: File) = file.canRead()
+        override fun canRead(file: IFile) = file.canRead()
 
-        override fun getReader(file: File): BaseReader? =
-            Reader(file).getSubtitleReader()
+        override fun getReader(file: IFile): BaseReader? =
+            Reader(file.toJavaFile()).getSubtitleReader()
 
-        override fun createExporter(input: File, outputDir: File, name: String): Exporter {
-            return ExportAdapter(Export(input, outputDir, name))
+        override fun createExporter(input: IFile, outputDir: IFile, name: String): Exporter {
+            return ExportAdapter(Export(input.toJavaFile(), outputDir.toJavaFile(), name))
         }
 
     }

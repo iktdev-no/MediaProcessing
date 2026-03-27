@@ -4,6 +4,7 @@ import com.github.pgreze.process.ProcessResult
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
@@ -15,12 +16,11 @@ import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SegmentEncodeRunnerTest: TestBase() {
 
-    private val testRoot = File("build/test-run")
+    private val testRoot = IFile("build/test-run")
 
     @BeforeEach
     fun clean() {

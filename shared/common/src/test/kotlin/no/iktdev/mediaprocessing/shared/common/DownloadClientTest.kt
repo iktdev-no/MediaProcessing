@@ -3,10 +3,10 @@ package no.iktdev.mediaprocessing.shared.common
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import no.iktdev.files.IFile
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
 import kotlin.io.path.createTempDirectory
@@ -14,7 +14,7 @@ import kotlin.test.assertFailsWith
 
 class DownloadClientTest {
 
-    private fun tempDir(): File = createTempDirectory().toFile()
+    private fun tempDir(): IFile = createTempDirectory().toFile().absolutePath.let { IFile(it) }
 
     private fun fakeConnection(data: ByteArray): HttpURLConnection {
         val mock = mockk<HttpURLConnection>()
@@ -28,7 +28,7 @@ class DownloadClientTest {
         length = 10
     )
 
-    private fun client(outDir: File) = object : DownloadClient(
+    private fun client(outDir: IFile) = object : DownloadClient(
         outDir = outDir,
         connectionFactory = mockk()
     ) {}
@@ -75,7 +75,7 @@ class DownloadClientTest {
     )
     fun finalizeDownload_moves_file_atomically() = runTest {
         val outDir = tempDir()
-        val tempFile = File(outDir, "temp.downloading").apply { writeText("hello") }
+        val tempFile =  outDir.using("temp.downloading").apply { writeText("hello") }
 
         val client = client(outDir)
         val metadata = fakeMetadata("jpg")
@@ -102,7 +102,7 @@ class DownloadClientTest {
     )
     fun finalizeDownload_throws_on_failure() = runTest {
         val outDir = tempDir()
-        val tempFile = File(outDir, "temp.downloading").apply { writeText("hello") }
+        val tempFile = outDir.using("temp.downloading").apply { writeText("hello") }
 
         // Gjør katalogen skrivebeskyttet for å tvinge move-feil
         outDir.setWritable(false)
@@ -132,7 +132,7 @@ class DownloadClientTest {
         val outDir = tempDir()
         val client = client(outDir)
 
-        val ext = client.getExtension(File("x"), fakeMetadata("png"))
+        val ext = client.getExtension(IFile("x"), fakeMetadata("png"))
 
         assertEquals("png", ext)
     }
@@ -150,7 +150,7 @@ class DownloadClientTest {
         val outDir = tempDir()
         val client = client(outDir)
 
-        val tempFile = File(outDir, "dummy").apply { writeText("irrelevant") }
+        val tempFile = outDir.using("dummy").apply { writeText("irrelevant") }
 
         val metadata = DownloadClient.DownloadMetadata(
             uri = URI("http://example.com/file"),

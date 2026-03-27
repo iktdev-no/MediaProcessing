@@ -15,7 +15,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.Convert
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
-import java.io.File
 
 @Component
 class MediaCreateConvertTaskListener: EventListener() {
@@ -84,7 +83,7 @@ class MediaCreateConvertTaskListener: EventListener() {
     fun createTaskFromDirect(event: Event): ConvertTask {
         val startEvent = event.requireQualifiedEntry<StartProcessingEvent>()
         validateInputExtension(startEvent)
-        val sourceFile = startEvent.data.fileUri.let { File(it) }
+        val sourceFile = startEvent.data.fileUri.let { IFile(it) }
         val language = sourceFile.parentFile.nameWithoutExtension // We always expect the parent file to be eks "eng", might be smart to validate that name is max 3
         val outputDirectory = sourceFile.parentFile.absolutePath
         val outputFileName = sourceFile.nameWithoutExtension
@@ -101,8 +100,8 @@ class MediaCreateConvertTaskListener: EventListener() {
     }
 
     fun validateInputExtension(startEvent: StartProcessingEvent) {
-        val sourceFile = startEvent.data.fileUri.let { File(it) }
-        val ext = sourceFile.extension.lowercase()
+        val sourceFile = startEvent.data.fileUri.let { IFile(it) }
+        val ext = sourceFile.extension().lowercase()
 
         if (ext !in allowedExtensions) {
             throw SoftDispatchException.ForcedListenerEjectionException(

@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
 import no.iktdev.mediaprocessing.coordinator.toFFmpegVersion
@@ -17,14 +18,12 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
-import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
 import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
-import java.io.File
 
 @Component
 class MediaCreateEncodeTaskListener(
@@ -68,7 +67,7 @@ class MediaCreateEncodeTaskListener(
         val extension = planner.toContainer()
         val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
 
-        val filename = File(preparedFile).nameWithoutExtension
+        val filename = IFile(preparedFile).nameWithoutExtension
 
         val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
             log.error("Unable to get parsing info, this no output directory to use. Exiting listener")

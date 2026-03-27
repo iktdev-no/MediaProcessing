@@ -8,11 +8,10 @@ import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.serialization.ZDS.toEvent
+import no.iktdev.files.IFile
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
-import java.io.File
 import java.io.FileInputStream
-import java.io.RandomAccessFile
 import java.net.InetAddress
 import java.security.MessageDigest
 import java.time.Instant
@@ -21,23 +20,6 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-fun File.notExist(): Boolean {
-    return !this.exists()
-}
-
-fun isFileAvailable(file: File): Boolean {
-    if (!file.exists()) return false
-    var stream: RandomAccessFile? = null
-    try {
-        stream = RandomAccessFile(file, "rw")
-        stream.close()
-        logger.info { "File ${file.name} is read and writable" }
-        return true
-    } catch (e: Exception) {
-        stream?.close()
-    }
-    return false
-}
 
 fun getAppVersion(): Int {
     val parsed = System.getenv("APP_VERSION")?.let {
@@ -78,9 +60,9 @@ fun silentTry(code: () -> Unit) {
     } catch (_: Exception) {}
 }
 
-fun File.getCRC32(): Long {
+fun IFile.getCRC32(): Long {
     val crc = CRC32()
-    this.inputStream().use { input ->
+    this.openInputStream().use { input ->
         val buffer = ByteArray(1024)
         var bytesRead: Int
         while (input.read(buffer).also { bytesRead = it } != -1) {
@@ -90,14 +72,14 @@ fun File.getCRC32(): Long {
     return crc.value
 }
 
-fun File.moveTo(destinationFile: File, onProgress: (Double) -> Unit = {}): Boolean {
+fun IFile.moveTo(destinationFile: IFile, onProgress: (Double) -> Unit = {}): Boolean {
     assert(this.exists()) {
         "Sourcefile ${this.absolutePath} does not exist, but it should"
     }
     assert(destinationFile.notExist()) {
         "Destinationfile ${destinationFile.absolutePath} exists, but it shouldn't"
     }
-    val tempDestinationFile = File(destinationFile.parentFile, "${destinationFile.name}.tmp")
+    val tempDestinationFile = destinationFile.parentFile.using("${destinationFile.name}.tmp")
 
 
     val success: Boolean = run {
@@ -105,8 +87,8 @@ fun File.moveTo(destinationFile: File, onProgress: (Double) -> Unit = {}): Boole
             val totalBytes = this.length()
             var copiedBytes = 0L
 
-            this.inputStream().use { input ->
-                tempDestinationFile.outputStream().use { output ->
+            this.openInputStream().use { input ->
+                tempDestinationFile.openOutputStream().use { output ->
                     val buffer = ByteArray(1024)
                     var bytesRead: Int
                     while (input.read(buffer).also { bytesRead = it } != -1) {
@@ -150,7 +132,7 @@ fun <T> List<T>.ifNotEmpty(block: (List<T>) -> Unit) {
     }
 }
 
-fun File.md5(): String {
+fun IFile.md5(): String {
     return getChecksum(this.absolutePath)
 }
 
@@ -204,18 +186,18 @@ inline fun <reified T> List<T>.sizeEquals(other: List<T>): Boolean {
     return this.size == other.size
 }
 
-fun File.resolveConflict(): File {
+fun IFile.resolveConflict(): IFile {
     if (!exists()) return this
 
     val parent = parentFile
     val name = nameWithoutExtension
-    val ext = extension
+    val ext = extension()
 
     var index = 1
-    var candidate: File
+    var candidate: IFile
 
     do {
-        candidate = File(parent, "$name ($index).$ext")
+        candidate = parent.using("$name ($index).$ext")
         index++
     } while (candidate.exists())
 

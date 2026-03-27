@@ -3,16 +3,14 @@ package no.iktdev.mediaprocessing.shared.common
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
-import no.iktdev.exfl.using
-import java.io.File
-import java.io.FileOutputStream
+import no.iktdev.files.IFile
 import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
 
-open class DownloadClient(val outDir: File, private val connectionFactory: ConnectionFactory) {
+open class DownloadClient(val outDir: IFile, private val connectionFactory: ConnectionFactory) {
     val log = KotlinLogging.logger {}
     private val BUFFER_SIZE = 4096
 
@@ -62,7 +60,7 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
     }
 
     open suspend fun downloadFile(useConnection: HttpURLConnection) = withContext(Dispatchers.IO) {
-        val downloadFile = outDir.using(UUID.randomUUID().toString() + ".downloading")
+        val downloadFile: IFile = outDir.using(UUID.randomUUID().toString() + ".downloading")
         if (downloadFile.exists()) {
             log.info { "${downloadFile.name} already exists. Download skipped!" }
             return@withContext null
@@ -71,7 +69,7 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
         var totalBytesRead = 0
         val buffer = ByteArray(BUFFER_SIZE)
         useConnection.inputStream.use { input ->
-            FileOutputStream(downloadFile).use { output ->
+            downloadFile.toJavaFile().outputStream().use { output ->
                 var bytesRead = input.read(buffer)
                 while (bytesRead >= 0) {
                     output.write(buffer, 0, bytesRead)
@@ -85,7 +83,7 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
         downloadFile
     }
 
-    open suspend fun finalizeDownload(tempFile: File, baseName: String, metadata: DownloadMetadata): File = withContext(
+    open suspend fun finalizeDownload(tempFile: IFile, baseName: String, metadata: DownloadMetadata): IFile = withContext(
         Dispatchers.IO) {
         val extension = getExtension(tempFile, metadata)
             ?: throw UnsupportedFormatException("Downloaded file does not contain a supported file extension")
@@ -108,7 +106,7 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
 
 
 
-    open fun getExtension(outFile: File, metadata: DownloadMetadata): String? {
+    open fun getExtension(outFile: IFile, metadata: DownloadMetadata): String? {
         return mimeToExtension(metadata.mimeType)
             ?: outFile.getFileType()
     }
@@ -125,8 +123,8 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
         }
     }
 
-    fun File.getFileType(): String? {
-        val bytes = this.inputStream().use { it.readNBytes(12) } // les første 12 bytes
+    fun IFile.getFileType(): String? {
+        val bytes = this.openInputStream().use { it.readNBytes(12) } // les første 12 bytes
         return when {
             // JPEG: FF D8 FF
             bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() && bytes[2] == 0xFF.toByte() -> "jpg"
@@ -185,7 +183,7 @@ open class DownloadClient(val outDir: File, private val connectionFactory: Conne
 
     data class DownloadResult(
         val success: Boolean,
-        val result: File? = null,
+        val result: IFile? = null,
         val error: String? = null
     )
 

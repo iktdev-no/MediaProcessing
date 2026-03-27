@@ -1,11 +1,11 @@
 package no.iktdev.mediaprocessing.converter
 
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.classes.Dialog
-import java.io.File
 
 interface Exporter {
-    fun write(dialogs: List<Dialog>): MutableList<File>
-    fun writeSrt(dialogs: List<Dialog>): File
-    fun writeSmi(dialogs: List<Dialog>): File
-    fun writeVtt(dialogs: List<Dialog>): File
+    fun write(dialogs: List<Dialog>): MutableList<IFile>
+    fun writeSrt(dialogs: List<Dialog>): IFile
+    fun writeSmi(dialogs: List<Dialog>): IFile
+    fun writeVtt(dialogs: List<Dialog>): IFile
 }

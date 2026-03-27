@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import io.mockk.slot
 import io.mockk.verify
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.exfl.using
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.MockData.coverEvent
 import no.iktdev.mediaprocessing.MockData.encodeEvent
@@ -11,24 +11,14 @@ import no.iktdev.mediaprocessing.MockData.extractEvent
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
-import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.MigrateStatus
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
 
@@ -196,16 +186,16 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
 
         assertThat(storeTask.data.collection).isEqualTo("Baking Bread")
         assertThat(storeTask.data.videoContent).isNotNull()
-        assertThat(storeTask.data.videoContent?.storeUri.let { f -> File(f).name })
+        assertThat(storeTask.data.videoContent?.storeUri!!.let { f -> IFile(f).name })
             .isEqualTo("Baking Bread - S01E01 - Flour.mp4")
 
         assertThat(storeTask.data.subtitleContent).hasSize(2)
         assertThat(
             storeTask.data.subtitleContent!!
-                .map { File(it.storeUri).nameWithoutExtension }
+                .map { IFile(it.storeUri).nameWithoutExtension }
         ).containsOnly("Baking Bread - S01E01 - Flour")
 
-        assertThat(File(storeTask.data.coverContent!!.storeUri).name)
+        assertThat(IFile(storeTask.data.coverContent!!.storeUri).name)
             .isEqualTo("Baking Bread.jpg")
 
 
@@ -294,7 +284,7 @@ class MigrateCreateStoreTaskCreateListenerTest : TestBase() {
         """
     )
     fun createMigrateForConvertOnly() {
-        val workFolder = File("build").using("subby", "sub", "eng")
+        val workFolder = IFile("build").using("subby", "sub", "eng")
 
         val started = StartProcessingEvent(
             data = StartData(

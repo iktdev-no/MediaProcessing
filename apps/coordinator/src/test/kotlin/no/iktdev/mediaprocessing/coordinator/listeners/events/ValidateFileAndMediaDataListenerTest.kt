@@ -10,17 +10,10 @@ import no.iktdev.mediaprocessing.MockData.dummyVideoStream
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.defaultMediaStreamParsedEvent
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
-import no.iktdev.files.IFile
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.io.File
 
 class ValidateFileAndMediaDataListenerTest: TestBase() {
 
@@ -179,14 +172,7 @@ class ValidateFileAndMediaDataListenerTest: TestBase() {
         Returneres Ok med eventuelle warnings
 """)
     fun testValidationOk() {
-        IFile.factory = { path ->
-            when (path) {
-                "build/test-intermediate/okfile.mkv" ->
-                    FakeFile(path, exists = true, size = 1000)
-                else ->
-                    FakeFile(path, exists = false, size = 0)
-            }
-        }
+        FakeFile("build/test-intermediate/okfile.mkv", exists = true, size = 1000)
 
 
         val start = StartProcessingEvent(

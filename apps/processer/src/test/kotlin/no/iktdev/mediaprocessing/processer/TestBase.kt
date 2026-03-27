@@ -21,13 +21,12 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.Segment
 import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import java.io.File
 
 open class TestBase {
     val workFolder = FakeFile("build").using("tests")
 
     val mockExecConfig = ExecutablesConfig(ffmpeg = "ffmpeg", ffprobe = "ffprobe")
-    val logDirectory = File(workFolder.parent, "logs")
+    val logDirectory = workFolder.parentFile.using("logs")
 
     val mockFfProvider = object : FfProvider {
         override fun getExecutableFfprobe(): String {

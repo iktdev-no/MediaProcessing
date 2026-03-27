@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.parse
 
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import java.io.File
 
 class SerieParsing : BaseParsing() {
 
@@ -19,7 +19,7 @@ class SerieParsing : BaseParsing() {
     // "Show - 01 [1080p]"
     private val animeEpisodeRegex = Regex("""(?<!\d)(\d{1,3})(?:v\d+)?(?=[\s\]\-]|$)""", RegexOption.IGNORE_CASE)
 
-    override fun extractEpisodeInfo(file: File): MediaParsedInfoEvent.ParsedData.EpisodeInfo {
+    override fun extractEpisodeInfo(file: IFile): MediaParsedInfoEvent.ParsedData.EpisodeInfo {
         val raw = file.nameWithoutExtension
 
         // -----------------------------------------------------
@@ -107,7 +107,7 @@ class SerieParsing : BaseParsing() {
         )
     }
 
-    override fun extractCollection(file: File): String {
+    override fun extractCollection(file: IFile): String {
 
         val raw = file.nameWithoutExtension
 
@@ -133,7 +133,7 @@ class SerieParsing : BaseParsing() {
         return cleaned.fullTrim().ifBlank { file.parentFile.name }
     }
 
-    override fun extractFilename(file: File): String {
+    override fun extractFilename(file: IFile): String {
 
         val collection = extractCollection(file)
         val ep = extractEpisodeInfo(file)
@@ -156,7 +156,7 @@ class SerieParsing : BaseParsing() {
         }.trim()
     }
 
-    override fun extractTitles(file: File): List<String> {
+    override fun extractTitles(file: IFile): List<String> {
 
         val collection = extractCollection(file)
 

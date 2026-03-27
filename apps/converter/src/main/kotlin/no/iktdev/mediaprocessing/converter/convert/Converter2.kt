@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.converter.convert
 
+import no.iktdev.files.IFile
 import no.iktdev.library.subtitle.Configuration
 import no.iktdev.library.subtitle.Syncro
 import no.iktdev.library.subtitle.classes.Dialog
@@ -9,7 +10,6 @@ import no.iktdev.mediaprocessing.converter.ConverterEnv
 import no.iktdev.mediaprocessing.converter.ConverterEnvironment
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleFormat
-import java.io.File
 
 class Converter2(
     env: ConverterEnvironment,
@@ -17,7 +17,7 @@ class Converter2(
 ): Converter(env = env, listener = listener) {
 
     @Throws(FileUnavailableException::class)
-    override fun getSubtitleReader(useFile: File): BaseReader? {
+    override fun getSubtitleReader(useFile: IFile): BaseReader? {
         if (!env.canRead(useFile)) {
             throw FileUnavailableException("Can't open file for reading..")
         }
@@ -30,7 +30,7 @@ class Converter2(
 
     @Throws(FileUnavailableException::class, FileIsNullOrEmpty::class)
     override suspend fun convert(data: ConvertTask.Data) {
-        val file = File(data.inputFile)
+        val file = IFile(data.inputFile)
         listener.onStarted(file.absolutePath)
         try {
             Configuration.exportJson = true
@@ -40,12 +40,12 @@ class Converter2(
             val filtered = read.filter { !it.ignore && it.type !in listOf(DialogType.SIGN_SONG, DialogType.CAPTION) }
             val syncOrNotSync = syncDialogs(filtered)
 
-            val exporter = env.createExporter(file, File(data.outputDirectory), data.outputFileName)
+            val exporter = env.createExporter(file, IFile(data.outputDirectory), data.outputFileName)
 
             val outFiles = if (data.formats.isEmpty()) {
                 exporter.write(syncOrNotSync)
             } else {
-                val exported = mutableListOf<File>()
+                val exported = mutableListOf<IFile>()
                 if (data.formats.contains(SubtitleFormat.SRT)) {
                     exported.add(exporter.writeSrt(syncOrNotSync))
                 }

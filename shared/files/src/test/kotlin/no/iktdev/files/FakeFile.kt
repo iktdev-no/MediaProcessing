@@ -1,7 +1,11 @@
 package no.iktdev.files
 
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.PrintWriter
+import java.nio.file.FileAlreadyExistsException
+import java.nio.file.FileSystemException
 import java.nio.file.Paths
 
 class FakeFile(
@@ -10,7 +14,8 @@ class FakeFile(
     private var size: Long = 0,
     private var directory: Boolean = false,
     private var content: String = "",
-    private var modified: Long = System.currentTimeMillis()
+    private var modified: Long = System.currentTimeMillis(),
+    private var writable: Boolean = true
 ) : IFile {
 
     init {
@@ -61,6 +66,9 @@ class FakeFile(
     override fun length(): Long = ref().size
     override fun readText(): String = ref().content
     override fun lastModified(): Long = ref().modified
+    override fun canRead(): Boolean {
+        return true
+    }
 
     override fun writeText(text: String) {
         val r = ref()
@@ -91,6 +99,11 @@ class FakeFile(
         r.exists = true
         r.directory = true
         return true
+    }
+
+    override fun setWritable(state: Boolean): Boolean {
+        val r = ref()
+        return r.setWritable(state)
     }
 
     override fun mkdirs(): Boolean {
@@ -175,6 +188,100 @@ class FakeFile(
 
         return true
     }
+
+    override fun openInputStream(): InputStream {
+        val r = ref()
+        val bytes = r.content.toByteArray()
+        return object : InputStream() {
+            var pos = 0
+
+            override fun read(): Int {
+                return if (pos < bytes.size) {
+                    bytes[pos++].toInt() and 0xFF
+                } else {
+                    -1
+                }
+            }
+
+            override fun read(b: ByteArray, off: Int, len: Int): Int {
+                if (pos >= bytes.size) return -1
+                val toCopy = minOf(len, bytes.size - pos)
+                System.arraycopy(bytes, pos, b, off, toCopy)
+                pos += toCopy
+                return toCopy
+            }
+        }
+    }
+
+    override fun openOutputStream(): OutputStream {
+        val r = ref()
+        r.exists = true
+
+        return object : OutputStream() {
+            private val buffer = StringBuilder()
+
+            override fun write(b: Int) {
+                buffer.append(b.toChar())
+            }
+
+            override fun write(b: ByteArray, off: Int, len: Int) {
+                buffer.append(String(b, off, len))
+            }
+
+            override fun flush() {
+                val newContent = buffer.toString()
+                r.content += newContent
+                r.size = r.content.toByteArray().size.toLong()
+                r.modified = System.currentTimeMillis()
+            }
+
+            override fun close() {
+                flush()
+            }
+        }
+    }
+
+    override fun copyTo(dest: IFile, overwrite: Boolean, bufferSize: Int): IFile {
+        if (!this.exists()) {
+            throw RuntimeException("${this.absolutePath} The source file doesn't exist.")
+        }
+
+        if (dest.exists()) {
+            if (!overwrite)
+                throw FileAlreadyExistsException(
+                    this.absolutePath,
+                    dest.absolutePath,
+                    "The destination file already exists."
+                )
+            else if (!dest.delete())
+                throw FileAlreadyExistsException(
+                    this.absolutePath,
+                    dest.absolutePath,
+                    "Tried to overwrite the destination, but failed to delete it."
+                )
+        }
+
+        if (this.isDirectory()) {
+            if (!dest.mkdirs())
+                throw FileSystemException(this.absolutePath, dest.absolutePath, "Failed to create target directory.")
+        } else {
+            dest.parentFile.mkdirs()
+
+            this.openInputStream().use { input ->
+                dest.openOutputStream().use { output ->
+                    val buffer = ByteArray(bufferSize)
+                    var bytesRead: Int
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
+        }
+
+        return dest
+    }
+
+
 
     override fun equals(other: Any?): Boolean {
         return if (other is FakeFile) {

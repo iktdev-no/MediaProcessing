@@ -6,13 +6,12 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
-import no.iktdev.mediaprocessing.shared.common.notExist
 import org.springframework.stereotype.Component
-import java.io.File
 import java.util.*
 
 @Component
@@ -73,7 +72,7 @@ class DownloadCoverTaskListener(
         return CoverDownloadResultEvent(null, status, error = message)
     }
 
-    open fun getDownloadClient(subfolder: String? = null): DownloadClient {
+    fun getDownloadClient(subfolder: String? = null): DownloadClient {
         val rootDir = coordinatorEnv.intermediateFolder.apply { mkdirs() }
 
         val targetDir =
@@ -87,7 +86,7 @@ class DownloadCoverTaskListener(
     }
 
 
-    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv, val outputDir: File) : DownloadClient(
+    class DefaultDownloadClient(private val coordinatorEnv: CoordinatorEnv, val outputDir: IFile) : DownloadClient(
         outDir = outputDir,
         connectionFactory = DefaultConnectionFactory(),) {
         override fun onCreate() {

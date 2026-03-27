@@ -3,10 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import io.mockk.verify
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.exfl.using
-import no.iktdev.files.FakeFile
-import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.io.File
 
 class MediaCreateConvertTaskListenerTest : TestBase() {
 
@@ -31,7 +28,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     """
     )
     fun verifyConvertTaskCreatedOnValidHistory() {
-        val tempFile = File.createTempFile("test", ".srt")
+        val tempFile = IFile("build").using("test.srt")
         tempFile.writeText("dummy subtitle")
 
         val startEvent = StartProcessingEvent(
@@ -69,7 +66,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     """
     )
     fun verifyNullWhenNoStartEvent() {
-        val tempFile = File.createTempFile("test", ".srt")
+        val tempFile = IFile("build").using("test.srt")
         val extractEvent = ProcesserExtractResultEvent(
             status = TaskStatus.Completed,
             data = ProcesserExtractResultEvent.ExtractResult(
@@ -95,7 +92,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     """
     )
     fun verifyNullWhenOperationNotConvert() {
-        val tempFile = File.createTempFile("test", ".srt")
+        val tempFile = IFile("build").using("test.srt")
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = tempFile.absolutePath,
@@ -128,7 +125,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     """
     )
     fun verifyNullWhenStatusNotCompleted() {
-        val tempFile = File.createTempFile("test", ".srt")
+        val tempFile = IFile("build").using("test.srt")
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = tempFile.absolutePath,
@@ -190,9 +187,8 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     """
     )
     fun verifyConvertCreatedIfOnlyConvert() {
-        IFile.factory = { path -> FakeFile(path, exists = true) }
 
-        val inFile = File("inbox").using("eng", "nonexistent.srt")
+        val inFile = IFile("inbox").using("eng", "nonexistent.srt")
         val startEvent = StartProcessingEvent(
             data = StartData(
                 fileUri = inFile.absolutePath,
@@ -226,11 +222,6 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
 """
     )
     fun verifyConvertTaskCreatedWithMockedFileExists() {
-
-        // Override IFile.factory for denne testen
-        IFile.factory = { path ->
-            FakeFile(path, exists = true)
-        }
 
         val startEvent = StartProcessingEvent(
             data = StartData(
@@ -266,7 +257,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
     """
     )
     fun verifyDirectFlowWithoutExtractEvent() {
-        val inFile = File("inbox").using("eng", "file.srt")
+        val inFile = IFile("inbox").using("eng", "file.srt")
 
         val startEvent = StartProcessingEvent(
             data = StartData(
@@ -293,7 +284,7 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
 """
     )
     fun verifyDirectFlowInvalidExtension() {
-        val inFile = File("inbox").using("eng", "file.txt")
+        val inFile = IFile("inbox").using("eng", "file.txt")
 
         val startEvent = StartProcessingEvent(
             data = StartData(
@@ -309,7 +300,6 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
         verify(exactly = 0) { TaskStore.persist(any()) }
     }
 
-    fun WorkingFolder() = File("build").using("test-run")
 
 
     @Test
@@ -322,7 +312,9 @@ class MediaCreateConvertTaskListenerTest : TestBase() {
 """
     )
     fun verifyNormalFlowWithMultipleOperations() {
-        val tempFile = File.createTempFile("test", ".srt").apply { writeText("dummy") }
+        val tempFile = IFile("build").using("test.srt").apply {
+            writeText("dummy")
+        }
 
         val startEvent = StartProcessingEvent(
             data = StartData(

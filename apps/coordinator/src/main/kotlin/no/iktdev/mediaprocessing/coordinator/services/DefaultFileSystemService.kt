@@ -1,14 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
-import org.springframework.stereotype.Component
-import java.io.File
 import java.nio.file.Files
 
 class DefaultFileSystemService : FileSystemService {
 
-    override fun copy(source: File, destination: File) {
+    override fun copy(source: IFile, destination: IFile) {
         if (!source.exists()) {
             throw FileServiceException.SourceMissing(source)
         }
@@ -20,20 +19,20 @@ class DefaultFileSystemService : FileSystemService {
         }
     }
 
-    override fun verifyIdentical(source: File, destination: File) {
-        val mismatch = Files.mismatch(source.toPath(), destination.toPath())
+    override fun verifyIdentical(original: IFile, target: IFile) {
+        val mismatch = Files.mismatch(original.toPath(), target.toPath())
         if (mismatch != -1L) {
-            throw FileServiceException.VerificationFailed(source, destination)
+            throw FileServiceException.VerificationFailed(original, target)
         }
     }
 
-    override fun delete(file: File) {
+    override fun delete(file: IFile) {
         file.delete()
     }
 
     override fun copyWithProgress(
-        source: File,
-        destination: File,
+        source: IFile,
+        destination: IFile,
         bufferSize: Int,
         onProgress: (copied: Long, total: Long) -> Unit
     ) {
@@ -45,8 +44,8 @@ class DefaultFileSystemService : FileSystemService {
         var copied = 0L
 
         try {
-            source.inputStream().use { input ->
-                destination.outputStream().use { output ->
+            source.openInputStream().use { input ->
+                destination.openOutputStream().use { output ->
                     val buffer = ByteArray(bufferSize)
                     while (true) {
                         val read = input.read(buffer)

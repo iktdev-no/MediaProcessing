@@ -2,11 +2,10 @@ package no.iktdev.mediaprocessing.processer.controller
 
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Progress
-import no.iktdev.mediaprocessing.ffmpeg.decoder.FfmpegDecodedProgress
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.io.File
 import java.util.*
 
 @RestController
@@ -28,7 +27,7 @@ class StateController(
 
     @GetMapping("/log")
     fun getLog(@RequestParam path: String): ResponseEntity<String> {
-        val file = File(path)
+        val file = IFile(path)
         log.info { "Attempting to find file $path" }
         return if (file.exists()) {
             log.info { "Found file $file" }

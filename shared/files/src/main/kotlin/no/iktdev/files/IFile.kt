@@ -1,6 +1,8 @@
 package no.iktdev.files
 
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import java.io.PrintWriter
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -20,7 +22,16 @@ interface IFile {
     fun length(): Long
     fun delete(): Boolean
 
+    fun canRead(): Boolean
+
     fun listFiles(): List<IFile>
+
+    fun listFiles(filter: (parent: IFile, name: String) -> Boolean): List<IFile> {
+        return this.listFiles()
+            .filter { child -> filter(this, child.name) }
+    }
+
+    fun toPath(): Path = Paths.get(this.absolutePath)
 
     fun toJavaFile(): File
 
@@ -31,6 +42,8 @@ interface IFile {
 
     fun mkdirs(): Boolean
     fun mkdir(): Boolean
+
+    fun setWritable(state: Boolean): Boolean
 
     companion object {
         // Default factory – can be overridden in tests
@@ -57,4 +70,12 @@ interface IFile {
 
     fun renameTo(dest: IFile): Boolean
 
+    fun notExist(): Boolean {
+        return !exists()
+    }
+
+    fun copyTo(dest: IFile, overwrite: Boolean = false, bufferSize: Int = DEFAULT_BUFFER_SIZE): IFile
+
+    fun openInputStream(): InputStream
+    fun openOutputStream(): OutputStream
 }

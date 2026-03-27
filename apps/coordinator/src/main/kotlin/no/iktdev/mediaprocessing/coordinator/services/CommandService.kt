@@ -1,14 +1,13 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
 import mu.KotlinLogging
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.dto.requests.StartProcessRequest
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.notExist
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Service
-import java.io.File
 import java.util.*
 
 @Service
@@ -17,7 +16,7 @@ class CommandService {
 
     fun startProcess(request: StartProcessRequest): StartResult {
         return try {
-            val file = File(request.fileUri)
+            val file = IFile(request.fileUri)
             if (file.notExist()) {
                 throw IllegalArgumentException("File does not exists at ${request.fileUri}")
             }

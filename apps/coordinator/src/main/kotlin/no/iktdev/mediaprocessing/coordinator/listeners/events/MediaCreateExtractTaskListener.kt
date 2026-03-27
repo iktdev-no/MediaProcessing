@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.ffmpeg.dsl.SubtitleCodec
@@ -15,8 +16,6 @@ import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
-import java.io.File
-import java.util.*
 
 @Component
 class MediaCreateExtractTaskListener(): EventListener() {
@@ -51,7 +50,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
 
 
         val preparedFileUri = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
-        val preparedFile = File(preparedFileUri)
+        val preparedFile = IFile(preparedFileUri)
 
 
         val entries = selectedStreams.mapNotNull { (idx, stream )->
@@ -64,7 +63,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
         }
 
         val createdEvent = ProcesserExtractTaskCreatedEvent(
-            taskIds = tasks.map { it -> it.taskId }
+            taskIds = tasks.map { it.taskId }
         ).derivedOf(event)
 
         tasks.forEach { task ->
@@ -75,7 +74,7 @@ class MediaCreateExtractTaskListener(): EventListener() {
         return createdEvent
     }
 
-    fun toSubtitleArgumentData(index: Int, inputFile: File, outputFolderName: String, stream: SubtitleStream): ExtractSubtitleData? {
+    fun toSubtitleArgumentData(index: Int, inputFile: IFile, outputFolderName: String, stream: SubtitleStream): ExtractSubtitleData? {
         val codec = SubtitleCodec.getCodec(stream.codec_name) ?: return null
         val extension = codec.getExtension()
 

@@ -8,11 +8,7 @@ import no.iktdev.mediaprocessing.MockData.extractEvent
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -36,31 +32,28 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun success1() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(parsed)
+            .addToHistory()
 
         val encode = encodeEvent("/tmp/video.mp4", parsed)
+            .addToHistory()
         val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
         val convert = convertEvent(language = "en", baseName = "sub1", outputFiles = listOf("/tmp/sub1.vtt"), derivedFrom = extract.last())
+            .addToHistory()
         val cover = coverEvent("/tmp/cover.jpg", metadata.last())
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            *metadata.toTypedArray(),
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-            *convert.toTypedArray(),
-            *cover.toTypedArray(),
-        )
-        eventStore.setHistory(history)
-        val result = listener.onEvent(history.last(), history)
+        val result = listener.onEvent(cover.last(), history)
 
         assertThat(result).isInstanceOf(CollectedEvent::class.java)
     }
@@ -88,25 +81,21 @@ class CollectEventsListenerTest : TestBase() {
                 )
             )
         }.newReferenceId()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(parsed).first()
+            .addToHistory()
         val encode = encodeEvent("/tmp/video.mp4", parsed)
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            metadata,
-            *encode.toTypedArray(),
-        )
-        eventStore.setHistory(history)
-
-        val result = listener.onEvent(history.last(), history)
+        val result = listener.onEvent(encode.last(), history)
 
         assertThat(result).isNull()
     }
@@ -132,31 +121,26 @@ class CollectEventsListenerTest : TestBase() {
                 )
             )
         }.newReferenceId()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(parsed)
+            .addToHistory()
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = parsed
         )
-
-        val history = listOf(
-            started,
-            parsed,
-            *metadata.toTypedArray(),
-            *convert.toTypedArray(),
-        )
-        eventStore.setHistory(history)
+            .addToHistory()
 
         val result = listener.onEvent(history.last(), history)
-
         assertThat(result).isInstanceOf(CollectedEvent::class.java)
     }
 
@@ -174,23 +158,20 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun failure1() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val encode = encodeEvent("/tmp/video.mp4", parsed)
-        val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-        )
-        eventStore.setHistory(history)
+        val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
 
         val result = listener.onEvent(history.last(), history)
         assertThat(result).isNull()
@@ -207,27 +188,26 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun failure2() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(parsed).first()
-        val encode = encodeEvent("/tmp/video.mp4", parsed)
-        val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
-        val convert = convertEvent(language = "en", baseName = "sub1", outputFiles = listOf("/tmp/sub1.vtt"), derivedFrom = extract.last())
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            metadata,
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-            *convert.toTypedArray(),
-        )
-        eventStore.setHistory(history)
+        val encode = encodeEvent("/tmp/video.mp4", parsed)
+            .addToHistory()
+
+        val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
+
+        val convert = convertEvent(language = "en", baseName = "sub1", outputFiles = listOf("/tmp/sub1.vtt"), derivedFrom = extract.last())
+            .addToHistory()
 
         val result = listener.onEvent(history.last(), history)
 
@@ -245,30 +225,29 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun failure3() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(parsed)
+            .addToHistory()
 
         val encode = encodeEvent("/tmp/video.mp4", parsed, TaskStatus.Failed)
-        val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
-        val convert = convertEvent(language = "en", baseName = "sub1", outputFiles = listOf("/tmp/sub1.vtt"), derivedFrom = extract.last())
-        val cover = coverEvent("/tmp/cover.jpg", metadata.last())
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            *metadata.toTypedArray(),
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-            *convert.toTypedArray(),
-            *cover.toTypedArray(),
-        )
-        eventStore.setHistory(history)
+        val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
+
+        val convert = convertEvent(language = "en", baseName = "sub1", outputFiles = listOf("/tmp/sub1.vtt"), derivedFrom = extract.last())
+            .addToHistory()
+
+        val cover = coverEvent("/tmp/cover.jpg", metadata.last())
+            .addToHistory()
 
         val result = listener.onEvent(history.last(), history)
 
@@ -289,18 +268,15 @@ class CollectEventsListenerTest : TestBase() {
         val started = defaultStartEvent().let { ev ->
             ev.copy(data = ev.data.copy(operation = setOf(OperationType.Encode)))
         }.newReferenceId()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-        )
-        eventStore.setHistory(history)
 
         val result = listener.onEvent(history.last(), history)
 
@@ -318,36 +294,35 @@ class CollectEventsListenerTest : TestBase() {
     )
     fun summarizerDoesNotGoHaywire() {
         val started = defaultStartEvent()
+            .addToHistory()
 
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
         ).derivedOf(started)
+            .addToHistory()
 
         val metadata = metadataEvent(parsed)
+            .addToHistory()
+
         val encode = encodeEvent("/tmp/video.mp4", parsed)
+            .addToHistory()
+
         val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
+            .addToHistory()
+
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = extract.last()
         )
+            .addToHistory()
+
         val cover = coverEvent("/tmp/cover.jpg", metadata.last())
+            .addToHistory()
 
-        val history = listOf(
-            started,
-            parsed,
-            *metadata.toTypedArray(),
-            *encode.toTypedArray(),
-            *extract.toTypedArray(),
-            *convert.toTypedArray(),
-            *cover.toTypedArray(),
-        )
-
-        // Gi summarizeren full historikk
-        eventStore.setHistory(history)
 
         // Første kjøring: skal produsere CollectedEvent
         val first = listener.onEvent(history.last(), history)
@@ -383,13 +358,15 @@ class CollectEventsListenerTest : TestBase() {
             )
         ).newReferenceId()
             .addToHistory()
+
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = started
-        ).addToHistory()
-        eventStore.setHistory(history)
+        )
+            .addToHistory()
+
 
         val result = listener.onEvent(convert.last(), history)
         assertNotNull(result)
@@ -413,13 +390,15 @@ class CollectEventsListenerTest : TestBase() {
             )
         ).newReferenceId()
             .addToHistory()
+
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = started
-        ).addToHistory()
-        eventStore.setHistory(history)
+        )
+            .addToHistory()
+
 
         val result = listener.onEvent(convert.last(), history)
         assertNotNull(result)
@@ -444,13 +423,14 @@ class CollectEventsListenerTest : TestBase() {
             )
         ).newReferenceId()
             .addToHistory()
+
         val convert = convertEvent(
             language = "en",
             baseName = "sub1",
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = started
-        ).addToHistory()
-        eventStore.setHistory(history)
+        )
+            .addToHistory()
 
         val result = listener.onEvent(convert.last(), history)
         assertNull(result)
