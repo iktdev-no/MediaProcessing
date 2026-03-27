@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent

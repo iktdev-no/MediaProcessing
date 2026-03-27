@@ -7,10 +7,7 @@ import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
-import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
-import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
-import no.iktdev.mediaprocessing.shared.common.projection.MigrateContentProject
 import no.iktdev.mediaprocessing.shared.common.projection.SummaryProjection
 import org.springframework.stereotype.Component
 
