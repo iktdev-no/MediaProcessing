@@ -23,6 +23,7 @@ interface IFile {
     fun delete(): Boolean
 
     fun canRead(): Boolean
+    fun canWrite(): Boolean
 
     fun listFiles(): List<IFile>
 

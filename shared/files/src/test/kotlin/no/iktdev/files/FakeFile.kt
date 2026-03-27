@@ -70,6 +70,10 @@ class FakeFile(
         return true
     }
 
+    override fun canWrite(): Boolean {
+        return true
+    }
+
     override fun writeText(text: String) {
         val r = ref()
         r.exists = true

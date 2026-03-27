@@ -97,6 +97,7 @@ class UseFile(path: String) : IFile {
     }
 
     override fun canRead() = file.canRead()
+    override fun canWrite() = file.canWrite()
 
     override fun copyTo(dest: IFile, overwrite: Boolean, bufferSize: Int): IFile {
         file.copyTo(dest.toJavaFile(), overwrite, bufferSize)
