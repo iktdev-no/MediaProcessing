@@ -11,7 +11,7 @@ enum class FileAccessMode {
     NO_ACCESS
 }
 
-sealed class IFile {
+sealed class IUiFile {
     abstract val name: String
     abstract val uri: String
     abstract val created: Long
@@ -28,7 +28,7 @@ data class File(
     override val actions: FileActions,
     val size: Long,
     override val accessMode: FileAccessMode
-) : IFile() {
+) : IUiFile() {
     override val type = FileType.File
 }
 
@@ -41,7 +41,7 @@ data class Folder(
     )),
     override val accessMode: FileAccessMode
 
-) : IFile() {
+) : IUiFile() {
     override val type = FileType.Folder
 }
 

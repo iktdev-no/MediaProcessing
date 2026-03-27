@@ -2,7 +2,8 @@ package no.iktdev.mediaprocessing.ui.service
 
 import no.iktdev.mediaprocessing.ui.MediaConfig
 import no.iktdev.mediaprocessing.ui.dto.file.*
-import no.iktdev.mediaprocessing.ui.notExist
+import no.iktdev.files.IFile
+
 import org.springframework.stereotype.Service
 import java.io.File
 
@@ -11,13 +12,13 @@ class ExplorerService(
     val mediaConfig: MediaConfig
 ) {
 
-    fun listHome(): List<IFile> =
+    fun listHome(): List<IUiFile> =
         listAt(mediaConfig.inbox)
 
-    fun listAt(path: String): List<IFile> {
-        val dir = File(path)
+    fun listAt(path: String): List<IUiFile> {
+        val dir = IFile(path)
 
-        if (!dir.exists() || !dir.isDirectory) {
+        if (!dir.exists() || !dir.isDirectory()) {
             return emptyList()
         }
 
@@ -29,17 +30,17 @@ class ExplorerService(
     }
 
 
-    fun pathToFile(path: String): IFile? {
-        val file = File(path)
+    fun pathToFile(path: String): IUiFile? {
+        val file = IFile(path)
         if (file.notExist())
             return null
         return file.toFileInfo()
     }
 
-    fun File.toFileInfo(): IFile {
+    fun IFile.toFileInfo(): IUiFile {
         val file = this
         val access = determineAccessMode(file)
-        return if (file.isDirectory) {
+        return if (file.isDirectory()) {
             Folder(
                 name = file.name,
                 uri = file.absolutePath,
@@ -55,7 +56,7 @@ class ExplorerService(
                 name = file.name,
                 uri = file.absolutePath,
                 created = file.lastModified(),
-                extension = file.extension,
+                extension = file.extension(),
                 actions = FileActions(
                     mediaActions = getMediaActionsForFile(file),
                     fileActions = getFileActions(file, access),
@@ -66,11 +67,11 @@ class ExplorerService(
         }
     }
 
-    fun getFileActions(file: File, accessMode: FileAccessMode): List<FileAction> {
+    fun getFileActions(file: IFile, accessMode: FileAccessMode): List<FileAction> {
         val actions = mutableListOf<FileAction>()
         if (accessMode == FileAccessMode.NO_ACCESS) return actions
 
-        if (file.isDirectory) {
+        if (file.isDirectory()) {
             actions.add(FileAction(id = FileActionType.Open, requiresConfirmation = false))
         }
         if (accessMode == FileAccessMode.READ_WRITE) {
@@ -81,8 +82,8 @@ class ExplorerService(
     }
 
 
-    fun getMediaActionsForFile(file: File): List<MediaAction> {
-        val ext = file.extension.lowercase()
+    fun getMediaActionsForFile(file: IFile): List<MediaAction> {
+        val ext = file.extension().lowercase()
 
         // 1. Subtitle files → Convert
         val subtitleExt = setOf("srt", "ass", "smi", "vtt")
@@ -111,7 +112,7 @@ class ExplorerService(
         return emptyList()
     }
 
-    fun determineAccessMode(file: File): FileAccessMode {
+    fun determineAccessMode(file: IFile): FileAccessMode {
         if (!file.exists()) {
             return FileAccessMode.NO_ACCESS
         }

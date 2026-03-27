@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.ui.controller
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.ui.MediaConfig
-import no.iktdev.mediaprocessing.ui.dto.file.IFile
+import no.iktdev.mediaprocessing.ui.dto.file.IUiFile
 import no.iktdev.mediaprocessing.ui.dto.requests.DeleteRequest
 import no.iktdev.mediaprocessing.ui.service.ExplorerService
 import org.springframework.http.ResponseEntity
@@ -19,12 +19,12 @@ class FileExploreController(
 
 
     @GetMapping("/home")
-    fun home(): ResponseEntity<List<IFile>> {
+    fun home(): ResponseEntity<List<IUiFile>> {
         return ResponseEntity.ok(explorer.listHome())
     }
 
     @GetMapping("/roots")
-    fun roots(): ResponseEntity<List<IFile>> {
+    fun roots(): ResponseEntity<List<IUiFile>> {
         return ResponseEntity.ok(
             listOfNotNull(
                 explorer.pathToFile(mediaConfig.inbox),
@@ -36,7 +36,7 @@ class FileExploreController(
     }
 
     @GetMapping("/explore")
-    fun list(@RequestParam path: String): ResponseEntity<List<IFile>> {
+    fun list(@RequestParam path: String): ResponseEntity<List<IUiFile>> {
         val file = File(path)
         if (!file.exists() || file.isFile) {
             return ResponseEntity.notFound().build()
