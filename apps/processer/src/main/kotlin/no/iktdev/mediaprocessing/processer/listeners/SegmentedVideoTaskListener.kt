@@ -31,6 +31,9 @@ class SegmentedVideoTaskListener(
 ) : VideoTaskListener(TaskType.CPU_INTENSIVE, executableConfig) {
     private val log = KotlinLogging.logger {}
 
+    init {
+        setUseSharedBusyState(true)
+    }
 
     override fun getWorkerId() =
         "${this::class.java.simpleName}-${taskType}-${UUID.randomUUID()}"

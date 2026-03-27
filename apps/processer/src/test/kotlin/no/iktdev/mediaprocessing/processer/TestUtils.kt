@@ -8,16 +8,13 @@ import no.iktdev.eventi.registry.TaskListenerRegistry
 import no.iktdev.eventi.registry.TaskTypeRegistry
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskReporter
-import no.iktdev.exfl.using
 import no.iktdev.mediaprocessing.processer.config.DirectoryProperties
-import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import java.io.File
 import java.lang.reflect.Field
 
 object TestUtils {
