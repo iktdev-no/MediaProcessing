@@ -11,6 +11,7 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.processer.config.DirectoryProperties
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
+import no.iktdev.mediaprocessing.processer.listeners.VideoTaskListener
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals

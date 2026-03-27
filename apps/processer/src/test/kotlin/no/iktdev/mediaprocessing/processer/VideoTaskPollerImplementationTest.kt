@@ -16,6 +16,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.listeners.LinearVideoTaskListener
 import no.iktdev.mediaprocessing.processer.listeners.SegmentedVideoTaskListener
+import no.iktdev.mediaprocessing.processer.listeners.VideoTaskListener
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
@@ -93,7 +94,7 @@ class VideoTaskPollerImplementationTest : TestBase() {
             MockTestTask::class.java
         )
         store.wipe()
-
+        VideoTaskListener.removeListeners()
         segmented = SegmentedVideoTaskListenerOverride(mockExecConfig)
         linear = LinearVideoTaskListenerOverride(mockExecConfig)
     }
