@@ -33,6 +33,11 @@ class TaskController(
         return coordinator.getPagedTasks(query)
     }
 
+    @GetMapping("/{taskId}/cancel")
+    fun cancelTask(@PathVariable taskId: UUID): Mono<Boolean> {
+        return coordinator.cancelTask(taskId)
+    }
+
     @GetMapping("/{taskId}/reset")
     fun resetTask(@PathVariable taskId: UUID): Mono<ResponseEntity<ResetTaskResponse>> {
         return coordinator.resetTask(taskId)

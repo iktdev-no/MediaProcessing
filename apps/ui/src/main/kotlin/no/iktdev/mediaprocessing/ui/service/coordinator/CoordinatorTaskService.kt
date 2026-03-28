@@ -71,4 +71,11 @@ class CoordinatorTaskService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<List<String>>() {})
     }
+
+    fun cancelTask(taskId: UUID): Mono<Boolean> {
+        return coordinatorWebClient.get()
+            .uri("/processer/tasks/${taskId}/cancel")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<Boolean>() {})
+    }
 }

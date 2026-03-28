@@ -9,12 +9,12 @@ import reactor.core.publisher.Mono
 import java.util.UUID
 
 @RestController
-@RequestMapping("/processer/cancel")
-class CancelController(
+@RequestMapping("/processer/tasks")
+class TasksController(
     private val processerClient: ProcesserClient
 ) {
 
-    @GetMapping("/{taskId}")
+    @GetMapping("/{taskId}/cancel")
     fun cancel(@PathVariable taskId: UUID): Mono<Boolean> {
         return processerClient.cancelTask(taskId)
     }
