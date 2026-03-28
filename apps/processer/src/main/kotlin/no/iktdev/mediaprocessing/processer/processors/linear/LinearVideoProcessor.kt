@@ -34,7 +34,7 @@ class LinearVideoProcessor(
         val cachedOut = noAudioMidfix.parentFile.using(
             "${noAudioMidfix.nameWithoutExtension}.work.${noAudioMidfix.extension()}"
         )
-
+        log.debug("WorkFile: ${cachedOut.absolutePath} :: Output: ${noAudioMidfix.absolutePath}")
         if (cachedOut.exists()) {
             log.info("Found existing work file ${cachedOut.absolutePath}, as this is incomplete and we are restarting, this will be deleted")
             val deleted = cachedOut.delete()
