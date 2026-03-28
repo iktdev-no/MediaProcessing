@@ -15,6 +15,11 @@ class VideoEncodeRunner(
         val dsl = ffmpeg {
             fromInstructions(videoInstructions)
             outputDirectory(outputDirectory)
+            output(outputFile.name) {
+                progress = true
+                useWorkFile = true
+                overwrite = videoInstructions.output?.overwrite ?: false
+            }
         }
 
         ffmpegInstance.run(dsl)
