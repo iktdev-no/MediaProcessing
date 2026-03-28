@@ -3,7 +3,9 @@ package no.iktdev.mediaprocessing.coordinator
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
+import java.util.UUID
 
 @Component
 class ProcesserClient(
@@ -22,6 +24,13 @@ class ProcesserClient(
                             .body(body)
                     }
             }
+
+    fun cancelTask(taskId: UUID): Mono<Boolean> =
+        processerWebClient.get()
+            .uri("/tasks/$taskId/cancel")
+            .retrieve()
+            .bodyToMono(Boolean::class.java)
+
 
 
     fun ping(): Mono<String> =

@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.ui.service.coordinator
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import java.util.UUID
 
 @Service
 class CoordinatorProcesserPassthroughService(
@@ -18,4 +19,11 @@ class CoordinatorProcesserPassthroughService(
             }
             .retrieve()
             .bodyToMono(String::class.java)
+
+    fun cancelTask(taskId: UUID): Mono<Boolean> =
+        coordinatorWebClient.get()
+            .uri("/processer/tasks/$taskId/cancel")
+            .retrieve()
+            .bodyToMono(Boolean::class.java)
+
 }

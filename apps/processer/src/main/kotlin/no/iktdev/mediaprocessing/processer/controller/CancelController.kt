@@ -8,10 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import java.util.UUID
 
 @Controller
+@RequestMapping("/tasks")
 class CancelController {
     @Autowired
     lateinit var linearVideoTaskListener: LinearVideoTaskListener
@@ -20,20 +23,20 @@ class CancelController {
     @Autowired
     lateinit var segmentedVideoTaskListener: SegmentedVideoTaskListener
 
-    @RequestMapping("/cancel/single")
-    fun cancelTask(@RequestBody taskId: String? = null): ResponseEntity<String> {
-        if (taskId.isNullOrBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No eventId provided!")
-        }
-        var canceled: Boolean = false
+    @RequestMapping("/{taskId}/cancel")
+    fun cancelTask(@PathVariable taskId: UUID): ResponseEntity<Boolean> {
         val listener = listOf(segmentedVideoTaskListener, linearVideoTaskListener, subtitleTaskListener)
-            .find { it -> it.currentTaskId?.toString() == taskId }
+            .find { it.currentTaskId == taskId }
 
-        if (listener != null) {
+        val canceled = if (listener != null) {
             listener.currentJob?.cancel()
-            canceled = true
-        }
+            true
+        } else false
 
-        return if (canceled) ResponseEntity.status(HttpStatus.FOUND).body("Canceled") else ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found!")
+        return if (canceled)
+            ResponseEntity.ok(true)
+        else
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(false)
     }
+
 }
