@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
 import no.iktdev.mediaprocessing.processer.runners.AudioEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.AudioVideoMergeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
+import java.util.UUID
 
 class SegmentedAudioProcessor(
     private val ffProvider: FfProvider,
@@ -61,7 +62,7 @@ class SegmentedAudioProcessor(
             null
         }.filterNotNull()
 
-        super.encodeAudioStreams(toEncode, logDirectory = ctx.logDirectory, null) { index, payload ->
+        super.encodeAudioStreams(ctx.task.taskId,toEncode, logDirectory = ctx.logDirectory, null) { index, payload ->
             checkpointStore.markCompleted(index)
             outputs += payload
 
@@ -92,6 +93,7 @@ class SegmentedAudioProcessor(
         )
 
         val runner = AudioVideoMergeRunner(
+            taskId = ctx.task.taskId,
             videoFile = concatted,
             audioFiles = audioFiles,
             output = finalOutput,

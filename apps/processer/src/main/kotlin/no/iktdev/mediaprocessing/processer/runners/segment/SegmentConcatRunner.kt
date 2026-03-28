@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.processer.runners.segment
 
+import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.runners.Runner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
@@ -8,6 +9,7 @@ import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 
 class SegmentConcatRunner(
+    private val task: Task,
     private val segments: List<Segment>,
     private val intermediateStore: IFile,
     private val output: IFile,

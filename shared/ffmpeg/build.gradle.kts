@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.github.pgreze:kotlin-process:1.5.1")
+    implementation("no.iktdev:process-runner:1.0.0")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation(libs.exfl)
 

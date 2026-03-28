@@ -69,6 +69,7 @@ class LinearAudioProcessor(
         }.filterNotNull()
 
         super.encodeAudioStreams(
+            taskId = ctx.task.taskId,
             toEncode,
             logDirectory = ctx.logDirectory,
             onProgress = { index, decoded ->

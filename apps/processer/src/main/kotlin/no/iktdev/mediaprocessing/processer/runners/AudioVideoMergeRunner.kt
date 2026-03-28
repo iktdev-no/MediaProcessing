@@ -1,12 +1,15 @@
 package no.iktdev.mediaprocessing.processer.runners
 
+import no.iktdev.eventi.models.Task
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
+import java.util.UUID
 
 class AudioVideoMergeRunner(
+    private val taskId: UUID,
     private val videoFile: IFile,
     private val audioFiles: List<AudioEncodeRunner.AudioEncodePayload>,
     private val output: IFile,

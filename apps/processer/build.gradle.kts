@@ -33,7 +33,7 @@ dependencies {
 
     // Coroutines / utilities
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("com.github.pgreze:kotlin-process:1.4.1")
+    implementation("no.iktdev:process-runner:1.0.0")
 
     // Custom libs
     implementation(libs.exfl)

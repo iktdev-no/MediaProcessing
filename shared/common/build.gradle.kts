@@ -29,7 +29,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 
     // Utilities
-    implementation("com.github.pgreze:kotlin-process:1.3.1")
+    implementation("no.iktdev:process-runner:1.0.0")
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
     implementation(libs.exfl)
 

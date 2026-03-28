@@ -45,6 +45,7 @@ class LinearVideoProcessor(
         val ffmpeg = ffProvider.getFfmpeg(logDirectory = ctx.logDirectory, listener = listener)
 
         val runner = VideoEncodeRunner(
+            taskId = ctx.task.taskId,
             ctx.videoInstruction,
             ctx.intermediateStore,
             outputFile = noAudioMidfix,

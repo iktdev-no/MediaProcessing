@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.processer.processors
 
 import mu.KotlinLogging
+import no.iktdev.eventi.models.Task
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
@@ -10,6 +11,7 @@ import no.iktdev.mediaprocessing.processer.context.FfProvider
 import no.iktdev.mediaprocessing.processer.listeners.FfTaskListener.FfmpegFailedException
 import no.iktdev.mediaprocessing.processer.runners.AudioEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
+import java.util.UUID
 
 open class AudioProcessor(
     private val ffProvider: FfProvider,
@@ -23,6 +25,7 @@ open class AudioProcessor(
     )
 
     protected suspend fun encodeAudioStreams(
+        taskId: UUID,
         streams: List<AudioEncodeItem>,
         logDirectory: IFile,
         onProgress: ((index: Int, progress: FfmpegDecodedProgress) -> Unit)? = null,
@@ -55,6 +58,7 @@ open class AudioProcessor(
 
 
             val runner = AudioEncodeRunner(
+                taskId = taskId,
                 audioInstruction = item.instruction,
                 outputDirectory = item.outStore,
                 ffmpegInstance = ffmpeg,

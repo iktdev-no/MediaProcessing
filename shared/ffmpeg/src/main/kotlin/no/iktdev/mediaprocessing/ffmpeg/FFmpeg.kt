@@ -40,13 +40,13 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
     open fun onCreate() {}
 
     protected lateinit var inputFile: String
-    open suspend fun run(command: FfmpegDsl) {
+    open suspend fun run(command: FfmpegDsl, onPid: (Long) -> Unit = {}) {
         inputFile = command.toInstructions().findPrimaryInput()
         logFile = logDir.using("$formattedDateTime-${IFile(inputFile).nameWithoutExtension}.log")
         listener?.onStarted(inputFile)
         val arguments = command.build()
         log.debug("Running ffmpeg with the following arguments\n${arguments.joinToString(" ")}")
-        result = execute(arguments) {
+        result = execute(arguments, pid = onPid) {
             onNewOutput(it)
         }
         onNewOutput("Received exit code: ${result.resultCode}")
@@ -75,14 +75,19 @@ open class FFmpeg(val executable: String, val logDir: IFile) {
     }
 
     @VisibleForTesting
-    internal open suspend fun execute(arguments: List<String>, output: (String) -> Unit): ProcessResult {
+    internal open suspend fun execute(arguments: List<String>, pid: (Long) -> Unit, output: (String) -> Unit): ProcessResult {
         return process(executable, *arguments.toTypedArray(),
             stdout = Redirect.CAPTURE,
             stderr = Redirect.CAPTURE,
             consumer = {
                 output(it)
             },
-            destroyForcibly = true
+            destroyForcibly = true,
+            onProcessStarted = { pid ->
+                pid?.let { pid(it) } ?: run {
+                    log.warn("Unable to obtain pid on start")
+                }
+            }
         )
     }
 
