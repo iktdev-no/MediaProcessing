@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.ffmpeg.dsl.plan
 
+import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.assertContainsAllWithOffset
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
@@ -7,7 +8,9 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.Presets
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioTarget
+import no.iktdev.mediaprocessing.ffmpeg.model.EncodeStrategy
 import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
+import no.iktdev.mediaprocessing.ffmpeg.util.FfmpegCodecs
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -22,8 +25,10 @@ class MediaPlanTest {
     @Test
     fun `video copy with one audio copy`() {
         val plan = SimpleMediaPlan(
+            sourceVideoCodec = FfmpegCodecs.hevc,
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
-            audioTracks = listOf(AudioTarget(0, 0, AudioCodec.Copy()))
+            audioTracks = listOf(AudioTarget(0, 0, AudioCodec.Copy())),
+            encodeStrategy = EncodeStrategy.Segmented
         )
 
         val video = plan.toVideoInstructions("Mock.mkv", "video.mkv")
@@ -61,8 +66,10 @@ class MediaPlanTest {
     @Test
     fun `video reencode to hevc with crf`() {
         val plan = SimpleMediaPlan(
+            sourceVideoCodec = FfmpegCodecs.hevc,
             videoTrack = VideoTarget(0, 0, VideoCodec.Hevc(crf = 18)),
-            audioTracks = listOf(AudioTarget(0, 0, AudioCodec.Aac(bitrate = 192, channels = 2)))
+            audioTracks = listOf(AudioTarget(0, 0, AudioCodec.Aac(bitrate = 192, channels = 2))),
+            encodeStrategy = EncodeStrategy.Segmented
         )
 
         val video = plan.toVideoInstructions("Mock.mkv", "video.mkv")
@@ -102,11 +109,13 @@ class MediaPlanTest {
     @Test
     fun `two audio tracks with different codecs`() {
         val plan = SimpleMediaPlan(
+            sourceVideoCodec = FfmpegCodecs.hevc,
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = listOf(
                 AudioTarget(0, 0, AudioCodec.Aac(bitrate = 128, channels = 2)),
                 AudioTarget(1, 1, AudioCodec.Opus(bitrate = 96, channels = 2))
-            )
+            ),
+            encodeStrategy = EncodeStrategy.Segmented
         )
 
         val audio = plan.toAudioInstructions("Mock.mkv")
@@ -148,6 +157,7 @@ class MediaPlanTest {
     @Test
     fun videoCopyAudioAacReencode() {
         val plan = SimpleMediaPlan(
+            sourceVideoCodec = FfmpegCodecs.hevc,
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = listOf(
                 AudioTarget(
@@ -159,7 +169,8 @@ class MediaPlanTest {
                         channels = 2
                     )
                 )
-            )
+            ),
+            encodeStrategy = EncodeStrategy.Segmented
         )
 
         val audio = plan.toAudioInstructions("Mock.mkv")
@@ -182,8 +193,10 @@ class MediaPlanTest {
     @DisplayName("Video reencode to HEVC with CRF=18 and preset=slow, Audio copy")
     fun videoReencodeHevcCrfPresetAudioCopy() {
         val plan = SimpleMediaPlan(
+            sourceVideoCodec = FfmpegCodecs.hevc,
             videoTrack = VideoTarget(0, 0, VideoCodec.Hevc(crf = 18, preset = Presets.Slow)),
-            audioTracks = listOf(AudioTarget(0, 0, AudioCodec.Copy()))
+            audioTracks = listOf(AudioTarget(0, 0, AudioCodec.Copy())),
+            encodeStrategy = EncodeStrategy.Segmented
         )
 
         val video = plan.toVideoInstructions("Mock.mkv", "video.mkv")
@@ -224,11 +237,13 @@ class MediaPlanTest {
     )
     fun `aac default 2ch and extended 6ch produce two unique audio tracks`() {
         val plan = SimpleMediaPlan(
+            sourceVideoCodec = FfmpegCodecs.hevc,
             videoTrack = VideoTarget(0, 0, VideoCodec.Copy),
             audioTracks = listOf(
                 AudioTarget(0, 2, AudioCodec.Aac(channels = 2, bitrate = 128)),
                 AudioTarget(0, 2, AudioCodec.Aac(channels = 6, bitrate = 384))
-            )
+            ),
+            encodeStrategy = EncodeStrategy.Segmented
         )
 
         val audio = plan.toAudioInstructions("Mock.mkv")

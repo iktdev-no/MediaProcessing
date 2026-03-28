@@ -67,14 +67,77 @@ fun CodecNameToFfmpegCodec(name: String): FfmpegCodecs {
 }
 
 
-fun getBestEncodeStrategy(codec: VideoCodec, stream: VideoStream): EncodeStrategy {
-    val transcodeDecision = codec.determineTranscodeDecision(stream)
-    return when (transcodeDecision) {
-        TranscodeDecision.Copy -> EncodeStrategy.Linear
-        TranscodeDecision.Remux -> EncodeStrategy.Linear
-        TranscodeDecision.Reencode -> EncodeStrategy.Segmented
+fun VideoStream.durationSecondsOrNull(): Long? {
+    // 1. duration_ts + time_base
+    if (duration_ts != null && time_base.contains("/")) {
+        val parts = time_base.split("/")
+        if (parts.size == 2) {
+            val num = parts[0].toLongOrNull()
+            val den = parts[1].toLongOrNull()
+            if (num != null && den != null && den > 0) {
+                return (duration_ts * num / den)
+            }
+        }
+    }
+
+    // 2. parse duration string
+    duration?.let { dur ->
+        if (dur == "N/A") return null
+
+        // HH:MM:SS.micro
+        if (dur.contains(":")) {
+            val parts = dur.split(":")
+            if (parts.size == 3) {
+                val hours = parts[0].toLongOrNull()
+                val minutes = parts[1].toLongOrNull()
+                val seconds = parts[2].toDoubleOrNull()
+
+                if (hours != null && minutes != null && seconds != null) {
+                    return ((hours * 3600) + (minutes * 60) + seconds).toLong()
+                }
+            }
+        }
+
+        // seconds.micro
+        dur.toDoubleOrNull()?.let { return it.toLong() }
+    }
+
+    // 3. nothing worked
+    return null
+}
+
+
+fun determineEncodeStrategy(
+    decision: TranscodeDecision,
+    stream: VideoStream
+): EncodeStrategy {
+
+    val durationSeconds = stream.durationSecondsOrNull()
+
+    return when (decision) {
+
+        TranscodeDecision.Copy,
+        TranscodeDecision.Remux -> {
+            // Copy/remux → alltid linear
+            EncodeStrategy.Linear
+        }
+
+        TranscodeDecision.Reencode -> {
+            // Hvis vi ikke vet varighet → straff med segmented
+            if (durationSeconds == null) {
+                return EncodeStrategy.Segmented
+            }
+
+            // Hvis kort → linear
+            if (durationSeconds < 30 * 60) {
+                EncodeStrategy.Linear
+            } else {
+                EncodeStrategy.Segmented
+            }
+        }
     }
 }
+
 
 fun FFmpegInstructions.resolveExpectedFullPath(store: IFile): IFile {
     val useFileName = this.output?.path ?: throw IllegalStateException("Output is missing on instruction")

@@ -178,7 +178,7 @@ object MockData {
 
     fun dummyVideoStream(
         index: Int,
-        durationTs: Long = 1000,
+        durationTs: Long? = null,
         codec: String = "h264",
         disposition: Disposition = dummyDisposition(),
         tags: Tags = dummyTags("eng"),

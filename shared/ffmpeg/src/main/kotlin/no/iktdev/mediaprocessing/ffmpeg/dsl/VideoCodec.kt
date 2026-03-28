@@ -2,6 +2,8 @@ package no.iktdev.mediaprocessing.ffmpeg.dsl
 
 import no.iktdev.mediaprocessing.ffmpeg.data.VideoStream
 import no.iktdev.mediaprocessing.ffmpeg.util.CodecNameToFfmpegCodec
+import no.iktdev.mediaprocessing.ffmpeg.util.FfmpegCodecs
+import no.iktdev.mediaprocessing.ffmpeg.util.FfmpegCodecs.*
 
 open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int? = null) {
 
@@ -229,6 +231,21 @@ open class VideoCodec(val codec: String, val crf: Int? = null, val bitrate: Int?
 
         return args
     }
+
+    companion object {
+        fun fromFFmpegCodec(sourceVideoCodec: FfmpegCodecs): VideoCodec {
+            return when (sourceVideoCodec) {
+                hevc -> Hevc()
+                h264 -> H264()
+                vp9 -> Vp9()
+                av1 -> Av1()
+                vid -> Vid()
+                vvc -> Vvc()
+                vp8 -> Vp8()
+            }
+        }
+    }
+
 
 }
 

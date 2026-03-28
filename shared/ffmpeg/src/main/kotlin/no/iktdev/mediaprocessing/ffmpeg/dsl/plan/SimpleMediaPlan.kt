@@ -3,10 +3,12 @@ package no.iktdev.mediaprocessing.ffmpeg.dsl.plan
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.ffmpeg.model.AudioTarget
+import no.iktdev.mediaprocessing.ffmpeg.model.EncodeStrategy
 import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
+import no.iktdev.mediaprocessing.ffmpeg.util.FfmpegCodecs
 
-class SimpleMediaPlan(videoTrack: VideoTarget, audioTracks: List<AudioTarget>) :
-    BaseMediaPlan(videoTrack, audioTracks) {
+class SimpleMediaPlan(sourceVideoCodec: FfmpegCodecs, videoTrack: VideoTarget, audioTracks: List<AudioTarget>, val encodeStrategy: EncodeStrategy) :
+    BaseMediaPlan(sourceVideoCodec, videoTrack, audioTracks) {
 
     fun toVideoInstructions(inputFile: String, outputFile: String): FFmpegInstructions {
 
@@ -19,7 +21,9 @@ class SimpleMediaPlan(videoTrack: VideoTarget, audioTracks: List<AudioTarget>) :
                 }
             }
 
-            output(outputFile)
+            output(outputFile) {
+                progress = encodeStrategy == EncodeStrategy.Linear
+            }
         }
 
         return dsl.toInstructions()
@@ -38,7 +42,9 @@ class SimpleMediaPlan(videoTrack: VideoTarget, audioTracks: List<AudioTarget>) :
                     }
                 }
 
-                output("audio_track_$idx.mka")
+                output("audio_track_$idx.mka") {
+                    progress = encodeStrategy == EncodeStrategy.Linear
+                }
             }
 
             dsl.toInstructions()

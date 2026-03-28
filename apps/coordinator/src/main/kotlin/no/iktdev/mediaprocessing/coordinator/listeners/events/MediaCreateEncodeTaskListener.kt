@@ -8,12 +8,14 @@ import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
 import no.iktdev.mediaprocessing.coordinator.toFFmpegVersion
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
+import no.iktdev.mediaprocessing.ffmpeg.dsl.TranscodeDecision
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.plan.SimpleMediaPlan
 import no.iktdev.mediaprocessing.ffmpeg.model.EncodeStrategy
 import no.iktdev.mediaprocessing.ffmpeg.model.VideoTarget
 import no.iktdev.mediaprocessing.ffmpeg.util.AudioTargeting
-import no.iktdev.mediaprocessing.ffmpeg.util.getBestEncodeStrategy
+import no.iktdev.mediaprocessing.ffmpeg.util.CodecNameToFfmpegCodec
+import no.iktdev.mediaprocessing.ffmpeg.util.determineEncodeStrategy
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
@@ -55,14 +57,19 @@ class MediaCreateEncodeTaskListener(
             )
         val useVideoStream = streams.videoStream[selectedEvent.selectedVideoTrack]
 
+        val transcodeDecision = videoPreference.determineTranscodeDecision(useVideoStream)
+        val encodeStrategy = determineEncodeStrategy(transcodeDecision, useVideoStream)
+
+        val useVideoCodec: VideoCodec = if (transcodeDecision == TranscodeDecision.Copy) VideoCodec.Copy else  videoPreference
+
+
         val videoTarget = VideoTarget(
             listIndex = selectedEvent.selectedVideoTrack,
             ffmpegIndex = streams.videoStream[selectedEvent.selectedVideoTrack].index,
-            codec = videoPreference
+            codec = useVideoCodec
         )
-
-        val encodeStrategy = getBestEncodeStrategy(videoPreference, useVideoStream)
-        val planner = SimpleMediaPlan(videoTarget, audioTargets)
+        val videoSourceCodec = CodecNameToFfmpegCodec(useVideoStream.codec_name)
+        val planner = SimpleMediaPlan(sourceVideoCodec = videoSourceCodec, videoTarget, audioTargets, encodeStrategy)
 
         val extension = planner.toContainer()
         val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
