@@ -31,12 +31,16 @@ class LinearVideoProcessor(
             return VideoEncodeRunner.VideoEncodeResult(noAudioMidfix)
         }
 
-        val cachedOut = IFile(OutputSection(noAudioMidfix.absolutePath).workFile)
+        val cachedOut = noAudioMidfix.parentFile.using(
+            "${noAudioMidfix.nameWithoutExtension}.work.${noAudioMidfix.extension()}"
+        )
+
         if (cachedOut.exists()) {
-            log.info("Found existing video file ${cachedOut.absolutePath}, as this is incomplete and we are restarting, this will be deleted")
+            log.info("Found existing work file ${cachedOut.absolutePath}, as this is incomplete and we are restarting, this will be deleted")
             val deleted = cachedOut.delete()
-            log.warn { "File ${noAudioMidfix.absolutePath} was ${if (deleted) "deleted" else "not deleted..."}" }
+            log.warn { "Work file ${cachedOut.absolutePath} was ${if (deleted) "deleted" else "NOT deleted"}" }
         }
+
 
         val ffmpeg = ffProvider.getFfmpeg(logDirectory = ctx.logDirectory, listener = listener)
 
