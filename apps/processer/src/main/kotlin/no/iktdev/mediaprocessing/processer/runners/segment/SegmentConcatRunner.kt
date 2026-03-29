@@ -7,9 +7,10 @@ import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
+import java.util.UUID
 
 class SegmentConcatRunner(
-    private val task: Task,
+    private val taskId: UUID,
     private val segments: List<Segment>,
     private val intermediateStore: IFile,
     private val output: IFile,

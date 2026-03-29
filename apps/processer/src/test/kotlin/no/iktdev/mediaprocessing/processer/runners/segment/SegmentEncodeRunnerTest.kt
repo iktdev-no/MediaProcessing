@@ -12,10 +12,13 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.TestBase
+import no.iktdev.mediaprocessing.processer.captureFfmpegDsl
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.processors.segment.Segment
+import no.iktdev.mediaprocessing.processer.verifyRunCalled
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SegmentEncodeRunnerTest: TestBase() {
@@ -81,6 +84,7 @@ class SegmentEncodeRunnerTest: TestBase() {
 
 
         val runner = SegmentEncodeRunner(
+            taskId = UUID.randomUUID(),
             segment = segment,
             videoInstructions = instruct,
             ffmpegInstance = ffmpeg
@@ -95,7 +99,7 @@ class SegmentEncodeRunnerTest: TestBase() {
         assertEquals(2, payload.index)
         assertEquals(segment.output, payload.output)
 
-        coVerify(exactly = 1) { ffmpeg.run(any()) }
+        ffmpeg.verifyRunCalled()
     }
 
     @Test
@@ -127,6 +131,7 @@ class SegmentEncodeRunnerTest: TestBase() {
 
 
         val runner = SegmentEncodeRunner(
+            taskId = UUID.randomUUID(),
             segment = segment,
             videoInstructions = instruct,
             ffmpegInstance = ffmpeg
@@ -139,23 +144,23 @@ class SegmentEncodeRunnerTest: TestBase() {
         val reason = (result as RunnerResult.Reject).reason
         assertEquals("Segment 1 failed with code 127", reason)
 
-        coVerify(exactly = 1) { ffmpeg.run(any()) }
+        ffmpeg.verifyRunCalled()
     }
 
     @Test
     @DisplayName("""
-    Når SegmentEncodeRunner bygges
-    Hvis run() kalles
-    Så:
-        Skal MpegArgument inneholde korrekt input, output, -ss og -t
-""")
+        Når SegmentEncodeRunner bygges
+        Hvis run() kalles
+        Så:
+            Skal MpegArgument inneholde korrekt input, output, -ss og -t
+        """)
     fun verifies_correct_ffmpeg_arguments() = runTest {
         val segment = fakeSegment(0)
         val input = workFolder.using("input.mp4").apply { writeText("dummy") }
         val ffmpeg = fakeFFmpeg(0)
 
-        val slotArgs = slot<FfmpegDsl>()
-        coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
+        // ✔ Global capture
+        val slotArgs = ffmpeg.captureFfmpegDsl()
 
         val instruct = FFmpegInstructions(
             inputs = InputSection().apply {
@@ -172,9 +177,9 @@ class SegmentEncodeRunnerTest: TestBase() {
             },
         )
 
-
         val runner = spyk(
             SegmentEncodeRunner(
+                taskId = UUID.randomUUID(),
                 segment = segment,
                 videoInstructions = instruct,
                 ffmpegInstance = ffmpeg
@@ -182,7 +187,6 @@ class SegmentEncodeRunnerTest: TestBase() {
         )
 
         every { runner.useWorkFileForSegments() } returns false
-
 
         runner.run()
 
@@ -210,6 +214,7 @@ class SegmentEncodeRunnerTest: TestBase() {
         val outputUsed = slotArgs.captured.outputFile()
         assertTrue(outputUsed in built)
     }
+
 
 }
 

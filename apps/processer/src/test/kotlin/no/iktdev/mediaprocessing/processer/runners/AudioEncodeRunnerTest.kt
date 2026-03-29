@@ -11,30 +11,19 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.TestBase
+import no.iktdev.mediaprocessing.processer.captureFfmpegDsl
+import no.iktdev.mediaprocessing.processer.fakeFFmpeg
+import no.iktdev.mediaprocessing.processer.verifyRunCalled
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class AudioEncodeRunnerTest : TestBase() {
 
     // ---------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------
-
-    private fun fakeFFmpeg(resultCode: Int, logFile: IFile = workFolder.using("ffmpeg.log")): FFmpeg {
-        val ff = mockk<FFmpeg>(relaxed = true)
-
-        coEvery { ff.run(any()) } returns Unit
-
-        every { ff.result } returns ProcessResult(
-            resultCode = resultCode,
-            output = emptyList()
-        )
-
-        every { ff.logFile } returns logFile
-
-        return ff
-    }
 
     private fun fakeInput(): IFile =
         workFolder.using("input.mka").apply { writeText("dummy") }
@@ -95,6 +84,7 @@ class AudioEncodeRunnerTest : TestBase() {
 
 
         val runner = AudioEncodeRunner(
+            taskId = UUID.randomUUID(),
             audioInstruction = instruct,
             outputDirectory = output.parentFile,
             ffmpegInstance = ffmpeg,
@@ -109,7 +99,7 @@ class AudioEncodeRunnerTest : TestBase() {
 
         assertEquals(output, payload.output)
 
-        coVerify(exactly = 1) { ffmpeg.run(any()) }
+        ffmpeg.verifyRunCalled()
     }
 
     // ---------------------------------------------------------
@@ -150,6 +140,7 @@ class AudioEncodeRunnerTest : TestBase() {
 
 
         val runner = AudioEncodeRunner(
+            taskId = UUID.randomUUID(),
             audioInstruction = instruct,
             outputDirectory = output.parentFile,
             ffmpegInstance = ffmpeg,
@@ -163,7 +154,7 @@ class AudioEncodeRunnerTest : TestBase() {
         val reason = (result as RunnerResult.Reject).reason
         assertEquals("Audio encode failed with code 127", reason)
 
-        coVerify(exactly = 1) { ffmpeg.run(any()) }
+        ffmpeg.verifyRunCalled()
     }
 
     // ---------------------------------------------------------
@@ -187,8 +178,7 @@ class AudioEncodeRunnerTest : TestBase() {
         }
         val ffmpeg = fakeFFmpeg(0)
 
-        val slotArgs = slot<FfmpegDsl>()
-        coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
+        val slotArgs = ffmpeg.captureFfmpegDsl()
 
         val instruct = FFmpegInstructions(
             inputs = InputSection().apply {
@@ -207,6 +197,7 @@ class AudioEncodeRunnerTest : TestBase() {
 
 
         val runner = AudioEncodeRunner(
+            taskId = UUID.randomUUID(),
             audioInstruction = instruct,
             outputDirectory = output.parentFile,
             ffmpegInstance = ffmpeg,

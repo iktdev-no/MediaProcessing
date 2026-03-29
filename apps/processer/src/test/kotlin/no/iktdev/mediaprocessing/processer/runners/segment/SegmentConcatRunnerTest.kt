@@ -14,6 +14,7 @@ import no.iktdev.mediaprocessing.processer.processors.segment.Segment
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import org.junit.jupiter.api.*
+import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SegmentConcatRunnerTest: TestBase() {
@@ -71,6 +72,7 @@ class SegmentConcatRunnerTest: TestBase() {
         val ffmpeg = fakeFFmpeg(0, logFile)
 
         val runner = SegmentConcatRunner(
+            taskId = UUID.randomUUID(),
             segments = listOf(seg0, seg1),
             intermediateStore = workFolder,
             output = output,
@@ -109,6 +111,7 @@ class SegmentConcatRunnerTest: TestBase() {
         val ffmpeg = fakeFFmpeg(127)
 
         val runner = SegmentConcatRunner(
+            taskId = UUID.randomUUID(),
             segments = listOf(seg0),
             intermediateStore = workFolder,
             output = output,
@@ -146,6 +149,7 @@ class SegmentConcatRunnerTest: TestBase() {
         val ffmpeg = fakeFFmpeg(0)
 
         val runner = SegmentConcatRunner(
+            taskId = UUID.randomUUID(),
             segments = listOf(seg0, seg1),
             intermediateStore = workFolder,
             output = output,
@@ -192,6 +196,7 @@ class SegmentConcatRunnerTest: TestBase() {
         coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
 
         val runner = SegmentConcatRunner(
+            taskId = UUID.randomUUID(),
             segments = listOf(seg0, seg1),
             intermediateStore = workFolder,
             output = output,

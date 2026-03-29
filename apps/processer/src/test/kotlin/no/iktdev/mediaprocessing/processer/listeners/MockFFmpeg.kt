@@ -18,7 +18,7 @@ class MockFFmpeg(override val listener: Listener, val delayMillis: Long = 500, p
         }
     }
 
-    override suspend fun run(command: FfmpegDsl) {
+    override suspend fun run(command: FfmpegDsl, onPid: (Long) -> Unit) {
         logFile = IFile("build/test-log/file.json")
         inputFile = command.toInstructions().findPrimaryInput()
         listener.onStarted(inputFile)

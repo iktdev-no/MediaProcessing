@@ -1,44 +1,25 @@
 package no.iktdev.mediaprocessing.processer.runners
 
-import com.github.pgreze.process.ProcessResult
-import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import no.iktdev.files.IFile
-import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
-import no.iktdev.mediaprocessing.ffmpeg.dsl.args.FfmpegDsl
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
 import no.iktdev.mediaprocessing.processer.TestBase
+import no.iktdev.mediaprocessing.processer.captureFfmpegDsl
+import no.iktdev.mediaprocessing.processer.fakeFFmpeg
+import no.iktdev.mediaprocessing.processer.verifyRunCalled
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.*
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VideoEncodeRunnerTest: TestBase() {
-
-        // ---------------------------------------------------------
-        // Helpers
-        // ---------------------------------------------------------
-
-        private fun fakeFFmpeg(resultCode: Int, logFile: IFile = workFolder.using("ffmpeg.log")): FFmpeg {
-            val ff = mockk<FFmpeg>(relaxed = true)
-
-            coEvery { ff.run(any()) } returns Unit
-
-            every { ff.result } returns ProcessResult(
-                resultCode = resultCode,
-                output = emptyList()
-            )
-
-            every { ff.logFile } returns logFile
-
-            return ff
-        }
 
         private fun fakeInput(): IFile =
             workFolder.using("input.mkv").apply { writeText("dummy") }
@@ -96,6 +77,7 @@ class VideoEncodeRunnerTest: TestBase() {
             )
 
             val runner = VideoEncodeRunner(
+                taskId = UUID.randomUUID(),
                 videoInstructions = instruct,
                 outputDirectory = output.parentFile,
                 outputFile = output,
@@ -110,7 +92,7 @@ class VideoEncodeRunnerTest: TestBase() {
 
             assertEquals(output, payload.output)
 
-            coVerify(exactly = 1) { ffmpeg.run(any()) }
+            ffmpeg.verifyRunCalled()
         }
 
         // ---------------------------------------------------------
@@ -150,6 +132,7 @@ class VideoEncodeRunnerTest: TestBase() {
             )
 
             val runner = VideoEncodeRunner(
+                taskId = UUID.randomUUID(),
                 videoInstructions = instruct,
                 outputDirectory = output.parentFile,
                 outputFile = output,
@@ -163,7 +146,7 @@ class VideoEncodeRunnerTest: TestBase() {
             val reason = (result as RunnerResult.Reject).reason
             assertEquals("Video encode failed with code 127", reason)
 
-            coVerify(exactly = 1) { ffmpeg.run(any()) }
+            ffmpeg.verifyRunCalled()
         }
 
         // ---------------------------------------------------------
@@ -188,8 +171,7 @@ class VideoEncodeRunnerTest: TestBase() {
 
             val ffmpeg = fakeFFmpeg(0)
 
-            val slotArgs = slot<FfmpegDsl>()
-            coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
+            val slotArgs = ffmpeg.captureFfmpegDsl()
 
             val instruct = FFmpegInstructions(
                 inputs = InputSection().apply {
@@ -206,6 +188,7 @@ class VideoEncodeRunnerTest: TestBase() {
             )
 
             val runner = VideoEncodeRunner(
+                taskId = UUID.randomUUID(),
                 videoInstructions = instruct,
                 outputDirectory = output.parentFile,
                 outputFile = output,

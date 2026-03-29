@@ -89,6 +89,7 @@ class SegmentedVideoProcessor(
         )
 
         val runner = SegmentEncodeRunner(
+            ctx.task.taskId,
             segment = segment,
             videoInstructions = ctx.videoInstruction,
             ffmpegInstance = ffmpeg
@@ -132,7 +133,7 @@ class SegmentedVideoProcessor(
             return noAudioMidfix
         }
 
-        val runner = SegmentConcatRunner(segments, ctx.intermediateStore, noAudioMidfix, ffmpeg)
+        val runner = SegmentConcatRunner(ctx.task.taskId, segments, ctx.intermediateStore, noAudioMidfix, ffmpeg)
         return when (val result = runner.run()) {
             is RunnerResult.Success -> {
                 progressListener.onConcatProgress(1.0)

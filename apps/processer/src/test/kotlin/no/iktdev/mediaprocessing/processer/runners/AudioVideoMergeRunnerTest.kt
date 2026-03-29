@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class AudioVideoMergeRunnerTest : TestBase() {
 
@@ -74,6 +75,7 @@ class AudioVideoMergeRunnerTest : TestBase() {
         val ffmpeg = fakeFFmpeg(0)
 
         val runner = AudioVideoMergeRunner(
+            taskId = UUID.randomUUID(),
             videoFile = video,
             audioFiles = listOf(audio),
             output = output,
@@ -108,6 +110,7 @@ class AudioVideoMergeRunnerTest : TestBase() {
         val ffmpeg = fakeFFmpeg(127)
 
         val runner = AudioVideoMergeRunner(
+            taskId = UUID.randomUUID(),
             videoFile = video,
             audioFiles = listOf(audio),
             output = output,
@@ -177,6 +180,7 @@ class AudioVideoMergeRunnerTest : TestBase() {
         coEvery { ffmpeg.run(capture(slotArgs)) } returns Unit
 
         val runner = AudioVideoMergeRunner(
+            taskId = UUID.randomUUID(),
             videoFile = video,
             audioFiles = listOf(audio0, audio1),
             output = output,

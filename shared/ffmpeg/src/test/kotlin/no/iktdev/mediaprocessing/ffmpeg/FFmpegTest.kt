@@ -27,7 +27,7 @@ class FFmpegTest: TestBase() {
         executable = "",
         logDir = IFile("/null")
     ) {
-        override suspend fun run(command: FfmpegDsl) {
+        override suspend fun run(command: FfmpegDsl, onPid: (Long) -> Unit) {
             val input = command.toInstructions().findPrimaryInput()
             inputFile = input
             logFile = IFile("/null/log.txt")
@@ -109,7 +109,11 @@ class FFmpegTest: TestBase() {
 
         // Ekte FFmpeg, men vi overstyrer execute() i en liten subclass
         val ffmpeg = object : FFmpeg("ffmpeg", logDir) {
-            override suspend fun execute(arguments: List<String>, output: (String) -> Unit): ProcessResult {
+            override suspend fun execute(
+                arguments: List<String>,
+                pid: (Long) -> Unit,
+                output: (String) -> Unit
+            ): ProcessResult {
                 return ProcessResult(0, emptyList())
             }
         }
@@ -162,7 +166,11 @@ class FFmpegTest: TestBase() {
 
         // Ekte FFmpeg, men vi overstyrer execute() i en liten subclass
         val ffmpeg = object : FFmpeg("ffmpeg", logDir) {
-            override suspend fun execute(arguments: List<String>, output: (String) -> Unit): ProcessResult {
+            override suspend fun execute(
+                arguments: List<String>,
+                pid: (Long) -> Unit,
+                output: (String) -> Unit
+            ): ProcessResult {
                 // Simulerer at ffmpeg skriver direkte til output-filen
                 val out = IFile(arguments.last()) // siste argument er output path
                 out.writeText("x")

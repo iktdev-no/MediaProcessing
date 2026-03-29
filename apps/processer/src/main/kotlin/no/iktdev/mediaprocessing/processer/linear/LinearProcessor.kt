@@ -45,7 +45,7 @@ class LinearProcessor(
         )
 
         val mergeRunner = AudioVideoMergeRunner(
-            task = ctx.task,
+            taskId = ctx.task.taskId,
             videoFile = videoFile,
             audioFiles = audioFiles,
             output = ctx.output,
