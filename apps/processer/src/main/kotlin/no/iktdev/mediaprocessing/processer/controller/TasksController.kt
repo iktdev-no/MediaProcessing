@@ -1,22 +1,19 @@
 package no.iktdev.mediaprocessing.processer.controller
 
-import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.mediaprocessing.processer.listeners.SubtitleTaskListener
 import no.iktdev.mediaprocessing.processer.listeners.LinearVideoTaskListener
 import no.iktdev.mediaprocessing.processer.listeners.SegmentedVideoTaskListener
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
 @RequestMapping("/tasks")
-class CancelController {
+class TasksController {
     @Autowired
     lateinit var linearVideoTaskListener: LinearVideoTaskListener
     @Autowired
