@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
 
 @RestController
-@RequestMapping("/processer/cpu-limit")
+@RequestMapping("/system/cpu-limit")
 class CpuLimitController(
     private val processerClient: ProcesserClient
 ) {
