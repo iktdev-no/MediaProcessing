@@ -80,6 +80,21 @@ export default function TasksPage() {
         })
     }, refreshInterval ? refreshInterval * 1000 : null)
 
+    const onCancelTask = async (taskId: string) => {
+        try {
+            await cancelTask(taskId, {
+                onError: (status) => {
+                    toast.error(`Failed to cancel task ${taskId} with status code ${status}`)
+                }
+            })
+            toast.success("Task cancelled")
+        } catch (err: any) {
+            if (err.status !== 404) {
+                toast.error("Cancellation failed")
+            }
+        }
+
+    }
 
 
 

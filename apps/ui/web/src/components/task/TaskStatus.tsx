@@ -1,6 +1,6 @@
 import AutorenewIcon from "@mui/icons-material/Autorenew"
-import CancelIcon from "@mui/icons-material/Cancel"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
+import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
 import ErrorIcon from "@mui/icons-material/Error"
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"
 import { keyframes } from "@mui/material"
@@ -37,7 +37,7 @@ export function TaskStatusIcon({ status }: { status: string }) {
             return <ErrorIcon color="error" />
 
         case "Cancelled":
-            return <CancelIcon sx={{ color: "#cc00ff" }} /> // neon lilla
+            return <DoNotDisturbIcon sx={{ color: "#7f7f7f" }} /> // neon lilla
 
         default:
             return null

@@ -22,3 +22,9 @@ export function resetFailedTask(
 export function getProgress() {
     return apiGet<Progress[]>("/tasks/progress")
 }
+1
+export function cancelTask(
+    taskId: string,
+    opts?: { onError?: (status: number, body: any) => void }) {
+    return apiGet<boolean>(`/tasks/${taskId}/cancel`, opts)
+}

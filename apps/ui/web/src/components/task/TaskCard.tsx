@@ -1,6 +1,7 @@
 import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
-import { Box, Chip, Paper, Typography } from "@mui/material"
+import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
+import { Box, Button, Chip, Paper, Typography } from "@mui/material"
 import { useState } from "react"
 import { useProgress } from "../../context/ProgressProvider"
 import type { UiTask } from "../../types/types"
@@ -14,9 +15,10 @@ export interface TaskCardProps {
     show: "taskId" | "referenceId"
     onCopy: () => void
     onReferenceIdClicked: (referenceId: string) => void
+    onCanceltask: (taskId: string) => void
 }
 
-export function TaskCard({ task, show, onCopy, onReferenceIdClicked }: TaskCardProps) {
+export function TaskCard({ task, show, onCopy, onReferenceIdClicked, onCanceltask }: TaskCardProps) {
     const live = useProgress().progress.get(task.taskId)
 
     const [open, setOpen] = useState(false)
@@ -34,87 +36,119 @@ export function TaskCard({ task, show, onCopy, onReferenceIdClicked }: TaskCardP
         <>
             <Paper sx={{ p: 1.25, display: "flex", flexDirection: "column", gap: 0.5 }}>
 
-                {/* Row 1: 5-column grid */}
+                {/* HEADER GRID: venstre + høyre */}
                 <Box
                     sx={{
                         display: "grid",
-                        gridTemplateColumns: "auto 1fr 8fr auto auto",
-                        alignItems: "center",
+                        gridTemplateColumns: "1fr auto", // venstre | høyre
                         columnGap: 2,
-                        width: "100%"
+                        width: "100%",
+                        alignItems: "stretch"
                     }}
                 >
-                    {/* Col 1: Icon */}
-                    <TaskStatusIcon status={task.status} />
 
-                    {/* Col 2: Event name */}
-                    <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-                        {task.task}
-                    </Typography>
-
-                    {/* Col 3: Chips */}
-                    <Box display="flex" gap={1}>
-                        <Chip
-                            label="Claimed"
-                            color={task.claimed ? "success" : "default"}
-                            size="small"
-                            icon={task.claimed ? <CheckIcon /> : <CloseIcon />}
-                        />
-                        <Chip
-                            label="Consumed"
-                            color={task.consumed ? "success" : "default"}
-                            size="small"
-                            icon={task.consumed ? <CheckIcon /> : <CloseIcon />}
-                        />
-                    </Box>
-
-                    {/* Col 4: Timestamp */}
-                    <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
-                        {formatted}
-                    </Typography>
-
-                    {/* Col 5: Details button */}
-                    <DetailsButton onClick={() => setOpen(true)} />
-                </Box>
-
-                {/* Row 2: IDs */}
-                <Typography
-                    variant="caption"
-                    sx={{
-                        color: "text.secondary",
-                        opacity: 0.8,
-                        mt: 0.25,
-                        display: "flex",
-                        gap: 0.5
-                    }}
-                >
+                    {/* VENSTRE SIDE (2 rader) */}
                     <Box
-                        component="span"
-                        onClick={() => onReferenceIdClicked(task.referenceId)}
                         sx={{
-                            cursor: "pointer",
-                            px: 0.3,
-                            borderRadius: 0.5,
-                            transition: "background-color 0.15s ease",
-                            "&:hover": {
-                                backgroundColor: "action.hover",
-                                color: "text.primary"
-                            }
+                            display: "grid",
+                            gridTemplateRows: "auto auto",
+                            rowGap: 1
                         }}
                     >
-                        {task.referenceId}
+                        {/* Rad 1: ikon, navn, chips, timestamp */}
+                        <Box
+                            sx={{
+                                display: "grid",
+                                gridTemplateColumns: "auto 1fr 8fr 1fr",
+                                alignItems: "center",
+                                columnGap: 2
+                            }}
+                        >
+                            <TaskStatusIcon status={task.status} />
+
+                            <Typography variant="body2" sx={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+                                {task.task}
+                            </Typography>
+
+                            <Box display="flex" gap={1}>
+                                <Chip
+                                    label="Claimed"
+                                    color={task.claimed ? "success" : "default"}
+                                    size="small"
+                                    icon={task.claimed ? <CheckIcon /> : <CloseIcon />}
+                                />
+                                <Chip
+                                    label="Consumed"
+                                    color={task.consumed ? "success" : "default"}
+                                    size="small"
+                                    icon={task.consumed ? <CheckIcon /> : <CloseIcon />}
+                                />
+                            </Box>
+
+                            <Typography variant="caption" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
+                                {formatted}
+                            </Typography>
+                        </Box>
+
+                        {/* Rad 2: IDs */}
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                color: "text.secondary",
+                                opacity: 0.8,
+                                display: "flex",
+                                gap: 0.5
+                            }}
+                        >
+                            <Box
+                                component="span"
+                                onClick={() => onReferenceIdClicked(task.referenceId)}
+                                sx={{
+                                    cursor: "pointer",
+                                    px: 0.3,
+                                    borderRadius: 0.5,
+                                    "&:hover": {
+                                        backgroundColor: "action.hover",
+                                        color: "text.primary"
+                                    }
+                                }}
+                            >
+                                {task.referenceId}
+                            </Box>
+
+                            • {task.taskId}
+                        </Typography>
                     </Box>
 
-                    • {task.taskId}
-                </Typography>
+                    {/* HØYRE SIDE: knappene (vertikal stack) */}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 1,
+                            height: "100%"
+                        }}
+                    >
+                        {["Pending", "InProgress"].includes(task.status) && (
+                            <Button size="large" variant="outlined" color="error" sx={{
+                                paddingX: 0,
+                            }}
+                                onClick={() => onCanceltask(task.taskId)}>
+                                <DoNotDisturbIcon />
+                            </Button>
+                        )}
+
+                        <DetailsButton onClick={() => setOpen(true)} />
+                    </Box>
+                </Box>
 
                 {/* Progress section */}
                 <TaskProgress task={task} progressUpdate={live} />
 
-
-
-
             </Paper>
+
 
             {/* Popup */}
             <TaskDetailsDialog open={open} onClose={() => setOpen(false)} task={task} onCopy={onCopy} />

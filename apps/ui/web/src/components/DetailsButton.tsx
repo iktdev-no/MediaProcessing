@@ -5,14 +5,13 @@ export function DetailsButton({ onClick }: { onClick: () => void }) {
     return (
         <Button
             variant="outlined"
-            size="small"
+            size="large"
             onClick={onClick}
             startIcon={<InfoIcon />}
             sx={{
                 textTransform: "none",
                 borderColor: "primary.main",
                 color: "primary.main",
-                paddingY: 0.25,
                 paddingX: 1,
                 minHeight: "28px",
             }}
