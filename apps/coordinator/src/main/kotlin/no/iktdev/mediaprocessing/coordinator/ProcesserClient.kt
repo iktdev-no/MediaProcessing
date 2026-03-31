@@ -34,7 +34,7 @@ class ProcesserClient(
 
     fun setCpuLimit(limit: CPULimit): Mono<Void> =
         processerWebClient.post()
-            .uri("/processer/cpu-limit")
+            .uri("/system/cpu-limit")
             .bodyValue(limit)
             .retrieve()
             .bodyToMono(Void::class.java)
@@ -42,7 +42,7 @@ class ProcesserClient(
 
     fun getCpuLimit(): Mono<CPULimit> =
         processerWebClient.get()
-            .uri("/processer/cpu-limit")
+            .uri("/system/cpu-limit")
             .retrieve()
             .bodyToMono(CPULimit::class.java)
 
