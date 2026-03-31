@@ -71,7 +71,7 @@ class MediaCreateEncodeTaskListener(
         val videoSourceCodec = CodecNameToFfmpegCodec(useVideoStream.codec_name)
         val planner = SimpleMediaPlan(sourceVideoCodec = videoSourceCodec, videoTarget, audioTargets, encodeStrategy)
 
-        val extension = planner.toContainer()
+        val extension = if (processerPreference.videoPreference?.enforceMkv == true) "mkv" else planner.toContainer()
         val preparedFile = history.requireEventValue<FilePrepareForWorkResultEvent, String> { it.file }
 
         val filename = IFile(preparedFile).nameWithoutExtension
