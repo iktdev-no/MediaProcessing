@@ -17,7 +17,7 @@ import javax.sql.DataSource
     classes = [ProcesserApplication::class],
     properties = ["spring.flyway.enabled=true"]
 )
-class ProcesserApplicationTest {
+class ProcesserApplicationTest: TestBase() {
 
     @Test
     fun `ExposedInitializer should connect to database`() {

@@ -83,6 +83,8 @@ export interface FileActions {
 
 export type FileType = "Folder" | "File"
 
+export type IUiFile = File | Folder
+
 export interface File {
   type: "File";
   accessMode: FileAccessMode;
@@ -100,8 +102,6 @@ export interface MediaAction {
 }
 
 export type MediaActionType = "All" | "Encode" | "ExtractSubtitles" | "ConvertSubtitle" | "MetadataSearch"
-
-export type IFile = File | Folder
 
 export interface FileAction {
   id: FileActionType;

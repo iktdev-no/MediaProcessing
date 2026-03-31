@@ -45,9 +45,14 @@ export interface VideoCodecConfig {
 
 export type VideoCodecType = "HEVC" | "H264" | "VP9" | "VP8" | "AV1" | "VVC" | "XVID" | "RAW" | "COPY"
 
-export interface PreferenceConfig {
+export interface VideoPreference {
+  codec: VideoCodecConfig;
+  enforceMkv: boolean;
+}
+
+export interface CoordinatorPreference {
   language: LanguagePreference;
-  processer: ProcesserPreference;
+  media: MediaPreference;
 }
 
 export interface AudioCodecConfig {
@@ -73,6 +78,11 @@ export interface AudioPreference {
 
 export type OpusApplication = "Audio" | "Voip" | "LowDelay"
 
+export interface MediaPreference {
+  audioPreference: AudioPreference | null;
+  videoPreference: VideoPreference | null;
+}
+
 export interface LanguagePreference {
   avoidDub: boolean;
   preferOriginal: boolean;
@@ -82,18 +92,21 @@ export interface LanguagePreference {
   subtitleSelectionMode: SubtitleSelectionMode;
 }
 
-
-export interface VideoPreference {
-  codec: VideoCodecConfig;
-  enforceMkv: boolean;
-}
-
-export interface ProcesserPreference {
-  audioPreference: AudioPreference | null;
-  videoPreference: VideoPreference | null;
-}
-
 export type SubtitleSelectionMode = "DialogueOnly" | "DialogueAndForced" | "All"
+
+
+export interface ProcessorPreference {
+  cpuLimit: CPULimit;
+}
+
+export interface CPULimit {
+  enabled: boolean;
+  limit: number;
+}
+
+export interface Companion {
+  default: CPULimit;
+}
 
 export type TaskStatus = "NotInitiated" | "Pending" | "InProgress" | "Completed" | "Failed" | "Cancelled"
 
