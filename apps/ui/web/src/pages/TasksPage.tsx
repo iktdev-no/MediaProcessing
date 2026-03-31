@@ -8,7 +8,8 @@ import {
     Snackbar
 } from "@mui/material"
 import { useEffect, useState } from "react"
-import { getTasks } from "../api/tasks"
+import { toast } from "react-toastify"
+import { cancelTask, getTasks } from "../api/tasks"
 import { FilterChips } from "../components/FilterChips"
 import { Paginator } from "../components/Paginator"
 import { TaskCard } from "../components/task/TaskCard"
@@ -16,7 +17,9 @@ import { useToast } from "../components/useToast"
 import { parseTaskFilters } from "../features/tasks/parseTaskFilters"
 import { knownTaskNames, taskFilterSchema } from "../features/tasks/taskFilterSchema"
 import { useAutoRefresh } from "../features/useAutoRefresh"
+import type { UiTask } from "../types/types"
 import type { PagedUiTask, TaskQuery } from "../types/webTypes"
+
 
 const handleBeforeAdd = (token: string, current: string[]) => {
     // Claimed
@@ -172,7 +175,7 @@ export default function TasksPage() {
                         alignContent: "start"
                     }}
                 >
-                    {data.items.map(task => (
+                    {data.items.map((task: UiTask) => (
                         <TaskCard
                             key={task.id}
                             task={task}
@@ -182,9 +185,8 @@ export default function TasksPage() {
                                 if (!filters.includes(referenceId)) {
                                     setFilters(prev => [...prev, referenceId])
                                 }
-                            }
-                            }
-
+                            }}
+                            onCanceltask={(taskId) => onCancelTask(taskId)}
                         />
                     ))}
                 </div>

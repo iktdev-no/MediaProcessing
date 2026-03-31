@@ -24,7 +24,7 @@ export const getTheme = (mode: "light" | "dark") =>
 
 // JsonViewerConfig.ts
 export const JSON_VIEWER_CONFIG = {
-    indentPx: 2, // juster denne for mer/mindre indent
+    indentPx: 0.01, // juster denne for mer/mindre indent
     colors: {
         bracket: "primary.main",
         key: "warning.main",
