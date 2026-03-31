@@ -1,10 +1,10 @@
-import type { IFile } from "../types/types"
-import { apiGet } from "./client"
+import type { IUiFile } from "../types/types";
+import { apiGet } from "./client";
 
 export function apiListHome() {
-    return apiGet<IFile[]>("/files/home")
+  return apiGet<IUiFile[]>("/files/home");
 }
 
 export function apiExplore(path: string) {
-    return apiGet<IFile[]>(`/files/explore?path=${encodeURIComponent(path)}`)
+  return apiGet<IUiFile[]>(`/files/explore?path=${encodeURIComponent(path)}`);
 }
