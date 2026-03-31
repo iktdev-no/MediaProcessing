@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference
+package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator
 
 data class LanguagePreference(
     val preferredAudio: List<String>,

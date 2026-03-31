@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator
 
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
@@ -31,7 +32,19 @@ class ProcesserClient(
             .retrieve()
             .bodyToMono(Boolean::class.java)
 
+    fun setCpuLimit(limit: CPULimit): Mono<Void> =
+        processerWebClient.post()
+            .uri("/processer/cpu-limit")
+            .bodyValue(limit)
+            .retrieve()
+            .bodyToMono(Void::class.java)
 
+
+    fun getCpuLimit(): Mono<CPULimit> =
+        processerWebClient.get()
+            .uri("/processer/cpu-limit")
+            .retrieve()
+            .bodyToMono(CPULimit::class.java)
 
     fun ping(): Mono<String> =
         processerWebClient.get()

@@ -18,13 +18,13 @@ import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.InMemoryEventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.VideoPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioCodecConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioCodecType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoCodecConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoCodecType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -48,7 +48,7 @@ open class TestBase {
     open fun setup() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } returns true
-        every { preference.getProcesserPreference() } returns ProcesserPreference(
+        every { preference.getMediaPreference() } returns MediaPreference(
             videoPreference = defaultVideoPreference,
             audioPreference = defaultAudioPreference
         )

@@ -1,11 +1,11 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.PreferenceConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.VideoPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioPreference
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -20,11 +20,11 @@ class PreferenceController(
     // ------------------------------------------------------------
 
     @GetMapping
-    fun getFull(): ResponseEntity<PreferenceConfig> =
+    fun getFull(): ResponseEntity<CoordinatorPreference> =
         ResponseEntity.ok(preferenceService.getFullConfig())
 
     @PutMapping
-    fun updateFull(@RequestBody body: PreferenceConfig): ResponseEntity<PreferenceConfig> {
+    fun updateFull(@RequestBody body: CoordinatorPreference): ResponseEntity<CoordinatorPreference> {
         preferenceService.saveFullConfig(body)
         return ResponseEntity.ok(preferenceService.getFullConfig())
     }
@@ -50,13 +50,13 @@ class PreferenceController(
     // ------------------------------------------------------------
 
     @GetMapping("/processer")
-    fun getProcesser(): ResponseEntity<ProcesserPreference> =
-        ResponseEntity.ok(preferenceService.getProcesserPreference())
+    fun getProcesser(): ResponseEntity<MediaPreference> =
+        ResponseEntity.ok(preferenceService.getMediaPreference())
 
     @PutMapping("/processer")
-    fun updateProcesser(@RequestBody body: ProcesserPreference): ResponseEntity<ProcesserPreference> {
-        preferenceService.saveProcesserPreference(body)
-        return ResponseEntity.ok(preferenceService.getProcesserPreference())
+    fun updateProcesser(@RequestBody body: MediaPreference): ResponseEntity<MediaPreference> {
+        preferenceService.saveMediaPreference(body)
+        return ResponseEntity.ok(preferenceService.getMediaPreference())
     }
 
 
@@ -66,12 +66,12 @@ class PreferenceController(
 
     @GetMapping("/video")
     fun getVideo(): ResponseEntity<VideoPreference> =
-        ResponseEntity.ok(preferenceService.getProcesserPreference().videoPreference)
+        ResponseEntity.ok(preferenceService.getMediaPreference().videoPreference)
 
     @PutMapping("/video")
     fun updateVideo(@RequestBody body: VideoPreference): ResponseEntity<VideoPreference> {
         preferenceService.saveVideoPreference(body)
-        return ResponseEntity.ok(preferenceService.getProcesserPreference().videoPreference)
+        return ResponseEntity.ok(preferenceService.getMediaPreference().videoPreference)
     }
 
 
@@ -81,11 +81,11 @@ class PreferenceController(
 
     @GetMapping("/audio")
     fun getAudio(): ResponseEntity<AudioPreference> =
-        ResponseEntity.ok(preferenceService.getProcesserPreference().audioPreference)
+        ResponseEntity.ok(preferenceService.getMediaPreference().audioPreference)
 
     @PutMapping("/audio")
     fun updateAudio(@RequestBody body: AudioPreference): ResponseEntity<AudioPreference> {
         preferenceService.saveAudioPreference(body)
-        return ResponseEntity.ok(preferenceService.getProcesserPreference().audioPreference)
+        return ResponseEntity.ok(preferenceService.getMediaPreference().audioPreference)
     }
 }

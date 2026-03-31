@@ -1,16 +1,16 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.PreferenceConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
-import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorPreferenceService
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.ui.service.coordinator.MediaPreferenceService
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/api/preferences")
 class PreferenceController(
-    private val coordinatorPreferences: CoordinatorPreferenceService
+    private val coordinatorPreferences: MediaPreferenceService
 ) {
 
     // ------------------------------------------------------------
@@ -18,11 +18,11 @@ class PreferenceController(
     // ------------------------------------------------------------
 
     @GetMapping
-    fun getFull(): Mono<PreferenceConfig> =
+    fun getFull(): Mono<CoordinatorPreference> =
         coordinatorPreferences.getFull()
 
     @PutMapping
-    fun updateFull(@RequestBody body: PreferenceConfig): Mono<PreferenceConfig> =
+    fun updateFull(@RequestBody body: CoordinatorPreference): Mono<CoordinatorPreference> =
         coordinatorPreferences.updateFull(body)
 
 
@@ -44,10 +44,10 @@ class PreferenceController(
     // ------------------------------------------------------------
 
     @GetMapping("/processer")
-    fun getProcesser(): Mono<ProcesserPreference> =
+    fun getProcesser(): Mono<MediaPreference> =
         coordinatorPreferences.getProcesser()
 
     @PutMapping("/processer")
-    fun updateProcesser(@RequestBody body: ProcesserPreference): Mono<ProcesserPreference> =
+    fun updateProcesser(@RequestBody body: MediaPreference): Mono<MediaPreference> =
         coordinatorPreferences.updateProcesser(body)
 }

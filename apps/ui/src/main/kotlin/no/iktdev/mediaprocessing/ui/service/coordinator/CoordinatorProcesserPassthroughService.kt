@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.ui.service.coordinator
 
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
@@ -25,5 +26,18 @@ class CoordinatorProcesserPassthroughService(
             .uri("/processer/tasks/$taskId/cancel")
             .retrieve()
             .bodyToMono(Boolean::class.java)
+
+    fun getCpuLimit(): Mono<CPULimit> =
+        coordinatorWebClient.get()
+            .uri("/processer/cpu-limit")
+            .retrieve()
+            .bodyToMono(CPULimit::class.java)
+
+    fun setCpuLimit(limit: CPULimit): Mono<Void> =
+        coordinatorWebClient.post()
+            .uri("/processer/cpu-limit")
+            .bodyValue(limit)
+            .retrieve()
+            .bodyToMono(Void::class.java)
 
 }

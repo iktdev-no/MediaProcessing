@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video
+package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video
 
 enum class Presets(val presetName: String) {
     Ultrafast("ultrafast"),

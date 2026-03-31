@@ -2,11 +2,11 @@ package no.iktdev.mediaprocessing.coordinator
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.PreferenceConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.VideoPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioPreference
 import org.springframework.stereotype.Component
 
 @Component
@@ -21,7 +21,7 @@ class Preference(
     // FULL CONFIG
     // ------------------------------------------------------------
 
-    fun getFullConfig(): PreferenceConfig {
+    fun getFullConfig(): CoordinatorPreference {
         val file = coordinatorEnv.preference
 
         if (!file.exists()) {
@@ -31,7 +31,7 @@ class Preference(
         }
 
         return try {
-            gson.fromJson(file.readText(), PreferenceConfig::class.java)
+            gson.fromJson(file.readText(), CoordinatorPreference::class.java)
                 ?: defaultConfig().also { writeConfig(it) }
         } catch (e: JsonSyntaxException) {
             val fallback = defaultConfig()
@@ -40,7 +40,7 @@ class Preference(
         }
     }
 
-    fun saveFullConfig(cfg: PreferenceConfig) {
+    fun saveFullConfig(cfg: CoordinatorPreference) {
         synchronized(lock) {
             writeConfig(cfg)
         }
@@ -64,12 +64,12 @@ class Preference(
     // PROCESSER
     // ------------------------------------------------------------
 
-    fun getProcesserPreference(): ProcesserPreference =
-        getFullConfig().processer
+    fun getMediaPreference(): MediaPreference =
+        getFullConfig().media
 
-    fun saveProcesserPreference(pref: ProcesserPreference) {
+    fun saveMediaPreference(pref: MediaPreference) {
         synchronized(lock) {
-            val cfg = getFullConfig().copy(processer = pref)
+            val cfg = getFullConfig().copy(media = pref)
             writeConfig(cfg)
         }
     }
@@ -79,14 +79,14 @@ class Preference(
     // ------------------------------------------------------------
 
     fun getVideoPreference(): VideoPreference =
-        getFullConfig().processer.videoPreference
-            ?: ProcesserPreference.default().videoPreference!!
+        getFullConfig().media.videoPreference
+            ?: MediaPreference.default().videoPreference!!
 
     fun saveVideoPreference(pref: VideoPreference) {
         synchronized(lock) {
             val current = getFullConfig()
-            val updatedProcesser = current.processer.copy(videoPreference = pref)
-            writeConfig(current.copy(processer = updatedProcesser))
+            val updatedProcesser = current.media.copy(videoPreference = pref)
+            writeConfig(current.copy(media = updatedProcesser))
         }
     }
 
@@ -95,14 +95,14 @@ class Preference(
     // ------------------------------------------------------------
 
     fun getAudioPreference(): AudioPreference =
-        getFullConfig().processer.audioPreference
-            ?: ProcesserPreference.default().audioPreference!!
+        getFullConfig().media.audioPreference
+            ?: MediaPreference.default().audioPreference!!
 
     fun saveAudioPreference(pref: AudioPreference) {
         synchronized(lock) {
             val current = getFullConfig()
-            val updatedProcesser = current.processer.copy(audioPreference = pref)
-            writeConfig(current.copy(processer = updatedProcesser))
+            val updatedProcesser = current.media.copy(audioPreference = pref)
+            writeConfig(current.copy(media = updatedProcesser))
         }
     }
 
@@ -110,14 +110,14 @@ class Preference(
     // INTERNAL HELPERS
     // ------------------------------------------------------------
 
-    private fun writeConfig(cfg: PreferenceConfig) {
+    private fun writeConfig(cfg: CoordinatorPreference) {
         val file = coordinatorEnv.preference
         file.parentFile?.mkdirs()
         file.writeText(gson.toJson(cfg))
     }
 
-    private fun defaultConfig() = PreferenceConfig(
-        processer = ProcesserPreference.default(),
+    private fun defaultConfig() = CoordinatorPreference(
+        media = MediaPreference.default(),
         language = LanguagePreference.default()
     )
 }

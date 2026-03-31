@@ -14,14 +14,14 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.MetadataDto
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.TaskStatus
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AacProfile
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.AudioCodecType
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio.OpusApplication
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.H264Profiles
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.Presets
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video.VideoCodecType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AacProfile
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioCodecConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioCodecType
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.OpusApplication
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.H264Profiles
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.Presets
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoCodecConfig
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoCodecType
 import kotlin.reflect.KProperty1
 
 fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): CoordinatorTaskDto {

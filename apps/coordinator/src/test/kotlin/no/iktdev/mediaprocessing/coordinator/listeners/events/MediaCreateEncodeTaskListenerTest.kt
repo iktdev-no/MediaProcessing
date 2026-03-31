@@ -16,7 +16,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.Segment
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.ProcesserPreference
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -32,7 +32,7 @@ class MediaCreateEncodeTaskListenerTest : TestBase() {
         mockkObject(TaskStore)
         every { TaskStore.persist(any()) } returns true
 
-        every { preference.getProcesserPreference() } returns ProcesserPreference(
+        every { preference.getMediaPreference() } returns MediaPreference(
             videoPreference = defaultVideoPreference,
             audioPreference = defaultAudioPreference
         )

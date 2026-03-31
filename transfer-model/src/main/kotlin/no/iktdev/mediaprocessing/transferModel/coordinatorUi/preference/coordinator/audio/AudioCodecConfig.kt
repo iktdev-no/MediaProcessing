@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.audio
+package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio
 
 data class AudioCodecConfig(
     val type: AudioCodecType,

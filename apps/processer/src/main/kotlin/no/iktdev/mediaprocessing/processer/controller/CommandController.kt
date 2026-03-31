@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.processer.controller
 
 import no.iktdev.mediaprocessing.processer.services.ProcessService
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.boot.actuate.health.HealthEndpoint
 import org.springframework.boot.actuate.health.Status
 import org.springframework.http.HttpStatus
@@ -31,16 +32,16 @@ class CommandController(
     // ---------------------------------------------------------
 
     @GetMapping("/cpu-limit")
-    fun getCpuLimit(): ResponseEntity<Int> =
-        ResponseEntity.ok(processService.getGlobalCpuLimitPercent())
+    fun getCpuLimit(): ResponseEntity<CPULimit> =
+        ResponseEntity.ok(processService.getGlobalCpuLimit())
 
-    @PostMapping("/cpu-limit/{percent}")
-    fun setCpuLimit(@PathVariable percent: Int): ResponseEntity<String> {
-        if (percent !in 1..100) {
+    @PostMapping("/cpu-limit")
+    fun setCpuLimit(@PathVariable limit: CPULimit): ResponseEntity<String> {
+        if (limit.limit !in 1..100) {
             return ResponseEntity.badRequest().body("percent must be between 1 and 100")
         }
 
-        processService.setGlobalCpuLimit(percent)
-        return ResponseEntity.ok("CPU limit updated to $percent%")
+        processService.updateCpuLimit(limit)
+        return ResponseEntity.ok("CPU limit updated successfully")
     }
 }

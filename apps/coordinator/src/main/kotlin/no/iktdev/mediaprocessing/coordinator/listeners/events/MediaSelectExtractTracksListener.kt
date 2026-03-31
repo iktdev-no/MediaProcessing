@@ -8,7 +8,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaT
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.SubtitleSelectionMode
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.SubtitleSelectionMode
 import org.springframework.stereotype.Component
 
 @Component

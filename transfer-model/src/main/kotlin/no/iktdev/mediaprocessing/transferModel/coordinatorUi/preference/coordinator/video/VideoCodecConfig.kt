@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.video
+package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video
 
 data class VideoCodecConfig(
     val type: VideoCodecType,

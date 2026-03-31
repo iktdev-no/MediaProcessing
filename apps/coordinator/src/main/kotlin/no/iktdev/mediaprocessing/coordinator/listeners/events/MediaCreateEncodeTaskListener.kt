@@ -39,7 +39,7 @@ class MediaCreateEncodeTaskListener(
     ): Event? {
         val selectedEvent = event.requireQualifiedEntry<MediaTracksEncodeSelectedEvent>()
 
-        val processerPreference = preference.getProcesserPreference()
+        val processerPreference = preference.getMediaPreference()
         val videoPreference = processerPreference.videoPreference?.codec?.toDsl() ?: VideoCodec.Hevc()
 
         val startedEvent = history.requireEvent<StartProcessingEvent>()
