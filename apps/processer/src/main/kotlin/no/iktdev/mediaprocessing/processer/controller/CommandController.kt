@@ -36,7 +36,7 @@ class CommandController(
         ResponseEntity.ok(processService.getGlobalCpuLimit())
 
     @PostMapping("/cpu-limit")
-    fun setCpuLimit(@PathVariable limit: CPULimit): ResponseEntity<String> {
+    fun setCpuLimit(@RequestBody limit: CPULimit): ResponseEntity<String> {
         if (limit.limit !in 1..100) {
             return ResponseEntity.badRequest().body("percent must be between 1 and 100")
         }
