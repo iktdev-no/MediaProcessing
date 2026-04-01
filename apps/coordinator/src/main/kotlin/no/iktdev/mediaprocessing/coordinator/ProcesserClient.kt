@@ -32,12 +32,14 @@ class ProcesserClient(
             .retrieve()
             .bodyToMono(Boolean::class.java)
 
-    fun setCpuLimit(limit: CPULimit): Mono<Void> =
+    fun setCpuLimit(limit: CPULimit): Mono<ResponseEntity<String>> =
         processerWebClient.post()
             .uri("/system/cpu-limit")
             .bodyValue(limit)
-            .retrieve()
-            .bodyToMono(Void::class.java)
+            .exchangeToMono { response ->
+                response.toEntity(String::class.java)
+            }
+
 
 
     fun getCpuLimit(): Mono<CPULimit> =

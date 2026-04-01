@@ -14,6 +14,7 @@ class ProcessService(
     private val preference: Preference,
 ) {
     val log = KotlinLogging.logger {}
+
     @Volatile
     private var cpuLimit: CPULimit = CPULimit.default
 

@@ -23,10 +23,12 @@ class CpuLimitController(
         return cpuLimit
     }
 
-    @PostMapping()
-    fun setCpuLimit(@RequestBody limit: CPULimit): ResponseEntity<String> {
-        processerClient.setCpuLimit(limit)
-        return ResponseEntity.ok("CPU limit updated to ${limit.limit}%")
+    @PostMapping
+    fun setCpuLimit(@RequestBody limit: CPULimit): Mono<ResponseEntity<String>> {
+        return processerClient.setCpuLimit(limit)
     }
+
+
+
 
 }
