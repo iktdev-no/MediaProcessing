@@ -33,11 +33,11 @@ class CoordinatorProcesserPassthroughService(
             .retrieve()
             .bodyToMono(CPULimit::class.java)
 
-    fun setCpuLimit(limit: CPULimit): Mono<Void> =
+    fun setCpuLimit(limit: CPULimit): Mono<String> =
         coordinatorWebClient.post()
             .uri("/processer/cpu-limit")
             .bodyValue(limit)
             .retrieve()
-            .bodyToMono(Void::class.java)
+            .bodyToMono(String::class.java)
 
 }

@@ -2,6 +2,9 @@ package no.iktdev.mediaprocessing.processer
 
 import io.mockk.clearAllMocks
 import io.mockk.unmockkAll
+import no.iktdev.eventi.lifecycle.ILifecycleStore
+import no.iktdev.eventi.lifecycle.LifecycleEntry
+import no.iktdev.eventi.lifecycle.LifecycleStore
 import no.iktdev.eventi.models.Task
 import no.iktdev.files.FakeFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
@@ -21,6 +24,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.Segment
 import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import java.util.UUID
 
 open class TestBase {
     val workFolder = FakeFile("build").using("tests")
@@ -40,6 +44,21 @@ open class TestBase {
             return object : FFmpeg("ffmpeg", logDirectory) {}
         }
     }
+
+    val defaultLifecycleStore = object : ILifecycleStore {
+        override fun add(entry: LifecycleEntry) {
+        }
+
+        override fun getAll(): List<LifecycleEntry> {
+            return emptyList()
+        }
+
+        override fun getForRef(ref: UUID): List<LifecycleEntry> {
+            return emptyList()
+        }
+
+    }
+
 
     fun defaultTestSegmentedProgressListener(task: Task): SegmentedProgressListener {
         return SegmentedProgressListener(task, null)

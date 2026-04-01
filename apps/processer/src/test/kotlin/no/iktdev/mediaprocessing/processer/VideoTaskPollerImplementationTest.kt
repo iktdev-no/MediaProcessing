@@ -76,6 +76,7 @@ class VideoTaskPollerImplementationTest : TestBase() {
     private var store: InMemoryTaskStore = InMemoryTaskStore()
     private var poller: TaskPollerImplementation = object : TaskPollerImplementation(
         taskStore = store,
+        lifecycleStore = defaultLifecycleStore,
         reporterFactory = { getTaskReporter() }
     ) {
         override var backoff: Duration = Duration.ofMillis(1)

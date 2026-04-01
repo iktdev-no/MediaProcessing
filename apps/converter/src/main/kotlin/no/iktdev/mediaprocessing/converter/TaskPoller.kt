@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.converter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import no.iktdev.eventi.lifecycle.LifecycleStore
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Progress
 import no.iktdev.eventi.models.store.TaskStatus
@@ -32,8 +33,10 @@ class PollerAdministrator(
 @Service
 class TaskPoller(
     private val reporter: TaskReporter,
+    private var lifecycleStore: LifecycleStore
 ) : TaskPollerImplementation(
     taskStore = TaskStore,
+    lifecycleStore = lifecycleStore,
     reporterFactory = { reporter } // én reporter brukes for alle tasks
 ) {
 

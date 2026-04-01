@@ -33,7 +33,7 @@ class CoordinatorPassthroughController(
     }
 
     @PostMapping("/cpu-limit")
-    fun setCpuLimit(@RequestBody limit: CPULimit): Mono<Void> {
+    fun setCpuLimit(@RequestBody limit: CPULimit): Mono<String> {
         return coordinator.setCpuLimit(limit)
     }
 }
