@@ -7,20 +7,32 @@ import org.junit.jupiter.api.Test
 
 class LimiterCgroupSetupTest {
 
+    private class TestLimiter(fs: FakeFs) : LinuxCpuLimiterService(fs) {
+        override fun supportsLimit(): Boolean = true
+    }
+
+
     @Test
     fun `ensureRoot enables cpu and cpuset controllers without breaking existing`() {
         val fs = FakeFs()
 
         fs.mkdirs("/sys/fs/cgroup")
+
+        // Required for supportsLimit() to return true
+        fs.writeText("/sys/fs/cgroup/cgroup.controllers", "cpu cpuset memory io")
+
         fs.writeText("/sys/fs/cgroup/cgroup.subtree_control", "memory io")
 
-        LinuxCpuLimiterService(fs)
+        TestLimiter(fs)
 
         val content = fs.readText("/sys/fs/cgroup/cgroup.subtree_control") ?: ""
 
-        assertTrue(content.contains("cpu"))
-        assertTrue(content.contains("cpuset"))
+        assertTrue(content.contains("+cpu"))
+        assertTrue(content.contains("+cpuset"))
+        assertTrue(content.contains("memory"))
+        assertTrue(content.contains("io"))
     }
+
 
     @Test
     fun `ensureRoot does nothing if controllers already enabled`() {

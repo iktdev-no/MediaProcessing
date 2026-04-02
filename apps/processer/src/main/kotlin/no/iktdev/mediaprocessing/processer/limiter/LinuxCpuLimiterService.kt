@@ -3,7 +3,6 @@ package no.iktdev.mediaprocessing.processer.limiter
 import no.iktdev.mediaprocessing.processer.services.fs.IFs
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.ceil
 
 internal open class LinuxCpuLimiterService(
     private val fs: IFs
@@ -23,9 +22,12 @@ internal open class LinuxCpuLimiterService(
         ensureRoot()
     }
 
+    // ---------------------------------------------------------
+    // SUPPORT CHECK
+    // ---------------------------------------------------------
+
     internal open fun supportsLimit(): Boolean =
         supportDetails().values.all { it }
-
 
     internal open fun isCgroupV2Mounted(): Boolean {
         val mounts = fs.readLines("/proc/mounts") ?: return false
@@ -33,46 +35,48 @@ internal open class LinuxCpuLimiterService(
     }
 
     internal open fun supportDetails(): Map<String, Boolean> {
-        val details = mutableMapOf<String, Boolean>()
-
         val controllers = "$rootPath/cgroup.controllers"
-        val hasCgroupV2 = fs.exists(controllers)
-        details["cgroup_v2"] = hasCgroupV2
+        val has = fs.exists(controllers)
 
-        if (!hasCgroupV2) return details
+        if (!has) {
+            return mapOf(
+                "cgroup_v2" to false,
+                "cpu_controller" to false,
+                "cpuset_controller" to false,
+                "cgroup2_mounted" to false,
+                "subtree_exists" to false
+            )
+        }
 
-        val content = fs.readText(controllers) ?: ""
-        val controllersList = content.split(Regex("\\s+"))
-        details["cpu_controller"] = "cpu" in controllersList
-        details["cpuset_controller"] = "cpuset" in controllersList
-        details["cgroup2_mounted"] = isCgroupV2Mounted()
+        val list = fs.readText(controllers)
+            ?.split(Regex("\\s+"))
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
 
-        val subtree = "$rootPath/cgroup.subtree_control"
-        val subtreeExists = fs.exists(subtree)
-        details["subtree_exists"] = subtreeExists
-
-        return details
+        return mapOf(
+            "cgroup_v2" to true,
+            "cpu_controller" to ("cpu" in list),
+            "cpuset_controller" to ("cpuset" in list),
+            "cgroup2_mounted" to isCgroupV2Mounted(),
+            "subtree_exists" to fs.exists("$rootPath/cgroup.subtree_control")
+        )
     }
 
-
-    internal fun supportReport(): String {
-        val d = supportDetails()
-        return buildString {
+    internal fun supportReport(): String =
+        buildString {
             appendLine("CPU limiting support:")
-            d.forEach { (k, v) ->
+            supportDetails().forEach { (k, v) ->
                 appendLine(" - $k: ${if (v) "OK" else "MISSING"}")
             }
         }
-    }
 
-
-
-    // ---------------------------
-    // ROOT SETUP (kernel-safe)
-    // ---------------------------
+    // ---------------------------------------------------------
+    // ROOT SETUP
+    // ---------------------------------------------------------
 
     private fun ensureRoot() {
         if (!supportsLimit()) return
+
         if (!fs.exists(appRootPath)) {
             fs.mkdirs(appRootPath)
         }
@@ -81,97 +85,126 @@ internal open class LinuxCpuLimiterService(
         if (!fs.exists(control)) return
 
         try {
-            val current1 = fs.readText(control) ?: ""
-            if (!current1.contains("cpu")) {
-                fs.writeText(control, "+cpu")
+            val currentSet = fs.readText(control)
+                ?.trim()
+                ?.split(" ")
+                ?.filter { it.isNotBlank() }
+                ?.toMutableSet()
+                ?: mutableSetOf()
+
+            val changed = currentSet.add("+cpu") or currentSet.add("+cpuset")
+
+            if (changed) {
+                fs.writeText(control, currentSet.joinToString(" "))
             }
 
-            val current2 = fs.readText(control) ?: ""
-            if (!current2.contains("cpuset")) {
-                fs.writeText(control, "+cpuset")
-            }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            println("ensureRoot failed: ${e.message}")
+        }
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // PROCESS
-    // ---------------------------
+    // ---------------------------------------------------------
 
     internal open fun alive(pid: Long): Boolean =
-        ProcessHandle.of(pid).map { it.isAlive }.orElse(false) ?: false
+        ProcessHandle.of(pid).map { it.isAlive }.orElse(false)
 
-
-    private fun groupPath(pid: Long): String =
+    private fun groupPath(pid: Long) =
         "$appRootPath/ffmpeg-$pid"
 
     private fun movePid(path: String, pid: Long) {
-        repeat(3) {
+        var delay = 5L
+        repeat(5) {
             if (fs.writeText("$path/cgroup.procs", pid.toString())) return
-            Thread.sleep(1)
+            Thread.sleep(delay)
+            delay *= 2
         }
         println("Failed to move pid=$pid to $path")
     }
 
-    // ---------------------------
-    // CPU QUOTA
-    // ---------------------------
+    // ---------------------------------------------------------
+    // CPU COUNT
+    // ---------------------------------------------------------
 
     @VisibleForTesting
     internal fun cpuCount(): Int {
-        val cpuMaxPath = "$rootPath/cpu.max"
+        val raw = fs.readText("$rootPath/cpuset.cpus.effective")
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: return Runtime.getRuntime().availableProcessors()
 
-        if (fs.exists(cpuMaxPath)) {
-            val parts = fs.readText(cpuMaxPath)?.trim()?.split(" ") ?: emptyList()
-            if (parts.size == 2) {
-                val quotaStr = parts[0]
-                val period = parts[1].toLongOrNull()
-
-                if (quotaStr != "max" && period != null && period > 0) {
-                    val quota = quotaStr.toLongOrNull()
-                    if (quota != null && quota > 0) {
-                        return ceil(quota.toDouble() / period).toInt().coerceAtLeast(1)
-                    }
+        val cores = raw.split(",")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .flatMap { part ->
+                if ("-" in part) {
+                    val (s, e) = part.split("-", limit = 2)
+                    val start = s.toIntOrNull()
+                    val end = e.toIntOrNull()
+                    if (start != null && end != null && end >= start)
+                        (start..end).toList()
+                    else emptyList()
+                } else {
+                    part.toIntOrNull()?.let { listOf(it) } ?: emptyList()
                 }
             }
+            .toSet()
+
+        return cores.size.takeIf { it > 0 }
+            ?: Runtime.getRuntime().availableProcessors()
+    }
+
+    // ---------------------------------------------------------
+    // CPU QUOTA
+    // ---------------------------------------------------------
+
+    internal open fun cpuQuota(gPath: String, percent: Int): String {
+        val cpuMaxRaw =
+            fs.readText("$gPath/cpu.max")
+                ?: fs.readText("$rootPath/cpu.max")
+                ?: "100000 100000"
+
+        val parts = cpuMaxRaw.trim().split(" ")
+
+        if (parts.firstOrNull() == "max") {
+            return "max"
         }
 
-        return Runtime.getRuntime().availableProcessors()
+        val period = parts.getOrNull(1)?.toLongOrNull() ?: 100_000L
+        val quota = (period * percent / 100).coerceAtLeast(1_000L)
+
+        return "$quota $period"
     }
 
-    private fun cpuQuota(percent: Int): String {
-        val total = cpuCount()
-        val allowed = total * (percent / 100.0)
-        val quota = (allowed * 100_000L).toLong().coerceAtLeast(1_000L)
-        return "$quota 100000"
-    }
-
-    // ---------------------------
+    // ---------------------------------------------------------
     // CPUSET
-    // ---------------------------
+    // ---------------------------------------------------------
 
     internal fun assignCpuset(pid: Long, percent: Int): List<Int> {
         val total = cpuCount()
-        val cores = (total * (percent / 100.0))
+        val cores = (total * percent / 100.0)
             .toInt()
-            .coerceAtLeast(1)
-            .coerceAtMost(total)
+            .coerceIn(1, total)
 
         synchronized(coreLock) {
-            val list = mutableListOf<Int>()
-            repeat(cores) {
-                list.add(nextCore)
+            val list = List(cores) {
+                val c = nextCore
                 nextCore = (nextCore + 1) % total
+                c
             }
+
             assignedCores[pid] = list
             assignedPercent[pid] = percent
+
             return list
         }
     }
 
     private fun getOrAssignCores(pid: Long, percent: Int): List<Int> {
         val existing = assignedCores[pid]
-        val prevPercent = assignedPercent[pid]
-        return if (existing != null && prevPercent == percent) existing
+        val prev = assignedPercent[pid]
+        return if (existing != null && prev == percent) existing
         else assignCpuset(pid, percent)
     }
 
@@ -184,9 +217,9 @@ internal open class LinuxCpuLimiterService(
         fs.writeText("$gPath/cpuset.mems", mems)
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // LIMIT
-    // ---------------------------
+    // ---------------------------------------------------------
 
     override fun limitProcess(pid: Long, percent: Int) {
         ensureRoot()
@@ -202,35 +235,25 @@ internal open class LinuxCpuLimiterService(
         try {
             initCpuset(gPath)
 
-            if (!fs.writeText("$gPath/cpu.max", cpuQuota(percent))) {
-                println("limit: failed cpu.max pid=$pid")
-            }
-
+            fs.writeText("$gPath/cpu.max", cpuQuota(gPath, percent))
             movePid(gPath, pid)
 
             val cores = getOrAssignCores(pid, percent)
-            if (!fs.writeText("$gPath/cpuset.cpus", cores.joinToString(","))) {
-                println("limit: failed cpuset pid=$pid")
-            }
+            fs.writeText("$gPath/cpuset.cpus", cores.joinToString(","))
 
         } catch (e: Exception) {
             println("limit failed pid=$pid: ${e.message}")
         }
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // UPDATE
-    // ---------------------------
+    // ---------------------------------------------------------
 
     override fun updateLimit(pid: Long, percent: Int) {
         ensureRoot()
 
         if (!alive(pid)) {
-            removeLimit(pid)
-            return
-        }
-
-        if (percent >= 100) {
             removeLimit(pid)
             return
         }
@@ -244,38 +267,33 @@ internal open class LinuxCpuLimiterService(
         try {
             initCpuset(gPath)
 
-            if (!fs.writeText("$gPath/cpu.max", cpuQuota(percent))) {
-                println("update: failed cpu.max pid=$pid")
-            }
-
+            fs.writeText("$gPath/cpu.max", cpuQuota(gPath, percent))
             movePid(gPath, pid)
 
             val cores = getOrAssignCores(pid, percent)
-            if (!fs.writeText("$gPath/cpuset.cpus", cores.joinToString(","))) {
-                println("update: failed cpuset pid=$pid")
-            }
+            fs.writeText("$gPath/cpuset.cpus", cores.joinToString(","))
 
         } catch (e: Exception) {
             println("update failed pid=$pid: ${e.message}")
         }
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // REMOVE
-    // ---------------------------
+    // ---------------------------------------------------------
 
     override fun removeLimit(pid: Long) {
-        ensureRoot()
-
         val gPath = groupPath(pid)
         val original = originalCgroups.remove(pid)
 
         assignedCores.remove(pid)
         assignedPercent.remove(pid)
 
-        if (assignedCores.isEmpty()) {
+        if (assignedCores.isEmpty() && assignedPercent.isEmpty()) {
             synchronized(coreLock) {
-                nextCore = 0
+                if (assignedCores.isEmpty()) {
+                    nextCore = 0
+                }
             }
         }
 
@@ -283,14 +301,12 @@ internal open class LinuxCpuLimiterService(
 
         try {
             if (!original.isNullOrBlank() && alive(pid)) {
-                val targetPath = "$rootPath/${original.removePrefix("/")}"
-                if (fs.exists(targetPath)) {
-                    movePid(targetPath, pid)
-                }
+                val target = "$rootPath/${original.removePrefix("/")}"
+                if (fs.exists(target)) movePid(target, pid)
             }
 
-            if (!fs.deleteRecursively(gPath)) {
-                println("remove: failed to delete $gPath (maybe busy)")
+            runCatching {
+                fs.deleteRecursively(gPath)
             }
 
         } catch (e: Exception) {
@@ -298,15 +314,14 @@ internal open class LinuxCpuLimiterService(
         }
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // CGROUP DETECTION
-    // ---------------------------
+    // ---------------------------------------------------------
 
     private fun detectCgroupPath(pid: Long): String {
-        val path = "/proc/$pid/cgroup"
-        val lines = fs.readLines(path) ?: return ""
-        return lines.firstOrNull { it.startsWith("0::") }
-            ?.substringAfter("0::")
+        val lines = fs.readLines("/proc/$pid/cgroup") ?: return ""
+        return lines.firstOrNull { it.contains("::/") }
+            ?.substringAfter("::")
             ?.trim()
             ?: ""
     }

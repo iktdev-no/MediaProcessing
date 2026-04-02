@@ -9,57 +9,95 @@ class CpuMathTest {
     private fun limiter(fs: FakeFs = FakeFs()) =
         LinuxCpuLimiterService(fs)
 
+    private fun setupGroup(fs: FakeFs, pid: Long = 1234): String {
+        val gPath = "/sys/fs/cgroup/mediaprocessing/ffmpeg-$pid"
+        fs.mkdirs(gPath)
+        return gPath
+    }
+
+    // -----------------------------
+    // cpuQuota tests
+    // -----------------------------
+
     @Test
     fun `cpuQuota clamps to minimum`() {
-        val l = limiter()
-        val q = l.cpuQuotaForTest(1)
+        val fs = FakeFs()
+        val l = limiter(fs)
+        val gPath = setupGroup(fs)
+
+        fs.writeText("$gPath/cpu.max", "100000 100000")
+
+        val q = l.cpuQuota(gPath, 1)
         val quota = q.split(" ")[0].toLong()
+
         assertTrue(quota >= 1000)
     }
 
     @Test
-    fun `cpuCount uses quota when available`() {
-        val fs = FakeFs()
-        fs.mkdirs("/sys/fs/cgroup")
-        fs.writeText("/sys/fs/cgroup/cpu.max", "20000 100000")
-
-        val l = limiter(fs)
-        assertEquals(1, l.cpuCount())
-    }
-
-    @Test
-    fun `cpuCount falls back to availableProcessors`() {
-        val l = limiter()
-        assertEquals(Runtime.getRuntime().availableProcessors(), l.cpuCount())
-    }
-
-    @Test
     fun `cpuQuota scales correctly with percent`() {
-        val l = limiter()
+        val fs = FakeFs()
+        val l = limiter(fs)
+        val gPath = setupGroup(fs)
 
-        val q10 = l.cpuQuotaForTest(10).split(" ")[0].toLong()
-        val q50 = l.cpuQuotaForTest(50).split(" ")[0].toLong()
-        val q100 = l.cpuQuotaForTest(100).split(" ")[0].toLong()
+        fs.writeText("$gPath/cpu.max", "100000 100000")
+
+        val q10 = l.cpuQuota(gPath, 10).split(" ")[0].toLong()
+        val q50 = l.cpuQuota(gPath, 50).split(" ")[0].toLong()
+        val q100 = l.cpuQuota(gPath, 100).split(" ")[0].toLong()
 
         assertTrue(q10 < q50)
         assertTrue(q50 < q100)
     }
 
     @Test
-    fun `cpuCount falls back on invalid cpu max`() {
+    fun `cpuQuota returns max when cpu max is max`() {
+        val fs = FakeFs()
+        val l = limiter(fs)
+        val gPath = setupGroup(fs)
+
+        fs.writeText("$gPath/cpu.max", "max 100000")
+
+        val q = l.cpuQuota(gPath, 50)
+        assertEquals("max", q)
+    }
+
+    // -----------------------------
+    // cpuCount tests
+    // -----------------------------
+
+    @Test
+    fun `cpuCount returns physical cpu count when cpuset missing`() {
+        val fs = FakeFs()
+        val l = limiter(fs)
+
+        assertEquals(
+            Runtime.getRuntime().availableProcessors(),
+            l.cpuCount()
+        )
+    }
+
+    @Test
+    fun `cpuCount uses cpuset when available`() {
         val fs = FakeFs()
         fs.mkdirs("/sys/fs/cgroup")
-        fs.writeText("/sys/fs/cgroup/cpu.max", "invalid data")
+        fs.writeText("/sys/fs/cgroup/cpuset.cpus.effective", "0-1")
 
         val l = limiter(fs)
 
-        assertEquals(Runtime.getRuntime().availableProcessors(), l.cpuCount())
+        assertEquals(2, l.cpuCount())
     }
 
-}
+    @Test
+    fun `cpuCount handles invalid cpuset gracefully`() {
+        val fs = FakeFs()
+        fs.mkdirs("/sys/fs/cgroup")
+        fs.writeText("/sys/fs/cgroup/cpuset.cpus.effective", "invalid")
 
-// Helpers
-private fun LinuxCpuLimiterService.cpuQuotaForTest(percent: Int) =
-    this::class.java.getDeclaredMethod("cpuQuota", Int::class.java)
-        .apply { isAccessible = true }
-        .invoke(this, percent) as String
+        val l = limiter(fs)
+
+        assertEquals(
+            Runtime.getRuntime().availableProcessors(),
+            l.cpuCount()
+        )
+    }
+}
