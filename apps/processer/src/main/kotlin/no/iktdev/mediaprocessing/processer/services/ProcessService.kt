@@ -13,59 +13,97 @@ class ProcessService(
     private val cpuLimiterService: CpuLimiterService = CpuLimiterFactory.create(),
     private val preference: Preference,
 ) {
-    val log = KotlinLogging.logger {}
+
+    private val log = KotlinLogging.logger {}
 
     @Volatile
     private var cpuLimit: CPULimit = CPULimit.default
 
+    private val processes = mutableListOf<ProcessEntry>()
+    private val lock = Any()
+
+    private var initialized = false
+
     init {
+        ensureInit()
+    }
+
+    // ---------------------------
+    // INIT
+    // ---------------------------
+
+    private fun ensureInit() {
+        if (initialized) return
+        initialized = true
+
         preference.getCpuLimit().takeIf { it.enabled }?.let {
             cpuLimit = it
         }
     }
 
+    // ---------------------------
+    // PUBLIC API
+    // ---------------------------
+
     fun getGlobalCpuLimit(): CPULimit = cpuLimit
 
     fun updateCpuLimit(cpuLimit: CPULimit): Boolean {
-        if (cpuLimit.enabled && (cpuLimit.limit !in 1..100)) {
-            log.warn { "Attempted to set invalid CPU limit: ${cpuLimit.limit}. Must be between 1 and 100." }
+        if (cpuLimit.enabled && cpuLimit.limit !in 1..100) {
+            log.warn {
+                "Attempted to set invalid CPU limit: ${cpuLimit.limit}. Must be between 1 and 100."
+            }
             return false
         }
+
         this.cpuLimit = cpuLimit
         preference.saveCPULimit(cpuLimit)
+
         if (cpuLimit.enabled) {
-            log.info { "CPU limit enabled with ${cpuLimit.limit}%, applying limits to all processes." }
+            log.info { "CPU limit enabled at ${cpuLimit.limit}%, applying limits." }
             applyCpuLimits()
         } else {
-            log.info { "CPU limit disabled, removing limits from all processes." }
+            log.info { "CPU limit disabled, removing limits." }
             removeCpuLimits()
         }
+
         return true
     }
 
-
-    private val processes: MutableList<ProcessEntry> = mutableListOf()
-
     fun addProcess(processEntry: ProcessEntry) {
-        processes.add(processEntry)
-        applyCpuLimits()
+        synchronized(lock) {
+            processes.add(processEntry)
+        }
+
+        if (cpuLimit.enabled) {
+            cpuLimiterService.limitProcess(processEntry.pid, cpuLimit.limit)
+        }
     }
 
     fun removeProcess(pid: Long) {
-        processes.removeIf { it.pid == pid }
+        synchronized(lock) {
+            processes.removeIf { it.pid == pid }
+        }
+
         cpuLimiterService.removeLimit(pid)
     }
 
     fun removeCpuLimits() {
-        processes.forEach { proc ->
+        val snapshot = synchronized(lock) { processes.toList() }
+
+        snapshot.forEach { proc ->
             cpuLimiterService.removeLimit(proc.pid)
         }
     }
 
     fun applyCpuLimits() {
-        processes.forEach { process ->
-            cpuLimiterService.limitProcess(process.pid, cpuLimit.limit)
+        ensureInit()
+
+        if (!cpuLimit.enabled) return
+
+        val snapshot = synchronized(lock) { processes.toList() }
+
+        snapshot.forEach { process ->
+            cpuLimiterService.updateLimit(process.pid, cpuLimit.limit)
         }
     }
-
 }
