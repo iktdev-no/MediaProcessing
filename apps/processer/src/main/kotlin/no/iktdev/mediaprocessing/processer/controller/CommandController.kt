@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.processer.controller
 
 import no.iktdev.mediaprocessing.processer.services.ProcessService
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.boot.actuate.health.HealthEndpoint
 import org.springframework.boot.actuate.health.Status
@@ -43,5 +44,11 @@ class CommandController(
 
         processService.updateCpuLimit(limit)
         return ResponseEntity.ok("CPU limit updated successfully")
+    }
+
+    @GetMapping("/cpu-limit/support")
+    fun getSupported(): ResponseEntity<CpuLimitSupport> {
+        val support = processService.detectSupportsCpuLimits()
+        return ResponseEntity.ok(support)
     }
 }

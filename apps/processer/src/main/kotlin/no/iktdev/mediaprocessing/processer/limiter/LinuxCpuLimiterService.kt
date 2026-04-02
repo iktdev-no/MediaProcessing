@@ -59,7 +59,7 @@ internal open class LinuxCpuLimiterService(
     // SUPPORT CHECK
     // ---------------------------------------------------------
 
-    fun supportsLimit(): Boolean =
+    internal open fun supportsLimit(): Boolean =
         detectSupportsCpuLimits().supported
 
 

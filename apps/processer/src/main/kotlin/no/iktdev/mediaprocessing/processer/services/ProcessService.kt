@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.processer.config.Preference
 import no.iktdev.mediaprocessing.processer.limiter.CpuLimiterFactory
 import no.iktdev.mediaprocessing.processer.limiter.CpuLimiterService
 import no.iktdev.mediaprocessing.processer.models.ProcessEntry
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.stereotype.Service
 
@@ -44,6 +45,9 @@ class ProcessService(
     // ---------------------------
     // PUBLIC API
     // ---------------------------
+
+    fun detectSupportsCpuLimits(): CpuLimitSupport =
+        cpuLimiterService.detectSupportsCpuLimits()
 
     fun getGlobalCpuLimit(): CPULimit = cpuLimit
 

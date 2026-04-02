@@ -14,9 +14,10 @@ import java.util.concurrent.TimeUnit
 class RealLinuxLimiterTest {
 
     private fun assumeCgroupWritable(limiter: LinuxCpuLimiterService) {
+        limiter.logSupport()
         assumeTrue(
             limiter.supportsLimit(),
-            "Skipping: CPU limiting not supported\n${limiter.supportReport()}"
+            "Skipping: CPU limiting not supported"
         )
 
         // Check if we can write to subtree_control

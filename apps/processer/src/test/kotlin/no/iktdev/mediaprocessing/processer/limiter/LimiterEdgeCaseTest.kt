@@ -6,6 +6,22 @@ import org.junit.jupiter.api.Test
 
 class LimiterEdgeCaseTest {
 
+    private class TestLimiter(fs: FakeFs) : LinuxCpuLimiterService(fs) {
+         override fun supportsLimit(): Boolean = true
+    }
+
+    fun FakeFs.mockCgroupV2Environment() {
+        mkdirs("/sys/fs/cgroup")
+        writeText("/sys/fs/cgroup/cgroup.procs", "1")
+        writeText("/sys/fs/cgroup/cgroup.controllers", "cpu cpuset")
+        writeText("/sys/fs/cgroup/cgroup.subtree_control", "+cpu +cpuset")
+        writeText("/sys/fs/cgroup/cpuset.mems", "0")
+
+        mkdirs("/proc")
+        writeText("/proc/mounts", "cgroup2 /sys/fs/cgroup cgroup2 rw 0 0")
+    }
+
+
     @Test
     fun `limitProcess does nothing when pid is dead`() {
         val fs = FakeFs()
@@ -37,29 +53,26 @@ class LimiterEdgeCaseTest {
 
     @Test
     fun `updateLimit falls back to limitProcess when cgroup missing`() {
-        val fs = FakeFs()
+        val fs = FakeFs().also { it.mockCgroupV2Environment() }
         fs.mkdirs("/proc/1")
         fs.writeText("/proc/1/cgroup", "0::/user.slice")
 
-        val l = LinuxCpuLimiterService(fs)
+        val l = TestLimiter(fs)
 
         l.updateLimit(1, 50)
 
-        assertTrue(fs.exists("/sys/fs/cgroup/mediaprocessing/ffmpeg-1"))
+        assertTrue(fs.exists("/sys/fs/cgroup/processer/ffmpeg-1"))
     }
 
     @Test
     fun `initCpuset falls back to root cpuset mems`() {
-        val fs = FakeFs()
-        fs.mkdirs("/sys/fs/cgroup")
-        fs.writeText("/sys/fs/cgroup/cpuset.mems", "0")
-
+        val fs = FakeFs().also { it.mockCgroupV2Environment() }
         fs.mkdirs("/proc/1")
         fs.writeText("/proc/1/cgroup", "0::/user.slice")
 
-        val l = LinuxCpuLimiterService(fs)
+        val l = TestLimiter(fs)
         l.limitProcess(1, 50)
 
-        assertEquals("0", fs.readText("/sys/fs/cgroup/mediaprocessing/ffmpeg-1/cpuset.mems"))
+        assertEquals("0", fs.readText("/sys/fs/cgroup/processer/ffmpeg-1/cpuset.mems"))
     }
 }

@@ -24,3 +24,9 @@ class LinuxCpuLimitSupport(
     val cgroupMounted: Boolean = false,
     val subtreeControlExists: Boolean = false,
 ): CpuLimitSupport(os = os, supported = supported, reason = reason) {}
+
+class WindowsCpuLimitSupport(
+    os: OperatingSystem = OperatingSystem.WINDOWS,
+    supported: Boolean = false,
+    reason: String? = "Not implemented yet",
+): CpuLimitSupport(os = os, supported = supported, reason = reason) {}

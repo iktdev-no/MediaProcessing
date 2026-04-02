@@ -1,5 +1,8 @@
 package no.iktdev.mediaprocessing.processer.limiter
 
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.WindowsCpuLimitSupport
+
 class WindowsCpuLimiterService : CpuLimiterService {
 
     private fun processExists(pid: Long): Boolean =
@@ -50,5 +53,9 @@ class WindowsCpuLimiterService : CpuLimiterService {
             "-Command",
             "Get-Process -Id $pid | ForEach-Object { \$_.PriorityClass = 'NORMAL' }"
         ).start()
+    }
+
+    override fun detectSupportsCpuLimits(): CpuLimitSupport {
+        return WindowsCpuLimitSupport()
     }
 }

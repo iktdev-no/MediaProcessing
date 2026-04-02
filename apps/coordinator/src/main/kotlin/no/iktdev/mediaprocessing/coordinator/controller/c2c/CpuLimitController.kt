@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller.c2c
 
 import no.iktdev.mediaprocessing.coordinator.ProcesserClient
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,6 +27,11 @@ class CpuLimitController(
     @PostMapping
     fun setCpuLimit(@RequestBody limit: CPULimit): Mono<ResponseEntity<String>> {
         return processerClient.setCpuLimit(limit)
+    }
+
+    @GetMapping("/support")
+    fun getCpuLimitSupport(): Mono<CpuLimitSupport> {
+        return processerClient.getCpuLimitSupport()
     }
 
 
