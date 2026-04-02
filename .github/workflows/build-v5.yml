@@ -1,5 +1,8 @@
 name: Build v5
 
+env:
+  CI: true
+
 on:
   push:
     branches: [ v5 ]

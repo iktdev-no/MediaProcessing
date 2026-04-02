@@ -1,5 +1,9 @@
 name: Build Java App
 
+env:
+  CI: true
+
+
 on:
   workflow_call:
     inputs:

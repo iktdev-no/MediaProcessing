@@ -1,5 +1,8 @@
 name: Build Shared
 
+env:
+  CI: true
+
 on:
   workflow_call:
     inputs:

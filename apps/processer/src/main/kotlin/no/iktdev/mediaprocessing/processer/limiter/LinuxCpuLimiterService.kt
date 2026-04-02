@@ -1,6 +1,9 @@
 package no.iktdev.mediaprocessing.processer.limiter
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.processer.services.fs.IFs
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LinuxCpuLimitSupport
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.concurrent.ConcurrentHashMap
 
@@ -8,8 +11,10 @@ internal open class LinuxCpuLimiterService(
     private val fs: IFs
 ) : CpuLimiterService {
 
+    private val log = KotlinLogging.logger {}
+
     private val rootPath = "/sys/fs/cgroup"
-    private val appRootPath = "$rootPath/mediaprocessing"
+    private val appRootPath =  "$rootPath/processer" // "$rootPath/mediaprocessing"
 
     private val originalCgroups = ConcurrentHashMap<Long, String>()
     internal val assignedCores = ConcurrentHashMap<Long, List<Int>>()
@@ -20,55 +25,82 @@ internal open class LinuxCpuLimiterService(
 
     init {
         ensureRoot()
+        logSupport()
     }
+
+    fun logSupport() {
+        val s = detectSupportsCpuLimits()
+
+        val block = buildString {
+            appendLine("──────────────────────────────────────────────")
+            appendLine(" CPU LIMIT SUPPORT (${s.os})")
+            appendLine("──────────────────────────────────────────────")
+            appendLine(" supported: ${s.supported}")
+            appendLine(" reason: ${s.reason ?: "OK"}")
+
+            if (s is LinuxCpuLimitSupport) {
+                appendLine(" cgroup v2:           ${s.cgroupV2}")
+                appendLine(" cpu controller:      ${s.cpuController}")
+                appendLine(" cpuset controller:   ${s.cpusetController}")
+                appendLine(" cgroup mounted:      ${s.cgroupMounted}")
+                appendLine(" subtree control:     ${s.subtreeControlExists}")
+            }
+
+            appendLine("──────────────────────────────────────────────")
+        }
+
+        log.info { block }
+    }
+
+
+
 
     // ---------------------------------------------------------
     // SUPPORT CHECK
     // ---------------------------------------------------------
 
-    internal open fun supportsLimit(): Boolean =
-        supportDetails().values.all { it }
+    fun supportsLimit(): Boolean =
+        detectSupportsCpuLimits().supported
+
 
     internal open fun isCgroupV2Mounted(): Boolean {
         val mounts = fs.readLines("/proc/mounts") ?: return false
         return mounts.any { it.contains("cgroup2") }
     }
 
-    internal open fun supportDetails(): Map<String, Boolean> {
-        val controllers = "$rootPath/cgroup.controllers"
-        val has = fs.exists(controllers)
+    override fun detectSupportsCpuLimits(): CpuLimitSupport {
+        val controllersPath = "$rootPath/cgroup.controllers"
 
-        if (!has) {
-            return mapOf(
-                "cgroup_v2" to false,
-                "cpu_controller" to false,
-                "cpuset_controller" to false,
-                "cgroup2_mounted" to false,
-                "subtree_exists" to false
+        if (!fs.exists(controllersPath)) {
+            return LinuxCpuLimitSupport(
+                supported = false,
+                reason = "cgroup.controllers not found (not cgroup v2?)"
             )
         }
 
-        val list = fs.readText(controllers)
+        val controllers = fs.readText(controllersPath)
             ?.split(Regex("\\s+"))
             ?.filter { it.isNotBlank() }
             ?: emptyList()
 
-        return mapOf(
-            "cgroup_v2" to true,
-            "cpu_controller" to ("cpu" in list),
-            "cpuset_controller" to ("cpuset" in list),
-            "cgroup2_mounted" to isCgroupV2Mounted(),
-            "subtree_exists" to fs.exists("$rootPath/cgroup.subtree_control")
+        val cpu = "cpu" in controllers
+        val cpuset = "cpuset" in controllers
+        val subtree = fs.exists("$rootPath/cgroup.subtree_control")
+        val mounted = isCgroupV2Mounted()
+
+        val supported = cpu && cpuset && subtree && mounted
+
+        return LinuxCpuLimitSupport(
+            supported = supported,
+            reason = if (supported) null else "Missing required controllers or subtree",
+            cgroupV2 = true,
+            cpuController = cpu,
+            cpusetController = cpuset,
+            cgroupMounted = mounted,
+            subtreeControlExists = subtree
         )
     }
 
-    internal fun supportReport(): String =
-        buildString {
-            appendLine("CPU limiting support:")
-            supportDetails().forEach { (k, v) ->
-                appendLine(" - $k: ${if (v) "OK" else "MISSING"}")
-            }
-        }
 
     // ---------------------------------------------------------
     // ROOT SETUP
