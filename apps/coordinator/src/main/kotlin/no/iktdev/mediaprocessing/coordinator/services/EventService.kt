@@ -84,6 +84,10 @@ class EventService {
         return EventStore.getDeletedSequences(referenceIds)
     }
 
+    fun getAllDeletedSequences(): Set<UUID> {
+        return EventStore.getAllDeletedSequences()
+    }
+
     val taskResultEventTypes: List<String> =
         EventRegistry.getEvents()
             .filter { TaskResultEvent::class.java.isAssignableFrom(it) }

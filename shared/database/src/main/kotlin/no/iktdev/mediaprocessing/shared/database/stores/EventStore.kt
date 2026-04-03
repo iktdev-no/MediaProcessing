@@ -16,6 +16,7 @@ import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import java.time.Instant
@@ -233,6 +234,17 @@ object EventStore: EventStore {
                 .toSet()
         }.getOrDefault(emptySet())
     }
+
+    fun getAllDeletedSequences(): Set<UUID> =
+        withTransaction {
+            EventsTable
+                .select(EventsTable.referenceId)
+                .where { EventsTable.event eq DeleteSequenceEvent::class.getName() }
+                .withDistinctOn(EventsTable.referenceId)
+                .map { UUID.fromString(it[EventsTable.referenceId]) }
+                .toSet()
+        }.getOrDefault(emptySet())
+
 
     fun deleteSequence(referenceId: UUID): UUID {
         val deleteSequenceEvent = DeleteSequenceEvent().usingReferenceId(referenceId)

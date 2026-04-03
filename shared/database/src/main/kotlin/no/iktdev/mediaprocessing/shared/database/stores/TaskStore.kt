@@ -14,6 +14,7 @@ import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
+import java.lang.ScopedValue.where
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -22,7 +23,7 @@ import kotlin.time.toJavaDuration
 
 object TaskStore: TaskStore {
 
-    fun getPagedTasks(query: TaskQuery): Paginated<PersistedTask> =
+    fun getPagedTasks(query: TaskQuery, deletedIds: Set<UUID>? = null): Paginated<PersistedTask> =
         pagedQuery(
             table = TasksTable,
             query = query,
@@ -47,6 +48,11 @@ object TaskStore: TaskStore {
                 query.referenceId?.let { where { TasksTable.referenceId like "%$it%" } }
                 query.from?.let { where { TasksTable.persistedAt greaterEq it } }
                 query.to?.let { where { TasksTable.persistedAt lessEq it } }
+                deletedIds
+                    ?.map(UUID::toString)
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { where { TasksTable.referenceId notInList it } }
+
             },
             mapper = { row ->
                 PersistedTask(

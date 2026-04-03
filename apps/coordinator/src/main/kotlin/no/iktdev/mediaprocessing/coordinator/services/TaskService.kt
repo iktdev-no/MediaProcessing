@@ -19,6 +19,7 @@ class TaskService(
     }
 
     fun getPagedTasks(page: TaskQuery): Paginated<PersistedTask> {
+        val deletedSequences = eventService.getAllDeletedSequences()
         return TaskStore.getPagedTasks(page).let {
             it.copy(items = getNonDeleted(it.items))
         }
