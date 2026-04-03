@@ -6,6 +6,7 @@ import no.iktdev.mediaprocessing.shared.database.LongTextColumnType
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.javatime.timestamp
 import org.jetbrains.exposed.sql.selectAll
@@ -27,6 +28,7 @@ object EventsTable: IntIdTable(name = "EVENTS") {
     fun getWhere(predicate: SqlExpressionBuilder.() -> Op<Boolean>): List<PersistedEvent> {
         return EventsTable.selectAll()
             .where(predicate)
+            .orderBy(EventsTable.id, SortOrder.DESC)
             .map {
                 PersistedEvent(
                     id = it[EventsTable.id].value.toLong(),
