@@ -19,6 +19,9 @@ internal open class LinuxCpuLimiterService(
     private val originalCgroups = ConcurrentHashMap<Long, String>()
     internal val assignedCores = ConcurrentHashMap<Long, List<Int>>()
     private val assignedPercent = ConcurrentHashMap<Long, Int>()
+    private var globalPinnedCores: List<Int>? = null
+    private val manuallyPinned = ConcurrentHashMap<Long, List<Int>>()
+
 
     private var nextCore = 0
     private val coreLock = Any()
@@ -53,11 +56,38 @@ internal open class LinuxCpuLimiterService(
     }
 
 
+    override fun setGlobalPinnedCores(cores: List<Int>?) {
+        globalPinnedCores = cores
+    }
+
+    override fun pinProcessToCores(pid: Long, cores: List<Int>) {
+        manuallyPinned[pid] = cores
+        assignedCores[pid] = cores
+        assignedPercent[pid] = -1
+    }
+
+    override fun getGlobalPinnedCores(): List<Int>? = globalPinnedCores
+    override fun isGlobalPinningActive(): Boolean = globalPinnedCores != null
+
+    override fun getManuallyPinnedCores(pid: Long): List<Int>? = manuallyPinned[pid]
+
+    override fun getAssignedCores(pid: Long): List<Int>? = assignedCores[pid]
+    override fun getCpuCount(): Int = cpuCount()
+    override fun getPercentLimit(pid: Long): Int? = assignedPercent[pid]
+
+    override fun getEffectiveCores(pid: Long): List<Int>? =
+        globalPinnedCores
+            ?: manuallyPinned[pid]
+            ?: assignedCores[pid]
+
+    fun getCpuLimitSupport(): CpuLimitSupport = detectSupportsCpuLimits()
 
 
     // ---------------------------------------------------------
     // SUPPORT CHECK
     // ---------------------------------------------------------
+
+
 
     internal open fun supportsLimit(): Boolean =
         detectSupportsCpuLimits().supported
@@ -234,11 +264,14 @@ internal open class LinuxCpuLimiterService(
     }
 
     private fun getOrAssignCores(pid: Long, percent: Int): List<Int> {
+        globalPinnedCores?.let { return it }          // 1. global
+        manuallyPinned[pid]?.let { return it }        // 2. per-PID
         val existing = assignedCores[pid]
         val prev = assignedPercent[pid]
         return if (existing != null && prev == percent) existing
-        else assignCpuset(pid, percent)
+        else assignCpuset(pid, percent)               // 3. implicit
     }
+
 
     private fun initCpuset(gPath: String) {
         val mems =
@@ -320,8 +353,9 @@ internal open class LinuxCpuLimiterService(
 
         assignedCores.remove(pid)
         assignedPercent.remove(pid)
+        manuallyPinned.remove(pid)
 
-        if (assignedCores.isEmpty() && assignedPercent.isEmpty()) {
+        if (assignedCores.isEmpty() && assignedPercent.isEmpty() && manuallyPinned.isEmpty() && globalPinnedCores == null) {
             synchronized(coreLock) {
                 if (assignedCores.isEmpty()) {
                     nextCore = 0

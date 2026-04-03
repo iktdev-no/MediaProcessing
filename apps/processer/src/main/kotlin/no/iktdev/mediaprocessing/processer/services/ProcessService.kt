@@ -110,4 +110,32 @@ class ProcessService(
             cpuLimiterService.updateLimit(process.pid, cpuLimit.limit)
         }
     }
+
+    fun setGlobalPinnedCores(cores: List<Int>?) =
+        cpuLimiterService.setGlobalPinnedCores(cores)
+
+    fun getGlobalPinnedCores(): List<Int>? =
+        cpuLimiterService.getGlobalPinnedCores()
+
+    fun isGlobalPinningActive(): Boolean =
+        cpuLimiterService.isGlobalPinningActive()
+
+    fun pinProcessToCores(pid: Long, cores: List<Int>) =
+        cpuLimiterService.pinProcessToCores(pid, cores)
+
+    fun getManuallyPinnedCores(pid: Long): List<Int>? =
+        cpuLimiterService.getManuallyPinnedCores(pid)
+
+    fun getAssignedCores(pid: Long): List<Int>? =
+        cpuLimiterService.getAssignedCores(pid)
+
+    fun getEffectiveCores(pid: Long): List<Int>? =
+        cpuLimiterService.getEffectiveCores(pid)
+
+    fun getPercentLimit(pid: Long): Int? =
+        cpuLimiterService.getPercentLimit(pid)
+
+    fun getProcesses(): List<ProcessEntry> =
+        synchronized(lock) { processes.toList() }
+
 }

@@ -81,10 +81,138 @@ internal class CoreAllocationTest {
         assertEquals(run(), run())
     }
 
+    @Test
+    fun `global pinning overrides implicit pinning`() {
+        val l = limiter()
+
+        l.setGlobalPinnedCores(listOf(2, 3))
+
+        val c1 = l.limitAndGetEffective(1, 25)
+        val c2 = l.limitAndGetEffective(2, 50)
+        val c3 = l.limitAndGetEffective(3, 10)
+
+        assertEquals(listOf(2, 3), c1)
+        assertEquals(listOf(2, 3), c2)
+        assertEquals(listOf(2, 3), c3)
+    }
+
+    @Test
+    fun `global pinning overrides per pid pinning`() {
+        val l = limiter()
+
+        l.pinProcessToCores(10, listOf(7))
+        l.setGlobalPinnedCores(listOf(1, 2))
+
+        val c = l.limitAndGetEffective(10, 25)
+
+        assertEquals(listOf(1, 2), c)
+    }
+
+    @Test
+    fun `global pinning applies to all processes`() {
+        val l = limiter()
+
+        l.setGlobalPinnedCores(listOf(4, 5))
+
+        val results = (1..5).map { pid ->
+            l.limitAndGetEffective(pid.toLong(), 30)
+        }
+
+        results.forEach { cores ->
+            assertEquals(listOf(4, 5), cores)
+        }
+    }
+
+    @Test
+    fun `removing global pinning restores implicit pinning`() {
+        val l = limiter()
+
+        val total = l.cpuCount()
+        val coresPerProcess = max(1, (total * 25) / 100)
+
+        l.setGlobalPinnedCores(listOf(8, 9))
+
+        // Under global pinning
+        val g1 = l.limitAndGetEffective(1, 25)
+        assertEquals(listOf(8, 9), g1)
+
+        // Remove global pinning
+        l.setGlobalPinnedCores(null)
+
+        // Now implicit pinning should resume
+        val c1 = l.limitAndGetEffective(2, 25)
+        val c2 = l.limitAndGetEffective(3, 25)
+
+        assertEquals((0 until coresPerProcess).toList(), c1)
+        assertEquals((coresPerProcess until coresPerProcess * 2).toList(), c2)
+    }
+
+    @Test
+    fun `per pid pinning overrides implicit pinning`() {
+        val l = limiter()
+
+        l.pinProcessToCores(10, listOf(4, 5))
+
+        val cores = l.limitAndGetEffective(10, 25)
+
+        assertEquals(listOf(4, 5), cores)
+    }
+
+    @Test
+    fun `per pid pinning is stable`() {
+        val l = limiter()
+
+        l.pinProcessToCores(20, listOf(7))
+
+        val c1 = l.limitAndGetEffective(20, 10)
+        val c2 = l.limitAndGetEffective(20, 50)
+
+        assertEquals(c1, c2)
+        assertEquals(listOf(7), c1)
+    }
+
+    @Test
+    fun `per pid pinning does not affect other processes`() {
+        val l = limiter()
+
+        l.pinProcessToCores(1, listOf(3))
+
+        val c1 = l.limitAndGetEffective(1, 25)
+        val c2 = l.limitAndGetEffective(2, 25)
+
+        assertEquals(listOf(3), c1)
+        assertNotEquals(c1, c2) // implicit pinning for pid 2
+    }
+
+    @Test
+    fun `removeLimit clears per pid pinning`() {
+        val l = limiter()
+
+        l.pinProcessToCores(5, listOf(6))
+
+        val pinned = l.limitAndGetEffective(5, 25)
+        assertEquals(listOf(6), pinned)
+
+        l.removeLimit(5)
+
+        val total = l.cpuCount()
+        val coresPerProcess = max(1, (total * 25) / 100)
+
+        val implicit = l.limitAndGetEffective(5, 25)
+
+        assertEquals((0 until coresPerProcess).toList(), implicit)
+    }
+
 
     private fun LinuxCpuLimiterService.limitProcessAndGetCores(pid: Long, percent: Int): List<Int> {
         this.limitProcess(pid, percent)
         return this.assignedCores[pid] ?: emptyList()
     }
+
+    private fun LinuxCpuLimiterService.limitAndGetEffective(pid: Long, percent: Int): List<Int> {
+        this.limitProcess(pid, percent)
+        return this.getEffectiveCores(pid) ?: emptyList()
+    }
+
 
 }

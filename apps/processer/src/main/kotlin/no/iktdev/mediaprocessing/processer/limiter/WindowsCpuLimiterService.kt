@@ -58,4 +58,18 @@ class WindowsCpuLimiterService : CpuLimiterService {
     override fun detectSupportsCpuLimits(): CpuLimitSupport {
         return WindowsCpuLimitSupport()
     }
+
+    override fun setGlobalPinnedCores(cores: List<Int>?) {}
+    override fun getGlobalPinnedCores(): List<Int>? = null
+    override fun isGlobalPinningActive(): Boolean = false
+
+    override fun pinProcessToCores(pid: Long, cores: List<Int>) {}
+    override fun getManuallyPinnedCores(pid: Long): List<Int>? = null
+
+    override fun getAssignedCores(pid: Long): List<Int>? = null
+    override fun getEffectiveCores(pid: Long): List<Int>? = null
+    override fun getPercentLimit(pid: Long): Int? = null
+
+    override fun getCpuCount(): Int =
+        Runtime.getRuntime().availableProcessors()
 }
