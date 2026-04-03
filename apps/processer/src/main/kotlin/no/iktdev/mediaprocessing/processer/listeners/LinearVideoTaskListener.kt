@@ -16,6 +16,7 @@ import no.iktdev.mediaprocessing.processer.linear.LinearContextFactory
 import no.iktdev.mediaprocessing.processer.linear.LinearProcessor
 import no.iktdev.mediaprocessing.processer.progress.DynamicProgressWeights
 import no.iktdev.mediaprocessing.processer.progress.LinearProgressListener
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import org.jetbrains.annotations.VisibleForTesting
@@ -28,7 +29,8 @@ class LinearVideoTaskListener(
     private val localProgress: LocalProgressCache,
     private val executableConfig: ExecutablesConfig,
     private val fileUtil: FileUtil,
-    private val processerProperties: ProcesserProperties
+    private val processerProperties: ProcesserProperties,
+    private val processService: ProcessService? = null
 ) : VideoTaskListener(TaskType.CPU_INTENSIVE, executableConfig) {
     private val log = KotlinLogging.logger {}
 
@@ -76,7 +78,7 @@ class LinearVideoTaskListener(
             return null
         }
 
-        val processor = LinearProcessor(this, progressListener)
+        val processor = LinearProcessor(this, progressListener, processService)
 
         val videoTrack = processor.processVideo(ctx)
 

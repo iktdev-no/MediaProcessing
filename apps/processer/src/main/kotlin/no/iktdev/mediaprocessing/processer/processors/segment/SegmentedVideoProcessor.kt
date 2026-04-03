@@ -11,11 +11,13 @@ import no.iktdev.mediaprocessing.processer.runners.segment.SegmentEncodeRunner
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.processer.context.SegmentedRunnerContext
 import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 import org.jetbrains.annotations.VisibleForTesting
 
 class SegmentedVideoProcessor(
     private val ffProvider: FfProvider,
-    private val progressListener: SegmentedProgressListener
+    private val progressListener: SegmentedProgressListener,
+    private val processService: ProcessService? = null
 ) {
     private val log = KotlinLogging.logger {}
 
@@ -92,7 +94,8 @@ class SegmentedVideoProcessor(
             ctx.task.taskId,
             segment = segment,
             videoInstructions = ctx.videoInstruction,
-            ffmpegInstance = ffmpeg
+            ffmpegInstance = ffmpeg,
+            processService = processService
         )
 
         when (val result = runner.run()) {

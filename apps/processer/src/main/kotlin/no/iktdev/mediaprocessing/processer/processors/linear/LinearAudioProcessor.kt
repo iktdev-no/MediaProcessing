@@ -10,19 +10,18 @@ import no.iktdev.mediaprocessing.processer.context.LinearRunnerContext
 import no.iktdev.mediaprocessing.processer.processors.AudioProcessor
 import no.iktdev.mediaprocessing.processer.progress.LinearProgressListener
 import no.iktdev.mediaprocessing.processer.runners.AudioEncodeRunner
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 
 class LinearAudioProcessor(
     private val ffProvider: FfProvider,
-    private val progressListener: LinearProgressListener
+    private val progressListener: LinearProgressListener,
+    private val processService: ProcessService? = null
 ): AudioProcessor(ffProvider) {
 
     private val log = KotlinLogging.logger {}
 
 
     suspend fun encodeAudio(ctx: LinearRunnerContext): List<AudioEncodeRunner.AudioEncodePayload> {
-
-
-
         val outputs = mutableListOf<AudioEncodeRunner.AudioEncodePayload>()
 
         val outStore = ctx.intermediateStore.using("audio").apply { mkdirs() }

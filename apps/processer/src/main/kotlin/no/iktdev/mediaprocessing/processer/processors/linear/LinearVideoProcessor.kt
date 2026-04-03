@@ -12,10 +12,12 @@ import no.iktdev.mediaprocessing.processer.listeners.FfTaskListener.FfmpegFailed
 import no.iktdev.mediaprocessing.processer.progress.LinearProgressListener
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.VideoEncodeRunner
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 
 class LinearVideoProcessor(
     private val ffProvider: FfProvider,
-    private val progressListener: LinearProgressListener
+    private val progressListener: LinearProgressListener,
+    private val processService: ProcessService? = null
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -49,7 +51,8 @@ class LinearVideoProcessor(
             ctx.videoInstruction,
             ctx.intermediateStore,
             outputFile = noAudioMidfix,
-            ffmpeg
+            ffmpeg,
+            processService = processService
         )
 
         when (val result = runner.run()) {

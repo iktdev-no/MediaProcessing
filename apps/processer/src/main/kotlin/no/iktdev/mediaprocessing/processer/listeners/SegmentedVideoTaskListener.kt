@@ -16,6 +16,7 @@ import no.iktdev.mediaprocessing.processer.processors.segment.SegmentedAudioProc
 import no.iktdev.mediaprocessing.processer.processors.segment.SegmentedContextFactory
 import no.iktdev.mediaprocessing.processer.processors.segment.SegmentedVideoProcessor
 import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import org.jetbrains.annotations.VisibleForTesting
@@ -28,6 +29,7 @@ class SegmentedVideoTaskListener(
     private val localProgress: LocalProgressCache,
     private val executableConfig: ExecutablesConfig,
     private val fileUtil: FileUtil,
+    private val processService: ProcessService? = null
 ) : VideoTaskListener(TaskType.CPU_INTENSIVE, executableConfig) {
     private val log = KotlinLogging.logger {}
 
@@ -62,7 +64,7 @@ class SegmentedVideoTaskListener(
             localProgress.update(taskId, progress)
         }
 
-        val videoProcessor = SegmentedVideoProcessor(this, progressListener)
+        val videoProcessor = SegmentedVideoProcessor(this, progressListener, processService)
 
         // 1) Probe
         val totalDuration = videoProcessor.probeDuration(ctx.input)

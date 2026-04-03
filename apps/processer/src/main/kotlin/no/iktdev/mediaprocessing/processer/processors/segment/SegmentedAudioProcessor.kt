@@ -12,11 +12,13 @@ import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
 import no.iktdev.mediaprocessing.processer.runners.AudioEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.AudioVideoMergeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 import java.util.UUID
 
 class SegmentedAudioProcessor(
     private val ffProvider: FfProvider,
-    private val progressListener: SegmentedProgressListener
+    private val progressListener: SegmentedProgressListener,
+    private val processService: ProcessService? = null
 ): AudioProcessor(ffProvider) {
     private val log = KotlinLogging.logger {}
 

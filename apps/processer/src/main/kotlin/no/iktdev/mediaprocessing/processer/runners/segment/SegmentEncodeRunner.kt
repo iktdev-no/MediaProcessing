@@ -19,10 +19,10 @@ class SegmentEncodeRunner(
     private val taskId: UUID,
     private val segment: Segment,
     private val videoInstructions: FFmpegInstructions,
-    private val ffmpegInstance: FFmpeg
+    private val ffmpegInstance: FFmpeg,
+    private val processService: ProcessService? = null
 ) : Runner() {
     @Autowired
-    private var processService: ProcessService? = null
     private val log = KotlinLogging.logger {}
 
     fun useWorkFileForSegments(): Boolean {

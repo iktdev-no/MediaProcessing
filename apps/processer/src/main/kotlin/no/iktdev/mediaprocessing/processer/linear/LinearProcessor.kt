@@ -11,10 +11,12 @@ import no.iktdev.mediaprocessing.processer.runners.AudioEncodeRunner
 import no.iktdev.mediaprocessing.processer.runners.AudioVideoMergeRunner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.runners.VideoEncodeRunner
+import no.iktdev.mediaprocessing.processer.services.ProcessService
 
 class LinearProcessor(
     private val ffProvider: FfProvider,
-    private val progressListener: LinearProgressListener
+    private val progressListener: LinearProgressListener,
+    private val processService: ProcessService? = null
 ) {
     private val log = KotlinLogging.logger {}
 
@@ -22,7 +24,7 @@ class LinearProcessor(
     suspend fun processVideo(
         ctx: LinearRunnerContext
     ): VideoEncodeRunner.VideoEncodeResult {
-        return LinearVideoProcessor(ffProvider, progressListener).encodeVideo(ctx)
+        return LinearVideoProcessor(ffProvider, progressListener, processService).encodeVideo(ctx)
     }
 
     suspend fun processAudio(

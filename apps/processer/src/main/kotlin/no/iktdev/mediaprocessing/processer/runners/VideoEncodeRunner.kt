@@ -17,10 +17,9 @@ class VideoEncodeRunner(
     private val videoInstructions: FFmpegInstructions,
     private val outputDirectory: IFile,
     private val outputFile: IFile,
-    private val ffmpegInstance: FFmpeg
+    private val ffmpegInstance: FFmpeg,
+    private val processService: ProcessService? = null
 ): Runner() {
-    @Autowired
-    private var processService: ProcessService? = null
     private val log = KotlinLogging.logger {}
 
     override suspend fun run(): RunnerResult<VideoEncodeResult> {
