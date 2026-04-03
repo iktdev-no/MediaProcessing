@@ -34,7 +34,9 @@ class ProcessService(
     // ---------------------------
 
     private fun ensureInit() {
-        if (initialized) return
+        if (initialized) {
+            return
+        }
         initialized = true
 
         preference.getCpuLimit().takeIf { it.enabled }?.let {
@@ -75,17 +77,23 @@ class ProcessService(
 
     fun addProcess(processEntry: ProcessEntry) {
         synchronized(lock) {
+            log.debug { "Adding process: $processEntry to list" }
             processes.add(processEntry)
         }
 
         if (cpuLimit.enabled) {
+            log.debug() { "Applying CPU limit of ${cpuLimit.limit}% to new process with PID ${processEntry.pid}" }
             cpuLimiterService.limitProcess(processEntry.pid, cpuLimit.limit)
         }
     }
 
     fun removeProcess(pid: Long) {
         synchronized(lock) {
-            processes.removeIf { it.pid == pid }
+            val entryToRemove = processes.find { it.pid == pid }
+            if (entryToRemove != null) {
+                log.debug() { "Removing process: $entryToRemove from list" }
+                processes.remove(entryToRemove)
+            }
         }
 
         cpuLimiterService.removeLimit(pid)
@@ -107,6 +115,7 @@ class ProcessService(
         val snapshot = synchronized(lock) { processes.toList() }
 
         snapshot.forEach { process ->
+            log.debug("Applying CPU limit of ${cpuLimit.limit}% to process with PID ${process.pid}")
             cpuLimiterService.updateLimit(process.pid, cpuLimit.limit)
         }
     }

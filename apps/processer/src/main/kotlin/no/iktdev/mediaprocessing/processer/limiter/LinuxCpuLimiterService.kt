@@ -35,7 +35,7 @@ internal open class LinuxCpuLimiterService(
         val s = detectSupportsCpuLimits()
 
         val block = buildString {
-            appendLine("──────────────────────────────────────────────")
+            appendLine("\n──────────────────────────────────────────────")
             appendLine(" CPU LIMIT SUPPORT (${s.os})")
             appendLine("──────────────────────────────────────────────")
             appendLine(" supported: ${s.supported}")
