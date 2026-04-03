@@ -13,6 +13,7 @@ import org.springframework.context.SmartLifecycle
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 /* ---------------------------------------------------------
@@ -77,7 +78,7 @@ class EventPoller(
 /* ---------------------------------------------------------
    ADMINISTRATOR (STARTER POLLER)
    --------------------------------------------------------- */
-
+@Profile("!dev")
 @Component
 class EventPollerAdministrator(
     private val eventPoller: EventPoller

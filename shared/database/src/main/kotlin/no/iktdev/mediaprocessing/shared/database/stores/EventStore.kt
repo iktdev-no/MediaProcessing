@@ -240,7 +240,7 @@ object EventStore: EventStore {
             EventsTable
                 .select(EventsTable.referenceId)
                 .where { EventsTable.event eq DeleteSequenceEvent::class.getName() }
-                .withDistinctOn(EventsTable.referenceId)
+                .withDistinct(true)
                 .map { UUID.fromString(it[EventsTable.referenceId]) }
                 .toSet()
         }.getOrDefault(emptySet())

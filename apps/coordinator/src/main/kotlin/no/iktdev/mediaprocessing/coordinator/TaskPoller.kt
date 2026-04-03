@@ -14,10 +14,12 @@ import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.util.*
 
+@Profile("!dev")
 @Component
 class TaskPollerAdministrator(
     private val taskPoller: TaskPoller,
@@ -29,7 +31,7 @@ class TaskPollerAdministrator(
     }
 }
 
-
+@Profile("!dev")
 @Service
 class TaskPoller(
     private val reporter: TaskReporter,
