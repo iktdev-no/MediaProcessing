@@ -22,7 +22,7 @@ class SequenceAggregatorService(
     private val eventService: EventService
 ) {
     fun getActiveSequences(): List<SequenceSummary> {
-        val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
+        val allEvents = EventStore.getPersistedEventsAtOrAfter(Instant.EPOCH)
         return getSequenceSummary(allEvents,
             { group: List<PersistedEvent> ->
                 group.none { it.event == CompletedEvent::class.java.simpleName }
@@ -31,7 +31,7 @@ class SequenceAggregatorService(
     }
 
     fun getRecentSequences(limit: Int): List<SequenceSummary> {
-        val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
+        val allEvents = EventStore.getPersistedEventsAtOrAfter(Instant.EPOCH)
         return getSequenceSummary(allEvents).take(limit)
     }
 
