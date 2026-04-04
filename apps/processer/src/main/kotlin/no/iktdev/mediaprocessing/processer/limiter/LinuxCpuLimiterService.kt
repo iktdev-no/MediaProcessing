@@ -14,7 +14,8 @@ internal open class LinuxCpuLimiterService(
     private val log = KotlinLogging.logger {}
 
     private val rootPath = "/sys/fs/cgroup"
-    private val appRootPath =  "$rootPath/processer" // "$rootPath/mediaprocessing"
+    private val appRootPath = "$rootPath/mediaprocessing"
+    private val appPrefix = "processer"
 
     private val originalCgroups = ConcurrentHashMap<Long, String>()
     internal val assignedCores = ConcurrentHashMap<Long, List<Int>>()
@@ -173,7 +174,7 @@ internal open class LinuxCpuLimiterService(
         ProcessHandle.of(pid).map { it.isAlive }.orElse(false)
 
     private fun groupPath(pid: Long) =
-        "$appRootPath/ffmpeg-$pid"
+        "$appRootPath/$appPrefix-ffmpeg-$pid"
 
     private fun movePid(path: String, pid: Long) {
         var delay = 5L

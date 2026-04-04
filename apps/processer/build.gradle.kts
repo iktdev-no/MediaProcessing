@@ -1,3 +1,5 @@
+import java.util.regex.Matcher
+
 plugins {
     id("java")
     kotlin("jvm")
@@ -77,4 +79,57 @@ tasks.bootJar {
 tasks.jar {
     archiveFileName.set("app.jar")
     archiveBaseName.set("app")
+}
+
+tasks.register("syncGovenorScript") {
+    group = "documentation"
+    description = "Embeds governor.sh into all README*.md files between placeholders."
+
+    val script = project.file("governor.sh")
+
+    doLast {
+        if (!script.exists()) error("governor.sh not found")
+
+        val scriptText = script.readText()
+        val startTag = "<!-- GOVENOR_SH_START -->"
+        val endTag = "<!-- GOVENOR_SH_END -->"
+
+        val readmes = project.projectDir
+            .listFiles { file -> file.name.matches(Regex("README(\\.[A-Za-z]+)?\\.md")) }
+            ?.toList()
+            ?: emptyList()
+
+        if (readmes.isEmpty()) {
+            println("No README*.md files found")
+            return@doLast
+        }
+
+        readmes.forEach { readme ->
+            val readmeText = readme.readText()
+
+            if (!readmeText.contains(startTag) || !readmeText.contains(endTag)) {
+                println("Skipping ${readme.name}: missing placeholders")
+                return@forEach
+            }
+
+            // No indent, no trimIndent, no whitespace pollution
+            val replacement = buildString {
+                append(startTag).append("\n")
+                append("```bash\n")
+                append(scriptText)
+                append("\n```\n")
+                append(endTag)
+            }
+
+            val safeReplacement = Matcher.quoteReplacement(replacement)
+
+            val newContent = readmeText.replace(
+                Regex("$startTag[\\s\\S]*?$endTag"),
+                safeReplacement
+            )
+
+            readme.writeText(newContent)
+            println("Updated ${readme.name}")
+        }
+    }
 }
