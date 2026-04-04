@@ -61,7 +61,7 @@ class LimiterEdgeCaseTest {
 
         l.updateLimit(1, 50)
 
-        assertTrue(fs.exists("/sys/fs/cgroup/processer/ffmpeg-1"))
+        assertTrue(fs.exists("/sys/fs/cgroup/mediaprocessing/processer-ffmpeg-1"))
     }
 
     @Test
@@ -73,6 +73,6 @@ class LimiterEdgeCaseTest {
         val l = TestLimiter(fs)
         l.limitProcess(1, 50)
 
-        assertEquals("0", fs.readText("/sys/fs/cgroup/processer/ffmpeg-1/cpuset.mems"))
+        assertEquals("0", fs.readText("/sys/fs/cgroup/mediaprocessing/processer-ffmpeg-1/cpuset.mems"))
     }
 }
