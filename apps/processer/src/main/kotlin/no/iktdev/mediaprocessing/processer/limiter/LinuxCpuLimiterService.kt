@@ -175,13 +175,25 @@ internal open class LinuxCpuLimiterService(
                 ?.filter { it.isNotBlank() }
                 ?.toMutableSet()
                 ?: mutableSetOf()
+            log.info("Found subtree_control controllers: ${currentSet.joinToString(", ")}")
 
-            val changed = currentSet.add("+cpu") or currentSet.add("+cpuset")
+            var requiresUpdate = false
+            if (!currentSet.contains("cpu")) {
+                currentSet.add("+cpu")
+                requiresUpdate = true
+            }
 
-            if (changed) {
+            if (!currentSet.contains("cpuset")) {
+                currentSet.add("+cpuset")
+                requiresUpdate = true
+            }
+
+            if (requiresUpdate) {
                 if (!fs.writeText(subtree, currentSet.joinToString(" "))) {
                     log.error { "Failed to write subtree_control in $root" }
                     return false
+                } else {
+                    log.info { "Updated subtree_control to: ${currentSet.joinToString(", ")}" }
                 }
             }
 
