@@ -218,14 +218,35 @@ internal open class LinuxCpuLimiterService(
         "$appRootPath/$appPrefix-ffmpeg-$pid"
 
     private fun movePid(path: String, pid: Long) {
+        val procsFile = "$path/cgroup.procs"
+
         var delay = 5L
-        repeat(5) {
-            if (fs.writeText("$path/cgroup.procs", pid.toString())) return
+        repeat(5) { attempt ->
+            // Try to write PID into cgroup.procs
+            if (fs.writeText(procsFile, pid.toString())) {
+
+                // Verify PID is actually inside the cgroup
+                val procs = fs.readText(procsFile)
+                    ?.lines()
+                    ?.mapNotNull { it.toLongOrNull() }
+                    ?: emptyList()
+
+                if (procs.contains(pid)) {
+                    log.debug { "PID $pid successfully moved into $path (attempt ${attempt + 1})" }
+                    return
+                } else {
+                    log.error { "PID $pid write succeeded but verification failed on attempt ${attempt + 1}" }
+                }
+            }
+
+            // Retry with exponential backoff
             Thread.sleep(delay)
             delay *= 2
         }
-        println("Failed to move pid=$pid to $path")
+
+        log.error { "Failed to move PID $pid into $path after retries" }
     }
+
 
     // ---------------------------------------------------------
     // CPU COUNT
@@ -343,10 +364,23 @@ internal open class LinuxCpuLimiterService(
             initCpuset(gPath)
 
             fs.writeText("$gPath/cpu.max", cpuQuota(gPath, percent))
+            val verify = fs.readText("$gPath/cpu.max")?.trim()
+            if (verify.isNullOrBlank()) {
+                log.error { "cpu.max verification failed: file empty for $gPath" }
+            } else {
+                log.debug { "cpu.max now = '$verify' for pid=$pid" }
+            }
+
             movePid(gPath, pid)
 
             val cores = getOrAssignCores(pid, percent)
             fs.writeText("$gPath/cpuset.cpus", cores.joinToString(","))
+            val cpus = fs.readText("$gPath/cpuset.cpus")?.trim()
+            if (cpus.isNullOrBlank()) {
+                log.error { "cpuset.cpus verification failed for $gPath" }
+            } else {
+                log.debug { "cpuset.cpus now = '$cpus' for pid=$pid" }
+            }
 
         } catch (e: Exception) {
             println("limit failed pid=$pid: ${e.message}")
