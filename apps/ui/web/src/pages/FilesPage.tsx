@@ -19,12 +19,13 @@ import { useSearchParams } from "react-router-dom";
 import { apiDelete, apiGet } from "../api/client";
 
 import { toast } from "react-toastify";
-import { startProcess } from "../api/media";
+import { startProcess } from "../api/coordinator/media";
 import { BreadcrumbPath } from "../components/BreadcrumbPath";
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { FileContextMenu } from "../components/FileContextMenu";
 import { FileList } from "../components/FileList";
 import { LoadingToast } from "../components/LoadingToast";
+import { useTitle } from "../features/useTitle";
 import type { FileAction, IUiFile, MediaAction } from "../types/types";
 
 /* ───────────────── Helpers ───────────────── */
@@ -59,6 +60,12 @@ export default function FilesPage() {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState<IUiFile | null>(null);
+
+  const { setTitle } = useTitle();
+
+  useEffect(() => {
+    setTitle("Files");
+  }, []);
 
   /* ───── Data loading tied to URL ───── */
 

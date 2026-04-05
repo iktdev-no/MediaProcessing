@@ -16,7 +16,7 @@ import type {
     SubtitleSelectionMode,
 } from "../../../types/transfer-model";
 
-export function SubtitleTab({
+export default function SubtitleTab({
   prefs,
   setPrefs,
 }: {

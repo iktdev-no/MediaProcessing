@@ -7,9 +7,9 @@ import {
 } from "@mui/material";
 import type { CoordinatorPreference } from "../../../types/transfer-model";
 import { FieldSection } from "../../FieldSection";
-import { AudioCodecEditor } from "./AudioCodecEditor";
+import AudioCodecEditor from "./AudioCodecEditor";
 
-export function AudioTab({
+export default function AudioTab({
   prefs,
   setPrefs,
 }: {

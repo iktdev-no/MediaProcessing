@@ -1,5 +1,5 @@
-import type { IUiFile } from "../types/types";
-import { apiGet } from "./client";
+import type { IUiFile } from "../../types/types";
+import { apiGet } from "../client";
 
 export function apiListHome() {
   return apiGet<IUiFile[]>("/files/home");

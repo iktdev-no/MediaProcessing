@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { FieldSection } from "../../FieldSection";
 
-export function VideoTab({
+export default function VideoTab({
   prefs,
   setPrefs,
 }: {

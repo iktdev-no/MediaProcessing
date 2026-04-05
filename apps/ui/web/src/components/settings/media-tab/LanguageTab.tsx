@@ -16,7 +16,7 @@ import type { CoordinatorPreference } from "../../../types/transfer-model";
 import { LANGUAGE_OPTIONS } from "../../../utils/languageList";
 import { LanguageFlag } from "../../../utils/languageToFlag";
 
-export function LanguageTab({
+export default function LanguageTab({
   prefs,
   setPrefs,
 }: {

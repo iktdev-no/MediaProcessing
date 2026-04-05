@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { CoordinatorPreference } from "../../types/transfer-model";
 
-export function usePreferences() {
+export function useCoordinatorPreferences() {
   const [prefs, setPrefs] = useState<CoordinatorPreference | null>(null);
   const [original, setOriginal] = useState<CoordinatorPreference | null>(null);
   const [loading, setLoading] = useState(true);

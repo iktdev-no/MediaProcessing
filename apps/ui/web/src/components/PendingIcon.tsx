@@ -1,8 +1,9 @@
+import { useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 
 export function PendingIcon({
   size = 32,
-  color = "currentColor",
+  color = "inherit",
   duration = 2000,
 
   sandAmount = 1.0,
@@ -12,6 +13,31 @@ export function PendingIcon({
   dripYOffset = 11.5,
   dripHeight = 8,
 }) {
+  const theme = useTheme();
+
+  const muiColors = [
+    "primary",
+    "secondary",
+    "error",
+    "warning",
+    "info",
+    "success",
+  ] as const;
+
+  type MuiColor = (typeof muiColors)[number];
+
+  const resolveColor = () => {
+    if (color === "inherit") return "currentColor";
+
+    if (muiColors.includes(color as MuiColor)) {
+      return theme.palette[color as MuiColor]?.main ?? color;
+    }
+
+    return color; // raw CSS color like "#ff00ff"
+  };
+
+  const resolvedColor = resolveColor();
+
   const [progress, setProgress] = useState(0);
 
   // running → rotating → resetting
@@ -101,7 +127,7 @@ export function PendingIcon({
       {/* OUTLINE */}
       <path
         d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2zm10 14.5V20H8v-3.5l4-4zm-4-5-4-4V4h8v3.5z"
-        fill={color}
+        fill={resolvedColor}
       />
 
       {/* TOP SAND */}
@@ -110,7 +136,7 @@ export function PendingIcon({
         y={2 + (1 - topSand) * topSandMaxHeight}
         width="8"
         height={topSand * topSandMaxHeight}
-        fill={color}
+        fill={resolvedColor}
         mask="url(#topMask)"
         style={{
           transition: animateSand ? "all 0.12s linear" : "none",
@@ -123,7 +149,7 @@ export function PendingIcon({
         y={22 - bottomSand * bottomSandMaxHeight}
         width="8"
         height={bottomSand * bottomSandMaxHeight}
-        fill={color}
+        fill={resolvedColor}
         mask="url(#bottomMask)"
         style={{
           transition: animateSand ? "all 0.12s linear" : "none",
@@ -137,7 +163,7 @@ export function PendingIcon({
           y={dripYOffset}
           width="1"
           height={dripHeight}
-          fill={color}
+          fill={resolvedColor}
           opacity={0.7}
         />
       )}
