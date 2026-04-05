@@ -6,17 +6,18 @@ import { LineageDialog } from "../components/event/EventLinageDialog";
 import { EventsTable } from "../components/event/EventsTable";
 import { FilterChips } from "../components/FilterChips";
 import { Paginator } from "../components/Paginator";
+import { RefreshProgressBar } from "../components/RefreshProgressBar";
 import { eventFilterSchema } from "../features/events/eventFilterSchema";
 import { parseEventFilters } from "../features/events/parseEventFilters";
+import { usePageQuery } from "../features/usePageQuery";
 import { useStorage } from "../features/useStorage";
 import { useTitle } from "../features/useTitle";
 import type { UiEvent } from "../types/types";
-import type { EventQuery, PagedUiEvent } from "../types/webTypes";
+import type { EventQuery } from "../types/webTypes";
 
 export default function EventsPage() {
   const { setTitle } = useTitle();
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
+  const [filters, setFilters] = useState<string[]>([]);
   const [refreshInterval, setRefreshInterval] = useStorage<number>(
     "events-refresh-interval",
     0,
@@ -26,7 +27,6 @@ export default function EventsPage() {
     setTitle("Events");
   }, []);
 
-  const [filters, setFilters] = useState<string[]>([]);
   const [query, setQuery] = useState<EventQuery>({
     page: 0,
     pageSize: 50,
@@ -35,27 +35,18 @@ export default function EventsPage() {
     eventTypes: undefined,
   });
 
-  // 👇 Her definerer du handleBeforeAdd
-  const handleBeforeAdd = (token: string, current: string[]) => {
-    // allow multiple keys
-    if (token.startsWith("key:")) return current;
+  const parsedQuery = useMemo(
+    () => parseEventFilters(filters, query),
+    [filters, query],
+  );
 
-    // allow multiple eventIds
-    if (eventFilterSchema.eventIds.includes(token)) return current;
-
-    // date filters override same type
-    if (token.startsWith("from:")) {
-      return [...current.filter((f) => !f.startsWith("from:")), token];
-    }
-    if (token.startsWith("to:")) {
-      return [...current.filter((f) => !f.startsWith("to:")), token];
-    }
-
-    return current;
-  };
+  const { data, isLoading, isFetching, lastUpdated } = usePageQuery(
+    ["events", parsedQuery],
+    () => getEvents(parsedQuery),
+    refreshInterval,
+  );
 
   const [selected, setSelected] = useState<UiEvent | null>(null);
-
   const [lineageOpen, setLineageOpen] = useState(false);
   const [lineageEvent, setLineageEvent] = useState<UiEvent | null>(null);
 
@@ -64,34 +55,16 @@ export default function EventsPage() {
     setLineageOpen(true);
   }
 
-  const [data, setData] = useState<PagedUiEvent | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  // Parse filters → update query
-  const parsedQuery = useMemo(
-    () => parseEventFilters(filters, query),
-    [filters, query],
-  );
-
-  // Fetch tasks
-  // Fetch tasks når query endres
-  useEffect(() => {
-    setData(null);
-    setIsLoading(true);
-    getEvents(query).then((result) => {
-      setData(result);
-      setIsLoading(false);
-    });
-  }, [query]);
-
   return (
     <Box
-      sx={{
-        height: "100%",
+      style={{
         display: "flex",
         flexDirection: "column",
-        gap: 2,
+        height: "100%",
+        overflow: "hidden",
       }}
     >
+      {/* Header */}
       <Box
         sx={{
           p: 2,
@@ -109,31 +82,30 @@ export default function EventsPage() {
               setFilters(next);
               setQuery((q) => ({ ...q, page: 0 }));
             }}
-            onBeforeAdd={handleBeforeAdd}
+            onBeforeAdd={(token, current) => current}
             suggestions={[...eventFilterSchema.eventIds, "from:", "to:"]}
             keySuggestions={[]}
             keyLabel="Key"
           />
         </Box>
+
         <Box
           sx={{
             display: "flex",
             alignSelf: "start",
             alignItems: "center",
+            flexDirection: "column",
             gap: 2,
             whiteSpace: "nowrap",
           }}
         >
-          <FormControl size="small" sx={{ minWidth: 140 }}>
+          <FormControl size="small" sx={{ minWidth: 140, zIndex: 2 }}>
             <InputLabel id="refresh-label">Auto refresh</InputLabel>
             <Select
               labelId="refresh-label"
               value={refreshInterval}
               label="Auto refresh"
-              onChange={(e) => {
-                const v = Number(e.target.value);
-                setRefreshInterval(v);
-              }}
+              onChange={(e) => setRefreshInterval(Number(e.target.value))}
             >
               <MenuItem value={0}>Never</MenuItem>
               <MenuItem value={5}>5s</MenuItem>
@@ -142,25 +114,24 @@ export default function EventsPage() {
               <MenuItem value={30}>30s</MenuItem>
               <MenuItem value={60}>60s</MenuItem>
             </Select>
-            {refreshInterval > 0 && (
-              <></>
-              /*
-                <RefreshProgressBar
-                  refreshInterval={refreshInterval}
-                  isFetching={isFetching}
-                  sx={{ marginTop: -0.8, zIndex: -1 }}
-                />*/
-            )}
           </FormControl>
+          <RefreshProgressBar
+            refreshInterval={refreshInterval}
+            isFetching={isFetching}
+            sx={{ marginTop: -2.6, zIndex: 1 }}
+          />
         </Box>
       </Box>
+
+      {/* Table */}
       <EventsTable
-        events={data?.items ?? []}
-        loading={isLoading}
+        events={data?.items}
+        loading={isLoading || isFetching}
         onShowDetails={(ev) => setSelected(ev)}
         onShowLineage={(ev) => onShowLineage(ev)}
       />
 
+      {/* Footer */}
       <Box
         position="sticky"
         bottom={0}
@@ -180,10 +151,7 @@ export default function EventsPage() {
             page={data.page}
             size={data.size}
             total={data.total}
-            onPageChange={(page) => {
-              console.log(`New page ${page}`);
-              setQuery((q) => ({ ...q, page }));
-            }}
+            onPageChange={(page) => setQuery((q) => ({ ...q, page }))}
             onSizeChange={(pageSize) =>
               setQuery((q) => ({ ...q, page: 0, pageSize }))
             }
@@ -191,6 +159,7 @@ export default function EventsPage() {
         )}
       </Box>
 
+      {/* Dialogs */}
       <EventDialog
         event={selected}
         open={!!selected}

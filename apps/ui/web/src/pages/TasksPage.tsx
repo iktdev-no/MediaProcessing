@@ -7,11 +7,12 @@ import {
   Select,
   Snackbar,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { cancelTask, getTasks } from "../api/coordinator/tasks";
 import { FilterChips } from "../components/FilterChips";
 import { Paginator } from "../components/Paginator";
+import { RefreshProgressBar } from "../components/RefreshProgressBar";
 import { TaskCard } from "../components/task/TaskCard";
 import { useToast } from "../components/useToast";
 import { parseTaskFilters } from "../features/tasks/parseTaskFilters";
@@ -19,29 +20,21 @@ import {
   knownTaskNames,
   taskFilterSchema,
 } from "../features/tasks/taskFilterSchema";
-import { useAutoRefresh } from "../features/useAutoRefresh";
+import { usePageQuery } from "../features/usePageQuery";
 import { useStorage } from "../features/useStorage";
 import { useTitle } from "../features/useTitle";
 import type { UiTask } from "../types/types";
-import type { PagedUiTask, TaskQuery } from "../types/webTypes";
+import type { TaskQuery } from "../types/webTypes";
 
 const handleBeforeAdd = (token: string, current: string[]) => {
-  // Claimed
-  if (token === "claimed") {
+  if (token === "claimed")
     return [...current.filter((f) => f !== "!claimed"), token];
-  }
-  if (token === "!claimed") {
+  if (token === "!claimed")
     return [...current.filter((f) => f !== "claimed"), token];
-  }
-
-  // Consumed
-  if (token === "consumed") {
+  if (token === "consumed")
     return [...current.filter((f) => f !== "!consumed"), token];
-  }
-  if (token === "!consumed") {
+  if (token === "!consumed")
     return [...current.filter((f) => f !== "consumed"), token];
-  }
-
   return current;
 };
 
@@ -51,14 +44,11 @@ export default function TasksPage() {
     "tasks-refresh-interval",
     0,
   );
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const { setTitle } = useTitle();
+  useEffect(() => setTitle("Tasks"), []);
 
-  useEffect(() => {
-    setTitle("Tasks");
-  }, []);
-
+  const [filters, setFilters] = useState<string[]>([]);
   const [query, setQuery] = useState<TaskQuery>({
     page: 0,
     pageSize: 25,
@@ -66,30 +56,15 @@ export default function TasksPage() {
     order: "DESC",
   });
 
-  const [data, setData] = useState<PagedUiTask | null>(null);
-  const [filters, setFilters] = useState<string[]>([]);
+  const parsedQuery = useMemo(
+    () => parseTaskFilters(filters, query),
+    [filters, query],
+  );
 
-  // Parse filters → update query
-  useEffect(() => {
-    setQuery((prev) => parseTaskFilters(filters, prev));
-  }, [filters]);
-
-  // Fetch tasks
-  // Fetch tasks når query endres
-  useEffect(() => {
-    setData(null);
-    getTasks(query).then(setData);
-  }, [query]);
-
-  // Auto-refresh hvert 3 sekund
-  useAutoRefresh(
-    () => {
-      getTasks(query).then((d) => {
-        setData(d);
-        setLastUpdated(new Date());
-      });
-    },
-    refreshInterval ? refreshInterval * 1000 : null,
+  const { data, isLoading, isFetching, lastUpdated } = usePageQuery(
+    ["tasks", parsedQuery],
+    () => getTasks(parsedQuery),
+    refreshInterval,
   );
 
   const onCancelTask = async (taskId: string) => {
@@ -103,13 +78,12 @@ export default function TasksPage() {
       });
       toast.success("Task cancelled");
     } catch (err: any) {
-      if (err.status !== 404) {
-        toast.error("Cancellation failed");
-      }
+      if (err.status !== 404) toast.error("Cancellation failed");
     }
   };
 
-  if (!data) {
+  // FIRST LOAD ONLY
+  if (isLoading && !data) {
     return (
       <Box
         display="flex"
@@ -132,7 +106,7 @@ export default function TasksPage() {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
 
-      <div
+      <Box
         style={{
           display: "flex",
           flexDirection: "column",
@@ -140,7 +114,7 @@ export default function TasksPage() {
           overflow: "hidden",
         }}
       >
-        {/* Filter + Refresh + Last updated */}
+        {/* Header */}
         <Box
           sx={{
             p: 2,
@@ -167,12 +141,12 @@ export default function TasksPage() {
             />
           </Box>
 
-          {/* Right: Refresh selector + Last updated */}
           <Box
             sx={{
               display: "flex",
               alignSelf: "start",
               alignItems: "center",
+              flexDirection: "column",
               gap: 2,
               whiteSpace: "nowrap",
             }}
@@ -183,11 +157,7 @@ export default function TasksPage() {
                 labelId="refresh-label"
                 value={refreshInterval}
                 label="Auto refresh"
-                onChange={(e) => {
-                  const v = Number(e.target.value);
-                  setRefreshInterval(v);
-                  if (v === 0) setLastUpdated(null);
-                }}
+                onChange={(e) => setRefreshInterval(Number(e.target.value))}
               >
                 <MenuItem value={0}>Never</MenuItem>
                 <MenuItem value={5}>5s</MenuItem>
@@ -197,8 +167,14 @@ export default function TasksPage() {
                 <MenuItem value={60}>60s</MenuItem>
               </Select>
             </FormControl>
+            <RefreshProgressBar
+              refreshInterval={refreshInterval}
+              isFetching={isFetching}
+              sx={{ marginTop: -2.6, zIndex: 1 }}
+            />
           </Box>
         </Box>
+
         {/* Scrollable content */}
         <div
           style={{
@@ -212,7 +188,7 @@ export default function TasksPage() {
             alignContent: "start",
           }}
         >
-          {data.items.map((task: UiTask) => (
+          {data?.items.map((task: UiTask) => (
             <TaskCard
               key={task.id}
               task={task}
@@ -228,7 +204,7 @@ export default function TasksPage() {
           ))}
         </div>
 
-        {/* Sticky footer paginator */}
+        {/* Footer */}
         <Box
           position="sticky"
           bottom={0}
@@ -243,19 +219,20 @@ export default function TasksPage() {
               ? `Oppdatert ${lastUpdated.toLocaleTimeString("no-NO", { hour12: false })}`
               : "Oppdatert aldri"}
           </Box>
+
           {data && (
             <Paginator
               page={data.page}
               size={data.size}
               total={data.total}
               onPageChange={(page) => setQuery((q) => ({ ...q, page }))}
-              onSizeChange={(itemCount) =>
-                setQuery((q) => ({ ...q, page: 0, pageSize: itemCount }))
+              onSizeChange={(pageSize) =>
+                setQuery((q) => ({ ...q, page: 0, pageSize }))
               }
             />
           )}
         </Box>
-      </div>
+      </Box>
     </>
   );
 }
