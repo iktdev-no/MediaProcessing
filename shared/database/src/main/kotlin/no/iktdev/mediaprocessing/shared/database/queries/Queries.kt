@@ -6,10 +6,12 @@ import no.iktdev.mediaprocessing.shared.common.dto.Sort
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
 
+data class ColumnSort(val priority: Int, val column: Column<*>)
+
 fun <T> pagedQuery(
     table: Table,
     query: PagedQuery,
-    sortColumns: Map<String, Column<*>>? = null,
+    sortColumns: Map<String, ColumnSort>? = null,
     applyFilters: QueryBuilder.() -> Unit,
     mapper: (ResultRow) -> T
 ): Paginated<T> {
@@ -27,20 +29,32 @@ fun <T> pagedQuery(
         // 3. Count
         val total = filtered.count()
 
-        // 4. Sorting (optional)
+        // 4. Sorting with priority
         val sorted = if (sortColumns != null) {
-            val sortColumn = sortColumns[query.sort]
+
+            val sortOrder = if (query.order == Sort.ASC) SortOrder.ASC else SortOrder.DESC
+
+            // primær sortering (brukerens valg)
+            val primary = sortColumns[query.sort]
                 ?: error("Unknown sort: ${query.sort}")
 
-            val sortOrder = when (query.order) {
-                Sort.ASC -> SortOrder.ASC
-                Sort.DESC -> SortOrder.DESC
+            // bygg prioritert liste: primær først, så resten etter priority
+            val ordered = listOf(primary) +
+                    sortColumns.values
+                        .filter { it != primary }
+                        .sortedBy { it.priority }
+
+            // konverter til Exposed-par
+            val orderPairs = ordered.map { sort ->
+                sort.column to sortOrder
             }
 
-            filtered.orderBy(sortColumn, sortOrder)
+            filtered.orderBy(*orderPairs.toTypedArray())
+
         } else {
             filtered
         }
+
 
         // 5. Paging
         val paged = sorted
