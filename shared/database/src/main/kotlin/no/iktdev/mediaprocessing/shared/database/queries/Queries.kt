@@ -9,34 +9,46 @@ import org.jetbrains.exposed.sql.*
 fun <T> pagedQuery(
     table: Table,
     query: PagedQuery,
-    sortColumns: Map<String, Column<*>>,
+    sortColumns: Map<String, Column<*>>? = null,
     applyFilters: QueryBuilder.() -> Unit,
     mapper: (ResultRow) -> T
 ): Paginated<T> {
 
     return withTransaction {
 
-        // 1. Start query
-        var base = table.selectAll()
+        // 1. Base query
+        val base = table.selectAll()
 
-        // 2. Apply filters
+        // 2. Filters
         val builder = QueryBuilder(base)
         builder.applyFilters()
-        base = builder.build()
+        val filtered = builder.build()
 
-        // 3. Count before paging
-        val total = base.count()
+        // 3. Count
+        val total = filtered.count()
 
-        // 4. Sorting
-        val sortColumn = sortColumns[query.sort] ?: error("Unknown sort: ${query.sort}")
-        val sortOrder = if (query.order == Sort.ASC) SortOrder.ASC else SortOrder.DESC
+        // 4. Sorting (optional)
+        val sorted = if (sortColumns != null) {
+            val sortColumn = sortColumns[query.sort]
+                ?: error("Unknown sort: ${query.sort}")
 
-        // 5. Paging + mapping
-        val items = base
-            .orderBy(sortColumn, sortOrder)
+            val sortOrder = when (query.order) {
+                Sort.ASC -> SortOrder.ASC
+                Sort.DESC -> SortOrder.DESC
+            }
+
+            filtered.orderBy(sortColumn, sortOrder)
+        } else {
+            filtered
+        }
+
+        // 5. Paging
+        val paged = sorted
             .limit(query.pageSize)
             .offset((query.page * query.pageSize).toLong())
-            .map(mapper)
+
+        // 6. Map
+        val items = paged.map(mapper)
 
         Paginated(
             items = items,
