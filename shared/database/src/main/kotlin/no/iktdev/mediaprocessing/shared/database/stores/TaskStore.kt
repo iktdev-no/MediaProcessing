@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.database.likeAny
+import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
@@ -28,11 +29,12 @@ object TaskStore: TaskStore {
             table = TasksTable,
             query = query,
             sortColumns = mapOf(
-                "taskId" to TasksTable.taskId,
-                "referenceId" to TasksTable.referenceId,
-                "status" to TasksTable.status,
-                "persistedAt" to TasksTable.persistedAt,
-                "lastCheckIn" to TasksTable.lastCheckIn
+                "taskId" to ColumnSort(1, TasksTable.taskId),
+                "referenceId" to ColumnSort(2, TasksTable.referenceId),
+                "id" to ColumnSort(3, TasksTable.id),
+                "status" to ColumnSort(4, TasksTable.status),
+                "persistedAt" to ColumnSort(5, TasksTable.persistedAt),
+                "lastCheckIn" to ColumnSort(6, TasksTable.lastCheckIn)
             ),
             applyFilters = {
                 query.status?.let { statuses ->

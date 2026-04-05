@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.likeAny
+import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
@@ -32,10 +33,9 @@ object EventStore: EventStore {
             table = EventsTable,
             query = query,
             sortColumns = mapOf(
-                "referenceId" to EventsTable.referenceId,
-                "eventId" to EventsTable.eventId,
-                "event" to EventsTable.event,
-                "persistedAt" to EventsTable.persistedAt
+                "referenceId" to ColumnSort(1, EventsTable.referenceId),
+                "id" to ColumnSort(2, EventsTable.id),
+                "persistedAt" to ColumnSort(3, EventsTable.persistedAt)
             ),
             applyFilters = {
 
