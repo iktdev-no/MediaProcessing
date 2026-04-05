@@ -17,7 +17,6 @@ import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import java.time.Instant
@@ -88,6 +87,7 @@ object EventStore: EventStore {
         val result = withTransaction {
             EventsTable
                 .getWhere { EventsTable.referenceId eq referenceId.toString()}
+                .sortedBy { it.id }
         }
         return result.getOrDefault(emptyList())
     }
