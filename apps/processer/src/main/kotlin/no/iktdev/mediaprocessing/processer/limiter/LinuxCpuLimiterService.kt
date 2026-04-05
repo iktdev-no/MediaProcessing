@@ -13,8 +13,9 @@ internal open class LinuxCpuLimiterService(
 
     private val log = KotlinLogging.logger {}
 
-    private val rootPath = "/sys/fs/cgroup"
-    private val appRootPath = "$rootPath/mediaprocessing"
+    private fun getRootPath(): String = "/cgroup"
+
+    private val appRootPath = getRootPath()
     private val appPrefix = "processer"
 
     private val originalCgroups = ConcurrentHashMap<Long, String>()
@@ -100,7 +101,7 @@ internal open class LinuxCpuLimiterService(
     }
 
     override fun detectSupportsCpuLimits(): CpuLimitSupport {
-        val controllersPath = "$rootPath/cgroup.controllers"
+        val controllersPath = "${getRootPath()}/cgroup.controllers"
 
         if (!fs.exists(controllersPath)) {
             return LinuxCpuLimitSupport(
@@ -116,7 +117,7 @@ internal open class LinuxCpuLimiterService(
 
         val cpu = "cpu" in controllers
         val cpuset = "cpuset" in controllers
-        val subtree = fs.exists("$rootPath/cgroup.subtree_control")
+        val subtree = fs.exists("${getRootPath()}/cgroup.subtree_control")
         val mounted = isCgroupV2Mounted()
 
         val supported = cpu && cpuset && subtree && mounted
@@ -137,18 +138,38 @@ internal open class LinuxCpuLimiterService(
     // ROOT SETUP
     // ---------------------------------------------------------
 
-    private fun ensureRoot() {
-        if (!supportsLimit()) return
+    private fun ensureRoot(): Boolean {
+        val root = getRootPath()
 
-        if (!fs.exists(appRootPath)) {
-            fs.mkdirs(appRootPath)
+        // 1. Root must exist (bind mount)
+        if (!fs.exists(root)) {
+            log.error { "cgroup root $root does not exist. Missing bind mount?" }
+            return false
         }
 
-        val control = "$rootPath/cgroup.subtree_control"
-        if (!fs.exists(control)) return
+        // 2. Root must be writable
+        if (!fs.canWrite(root)) {
+            log.error { "cgroup root $root is not writable. Bind mount must be RW." }
+            return false
+        }
 
+        // 3. Must be cgroup v2 (controllers file must exist)
+        val controllersPath = "$root/cgroup.controllers"
+        if (!fs.exists(controllersPath)) {
+            log.error { "cgroup.controllers missing in $root. Not cgroup v2 or wrong mount." }
+            return false
+        }
+
+        // 4. subtree_control must exist
+        val subtree = "$root/cgroup.subtree_control"
+        if (!fs.exists(subtree)) {
+            log.error { "cgroup.subtree_control missing in $root. Cannot enable controllers." }
+            return false
+        }
+
+        // 5. Enable +cpu and +cpuset
         try {
-            val currentSet = fs.readText(control)
+            val currentSet = fs.readText(subtree)
                 ?.trim()
                 ?.split(" ")
                 ?.filter { it.isNotBlank() }
@@ -158,13 +179,21 @@ internal open class LinuxCpuLimiterService(
             val changed = currentSet.add("+cpu") or currentSet.add("+cpuset")
 
             if (changed) {
-                fs.writeText(control, currentSet.joinToString(" "))
+                if (!fs.writeText(subtree, currentSet.joinToString(" "))) {
+                    log.error { "Failed to write subtree_control in $root" }
+                    return false
+                }
             }
 
         } catch (e: Exception) {
-            println("ensureRoot failed: ${e.message}")
+            log.error { "Failed to initialize subtree_control: ${e.message}" }
+            return false
         }
+
+        return true
     }
+
+
 
     // ---------------------------------------------------------
     // PROCESS
@@ -192,7 +221,7 @@ internal open class LinuxCpuLimiterService(
 
     @VisibleForTesting
     internal fun cpuCount(): Int {
-        val raw = fs.readText("$rootPath/cpuset.cpus.effective")
+        val raw = fs.readText("${getRootPath()}/cpuset.cpus.effective")
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
             ?: return Runtime.getRuntime().availableProcessors()
@@ -225,7 +254,7 @@ internal open class LinuxCpuLimiterService(
     internal open fun cpuQuota(gPath: String, percent: Int): String {
         val cpuMaxRaw =
             fs.readText("$gPath/cpu.max")
-                ?: fs.readText("$rootPath/cpu.max")
+                ?: fs.readText("${getRootPath()}/cpu.max")
                 ?: "100000 100000"
 
         val parts = cpuMaxRaw.trim().split(" ")
@@ -277,7 +306,7 @@ internal open class LinuxCpuLimiterService(
     private fun initCpuset(gPath: String) {
         val mems =
             fs.readText("$appRootPath/cpuset.mems")?.trim()?.ifBlank { null }
-                ?: fs.readText("$rootPath/cpuset.mems")?.trim()
+                ?: fs.readText("${getRootPath()}/cpuset.mems")?.trim()
                 ?: "0"
 
         fs.writeText("$gPath/cpuset.mems", mems)
@@ -368,7 +397,7 @@ internal open class LinuxCpuLimiterService(
 
         try {
             if (!original.isNullOrBlank() && alive(pid)) {
-                val target = "$rootPath/${original.removePrefix("/")}"
+                val target = "${getRootPath()}/${original.removePrefix("/")}"
                 if (fs.exists(target)) movePid(target, pid)
             }
 

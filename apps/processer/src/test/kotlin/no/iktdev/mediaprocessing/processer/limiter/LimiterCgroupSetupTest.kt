@@ -16,16 +16,16 @@ class LimiterCgroupSetupTest {
     fun `ensureRoot enables cpu and cpuset controllers without breaking existing`() {
         val fs = FakeFs()
 
-        fs.mkdirs("/sys/fs/cgroup")
+        fs.mkdirs("/cgroup")
 
         // Required for supportsLimit() to return true
-        fs.writeText("/sys/fs/cgroup/cgroup.controllers", "cpu cpuset memory io")
+        fs.writeText("/cgroup/cgroup.controllers", "cpu cpuset memory io")
 
-        fs.writeText("/sys/fs/cgroup/cgroup.subtree_control", "memory io")
+        fs.writeText("/cgroup/cgroup.subtree_control", "memory io")
 
         TestLimiter(fs)
 
-        val content = fs.readText("/sys/fs/cgroup/cgroup.subtree_control") ?: ""
+        val content = fs.readText("/cgroup/cgroup.subtree_control") ?: ""
 
         assertTrue(content.contains("+cpu"))
         assertTrue(content.contains("+cpuset"))
@@ -38,14 +38,14 @@ class LimiterCgroupSetupTest {
     fun `ensureRoot does nothing if controllers already enabled`() {
         val fs = FakeFs()
 
-        fs.mkdirs("/sys/fs/cgroup")
-        fs.writeText("/sys/fs/cgroup/cgroup.subtree_control", "cpu cpuset")
+        fs.mkdirs("/cgroup")
+        fs.writeText("/cgroup/cgroup.subtree_control", "cpu cpuset")
 
-        val before = fs.readText("/sys/fs/cgroup/cgroup.subtree_control")
+        val before = fs.readText("/cgroup/cgroup.subtree_control")
 
         LinuxCpuLimiterService(fs)
 
-        val after = fs.readText("/sys/fs/cgroup/cgroup.subtree_control")
+        val after = fs.readText("/cgroup/cgroup.subtree_control")
 
         assertEquals(before, after)
     }

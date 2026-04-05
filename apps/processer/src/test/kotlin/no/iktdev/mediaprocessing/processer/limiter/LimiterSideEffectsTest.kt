@@ -17,13 +17,13 @@ class LimiterSideEffectsTest {
         fs.writeText("/proc/123/cgroup", "0::/user.slice")
 
         // Governor expects this directory to exist
-        fs.mkdirs("/sys/fs/cgroup/user.slice")
+        fs.mkdirs("/cgroup/user.slice")
 
         val l = TestLimiter(fs)
         l.limitProcess(123, 50)
 
         val writes = fs.writeLog
-            .filter { it.path.startsWith("/sys/fs/cgroup") }
+            .filter { it.path.startsWith("/cgroup") }
 
         assertEquals("cpuset.mems", writes[0].file)
         assertEquals("cpu.max", writes[1].file)
@@ -86,14 +86,14 @@ class LimiterSideEffectsTest {
         fs.writeText("/proc/1/cgroup", "0::/user.slice")
 
         // Governor expects this directory to exist
-        fs.mkdirs("/sys/fs/cgroup/user.slice")
+        fs.mkdirs("/cgroup/user.slice")
 
         val l = TestLimiter(fs)
 
         l.limitProcess(1, 50)
         l.removeLimit(1)
 
-        assertTrue(fs.exists("/sys/fs/cgroup/user.slice/cgroup.procs"))
-        assertFalse(fs.exists("/sys/fs/cgroup/mediaprocessing/ffmpeg-1"))
+        assertTrue(fs.exists("/cgroup/user.slice/cgroup.procs"))
+        assertFalse(fs.exists("/cgroup/mediaprocessing/ffmpeg-1"))
     }
 }

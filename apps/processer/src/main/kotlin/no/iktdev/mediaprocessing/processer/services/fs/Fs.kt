@@ -26,4 +26,8 @@ class Fs: IFs {
 
     override fun deleteRecursively(path: String) =
         File(path).deleteRecursively()
+
+    override fun canWrite(path: String): Boolean {
+        return File(path).canWrite()
+    }
 }

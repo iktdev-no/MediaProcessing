@@ -5,7 +5,7 @@ interface IFs {
     fun readLines(path: String): List<String>?
     fun list(path: String): List<String>?
 
-
+    fun canWrite(path: String): Boolean
     fun appendText(path: String, content: String): Boolean
     fun writeText(path: String, content: String): Boolean
     fun exists(path: String): Boolean

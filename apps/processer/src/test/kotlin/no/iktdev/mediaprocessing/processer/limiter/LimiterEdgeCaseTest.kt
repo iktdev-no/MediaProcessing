@@ -11,14 +11,14 @@ class LimiterEdgeCaseTest {
     }
 
     fun FakeFs.mockCgroupV2Environment() {
-        mkdirs("/sys/fs/cgroup")
-        writeText("/sys/fs/cgroup/cgroup.procs", "1")
-        writeText("/sys/fs/cgroup/cgroup.controllers", "cpu cpuset")
-        writeText("/sys/fs/cgroup/cgroup.subtree_control", "+cpu +cpuset")
-        writeText("/sys/fs/cgroup/cpuset.mems", "0")
+        mkdirs("/cgroup")
+        writeText("/cgroup/cgroup.procs", "1")
+        writeText("/cgroup/cgroup.controllers", "cpu cpuset")
+        writeText("/cgroup/cgroup.subtree_control", "+cpu +cpuset")
+        writeText("/cgroup/cpuset.mems", "0")
 
         mkdirs("/proc")
-        writeText("/proc/mounts", "cgroup2 /sys/fs/cgroup cgroup2 rw 0 0")
+        writeText("/proc/mounts", "cgroup2 /cgroup cgroup2 rw 0 0")
     }
 
 
@@ -44,7 +44,7 @@ class LimiterEdgeCaseTest {
         l.limitProcess(1, 50)
 
         // Simuler at original cgroup er borte
-        fs.deleteRecursively("/sys/fs/cgroup/user.slice")
+        fs.deleteRecursively("/cgroup/user.slice")
 
         assertDoesNotThrow {
             l.removeLimit(1)
@@ -61,7 +61,7 @@ class LimiterEdgeCaseTest {
 
         l.updateLimit(1, 50)
 
-        assertTrue(fs.exists("/sys/fs/cgroup/mediaprocessing/processer-ffmpeg-1"))
+        assertTrue(fs.exists("/cgroup/processer-ffmpeg-1"))
     }
 
     @Test
@@ -73,6 +73,6 @@ class LimiterEdgeCaseTest {
         val l = TestLimiter(fs)
         l.limitProcess(1, 50)
 
-        assertEquals("0", fs.readText("/sys/fs/cgroup/mediaprocessing/processer-ffmpeg-1/cpuset.mems"))
+        assertEquals("0", fs.readText("/cgroup/processer-ffmpeg-1/cpuset.mems"))
     }
 }

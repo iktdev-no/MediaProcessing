@@ -17,7 +17,7 @@ Nedenfor følger den korrekte og anbefalte måten å sette opp dette på.
 
 Dette scriptet oppretter en egen cgroup‑mappe for prosesser‑modulen og gir eierskap til brukeren som kjører containeren (typisk UID 1000):
 
-                <!-- GOVENOR_SH_START -->
+<!-- GOVENOR_SH_START -->
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -131,7 +131,7 @@ echo "  cpuset.cpus: $(cat "$BASE_GROUP/cpuset.cpus" 2>/dev/null || echo '<none>
 
 Du kan kopiere scriptet over manuelt, eller kjøre siste versjon direkte fra repoet:
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/iktdev-no/MediaProcessing/refs/heads/v5/apps/processer/governor.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/iktdev-no/MediaProcessing/refs/heads/v5/apps/processer/install.sh)"
 ```
 
 
@@ -148,20 +148,16 @@ Eksempel:
 In addition to create a cgroup folder, we will also need to mount this into the docker container.
 An example will be given of a docker-compose service definition for the processer, which includes the necessary cgroup mount and configuration to use it.
 ```yaml
-services:
   processer:
     hostname: processer
     restart: always
     container_name: mediaprocessing.processerV5
     image: bskjon/mediaprocessing-processer:v5
-
     networks:
       - mediaprocessing
       - services_service
-
     ports:
       - "192.168.2.250:6082:8080"
-
     environment:
       TZ: ${TIME_ZONE}
       DATABASE_NAME: ${DATABASE_NAME}
@@ -169,32 +165,30 @@ services:
       DATABASE_PORT: ${DATABASE_PORT}
       DATABASE_USERNAME: ${DATABASE_USERNAME}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-
+      #FullLogging: true
     volumes:
       - ${MEDIA_INBOX}:${CONTAINER_INBOX}
       - ${MEDIA_OUTBOX}:${CONTAINER_OUTBOX}
       - ${MEDIA_SCRATCH}:${CONTAINER_SCRATCH}
       - ${MEDIA_INTERMEDIATE}:${CONTAINER_INTERMEDIATE}
-
-      # Delegert cgroup mount – dette er kritisk
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-
+      - ./data/processer/config:/data/config/
       - ./data/processer/logs:/data/logs
-
-    # Viktig: isolerer containerens cgroup-namespace
-    # Noen IDEer kan gi en falsk advarsel om at nøkkelen ikke er kjent.
-    # Docker støtter dette fullt ut.
-    cgroupns: host
-
-    # Må matche UID/GID som eier cgroup-grenen
-    user: "1000:1000"
-
+      - /sys/fs/cgroup/mediaprocessing.slice:/cgroup:rw
+    #      - ./docker-entrypoint.d/:/docker-entrypoint.d/
+    security_opt:
+      - no-new-privileges:true
+    cgroup_parent: mediaprocessing.slice
+    cgroup: host
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/system/ready" ]
       interval: 10s
       timeout: 3s
       retries: 20
       start_period: 30s
+  #    depends_on:
+  #      coordinator:
+  #        condition: service_healthy
+
 ```
 
 ---

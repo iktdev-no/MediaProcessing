@@ -116,6 +116,26 @@ class FakeFs : IFs {
         return true
     }
 
+    override fun canWrite(path: String): Boolean {
+        val p = normalize(path)
+
+        // Hvis path er en fil → skrivbar hvis parent-dir finnes
+        if (files.containsKey(p)) {
+            val parent = parentOf(p)
+            return dirs.contains(parent)
+        }
+
+        // Hvis path er en dir → skrivbar hvis dir finnes
+        if (dirs.contains(p)) {
+            return true
+        }
+
+        // Hvis path ikke finnes → skrivbar hvis parent finnes
+        val parent = parentOf(p)
+        return dirs.contains(parent)
+    }
+
+
     fun dump(): String {
         val sb = StringBuilder()
         sb.appendLine("Dirs:")

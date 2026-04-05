@@ -10,7 +10,7 @@ class CpuMathTest {
         LinuxCpuLimiterService(fs)
 
     private fun setupGroup(fs: FakeFs, pid: Long = 1234): String {
-        val gPath = "/sys/fs/cgroup/mediaprocessing/ffmpeg-$pid"
+        val gPath = "/cgroup/ffmpeg-$pid"
         fs.mkdirs(gPath)
         return gPath
     }
@@ -79,8 +79,8 @@ class CpuMathTest {
     @Test
     fun `cpuCount uses cpuset when available`() {
         val fs = FakeFs()
-        fs.mkdirs("/sys/fs/cgroup")
-        fs.writeText("/sys/fs/cgroup/cpuset.cpus.effective", "0-1")
+        fs.mkdirs("/cgroup")
+        fs.writeText("/cgroup/cpuset.cpus.effective", "0-1")
 
         val l = limiter(fs)
 
@@ -90,8 +90,8 @@ class CpuMathTest {
     @Test
     fun `cpuCount handles invalid cpuset gracefully`() {
         val fs = FakeFs()
-        fs.mkdirs("/sys/fs/cgroup")
-        fs.writeText("/sys/fs/cgroup/cpuset.cpus.effective", "invalid")
+        fs.mkdirs("/cgroup")
+        fs.writeText("/cgroup/cpuset.cpus.effective", "invalid")
 
         val l = limiter(fs)
 
