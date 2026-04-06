@@ -3,6 +3,9 @@ import sys
 import time
 from datetime import datetime
 from threading import Thread
+from types import FrameType
+from typing import Optional,  Dict, Any
+
 import uvicorn
 
 from api.health_api import app as health_app, init_health_api
@@ -10,27 +13,33 @@ from config.database_config import DatabaseConfig
 from db.database import Database
 from utils.logger import logger
 from worker.poller import run_worker
-
-shutdown_flag = False
-
-# Heartbeat state (nå med full backoff-tracking)
-worker_heartbeat = time.time()
-worker_in_backoff = False
-worker_error = None
-
-backoff_entered_at = None
-backoff_exited_at = None
-backoff_entered_human = None
-backoff_exited_human = None
+from sources.registry import init_source_config
 
 
-def handle_shutdown(signum, frame):
+# Global shutdown flag
+shutdown_flag: bool = False
+
+# Heartbeat state
+worker_heartbeat: float = time.time()
+worker_in_backoff: bool = False
+worker_error: Optional[str] = None
+
+backoff_entered_at: Optional[float] = None
+backoff_exited_at: Optional[float] = None
+backoff_entered_human: Optional[str] = None
+backoff_exited_human: Optional[str] = None
+
+
+def handle_shutdown(signum: int, frame: Optional[FrameType]) -> None:
+    """
+    Signal handler for SIGINT/SIGTERM.
+    """
     global shutdown_flag
     logger.info("🛑 Shutdown signal mottatt, avslutter worker...")
     shutdown_flag = True
 
 
-def set_heartbeat(ts, in_backoff=False, error=None):
+def set_heartbeat(ts: float, in_backoff: bool = False, error: Optional[str] = None) -> None:
     """
     Oppdaterer worker-state, inkludert når backoff starter og slutter.
     """
@@ -41,14 +50,14 @@ def set_heartbeat(ts, in_backoff=False, error=None):
     prev: bool = worker_in_backoff
 
     # Går INN i backoff
-    if in_backoff and prev is False:
+    if in_backoff and not prev:
         backoff_entered_at = ts
         backoff_entered_human = datetime.fromtimestamp(ts).isoformat()
         backoff_exited_at = None
         backoff_exited_human = None
 
     # Går UT av backoff
-    if not in_backoff and prev is True:
+    if not in_backoff and prev:
         backoff_exited_at = ts
         backoff_exited_human = datetime.fromtimestamp(ts).isoformat()
 
@@ -57,13 +66,12 @@ def set_heartbeat(ts, in_backoff=False, error=None):
     worker_error = error
 
 
-def get_heartbeat():
+def get_heartbeat() -> Dict[str, Any]:
     """
     Returnerer all metadata health_api trenger.
     """
     now = time.time()
 
-    # Beregn varighet i backoff
     if backoff_entered_at and not backoff_exited_at:
         duration = now - backoff_entered_at
     elif backoff_entered_at and backoff_exited_at:
@@ -86,15 +94,17 @@ def get_heartbeat():
     }
 
 
-def start_health_server():
+def start_health_server() -> None:
     uvicorn.run(health_app, host="0.0.0.0", port=8080, log_level="error")
 
 
-def main():
+def main() -> None:
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
 
     logger.info("🚀 Starter worker-applikasjon")
+    logger.info("🔧 Laster source-config...")
+    init_source_config()
 
     try:
         config = DatabaseConfig.from_env()
@@ -113,7 +123,7 @@ def main():
         run_worker(
             db=db,
             shutdown_flag_ref=lambda: shutdown_flag,
-            heartbeat_ref=set_heartbeat
+            heartbeat_ref=set_heartbeat,
         )
 
     except Exception as e:

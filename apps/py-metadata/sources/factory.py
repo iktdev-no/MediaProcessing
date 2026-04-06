@@ -1,15 +1,17 @@
 # sources/factory.py
 from typing import List
 
-from config.source_activation_loader import load_source_config
 from .mal import Mal
 from .anii import Anii
 from .aniiv2 import AniiV2
+from .imdbV2 import ImdbV2
 from .imdb import Imdb
 from .source import SourceBase
+from .tmdb import Tmdb
+from sources.registry import SOURCE_CONFIG
 
 def get_all_sources(titles: List[str]) -> List[SourceBase]:
-    cfg = load_source_config()
+    cfg = SOURCE_CONFIG  # <--- bruker cached config
 
     sources: List[SourceBase] = []
 
@@ -20,7 +22,13 @@ def get_all_sources(titles: List[str]) -> List[SourceBase]:
         sources.append(Mal(titles))
 
     if cfg.get("imdb", False):
-        sources.append(Imdb(titles))
+        sources.append(ImdbV2(titles))
+
+    if cfg.get("imdbLegacy", False):
+        sources.append(Imdb(titles))      
+
+    if cfg.get("tmdb", False):
+        sources.append(Tmdb(titles))
 
     if cfg.get("anii", False):
         sources.append(Anii(titles))

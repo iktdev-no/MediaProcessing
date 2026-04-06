@@ -1,7 +1,7 @@
 import asyncio
 import time
 import uuid
-from typing import Optional
+from typing import Optional, Callable, Tuple
 
 from db.database import Database
 from db.repository import (
@@ -16,7 +16,19 @@ from utils.logger import logger
 from models.task import MetadataSearchTask, Task
 
 
-def run_iteration(db: Database, worker_id: str, poll_interval: int, heartbeat_ref) -> tuple[int, int]:
+# Type for heartbeat callback
+HeartbeatCallback = Callable[[float, bool, Optional[str]], None]
+
+# Type for shutdown flag callback
+ShutdownFlagCallback = Callable[[], bool]
+
+
+def run_iteration(
+    db: Database,
+    worker_id: str,
+    poll_interval: int,
+    heartbeat_ref: HeartbeatCallback
+) -> Tuple[int, int]:
     try:
         task: Optional[Task] = fetch_next_task(db)
 
@@ -34,8 +46,11 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int, heartbeat_re
             logger.info(f"🔔 Fant task {task.taskId} ({task.task}), claimed by {worker_id}")
 
             try:
-                event: MetadataSearchResultEvent = asyncio.run(process_task(db, task))
-                if event:
+                event: Optional[MetadataSearchResultEvent] = asyncio.run(
+                    process_task(db, task)
+                )
+
+                if event is not None:
                     persist_event_and_mark_consumed(db, event, str(task.taskId))
                     logger.info(f"✅ Task {task.taskId} ferdig prosessert")
                 else:
@@ -60,12 +75,21 @@ def run_iteration(db: Database, worker_id: str, poll_interval: int, heartbeat_re
         return poll_interval, 5
 
 
-def run_worker(db: Database, shutdown_flag_ref=lambda: False, heartbeat_ref=None) -> None:
+def run_worker(
+    db: Database,
+    shutdown_flag_ref: ShutdownFlagCallback = lambda: False,
+    heartbeat_ref: Optional[HeartbeatCallback] = None
+) -> None:
     poll_interval: int = 5
-    worker_id = f"PyMetadata-{uuid.uuid4()}"
+    worker_id: str = f"PyMetadata-{uuid.uuid4()}"
+
+    if heartbeat_ref is None:
+        raise ValueError("heartbeat_ref må være satt")
 
     while not shutdown_flag_ref():
-        sleep_interval, poll_interval = run_iteration(db, worker_id, poll_interval, heartbeat_ref)
+        sleep_interval, poll_interval = run_iteration(
+            db, worker_id, poll_interval, heartbeat_ref
+        )
         time.sleep(sleep_interval)
 
     logger.info("👋 run_worker loop avsluttet")

@@ -1,7 +1,6 @@
 # config/source_priority_loader.py
 
 import json
-import os
 from pathlib import Path
 
 DEFAULT_PRIORITY = {
@@ -27,7 +26,7 @@ def get_priority_config_path() -> Path:
         return Path(__file__).parent / "source_priority.json"
 
 
-def load_source_priority() -> dict:
+def load_source_priority() -> dict[str, int]:
     path = get_priority_config_path()
 
     # Ensure directory exists

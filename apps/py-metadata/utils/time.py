@@ -4,7 +4,7 @@ def utc_now():
     """Returnerer nåværende tid i UTC som en timezone-aware datetime."""
     return datetime.now(timezone.utc)
 
-def parse_mysql_ts(value):
+def parse_mysql_ts(value: str|datetime|None):
     if value is None:
         return None
 

@@ -15,6 +15,7 @@ from models.event import (
 from worker.search_runner import run_search
 from db.repository import mark_failed
 from tests.fakes.fake_db import FakeDB
+from sources.registry import init_source_config
 
 
 def print_summary(results: list[SearchResult], titles: list[str]) -> None:
@@ -117,11 +118,10 @@ async def dry_run():
         persistedAt=utc_now(),
         data=MetadataSearchData(
             searchTitles=[
-                "Chainsaw Man",
-                "Chainsaw Man - S01E01 - Inu to chainsaw"
+                "The Wrecking Crew",
             ],
-            collection="Anime",
-            mediaType="Serie"
+            collection="Crew",
+            mediaType="Movie"
         )
     )
 
@@ -146,4 +146,6 @@ async def dry_run():
 
 
 if __name__ == "__main__":
+    logger.info("🔧 Laster source-config...")
+    init_source_config()
     asyncio.run(dry_run())

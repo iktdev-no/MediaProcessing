@@ -2,11 +2,15 @@
 
 import json
 from pathlib import Path
+import os
+
 
 DEFAULT_CONFIG = {
     "aniiv2": True,
     "mal": True,
     "imdb": True,
+    "imdbLegacy": True,
+    "tmdb": True,
     "anii": False
 }
 
@@ -26,7 +30,7 @@ def get_config_path() -> Path:
         return Path(__file__).parent / "sources.json"
 
 
-def load_source_config() -> dict:
+def load_source_config() -> dict[str, bool]:
     path = get_config_path()
 
     # Ensure directory exists
@@ -37,22 +41,29 @@ def load_source_config() -> dict:
     if not path.exists():
         with open(path, "w", encoding="utf-8") as f:
             json.dump(DEFAULT_CONFIG, f, indent=4)
-        return DEFAULT_CONFIG.copy()
+        config = DEFAULT_CONFIG.copy()
+    else:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                config = json.load(f)
 
-    # Try to load existing config
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            # Ensure all keys exist
+            for key in DEFAULT_CONFIG:
+                if key not in config:
+                    config[key] = DEFAULT_CONFIG[key]
 
-        # Validate keys (optional)
-        for key in DEFAULT_CONFIG:
-            if key not in data:
-                data[key] = DEFAULT_CONFIG[key]
+        except Exception:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(DEFAULT_CONFIG, f, indent=4)
+            config = DEFAULT_CONFIG.copy()
 
-        return data
+    # ---------------------------------------------------------
+    # TMDB auto-disable if API key is missing
+    # ---------------------------------------------------------
+    if not os.getenv("TMDB_API_KEY"):
+        if config.get("tmdb", True):
+            print("[source-loader] TMDB disabled: missing TMDB_API_KEY")
+        config["tmdb"] = False
 
-    except Exception:
-        # If file is corrupted → rewrite with defaults
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(DEFAULT_CONFIG, f, indent=4)
-        return DEFAULT_CONFIG.copy()
+
+    return config

@@ -110,7 +110,7 @@ def _keyword_score(search_keywords: List[str], meta_titles: List[str]) -> float:
     # Straff for metadata-ord som ikke finnes i søket
     for mw in meta_words:
         if mw not in search_set and mw not in GENERIC_WORDS:
-            score -= 15.0
+            score -= 1.0
 
     return score
 

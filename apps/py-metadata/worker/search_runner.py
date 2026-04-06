@@ -11,7 +11,6 @@ from db.metadata_repository import fetch_metadata_by_source_and_id
 async def run_search(db, titles: List[str]) -> List[Metadata]:
     sources = get_all_sources(titles)
     metadata_results: List[Metadata] = []
-
     # 1. First: query IDs for all sources
     for source in sources:
         for title in titles:

@@ -78,7 +78,7 @@ class SourceBase(ABC):
         known_series = {
             "tv", "tv series", "tv mini series", "ona", "ova",
             "special", "music", "series", "short", "video",
-            "episode", "video game"
+            "episode", "video game", "tvSeries"
         }
 
         if t in known_series:
