@@ -47,7 +47,7 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): Coordi
         persistedAt = persistedAt,
         logs = matchingLogs,
         abandoned = TaskLifecycleRules.isAbandoned(consumed, persistedAt, lastCheckIn),
-        avaliableOverrides = overrides,
+        availableOverrides = overrides,
     )
 }
 

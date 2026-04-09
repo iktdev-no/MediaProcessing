@@ -76,7 +76,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val fs = MockFileSystemService().also { listener.fs = it }
         val content = ContentMigrationPlan.SingleContent("/tmp/source", destFile.absolutePath)
 
-        val result = listener.migrateVideo(fs, content)
+        val result = listener.migrateVideo(fs, content, emptyList())
 
         assertEquals(MigrateStatus.Completed, result.status)
         assertEquals("/tmp/dest", result.storedUri)
@@ -100,7 +100,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val content = ContentMigrationPlan.SingleContent("/tmp/source", destFile.absolutePath)
 
         assertThrows<FileServiceException.CopyFailed> {
-            listener.migrateVideo(fs, content)
+            listener.migrateVideo(fs, content, emptyList())
         }
     }
 
@@ -120,7 +120,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val content = ContentMigrationPlan.SingleContent("/tmp/source", destFile.absolutePath)
 
         assertThrows<FileServiceException.VerificationFailed> {
-            listener.migrateVideo(fs, content)
+            listener.migrateVideo(fs, content, emptyList())
         }
     }
 
@@ -136,7 +136,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
     fun migrateVideo_null() {
         val fs = MockFileSystemService().also { listener.fs = it }
 
-        val result = listener.migrateVideo(fs, null)
+        val result = listener.migrateVideo(fs, null, emptyList())
 
         assertEquals(MigrateStatus.NotPresent, result.status)
     }
@@ -157,7 +157,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
     fun migrateSubtitle_empty() {
         val fs = MockFileSystemService().also { listener.fs = it }
 
-        val result = listener.migrateSubtitle(fs, emptyList())
+        val result = listener.migrateSubtitle(fs, emptyList(), emptyList())
 
         assertEquals(1, result.size)
         assertEquals(MigrateStatus.NotPresent, result.first().status)
@@ -176,7 +176,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val fs = MockFileSystemService().also { listener.fs = it }
         val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", "/tmp/b")
 
-        val result = listener.migrateSubtitle(fs, listOf(sub))
+        val result = listener.migrateSubtitle(fs, listOf(sub), emptyList())
 
         assertEquals(MigrateStatus.Completed, result.first().status)
     }
@@ -197,7 +197,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", destFile.absolutePath)
 
         assertThrows<FileServiceException.VerificationFailed> {
-            listener.migrateSubtitle(fs, listOf(sub))
+            listener.migrateSubtitle(fs, listOf(sub), emptyList())
         }
     }
 
@@ -217,7 +217,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val sub = ContentMigrationPlan.SingleSubtitle("en", "/tmp/a", destFile.absolutePath)
 
         assertThrows<FileServiceException.CopyFailed> {
-            listener.migrateSubtitle(fs, listOf(sub))
+            listener.migrateSubtitle(fs, listOf(sub), emptyList())
         }
     }
 
@@ -240,7 +240,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val fs = MockFileSystemService().also { listener.fs = it }
         val cover = ContentMigrationPlan.SingleContent("/tmp/c", destFile.absolutePath)
 
-        val result = listener.migrateCover(fs, cover)
+        val result = listener.migrateCover(fs, cover, emptyList())
 
         assertEquals(MigrateStatus.Completed, result.status)
     }
@@ -261,7 +261,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val cover = ContentMigrationPlan.SingleContent("/tmp/c", destFile.absolutePath)
 
         assertThrows<FileServiceException.VerificationFailed> {
-            listener.migrateCover(fs, cover)
+            listener.migrateCover(fs, cover, emptyList())
         }
     }
 
@@ -281,7 +281,7 @@ class MigrateContentToStoreTaskListenerTest: TestBase() {
         val cover = ContentMigrationPlan.SingleContent("/tmp/c", destFile.absolutePath)
 
         assertThrows<FileServiceException.CopyFailed> {
-            listener.migrateCover(fs, cover)
+            listener.migrateCover(fs, cover, emptyList())
         }
     }
 
