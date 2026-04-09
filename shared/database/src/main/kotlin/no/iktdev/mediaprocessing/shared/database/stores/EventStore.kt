@@ -74,10 +74,10 @@ object EventStore: EventStore {
             }
         )
 
-    override fun getPersistedEventsAtOrAfter(timestamp: Instant): List<PersistedEvent> {
+    override fun getPersistedEventsAfter(timestamp: Instant): List<PersistedEvent> {
         return withTransaction {
             EventsTable.getWhere {
-                EventsTable.persistedAt greaterEq  timestamp
+                EventsTable.persistedAt greater  timestamp
             }
         }.getOrDefault(emptyList())
     }

@@ -1,7 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator
 
-import kotlinx.coroutines.*
-import kotlinx.coroutines.GlobalScope.coroutineContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.annotation.Profile
@@ -11,21 +16,15 @@ import java.time.Instant
 @Component
 @Profile("testDev")
 class DummyEventPoller(
+    private val eventStore: EventStore
 ) : SmartLifecycle {
-    val eventStore = EventStore
 
     private var running = false
     private var job: Job? = null
+
     private var scanFrom: Instant = Instant.EPOCH
 
-    init {
-        println(">>> DummyEventPoller bean CREATED")
-    }
-
-    override fun isAutoStartup(): Boolean = true
-
     override fun start() {
-        println(">>> DummyEventPoller.start() called")
         job = CoroutineScope(Dispatchers.Default).launch {
             runDummyPoller()
         }
@@ -33,7 +32,6 @@ class DummyEventPoller(
     }
 
     override fun stop() {
-        println(">>> DummyEventPoller.stop() called")
         job?.cancel()
         running = false
     }
@@ -44,7 +42,7 @@ class DummyEventPoller(
         println("=== Dummy Poller Started ===")
         println("Initial scanFrom = $scanFrom")
 
-        while (coroutineContext.isActive) {
+        while (currentCoroutineContext().isActive) {
             val events = eventStore.getPersistedEventsAfter(scanFrom)
 
             println("\n--- POLL ---")
@@ -85,4 +83,6 @@ class DummyEventPoller(
             delay(1000)
         }
     }
+
+
 }

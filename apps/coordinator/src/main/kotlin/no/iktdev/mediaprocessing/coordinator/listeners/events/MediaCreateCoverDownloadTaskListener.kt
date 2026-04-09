@@ -3,12 +3,14 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.requireAs
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
 import org.springframework.stereotype.Component
@@ -21,7 +23,7 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event as? MetadataSearchResultEvent ?: return null
+        val useEvent = event.requireQualifiedEntry<MetadataSearchResultEvent>()
         if (useEvent.status != TaskStatus.Completed) {
             log.warn("MetadataResult on ${event.referenceId} did not complete successfully")
             return null

@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.requireEvent
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
 
 @Component
@@ -27,7 +28,7 @@ class MediaDetermineSubtitleTrackTypeListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        val prepareEvent = event as? FilePrepareForWorkResultEvent ?: return null // feil type → ignorér
+        val prepareEvent = event.requireQualifiedEntry<FilePrepareForWorkResultEvent>()
         if (prepareEvent.status != TaskStatus.Completed) {
             return null
         }

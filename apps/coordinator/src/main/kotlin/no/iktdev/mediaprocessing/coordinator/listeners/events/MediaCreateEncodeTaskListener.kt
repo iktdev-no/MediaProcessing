@@ -7,6 +7,7 @@ import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
 import no.iktdev.mediaprocessing.coordinator.toFFmpegVersion
+import no.iktdev.mediaprocessing.ffmpeg.data.ParsedMediaStreams
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.TranscodeDecision
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
@@ -46,8 +47,7 @@ class MediaCreateEncodeTaskListener(
         if (startedEvent.data.operation.none { it == OperationType.Encode }) {
             return null
         }
-
-        val streams = history.getInstanceOf<MediaStreamParsedEvent>()?.data ?: return null
+        val streams = history.requireEventValue<MediaStreamParsedEvent, ParsedMediaStreams> { it.data }
 
         val audioTargets = AudioTargeting(streams.audioStream).getAudioTargets(
             selectedEvent.audioTracks.map { it.toFFmpegVersion() },

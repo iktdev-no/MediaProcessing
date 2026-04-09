@@ -28,7 +28,7 @@ class MediaSelectEncodeTracksListener(
             return null
         }
 
-        val useEvent = history.find { it is MediaStreamParsedEvent } as? MediaStreamParsedEvent ?: return null
+        val useEvent = history.requireEvent<MediaStreamParsedEvent>()
 
 
         val videoTrackIndex = getVideoTrackToUse(useEvent.data.videoStream)

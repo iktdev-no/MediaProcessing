@@ -204,7 +204,9 @@ fun IFile.resolveConflict(): IFile {
     return candidate
 }
 
-fun UtcNow(): Instant = Instant.now()
+fun UtcNow(): Instant =
+    Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS)
+
 
 fun List<Event>.effective(): List<Event> {
     val deletedIds = this
