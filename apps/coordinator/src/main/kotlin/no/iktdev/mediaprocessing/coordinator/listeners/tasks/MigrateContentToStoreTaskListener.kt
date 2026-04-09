@@ -33,10 +33,11 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     override suspend fun onTask(task: Task): Event? {
         val picked = task as? MigrateToContentStoreTask ?: return null
         val fs = getFileSystemService()
+        val overrides = picked.overrides
 
-        val video = migrateVideo(fs, picked.data.videoContent)
-        val subs = migrateSubtitle(fs, picked.data.subtitleContent ?: emptyList())
-        val covers = migrateCover(fs, picked.data.coverContent)
+        val video = migrateVideo(fs, picked.data.videoContent, overrides)
+        val subs = migrateSubtitle(fs, picked.data.subtitleContent ?: emptyList(), overrides)
+        val covers = migrateCover(fs, picked.data.coverContent, overrides)
 
         deleteCache(fs, picked)
 
@@ -79,8 +80,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     // MIGRATION HELPERS
     // -------------------------------------------------------------------------
 
-    private fun migrateFile(fs: FileSystemService, source: IFile, destination: IFile) {
-        if (destination.exists()) {
+    private fun migrateFile(fs: FileSystemService, source: IFile, destination: IFile, overrides: List<MigrateToContentStoreTask.Overrides>) {
+        if (destination.exists() && overrides.none { it == MigrateToContentStoreTask.Overrides.AllowOverwrite }) {
             try {
                 fs.verifyIdentical(source, destination)
                 return
@@ -96,7 +97,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateVideo(
         fs: FileSystemService,
-        content: ContentMigrationPlan.SingleContent?
+        content: ContentMigrationPlan.SingleContent?,
+        overrides: List<MigrateToContentStoreTask.Overrides>
     ): MigrateContentToStoreTaskResultEvent.FileMigration {
 
         if (content == null) {
@@ -106,7 +108,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
         val source = IFile(content.cachedUri)
         val dest = IFile(content.storeUri)
 
-        migrateFile(fs, source, dest)
+        migrateFile(fs, source, dest, overrides)
 
         return MigrateContentToStoreTaskResultEvent.FileMigration(
             storedUri = dest.absolutePath,
@@ -116,7 +118,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateSubtitle(
         fs: FileSystemService,
-        subs: List<ContentMigrationPlan.SingleSubtitle>
+        subs: List<ContentMigrationPlan.SingleSubtitle>,
+        overrides: List<MigrateToContentStoreTask.Overrides>
     ): List<MigrateContentToStoreTaskResultEvent.SubtitleMigration> {
 
         if (subs.isEmpty()) {
@@ -133,7 +136,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
             val source = IFile(sub.cachedUri)
             val dest = IFile(sub.storeUri)
 
-            migrateFile(fs, source, dest)
+            migrateFile(fs, source, dest, overrides)
 
             MigrateContentToStoreTaskResultEvent.SubtitleMigration(
                 language = sub.language,
@@ -145,7 +148,8 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
 
     internal fun migrateCover(
         fs: FileSystemService,
-        cover: ContentMigrationPlan.SingleContent?
+        cover: ContentMigrationPlan.SingleContent?,
+        overrides: List<MigrateToContentStoreTask.Overrides>
     ): MigrateContentToStoreTaskResultEvent.FileMigration {
 
         return cover?.let { cover ->
@@ -159,7 +163,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
                     status = MigrateStatus.Skipped
                 )
             }
-            migrateFile(fs, source, dest)
+            migrateFile(fs, source, dest, overrides)
 
             MigrateContentToStoreTaskResultEvent.FileMigration(
                 storedUri = dest.absolutePath,

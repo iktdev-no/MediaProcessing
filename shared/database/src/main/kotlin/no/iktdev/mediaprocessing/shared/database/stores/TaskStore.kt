@@ -15,6 +15,7 @@ import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.lang.ScopedValue.where
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -22,7 +23,7 @@ import java.util.*
 import kotlin.time.Duration
 import kotlin.time.toJavaDuration
 
-object TaskStore: TaskStore {
+object TaskStore : TaskStore {
 
     fun getPagedTasks(query: TaskQuery, deletedIds: Set<UUID>? = null): Paginated<PersistedTask> =
         pagedQuery(
@@ -74,7 +75,6 @@ object TaskStore: TaskStore {
         )
 
 
-
     override fun persist(task: Task): Boolean {
         val asData = WGson.toJson(task)
         val taskName = task::class.simpleName ?: run {
@@ -91,6 +91,44 @@ object TaskStore: TaskStore {
             }
         }.isSuccess
     }
+
+    fun updateTask(task: Task): Boolean {
+        val asData = WGson.toJson(task)
+        return withTransaction {
+            TasksTable.update({
+                (TasksTable.taskId eq task.taskId.toString()) and
+                        (TasksTable.referenceId eq task.referenceId.toString()) and
+                        (
+                                // Pending: kun hvis ingen jobber med den
+                                (
+                                        (TasksTable.status eq TaskStatus.Pending) and
+                                                (TasksTable.claimed eq false) and
+                                                (TasksTable.consumed eq false)
+                                        )
+                                        or
+                                        // Failed: alltid claimed=true, consumed=true
+                                        (
+                                                (TasksTable.status eq TaskStatus.Failed) and
+                                                        (TasksTable.claimed eq true) and
+                                                        (TasksTable.consumed eq true)
+                                                )
+                                        or
+                                        // Cancelled: alltid lov
+                                        (
+                                                TasksTable.status eq TaskStatus.Cancelled
+                                                )
+                                )
+
+
+            }) {
+                it[data] = asData
+                it[claimed] = false
+                it[consumed] = false
+                it[lastCheckIn] = null
+            }
+        }.isSuccess
+    }
+
 
     override fun findByTaskId(taskId: UUID): PersistedTask? {
         return withTransaction {
@@ -145,7 +183,7 @@ object TaskStore: TaskStore {
         return withTransaction {
             TasksTable.update({
                 (TasksTable.taskId eq taskId.toString()) and
-                (TasksTable.claimed eq false)
+                        (TasksTable.claimed eq false)
             }) {
                 it[claimed] = true
                 it[claimedBy] = workerId
@@ -179,9 +217,9 @@ object TaskStore: TaskStore {
         withTransaction {
             TasksTable.update({
                 (TasksTable.claimed eq true) and
-                (TasksTable.consumed eq false) and
-                (TasksTable.lastCheckIn.isNotNull()) and
-                (TasksTable.lastCheckIn less expirationTime)
+                        (TasksTable.consumed eq false) and
+                        (TasksTable.lastCheckIn.isNotNull()) and
+                        (TasksTable.lastCheckIn less expirationTime)
             }) {
                 it[claimed] = false
                 it[claimedBy] = null

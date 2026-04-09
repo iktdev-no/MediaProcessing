@@ -17,5 +17,6 @@ data class CoordinatorTaskDto(
     val persistedAt: Instant,
     val logs: List<String> = emptyList(),
     val abandoned: Boolean,
+    val avaliableOverrides: List<String> = emptyList()
 )
 

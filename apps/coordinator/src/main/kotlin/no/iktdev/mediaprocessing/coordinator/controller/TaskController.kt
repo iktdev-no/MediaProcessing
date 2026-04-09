@@ -1,6 +1,5 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
-
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressManagerService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressTranslatorService
@@ -18,9 +17,12 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Mono
 import java.util.*
 
 @RestController
@@ -31,10 +33,12 @@ class TaskController(
     private val progressManagerService: ProgressManagerService
 ) {
 
+
     @GetMapping("/names")
     fun getTaskNames(): List<String> {
         return TaskRegistry.getTasks().map { it.simpleName }
     }
+
 
     @GetMapping("/active")
     fun getActiveTasks(): List<CoordinatorTaskDto> {
@@ -50,7 +54,6 @@ class TaskController(
 
         return paginatedTasks.map { it.toCoordinatorTransferDto(logEvents) }
     }
-
 
 
     @GetMapping("/{id}")
@@ -94,10 +97,18 @@ class TaskController(
             )
         )
     }
+
+    @PatchMapping("/{taskId}/override")
+    fun setTaskOverrides(@PathVariable taskId: UUID, @RequestBody overrides: List<String>): Mono<Boolean> {
+        return Mono.just(taskService.setTaskOverrides(taskId, overrides))
+    }
+
+
     @GetMapping("/{taskId}/reset/force")
     fun resetTaskForce(@PathVariable taskId: UUID): ResponseEntity<ResetTaskResponse> {
         return resetTask(taskId, true)
     }
+
 
     @GetMapping("/progress/all")
     fun getAllProgress(): List<Progress> {

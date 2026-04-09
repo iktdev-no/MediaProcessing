@@ -1,10 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
 import no.iktdev.eventi.models.store.PersistedTask
+import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 import java.util.*
 
 
@@ -52,6 +54,11 @@ class TaskService(
 
         // 3. Filtrer bort tasks som tilhører slettede sekvenser
         return tasks.filterNot { it.referenceId in deleted }
+    }
+
+    fun setTaskOverrides(taskId: UUID, overrides: List<String>): Boolean {
+        val task = TaskStore.findByTaskId(taskId)?.toTask() ?: return false
+        return eventService.createOverrideRequestEvent(task.referenceId, taskId, task.metadata.derivedFromId, overrides)
     }
 
 }

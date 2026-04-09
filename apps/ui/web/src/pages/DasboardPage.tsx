@@ -4,12 +4,12 @@ import { getCoordinatorHealth } from "../api/coordinator/health";
 
 // MUI
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Grid,
-    Stack,
-    Typography,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Grid,
+  Stack,
+  Typography,
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -20,10 +20,10 @@ import { StoragePanel } from "../components/dashboard/StoragePanel";
 import { TaskOverview } from "../components/dashboard/TaskOverview";
 import { useTitle } from "../features/useTitle";
 import type {
-    CoordinatorHealth,
-    DiskInfo,
-    EventRate,
-    SequenceHealth,
+  CoordinatorHealth,
+  DiskInfo,
+  EventRate,
+  SequenceHealth,
 } from "../types/transfer-model";
 
 // --- TASK OVERVIEW ---

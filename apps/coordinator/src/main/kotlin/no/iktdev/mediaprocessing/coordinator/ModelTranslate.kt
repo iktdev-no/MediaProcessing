@@ -3,11 +3,13 @@ package no.iktdev.mediaprocessing.coordinator
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.models.store.PersistedTask
+import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.ffmpeg.model.SelectedAudioTracks
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
@@ -29,6 +31,8 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): Coordi
         .filter { log -> log.ids.contains(taskId) }
         .map { it.logFile }
 
+    val overrides = this.getOverrides()
+
     return CoordinatorTaskDto(
         id = id,
         referenceId = referenceId,
@@ -42,9 +46,20 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): Coordi
         lastCheckIn = lastCheckIn,
         persistedAt = persistedAt,
         logs = matchingLogs,
-        abandoned = TaskLifecycleRules.isAbandoned(consumed, persistedAt, lastCheckIn)
+        abandoned = TaskLifecycleRules.isAbandoned(consumed, persistedAt, lastCheckIn),
+        avaliableOverrides = overrides,
     )
 }
+
+fun PersistedTask.getOverrides(): List<String> {
+    return when (val task = this.toTask()) {
+        is MigrateToContentStoreTask -> {
+            task.overrides.map { it.name }
+        }
+        else -> emptyList()
+    }
+}
+
 
 fun Event.extractPayload(): Map<String, Any?>? {
     val ignored = setOf("referenceId", "eventId", "metadata")

@@ -6,6 +6,9 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 object EventRegistry {
     fun getEvents(): List<Class<out Event>> {
         return listOf(
+            AlterOverrideEvent::class.java,
+            AlteredOverrideEvent::class.java,
+
             CollectedEvent::class.java,
             CompletedEvent::class.java,
             ContinuationSummaryEvent::class.java,

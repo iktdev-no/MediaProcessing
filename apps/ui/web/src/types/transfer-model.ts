@@ -18,6 +18,12 @@ export interface CoordinatorHealth {
   status: CoordinatorHealthStatus;
 }
 
+export interface ProcessEntry {
+  pid: number;
+  processType: ProcessType;
+  taskId: string;
+}
+
 export interface DeleteResultFailure {
   type: "DeleteResultFailure";
   message: string;
@@ -123,6 +129,8 @@ export interface EventRate {
   lastMinute: number;
 }
 
+export type ProcessType = "LINEAR_VIDEO_ENCODE" | "LINEAR_AUDIO_ENCODE" | "SEGMENTED_VIDEO_ENCODE" | "SEGMENTED_AUDIO_ENCODE"
+
 export interface SequenceHealth {
   age: string;
   eventCount: number;
@@ -133,6 +141,23 @@ export interface SequenceHealth {
   overdueDuration: string;
   referenceId: string;
   startTime: string;
+}
+
+export interface WindowsCpuLimitSupport {
+  os: OperatingSystem;
+  reason: string | null;
+  supported: boolean;
+}
+
+export interface LinuxCpuLimitSupport {
+  cgroupMounted: boolean;
+  cgroupV2: boolean;
+  cpuController: boolean;
+  cpusetController: boolean;
+  subtreeControlExists: boolean;
+  os: OperatingSystem;
+  reason: string | null;
+  supported: boolean;
 }
 
 export interface DeleteResultSuccess {
@@ -173,8 +198,15 @@ export interface SimpleProgress {
   taskId: string;
 }
 
+export interface CpuLimitSupport {
+  os: OperatingSystem;
+  reason: string | null;
+  supported: boolean;
+}
+
 export interface CoordinatorTaskDto {
   abandoned: boolean;
+  avaliableOverrides: string[];
   claimed: boolean;
   claimedBy: string | null;
   consumed: boolean;
@@ -232,6 +264,13 @@ export interface MetadataDto {
   derivedFromEventIds: string[] | null;
 }
 
+export interface ProcessCoreInfo {
+  assigned: number[] | null;
+  effective: number[] | null;
+  manual: number[] | null;
+  percent: number | null;
+}
+
 export interface ApiResponse {
   message: string;
   ok: boolean;
@@ -252,6 +291,8 @@ export interface LineageNode {
   parents: string[];
   persistedAt: string | null;
 }
+
+export type OperatingSystem = "LINUX" | "WINDOWS" | "MACOS" | "OTHER"
 
 export type CurrentState = "Continuing" | "OnHold"
 

@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.AlterOverrideEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultFailure
@@ -140,5 +141,19 @@ class EventService {
         }
     }
 
+    fun createOverrideRequestEvent(referenceId: UUID, taskId: UUID, derivedOf: Set<UUID>?, overrides: List<String>): Boolean {
+        try {
+            val alterEvent = AlterOverrideEvent(taskId, overrides)
+                .apply {
+                    metadata.derivedFromEventId(derivedOf ?: emptySet())
+                }
+                .usingReferenceId(referenceId)
+            EventStore.persist(alterEvent)
+            return true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
+        }
+    }
 
 }

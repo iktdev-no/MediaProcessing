@@ -59,6 +59,14 @@ class CoordinatorTaskService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<ResetTaskResponse>() {})
 
+    fun setTaskOverrides(taskId: UUID, overrides: List<String>): Mono<Void> =
+        coordinatorWebClient.patch()
+            .uri("/tasks/$taskId/override")
+            .bodyValue(overrides)
+            .retrieve()
+            .bodyToMono(Void::class.java)
+
+
     fun getAllProgress(): Mono<List<Progress>> =
         coordinatorWebClient.get()
             .uri("/tasks/progress/all")
