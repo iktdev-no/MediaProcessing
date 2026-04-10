@@ -12,7 +12,7 @@ class InMemoryEventStore : EventStore {
     private val persisted = mutableListOf<PersistedEvent>()
     private var nextId = 1L
 
-    override fun getPersistedEventsAtOrAfter(timestamp: Instant): List<PersistedEvent> =
+    override fun getPersistedEventsAfter(timestamp: Instant): List<PersistedEvent> =
         persisted.filter { it.persistedAt > timestamp }
 
     override fun getPersistedEventsFor(referenceId: UUID): List<PersistedEvent> =
