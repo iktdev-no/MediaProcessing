@@ -37,7 +37,7 @@ class AlterOverrideEventListener(private val taskStore: TaskStore = TaskStore): 
         }
 
         return if (success) {
-            AlteredOverrideEvent(task.taskId)
+            AlteredOverrideEvent(task.taskId).derivedOf(event)
         } else {
             log.warn("Could not apply alter override")
             null

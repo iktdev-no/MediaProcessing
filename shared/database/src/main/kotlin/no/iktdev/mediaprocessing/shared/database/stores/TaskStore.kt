@@ -121,6 +121,7 @@ object TaskStore : TaskStore {
 
 
             }) {
+                it[status] = TaskStatus.Pending
                 it[data] = asData
                 it[claimed] = false
                 it[consumed] = false
