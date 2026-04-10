@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
+import mu.KotlinLogging
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
@@ -14,6 +15,7 @@ import java.util.*
 class TaskService(
     private val eventService: EventService
 ) {
+    private val log = KotlinLogging.logger {}
 
 
     fun getActiveTasks(): List<PersistedTask> {
@@ -57,7 +59,10 @@ class TaskService(
     }
 
     fun setTaskOverrides(taskId: UUID, overrides: List<String>): Boolean {
-        val task = TaskStore.findByTaskId(taskId)?.toTask() ?: return false
+        val task = TaskStore.findByTaskId(taskId)?.toTask() ?: run {
+            log.error("Could not find task with id=$taskId")
+            return false
+        }
         return eventService.createOverrideRequestEvent(task.referenceId, taskId, task.metadata.derivedFromId, overrides)
     }
 

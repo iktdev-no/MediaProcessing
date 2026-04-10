@@ -8,6 +8,7 @@ import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.AlterOverrideEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.AlteredOverrideEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 
@@ -19,7 +20,7 @@ class AlterOverrideEventListener(private val taskStore: TaskStore = TaskStore): 
         event: Event,
         history: List<Event>
     ): Event? {
-        val alterEvent = event.requireAs<AlterOverrideEvent>()
+        val alterEvent = event.requireQualifiedEntry<AlterOverrideEvent>()
         val persistedTask = taskStore.findByTaskId(alterEvent.targetEventId)
         if (persistedTask == null) {
             log.error("Event ${alterEvent.targetEventId} not found in tasks")
@@ -37,18 +38,28 @@ class AlterOverrideEventListener(private val taskStore: TaskStore = TaskStore): 
 
         return if (success) {
             AlteredOverrideEvent(task.taskId)
-        } else null
+        } else {
+            log.warn("Could not apply alter override")
+            null
+        }
     }
 
     fun applyOverrideToMigrateContentStoreTask(task: MigrateToContentStoreTask, alterOverrideEvent: AlterOverrideEvent): Boolean {
         val overrides = alterOverrideEvent.overrides.mapNotNull { it -> try {
             MigrateToContentStoreTask.Overrides.valueOf(it)
-        } catch (e: IllegalArgumentException) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             log.error("$it is unsupported for task ${task.taskId}")
             null
         }
         }
         task.overrides = overrides
-        return taskStore.updateTask(task)
+        return taskStore.updateTask(task).also {
+            if (it) {
+                log.info("$task is updated")
+            } else {
+                log.error("$task is update failed")
+            }
+        }
     }
 }
