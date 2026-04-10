@@ -1,88 +1,103 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.GlobalScope.coroutineContext
+import no.iktdev.eventi.events.EventDispatcher
+import no.iktdev.eventi.events.EventListener
+import no.iktdev.eventi.events.EventPollerImplementation
+import no.iktdev.eventi.events.SequenceDispatchQueue
+import no.iktdev.eventi.lifecycle.LifecycleStore
+import no.iktdev.eventi.models.DispatchResult
+import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.context.SmartLifecycle
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.time.Instant
+
+/* ---------------------------------------------------------
+   CONFIG: Beans for dispatcher + queue
+   --------------------------------------------------------- */
+
+@Configuration
+class EventiCoordinatorConfig {
+
+    @Bean
+    fun sequenceDispatchQueue(lifecycleStore: LifecycleStore): SequenceDispatchQueue =
+        SequenceDispatchQueue(
+            maxConcurrency = 8,
+            lifecycleStore = lifecycleStore
+        )
+
+    @Bean
+    fun overrideDispatcher(lifecycleStore: LifecycleStore): OverrideDispatcher =
+        OverrideDispatcher(
+            eventStore = EventStore,
+            lifecycleStore = lifecycleStore
+        )
+}
+
+/* ---------------------------------------------------------
+   DISPATCHER OVERRIDE
+   --------------------------------------------------------- */
+
+class OverrideDispatcher(
+    eventStore: EventStore,
+    lifecycleStore: LifecycleStore
+) : EventDispatcher(eventStore, lifecycleStore) {
+
+    override fun onDispatched(
+        event: Event,
+        listener: EventListener,
+        result: DispatchResult,
+        message: String?
+    ) {
+        super.onDispatched(event, listener, result, message)
+        // custom logic if needed
+    }
+}
+
+/* ---------------------------------------------------------
+   EVENT POLLER
+   --------------------------------------------------------- */
 
 @Component
-@Profile("testDev")
-class DummyEventPoller(
+@DependsOn("ExposedInit")
+class EventPoller(
+    private val lifecycleStore: LifecycleStore,
+    private val sequenceDispatchQueue: SequenceDispatchQueue,
+    private val overrideDispatcher: OverrideDispatcher
+) : EventPollerImplementation(
+    eventStore = EventStore,
+    dispatchQueue = sequenceDispatchQueue,
+    lifecycleStore = lifecycleStore,
+    dispatcher = overrideDispatcher
+)
+
+/* ---------------------------------------------------------
+   ADMINISTRATOR (STARTER POLLER)
+   --------------------------------------------------------- */
+@Profile("!dev")
+@Component
+class EventPollerAdministrator(
+    private val eventPoller: EventPoller
 ) : SmartLifecycle {
-    val eventStore = EventStore
 
     private var running = false
     private var job: Job? = null
-    private var scanFrom: Instant = Instant.EPOCH
-
-    init {
-        println(">>> DummyEventPoller bean CREATED")
-    }
-
-    override fun isAutoStartup(): Boolean = true
 
     override fun start() {
-        println(">>> DummyEventPoller.start() called")
         job = CoroutineScope(Dispatchers.Default).launch {
-            runDummyPoller()
+            eventPoller.start()
         }
         running = true
     }
 
     override fun stop() {
-        println(">>> DummyEventPoller.stop() called")
         job?.cancel()
         running = false
     }
 
     override fun isRunning(): Boolean = running
-
-    private suspend fun runDummyPoller() {
-        println("=== Dummy Poller Started ===")
-        println("Initial scanFrom = $scanFrom")
-
-        while (coroutineContext.isActive) {
-            val events = eventStore.getPersistedEventsAfter(scanFrom)
-
-            println("\n--- POLL ---")
-            println("scanFrom = $scanFrom")
-            println("found    = ${events.size}")
-
-            if (events.isEmpty()) {
-                println("No events → bumping scanFrom by 1ns")
-                scanFrom = scanFrom.plusNanos(1)
-                delay(1000)
-                continue
-            }
-
-            events.forEach { ev ->
-                println("Event ${ev.id}")
-                println("  persistedAt = ${ev.persistedAt}")
-                println("  referenceId = ${ev.referenceId}")
-            }
-
-            val maxTs = events.maxOf { it.persistedAt }
-
-            when {
-                maxTs > scanFrom -> {
-                    println("→ bump scanFrom to $maxTs")
-                    scanFrom = maxTs
-                }
-                maxTs == scanFrom -> {
-                    println("→ livelock detected: bumping scanFrom by 1ns")
-                    scanFrom = scanFrom.plusNanos(1)
-                }
-                maxTs < scanFrom -> {
-                    println("🔥 ERROR: DB returned event older than scanFrom!")
-                    println("scanFrom = $scanFrom")
-                    println("maxTs    = $maxTs")
-                }
-            }
-
-            delay(1000)
-        }
-    }
 }
