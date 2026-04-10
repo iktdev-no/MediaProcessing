@@ -33,7 +33,7 @@ class MigrateContentToStoreTaskListener : TaskListener(TaskType.IO_INTENSIVE) {
     override suspend fun onTask(task: Task): Event? {
         val picked = task as? MigrateToContentStoreTask ?: return null
         val fs = getFileSystemService()
-        val overrides = picked.overrides
+        val overrides = picked.overrides ?: emptyList()
 
         val video = migrateVideo(fs, picked.data.videoContent, overrides)
         val subs = migrateSubtitle(fs, picked.data.subtitleContent ?: emptyList(), overrides)

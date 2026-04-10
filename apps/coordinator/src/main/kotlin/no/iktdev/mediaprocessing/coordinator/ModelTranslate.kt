@@ -55,7 +55,7 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): Coordi
 fun PersistedTask.getOverrides(): Overrides? {
     return when (val task = this.toTask()) {
         is MigrateToContentStoreTask -> {
-            val active = task.overrides.map { it.name }
+            val active = task.overrides?.map { it.name } ?: emptyList()
             val available = MigrateToContentStoreTask.Overrides.entries
                 .map { it.name }
                 .filterNot { it in active }

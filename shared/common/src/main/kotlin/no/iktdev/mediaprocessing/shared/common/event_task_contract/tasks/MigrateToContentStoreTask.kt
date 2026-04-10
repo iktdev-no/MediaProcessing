@@ -5,7 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 
 data class MigrateToContentStoreTask(
     val data: ContentMigrationPlan,
-    var overrides: List<Overrides> = emptyList()
+    var overrides: List<Overrides>? = emptyList()
 ): Task() {
     enum class Overrides {
         AllowOverwrite
