@@ -63,7 +63,11 @@ class TaskService(
             log.error("Could not find task with id=$taskId")
             return false
         }
-        return eventService.createOverrideRequestEvent(task.referenceId, taskId, task.metadata.derivedFromId, overrides)
+        val success = eventService.createOverrideRequestEvent(task.referenceId, taskId, task.metadata.derivedFromId, overrides)
+        if (success) {
+            resetFailedTask(taskId)
+        }
+        return success
     }
 
 }
