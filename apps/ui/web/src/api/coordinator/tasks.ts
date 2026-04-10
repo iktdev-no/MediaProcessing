@@ -1,10 +1,10 @@
 import type { Progress } from "../../types/transfer-model";
 import type {
-    PagedUiTask,
-    ResetTaskResponse,
-    TaskQuery,
+  PagedUiTask,
+  ResetTaskResponse,
+  TaskQuery,
 } from "../../types/webTypes";
-import { apiGet, buildQuery } from "../client";
+import { apiGet, apiPatch, buildQuery } from "../client";
 
 export function getTasks(query: TaskQuery) {
   const qs = buildQuery(query);
@@ -32,4 +32,16 @@ export function cancelTask(
   opts?: { onError?: (status: number, body: any) => void },
 ) {
   return apiGet<boolean>(`/tasks/${taskId}/cancel`, opts);
+}
+
+export function patchTaskOverride(
+  taskId: string,
+  overrideName: string,
+  opts?: { onError?: (status: number, body: any) => void },
+) {
+  return apiPatch<string[], any>(
+    `/tasks/${taskId}/override`,
+    [overrideName],
+    opts,
+  );
 }
