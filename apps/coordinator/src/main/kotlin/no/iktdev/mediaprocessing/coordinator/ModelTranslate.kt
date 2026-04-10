@@ -47,18 +47,25 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): Coordi
         persistedAt = persistedAt,
         logs = matchingLogs,
         abandoned = TaskLifecycleRules.isAbandoned(consumed, persistedAt, lastCheckIn),
-        availableOverrides = overrides,
+        availableOverrides = overrides?.available ?: emptyList(),
+        activeOverrides = overrides?.active ?: emptyList(),
     )
 }
 
-fun PersistedTask.getOverrides(): List<String> {
+fun PersistedTask.getOverrides(): Overrides? {
     return when (val task = this.toTask()) {
         is MigrateToContentStoreTask -> {
-            task.overrides.map { it.name }
+            val active = task.overrides.map { it.name }
+            val available = MigrateToContentStoreTask.Overrides.entries
+                .map { it.name }
+                .filterNot { it in active }
+            Overrides(available = available, active = active)
         }
-        else -> emptyList()
+        else -> null
     }
 }
+
+data class Overrides(val available: List<String>, val active: List<String>)
 
 
 fun Event.extractPayload(): Map<String, Any?>? {

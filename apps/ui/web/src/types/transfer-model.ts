@@ -206,7 +206,8 @@ export interface CpuLimitSupport {
 
 export interface CoordinatorTaskDto {
   abandoned: boolean;
-  avaliableOverrides: string[];
+  activeOverrides: string[];
+  availableOverrides: string[];
   claimed: boolean;
   claimedBy: string | null;
   consumed: boolean;

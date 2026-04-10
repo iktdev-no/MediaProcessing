@@ -3,6 +3,8 @@
 
 export interface UiTask {
   abandoned: boolean;
+  activeOverrides: string[];
+  availableOverrides: string[];
   claimed: boolean;
   claimedBy: string | null;
   consumed: boolean;

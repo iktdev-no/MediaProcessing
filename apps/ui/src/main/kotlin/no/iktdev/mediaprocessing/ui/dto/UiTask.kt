@@ -20,6 +20,7 @@ data class UiTask(
     val abandoned: Boolean,
     val logFiles: List<String> = emptyList(),
     val availableOverrides: List<String> = emptyList(),
+    val activeOverrides: List<String> = emptyList(),
 
     // Sanntidsfelter (kun fra SSE)
     val progress: Int? = null,
@@ -42,7 +43,8 @@ data class UiTask(
             persistedAt = c.persistedAt,
             abandoned = c.abandoned,
             logFiles = c.logs,
-            availableOverrides = c.availableOverrides
+            availableOverrides = c.availableOverrides,
+            activeOverrides = c.activeOverrides,
         )
     }
 }
