@@ -107,6 +107,7 @@ class EventProducedDataCleanupService(
             ?: return 0L
 
         if (folder.exists() && folder.isDirectory()) {
+            log.info("Deleting ${folder.name} and its contents")
             val size = folder.sizeRecursive()
             folder.deleteRecursively()
             return size
