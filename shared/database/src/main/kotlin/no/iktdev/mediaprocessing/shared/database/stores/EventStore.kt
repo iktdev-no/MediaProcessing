@@ -225,24 +225,26 @@ object EventStore: EventStore {
         return withTransaction {
             val e = EventsTable
 
-            // 1. Finn siste event per referenceId
+            // 1. Definer max-funksjonen med et tydelig alias
+            val maxIdExpr = e.id.max().alias("max_id")
+
+            // 2. Finn siste event per referenceId
             val lastEventIdForRefs = e
-                .select(
-                    columns = listOf(
-                        e.referenceId,
-                        e.id.max()
-                    )
-                )
+                .select(e.referenceId, maxIdExpr)
                 .groupBy(e.referenceId)
                 .alias("last_event")
 
-            // 2. Finn referenceId hvor siste event er CompletedEvent
+            // 3. Hent ut kolonnereferansene fra ALIASET, ikke fra opprinnelig tabell
+            val aliasReferenceId = lastEventIdForRefs[e.referenceId]
+            val aliasMaxId = lastEventIdForRefs[maxIdExpr]
+
+            // 4. Finn referenceId hvor siste event matcher eventName
             val completedRefs = e
                 .join(lastEventIdForRefs, JoinType.INNER) {
-                    (e.referenceId eq lastEventIdForRefs[e.referenceId]) and
-                            (e.id eq lastEventIdForRefs[e.id.max()])
+                    // Bruk alias-kolonnene her!
+                    (e.referenceId eq aliasReferenceId) and (e.id eq aliasMaxId)
                 }
-                .selectAll()
+                .select(e.referenceId) // Vi trenger bare referenceId her
                 .where { e.event eq eventName }
                 .map { UUID.fromString(it[e.referenceId]) }
 
@@ -250,16 +252,17 @@ object EventStore: EventStore {
                 return@withTransaction emptyList()
             }
 
-            // 3. Hent ALLE events for ALLE disse referenceId i én query
+            // 5. Hent ALLE events for ALLE disse referenceId i én query
             val allEventsForCompletedRefs = getWhere {
                 e.referenceId inList completedRefs.map { it.toString() }
             }
 
-            // 4. Gruppér per referenceId
+            // 6. Gruppér per referenceId
             allEventsForCompletedRefs
                 .groupBy { it.referenceId }
                 .values
-                .map { it.sortedBy { ev -> ev.id } } // valgfritt: sortér stigende
+                .map { it.sortedBy { ev -> ev.id } }
+
         }.getOrDefault(emptyList())
     }
 
