@@ -1,5 +1,5 @@
-import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
@@ -9,15 +9,15 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:6085",
         changeOrigin: true,
-        secure: false,        // ← viktig for POST
+        secure: false, // ← viktig for POST
         ws: false,
         configure: (proxy) => {
           proxy.on("proxyRes", (proxyRes) => {
-            proxyRes.headers["Cache-Control"] = "no-cache"
-            proxyRes.headers["Connection"] = "keep-alive"
-          })
-        }
-      }
-    }
-  }
-})
+            proxyRes.headers["Cache-Control"] = "no-cache";
+            proxyRes.headers["Connection"] = "keep-alive";
+          });
+        },
+      },
+    },
+  },
+});

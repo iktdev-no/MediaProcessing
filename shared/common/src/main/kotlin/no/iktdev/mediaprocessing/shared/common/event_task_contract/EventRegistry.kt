@@ -11,6 +11,8 @@ object EventRegistry {
 
             CollectedEvent::class.java,
             CompletedEvent::class.java,
+            CompletedCacheDeletedEvent::class.java,
+            CompletedInputDeletedEvent::class.java,
             ContinuationSummaryEvent::class.java,
 
             ConvertTaskCreatedEvent::class.java,

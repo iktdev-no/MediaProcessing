@@ -79,4 +79,6 @@ interface IFile {
 
     fun openInputStream(): InputStream
     fun openOutputStream(): OutputStream
+    fun writeBytes(bytes: ByteArray)
+    fun setLastModified(time: Long)
 }

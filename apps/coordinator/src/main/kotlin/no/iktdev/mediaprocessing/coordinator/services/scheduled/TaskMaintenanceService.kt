@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.coordinator.services
+package no.iktdev.mediaprocessing.coordinator.services.scheduled
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.UtcNow

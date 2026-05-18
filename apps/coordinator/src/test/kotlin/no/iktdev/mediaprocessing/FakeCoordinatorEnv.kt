@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing
 
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
+import no.iktdev.mediaprocessing.coordinator.config.AppConfig
 import no.iktdev.mediaprocessing.coordinator.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
@@ -17,7 +18,8 @@ class FakeCoordinatorEnv(prefFile: IFile) : CoordinatorEnv(
         intermediate = "/tmp/intermediate",
         outbox = "/tmp/outbox",
         inbox = "/tmp/inbox"
-    )
+    ),
+    config = AppConfig(preferenceFile = prefFile.path, preservedFile = "/tmp/preserved.txt")
 ) {
     override val preference: IFile = prefFile
 }

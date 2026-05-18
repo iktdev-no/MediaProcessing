@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.coordinator.config.AppConfig
 import no.iktdev.mediaprocessing.coordinator.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
@@ -10,7 +11,8 @@ import org.springframework.stereotype.Service
 class CoordinatorEnv(
     val streamIt: StreamItConfig,
     val exec: ExecutablesConfig,
-    val media: MediaPaths
+    val media: MediaPaths,
+    val config: AppConfig
 ) {
     val streamitAddress = streamIt.address
     val ffprobe = exec.ffprobe
@@ -19,6 +21,7 @@ class CoordinatorEnv(
     val intermediateFolder = IFile(media.intermediate)
     val outboxFolder = IFile(media.outbox)
     val inboxFolder = IFile(media.inbox)
-    val preference: IFile = IFile("/data/config/preference.json")
+    val preference: IFile = IFile(config.preferenceFile)
+    val preserveFile: IFile = IFile(config.preservedFile)
 
 }

@@ -15,10 +15,18 @@ import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
+import no.iktdev.mediaprocessing.shared.database.tables.EventsTable.getFromQuery
+import no.iktdev.mediaprocessing.shared.database.tables.EventsTable.getWhere
 import no.iktdev.mediaprocessing.shared.database.withTransaction
+import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.max
+import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -212,6 +220,55 @@ object EventStore: EventStore {
                 ?.get(EventsTable.persistedAt)
         }.getOrDefault(null)
     }
+
+    fun getEventSequenceWithLastEventAs(eventName: String): List<List<PersistedEvent>> {
+        return withTransaction {
+            val e = EventsTable
+
+            // 1. Finn siste event per referenceId
+            val lastEventIdForRefs = e
+                .select(
+                    columns = listOf(
+                        e.referenceId,
+                        e.id.max()
+                    )
+                )
+                .groupBy(e.referenceId)
+                .alias("last_event")
+
+            // 2. Finn referenceId hvor siste event er CompletedEvent
+            val completedRefs = e
+                .join(lastEventIdForRefs, JoinType.INNER) {
+                    (e.referenceId eq lastEventIdForRefs[e.referenceId]) and
+                            (e.id eq lastEventIdForRefs[e.id.max()])
+                }
+                .selectAll()
+                .where { e.event eq eventName }
+                .map { UUID.fromString(it[e.referenceId]) }
+
+            if (completedRefs.isEmpty()) {
+                return@withTransaction emptyList()
+            }
+
+            // 3. Hent ALLE events for ALLE disse referenceId i én query
+            val allEventsForCompletedRefs = getWhere {
+                e.referenceId inList completedRefs.map { it.toString() }
+            }
+
+            // 4. Gruppér per referenceId
+            allEventsForCompletedRefs
+                .groupBy { it.referenceId }
+                .values
+                .map { it.sortedBy { ev -> ev.id } } // valgfritt: sortér stigende
+        }.getOrDefault(emptyList())
+    }
+
+    fun getStartEvents(): List<PersistedEvent> {
+        return withTransaction {
+            EventsTable.getWhere { EventsTable.event eq StartProcessingEvent::class.getName() }
+        }.getOrDefault(emptyList())
+    }
+
 
     fun isEventSequenceDeleted(referenceId: UUID): Boolean {
         return withTransaction {

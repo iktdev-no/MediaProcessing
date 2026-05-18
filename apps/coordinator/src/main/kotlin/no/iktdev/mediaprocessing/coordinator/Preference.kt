@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CleanupPreference
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
@@ -75,6 +76,21 @@ class Preference(
     }
 
     // ------------------------------------------------------------
+    // Cleanup
+    // ------------------------------------------------------------
+
+    fun getCleanupPreference(): CleanupPreference =
+        getFullConfig().cleanup
+
+    fun saveCleanupPreference(pref: CleanupPreference) {
+        synchronized(lock) {
+            val cfg = getFullConfig().copy(cleanup = pref)
+            writeConfig(cfg)
+        }
+    }
+
+
+    // ------------------------------------------------------------
     // VIDEO
     // ------------------------------------------------------------
 
@@ -118,6 +134,7 @@ class Preference(
 
     private fun defaultConfig() = CoordinatorPreference(
         media = MediaPreference.default(),
-        language = LanguagePreference.default()
+        language = LanguagePreference.default(),
+        cleanup = CleanupPreference.default()
     )
 }

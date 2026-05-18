@@ -56,7 +56,21 @@ export interface VideoPreference {
   enforceMkv: boolean;
 }
 
+export type FlowTypes = "Auto" | "Manual" | "Any"
+
+export interface InputCleanupPreference {
+  enabled: boolean;
+  flows: FlowTypes;
+  retention: Retention;
+}
+
+export interface CleanupPreference {
+  cacheCleanupPreference: CacheCleanupPreference;
+  inputCleanupPreference: InputCleanupPreference;
+}
+
 export interface CoordinatorPreference {
+  cleanup: CleanupPreference;
   language: LanguagePreference;
   media: MediaPreference;
 }
@@ -89,6 +103,12 @@ export interface MediaPreference {
   videoPreference: VideoPreference | null;
 }
 
+export interface CacheCleanupPreference {
+  enabled: boolean;
+  flows: FlowTypes;
+  retention: Retention;
+}
+
 export interface LanguagePreference {
   avoidDub: boolean;
   preferOriginal: boolean;
@@ -97,6 +117,16 @@ export interface LanguagePreference {
   subtitleFormatPriority: string[];
   subtitleSelectionMode: SubtitleSelectionMode;
 }
+
+
+export interface Retention {
+  unit: RetentionUnit;
+  value: number;
+}
+
+
+
+export type RetentionUnit = "Hours" | "Days"
 
 export type SubtitleSelectionMode = "DialogueOnly" | "DialogueAndForced" | "All"
 
@@ -291,6 +321,13 @@ export interface LineageNode {
   eventName: string;
   parents: string[];
   persistedAt: string | null;
+}
+
+export interface InputFileInfo {
+  fileName: string;
+  fileUri: string;
+  preserved: boolean;
+  usedInReferences: string[];
 }
 
 export type OperatingSystem = "LINUX" | "WINDOWS" | "MACOS" | "OTHER"

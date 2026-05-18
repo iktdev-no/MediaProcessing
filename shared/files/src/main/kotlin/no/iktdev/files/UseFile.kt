@@ -106,4 +106,12 @@ class UseFile(path: String) : IFile {
 
     override fun openInputStream(): InputStream  = file.inputStream()
     override fun openOutputStream(): OutputStream  = file.outputStream()
+    override fun writeBytes(bytes: ByteArray) {
+        file.writeBytes(bytes)
+    }
+
+    override fun setLastModified(time: Long) {
+        file.setLastModified(time)
+    }
+
 }

@@ -44,6 +44,7 @@ open class TestBase {
     val defaultVideoPreference = VideoPreference(VideoCodecConfig(VideoCodecType.HEVC))
     val defaultAudioPreference = AudioPreference(AudioCodecConfig(AudioCodecType.AAC).copy(channels = 2))
 
+
     @BeforeEach
     open fun setup() {
         mockkObject(TaskStore)

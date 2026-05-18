@@ -17,6 +17,7 @@ import HealthPage from "./pages/HealthPage";
 import { SequencePage } from "./pages/SequencePage";
 import SettingPage from "./pages/SettingPage";
 import TasksPage from "./pages/TasksPage";
+import CleanupAndRetentionPreferencePage from "./pages/settings/CleanupAndretentionPreferencePage";
 import MediaPreferencesPage from "./pages/settings/MediaPreferencePage";
 import ProcessorSettingsPage from "./pages/settings/ProcesserSettingsPage";
 
@@ -79,6 +80,10 @@ function App() {
             <Route path="/settings" element={<SettingPage />}>
               <Route path="media/*" element={<MediaPreferencesPage />} />
               <Route path="processor/*" element={<ProcessorSettingsPage />} />
+              <Route
+                path="cleanup/*"
+                element={<CleanupAndRetentionPreferencePage />}
+              />
             </Route>
             <Route path="/sequences" element={<SequencePage />} />
             <Route path="/files" element={<FilesPage />} />

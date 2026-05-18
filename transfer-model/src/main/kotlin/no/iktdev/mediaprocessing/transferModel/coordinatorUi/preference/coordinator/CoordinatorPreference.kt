@@ -2,5 +2,6 @@ package no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordin
 
 data class CoordinatorPreference(
     val media: MediaPreference,
-    val language: LanguagePreference
+    val language: LanguagePreference,
+    val cleanup: CleanupPreference = CleanupPreference.default(),
 )

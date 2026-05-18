@@ -34,4 +34,13 @@ class InMemoryEventStore : EventStore {
 
     fun all(): List<PersistedEvent> = persisted
     fun clear() { persisted.clear(); nextId = 1L }
+
+    fun getEventSequenceWithLastEventAs(eventName: String): List<List<PersistedEvent>> {
+        return persisted
+            .groupBy { it.referenceId }
+            .values
+            .map { it.sortedBy { p -> p.persistedAt } }
+            .filter { seq -> seq.lastOrNull()?.event == eventName }
+    }
+
 }

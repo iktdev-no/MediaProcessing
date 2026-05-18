@@ -23,6 +23,11 @@ export default function SettingsPage() {
       base: "/settings/processor",
       path: "/settings/processor",
     },
+    {
+      label: "Cleanup & Retention",
+      base: "/settings/cleanup",
+      path: "/settings/cleanup",
+    },
   ];
 
   const active = tabs.findIndex((t) => location.pathname.startsWith(t.base));

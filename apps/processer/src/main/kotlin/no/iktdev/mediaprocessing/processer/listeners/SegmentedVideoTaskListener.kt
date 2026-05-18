@@ -106,7 +106,8 @@ class SegmentedVideoTaskListener(
             status = TaskStatus.Completed,
             logFile = mergedLog.absolutePath,
             data = ProcesserEncodeResultEvent.EncodeResult(
-                cachedOutputFile = ctx.output.absolutePath
+                cachedOutputFile = ctx.output.absolutePath,
+                cachedSegmentFiles = segments.map { it.output.absolutePath }
             )
         ).producedFrom(task)
     }

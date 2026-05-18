@@ -209,6 +209,54 @@ export async function apiPatch<TRequest, TResponse>(
 }
 
 // ------------------------------------------------------------
+// PUT
+// ------------------------------------------------------------
+export async function apiPut<TRequest, TResponse>(
+  path: string,
+  body: TRequest,
+): Promise<TResponse> {
+  const res = await fetch(`/api${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "*/*",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    let errorBody: any = null;
+
+    try {
+      errorBody = await res.json();
+    } catch {
+      errorBody = await res.text().catch(() => null);
+    }
+
+    const message =
+      typeof errorBody === "object" && errorBody?.message
+        ? errorBody.message
+        : `POST ${path} failed with ${res.status}`;
+
+    toast.error(message);
+
+    const error: any = new Error(message);
+    error.status = res.status;
+    error.body = errorBody;
+    throw error;
+  }
+
+  const contentType = res.headers.get("content-type") ?? "";
+
+  if (contentType.includes("application/json")) {
+    return res.json();
+  }
+
+  const text = await res.text();
+  return text as unknown as TResponse;
+}
+
+// ------------------------------------------------------------
 // SSE
 // ------------------------------------------------------------
 let errorToastShown = false;

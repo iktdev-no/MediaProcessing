@@ -10,6 +10,7 @@ class ProcesserEncodeResultEvent(
     error: String? = null
 ) : TaskResultEvent(status, error, logFile) {
     data class EncodeResult(
-        val cachedOutputFile: String? = null
+        val cachedOutputFile: String? = null,
+        val cachedSegmentFiles: List<String>? = null
     )
 }

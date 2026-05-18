@@ -8,6 +8,7 @@ import no.iktdev.mediaprocessing.ui.dto.UiEvent
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultFailure
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultSuccess
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.InputFileInfo
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
@@ -74,5 +75,22 @@ class CoordinatorEventService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<List<String>>() {})
     }
+
+
+    fun getFilesUsedInEvents(): Mono<List<InputFileInfo>> {
+        return coordinatorWebClient.get()
+            .uri("/files/used")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<List<InputFileInfo>>() {})
+    }
+
+    fun setPreservedFiles(files: List<String>): Mono<List<InputFileInfo>> {
+        return coordinatorWebClient.put()
+            .uri("/files/preserve")
+            .bodyValue(files)
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<List<InputFileInfo>>() {})
+    }
+
 
 }

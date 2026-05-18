@@ -131,6 +131,7 @@ class FakeFile(
                 it.content = ""
                 it.size = 0
             }
+        delete()
         return true
     }
 
@@ -164,6 +165,15 @@ class FakeFile(
             override fun close() {}
         }) {}
 
+    override fun writeBytes(bytes: ByteArray) {
+        val r = ref()
+        r.exists = true
+        r.directory = false
+        r.size = bytes.size.toLong()
+        r.content = String(bytes) // lagres som binær data i string-form
+        r.modified = System.currentTimeMillis()
+    }
+
 
     override fun toJavaFile(): File =
         throw UnsupportedOperationException("FakeFile does not support toJavaFile()")
@@ -171,6 +181,10 @@ class FakeFile(
     override fun using(vararg paths: String): IFile {
         val newPath = Paths.get(absolutePath, *paths).normalize().toString()
         return getOrCreate(newPath)
+    }
+
+    override fun setLastModified(time: Long) {
+        this.modified = time
     }
 
     override fun renameTo(dest: IFile): Boolean {
