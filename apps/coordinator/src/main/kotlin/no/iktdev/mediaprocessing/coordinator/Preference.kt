@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator
 
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.InstanceCreator
 import com.google.gson.JsonSyntaxException
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CleanupPreference
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
@@ -15,7 +17,18 @@ class Preference(
     private val coordinatorEnv: CoordinatorEnv
 ) {
 
-    private val gson = Gson()
+    private fun defaultConfig() = CoordinatorPreference(
+        media = MediaPreference.default(),
+        language = LanguagePreference.default(),
+        cleanup = CleanupPreference.default()
+    )
+
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(
+            CoordinatorPreference::class.java,
+            InstanceCreator { defaultConfig() }
+        )
+        .create()
     private val lock = Any()
 
     // ------------------------------------------------------------
@@ -132,9 +145,5 @@ class Preference(
         file.writeText(gson.toJson(cfg))
     }
 
-    private fun defaultConfig() = CoordinatorPreference(
-        media = MediaPreference.default(),
-        language = LanguagePreference.default(),
-        cleanup = CleanupPreference.default()
-    )
+
 }
