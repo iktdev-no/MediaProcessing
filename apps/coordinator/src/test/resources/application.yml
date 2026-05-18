@@ -48,5 +48,5 @@ executables:
   ffprobe: ffprobe
 
 preference:
-  preservedFile: build/test/data/config/preference.json
-  preferenceFile: build/test/data/config/preserve.json
+    preferenceFile: build/test/data/config/preference.json
+    preservedFile: build/test/data/config/preserve.json

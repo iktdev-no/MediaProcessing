@@ -42,5 +42,6 @@ executables:
   ffprobe: ffprobe
 
 preference:
-  preservedFile: /data/config/preference.json
-  preferenceFile: /data/config/preserve.json
+
+    preferenceFile: /data/config/preference.json
+    preservedFile: /data/config/preserve.json
