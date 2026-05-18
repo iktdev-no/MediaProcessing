@@ -40,6 +40,7 @@ class EventProducedDataCleanupService(
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     fun startCacheCleanup() {
+        log.info { "Starting cache cleanup..." }
         val cacheRetention = preference.getCleanupPreference().cacheCleanupPreference
         if (!cacheRetention.enabled)
             return
@@ -117,6 +118,7 @@ class EventProducedDataCleanupService(
 
     @Scheduled(cron = "0 0 0 * * *")
     fun cleanupDailyAtMidnight() {
+        log.info { "Starting input file cleanup..." }
         val pref = preference.getCleanupPreference().inputCleanupPreference
         if (!pref.enabled) return
 
