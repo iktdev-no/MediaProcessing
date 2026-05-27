@@ -1,5 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.tasks
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
@@ -15,6 +17,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.File
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
 import org.springframework.stereotype.Component
 import java.nio.file.FileSystemException
+import java.nio.file.Files
 import java.util.*
 
 @Component
@@ -77,6 +80,17 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
         }
 
         var lastProgress = -1
+        val sourceSize = source.length()
+        val store = withContext(Dispatchers.IO) {
+            Files.getFileStore(destinationFile.toPath())
+        }
+        val free = store.usableSpace
+
+        if (free < sourceSize) {
+            throw FileSystemException(
+                "Insufficient space: need $sourceSize bytes, available $free bytes at ${destinationFile.parent}"
+            )
+        }
 
         fs.copyWithProgress(source, destinationFile) { copied, total ->
             val percent = (copied * 100 / total).toInt()

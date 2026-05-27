@@ -42,6 +42,7 @@ class EventProducedDataCleanupService(
     fun startCacheCleanup() {
         log.info { "Starting cache cleanup..." }
         val cacheRetention = preference.getCleanupPreference().cacheCleanupPreference
+        log.info { "Cache Cleanup settings: enabled=${cacheRetention.enabled}, retention=${cacheRetention.retention}" }
         if (!cacheRetention.enabled)
             return
         val retentionDuration = cacheRetention.retention.toDuration()
@@ -59,6 +60,7 @@ class EventProducedDataCleanupService(
             started != null && sequencesStartTypeTargeting.contains(started.data.flow)
         }
 
+        log.info { "Cache cleanup summary: Found ${eligibleSequences.size} sequences matching flow criteria." }
         if (eligibleSequences.isEmpty()) {
             log.info("No events were ready to have their cache cleared")
             return
@@ -121,6 +123,7 @@ class EventProducedDataCleanupService(
     fun cleanupDailyAtMidnight() {
         log.info { "Starting input file cleanup..." }
         val pref = preference.getCleanupPreference().inputCleanupPreference
+        log.info { "Input Cleanup settings: enabled=${pref.enabled}, retention=${pref.retention}" }
         if (!pref.enabled) return
 
         val retention = pref.retention.toDuration()
@@ -138,7 +141,7 @@ class EventProducedDataCleanupService(
             preserved = preserved,
             retention = retention
         )
-
+        log.info { "Input Cleanup summary: Found ${filesWithEvents.size} total candidates, ${candidates.size} marked for deletion, ${filesWithEvents.size - candidates.size} ignored." }
         if (candidates.isEmpty()) {
             log.info("No input files eligible for cleanup")
             return
