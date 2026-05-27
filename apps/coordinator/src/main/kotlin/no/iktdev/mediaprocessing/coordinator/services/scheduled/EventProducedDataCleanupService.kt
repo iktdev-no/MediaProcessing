@@ -40,11 +40,12 @@ class EventProducedDataCleanupService(
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     fun startCacheCleanup() {
-        log.info { "Starting cache cleanup..." }
         val cacheRetention = preference.getCleanupPreference().cacheCleanupPreference
         log.info { "Cache Cleanup settings: enabled=${cacheRetention.enabled}, retention=${cacheRetention.retention}" }
-        if (!cacheRetention.enabled)
+        if (!cacheRetention.enabled) {
             return
+        }
+        log.info { "Starting cache cleanup..." }
         val retentionDuration = cacheRetention.retention.toDuration()
         val events = EventStore.getEventSequenceWithLastEventAs(CompletedEvent::class.getName())
             .map { it.effectivePersisted() }
@@ -79,8 +80,17 @@ class EventProducedDataCleanupService(
                 ?: return@filter false
 
             val created = completed.metadata.created
-            Duration.between(created, now) >= retentionDuration
+            val isOldEnough = Duration.between(created, now) >= retentionDuration
+
+            // --- LAGT TIL: Debug om sekvensen i det hele tatt er gammel nok ---
+            if (!isOldEnough) {
+                log.debug { "Sequence ${completed.referenceId} is not old enough for cache cleanup. Created: $created" }
+            }
+
+            isOldEnough
         }
+
+        log.info { "Cache cleanup: Found ${ready.size} sequences ready for physical deletion." }
 
         ready.forEach { seq ->
             val events = seq.mapNotNull { it.toEvent() }
@@ -90,6 +100,10 @@ class EventProducedDataCleanupService(
                 val completed = events.find { it is CompletedEvent }!!
                 EventStore.persist(CompletedCacheDeletedEvent().derivedOf(completed))
                 log.info("Deleted ${freed.humanReadable()} from cache for referenceId ${completed.referenceId}")
+            } else {
+                // --- LAGT TIL: Varsling når sekvensen ble valgt, men ingenting ble slettet ---
+                val refId = events.find { it is CompletedEvent }?.let { (it as CompletedEvent).referenceId }
+                log.warn { "Sequence $refId was selected, but no files were cleared. Check file paths/structure." }
             }
         }
     }
@@ -100,19 +114,30 @@ class EventProducedDataCleanupService(
 
         val outputFile = encode?.data?.cachedOutputFile
             ?: extract?.data?.cachedOutputFile
-            ?: return 0L
+            ?: run {
+                log.debug { "No cachedOutputFile found in events" }
+                return 0L
+            }
 
         val output = IFile(outputFile)
         val intermediateRoot = IFile(mediaPaths.intermediate)
 
+        log.debug { "Checking cleanup for path: ${output.absolutePath}" }
+        log.debug { "Intermediate root is: ${intermediateRoot.absolutePath}" }
+
         val folder = output.parentFile.isChildOfAndOneLevelBeneath(intermediateRoot)
-            ?: return 0L
+            ?: run {
+                log.debug { "Path did not match intermediate root requirement. Parent: ${output.parentFile.absolutePath}" }
+                return 0L
+            }
 
         if (folder.exists() && folder.isDirectory()) {
             log.info("Deleting ${folder.name} and its contents")
             val size = folder.sizeRecursive()
             folder.deleteRecursively()
             return size
+        } else {
+            log.debug { "Folder does not exist or is not a directory: ${folder.absolutePath}" }
         }
         return 0L
     }
@@ -121,10 +146,12 @@ class EventProducedDataCleanupService(
 
     @Scheduled(cron = "0 0 0 * * *")
     fun cleanupDailyAtMidnight() {
-        log.info { "Starting input file cleanup..." }
         val pref = preference.getCleanupPreference().inputCleanupPreference
         log.info { "Input Cleanup settings: enabled=${pref.enabled}, retention=${pref.retention}" }
-        if (!pref.enabled) return
+        if (!pref.enabled) {
+            log.info { "Starting input file cleanup..." }
+            return
+        }
 
         val retention = pref.retention.toDuration()
         val preserved = fileInfoService.getPreservedInputFiles()
@@ -175,7 +202,9 @@ class EventProducedDataCleanupService(
     }
 
     internal fun deleteFiles(candidates: Map<IFile, List<Event>>) {
-        candidates.forEach { (file, lastEvents) ->
+        val existingFiles = candidates.filter { it.key.exists() }
+
+        existingFiles.forEach { (file, lastEvents) ->
             log.info("Deleting old input file: ${file.path}")
             file.delete()
 
@@ -185,6 +214,10 @@ class EventProducedDataCleanupService(
                 EventStore.persist(deleteEvent)
                 log.info("Published CompletedInputDeletedEvent for sequence ending with: ${lastEvent::class.simpleName}")
             }
+        }
+        val missingFiles = (candidates - existingFiles.keys).keys
+        if (missingFiles.isNotEmpty()) {
+            log.warn { "Could not find the following files for cleanup: \n${missingFiles.joinToString("\n") { it.path }}" }
         }
     }
 

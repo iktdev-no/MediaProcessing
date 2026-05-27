@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.services.CommandService
+import no.iktdev.mediaprocessing.coordinator.services.scheduled.EventProducedDataCleanupService
 import no.iktdev.mediaprocessing.shared.common.dto.requests.StartProcessRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/operations")
 class OperationsController(
-    private val commandService: CommandService
+    private val commandService: CommandService,
+    private val cleanupService: EventProducedDataCleanupService
 ) {
 
     @PostMapping("/start")
@@ -37,6 +39,17 @@ class OperationsController(
                 )
         }
     }
+
+    @PostMapping("/cleanup/cache")
+    fun cleanupCache() {
+        cleanupService.startCacheCleanup()
+    }
+
+    @PostMapping("/cleanup/inbox")
+    fun cleanupInbox() {
+        cleanupService.cleanupDailyAtMidnight()
+    }
+
 
 
 }

@@ -64,3 +64,8 @@ mediaprocessing:
 
 executables:
   ffprobe: ffprobe
+
+preference:
+
+  preferenceFile: ./tmp/data/config/preference.json
+  preservedFile: ./tmp/data/config/preserve.json
