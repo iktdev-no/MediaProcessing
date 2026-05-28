@@ -82,7 +82,7 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
         var lastProgress = -1
         val sourceSize = source.length()
         val store = withContext(Dispatchers.IO) {
-            Files.getFileStore(destinationFile.toPath())
+            Files.getFileStore(destinationFile.parentFile.toPath())
         }
         val free = store.usableSpace
 
