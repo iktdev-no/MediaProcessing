@@ -170,7 +170,6 @@ class SegmentedVideoTaskListenerTest: TestBase() {
         val intermediate = workFolder.using("intermediate", "out").apply { mkdirs() }
         val logs = workFolder.using("logs").apply { mkdirs() }
 
-        every { fileUtil.getTemporaryStoreFile(any()) } returns output
         every { fileUtil.getTemporaryStoreFolder(any()) } returns intermediate
         every { fileUtil.getLogDirectory() } returns logs
 
@@ -253,7 +252,6 @@ class SegmentedVideoTaskListenerTest: TestBase() {
         val output = workFolder.using("out", "out.mp4").apply { parentFile.mkdirs() }
 
         every { fileUtil.getTemporaryStoreFolder(any()) } returns workFolder.using("intermediate")
-        every { fileUtil.getTemporaryStoreFile(any()) } returns output
 
         every { fileUtil.getLogDirectory() } returns workFolder.using("logs").apply { mkdirs() }
 

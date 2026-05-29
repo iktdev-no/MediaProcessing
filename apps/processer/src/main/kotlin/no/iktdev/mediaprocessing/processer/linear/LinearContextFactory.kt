@@ -18,9 +18,6 @@ class LinearContextFactory(private val fileUtil: FileUtil) {
         val logDirectory = fileUtil.getLogDirectory()
             .using("encode_segment", taskData.taskId.toString())
 
-        val baseOutputFileName = IFile(taskData.data.outputFileName).nameWithoutExtension
-        val videoCheckpointFile = intermediateStore
-            .using("VIDEO_CHECKPOINTS.json")
         val audioCheckpointFile = intermediateStore
             .using("AUDIO_CHECKPOINTS.json")
 
