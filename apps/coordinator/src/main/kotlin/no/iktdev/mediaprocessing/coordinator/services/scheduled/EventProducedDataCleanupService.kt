@@ -167,17 +167,17 @@ class EventProducedDataCleanupService(
 
         events.getInstancesOf<FilePrepareForWorkResultEvent>()
             .mapNotNull { it.file }
-            .map { CacheItem(IFile(it), CacheItemType.Intermediate) }
+            .map { CacheItem(IFile(it), CacheItemType.Scratch) }
             .let(filesToDelete::addAll)
 
         events.getInstancesOf<ProcesserEncodeResultEvent>()
             .mapNotNull { it.data?.cachedOutputFile }
-            .map { CacheItem(IFile(it), CacheItemType.Scratch) }
+            .map { CacheItem(IFile(it), CacheItemType.Intermediate) }
             .let(filesToDelete::addAll)
 
         events.getInstancesOf<ProcesserExtractResultEvent>()
             .mapNotNull { it.data?.cachedOutputFile }
-            .map { CacheItem(IFile(it), CacheItemType.Scratch) }
+            .map { CacheItem(IFile(it), CacheItemType.Intermediate) }
             .let(filesToDelete::addAll)
 
         val deduped = filesToDelete.distinctBy { it.key(intermediateRoot, scratchRoot) }

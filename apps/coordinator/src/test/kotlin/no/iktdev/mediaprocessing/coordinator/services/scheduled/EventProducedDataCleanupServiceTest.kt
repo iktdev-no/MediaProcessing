@@ -48,6 +48,7 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
         // FIX: stub mediaPaths used by service()
         every { coordinatorEnv.media } returns mockk {
             every { intermediate } returns "/tmp/intermediate"
+            every { scratch } returns "/tmp/scratch"
         }
 
         mockkObject(EventStore)
