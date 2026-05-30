@@ -88,6 +88,23 @@ class UseFile(path: String) : IFile {
         return file.deleteRecursively()
     }
 
+    override fun deleteAllChildren(): Boolean {
+        val children = file.listFiles() ?: return true
+
+        var ok = true
+
+        for (child in children) {
+            if (child.isDirectory()) {
+                if (!child.deleteRecursively()) ok = false
+            } else {
+                if (!child.delete()) ok = false
+            }
+        }
+
+        return ok
+    }
+
+
     override fun renameTo(dest: IFile): Boolean {
         return file.renameTo(dest.toJavaFile())
     }
@@ -114,4 +131,7 @@ class UseFile(path: String) : IFile {
         file.setLastModified(time)
     }
 
+    override fun startsWith(other: IFile): Boolean {
+        return file.startsWith(other.toJavaFile())
+    }
 }

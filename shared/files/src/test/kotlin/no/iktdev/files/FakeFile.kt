@@ -135,10 +135,35 @@ class FakeFile(
         return true
     }
 
-    override fun listFiles(): List<IFile> =
-        fileRegistry.values
-            .filter { it.absolutePath.startsWith("$absolutePath/") }
-            .map { it }
+    override fun deleteAllChildren(): Boolean {
+        val children = listFiles()
+        var ok = true
+
+        for (child in children) {
+            val f = child as FakeFile
+
+            if (f.isDirectory()) {
+                if (!f.deleteRecursively()) ok = false
+            } else {
+                if (!f.delete()) ok = false
+            }
+        }
+
+        return ok
+    }
+
+    override fun listFiles(): List<IFile> {
+        val prefix = if (absolutePath.endsWith("/")) absolutePath else "$absolutePath/"
+        return fileRegistry.values
+            .filter { it.absolutePath.startsWith(prefix) }
+            .filter { child ->
+                // relative path after root
+                val rel = child.absolutePath.removePrefix(prefix)
+                // direct child has no further slashes
+                !rel.contains('/')
+            }
+    }
+
 
     override fun walk(): Sequence<IFile> =
         fileRegistry.values
@@ -299,6 +324,9 @@ class FakeFile(
         return dest
     }
 
+    override fun startsWith(other: IFile): Boolean {
+        return this.absolutePath.startsWith(other.absolutePath)
+    }
 
 
     override fun equals(other: Any?): Boolean {

@@ -64,6 +64,7 @@ interface IFile {
     fun printWriter(): PrintWriter
 
     fun deleteRecursively(): Boolean
+    fun deleteAllChildren(): Boolean
 
     fun resolve(child: String): IFile {
         return IFile(Paths.get(this.path).resolve(child).toString())
@@ -81,4 +82,5 @@ interface IFile {
     fun openOutputStream(): OutputStream
     fun writeBytes(bytes: ByteArray)
     fun setLastModified(time: Long)
+    fun startsWith(other: IFile): Boolean
 }
