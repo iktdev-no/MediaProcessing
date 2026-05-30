@@ -59,16 +59,22 @@ class EventProducedDataCleanupService(
             deleted += (scratchBefore - scratchAfter)
         }
 
-        log.info("Deleted ${deleted.humanReadable()} from cache")
+        log.info("Wiped ${deleted.humanReadable()} from cache")
     }
 
 
     fun wipeInbox() {
         val inbox = IFile(mediaPaths.inbox)
+
+        val preserved = fileInfoService.getPreservedInputFiles()
+            .map { it.fileUri }
+            .toSet()
+
         val preSize = inbox.sizeRecursive()
-        inbox.deleteAllChildren()
+        inbox.wipeExcept(preserved)
         val deletedSize = preSize - inbox.sizeRecursive()
-        log.info("Deleted ${deletedSize.humanReadable()} from inbox")
+
+        log.info("Wiped ${deletedSize.humanReadable()} from inbox")
 
     }
 
@@ -360,6 +366,32 @@ class EventProducedDataCleanupService(
                 folder?.absolutePath ?: "INVALID_INTERMEDIATE_${file.absolutePath}"
             }
         }
+
+    fun IFile.wipeExcept(preserved: Set<String>): Boolean {
+        var ok = true
+
+        // 1. Slett alle filer som ikke er preserved
+        this.walk()
+            .filter { it.isFile() }
+            .filter { it.absolutePath !in preserved }
+            .forEach { file ->
+                if (!file.delete()) ok = false
+            }
+
+        // 2. Slett tomme mapper (bottom-up)
+        this.walk()
+            .filter { it.isDirectory() }
+            .sortedByDescending { it.absolutePath.length } // bottom-up
+            .forEach { dir ->
+                val children = dir.listFiles()
+                if (children.isNullOrEmpty()) {
+                    if (!dir.delete()) ok = false
+                }
+            }
+
+        return ok
+    }
+
 
 
 
