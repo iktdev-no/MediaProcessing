@@ -49,3 +49,5 @@ bin/
 .idea/runConfigurations
 /apps/py-metadata/venv/
 /apps/py-watcher/venv/
+/apps/py-metadata/.cache
+/tmp
