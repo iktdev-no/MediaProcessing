@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.ui.controller
 
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.ui.UiSseHub
 import no.iktdev.mediaprocessing.ui.dto.requests.StartProcessRequest
 import no.iktdev.mediaprocessing.ui.dto.status.SystemStatus
@@ -18,6 +19,7 @@ class UiApiController(
     private val hub: UiSseHub,
     private val mediaPathRewriteService: MediaPathRewriteService,
 ) {
+    val log = KotlinLogging.logger {}
 
     @PostMapping("/operations/start")
     fun startProcess(@RequestBody req: StartProcessRequest): Mono<Map<String, String>> {
@@ -32,4 +34,31 @@ class UiApiController(
         return statusService.status
     }
 
+    @PostMapping("/operations/cleanup/cache")
+    fun cleanupCache() {
+        coordinator.requestCleanupForCache()
+            .doOnSuccess { log.info { "Cleanup request accepted by coordinator" } }
+            .subscribe()
+    }
+
+    @PostMapping("/operations/cleanup/inbox")
+    fun cleanupInbox() {
+        coordinator.requestCleanupForInbox()
+            .doOnSuccess { log.info { "Cleanup request accepted by coordinator" } }
+            .subscribe()
+    }
+
+    @PostMapping("/operations/cleanup/cache/wipe")
+    fun wipeCache() {
+        coordinator.requestCacheWipe()
+            .doOnSuccess { log.info { "Wipe request accepted by coordinator" } }
+            .subscribe()
+    }
+
+    @PostMapping("/operations/cleanup/inbox/wipe")
+    fun wipeInbox() {
+        coordinator.requestInboxWipe()
+            .doOnSuccess { log.info { "Wipe request accepted by coordinator" } }
+            .subscribe()
+    }
 }

@@ -7,3 +7,33 @@ export function startProcess(req: StartProcessRequest) {
     req,
   );
 }
+
+export function triggerCacheCleanup() {
+  return apiPost<void, void>(
+    "/operations/cleanup/cache",
+    undefined // Ingen body nødvendig for denne operasjonen
+  );
+}
+
+export function triggerCacheWipe() {
+  return apiPost<void, void>(
+    "/operations/cleanup/cache/wipe",
+    undefined // Ingen body nødvendig for denne operasjonen
+  );
+}
+
+
+
+export function triggerInboxCleanup() {
+  return apiPost<void, void>(
+    "/operations/cleanup/inbox",
+    undefined
+  );
+}
+
+export function triggerInboxWipe() {
+  return apiPost<void, void>(
+    "/operations/cleanup/inbox/wipe",
+    undefined
+  );
+}

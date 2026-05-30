@@ -10,6 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -94,9 +95,33 @@ class CoordinatorClient(
             .bodyToMono(object : ParameterizedTypeReference<Map<String, String>>() {})
     }
 
+    fun requestCleanupForCache(): Mono<Void> {
+        return coordinatorWebClient.post()
+            .uri("/operations/cleanup/cache")
+            .retrieve()
+            .bodyToMono<Void>()
+    }
 
+    fun requestCleanupForInbox(): Mono<Void> {
+        return coordinatorWebClient.post()
+            .uri("/operations/cleanup/inbox")
+            .retrieve()
+            .bodyToMono<Void>()
+    }
 
+    fun requestCacheWipe(): Mono<Void> {
+            return coordinatorWebClient.post()
+                .uri("/operations/cleanup/cache/wipe")
+                .retrieve()
+                .bodyToMono<Void>()
+        }
 
+    fun requestInboxWipe(): Mono<Void> {
+            return coordinatorWebClient.post()
+                .uri("/operations/cleanup/inbox/wipe")
+                .retrieve()
+                .bodyToMono<Void>()
+    }
 
 
 }

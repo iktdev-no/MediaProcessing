@@ -13,6 +13,8 @@ export interface GenericConfirmDialogProps {
     message: string
     confirmLabel?: string
     cancelLabel?: string
+    cancelVariant?: "text" | "outlined" | "contained"
+    confirmVariant?: "text" | "outlined" | "contained"
     confirmColor?: "primary" | "error" | "warning" | "success" | "info"
     onConfirm: () => void
     onCancel: () => void
@@ -25,18 +27,22 @@ export function ConfirmationDialog({
     confirmLabel = "OK",
     cancelLabel = "Avbryt",
     confirmColor = "primary",
+    cancelVariant = "text",
+    confirmVariant = "contained",
     onConfirm,
     onCancel
 }: GenericConfirmDialogProps) {
     return (
-        <Dialog open={open} onClose={onCancel}>
+        <Dialog open={open} onClose={onCancel}   PaperProps={{
+    sx: { padding: 2 }
+  }}>
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
-                <Typography>{message}</Typography>
+                <Typography sx={{ whiteSpace: "pre-line" }}>{message}</Typography>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onCancel}>{cancelLabel}</Button>
-                <Button color={confirmColor} onClick={onConfirm}>
+                <Button variant={cancelVariant} onClick={onCancel}>{cancelLabel}</Button>
+                <Button variant={confirmVariant} color={confirmColor} onClick={onConfirm}>
                     {confirmLabel}
                 </Button>
             </DialogActions>
