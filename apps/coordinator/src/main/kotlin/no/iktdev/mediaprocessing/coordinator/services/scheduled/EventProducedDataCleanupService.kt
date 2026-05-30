@@ -41,6 +41,37 @@ class EventProducedDataCleanupService(
 
     //region Cache Clear
 
+    fun wipeCache() {
+        val intermediate = IFile(mediaPaths.intermediate)
+        val scratch = IFile(mediaPaths.scratch)
+
+        var deleted = 0L
+
+        val intBefore = intermediate.sizeRecursive()
+        if (intermediate.deleteAllChildren()) {
+            val intAfter = intermediate.sizeRecursive()
+            deleted += (intBefore - intAfter)
+        }
+
+        val scratchBefore = scratch.sizeRecursive()
+        if (scratch.deleteAllChildren()) {
+            val scratchAfter = scratch.sizeRecursive()
+            deleted += (scratchBefore - scratchAfter)
+        }
+
+        log.info("Deleted ${deleted.humanReadable()} from cache")
+    }
+
+
+    fun wipeInbox() {
+        val inbox = IFile(mediaPaths.inbox)
+        val preSize = inbox.sizeRecursive()
+        inbox.deleteAllChildren()
+        val deletedSize = preSize - inbox.sizeRecursive()
+        log.info("Deleted ${deletedSize.humanReadable()} from inbox")
+
+    }
+
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     fun startCacheCleanup() {
         val cacheRetention = preference.getCleanupPreference().cacheCleanupPreference

@@ -45,11 +45,20 @@ class OperationsController(
         cleanupService.startCacheCleanup()
     }
 
+    @PostMapping("/cleanup/cache/wipe")
+    fun wipeCache() {
+        cleanupService.wipeCache()
+    }
+
     @PostMapping("/cleanup/inbox")
     fun cleanupInbox() {
         cleanupService.cleanupDailyAtMidnight()
     }
 
+    @PostMapping("/cleanup/inbox/wipe")
+    fun wipeInbox() {
+        cleanupService.wipeInbox()
+    }
 
 
 }
