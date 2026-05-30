@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedCacheDeletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedInputDeletedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
@@ -25,8 +26,10 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordina
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.toDuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.io.File
 import java.time.Duration
 import java.time.Instant
+import kotlin.io.path.name
 
 @Service
 class EventProducedDataCleanupService(
@@ -108,38 +111,69 @@ class EventProducedDataCleanupService(
         }
     }
 
+    enum class CacheItemType {
+        Scratch,
+        Intermediate
+    }
+
+    data class CacheItem(
+        val file: IFile,
+        val type: CacheItemType,
+    )
+
+
     fun clearCachedDataForSequence(events: List<Event>): Long {
-        val encode = events.getInstanceOf<ProcesserEncodeResultEvent>()
-        val extract = events.getInstanceOf<ProcesserExtractResultEvent>()
-
-        val outputFile = encode?.data?.cachedOutputFile
-            ?: extract?.data?.cachedOutputFile
-            ?: run {
-                log.debug { "No cachedOutputFile found in events" }
-                return 0L
-            }
-
-        val output = IFile(outputFile)
         val intermediateRoot = IFile(mediaPaths.intermediate)
+        val scratchRoot = IFile(mediaPaths.scratch)
 
-        log.debug { "Checking cleanup for path: ${output.absolutePath}" }
-        log.debug { "Intermediate root is: ${intermediateRoot.absolutePath}" }
+        val filesToDelete = mutableListOf<CacheItem>()
 
-        val folder = output.parentFile.isChildOfAndOneLevelBeneath(intermediateRoot)
-            ?: run {
-                log.debug { "Path did not match intermediate root requirement. Parent: ${output.parentFile.absolutePath}" }
-                return 0L
+        events.getInstancesOf<FilePrepareForWorkResultEvent>()
+            .mapNotNull { it.file }
+            .map { CacheItem(IFile(it), CacheItemType.Intermediate) }
+            .let(filesToDelete::addAll)
+
+        events.getInstancesOf<ProcesserEncodeResultEvent>()
+            .mapNotNull { it.data?.cachedOutputFile }
+            .map { CacheItem(IFile(it), CacheItemType.Scratch) }
+            .let(filesToDelete::addAll)
+
+        events.getInstancesOf<ProcesserExtractResultEvent>()
+            .mapNotNull { it.data?.cachedOutputFile }
+            .map { CacheItem(IFile(it), CacheItemType.Scratch) }
+            .let(filesToDelete::addAll)
+
+        val deduped = filesToDelete.distinctBy { it.key(intermediateRoot, scratchRoot) }
+
+        var deletedTotalSize = 0L
+
+        for (item in deduped) {
+            val target = when (item.type) {
+                CacheItemType.Scratch -> item.file
+
+                CacheItemType.Intermediate -> {
+                    item.file.findContainingFolderUnder(intermediateRoot)
+                        ?: item.file
+                }
             }
 
-        if (folder.exists() && folder.isDirectory()) {
-            log.info("Deleting ${folder.name} and its contents")
-            val size = folder.sizeRecursive()
-            folder.deleteRecursively()
-            return size
-        } else {
-            log.debug { "Folder does not exist or is not a directory: ${folder.absolutePath}" }
+            if (target.notExist()) {
+                log.debug { "Folder or file does not exist: ${target.absolutePath}" }
+                continue
+            }
+
+            if (target.isDirectory()) {
+                val size = target.sizeRecursive()
+                target.deleteRecursively()
+                deletedTotalSize += size
+            } else {
+                val size = target.length()
+                target.delete()
+                deletedTotalSize += size
+            }
         }
-        return 0L
+
+        return deletedTotalSize
     }
 //endregion
 
@@ -253,9 +287,48 @@ class EventProducedDataCleanupService(
 
 
 
-    fun IFile.isChildOfAndOneLevelBeneath(file: IFile): IFile? {
-        return if (this.parentFile.absolutePath == file.absolutePath) this else null
+    fun IFile.findContainingFolderUnder(root: IFile): IFile? {
+        if (root.notExist() || !root.isDirectory()) {
+            log.error { "Folder ${root.absolutePath} does not exist or is not a directory" }
+            return null
+        }
+
+        val rootPath = root.absolutePath.trimEnd(File.separatorChar)
+        val fullPath = this.absolutePath
+
+        // Må ligge under root
+        if (!fullPath.startsWith(rootPath + File.separator)) {
+            return null
+        }
+
+        // Fjern root-delen
+        val relative = fullPath.removePrefix(rootPath)
+            .trimStart(File.separatorChar)
+
+        // Første segment etter root
+        val firstSegment = relative.substringBefore(File.separator, missingDelimiterValue = "")
+        if (firstSegment.isBlank()) return null
+
+        return root.resolve(firstSegment)
     }
+
+
+
+    fun IFile.isChildOf(file: IFile): Boolean {
+        return this.startsWith(file)
+    }
+
+    fun CacheItem.key(intermediateRoot: IFile, scratchRoot: IFile): String =
+        when (type) {
+            CacheItemType.Scratch ->
+                if (file.isChildOf(scratchRoot)) file.absolutePath
+                else "INVALID_SCRATCH_${file.absolutePath}"
+
+            CacheItemType.Intermediate -> {
+                val folder = file.findContainingFolderUnder(intermediateRoot)
+                folder?.absolutePath ?: "INVALID_INTERMEDIATE_${file.absolutePath}"
+            }
+        }
 
 
 
