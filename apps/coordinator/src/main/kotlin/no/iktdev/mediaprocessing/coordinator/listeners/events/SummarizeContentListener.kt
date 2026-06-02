@@ -3,9 +3,12 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
 import no.iktdev.mediaprocessing.shared.common.projection.SummaryProjection
@@ -24,7 +27,16 @@ class SummarizeContentListener(
         if (event !is CollectedEvent) return null
 
         val useHistory = (history.filter { event.eventIds.contains(it.eventId) })
-        val collection = CollectionProjection(useHistory, coordinatorEnv.outboxFolder).getCollection()
+        val determinedCollection = useHistory.getInstanceOf<DeterminedCollectionTaskResultEvent>()
+
+
+
+        val collection = determinedCollection
+            ?.takeIf { it.status == TaskStatus.Completed }
+            ?.collection
+            ?.takeIf { it.isNotBlank() }
+            ?: CollectionProjection(useHistory, coordinatorEnv.outboxFolder).getCollection()
+
 
         val projection = SummaryProjection(collection, useHistory, coordinatorEnv.outboxFolder)
         val migrationPlan = projection.createMigrationPlan()

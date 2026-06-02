@@ -139,4 +139,11 @@ class TaskProjection(val events: List<Event>) {
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )
+
+    fun projectDeterminedCollectionStatus() =
+        projectStatus<DetermineCollectionTaskCreatedEvent, DeterminedCollectionTaskResultEvent>(
+            createdIds = { it.map { e -> e.taskId } },
+            resultStatus = { it.status },
+            resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
+        )
 }

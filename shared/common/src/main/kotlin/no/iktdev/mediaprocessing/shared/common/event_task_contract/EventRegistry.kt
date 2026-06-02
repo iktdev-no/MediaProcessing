@@ -49,6 +49,9 @@ object EventRegistry {
             MetadataSearchResultEvent::class.java,
             MetadataSearchTaskCreatedEvent::class.java,
 
+            DetermineCollectionTaskCreatedEvent::class.java,
+            DeterminedCollectionTaskResultEvent::class.java,
+
             MigrateContentToStoreTaskCreatedEvent::class.java,
             MigrateContentToStoreTaskResultEvent::class.java,
 

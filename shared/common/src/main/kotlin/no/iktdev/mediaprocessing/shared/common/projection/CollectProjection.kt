@@ -27,6 +27,9 @@ class CollectProjection(val events: List<Event>) {
         private set
     var contentStoredTaskStatus: TaskStatus = TaskStatus.NotInitiated
         private set
+    /** This cannot be added to getTaskStatus as it will be a blocking state*/
+    var determineCollectionTaskStatus: TaskStatus = TaskStatus.NotInitiated
+        private set
     val metadata: MetadataProjection? by lazy { projectMetadata() }
     val processedMedia: ProcessedMediaProjection? by lazy { projectProcessedMedia() }
     val parsedFileInfo: ParsedFileInfoProjection? by lazy { projectParsedFileInfo() }
@@ -42,6 +45,7 @@ class CollectProjection(val events: List<Event>) {
         contentMigratedTaskStatus = taskProjection.projectMigrateContentStatus()
         contentStoredTaskStatus = taskProjection.projectStoreContentAndMetadataStatus()
         prepareForWorkTaskStatus = taskProjection.projectPrepareFileForWorkStatus()
+        determineCollectionTaskStatus = taskProjection.projectDeterminedCollectionStatus()
     }
 
     fun getTaskStatus(): List<TaskStatus> = listOf(
@@ -66,8 +70,17 @@ class CollectProjection(val events: List<Event>) {
         return required.map { statusMap[it] ?: TaskStatus.NotInitiated }
     }
 
+    fun getRequiredToRunTaskStatuses(): List<TaskStatus> {
+        return listOf(
+            determineCollectionTaskStatus, // denne kan feile uten å stoppe workflow
+        )
+    }
+
+
     fun isWorkflowComplete(): Boolean {
         val statuses = getRelevantTaskStatuses()
+
+        val nonBlocking = getRequiredToRunTaskStatuses()
 
         if (statuses.isEmpty()) return false
 
@@ -77,6 +90,10 @@ class CollectProjection(val events: List<Event>) {
 
         if (anyFailed) return false
         if (anyPending) return false
+
+        if (nonBlocking.any { it == TaskStatus.Pending }) {
+            return false
+        }
 
         return allCompleted
     }
