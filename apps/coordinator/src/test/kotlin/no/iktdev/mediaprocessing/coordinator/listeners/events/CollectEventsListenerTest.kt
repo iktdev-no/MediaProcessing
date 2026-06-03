@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.MockData.convertEvent
 import no.iktdev.mediaprocessing.MockData.coverEvent
+import no.iktdev.mediaprocessing.MockData.determineCollectionEvents
 import no.iktdev.mediaprocessing.MockData.encodeEvent
 import no.iktdev.mediaprocessing.MockData.extractEvent
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
@@ -51,6 +52,8 @@ class CollectEventsListenerTest : TestBase() {
         val convert = convertEvent(language = "en", baseName = "sub1", outputFiles = listOf("/tmp/sub1.vtt"), derivedFrom = extract.last())
             .addToHistory()
         val cover = coverEvent("/tmp/cover.jpg", metadata.last())
+            .addToHistory()
+        val determined = determineCollectionEvents(collection = "MyCollection", cover.last())
             .addToHistory()
 
         val result = listener.onEvent(cover.last(), history)
@@ -138,6 +141,8 @@ class CollectEventsListenerTest : TestBase() {
             outputFiles = listOf("/tmp/sub1.vtt"),
             derivedFrom = parsed
         )
+            .addToHistory()
+        val determined = determineCollectionEvents(collection = "MyCollection", convert.last(), TaskStatus.Failed)
             .addToHistory()
 
         val result = listener.onEvent(history.last(), history)
@@ -322,6 +327,8 @@ class CollectEventsListenerTest : TestBase() {
 
         val cover = coverEvent("/tmp/cover.jpg", metadata.last())
             .addToHistory()
+        val determined = determineCollectionEvents(collection = "MyCollection", cover.last())
+            .addToHistory()
 
 
         // Første kjøring: skal produsere CollectedEvent
@@ -366,6 +373,8 @@ class CollectEventsListenerTest : TestBase() {
             derivedFrom = started
         )
             .addToHistory()
+        val determined = determineCollectionEvents(collection = "MyCollection", convert.last())
+            .addToHistory()
 
 
         val result = listener.onEvent(convert.last(), history)
@@ -398,7 +407,8 @@ class CollectEventsListenerTest : TestBase() {
             derivedFrom = started
         )
             .addToHistory()
-
+        val determined = determineCollectionEvents(collection = "MyCollection", convert.last())
+            .addToHistory()
 
         val result = listener.onEvent(convert.last(), history)
         assertNotNull(result)

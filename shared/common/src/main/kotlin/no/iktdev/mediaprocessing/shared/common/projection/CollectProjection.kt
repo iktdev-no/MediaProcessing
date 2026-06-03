@@ -70,17 +70,16 @@ class CollectProjection(val events: List<Event>) {
         return required.map { statusMap[it] ?: TaskStatus.NotInitiated }
     }
 
-    fun getRequiredToRunTaskStatuses(): List<TaskStatus> {
+    fun hasRequiredTasksToRunCompleted(): Boolean {
+        val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
         return listOf(
             determineCollectionTaskStatus, // denne kan feile uten å stoppe workflow
-        )
+        ).none { it in nonQualifiedToContinue }
     }
 
 
     fun isWorkflowComplete(): Boolean {
         val statuses = getRelevantTaskStatuses()
-
-        val nonBlocking = getRequiredToRunTaskStatuses()
 
         if (statuses.isEmpty()) return false
 
@@ -91,7 +90,7 @@ class CollectProjection(val events: List<Event>) {
         if (anyFailed) return false
         if (anyPending) return false
 
-        if (nonBlocking.any { it == TaskStatus.Pending }) {
+        if (!hasRequiredTasksToRunCompleted()) {
             return false
         }
 

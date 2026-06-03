@@ -140,6 +140,29 @@ object MockData {
         return listOf(start, result)
     }
 
+    fun determineCollectionEvents(
+        collection: String?,
+        derivedFrom: Event,
+        status: TaskStatus = TaskStatus.Completed
+    ): List<Event> {
+
+        val dummyTask = DummyTask().derivedOf(derivedFrom)
+
+        val create = DetermineCollectionTaskCreatedEvent(
+            taskId = dummyTask.taskId
+        ).derivedOf(derivedFrom)
+
+        val result = DeterminedCollectionTaskResultEvent(
+            status = status,
+            error = null,
+            collection = collection
+        ).producedFrom(dummyTask)
+
+        return listOf(create, result)
+    }
+
+
+
     fun dummyAudioStream(
         index: Int,
         language: String = "eng",

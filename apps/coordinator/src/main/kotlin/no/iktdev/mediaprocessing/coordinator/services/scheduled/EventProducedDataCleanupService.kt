@@ -59,7 +59,7 @@ class EventProducedDataCleanupService(
             deleted += (scratchBefore - scratchAfter)
         }
 
-        log.info("Wiped ${deleted.humanReadable()} from cache")
+        log.info("[Cache] Wiped ${deleted.humanReadable()} from cache")
     }
 
 
@@ -74,18 +74,18 @@ class EventProducedDataCleanupService(
         inbox.wipeExcept(preserved)
         val deletedSize = preSize - inbox.sizeRecursive()
 
-        log.info("Wiped ${deletedSize.humanReadable()} from inbox")
+        log.info("[Inbox] Wiped ${deletedSize.humanReadable()} from inbox")
 
     }
 
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     fun startCacheCleanup() {
         val cacheRetention = preference.getCleanupPreference().cacheCleanupPreference
-        log.info { "Cache Cleanup settings: enabled=${cacheRetention.enabled}, retention=${cacheRetention.retention}" }
+        log.info { "[Cache] Cache Cleanup settings: enabled=${cacheRetention.enabled}, retention=${cacheRetention.retention}" }
         if (!cacheRetention.enabled) {
             return
         }
-        log.info { "Starting cache cleanup..." }
+        log.info { "[Cache] Starting cache cleanup..." }
         val retentionDuration = cacheRetention.retention.toDuration()
         val events = EventStore.getEventSequenceWithLastEventAs(CompletedEvent::class.getName())
             .map { it.effectivePersisted() }
@@ -101,9 +101,9 @@ class EventProducedDataCleanupService(
             started != null && sequencesStartTypeTargeting.contains(started.data.flow)
         }
 
-        log.info { "Cache cleanup summary: Found ${eligibleSequences.size} sequences matching flow criteria." }
+        log.info { "[Cache] Cache cleanup summary: Found ${eligibleSequences.size} sequences matching flow criteria." }
         if (eligibleSequences.isEmpty()) {
-            log.info("No events were ready to have their cache cleared")
+            log.info("[Cache] No events were ready to have their cache cleared")
             return
         }
         performCacheCleanup(retentionDuration, eligibleSequences)
@@ -124,13 +124,13 @@ class EventProducedDataCleanupService(
 
             // --- LAGT TIL: Debug om sekvensen i det hele tatt er gammel nok ---
             if (!isOldEnough) {
-                log.debug { "Sequence ${completed.referenceId} is not old enough for cache cleanup. Created: $created" }
+                log.debug { "[Cache] Sequence ${completed.referenceId} is not old enough for cache cleanup. Created: $created" }
             }
 
             isOldEnough
         }
 
-        log.info { "Cache cleanup: Found ${ready.size} sequences ready for physical deletion." }
+        log.info { "[Cache] Found ${ready.size} sequences ready for physical deletion." }
 
         ready.forEach { seq ->
             val events = seq.mapNotNull { it.toEvent() }
@@ -139,11 +139,11 @@ class EventProducedDataCleanupService(
             if (freed > 0) {
                 val completed = events.find { it is CompletedEvent }!!
                 EventStore.persist(CompletedCacheDeletedEvent().derivedOf(completed))
-                log.info("Deleted ${freed.humanReadable()} from cache for referenceId ${completed.referenceId}")
+                log.info("[Cache] Deleted ${freed.humanReadable()} from cache for referenceId ${completed.referenceId}")
             } else {
                 // --- LAGT TIL: Varsling når sekvensen ble valgt, men ingenting ble slettet ---
                 val refId = events.find { it is CompletedEvent }?.let { (it as CompletedEvent).referenceId }
-                log.warn { "Sequence $refId was selected, but no files were cleared. Check file paths/structure." }
+                log.warn { "[Cache] Sequence $refId was selected, but no files were cleared. Check file paths/structure." }
             }
         }
     }
@@ -195,7 +195,7 @@ class EventProducedDataCleanupService(
             }
 
             if (target.notExist()) {
-                log.debug { "Folder or file does not exist: ${target.absolutePath}" }
+                log.debug { "[Cache] Folder or file does not exist: ${target.absolutePath}" }
                 continue
             }
 
@@ -218,9 +218,9 @@ class EventProducedDataCleanupService(
     @Scheduled(cron = "0 0 0 * * *")
     fun cleanupDailyAtMidnight() {
         val pref = preference.getCleanupPreference().inputCleanupPreference
-        log.info { "Input Cleanup settings: enabled=${pref.enabled}, retention=${pref.retention}" }
+        log.info { "[Inbox] Input Cleanup settings: enabled=${pref.enabled}, retention=${pref.retention}" }
         if (!pref.enabled) {
-            log.info { "Starting input file cleanup..." }
+            log.info { "[Inbox] Starting input file cleanup..." }
             return
         }
 
@@ -239,9 +239,9 @@ class EventProducedDataCleanupService(
             preserved = preserved,
             retention = retention
         )
-        log.info { "Input Cleanup summary: Found ${filesWithEvents.size} total candidates, ${candidates.size} marked for deletion, ${filesWithEvents.size - candidates.size} ignored." }
+        log.info { "[Inbox] Input Cleanup summary: Found ${filesWithEvents.size} total candidates, ${candidates.size} marked for deletion, ${filesWithEvents.size - candidates.size} ignored." }
         if (candidates.isEmpty()) {
-            log.info("No input files eligible for cleanup")
+            log.info("[Inbox] No input files eligible for cleanup")
             return
         }
 
@@ -276,19 +276,19 @@ class EventProducedDataCleanupService(
         val existingFiles = candidates.filter { it.key.exists() }
 
         existingFiles.forEach { (file, lastEvents) ->
-            log.info("Deleting old input file: ${file.path}")
+            log.info("[Inbox] Deleting old input file: ${file.path}")
             file.delete()
 
             lastEvents.forEach { lastEvent ->
                 val deleteEvent = CompletedInputDeletedEvent()
                     .derivedOf(lastEvent)
                 EventStore.persist(deleteEvent)
-                log.info("Published CompletedInputDeletedEvent for sequence ending with: ${lastEvent::class.simpleName}")
+                log.info("[Inbox] Published CompletedInputDeletedEvent for sequence ending with: ${lastEvent::class.simpleName}")
             }
         }
         val missingFiles = (candidates - existingFiles.keys).keys
         if (missingFiles.isNotEmpty()) {
-            log.warn { "Could not find the following files for cleanup: \n${missingFiles.joinToString("\n") { it.path }}" }
+            log.warn { "[Inbox] Could not find the following files for cleanup: \n${missingFiles.joinToString("\n") { it.path }}" }
         }
     }
 
