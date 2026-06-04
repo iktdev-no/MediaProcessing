@@ -38,6 +38,8 @@ class DetermineCollectionEventCreateListener : EventListener() {
             return null
         }
 
+        val asParents = useEvents.ofTypes(requiredEvents)
+
         // 3. Unngå duplikater
         if (useEvents.any { it is DetermineCollectionTaskCreatedEvent }) {
             return null
@@ -48,14 +50,14 @@ class DetermineCollectionEventCreateListener : EventListener() {
 
         // 5. Lag task
         val task = DetermineCollectionTask(names = candidates)
+            .derivedOf(asParents.first())
         TaskStore.persist(task)
 
 
-        val asParents = useEvents.ofTypes(requiredEvents)
 
         // 6. Returner eventet korrekt koblet
         return DetermineCollectionTaskCreatedEvent(taskId = task.taskId)
-            .derivedOf(*asParents.toTypedArray())
+            .derivedOf(asParents)
     }
 
     private fun buildCollectionCandidates(events: List<Event>): List<String> {
