@@ -3,9 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
-import no.iktdev.eventi.models.Metadata
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DetermineCollectionTaskCreatedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.DetermineCollectionTask
@@ -16,7 +15,9 @@ import org.springframework.stereotype.Component
 
 @ListenerOrder(6)
 @Component
-class DetermineCollectionEventCreateListener : EventListener() {
+class DetermineCollectionTaskCreateListener : EventListener() {
+
+    override fun allowDerivativeOnHistoricalEvent() = true
 
     private val requiredEvents = listOf(
         MediaParsedInfoEvent::class,
@@ -25,39 +26,34 @@ class DetermineCollectionEventCreateListener : EventListener() {
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
 
-        // 1. Kombiner history + event slik at vi får "faktisk state"
+        // Stop if completed
+        if (event is CompletedEvent || history.any { it is CompletedEvent }) return null
+
         val useEvents = history + event
+
+        // Avoid duplicates
         if (useEvents.any { it is DetermineCollectionTaskCreatedEvent }) return null
 
-        // 2. Sjekk om ALLE required events finnes i useEvents
+        // Check if all required events exist
         val hasAllRequired = requiredEvents.all { type ->
             useEvents.any { type.isInstance(it) }
         }
+        if (!hasAllRequired) return null
 
-        if (!hasAllRequired) {
-            return null
-        }
+        // Extract the required parent events
+        val parents = useEvents.ofTypes(requiredEvents)
 
-        val asParents = useEvents.ofTypes(requiredEvents)
-
-        // 3. Unngå duplikater
-        if (useEvents.any { it is DetermineCollectionTaskCreatedEvent }) {
-            return null
-        }
-
-        // 4. Bygg kandidatnavn
+        // Build candidates
         val candidates = buildCollectionCandidates(useEvents)
 
-        // 5. Lag task
+        // Create task (use first parent for derivation)
         val task = DetermineCollectionTask(names = candidates)
-            .derivedOf(asParents.first())
+            .derivedOf(event)   // <‑‑ IMPORTANT: derive from the triggering event only
         TaskStore.persist(task)
 
-
-
-        // 6. Returner eventet korrekt koblet
+        // Create event (also derive from triggering event only)
         return DetermineCollectionTaskCreatedEvent(taskId = task.taskId)
-            .derivedOf(asParents)
+            .derivedOf(event)
     }
 
     private fun buildCollectionCandidates(events: List<Event>): List<String> {

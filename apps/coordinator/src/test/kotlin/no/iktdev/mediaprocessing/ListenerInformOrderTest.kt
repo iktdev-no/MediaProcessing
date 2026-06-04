@@ -58,7 +58,7 @@ class ListenerInformOrderTest(): TestBase() {
             MediaReadStreamsTaskCreatedListener::class.java.simpleName,
             MediaParseStreamsListener::class.java.simpleName,
             MediaCreateMetadataSearchTaskListener::class.java.simpleName,
-            DetermineCollectionEventCreateListener::class.java.simpleName,
+            DetermineCollectionTaskCreateListener::class.java.simpleName,
         )
     }
 
