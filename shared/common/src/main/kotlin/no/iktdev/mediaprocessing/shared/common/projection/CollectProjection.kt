@@ -74,6 +74,7 @@ class CollectProjection(val events: List<Event>) {
         val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
         return listOf(
             determineCollectionTaskStatus, // denne kan feile uten å stoppe workflow
+            coverDownloadTaskStatus, // Denne må enten være skipped eller completed eller failed
         ).none { it in nonQualifiedToContinue }
     }
 
@@ -214,7 +215,8 @@ class CollectProjection(val events: List<Event>) {
         InProgress,
         Completed,
         Failed,
-        Cancelled
+        Cancelled,
+        Skipped
     }
 
     fun prettyPrint(): String = buildString {
@@ -263,6 +265,7 @@ class CollectProjection(val events: List<Event>) {
         TaskStatus.Completed -> "\u001B[32m$this\u001B[0m" // grønn
         TaskStatus.Failed -> "\u001B[31m$this\u001B[0m" // rød
         TaskStatus.Cancelled -> "\u001B[90m$this\u001B[0m" // grå
+        TaskStatus.Skipped -> "\u001B[90m$this\u001B[0m" // grå
     }
 
 }

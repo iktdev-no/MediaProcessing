@@ -23,6 +23,7 @@ object EventRegistry {
 
             CoverDownloadTaskCreatedEvent::class.java,
             CoverDownloadResultEvent::class.java,
+            CoverDownloadSkippedEvent::class.java,
 
             DeleteSequenceEvent::class.java,
             DeletedEvent::class.java,

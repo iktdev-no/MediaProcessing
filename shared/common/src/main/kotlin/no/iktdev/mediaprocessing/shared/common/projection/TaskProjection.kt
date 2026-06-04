@@ -43,12 +43,16 @@ class TaskProjection(val events: List<Event>) {
         )
 
     // 2: Cover download (flere taskIds)
-    fun projectCoverDownloadStatus() =
-        projectStatus<CoverDownloadTaskCreatedEvent, CoverDownloadResultEvent>(
+    fun projectCoverDownloadStatus(): TaskStatus {
+        if (events.findLast { it is CoverDownloadTaskCreatedEvent } == null) {
+            return TaskStatus.Skipped
+        }
+        return projectStatus<CoverDownloadTaskCreatedEvent, CoverDownloadResultEvent>(
             createdIds = { it.flatMap { e -> e.taskIds } },
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )
+    }
 
     // 3: Metadata search (én taskId)
     fun projectMetadataSearchStatus() =

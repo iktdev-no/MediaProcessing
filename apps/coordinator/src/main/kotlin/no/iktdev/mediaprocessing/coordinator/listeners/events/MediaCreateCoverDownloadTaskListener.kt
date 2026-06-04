@@ -29,30 +29,34 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
             return null
         }
 
-        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
-            log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
-            return null
-        }
+        val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()
+            ?.data?.parsedFileName
+            ?: run {
+                log.error("Unable to get parsing info, thus no output directory to use. Exiting listener")
+                return null
+            }
 
-        val downloadData = useEvent.recommended?.let { recommended ->
-            val cover = recommended.metadata.cover ?: return@let null
-            val data = recommended.metadata
+        val downloadData = useEvent.recommended
+            ?.metadata
+            ?.let { data ->
+                data.cover
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { cover ->
+                        CoverDownloadTask.CoverDownloadData(
+                            url = cover,
+                            source = data.source,
+                            outputFileName = "${data.title}-${data.source}",
+                            outputFolderName = parsedInfo
+                        )
+                    }
+            }
 
-            CoverDownloadTask.CoverDownloadData(
-                url = cover,
-                source = data.source,
-                outputFileName = "${data.title}-${data.source}",
-                outputFolderName = parsedInfo
-            )
-        }
         if (downloadData == null) {
             log.info("No cover found for ${event.referenceId}, skipping cover download task creation")
             return null
         }
 
-        val tasks = listOf(
-            CoverDownloadTask(downloadData)
-        )
+        val tasks = listOf(CoverDownloadTask(downloadData))
 
         val createdTasksEvent = CoverDownloadTaskCreatedEvent(
             tasks.map { it.taskId }
@@ -65,4 +69,5 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
 
         return createdTasksEvent
     }
+
 }
