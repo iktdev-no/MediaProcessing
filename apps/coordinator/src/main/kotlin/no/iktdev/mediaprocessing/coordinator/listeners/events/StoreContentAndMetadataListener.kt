@@ -31,12 +31,14 @@ class StoreContentAndMetadataListener: EventListener() {
         val startEvent = history.requireEvent<StartProcessingEvent>()
         if (startEvent.data.operation.isOnly(OperationType.MetadataSearch)) {
             event.requireQualifiedEntry<PersistContentEvent>()
-        } else {
-            history.requireEvent<PersistContentEvent>()
-            val migrateEvent = event as? MigrateContentToStoreTaskResultEvent ?: return null
-            if (migrateEvent.status == TaskStatus.Failed) {
-                return null
-            }
+        }
+
+        if (history.getInstanceOf<PersistContentEvent>() == null) {
+            return null
+        }
+        val migrateEvent = event as? MigrateContentToStoreTaskResultEvent ?: return null
+        if (migrateEvent.status == TaskStatus.Failed) {
+            return null
         }
 
         val useEvent = history.getInstanceOf<ContinuationSummaryEvent>() ?: return null

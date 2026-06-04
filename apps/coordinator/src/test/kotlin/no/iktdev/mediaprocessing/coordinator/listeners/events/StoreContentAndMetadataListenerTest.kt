@@ -37,7 +37,8 @@ class StoreContentAndMetadataListenerTest : TestBase() {
         val startedEvent = defaultStartEvent().addToHistory()
         val event = DummyEvent().derivedOf(startedEvent).addToHistory()
 
-        assertThrows<SoftDispatchException.MissingEventException> { listener.onEvent(event, history) }
+        val result = listener.onEvent(event, history)
+        assertThat(result).isNull()
     }
 
     @Test
@@ -52,10 +53,8 @@ class StoreContentAndMetadataListenerTest : TestBase() {
     fun `returns null when no collected event exists`() {
         val startedEvent = defaultStartEvent().addToHistory()
         val event = migrateEvent().derivedOf(startedEvent).addToHistory()
-
-        assertThrows<SoftDispatchException.MissingEventException> {
-            listener.onEvent(event, history)
-        }
+        val result = listener.onEvent(event, history)
+        assertThat(result).isNull()
     }
 
     @Test
@@ -75,9 +74,8 @@ class StoreContentAndMetadataListenerTest : TestBase() {
         // Historikken inneholder kun collected-eventet, ingen metadata eller parsed info
         val history = listOf(startedEvent, collected)
 
-        assertThrows<SoftDispatchException.MissingEventException> {
-            listener.onEvent(event, history)
-        }
+        val result = listener.onEvent(event, history)
+        assertThat(result).isNull()
     }
 
     @Test
