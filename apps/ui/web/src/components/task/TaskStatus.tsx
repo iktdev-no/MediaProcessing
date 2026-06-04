@@ -5,6 +5,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { keyframes } from "@mui/material";
 import type { TaskStatus } from "../../types/transfer-model";
 import { PendingIcon } from "../PendingIcon";
+import FastForwardIcon from '@mui/icons-material/FastForward';
 
 const spin = keyframes({
   from: { transform: "rotate(0deg)" },
@@ -35,6 +36,9 @@ export function TaskStatusIcon({ status }: { status: string }) {
 
     case "Cancelled":
       return <DoNotDisturbIcon sx={{ color: "#7f7f7f" }} />; // neon lilla
+
+    case "Skipped":
+      return <FastForwardIcon sx={{ color: "#7f7f7f" }} />;
 
     default:
       return null;

@@ -144,7 +144,7 @@ export interface Companion {
   default: CPULimit;
 }
 
-export type TaskStatus = "NotInitiated" | "Pending" | "InProgress" | "Completed" | "Failed" | "Cancelled"
+export type TaskStatus = "NotInitiated" | "Pending" | "InProgress" | "Completed" | "Failed" | "Cancelled" | "Skipped"
 
 export type Mode = "Auto" | "Manual"
 

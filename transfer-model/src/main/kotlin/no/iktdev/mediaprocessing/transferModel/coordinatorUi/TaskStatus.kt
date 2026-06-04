@@ -6,5 +6,6 @@ enum class TaskStatus {
     InProgress,
     Completed,
     Failed,
-    Cancelled
+    Cancelled,
+    Skipped
 }
