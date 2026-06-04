@@ -43,14 +43,14 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
         val useEvent = useEvents.getInstanceOf<MetadataSearchResultEvent>() ?: return null
         if (useEvent.status != TaskStatus.Completed) {
             log.warn("MetadataResult on ${event.referenceId} did not complete successfully")
-            return null
+            return CoverDownloadSkippedEvent().derivedOf(useEvent)
         }
 
         val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()
             ?.data?.parsedFileName
             ?: run {
                 log.error("Unable to get parsing info, thus no output directory to use. Exiting listener")
-                return null
+                return CoverDownloadSkippedEvent().derivedOf(useEvent)
             }
 
         val downloadData = useEvent.recommended
@@ -70,7 +70,7 @@ class MediaCreateCoverDownloadTaskListener: EventListener() {
 
         if (downloadData == null) {
             log.info("No cover found for ${event.referenceId}, skipping cover download task creation")
-            return null
+            return CoverDownloadSkippedEvent().derivedOf(useEvent)
         }
 
         val tasks = listOf(CoverDownloadTask(downloadData))

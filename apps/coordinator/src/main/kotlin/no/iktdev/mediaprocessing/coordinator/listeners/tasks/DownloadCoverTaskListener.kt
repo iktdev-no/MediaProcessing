@@ -38,7 +38,7 @@ class DownloadCoverTaskListener(
         val downloadResult = try {
             downloadClient.download(taskData.url, taskData.outputFileName)
         } catch (e: Exception) {
-            return CoverDownloadResultEvent(status = TaskStatus.Failed)
+            return CoverDownloadResultEvent(status = TaskStatus.Failed).producedFrom(pickedTask)
         }
         val downloadedFile = downloadResult.result
 
@@ -55,7 +55,7 @@ class DownloadCoverTaskListener(
             log.error { "Failed to download cover from ${taskData.url}" }
             return CoverDownloadResultEvent(
                 status = TaskStatus.Failed,
-            )
+            ).producedFrom(pickedTask)
         }
     }
 

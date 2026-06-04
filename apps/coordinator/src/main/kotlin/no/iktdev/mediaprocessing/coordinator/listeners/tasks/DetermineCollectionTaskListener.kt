@@ -107,7 +107,7 @@ class DetermineCollectionTaskListener(
         return DeterminedCollectionTaskResultEvent(
             status = TaskStatus.Completed,
             collection = first
-        )
+        ).producedFrom(pickedTask)
     }
 
 
