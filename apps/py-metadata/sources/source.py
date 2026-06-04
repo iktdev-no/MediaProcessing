@@ -75,11 +75,11 @@ class SourceBase(ABC):
         if "movie" in t:
             return MediaType.MOVIE
 
-        known_series = {
+        known_series = {x.lower() for x in {
             "tv", "tv series", "tv mini series", "ona", "ova",
             "special", "music", "series", "short", "video",
             "episode", "video game", "tvSeries"
-        }
+        }}
 
         if t in known_series:
             return MediaType.SERIE
