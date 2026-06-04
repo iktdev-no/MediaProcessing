@@ -3,11 +3,14 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.Metadata
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DetermineCollectionTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.DetermineCollectionTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.ofTypes
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 
@@ -16,14 +19,15 @@ import org.springframework.stereotype.Component
 class DetermineCollectionEventCreateListener : EventListener() {
 
     private val requiredEvents = listOf(
-        MediaParsedInfoEvent::class.java,
-        MetadataSearchResultEvent::class.java,
+        MediaParsedInfoEvent::class,
+        MetadataSearchResultEvent::class,
     )
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
 
         // 1. Kombiner history + event slik at vi får "faktisk state"
         val useEvents = history + event
+        if (useEvents.any { it is DetermineCollectionTaskCreatedEvent }) return null
 
         // 2. Sjekk om ALLE required events finnes i useEvents
         val hasAllRequired = requiredEvents.all { type ->
@@ -46,9 +50,12 @@ class DetermineCollectionEventCreateListener : EventListener() {
         val task = DetermineCollectionTask(names = candidates)
         TaskStore.persist(task)
 
+
+        val asParents = useEvents.ofTypes(requiredEvents)
+
         // 6. Returner eventet korrekt koblet
         return DetermineCollectionTaskCreatedEvent(taskId = task.taskId)
-            .derivedOf(event)
+            .derivedOf(*asParents.toTypedArray())
     }
 
     private fun buildCollectionCandidates(events: List<Event>): List<String> {

@@ -186,6 +186,13 @@ inline fun <reified T> List<T>.sizeEquals(other: List<T>): Boolean {
     return this.size == other.size
 }
 
+fun List<Event>.ofTypes(vararg types: KClass<out Event>): List<Event> =
+    this.filter { e -> types.any { it.isInstance(e) } }
+fun List<Event>.ofTypes(types: List<KClass<out Event>>): List<Event> =
+    this.filter { e -> types.any { it.isInstance(e) } }
+
+
+
 fun IFile.resolveConflict(): IFile {
     if (!exists()) return this
 
