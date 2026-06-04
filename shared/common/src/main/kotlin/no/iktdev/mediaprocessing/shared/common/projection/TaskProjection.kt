@@ -44,7 +44,7 @@ class TaskProjection(val events: List<Event>) {
 
     // 2: Cover download (flere taskIds)
     fun projectCoverDownloadStatus(): TaskStatus {
-        if (events.findLast { it is CoverDownloadTaskCreatedEvent } == null) {
+        if (events.findLast { it is CoverDownloadSkippedEvent } != null) {
             return TaskStatus.Skipped
         }
         return projectStatus<CoverDownloadTaskCreatedEvent, CoverDownloadResultEvent>(
