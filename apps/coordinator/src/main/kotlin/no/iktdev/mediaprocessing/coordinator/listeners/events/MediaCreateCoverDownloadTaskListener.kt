@@ -5,7 +5,10 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.requireAs
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadSkippedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DetermineCollectionTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
@@ -19,11 +22,25 @@ import org.springframework.stereotype.Component
 class MediaCreateCoverDownloadTaskListener: EventListener() {
     private val log = KotlinLogging.logger {}
 
+    override fun allowDerivativeOnHistoricalEvent() = true
+
+    private val producedEventTypes = listOf(
+        CoverDownloadSkippedEvent::class,
+        CoverDownloadTaskCreatedEvent::class,
+    )
+
     override fun onEvent(
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event.requireQualifiedEntry<MetadataSearchResultEvent>()
+        val useEvents = history + event
+        if (useEvents.any { it is CompletedEvent }) return null
+        val hasProduces =  producedEventTypes.any { type ->
+            useEvents.any { type.isInstance(it) }
+        }
+        if (hasProduces) return null
+
+        val useEvent = useEvents.getInstanceOf<MetadataSearchResultEvent>() ?: return null
         if (useEvent.status != TaskStatus.Completed) {
             log.warn("MetadataResult on ${event.referenceId} did not complete successfully")
             return null

@@ -25,11 +25,10 @@ class DetermineCollectionTaskCreateListener : EventListener() {
     )
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
+        val useEvents = history + event
 
         // Stop if completed
-        if (event is CompletedEvent || history.any { it is CompletedEvent }) return null
-
-        val useEvents = history + event
+        if (useEvents.any { it is CompletedEvent }) return null
 
         // Avoid duplicates
         if (useEvents.any { it is DetermineCollectionTaskCreatedEvent }) return null

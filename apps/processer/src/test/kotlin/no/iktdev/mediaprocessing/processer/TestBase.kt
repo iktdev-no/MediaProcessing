@@ -57,6 +57,10 @@ open class TestBase {
             return emptyList()
         }
 
+        override fun hasAccepted(ref: UUID, listenerName: String): Boolean {
+            return false
+        }
+
     }
 
 
