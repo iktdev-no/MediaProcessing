@@ -144,6 +144,8 @@ class CollectEventsListenerTest : TestBase() {
             .addToHistory()
         val determined = determineCollectionEvents(collection = "MyCollection", convert.last(), TaskStatus.Failed)
             .addToHistory()
+        val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
+            .addToHistory()
 
         val result = listener.onEvent(history.last(), history)
         assertThat(result).isInstanceOf(CollectedEvent::class.java)
@@ -375,7 +377,8 @@ class CollectEventsListenerTest : TestBase() {
             .addToHistory()
         val determined = determineCollectionEvents(collection = "MyCollection", convert.last())
             .addToHistory()
-
+        val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
+            .addToHistory()
 
         val result = listener.onEvent(convert.last(), history)
         assertNotNull(result)
@@ -409,7 +412,8 @@ class CollectEventsListenerTest : TestBase() {
             .addToHistory()
         val determined = determineCollectionEvents(collection = "MyCollection", convert.last())
             .addToHistory()
-
+        val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
+            .addToHistory()
         val result = listener.onEvent(convert.last(), history)
         assertNotNull(result)
         assertThat(result).isInstanceOf(CollectedEvent::class.java)
