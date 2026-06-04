@@ -10,7 +10,9 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Determ
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.DetermineCollectionTask
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import java.util.UUID
 
@@ -46,17 +48,25 @@ class DetermineCollectionTaskListener(
         logger.info("Determining collection for names: ${pickedTask.names}")
 
         val responses = pickedTask.names.map { name ->
-            val response = streamitRestTemplate.exchange(
-                "/api/meta/title/search/$name",
-                HttpMethod.GET,
-                null,
-                String::class.java
-            )
-
-            logger.debug("Response for '{}': status={}, body='{}'", name, response.statusCode, response.body)
-
-            name to response
+            try {
+                val response = streamitRestTemplate.exchange(
+                    "/api/meta/title/search/$name",
+                    HttpMethod.GET,
+                    null,
+                    String::class.java
+                )
+                name to response
+            } catch (e: HttpClientErrorException.NotFound) {
+                logger.debug("Title '{}' not found (404)", name)
+                name to ResponseEntity.status(HttpStatus.NOT_FOUND).body<String?>(null)
+            } catch (e: Exception) {
+                return DeterminedCollectionTaskResultEvent(
+                    status = TaskStatus.Failed,
+                    collection = null
+                )
+            }
         }
+
 
         // Filtrer ut gyldige svar
         val validBodies = responses
