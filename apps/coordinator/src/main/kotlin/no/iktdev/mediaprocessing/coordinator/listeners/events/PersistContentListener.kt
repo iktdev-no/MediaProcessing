@@ -8,6 +8,7 @@ import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.listeners.PolicyGateEventListener
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
+import no.iktdev.mediaprocessing.shared.common.short
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
 
@@ -36,7 +37,7 @@ class PersistContentListener(
             return super.onEvent(event, useHistory)
         }
 
-        log.debug("Last signal is ${lastSignal::class.java.name}")
+        log.debug("[${lastSignal.referenceId.short()}] Last signal is ${lastSignal::class.java.name}")
 
         if (lastSignal is OnHoldSignalEvent) {
             return null

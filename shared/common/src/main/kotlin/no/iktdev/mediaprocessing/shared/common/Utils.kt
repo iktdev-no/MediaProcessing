@@ -15,6 +15,7 @@ import java.io.FileInputStream
 import java.net.InetAddress
 import java.security.MessageDigest
 import java.time.Instant
+import java.util.UUID
 import java.util.zip.CRC32
 import kotlin.reflect.KClass
 
@@ -287,6 +288,9 @@ inline fun <reified T : Event> Event.requireQualifiedEntry(): T {
     return this as? T
         ?: throw SoftDispatchException.UnqualifiedEntryEventException(T::class.java)
 }
+
+fun UUID.short(): String = this.toString().substring(0, 8)
+
 
 
 
