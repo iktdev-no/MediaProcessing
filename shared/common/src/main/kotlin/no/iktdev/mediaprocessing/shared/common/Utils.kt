@@ -217,15 +217,42 @@ fun UtcNow(): Instant =
 
 
 fun List<Event>.effective(): List<Event> {
-    val deletedIds = this
+    // 1. Bygg parent → children map
+    val children = this
+        .flatMap { ev ->
+            ev.metadata.derivedFromId.orEmpty().map { parentId -> parentId to ev.eventId }
+        }
+        .groupBy({ it.first }, { it.second })
+
+    // 2. Finn alle direkte slettede eventId-er
+    val deletedRoots = this
         .filterIsInstance<DeleteEvent>()
         .map { it.deletedEventId }
         .toSet()
 
+    // 3. Finn alle descendants rekursivt
+    val allDeleted = mutableSetOf<UUID>()
+    val stack = ArrayDeque<UUID>()
+
+    stack.addAll(deletedRoots)
+    allDeleted.addAll(deletedRoots)
+
+    while (stack.isNotEmpty()) {
+        val current = stack.removeFirst()
+        val kids = children[current].orEmpty()
+        for (kid in kids) {
+            if (allDeleted.add(kid)) {
+                stack.add(kid)
+            }
+        }
+    }
+
+    // 4. Filtrer bort alle slettede events
     return this
-        .filter { it.eventId !in deletedIds }
+        .filter { it.eventId !in allDeleted }
         .filterNot { it is DeleteEvent }
 }
+
 
 fun List<PersistedEvent>.effectivePersisted(): List<PersistedEvent> {
     val parsed = this.mapNotNull { pe ->
@@ -234,7 +261,7 @@ fun List<PersistedEvent>.effectivePersisted(): List<PersistedEvent> {
 
     val effectiveEvents = parsed
         .map { it.second }
-        .effective() // bruker extension over
+        .effective()
 
     val effectiveIds = effectiveEvents.map { it.eventId }.toSet()
 
@@ -243,6 +270,7 @@ fun List<PersistedEvent>.effectivePersisted(): List<PersistedEvent> {
         .map { it.first }
         .sortedBy { it.persistedAt }
 }
+
 
 fun <T : Any> KClass<T>.getName(): String =
     this.simpleName ?: this.java.simpleName
