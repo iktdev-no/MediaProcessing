@@ -4,8 +4,10 @@ import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.jetbrains.annotations.VisibleForTesting
 import org.springframework.stereotype.Component
@@ -52,32 +54,38 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
 
         val useEvent = event as? MediaParsedInfoEvent ?: return null
 
-        val task = MetadataSearchTask(
-            MetadataSearchTask.SearchData(
-                searchTitles = useEvent.data.parsedSearchTitles,
-                collection = useEvent.data.parsedCollection,
-                mediaType = useEvent.data.mediaType
-            )
+        val searchData = MetadataSearchTask.SearchData(
+            searchTitles = useEvent.data.parsedSearchTitles,
+            collection = useEvent.data.parsedCollection,
+            mediaType = useEvent.data.mediaType
         )
-        val finalResult = MetadataSearchTaskCreatedEvent(task.taskId).derivedOf(useEvent)
-        task.apply { derivedOf(finalResult) }
 
-        TaskStore.persist(task)
-        scheduleTaskExpiry(task.taskId, finalResult.eventId, task.referenceId)
-        return finalResult
+        val metadataSearchTask = MetadataSearchTask(data = searchData)
+            .derivedOf(useEvent)
+
+        val taskCreatedEvent = MetadataSearchTaskCreatedEvent(taskId = metadataSearchTask.taskId)
+            .derivedOf(useEvent).also {
+                TaskStore.persist(metadataSearchTask)
+                scheduleTaskExpiry(metadataSearchTask.taskId, it.eventId, it.referenceId)
+            }
+
+
+        return taskCreatedEvent
     }
 
     private fun scheduleTaskExpiry(taskId: UUID, eventId: UUID, referenceId: UUID) {
         if (scheduledExpiries.containsKey(taskId)) return
 
         val future = scheduler.schedule({
+            val task = TaskStore.findByTaskId(taskId)?.toTask() ?: return@schedule
             // Hvis tasken fortsatt ikke har result/failed → marker som failed
-            TaskStore.claim(taskId, "Coordinator-MetadataSearchTaskListener-TimeoutScheduler")
-            TaskStore.markConsumed(taskId, TaskStatus.Failed)
+            TaskStore.claim(task.taskId, "Coordinator-MetadataSearchTaskListener-TimeoutScheduler")
+            TaskStore.markConsumed(task.taskId, TaskStatus.Failed)
             val failureEvent = MetadataSearchResultEvent(
                 status = TaskStatus.Failed,
             ).apply { setFailed(listOf(taskId)) }
-            //publishEvent(MetadataSearchFailedEvent(taskId, "Timeout").derivedOf(referenceId))
+                .producedFrom(task)
+            EventStore.persist(failureEvent)
             scheduledExpiries.remove(taskId)
         }, 10, TimeUnit.MINUTES)
 

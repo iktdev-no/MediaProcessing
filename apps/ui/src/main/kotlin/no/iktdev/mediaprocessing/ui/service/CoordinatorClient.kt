@@ -28,13 +28,13 @@ class CoordinatorClient(
         onConnected: () -> Unit,
         onDisconnected: () -> Unit,
         onReconnecting: () -> Unit
-    ): Flux<ServerSentEvent<String>> {
+    ): Flux<ServerSentEvent<Any>> {
 
         return coordinatorWebClient.get()
             .uri("/internal/sse")
             .accept(MediaType.TEXT_EVENT_STREAM)
             .retrieve()
-            .bodyToFlux(object : ParameterizedTypeReference<ServerSentEvent<String>>() {})
+            .bodyToFlux(object : ParameterizedTypeReference<ServerSentEvent<Any>>() {})
             .doOnSubscribe {
                 onConnected()
             }

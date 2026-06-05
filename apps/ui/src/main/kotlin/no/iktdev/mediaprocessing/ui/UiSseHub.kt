@@ -5,7 +5,6 @@ import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import no.iktdev.mediaprocessing.ui.dto.SSEMessage
 import no.iktdev.mediaprocessing.ui.service.CoordinatorClient
-import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import reactor.core.Disposable
