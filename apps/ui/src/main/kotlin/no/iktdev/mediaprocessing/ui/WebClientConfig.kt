@@ -32,7 +32,10 @@ class WebClientConfig(
             .resolver(DefaultAddressResolverGroup.INSTANCE)
 
         return WebClient.builder()
+            .baseUrl(appsConfig.coordinator.address)
             .clientConnector(ReactorClientHttpConnector(httpClient))
+            .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
             .build()
     }
+
 }
