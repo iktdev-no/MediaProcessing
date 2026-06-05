@@ -20,6 +20,7 @@ import java.time.Duration
 @Service
 class CoordinatorClient(
     private val coordinatorWebClient: WebClient,
+    private val sseWebClient: WebClient,
 ) {
     val log = KotlinLogging.logger {}
 
@@ -28,16 +29,13 @@ class CoordinatorClient(
         onConnected: () -> Unit,
         onDisconnected: () -> Unit,
         onReconnecting: () -> Unit
-    ): Flux<ServerSentEvent<Any>> {
-
-        return coordinatorWebClient.get()
+    ): Flux<ServerSentEvent<Any>> =
+        sseWebClient.get()
             .uri("/internal/sse")
             .accept(MediaType.TEXT_EVENT_STREAM)
             .retrieve()
             .bodyToFlux(object : ParameterizedTypeReference<ServerSentEvent<Any>>() {})
-            .doOnSubscribe {
-                onConnected()
-            }
+            .doOnSubscribe { onConnected() }
             .doOnError { ex ->
                 onDisconnected()
                 log.warn(ex) { "SSE connection lost" }
@@ -52,7 +50,6 @@ class CoordinatorClient(
                         log.info { "Reconnecting to SSE..." }
                     }
             )
-    }
 
 
 

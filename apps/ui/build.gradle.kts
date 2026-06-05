@@ -29,6 +29,9 @@ dependencies {
 
     // Riktig WebFlux for Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("io.projectreactor.netty:reactor-netty")
+    implementation("io.projectreactor.netty:reactor-netty-http")
+
 
     // Jackson (BOM-styrt)
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
