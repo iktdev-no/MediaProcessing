@@ -81,7 +81,7 @@ async def process_task(db, task: MetadataSearchTask) -> MetadataSearchResultEven
 
         core_metadata = EventMetadata(
             created=utc_now(),
-            derivedFromId={task.referenceId, task.taskId}
+            derivedFromId={task.taskId}
         )
 
         event = MetadataSearchResultEvent(

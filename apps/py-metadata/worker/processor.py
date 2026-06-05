@@ -82,7 +82,7 @@ async def process_task(db, task: MetadataSearchTask) -> MetadataSearchResultEven
         # 5) Bygg event
         core_metadata = EventMetadata(
             created=utc_now(),
-            derivedFromId={task.referenceId, task.taskId}
+            derivedFromId={task.taskId}
         )
 
         event = MetadataSearchResultEvent(
