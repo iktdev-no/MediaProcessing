@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ui
 
 import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -8,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Component
 class CoordinatorHealthCheck(
-    private val webClient: WebClient
+    @param:Qualifier("coordinatorWebClient") private val webClient: WebClient,
 ) : ApplicationRunner {
 
     private val log = KotlinLogging.logger {}

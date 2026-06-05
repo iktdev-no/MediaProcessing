@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.ui.AppConfig
 import no.iktdev.mediaprocessing.ui.AppsConfig
 import no.iktdev.mediaprocessing.ui.UiSseHub
 import no.iktdev.mediaprocessing.ui.dto.status.SystemStatus
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -13,7 +14,7 @@ import java.time.Duration
 @Service
 class StatusService(
     private val apps: AppsConfig,
-    private val webClient: WebClient,
+    @param:Qualifier("coordinatorWebClient") private val webClient: WebClient,
     private val hub: UiSseHub
 ) {
     var status: SystemStatus = SystemStatus()

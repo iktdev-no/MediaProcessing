@@ -5,6 +5,7 @@ import no.iktdev.mediaprocessing.shared.common.dto.requests.StartProcessRequest
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.ui.dto.file.MediaActionType
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerSentEvent
@@ -19,8 +20,8 @@ import java.time.Duration
 
 @Service
 class CoordinatorClient(
-    private val coordinatorWebClient: WebClient,
-    private val sseWebClient: WebClient,
+    @param:Qualifier("coordinatorWebClient") private val coordinatorWebClient: WebClient,
+    @param:Qualifier("sseWebClient") private val sseWebClient: WebClient,
 ) {
     val log = KotlinLogging.logger {}
 
