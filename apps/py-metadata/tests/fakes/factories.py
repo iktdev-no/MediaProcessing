@@ -56,24 +56,38 @@ def make_task_row(
     claimed=False,
     consumed=False,
 ):
+    task_id = task_id or uuid.uuid4()
+    reference_id = reference_id or uuid.uuid4()
+
+    payload = {
+        "referenceId": str(reference_id),
+        "taskId": str(task_id),
+        "metadata": {
+            "created": utc_now().isoformat(),
+            "derivedFromId": []
+        },
+        "data": {
+            "searchTitles": search_titles or ["Foo", "Bar"],
+            "collection": collection,
+            "mediaType": media_type.value,
+            "referenceId": str(reference_id),
+            "taskId": str(task_id)
+        }
+    }
+
     return {
-        "REFERENCE_ID": str(reference_id or uuid.uuid4()),
-        "TASK_ID": str(task_id or uuid.uuid4()),
+        "REFERENCE_ID": str(reference_id),
+        "TASK_ID": str(task_id),
         "TASK": "MetadataSearchTask",
         "STATUS": TaskStatus.PENDING.value,
-        "DATA": json.dumps({
-            "data": {
-                "searchTitles": search_titles or ["Foo", "Bar"],
-                "collection": collection,
-                "mediaType": media_type.value,
-            }
-        }),
+        "DATA": json.dumps(payload),
         "CLAIMED": claimed,
         "CLAIMED_BY": None,
         "CONSUMED": consumed,
         "LAST_CHECK_IN": None,
         "PERSISTED_AT": utc_now().strftime("%Y-%m-%d %H:%M:%S.%f"),
     }
+
 
 
 # -------------------------------------------------------------------

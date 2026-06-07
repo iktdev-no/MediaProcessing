@@ -4,7 +4,7 @@ import time
 
 from models.event import MetadataSearchResultEvent, EventMetadata
 from worker.poller import run_worker
-from models.task import MetadataSearchTask, MetadataSearchData
+from models.task import MetadataSearchTask, MetadataSearchData, Metadata as TaskMetadata
 from models.enums import MediaType, TaskStatus
 from utils.time import utc_now
 
@@ -28,15 +28,24 @@ def make_dummy_event():
 
 
 def make_task():
+    refId = uuid.uuid4()
+    taskId = uuid.uuid4()
+
     return MetadataSearchTask(
-        referenceId=uuid.uuid4(),
-        taskId=uuid.uuid4(),
+        referenceId=refId,
+        taskId=taskId,
         task="MetadataSearchTask",
         status=TaskStatus.PENDING,
         data=MetadataSearchData(
             searchTitles=["foo"],
             collection="bar",
-            mediaType=MediaType.MOVIE
+            mediaType=MediaType.MOVIE,
+            referenceId=refId,
+            taskId=taskId
+        ),
+        metadata=TaskMetadata(
+            created=utc_now(),
+            derivedFromId=[]
         ),
         claimed=False,
         claimedBy=None,

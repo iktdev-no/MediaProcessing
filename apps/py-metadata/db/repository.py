@@ -20,6 +20,10 @@ def fetch_next_task(db: Database) -> Optional[MetadataSearchTask]:
     if not row:
         return None
 
+    print("RAW ROW:", row)
+    print("RAW DATA:", row["DATA"])
+
+
     try:
         # 1. Parse payload (JSON → Pydantic)
         payload = MetadataSearchPayload.model_validate_json(row["DATA"])
@@ -42,6 +46,7 @@ def fetch_next_task(db: Database) -> Optional[MetadataSearchTask]:
             task=row["TASK"],
             status=status,
             data=payload.data,
+            metadata=payload.metadata,
             claimed=row["CLAIMED"],
             claimedBy=row["CLAIMED_BY"],
             consumed=row["CONSUMED"],

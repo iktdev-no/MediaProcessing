@@ -2,7 +2,7 @@ import uuid
 import pytest
 
 import worker.processor as processor
-from models.task import MetadataSearchTask, MetadataSearchData, TaskStatus
+from models.task import MetadataSearchTask, MetadataSearchData, TaskStatus, Metadata as TaskMetadata
 from models.metadata import Metadata, Summary, MediaType
 from models.event import MetadataResult
 from utils.time import utc_now
@@ -25,16 +25,25 @@ def make_dummy_metadata(source="mal", title="Foo"):
     )
 
 
+
 def make_dummy_task():
+    refId = uuid.uuid4()
+    taskId = uuid.uuid4()
     return MetadataSearchTask(
-        referenceId=uuid.uuid4(),
-        taskId=uuid.uuid4(),
+        referenceId=refId,
+        taskId=taskId,
         task="MetadataSearchTask",
         status=TaskStatus.PENDING,
         data=MetadataSearchData(
             searchTitles=["Foo"],
             collection="bar",
-            mediaType=MediaType.MOVIE
+            mediaType=MediaType.MOVIE,
+            referenceId=refId,
+            taskId=taskId
+        ),
+        metadata=TaskMetadata(
+            created=utc_now(),
+            derivedFromId=[]
         ),
         claimed=False,
         claimedBy=None,
