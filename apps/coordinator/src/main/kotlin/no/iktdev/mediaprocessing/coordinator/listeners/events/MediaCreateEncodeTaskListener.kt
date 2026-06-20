@@ -2,7 +2,12 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
+import no.iktdev.eventi.events.SingleTaskCreatorEventListener
+import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.SingleTaskCratedEvent
+import no.iktdev.eventi.models.Task
+import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
@@ -25,19 +30,25 @@ import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 
 @Component
 class MediaCreateEncodeTaskListener(
     private val preference: Preference
-) : EventListener() {
+) : SingleTaskCreatorEventListener(EventStore, TaskStore) {
 
     private val log = KotlinLogging.logger {}
 
-    override fun onEvent(event: Event,
+    override fun isEventOfMyCreation(event: Event): Boolean {
+        return event is ProcesserEncodeTaskCreatedEvent
+    }
+
+    override fun onCreateTask(
+        event: Event,
         history: List<Event>
-    ): Event? {
+    ): Task? {
         val selectedEvent = event.requireQualifiedEntry<MediaTracksEncodeSelectedEvent>()
 
         val processerPreference = preference.getMediaPreference()
@@ -107,14 +118,18 @@ class MediaCreateEncodeTaskListener(
             EncodeStrategy.Segmented -> SegmentedEncodeTask(encodeData)
         }
 
+        return task
+    }
+
+    override fun onTaskCreated(
+        event: Event,
+        history: List<Event>,
+        task: Task
+    ): SingleTaskCratedEvent {
         val producerEvent = ProcesserEncodeTaskCreatedEvent(
             taskId = task.taskId,
             task::class.simpleName!!
         ).derivedOf(event)
-
-        task.apply { derivedOf(producerEvent) }
-        TaskStore.persist(task)
-
         return producerEvent
     }
 

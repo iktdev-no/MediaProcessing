@@ -6,6 +6,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.eventi.tasks.TaskValidator
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
@@ -28,8 +29,8 @@ class SubtitleTaskListener(
 
     override fun supports(task: Task) = task is ExtractSubtitleTask
 
-    override fun accept(task: Task, reporter: TaskReporter): Boolean {
-        val accepts = super.accept(task, reporter)
+    override fun accept(task: Task, reporter: TaskReporter, validator: TaskValidator?): Boolean {
+        val accepts = super.accept(task, reporter,validator)
         if (accepts) {
             log.info { "${getWorkerId()} accepts subtitle task ${task.taskId}" }
         }

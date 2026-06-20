@@ -7,10 +7,12 @@ import mu.KotlinLogging
 import no.iktdev.eventi.lifecycle.LifecycleStore
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Progress
+import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.eventi.tasks.TaskValidator
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.boot.ApplicationArguments
@@ -35,14 +37,22 @@ class PollerAdministrator(
 class TaskPoller(
     private val reporter: TaskReporter,
     private val lifecycleStore: LifecycleStore,
+    private val validator: TaskValidator
 ) : TaskPollerImplementation(
     taskStore = TaskStore,
     lifecycleStore = lifecycleStore,
-    reporterFactory = { reporter } // én reporter brukes for alle tasks
+    reporterFactory = { reporter }, // én reporter brukes for alle tasks
+    validatorFactory = validator
 ) {
 
 }
 
+@Component
+class TaskValidator(): TaskValidator {
+    override fun isTaskValidForResult(task: Task): Boolean {
+        return TaskStore.findByTaskId(task.taskId)?.consumed == false
+    }
+}
 
 @Component
 class DefaultTaskReporter(

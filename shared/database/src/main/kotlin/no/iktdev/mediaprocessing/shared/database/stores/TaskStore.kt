@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.database.stores
 
+import no.iktdev.eventi.models.StoreResult
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
@@ -246,7 +247,7 @@ object TaskStore : TaskStore {
         }.isSuccess
     }
 
-    fun resetTaskById(taskId: UUID): Result<Int> {
+    override fun resetTaskById(taskId: UUID): Boolean {
         return withTransaction {
             TasksTable.update({
                 (TasksTable.claimed eq true) and
@@ -260,7 +261,35 @@ object TaskStore : TaskStore {
                 it[consumed] = false
                 it[lastCheckIn] = null
             }
+        }.isSuccess
+    }
+
+    override fun resetTasksById(taskId: List<UUID>): StoreResult {
+        val out = withTransaction {
+            TasksTable.update({
+                (TasksTable.claimed eq true) and
+                        (TasksTable.consumed eq true) and
+                        (TasksTable.status eq TaskStatus.Failed) and
+                        (TasksTable.taskId inList taskId.map { it.toString() })
+            }) {
+                it[status] = TaskStatus.Pending
+                it[claimed] = false
+                it[claimedBy] = null
+                it[consumed] = false
+                it[lastCheckIn] = null
+            }
         }
+        return StoreResult(out.isSuccess, out.getOrDefault(0))
+
+    }
+
+    override fun deleteTasksById(taskId: UUID): StoreResult {
+        val out = withTransaction {
+            TasksTable.deleteWhere {
+                (TasksTable.taskId eq taskId.toString())
+            }
+        }
+        return StoreResult(out.isSuccess, out.getOrDefault(0))
     }
 
     override fun getPendingTasks(): List<PersistedTask> {

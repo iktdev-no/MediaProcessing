@@ -8,6 +8,7 @@ import no.iktdev.eventi.registry.TaskListenerRegistry
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.registry.TaskTypeRegistry
+import no.iktdev.eventi.tasks.TaskValidator
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
@@ -40,8 +41,8 @@ class LinearVideoTaskListenerOverride(executableConfig: ExecutablesConfig) : Lin
     processerProperties = getProcesserProperties()
 ) {
     val accepted = mutableListOf<UUID>()
-    override fun accept(task: Task, reporter: TaskReporter): Boolean {
-        return super.accept(task, reporter)
+    override fun accept(task: Task, reporter: TaskReporter, validator: TaskValidator?): Boolean {
+        return super.accept(task, reporter, validator)
     }
 
     override suspend fun onTask(task: Task): Event? {
@@ -57,8 +58,8 @@ class SegmentedVideoTaskListenerOverride(executableConfig: ExecutablesConfig) : 
     executableConfig = executableConfig,
 ) {
     val accepted = mutableListOf<UUID>()
-    override fun accept(task: Task, reporter: TaskReporter): Boolean {
-        return super.accept(task, reporter)
+    override fun accept(task: Task, reporter: TaskReporter, validator: TaskValidator?): Boolean {
+        return super.accept(task, reporter, validator)
     }
 
     override suspend fun onTask(task: Task): Event? {

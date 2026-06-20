@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.MultiTaskIdentity
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
@@ -266,7 +267,7 @@ class TaskProjectionTest : TestBase() {
             )
         ).derivedOf(start)
 
-        ProcesserExtractTaskCreatedEvent(taskIds = listOf(extract.taskId))
+        ProcesserExtractTaskCreatedEvent(taskIds = setOf(MultiTaskIdentity(extract.taskId, "Potet")))
             .derivedOf(start)
             .addToHistory()
 
@@ -320,7 +321,7 @@ class TaskProjectionTest : TestBase() {
             )
         ).derivedOf(start)
 
-        ProcesserExtractTaskCreatedEvent(taskIds = listOf(extract.taskId))
+        ProcesserExtractTaskCreatedEvent(taskIds = setOf(MultiTaskIdentity(extract.taskId, "Potet")))
             .derivedOf(start)
             .addToHistory()
 

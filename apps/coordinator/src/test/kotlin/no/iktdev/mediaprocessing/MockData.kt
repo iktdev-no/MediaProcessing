@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing
 
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.MultiTaskIdentity
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.TestBase.DummyTask
 import no.iktdev.mediaprocessing.ffmpeg.data.*
@@ -91,7 +92,8 @@ object MockData {
 
     fun extractEvent(language: String, cachedFile: String, derivedFrom: Event): List<Event> {
         val dummyTask = DummyTask().derivedOf(derivedFrom)
-        val create = ProcesserExtractTaskCreatedEvent(listOf(dummyTask.taskId) as MutableList<UUID>)
+        val create = ProcesserExtractTaskCreatedEvent(
+            setOf(MultiTaskIdentity(dummyTask.taskId, "potato")))
             .derivedOf(derivedFrom)
 
         val result = ProcesserExtractResultEvent(
@@ -128,7 +130,9 @@ object MockData {
 
     fun coverEvent(cacheFile: String, derivedFrom: Event, source: String = "test"): List<Event> {
         val dummyTask = DummyTask().derivedOf(derivedFrom)
-        val start = CoverDownloadTaskCreatedEvent(listOf(dummyTask.taskId)).derivedOf(derivedFrom)
+        val start = CoverDownloadTaskCreatedEvent(setOf(
+            MultiTaskIdentity(dummyTask.taskId, "potato"),
+        )).derivedOf(derivedFrom)
 
         val result = CoverDownloadResultEvent(
             data = CoverDownloadResultEvent.CoverDownloadedData(

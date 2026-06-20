@@ -4,15 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="91060a06-3c9f-4027-8244-e472c2e46f4e" name="Changes" comment="Fixed TaskListener result production">
-      <change afterPath="$PROJECT_DIR$/.aiassistant/rules/Test definitions.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/UIApplicationKt.xml" beforeDir="false" />
+    <list default="true" id="91060a06-3c9f-4027-8244-e472c2e46f4e" name="Changes" comment="eventi update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/StoreContentAndMetadataListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/StoreContentAndMetadataListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/StoreContentAndMetadataListenerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/StoreContentAndMetadataListenerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateCoverDownloadTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateCoverDownloadTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateExtractTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateExtractTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/TaskService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/services/TaskService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/MockData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/MockData.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateExtractTaskListenerTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateExtractTaskListenerTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/TaskPoller.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/TaskPoller.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/LinearVideoTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/LinearVideoTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SegmentedVideoTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SegmentedVideoTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SubtitleTaskListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SubtitleTaskListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/processer/src/test/kotlin/no/iktdev/mediaprocessing/processer/VideoTaskPollerImplementationTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/apps/processer/src/test/kotlin/no/iktdev/mediaprocessing/processer/VideoTaskPollerImplementationTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/MultiTaskCreatedEvent.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/events/CoverDownloadTaskCreatedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/events/CoverDownloadTaskCreatedEvent.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/events/ProcesserEncodeTaskCreatedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/events/ProcesserEncodeTaskCreatedEvent.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/events/ProcesserExtractTaskCreatedEvent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/event_task_contract/events/ProcesserExtractTaskCreatedEvent.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/projection/TaskProjection.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/main/kotlin/no/iktdev/mediaprocessing/shared/common/projection/TaskProjection.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/common/src/test/kotlin/no/iktdev/mediaprocessing/shared/common/projection/TaskProjectionTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/common/src/test/kotlin/no/iktdev/mediaprocessing/shared/common/projection/TaskProjectionTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/database/src/main/kotlin/no/iktdev/mediaprocessing/shared/database/stores/EventStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/database/src/main/kotlin/no/iktdev/mediaprocessing/shared/database/stores/EventStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/database/src/main/kotlin/no/iktdev/mediaprocessing/shared/database/stores/TaskStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/database/src/main/kotlin/no/iktdev/mediaprocessing/shared/database/stores/TaskStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/database/src/test/kotlin/no/iktdev/mediaprocessing/shared/database/InMemoryEventStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/database/src/test/kotlin/no/iktdev/mediaprocessing/shared/database/InMemoryEventStore.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/shared/database/src/test/kotlin/no/iktdev/mediaprocessing/shared/database/InMemoryTaskStore.kt" beforeDir="false" afterPath="$PROJECT_DIR$/shared/database/src/test/kotlin/no/iktdev/mediaprocessing/shared/database/InMemoryTaskStore.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,284 +149,286 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.AudioEncodeRunnerTest.executor": "Run",
-    "Gradle.AudioEncodeRunnerTest.success_case_returns_success_payload.executor": "Run",
-    "Gradle.AudioEncodeRunnerTest.verifies_correct_ffmpeg_arguments.executor": "Run",
-    "Gradle.AudioTargetingClampTest.executor": "Run",
-    "Gradle.AudioTargetingDualOutputTest.executor": "Run",
-    "Gradle.AudioTargetingDualOutputTest.extended_falls_back_to_default_preference.executor": "Run",
-    "Gradle.AudioTargetingDualOutputTest.one_source_becomes_two_targets.executor": "Run",
-    "Gradle.AudioTargetingDualOutputTest.two_sources_default_copy_extended_surround.executor": "Run",
-    "Gradle.AudioTargetingGetAudioTargetsTest.default_track_only.executor": "Run",
-    "Gradle.AudioTargetingGetAudioTargetsTest.executor": "Run",
-    "Gradle.AudioTargetingTest.selects_correct_audio_targets.executor": "Run",
-    "Gradle.AudioVideoMergeRunnerTest.executor": "Run",
-    "Gradle.AudioVideoMergeRunnerTest.success_case_returns_success_payload.executor": "Debug",
-    "Gradle.AudioVideoMergeRunnerTest.verifies_correct_ffmpeg_arguments.executor": "Run",
-    "Gradle.Build mediaprocesserv5.executor": "Run",
-    "Gradle.CollectEventsListenerTest.convertOnlyShouldCollect.executor": "Run",
-    "Gradle.CollectEventsListenerTest.convertOnlyShouldCollectOnAuto.executor": "Run",
-    "Gradle.CollectEventsListenerTest.convertWithMoreOperationsShouldNotCollect.executor": "Run",
-    "Gradle.CollectEventsListenerTest.executor": "Run",
-    "Gradle.CollectionProjectionTest.executor": "Run",
-    "Gradle.CollectionProjectionTest.unicodeMatching.executor": "Run",
-    "Gradle.CoreAllocationTest.executor": "Run",
-    "Gradle.CoreAllocationTest.round robin allocates sequential cores.executor": "Run",
-    "Gradle.CoreAllocationTest.wrap around when exceeding total cores.executor": "Run",
-    "Gradle.CpuMathTest.cpuCount returns physical cpu count.executor": "Run",
-    "Gradle.CpuMathTest.executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight skips preserved files.executor": "Debug",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_deletes_only_old_files.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_does_not_delete_file_with_mixed_age_events.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_never_deletes_when_disabled.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_skips_preserved_files.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_skips_when_no_events.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDeletesFolderAndReturnsSize.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCacheCleanup_never_runs_cleanup_when_disabled.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCleanupDeletesOnlyAuto.executor": "Run",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCleanupDeletesOnlyManual.executor": "Debug",
-    "Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCleanupOnlyDeletesAuto.executor": "Run",
-    "Gradle.FFmpegTest.executor": "Run",
-    "Gradle.FFmpegTest.ffmpeg does not rename when not using work file.executor": "Run",
-    "Gradle.FFmpegTest.ffmpeg renames work file when using work file.executor": "Run",
-    "Gradle.FfmpegCompilerTest.executor": "Run",
-    "Gradle.FfmpegDslTest.testDslRoundTrip.executor": "Run",
-    "Gradle.FilePrepareForWorkCreateTaskListenerTest.executor": "Run",
-    "Gradle.LimiterCgroupSetupTest.ensureRoot enables cpu and cpuset controllers without breaking existing.executor": "Run",
-    "Gradle.LimiterEdgeCaseTest.initCpuset falls back to root cpuset mems.executor": "Run",
-    "Gradle.LimiterEdgeCaseTest.updateLimit falls back to limitProcess when cgroup missing.executor": "Run",
-    "Gradle.LimiterSideEffectsTest.executor": "Run",
-    "Gradle.LinearAudioProcessorTest.completed_track_missing_file_throws.executor": "Debug",
-    "Gradle.LinearAudioProcessorTest.executor": "Run",
-    "Gradle.LinearVideoProcessorTest.encoding_failure_throws_exception.executor": "Debug",
-    "Gradle.LinearVideoProcessorTest.encoding_success_returns_payload.executor": "Run",
-    "Gradle.LinearVideoProcessorTest.executor": "Run",
-    "Gradle.LinearVideoProcessorTest.progress_listener_receives_updates.executor": "Run",
-    "Gradle.LinearVideoProcessorTest.progress_listener_reports_completion.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.collectLogs_merges_logs_in_order.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.linear_listener_rejects_when_strategy_is_segmented.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.onTask waits for runner to complete.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.onTask_full_pipeline_returns_completed.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.onTask_keeps_referenceId.executor": "Run",
-    "Gradle.LinearVideoTaskListenerTest.overwrite_false_publishes_failed_and_throws.executor": "Run",
-    "Gradle.ListenerInformOrderTest.only ordered handlers should be in correct order.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyConvertCreatedIfOnlyConvert.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyConvertTaskCreatedWithMockedFileExists.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyNormalFlowFailsWhenParentDirectoryMissing.executor": "Debug",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyNormalFlowWithMultipleOperations.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyNullWhenDataIsNull.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyNullWhenFileDoesNotExist.executor": "Run",
-    "Gradle.MediaCreateConvertTaskListenerTest.verifyNullWhenStatusNotCompleted.executor": "Run",
-    "Gradle.MediaCreateEncodeTaskListenerTest.executor": "Debug",
-    "Gradle.MediaCreateEncodeTaskListenerTest.testMultiLanguageDefaultAndExtended.executor": "Run",
-    "Gradle.MediaCreateEncodeTaskListenerTest.testSegmentedSingleLanguage.executor": "Run",
-    "Gradle.MediaCreateEncodeTaskListenerTest.testSegmentedWithExtendedAudio.executor": "Run",
-    "Gradle.MediaCreateEncodeTaskListenerTest.testSingleLanguageDefaultOnly.executor": "Run",
-    "Gradle.MediaCreateEncodeTaskListenerTest.testSingleLanguageWithExtended.executor": "Run",
-    "Gradle.MediaCreateExtractTaskListenerTest.executor": "Run",
-    "Gradle.MediaCreateExtractTaskListenerTest.testOnEventCreatesTasks.executor": "Run",
-    "Gradle.MediaCreateExtractTaskListenerTest.testOnEventWithMultipleSubtitles.executor": "Debug",
-    "Gradle.MediaCreateExtractTaskListenerTest.testSrtSubtitle.executor": "Run",
-    "Gradle.MediaCreateLinearEncodeTaskListenerTest.executor": "Run",
-    "Gradle.MediaCreateLinearEncodeTaskListenerTest.testSingleLanguageDefaultOnly.executor": "Debug",
-    "Gradle.MediaCreateLinearEncodeTaskListenerTest.testSingleLanguageWithExtended.executor": "Run",
-    "Gradle.MediaDetermineSubtitleTrackTypeListenerTest.testSubtitleCases.executor": "Run",
-    "Gradle.MediaParseStreamsListenerTest.testParseStreamsDoesNotThrowButReturnsNullOnInvalidJson.executor": "Run",
-    "Gradle.MediaParsedInfoListenerTest.executor": "Run",
-    "Gradle.MediaParsedInfoListenerTest.parseVideoType.executor": "Run",
-    "Gradle.MediaParsedInfoListenerTest.parsedInfoTest (1).executor": "Run",
-    "Gradle.MediaParsedInfoListenerTest.parsedInfoTest.executor": "Run",
-    "Gradle.MediaPlanTest.Video copy, Audio AAC reencode.executor": "Run",
-    "Gradle.MediaPlanTest.aac default 2ch and extended 6ch produce two unique audio tracks.executor": "Debug",
-    "Gradle.MediaPlanTest.audioArgsReturnsNestedLists.executor": "Run",
-    "Gradle.MediaPlanTest.executor": "Run",
-    "Gradle.MediaPlanTest.linearPlanCombinesVideoAndAudio.executor": "Run",
-    "Gradle.MediaPlanTest.pcmInputDownmixToAacStereo.executor": "Run",
-    "Gradle.MediaPlanTest.segmentedPlanReturnsAudioOnly.executor": "Debug",
-    "Gradle.MediaPlanTest.testAudioListIndexVsFfmpegIndex.executor": "Run",
-    "Gradle.MediaPlanTest.testAudioOutputIndexOrder.executor": "Run",
-    "Gradle.MediaPlanTest.testExtendedKeptWhenCodecDiffers.executor": "Run",
-    "Gradle.MediaPlanTest.testNoUpscalingBeyondSource.executor": "Run",
-    "Gradle.MediaPlanTest.testNoUpscalingBitrateChannelsSampleRate.executor": "Run",
-    "Gradle.MediaPlanTest.testNoUpscalingChannelsOrSampleRate.executor": "Run",
-    "Gradle.MediaPlanTest.testVideoListIndexVsFfmpegIndex.executor": "Run",
-    "Gradle.MediaPlanTest.two audio tracks with different codecs.executor": "Run",
-    "Gradle.MediaPlanTest.twoAudioTracksDifferentCodecs.executor": "Debug",
-    "Gradle.MediaPlanTest.video copy with one audio copy.executor": "Run",
-    "Gradle.MediaPlanTest.video reencode to hevc with crf.executor": "Run",
-    "Gradle.MediaPlanTest.videoCopyAudioAacReencode.executor": "Run",
-    "Gradle.MediaSelectExtractTracksListenerTest.executor": "Run",
-    "Gradle.MediaSelectExtractTracksListenerTest.testNorMacroLanguageSelection.executor": "Run",
-    "Gradle.MediaSelectExtractTracksListenerTest.validate.executor": "Run",
-    "Gradle.MediaTracksEncodeSelectorTest.executor": "Run",
-    "Gradle.MediaTracksEncodeSelectorTest.testEngDubJpnOriginal.executor": "Run",
-    "Gradle.MediaTracksEncodeSelectorTest.testFallbackToOriginalWhenNoPreferredLanguageMatches.executor": "Run",
-    "Gradle.MediaTracksEncodeSelectorTest.testOnEventNonParsedEvent.executor": "Run",
-    "Gradle.MediaTracksEncodeSelectorTest.testSwedishOriginalAndDanishDub.executor": "Run",
-    "Gradle.MigrateContentProjectPathTest.coverStoreFiles_useSanitizedNames.executor": "Run",
-    "Gradle.MigrateContentToStoreTaskListenerTest.executor": "Run",
-    "Gradle.MigrateContentToStoreTaskListenerTest.migrateVideo_copyFails.executor": "Run",
-    "Gradle.MigrateContentToStoreTaskListenerTest.migrateVideo_success.executor": "Run",
-    "Gradle.MigrateCreateStoreTaskCreateListenerTest.createMigrateForConvert.executor": "Run",
-    "Gradle.MigrateCreateStoreTaskCreateListenerTest.createMigrateForConvertOnly.executor": "Run",
-    "Gradle.MigrateCreateStoreTaskCreateListenerTest.creates migrate-to-store task.executor": "Run",
-    "Gradle.MigrateCreateStoreTaskCreateListenerTest.executor": "Run",
-    "Gradle.MigrateCreateStoreTaskCreateListenerTest.success1.executor": "Run",
-    "Gradle.MpegArgumentTest.executor": "Run",
-    "Gradle.MpegArgumentTest.usefile_generates_correct_work_file.executor": "Run",
-    "Gradle.PersistContentListenerTest.executor": "Run",
-    "Gradle.PersistContentListenerTest.manualFlow_doesNotGenerateMultipleOnHold.executor": "Run",
-    "Gradle.PersistContentListenerTest.manualFlow_withManualAllowCompletion_producesPersistContent.executor": "Debug",
-    "Gradle.PersistContentListenerTest.persistContentEvent_isDerivedFromSummary_notSignal.executor": "Run",
-    "Gradle.PersistContentListenerTest.persistContentEvent_isDerivedFromSummary_notSignals.executor": "Run",
-    "Gradle.ProbeRunnerTest.executor": "Run",
-    "Gradle.ProcesserApplicationTest.executor": "Run",
-    "Gradle.SchemaValidation.executor": "Run",
-    "Gradle.SegmentConcatRunnerTest.concat_list_file_is_generated_correctly.executor": "Run",
-    "Gradle.SegmentConcatRunnerTest.executor": "Run",
-    "Gradle.SegmentConcatRunnerTest.verifies_correct_ffmpeg_arguments.executor": "Run",
-    "Gradle.SegmentEncodeRunnerTest.executor": "Run",
-    "Gradle.SegmentEncodeRunnerTest.verifies_correct_ffmpeg_arguments.executor": "Run",
-    "Gradle.SegmentedAudioProcessorTest.audio encoding failure throws FfmpegFailedException.executor": "Run",
-    "Gradle.SegmentedAudioProcessorTest.completed audio track missing file throws.executor": "Run",
-    "Gradle.SegmentedAudioProcessorTest.executor": "Run",
-    "Gradle.SegmentedAudioProcessorTest.merge audio into video failure throws.executor": "Run",
-    "Gradle.SegmentedAudioProcessorTest.merge audio into video succeeds.executor": "Run",
-    "Gradle.SegmentedAudioProcessorTest.stale audio file is deleted and re-encoded.executor": "Run",
-    "Gradle.SegmentedVideoProcessorTest.encoding_failure_throws_exception.executor": "Run",
-    "Gradle.SegmentedVideoProcessorTest.executor": "Run",
-    "Gradle.SegmentedVideoProcessorTest.stale_segment_file_is_deleted.executor": "Run",
-    "Gradle.SegmentedVideoTaskListenerTest.collectLogs_merges_in_timestamp_order.executor": "Run",
-    "Gradle.SegmentedVideoTaskListenerTest.concat_is_called_after_all_segments.executor": "Run",
-    "Gradle.SegmentedVideoTaskListenerTest.executor": "Run",
-    "Gradle.SegmentedVideoTaskListenerTest.only_uncompleted_segments_are_processed.executor": "Run",
-    "Gradle.SegmentedVideoTaskListenerTest.segmented_listener_accepts_when_strategy_is_segmented.executor": "Run",
-    "Gradle.SegmentedVideoTaskListenerTest.strategy_returns_segmented_for_video_reencode.executor": "Run",
-    "Gradle.StoreContentAndMetadataListenerTest.createTaskForWhenOnlyStoringSubtitles.executor": "Run",
-    "Gradle.StoreContentAndMetadataListenerTest.creates task and returns created event.executor": "Run",
-    "Gradle.StoreContentAndMetadataListenerTest.executor": "Run",
-    "Gradle.StoreContentAndMetadataListenerTest.ignores non migrate events.executor": "Run",
-    "Gradle.StoreContentAndMetadataListenerTest.returns null when no collected event exists.executor": "Run",
-    "Gradle.StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata.executor": "Run",
-    "Gradle.SubtitleTaskListenerTest.executor": "Run",
-    "Gradle.SubtitleTaskListenerTest.onTask waits for runner to complete.executor": "Debug",
-    "Gradle.SubtitleTaskListenerTest.onTask_keeps_referenceId.executor": "Run",
-    "Gradle.SubtitleTaskListenerTest.verifies_input_file_is_found.executor": "Debug",
-    "Gradle.SummarizeContentListenerTest.executor": "Run",
-    "Gradle.SummarizeContentListenerTest.missingMetadata_returnsNull.executor": "Debug",
-    "Gradle.SummarizeContentListenerTest.summarizeOnlyConvertedPresent.executor": "Run",
-    "Gradle.SystemInfoServiceTest.executor": "Run",
-    "Gradle.SystemInfoServiceTest.system info parses cpu, memory, load and uptime correctly.executor": "Run",
-    "Gradle.SystemInfoServiceTest.testSystemInfo.executor": "Run",
-    "Gradle.TaskProjectionTest.executor": "Run",
-    "Gradle.TaskProjectionTest.testChainAcknowledgementSuccess1.executor": "Run",
-    "Gradle.TestBaseWithDatabase.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.apps.converter.test'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.apps.coordinator'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.apps.processer'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.apps.processer.test'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.shared.common'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.shared.database'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.shared.ffmpeg'.executor": "Run",
-    "Gradle.Tests in 'MediaProcessing.shared.ffmpeg.test'.executor": "Run",
-    "Gradle.Tests in 'no.iktdev.mediaprocessing.coordinator.listeners'.executor": "Run",
-    "Gradle.Tests in 'no.iktdev.mediaprocessing.coordinator.listeners.tasks'.executor": "Run",
-    "Gradle.Tests in 'no.iktdev.mediaprocessing.processer'.executor": "Run",
-    "Gradle.Tests in 'no.iktdev.mediaprocessing.processer.limiter'.executor": "Run",
-    "Gradle.Tests in 'no.iktdev.mediaprocessing.processer.listeners'.executor": "Run",
-    "Gradle.Tests in 'no.iktdev.mediaprocessing.processer.runners'.executor": "Run",
-    "Gradle.Upgrade Gradle wrapper.executor": "Run",
-    "Gradle.ValidateEventsRegistered.validateEventsAreRegistered.executor": "Run",
-    "Gradle.ValidateFileAndMediaDataListenerTest.executor": "Run",
-    "Gradle.ValidateFileAndMediaDataListenerTest.testFunctionalValidationFails.executor": "Run",
-    "Gradle.ValidateFileAndMediaDataListenerTest.testMinimumRequiredFieldsForFormat.executor": "Run",
-    "Gradle.ValidateFileAndMediaDataListenerTest.testUnparseableFormat.executor": "Run",
-    "Gradle.ValidateFileAndMediaDataListenerTest.testValidationOk.executor": "Run",
-    "Gradle.VideoCodecTest.verifyCopy1.executor": "Run",
-    "Gradle.VideoEncodeRunnerTest.executor": "Run",
-    "Gradle.VideoEncodeRunnerTest.verifies_correct_ffmpeg_arguments.executor": "Run",
-    "Gradle.VideoTaskListenerTest.executor": "Run",
-    "Gradle.VideoTaskPollerImplementationTest.Linear listener should accept this encode task.executor": "Debug",
-    "Gradle.VideoTaskPollerImplementationTest.Segmented listener should accept when strategy is Segmented.executor": "Run",
-    "Gradle.VideoTaskPollerImplementationTest.executor": "Run",
-    "Gradle.mediaprocesserv5 [./gradlew :apps:converter:dependencies --configuration testRuntimeClasspath | grep junit-platform].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:clean].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:converter:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:converter:dependencies --configuration testRuntimeClasspath | grep junit-platform].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:coordinator:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:coordinator:test].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:processer:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:test].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:ui:build :apps:ui:generateTs].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:ui:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:ui:clean].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:ui:jar].executor": "Run",
-    "Gradle.mediaprocesserv5 [:apps:ui:localDev].executor": "Run",
-    "Gradle.mediaprocesserv5 [:transfer-model:build :transfer-model:generateTs :apps:ui:build :apps:ui:generateTs].executor": "Run",
-    "Gradle.mediaprocesserv5 [:transfer-model:build :transfer-model:generateTs].executor": "Run",
-    "Gradle.mediaprocesserv5 [:transfer-model:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [:transfer-model:compileKotlin].executor": "Run",
-    "Gradle.mediaprocesserv5 [:transfer-model:generateTs].executor": "Run",
-    "Gradle.mediaprocesserv5 [apps:build].executor": "Run",
-    "Gradle.mediaprocesserv5 [apps:ui:localDev].executor": "Run",
-    "Gradle.mediaprocesserv5 [build].executor": "Run",
-    "Gradle.mediaprocesserv5 [clean test].executor": "Run",
-    "Gradle.mediaprocesserv5 [clean].executor": "Run",
-    "Gradle.mediaprocesserv5 [generateTs].executor": "Run",
-    "Gradle.mediaprocesserv5 [localDev].executor": "Run",
-    "Gradle.mediaprocesserv5 [syncGovenorScript].executor": "Run",
-    "Gradle.mediaprocesserv5 [testJar].executor": "Run",
-    "Gradle.mediaprocesserv5 [test].executor": "Run",
-    "Gradle.mediaprocesserv5.executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.CollectEventsListenerTest and 1 more.executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.FilePrepareForWorkCreateTaskListenerTest and 10 more.executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.MediaCreateMetadataSearchTaskListenerTest and 7 more.executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.MediaCreateMetadataSearchTaskListenerTest and 8 more.executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.MigrateCreateStoreTaskCreateListenerTest and 1 more.executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.tasks.MigrateContentToStoreTaskListenerTest and 1 more (1).executor": "Run",
-    "Gradle.no.iktdev.mediaprocessing.coordinator.listeners.tasks.MigrateContentToStoreTaskListenerTest and 1 more.executor": "Run",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.CoordinatorApplication.executor": "Debug",
-    "Spring Boot.CoordinatorTestDev.executor": "Debug",
-    "Spring Boot.UI Local.executor": "Run",
-    "Spring Boot.UIApplication.executor": "Run",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
-    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
-    "git-widget-placeholder": "v5",
-    "kotlin-language-version-configured": "true",
-    "last_directory_selection": "/mount/870 EVO 1TB/Workspace/mediaprocesserv5/shared/ffmpeg/src/test/kotlin/no/iktdev/mediaprocessing/ffmpeg/dsl",
-    "last_opened_file_path": "/workspace/Streamit/Streamit-service",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
-    "ts.external.directory.path": "/workspace/mediaprocesserv5/apps/ui/web/node_modules/typescript/lib"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.AudioEncodeRunnerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioEncodeRunnerTest.success_case_returns_success_payload.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioEncodeRunnerTest.verifies_correct_ffmpeg_arguments.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingClampTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingDualOutputTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingDualOutputTest.extended_falls_back_to_default_preference.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingDualOutputTest.one_source_becomes_two_targets.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingDualOutputTest.two_sources_default_copy_extended_surround.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingGetAudioTargetsTest.default_track_only.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingGetAudioTargetsTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioTargetingTest.selects_correct_audio_targets.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioVideoMergeRunnerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AudioVideoMergeRunnerTest.success_case_returns_success_payload.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.AudioVideoMergeRunnerTest.verifies_correct_ffmpeg_arguments.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build mediaprocesserv5.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CollectEventsListenerTest.convertOnlyShouldCollect.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CollectEventsListenerTest.convertOnlyShouldCollectOnAuto.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CollectEventsListenerTest.convertWithMoreOperationsShouldNotCollect.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CollectEventsListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CollectionProjectionTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CollectionProjectionTest.unicodeMatching.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CoreAllocationTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CoreAllocationTest.round robin allocates sequential cores.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CoreAllocationTest.wrap around when exceeding total cores.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CpuMathTest.cpuCount returns physical cpu count.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.CpuMathTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight skips preserved files.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_deletes_only_old_files.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_does_not_delete_file_with_mixed_age_events.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_never_deletes_when_disabled.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_skips_preserved_files.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDailyAtMidnight_skips_when_no_events.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.cleanupDeletesFolderAndReturnsSize.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCacheCleanup_never_runs_cleanup_when_disabled.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCleanupDeletesOnlyAuto.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCleanupDeletesOnlyManual.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.EventProducedDataCleanupServicePerformCleanupTest.startCleanupOnlyDeletesAuto.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FFmpegTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FFmpegTest.ffmpeg does not rename when not using work file.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FFmpegTest.ffmpeg renames work file when using work file.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FfmpegCompilerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FfmpegDslTest.testDslRoundTrip.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.FilePrepareForWorkCreateTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LimiterCgroupSetupTest.ensureRoot enables cpu and cpuset controllers without breaking existing.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LimiterEdgeCaseTest.initCpuset falls back to root cpuset mems.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LimiterEdgeCaseTest.updateLimit falls back to limitProcess when cgroup missing.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LimiterSideEffectsTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearAudioProcessorTest.completed_track_missing_file_throws.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.LinearAudioProcessorTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoProcessorTest.encoding_failure_throws_exception.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.LinearVideoProcessorTest.encoding_success_returns_payload.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoProcessorTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoProcessorTest.progress_listener_receives_updates.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoProcessorTest.progress_listener_reports_completion.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.collectLogs_merges_logs_in_order.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.linear_listener_rejects_when_strategy_is_segmented.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.onTask waits for runner to complete.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.onTask_full_pipeline_returns_completed.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.onTask_keeps_referenceId.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LinearVideoTaskListenerTest.overwrite_false_publishes_failed_and_throws.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ListenerInformOrderTest.only ordered handlers should be in correct order.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyConvertCreatedIfOnlyConvert.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyConvertTaskCreatedWithMockedFileExists.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyNormalFlowFailsWhenParentDirectoryMissing.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyNormalFlowWithMultipleOperations.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyNullWhenDataIsNull.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyNullWhenFileDoesNotExist.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateConvertTaskListenerTest.verifyNullWhenStatusNotCompleted.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateEncodeTaskListenerTest.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaCreateEncodeTaskListenerTest.testMultiLanguageDefaultAndExtended.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateEncodeTaskListenerTest.testSegmentedSingleLanguage.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateEncodeTaskListenerTest.testSegmentedWithExtendedAudio.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateEncodeTaskListenerTest.testSingleLanguageDefaultOnly.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateEncodeTaskListenerTest.testSingleLanguageWithExtended.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateExtractTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateExtractTaskListenerTest.testOnEventCreatesTasks.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateExtractTaskListenerTest.testOnEventWithMultipleSubtitles.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaCreateExtractTaskListenerTest.testSrtSubtitle.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateLinearEncodeTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaCreateLinearEncodeTaskListenerTest.testSingleLanguageDefaultOnly.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaCreateLinearEncodeTaskListenerTest.testSingleLanguageWithExtended.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaDetermineSubtitleTrackTypeListenerTest.testSubtitleCases.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaParseStreamsListenerTest.testParseStreamsDoesNotThrowButReturnsNullOnInvalidJson.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaParsedInfoListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaParsedInfoListenerTest.parseVideoType.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaParsedInfoListenerTest.parsedInfoTest (1).executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaParsedInfoListenerTest.parsedInfoTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.Video copy, Audio AAC reencode.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.aac default 2ch and extended 6ch produce two unique audio tracks.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaPlanTest.audioArgsReturnsNestedLists.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.linearPlanCombinesVideoAndAudio.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.pcmInputDownmixToAacStereo.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.segmentedPlanReturnsAudioOnly.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaPlanTest.testAudioListIndexVsFfmpegIndex.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.testAudioOutputIndexOrder.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.testExtendedKeptWhenCodecDiffers.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.testNoUpscalingBeyondSource.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.testNoUpscalingBitrateChannelsSampleRate.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.testNoUpscalingChannelsOrSampleRate.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.testVideoListIndexVsFfmpegIndex.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.two audio tracks with different codecs.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.twoAudioTracksDifferentCodecs.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.MediaPlanTest.video copy with one audio copy.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.video reencode to hevc with crf.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaPlanTest.videoCopyAudioAacReencode.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaSelectExtractTracksListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaSelectExtractTracksListenerTest.testNorMacroLanguageSelection.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaSelectExtractTracksListenerTest.validate.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaTracksEncodeSelectorTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaTracksEncodeSelectorTest.testEngDubJpnOriginal.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaTracksEncodeSelectorTest.testFallbackToOriginalWhenNoPreferredLanguageMatches.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaTracksEncodeSelectorTest.testOnEventNonParsedEvent.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MediaTracksEncodeSelectorTest.testSwedishOriginalAndDanishDub.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateContentProjectPathTest.coverStoreFiles_useSanitizedNames.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateContentToStoreTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateContentToStoreTaskListenerTest.migrateVideo_copyFails.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateContentToStoreTaskListenerTest.migrateVideo_success.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateCreateStoreTaskCreateListenerTest.createMigrateForConvert.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateCreateStoreTaskCreateListenerTest.createMigrateForConvertOnly.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateCreateStoreTaskCreateListenerTest.creates migrate-to-store task.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateCreateStoreTaskCreateListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MigrateCreateStoreTaskCreateListenerTest.success1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MpegArgumentTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.MpegArgumentTest.usefile_generates_correct_work_file.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.PersistContentListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.PersistContentListenerTest.manualFlow_doesNotGenerateMultipleOnHold.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.PersistContentListenerTest.manualFlow_withManualAllowCompletion_producesPersistContent.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.PersistContentListenerTest.persistContentEvent_isDerivedFromSummary_notSignal.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.PersistContentListenerTest.persistContentEvent_isDerivedFromSummary_notSignals.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ProbeRunnerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ProcesserApplicationTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SchemaValidation.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentConcatRunnerTest.concat_list_file_is_generated_correctly.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentConcatRunnerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentConcatRunnerTest.verifies_correct_ffmpeg_arguments.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentEncodeRunnerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentEncodeRunnerTest.verifies_correct_ffmpeg_arguments.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedAudioProcessorTest.audio encoding failure throws FfmpegFailedException.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedAudioProcessorTest.completed audio track missing file throws.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedAudioProcessorTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedAudioProcessorTest.merge audio into video failure throws.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedAudioProcessorTest.merge audio into video succeeds.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedAudioProcessorTest.stale audio file is deleted and re-encoded.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoProcessorTest.encoding_failure_throws_exception.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoProcessorTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoProcessorTest.stale_segment_file_is_deleted.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoTaskListenerTest.collectLogs_merges_in_timestamp_order.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoTaskListenerTest.concat_is_called_after_all_segments.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoTaskListenerTest.only_uncompleted_segments_are_processed.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoTaskListenerTest.segmented_listener_accepts_when_strategy_is_segmented.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SegmentedVideoTaskListenerTest.strategy_returns_segmented_for_video_reencode.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.StoreContentAndMetadataListenerTest.createTaskForWhenOnlyStoringSubtitles.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.StoreContentAndMetadataListenerTest.creates task and returns created event.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.StoreContentAndMetadataListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.StoreContentAndMetadataListenerTest.ignores non migrate events.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.StoreContentAndMetadataListenerTest.returns null when no collected event exists.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleTaskListenerTest.onTask waits for runner to complete.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SubtitleTaskListenerTest.onTask_keeps_referenceId.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SubtitleTaskListenerTest.verifies_input_file_is_found.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SummarizeContentListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SummarizeContentListenerTest.missingMetadata_returnsNull.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.SummarizeContentListenerTest.summarizeOnlyConvertedPresent.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SystemInfoServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SystemInfoServiceTest.system info parses cpu, memory, load and uptime correctly.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.SystemInfoServiceTest.testSystemInfo.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TaskProjectionTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TaskProjectionTest.testChainAcknowledgementSuccess1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestBaseWithDatabase.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.converter.test'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.coordinator'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.coordinator.test'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.processer'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.apps.processer.test'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.shared.common'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.shared.database'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.shared.ffmpeg'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'MediaProcessing.shared.ffmpeg.test'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'no.iktdev.mediaprocessing.coordinator.listeners'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'no.iktdev.mediaprocessing.coordinator.listeners.tasks'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'no.iktdev.mediaprocessing.processer'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'no.iktdev.mediaprocessing.processer.limiter'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'no.iktdev.mediaprocessing.processer.listeners'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Tests in 'no.iktdev.mediaprocessing.processer.runners'.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Upgrade Gradle wrapper.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ValidateEventsRegistered.validateEventsAreRegistered.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ValidateFileAndMediaDataListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ValidateFileAndMediaDataListenerTest.testFunctionalValidationFails.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ValidateFileAndMediaDataListenerTest.testMinimumRequiredFieldsForFormat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ValidateFileAndMediaDataListenerTest.testUnparseableFormat.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.ValidateFileAndMediaDataListenerTest.testValidationOk.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoCodecTest.verifyCopy1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoEncodeRunnerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoEncodeRunnerTest.verifies_correct_ffmpeg_arguments.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoTaskListenerTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoTaskPollerImplementationTest.Linear listener should accept this encode task.executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.VideoTaskPollerImplementationTest.Segmented listener should accept when strategy is Segmented.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.VideoTaskPollerImplementationTest.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [./gradlew :apps:converter:dependencies --configuration testRuntimeClasspath | grep junit-platform].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:converter:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:converter:dependencies --configuration testRuntimeClasspath | grep junit-platform].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:coordinator:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:coordinator:test].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:processer:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:test].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:ui clean build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:ui:build :apps:ui:generateTs].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:ui:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:ui:clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:ui:jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:apps:ui:localDev].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:transfer-model:build :transfer-model:generateTs :apps:ui:build :apps:ui:generateTs].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:transfer-model:build :transfer-model:generateTs].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:transfer-model:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:transfer-model:compileKotlin].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [:transfer-model:generateTs].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [apps:build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [apps:ui:localDev].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [clean build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [clean test].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [generateTs].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [localDev].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [syncGovenorScript].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [testJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5 [test].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.mediaprocesserv5.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.CollectEventsListenerTest and 1 more.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.FilePrepareForWorkCreateTaskListenerTest and 10 more.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.MediaCreateMetadataSearchTaskListenerTest and 7 more.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.MediaCreateMetadataSearchTaskListenerTest and 8 more.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.events.MigrateCreateStoreTaskCreateListenerTest and 1 more.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.tasks.MigrateContentToStoreTaskListenerTest and 1 more (1).executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.no.iktdev.mediaprocessing.coordinator.listeners.tasks.MigrateContentToStoreTaskListenerTest and 1 more.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.CoordinatorApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;Spring Boot.CoordinatorTestDev.executor&quot;: &quot;Debug&quot;,
+    &quot;Spring Boot.UI Local.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.UIApplication.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary&quot;: &quot;JUnit5&quot;,
+    &quot;com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5&quot;: &quot;&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;v5&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_directory_selection&quot;: &quot;/mount/870 EVO 1TB/Workspace/mediaprocesserv5/shared/ffmpeg/src/test/kotlin/no/iktdev/mediaprocessing/ffmpeg/dsl&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/workspace/Streamit/Streamit-service&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.project.gradle&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/workspace/mediaprocesserv5/apps/ui/web/node_modules/typescript/lib&quot;
   },
-  "keyToStringList": {
-    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
-      "JSON"
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;JSON&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/shared/database/src/test/resources/flyway-test" />
@@ -468,10 +486,12 @@
       <command value="gradle test" />
       <command value="gradle :transfer-model:build :transfer-model:generateTs :apps:ui:build :apps:ui:generateTs" />
       <command value="gradle clean test" />
+      <command value="gradle :apps:ui clean build --refresh-dependencies" />
+      <command value="gradle clean build --refresh-dependencies" />
     </option>
   </component>
-  <component name="RunManager" selected="Gradle.StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata">
-    <configuration name="CollectEventsListenerTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.mediaprocesserv5 [clean test]">
+    <configuration name="Tests in 'MediaProcessing.apps.processer'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -482,9 +502,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value=":apps:coordinator:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.coordinator.listeners.events.CollectEventsListenerTest&quot;" />
+            <option value=":apps:processer:test" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -498,83 +516,80 @@
       <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
-    <configuration name="StoreContentAndMetadataListenerTest.ignores non migrate events" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="mediaprocesserv5 [:apps:ui clean build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
+        <option name="scriptParameters" value="--refresh-dependencies" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value=":apps:coordinator:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.coordinator.listeners.events.StoreContentAndMetadataListenerTest.ignores non migrate events&quot;" />
+            <option value=":apps:ui" />
+            <option value="clean" />
+            <option value="build" />
           </list>
         </option>
         <option name="vmOptions" />
       </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
+      <RunAsTest>false</RunAsTest>
       <GradleProfilingDisabled>false</GradleProfilingDisabled>
       <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
-    <configuration name="StoreContentAndMetadataListenerTest.returns null when no collected event exists" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="mediaprocesserv5 [:apps:ui:clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
+        <option name="scriptParameters" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value=":apps:coordinator:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.coordinator.listeners.events.StoreContentAndMetadataListenerTest.returns null when no collected event exists&quot;" />
+            <option value=":apps:ui:clean" />
           </list>
         </option>
         <option name="vmOptions" />
       </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
+      <RunAsTest>false</RunAsTest>
       <GradleProfilingDisabled>false</GradleProfilingDisabled>
       <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
     </configuration>
-    <configuration name="StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="mediaprocesserv5 [clean build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" value="" />
+        <option name="scriptParameters" value="--refresh-dependencies" />
         <option name="taskDescriptions">
           <list />
         </option>
         <option name="taskNames">
           <list>
-            <option value=":apps:coordinator:test" />
-            <option value="--tests" />
-            <option value="&quot;no.iktdev.mediaprocessing.coordinator.listeners.events.StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata&quot;" />
+            <option value="clean" />
+            <option value="build" />
           </list>
         </option>
         <option name="vmOptions" />
       </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>true</RunAsTest>
+      <RunAsTest>false</RunAsTest>
       <GradleProfilingDisabled>false</GradleProfilingDisabled>
       <GradleCoverageDisabled>false</GradleCoverageDisabled>
       <method v="2" />
@@ -660,10 +675,10 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Gradle.StoreContentAndMetadataListenerTest.ignores non migrate events" />
-      <item itemvalue="Gradle.StoreContentAndMetadataListenerTest.returns null when no collected event exists" />
-      <item itemvalue="Gradle.StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata" />
-      <item itemvalue="Gradle.CollectEventsListenerTest" />
+      <item itemvalue="Gradle.Tests in 'MediaProcessing.apps.processer'" />
+      <item itemvalue="Gradle.mediaprocesserv5 [:apps:ui clean build]" />
+      <item itemvalue="Gradle.mediaprocesserv5 [:apps:ui:clean]" />
+      <item itemvalue="Gradle.mediaprocesserv5 [clean build]" />
       <item itemvalue="Gradle.mediaprocesserv5 [clean test]" />
       <item itemvalue="Spring Boot.CoordinatorTestDev" />
       <item itemvalue="Spring Boot.UI Local" />
@@ -672,11 +687,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.StoreContentAndMetadataListenerTest.returns null when projection lacks collection or metadata" />
-        <item itemvalue="Gradle.StoreContentAndMetadataListenerTest.returns null when no collected event exists" />
-        <item itemvalue="Gradle.StoreContentAndMetadataListenerTest.ignores non migrate events" />
         <item itemvalue="Gradle.mediaprocesserv5 [clean test]" />
-        <item itemvalue="Gradle.CollectEventsListenerTest" />
+        <item itemvalue="Gradle.Tests in 'MediaProcessing.apps.processer'" />
+        <item itemvalue="Gradle.mediaprocesserv5 [clean build]" />
+        <item itemvalue="Gradle.mediaprocesserv5 [:apps:ui clean build]" />
+        <item itemvalue="Gradle.mediaprocesserv5 [:apps:ui:clean]" />
       </list>
     </recent_temporary>
   </component>
@@ -695,94 +710,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770089733502</updated>
-    </task>
-    <task id="LOCAL-00228" summary="Sorting..">
-      <option name="closed" value="true" />
-      <created>1775355664756</created>
-      <option name="number" value="00228" />
-      <option name="presentableId" value="LOCAL-00228" />
-      <option name="project" value="LOCAL" />
-      <updated>1775355664756</updated>
-    </task>
-    <task id="LOCAL-00229" summary="Sorting...">
-      <option name="closed" value="true" />
-      <created>1775356726240</created>
-      <option name="number" value="00229" />
-      <option name="presentableId" value="LOCAL-00229" />
-      <option name="project" value="LOCAL" />
-      <updated>1775356726240</updated>
-    </task>
-    <task id="LOCAL-00230" summary="Missing dep">
-      <option name="closed" value="true" />
-      <created>1775357174577</created>
-      <option name="number" value="00230" />
-      <option name="presentableId" value="LOCAL-00230" />
-      <option name="project" value="LOCAL" />
-      <updated>1775357174577</updated>
-    </task>
-    <task id="LOCAL-00231" summary="History sort">
-      <option name="closed" value="true" />
-      <created>1775357836363</created>
-      <option name="number" value="00231" />
-      <option name="presentableId" value="LOCAL-00231" />
-      <option name="project" value="LOCAL" />
-      <updated>1775357836363</updated>
-    </task>
-    <task id="LOCAL-00232" summary="UI Update">
-      <option name="closed" value="true" />
-      <created>1775400522417</created>
-      <option name="number" value="00232" />
-      <option name="presentableId" value="LOCAL-00232" />
-      <option name="project" value="LOCAL" />
-      <updated>1775400522418</updated>
-    </task>
-    <task id="LOCAL-00233" summary="Python Version">
-      <option name="closed" value="true" />
-      <created>1775400529753</created>
-      <option name="number" value="00233" />
-      <option name="presentableId" value="LOCAL-00233" />
-      <option name="project" value="LOCAL" />
-      <updated>1775400529753</updated>
-    </task>
-    <task id="LOCAL-00234" summary="Ui Update. No freezes">
-      <option name="closed" value="true" />
-      <created>1775402667725</created>
-      <option name="number" value="00234" />
-      <option name="presentableId" value="LOCAL-00234" />
-      <option name="project" value="LOCAL" />
-      <updated>1775402667725</updated>
-    </task>
-    <task id="LOCAL-00235" summary="Metadata update">
-      <option name="closed" value="true" />
-      <created>1775442591783</created>
-      <option name="number" value="00235" />
-      <option name="presentableId" value="LOCAL-00235" />
-      <option name="project" value="LOCAL" />
-      <updated>1775442591784</updated>
-    </task>
-    <task id="LOCAL-00236" summary="Override + New eventi rc.68">
-      <option name="closed" value="true" />
-      <created>1775755780063</created>
-      <option name="number" value="00236" />
-      <option name="presentableId" value="LOCAL-00236" />
-      <option name="project" value="LOCAL" />
-      <updated>1775755780063</updated>
-    </task>
-    <task id="LOCAL-00237" summary="Update">
-      <option name="closed" value="true" />
-      <created>1775771761838</created>
-      <option name="number" value="00237" />
-      <option name="presentableId" value="LOCAL-00237" />
-      <option name="project" value="LOCAL" />
-      <updated>1775771761838</updated>
-    </task>
-    <task id="LOCAL-00238" summary="Livelock fix">
-      <option name="closed" value="true" />
-      <created>1775778507580</created>
-      <option name="number" value="00238" />
-      <option name="presentableId" value="LOCAL-00238" />
-      <option name="project" value="LOCAL" />
-      <updated>1775778507580</updated>
     </task>
     <task id="LOCAL-00239" summary="Livelock fix">
       <option name="closed" value="true" />
@@ -1063,7 +990,84 @@
       <option name="presentableId" value="LOCAL−00276" />
       <updated>1780608987737</updated>
     </task>
-    <option name="localTasksCounter" value="277" />
+    <task id="LOCAL−00277" summary="Removed screaming listener">
+      <option name="closed" value="true" />
+      <created>1780610430597</created>
+      <option name="number" value="LOCAL−00277" />
+      <option name="presentableId" value="LOCAL−00277" />
+      <updated>1780610430598</updated>
+    </task>
+    <task id="LOCAL−00278" summary="Lib update">
+      <option name="closed" value="true" />
+      <created>1780613258855</created>
+      <option name="number" value="LOCAL−00278" />
+      <option name="presentableId" value="LOCAL−00278" />
+      <updated>1780613258855</updated>
+    </task>
+    <task id="LOCAL−00279" summary="Removed referenceId from derivedOf?">
+      <option name="closed" value="true" />
+      <created>1780618129104</created>
+      <option name="number" value="LOCAL−00279" />
+      <option name="presentableId" value="LOCAL−00279" />
+      <updated>1780618129104</updated>
+    </task>
+    <task id="LOCAL−00280" summary="Fixes + expiry">
+      <option name="closed" value="true" />
+      <created>1780619027362</created>
+      <option name="number" value="LOCAL−00280" />
+      <option name="presentableId" value="LOCAL−00280" />
+      <updated>1780619027362</updated>
+    </task>
+    <task id="LOCAL−00281" summary="Updated to eventi 1.4-rc2">
+      <option name="closed" value="true" />
+      <created>1780619075480</created>
+      <option name="number" value="LOCAL−00281" />
+      <option name="presentableId" value="LOCAL−00281" />
+      <updated>1780619075480</updated>
+    </task>
+    <task id="LOCAL−00282" summary="effective">
+      <option name="closed" value="true" />
+      <created>1780620421628</created>
+      <option name="number" value="LOCAL−00282" />
+      <option name="presentableId" value="LOCAL−00282" />
+      <updated>1780620421628</updated>
+    </task>
+    <task id="LOCAL−00283" summary="Beans">
+      <option name="closed" value="true" />
+      <created>1780663152730</created>
+      <option name="number" value="LOCAL−00283" />
+      <option name="presentableId" value="LOCAL−00283" />
+      <updated>1780663152730</updated>
+    </task>
+    <task id="LOCAL−00284" summary="Beans fix">
+      <option name="closed" value="true" />
+      <created>1780664032559</created>
+      <option name="number" value="LOCAL−00284" />
+      <option name="presentableId" value="LOCAL−00284" />
+      <updated>1780664032559</updated>
+    </task>
+    <task id="LOCAL−00285" summary="Fixed inheritance">
+      <option name="closed" value="true" />
+      <created>1780868897750</created>
+      <option name="number" value="LOCAL−00285" />
+      <option name="presentableId" value="LOCAL−00285" />
+      <updated>1780868897750</updated>
+    </task>
+    <task id="LOCAL−00286" summary="I H8 python">
+      <option name="closed" value="true" />
+      <created>1780873014970</created>
+      <option name="number" value="LOCAL−00286" />
+      <option name="presentableId" value="LOCAL−00286" />
+      <updated>1780873014970</updated>
+    </task>
+    <task id="LOCAL−00287" summary="eventi update">
+      <option name="closed" value="true" />
+      <created>1781039815643</created>
+      <option name="number" value="LOCAL−00287" />
+      <option name="presentableId" value="LOCAL−00287" />
+      <updated>1781039815643</updated>
+    </task>
+    <option name="localTasksCounter" value="288" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1081,21 +1085,10 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Coordinator cleanup" />
-    <MESSAGE value="Fixed wrong path used" />
-    <MESSAGE value="Changed impl" />
-    <MESSAGE value="Fixed deletion for cache" />
-    <MESSAGE value="Manuall full wipe" />
-    <MESSAGE value="Manuall full wipe and keep preserved" />
-    <MESSAGE value="IFile update" />
-    <MESSAGE value="Wipe from frontend" />
-    <MESSAGE value="Updated ignore" />
-    <MESSAGE value="Fixed tests + wrong enum" />
     <MESSAGE value="Using streamit to search for collection. (Softfailure)" />
     <MESSAGE value="Fixed check + qualifier" />
     <MESSAGE value="Eventi v1.1 + Fixed correct inheritance" />
     <MESSAGE value="Lowering" />
-    <MESSAGE value="Fixed inheritance" />
     <MESSAGE value="Enabling DerivativeOnHistoricalEvents" />
     <MESSAGE value="Updating eventi to 1.2 with eject on derivativeOnHistorically" />
     <MESSAGE value="Handling expected 404" />
@@ -1106,7 +1099,18 @@
     <MESSAGE value="Changed behaviour on cover download + simplified rejection in determineCollection" />
     <MESSAGE value="Changed behavior on cover download + simplified rejection in determineCollection" />
     <MESSAGE value="Fixed TaskListener result production" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed TaskListener result production" />
+    <MESSAGE value="Removed screaming listener" />
+    <MESSAGE value="Lib update" />
+    <MESSAGE value="Removed referenceId from derivedOf?" />
+    <MESSAGE value="Fixes + expiry" />
+    <MESSAGE value="Updated to eventi 1.4-rc2" />
+    <MESSAGE value="effective" />
+    <MESSAGE value="Beans" />
+    <MESSAGE value="Beans fix" />
+    <MESSAGE value="Fixed inheritance" />
+    <MESSAGE value="I H8 python" />
+    <MESSAGE value="eventi update" />
+    <option name="LAST_COMMIT_MESSAGE" value="eventi update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1397,16 +1401,6 @@
           <option name="timeStamp" value="242" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>117</line>
-          <option name="timeStamp" value="249" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>115</line>
-          <option name="timeStamp" value="250" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/processors/segment/SegmentedVideoProcessor.kt</url>
           <line>78</line>
           <option name="timeStamp" value="299" />
@@ -1562,11 +1556,6 @@
           <option name="timeStamp" value="412" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>73</line>
-          <option name="timeStamp" value="414" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/shared/ffmpeg/src/test/kotlin/no/iktdev/mediaprocessing/ffmpeg/dsl/plan/MediaPlanTest.kt</url>
           <line>215</line>
           <option name="timeStamp" value="415" />
@@ -1623,12 +1612,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SubtitleTaskListener.kt</url>
-          <line>41</line>
+          <line>42</line>
           <option name="timeStamp" value="447" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SubtitleTaskListener.kt</url>
-          <line>48</line>
+          <line>49</line>
           <properties>
             <option name="lambda-ordinal" value="-1" />
           </properties>
@@ -1636,12 +1625,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SubtitleTaskListener.kt</url>
-          <line>43</line>
+          <line>44</line>
           <option name="timeStamp" value="452" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/listeners/SubtitleTaskListener.kt</url>
-          <line>44</line>
+          <line>45</line>
           <option name="timeStamp" value="453" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
@@ -1966,11 +1955,6 @@
           <option name="timeStamp" value="536" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>104</line>
-          <option name="timeStamp" value="539" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/shared/ffmpeg/src/main/kotlin/no/iktdev/mediaprocessing/ffmpeg/util/FFmpegUtils.kt</url>
           <line>116</line>
           <option name="timeStamp" value="541" />
@@ -2001,11 +1985,6 @@
           <option name="timeStamp" value="546" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>109</line>
-          <option name="timeStamp" value="547" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListenerTest.kt</url>
           <line>322</line>
           <option name="timeStamp" value="548" />
@@ -2014,16 +1993,6 @@
           <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListenerTest.kt</url>
           <line>272</line>
           <option name="timeStamp" value="549" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>87</line>
-          <option name="timeStamp" value="550" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateEncodeTaskListener.kt</url>
-          <line>101</line>
-          <option name="timeStamp" value="551" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
           <url>file://$PROJECT_DIR$/apps/processer/src/test/kotlin/no/iktdev/mediaprocessing/processer/limiter/LimiterCgroupSetupTest.kt</url>
@@ -2208,6 +2177,24 @@
           <line>187</line>
           <option name="timeStamp" value="630" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/main/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateExtractTaskListener.kt</url>
+          <line>117</line>
+          <option name="timeStamp" value="631" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateCoverDownloadTaskListenerTest.kt</url>
+          <line>36</line>
+          <properties>
+            <option name="lambda-ordinal" value="-1" />
+          </properties>
+          <option name="timeStamp" value="633" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/apps/coordinator/src/test/kotlin/no/iktdev/mediaprocessing/coordinator/listeners/events/MediaCreateCoverDownloadTaskListenerTest.kt</url>
+          <line>34</line>
+          <option name="timeStamp" value="634" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" type="kotlin-function">
           <url>file://$PROJECT_DIR$/apps/processer/src/main/kotlin/no/iktdev/mediaprocessing/processer/processors/linear/LinearVideoProcessor.kt</url>
           <line>67</line>
@@ -2217,6 +2204,10 @@
           </properties>
           <option name="timeStamp" value="445" />
         </line-breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="no.iktdev.eventi.events.EjectException" package="no.iktdev.eventi.events" />
+          <option name="timeStamp" value="632" />
+        </breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>

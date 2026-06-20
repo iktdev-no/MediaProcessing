@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.database
 
 import no.iktdev.eventi.MyTime
+import no.iktdev.eventi.models.StoreResult
 import no.iktdev.eventi.serialization.ZDS.toPersisted
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
@@ -62,6 +63,29 @@ open class InMemoryTaskStore : TaskStore {
         }.forEach {
             update(it.copy(claimed = false, claimedBy = null, lastCheckIn = null))
         }
+    }
+
+    override fun resetTaskById(taskId: UUID): Boolean {
+        val state = tasks.find { it.taskId == taskId }?.let {
+            update(it.copy(claimed = false, lastCheckIn = null, status = TaskStatus.Pending, consumed = false))
+            true
+        } ?: false
+        return state
+    }
+
+    override fun resetTasksById(taskId: List<UUID>): StoreResult {
+        val out = tasks.filter { it.taskId in taskId && it.consumed && it.status != TaskStatus.Pending }.onEach {
+            update(it.copy(claimed = false, lastCheckIn = null, status = TaskStatus.Pending, consumed = false))
+        }
+        return StoreResult(out.size == taskId.size, out.size)
+    }
+
+    override fun deleteTasksById(taskId: UUID): StoreResult {
+        val success = tasks.find { it.taskId == taskId }?.let {
+            tasks.remove(it)
+            1
+        } ?: 0
+        return StoreResult(success == 1, success)
     }
 
     override fun getPendingTasks() = tasks.filter { !it.consumed }

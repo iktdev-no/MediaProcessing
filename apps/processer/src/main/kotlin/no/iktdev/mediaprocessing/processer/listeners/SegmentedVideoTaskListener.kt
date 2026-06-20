@@ -6,6 +6,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.eventi.tasks.TaskValidator
 import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
@@ -43,8 +44,8 @@ class SegmentedVideoTaskListener(
     override fun supports(task: Task): Boolean =
         task is SegmentedEncodeTask
 
-    override fun accept(task: Task, reporter: TaskReporter): Boolean {
-        val accepts = super.accept(task, reporter)
+    override fun accept(task: Task, reporter: TaskReporter, validator: TaskValidator?): Boolean {
+        val accepts = super.accept(task, reporter, validator)
         if (accepts) {
             log.info { "${getWorkerId()} accepts video task ${task.taskId}" }
         }

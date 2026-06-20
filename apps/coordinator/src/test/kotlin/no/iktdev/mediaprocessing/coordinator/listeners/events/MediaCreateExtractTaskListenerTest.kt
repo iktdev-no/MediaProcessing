@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
+import no.iktdev.eventi.models.StoreResult
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
@@ -43,6 +44,18 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         override fun heartbeat(taskId: UUID): Boolean { TODO("Not yet implemented") }
         override fun markConsumed(taskId: UUID, status: TaskStatus): Boolean { TODO("Not yet implemented") }
         override fun releaseExpiredTasks() { TODO("Not yet implemented") }
+        override fun resetTaskById(taskId: UUID): Boolean {
+            TODO("Not yet implemented")
+        }
+
+        override fun resetTasksById(taskId: List<UUID>): StoreResult {
+            TODO("Not yet implemented")
+        }
+
+        override fun deleteTasksById(taskId: UUID): StoreResult {
+            TODO("Not yet implemented")
+        }
+
         override fun getPendingTasks(): List<PersistedTask> { TODO("Not yet implemented") }
     }
 

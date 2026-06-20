@@ -73,6 +73,12 @@ fun IFile.getCRC32(): Long {
     return crc.value
 }
 
+fun String.getSha256(): String {
+    val bytes = MessageDigest.getInstance("SHA-256").digest(this.toByteArray())
+    return bytes.joinToString("") { "%02x".format(it) }
+}
+
+
 fun IFile.moveTo(destinationFile: IFile, onProgress: (Double) -> Unit = {}): Boolean {
     assert(this.exists()) {
         "Sourcefile ${this.absolutePath} does not exist, but it should"

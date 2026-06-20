@@ -48,7 +48,7 @@ class TaskProjection(val events: List<Event>) {
             return TaskStatus.Skipped
         }
         return projectStatus<CoverDownloadTaskCreatedEvent, CoverDownloadResultEvent>(
-            createdIds = { it.flatMap { e -> e.taskIds } },
+            createdIds = { it.flatMap { e -> e.taskIds.map { v -> v.taskId } }},
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )
@@ -73,7 +73,7 @@ class TaskProjection(val events: List<Event>) {
     // 5: Extract subtitles (flere taskIds)
     fun projectExtractSubtitleStatus() =
         projectStatus<ProcesserExtractTaskCreatedEvent, ProcesserExtractResultEvent>(
-            createdIds = { it.flatMap { e -> e.taskIds } },
+            createdIds = { it.flatMap { e -> e.taskIds.map { v -> v.taskId } }},
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )

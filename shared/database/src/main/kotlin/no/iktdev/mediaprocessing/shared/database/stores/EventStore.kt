@@ -15,18 +15,14 @@ import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable
-import no.iktdev.mediaprocessing.shared.database.tables.EventsTable.getFromQuery
 import no.iktdev.mediaprocessing.shared.database.tables.EventsTable.getWhere
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.max
-import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -99,6 +95,16 @@ object EventStore: EventStore {
         }
         return result.getOrDefault(emptyList())
     }
+
+    override fun getEventInSequence(referenceId: UUID, eventId: UUID): Event? {
+        return withTransaction {
+            EventsTable.getWhere {
+                (EventsTable.referenceId eq referenceId.toString()) and
+                        (EventsTable.eventId eq eventId.toString())
+            }.single().toEvent()
+        }.getOrDefault(null)
+    }
+
 
     fun getPersistedEventsFor(
         referenceIds: Set<UUID>,
