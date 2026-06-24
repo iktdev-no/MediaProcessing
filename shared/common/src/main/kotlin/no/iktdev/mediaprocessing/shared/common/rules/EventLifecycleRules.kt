@@ -4,6 +4,7 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.getName
 import java.time.Duration
 
@@ -27,7 +28,7 @@ object EventLifecycleRules {
                     pe.match<ConvertTaskCreatedEvent>(Duration.ofMinutes(5)) +
                     pe.match<CoverDownloadTaskCreatedEvent>(Duration.ofMinutes(5)) +
                     pe.match<MetadataSearchTaskCreatedEvent>(Duration.ofMinutes(10)) +
-                    pe.match<MigrateContentToStoreTaskCreatedEvent>(Duration.ofMinutes(5)) +
+                    pe.match<TransferContentTaskCreatedEvent>(Duration.ofMinutes(5)) +
                     pe.match<ProcesserEncodeTaskCreatedEvent>(Duration.ofHours(8)) +
                     pe.match<ProcesserExtractTaskCreatedEvent>(Duration.ofMinutes(15)) +
                     pe.match<StoreContentAndMetadataTaskCreatedEvent>(Duration.ofMinutes(5))

@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @Component
-class StoreContentAndMetadataTaskListener : TaskListener(TaskType.MIXED) {
+class StoreMetadataAndReferencesTaskListener : TaskListener(TaskType.MIXED) {
 
     @Autowired
     lateinit var streamitRestTemplate: RestTemplate

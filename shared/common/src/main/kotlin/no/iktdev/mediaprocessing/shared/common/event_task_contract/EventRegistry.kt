@@ -2,6 +2,13 @@ package no.iktdev.mediaprocessing.shared.common.event_task_contract
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeleteSequenceEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.CoverTransferredResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.SubtitleTransferredResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.VideoTransferredResultEvent
 
 object EventRegistry {
     fun getEvents(): List<Class<out Event>> {
@@ -53,8 +60,10 @@ object EventRegistry {
             DetermineCollectionTaskCreatedEvent::class.java,
             DeterminedCollectionTaskResultEvent::class.java,
 
-            MigrateContentToStoreTaskCreatedEvent::class.java,
-            MigrateContentToStoreTaskResultEvent::class.java,
+            TransferContentTaskCreatedEvent::class.java,
+            VideoTransferredResultEvent::class.java,
+            CoverTransferredResultEvent::class.java,
+            SubtitleTransferredResultEvent::class.java,
 
             ProcesserEncodeResultEvent::class.java,
             ProcesserEncodeTaskCreatedEvent::class.java,

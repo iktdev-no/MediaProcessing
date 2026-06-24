@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-class StoreContentAndMetadataTaskListenerTest {
+class StoreMetadataAndReferencesTaskListenerTest {
 
     // -------------------------------------------------------------------------
     // Fake Reporter
@@ -60,11 +60,11 @@ class StoreContentAndMetadataTaskListenerTest {
     @Mock
     lateinit var restTemplate: RestTemplate
 
-    lateinit var listener: StoreContentAndMetadataTaskListener
+    lateinit var listener: StoreMetadataAndReferencesTaskListener
 
     @BeforeEach
     fun setup() {
-        listener = StoreContentAndMetadataTaskListener()
+        listener = StoreMetadataAndReferencesTaskListener()
         listener.streamitRestTemplate = restTemplate
     }
 
@@ -217,7 +217,7 @@ class StoreContentAndMetadataTaskListenerTest {
     fun workerId_hasCorrectFormat() {
         val id = listener.getWorkerId()
 
-        assertThat(id).contains("StoreContentAndMetadataTaskListener-MIXED-")
+        assertThat(id).contains("StoreMetadataAndReferencesTaskListener-MIXED-")
         assertThat(id.split("-").last().length).isGreaterThan(10)
     }
 }

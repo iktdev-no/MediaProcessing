@@ -2,6 +2,9 @@ package no.iktdev.mediaprocessing.shared.common.rules
 
 import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer.CoverTransferTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer.SubtitleTransferTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer.VideoTransferTask
 import no.iktdev.mediaprocessing.shared.common.getName
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -39,7 +42,9 @@ object TaskLifecycleRules {
             ExtractSubtitleTask::class.getName() -> Instant.now().minus(15, ChronoUnit.MINUTES)
             ConvertTask::class.getName() -> Instant.now().minus(6, ChronoUnit.MINUTES)
             MetadataSearchTask::class.getName() -> Instant.now().minus(10, ChronoUnit.MINUTES)
-            MigrateToContentStoreTask::class.getName() -> Instant.now().minus(30, ChronoUnit.MINUTES)
+            VideoTransferTask::class.getName() -> Instant.now().minus(60, ChronoUnit.MINUTES)
+            CoverTransferTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
+            SubtitleTransferTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
             StoreContentAndMetadataTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
             else -> Instant.now().minus(30, ChronoUnit.MINUTES)
         }

@@ -9,7 +9,7 @@ import no.iktdev.mediaprocessing.ffmpeg.dsl.AudioCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.ffmpeg.model.SelectedAudioTracks
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MigrateToContentStoreTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks_super.TransferTask
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
@@ -54,9 +54,9 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): Coordi
 
 fun PersistedTask.getOverrides(): Overrides? {
     return when (val task = this.toTask()) {
-        is MigrateToContentStoreTask -> {
+        is TransferTask -> {
             val active = task.overrides?.map { it.name } ?: emptyList()
-            val available = MigrateToContentStoreTask.Overrides.entries
+            val available = TransferTask.Overrides.entries
                 .map { it.name }
                 .filterNot { it in active }
             Overrides(available = available, active = active)

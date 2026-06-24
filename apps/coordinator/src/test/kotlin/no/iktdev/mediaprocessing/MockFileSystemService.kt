@@ -40,12 +40,13 @@ class MockFileSystemService : FileSystemService {
         // Do Nothing for now
     }
 
-    override fun verifyIdentical(original: IFile, target: IFile) {
+    override fun verifyIdentical(original: IFile, target: IFile): Boolean {
         verified += original to target
 
         if (!identical) {
             throw FileServiceException.VerificationFailed(original, target)
         }
+        return identical
     }
 
     override fun delete(file: IFile) {

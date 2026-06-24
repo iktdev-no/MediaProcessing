@@ -10,6 +10,9 @@ import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeleteSequenceEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort

@@ -5,7 +5,6 @@ import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MigrateContentToStoreTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.getName
 import org.springframework.stereotype.Component
@@ -23,7 +22,7 @@ class CompletedListener: EventListener() {
             return null
         val useEvent = event as StoreContentAndMetadataTaskResultEvent
         if (useEvent.status != TaskStatus.Completed) {
-            log.info { "${useEvent.referenceId} - ${MigrateContentToStoreTaskResultEvent::class.getName()} is failed, thus no task will be created" }
+            log.info { "${useEvent.referenceId} - ${StoreContentAndMetadataTaskResultEvent::class.getName()} is failed, thus no task will be created" }
             return null
         }
         return CompletedEvent().derivedOf(event)

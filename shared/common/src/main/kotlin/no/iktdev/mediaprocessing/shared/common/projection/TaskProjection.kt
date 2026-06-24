@@ -2,6 +2,8 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events_super.TransferredBaseResultEvent
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection.TaskStatus
 import java.util.*
@@ -130,8 +132,8 @@ class TaskProjection(val events: List<Event>) {
 
     // 8: Migrate content (én taskId)
     fun projectMigrateContentStatus() =
-        projectStatus<MigrateContentToStoreTaskCreatedEvent, MigrateContentToStoreTaskResultEvent>(
-            createdIds = { it.map { e -> e.taskId } },
+        projectStatus<TransferContentTaskCreatedEvent, TransferredBaseResultEvent>(
+            createdIds = { it.flatMap { e -> e.taskIds.map { v -> v.taskId } }},
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }
         )

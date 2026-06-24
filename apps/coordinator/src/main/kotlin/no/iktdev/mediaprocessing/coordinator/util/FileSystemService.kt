@@ -10,7 +10,7 @@ interface FileSystemService {
         bufferSize: Int = 1024 * 1024,
         onProgress: (copied: Long, total: Long) -> Unit
     )
-    fun verifyIdentical(original: IFile, target: IFile)
+    fun verifyIdentical(original: IFile, target: IFile): Boolean
     fun delete(file: IFile)
 }
 
@@ -27,5 +27,7 @@ sealed class FileServiceException(message: String, cause: Throwable? = null) : R
 
     class VerificationFailed(val source: IFile, val destination: IFile) :
         FileServiceException("Copied file is not identical: ${destination.absolutePath}")
+
+    class FilesAreIdentical(val source: IFile, val destination: IFile) : FileServiceException("Files are identical: ${source.absolutePath} -> ${destination.absolutePath}. No need to copy")
 }
 

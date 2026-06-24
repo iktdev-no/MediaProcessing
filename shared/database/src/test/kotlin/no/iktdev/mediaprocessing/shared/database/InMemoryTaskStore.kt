@@ -100,4 +100,7 @@ open class InMemoryTaskStore : TaskStore {
     }
 
     private fun serialize(data: Any?): String = data?.toString() ?: "{}"
+
+    fun clear() { tasks.clear(); nextId = 1L }
+
 }

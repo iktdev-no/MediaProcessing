@@ -14,6 +14,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.reflections.Reflections
+import java.lang.reflect.Modifier
 import java.time.Instant
 import java.util.*
 import kotlin.reflect.KClass
@@ -46,19 +47,28 @@ class TaskResultEventSerializationTest {
 
     @Test
     fun `all TaskResultEvent subclasses must serialize with Gson and Jackson`() {
-        val reflections = Reflections("no.iktdev.mediaprocessing") // rotpakken din
+        val reflections = Reflections("no.iktdev.mediaprocessing")
         val subclasses = reflections.getSubTypesOf(TaskResultEvent::class.java)
 
         require(subclasses.isNotEmpty()) {
             "Fant ingen subklasser av TaskResultEvent — er pakken riktig?"
         }
 
-        subclasses.forEach { clazz ->
+        // Filtrer ut klasser som er abstrakte eller interfaces
+        val concreteSubclasses = subclasses.filter { clazz ->
+            val modifiers = clazz.modifiers
+            !Modifier.isAbstract(modifiers) && !Modifier.isInterface(modifiers)
+        }
+
+        concreteSubclasses.forEach { clazz ->
             assertDoesNotThrow("Serialization failed for ${clazz.simpleName}") {
                 val instance = createDummyInstance(clazz)
+
+                // Gson test
                 val jsonGson = gson.toJson(instance)
                 gson.fromJson(jsonGson, clazz)
 
+                // Jackson test
                 val jsonJackson = jackson.writeValueAsString(instance)
                 jackson.readValue(jsonJackson, clazz)
             }

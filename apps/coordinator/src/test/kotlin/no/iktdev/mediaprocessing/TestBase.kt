@@ -17,6 +17,7 @@ import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.InMemoryEventStore
+import no.iktdev.mediaprocessing.shared.database.InMemoryTaskStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoPreference
@@ -32,6 +33,7 @@ import java.util.*
 
 open class TestBase {
     val eventStore = InMemoryEventStore()
+    val taskStore = InMemoryTaskStore()
 
     val history = mutableListOf<Event>()
 
@@ -63,6 +65,7 @@ open class TestBase {
             EventTypeRegistry.register(it)
         }
         eventStore.clear()
+        taskStore.clear()
         history.clear()
         FakeFile.wipe()
     }

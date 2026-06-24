@@ -19,11 +19,13 @@ class DefaultFileSystemService : FileSystemService {
         }
     }
 
-    override fun verifyIdentical(original: IFile, target: IFile) {
+    override fun verifyIdentical(original: IFile, target: IFile): Boolean {
         val mismatch = Files.mismatch(original.toPath(), target.toPath())
         if (mismatch != -1L) {
             throw FileServiceException.VerificationFailed(original, target)
+            return false
         }
+        return true
     }
 
     override fun delete(file: IFile) {
