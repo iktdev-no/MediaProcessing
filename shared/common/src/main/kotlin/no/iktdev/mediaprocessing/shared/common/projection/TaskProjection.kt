@@ -140,7 +140,7 @@ class TaskProjection(val events: List<Event>) {
 
     // 9: Store content + metadata (én taskId)
     fun projectStoreContentAndMetadataStatus() =
-        projectStatus<StoreContentAndMetadataTaskCreatedEvent, StoreContentAndMetadataTaskResultEvent>(
+        projectStatus<StoreMediaInfoAndMetadataTaskCreatedEvent, StoreMediaInfoAndMetadataTaskResultEvent>(
             createdIds = { it.map { e -> e.taskId } },
             resultStatus = { it.status },
             resultIds = { it.flatMap { e -> e.metadata.derivedFromId?.toList() ?: emptyList() } }

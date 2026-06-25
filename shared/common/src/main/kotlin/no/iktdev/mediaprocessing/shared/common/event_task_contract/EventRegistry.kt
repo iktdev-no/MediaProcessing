@@ -77,8 +77,8 @@ object EventRegistry {
 
             StartProcessingEvent::class.java,
 
-            StoreContentAndMetadataTaskCreatedEvent::class.java,
-            StoreContentAndMetadataTaskResultEvent::class.java
+            StoreMediaInfoAndMetadataTaskCreatedEvent::class.java,
+            StoreMediaInfoAndMetadataTaskResultEvent::class.java
         )
     }
 }

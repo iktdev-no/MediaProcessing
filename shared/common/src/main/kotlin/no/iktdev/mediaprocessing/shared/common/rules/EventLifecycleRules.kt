@@ -31,7 +31,7 @@ object EventLifecycleRules {
                     pe.match<TransferContentTaskCreatedEvent>(Duration.ofMinutes(5)) +
                     pe.match<ProcesserEncodeTaskCreatedEvent>(Duration.ofHours(8)) +
                     pe.match<ProcesserExtractTaskCreatedEvent>(Duration.ofMinutes(15)) +
-                    pe.match<StoreContentAndMetadataTaskCreatedEvent>(Duration.ofMinutes(5))
+                    pe.match<StoreMediaInfoAndMetadataTaskCreatedEvent>(Duration.ofMinutes(5))
         }
 
     inline fun <reified T : Event> PersistedEvent.match(duration: Duration): Duration =

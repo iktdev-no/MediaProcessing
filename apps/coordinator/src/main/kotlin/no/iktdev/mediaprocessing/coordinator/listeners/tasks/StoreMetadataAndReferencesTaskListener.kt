@@ -5,8 +5,8 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -27,11 +27,11 @@ class StoreMetadataAndReferencesTaskListener : TaskListener(TaskType.MIXED) {
     }
 
     override fun supports(task: Task): Boolean {
-        return task is StoreContentAndMetadataTask
+        return task is StoreMediaInfoAndMetadataTask
     }
 
     override suspend fun onTask(task: Task): Event? {
-        val pickedTask = task as? StoreContentAndMetadataTask ?: return null
+        val pickedTask = task as? StoreMediaInfoAndMetadataTask ?: return null
 
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
         val entity = HttpEntity(pickedTask.data, headers)
@@ -49,7 +49,7 @@ class StoreMetadataAndReferencesTaskListener : TaskListener(TaskType.MIXED) {
         }
 
         // Hvis vi kommer hit → alt OK
-        return StoreContentAndMetadataTaskResultEvent(
+        return StoreMediaInfoAndMetadataTaskResultEvent(
             status = TaskStatus.Completed
         ).producedFrom(task)
     }
@@ -65,7 +65,7 @@ class StoreMetadataAndReferencesTaskListener : TaskListener(TaskType.MIXED) {
             else -> ""
         }
 
-        return StoreContentAndMetadataTaskResultEvent(
+        return StoreMediaInfoAndMetadataTaskResultEvent(
             status = status,
             error = message
         ).producedFrom(task)

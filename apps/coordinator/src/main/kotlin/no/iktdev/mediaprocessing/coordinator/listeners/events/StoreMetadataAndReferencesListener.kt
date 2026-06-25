@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
-import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.SingleTaskCreatorEventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.SingleTaskCratedEvent
@@ -10,9 +9,9 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Contin
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.TaskProjection
@@ -27,7 +26,12 @@ import org.springframework.stereotype.Component
 class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventStore = EventStore, taskStore = TaskStore) {
     val log = KotlinLogging.logger {}
 
-    override fun isEventOfMyCreation(event: Event) = event is StoreContentAndMetadataTaskCreatedEvent
+    override fun isEventOfMyCreation(event: Event) = event is StoreMediaInfoAndMetadataTaskCreatedEvent
+
+    val requiredTransferStatus = listOf(
+        CollectProjection.TaskStatus.Skipped,
+        CollectProjection.TaskStatus.Completed
+    )
 
     override fun onCreateTask(
         event: Event,
@@ -43,12 +47,12 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         }
         val transferStatus = TaskProjection(listOf(event) + history)
 
-        if (transferStatus.projectMigrateContentStatus() == CollectProjection.TaskStatus.Failed) {
+        if (transferStatus.projectMigrateContentStatus() !in requiredTransferStatus) {
             return null
         }
 
         val useEvent = history.getInstanceOf<ContinuationSummaryEvent>() ?: return null
-        return StoreContentAndMetadataTask(useEvent.data)
+        return StoreMediaInfoAndMetadataTask(useEvent.data)
     }
 
     override fun onTaskCreated(
@@ -57,7 +61,7 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         task: Task
     ): SingleTaskCratedEvent {
 
-        return StoreContentAndMetadataTaskCreatedEvent(task.taskId)
+        return StoreMediaInfoAndMetadataTaskCreatedEvent(task.taskId)
             .derivedOf(event)
     }
 }

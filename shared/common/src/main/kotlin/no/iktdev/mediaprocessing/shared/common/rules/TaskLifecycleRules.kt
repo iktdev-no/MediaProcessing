@@ -45,7 +45,7 @@ object TaskLifecycleRules {
             VideoTransferTask::class.getName() -> Instant.now().minus(60, ChronoUnit.MINUTES)
             CoverTransferTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
             SubtitleTransferTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
-            StoreContentAndMetadataTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
+            StoreMediaInfoAndMetadataTask::class.getName() -> Instant.now().minus(5, ChronoUnit.MINUTES)
             else -> Instant.now().minus(30, ChronoUnit.MINUTES)
         }
     }

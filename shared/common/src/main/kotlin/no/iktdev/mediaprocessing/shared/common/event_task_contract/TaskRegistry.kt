@@ -10,7 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDo
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.DetermineCollectionTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer.CoverTransferTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer.SubtitleTransferTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer.VideoTransferTask
@@ -36,7 +36,7 @@ object TaskRegistry {
             CoverTransferTask::class.java,
             SubtitleTransferTask::class.java,
 
-            StoreContentAndMetadataTask::class.java,
+            StoreMediaInfoAndMetadataTask::class.java,
         )
     }
 }

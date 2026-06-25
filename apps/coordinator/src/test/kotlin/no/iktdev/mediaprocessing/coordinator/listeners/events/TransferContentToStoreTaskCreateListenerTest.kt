@@ -15,10 +15,9 @@ import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.*
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
-import no.iktdev.mediaprocessing.shared.database.tables.TasksTable.taskId
 import no.iktdev.mediaprocessing.withMetadata
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -151,9 +150,9 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         val result = listener.onEvent(results.last(), history)
 
-        assertThat(result).isInstanceOf(StoreContentAndMetadataTaskCreatedEvent::class.java)
+        assertThat(result).isInstanceOf(StoreMediaInfoAndMetadataTaskCreatedEvent::class.java)
 
-        val slot = slot<StoreContentAndMetadataTask>()
+        val slot = slot<StoreMediaInfoAndMetadataTask>()
 
         verify(exactly = 1) {
             TaskStore.persist(capture(slot))
@@ -213,9 +212,9 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         val result = listener.onEvent(results.last(), history)
 
-        assertThat(result).isInstanceOf(StoreContentAndMetadataTaskCreatedEvent::class.java)
+        assertThat(result).isInstanceOf(StoreMediaInfoAndMetadataTaskCreatedEvent::class.java)
 
-        val slot = slot<StoreContentAndMetadataTask>()
+        val slot = slot<StoreMediaInfoAndMetadataTask>()
 
         verify(exactly = 1) {
             TaskStore.persist(capture(slot))

@@ -7,8 +7,8 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreContentAndMetadataTaskResultEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreContentAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.assertj.core.api.Assertions.assertThat
@@ -110,7 +110,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
         """
     )
     fun supports_returnsTrueForCorrectTask() {
-        val task = StoreContentAndMetadataTask(data = sampleContentExport())
+        val task = StoreMediaInfoAndMetadataTask(data = sampleContentExport())
 
         val result = listener.supports(task)
 
@@ -149,7 +149,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
     )
     fun accept_returnsCompletedOnSuccess() = runTest {
         val reporter = FakeTaskReporter()
-        val task = StoreContentAndMetadataTask(data = sampleContentExport()).newReferenceId()
+        val task = StoreMediaInfoAndMetadataTask(data = sampleContentExport()).newReferenceId()
 
         whenever(
             restTemplate.exchange(
@@ -163,7 +163,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
         listener.accept(task, reporter)
         listener.currentJob?.join()
 
-        val event = reporter.events.first() as StoreContentAndMetadataTaskResultEvent
+        val event = reporter.events.first() as StoreMediaInfoAndMetadataTaskResultEvent
 
         assertThat(reporter.completed).isTrue()
         assertThat(event.status).isEqualTo(TaskStatus.Completed)
@@ -180,7 +180,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
     )
     fun accept_returnsFailedOnException() = runTest {
         val reporter = FakeTaskReporter()
-        val task = StoreContentAndMetadataTask(data = sampleContentExport()).newReferenceId()
+        val task = StoreMediaInfoAndMetadataTask(data = sampleContentExport()).newReferenceId()
 
         whenever(
             restTemplate.exchange(
@@ -194,7 +194,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
         listener.accept(task, reporter)
         listener.currentJob?.join()
 
-        val event = reporter.events.first() as StoreContentAndMetadataTaskResultEvent
+        val event = reporter.events.first() as StoreMediaInfoAndMetadataTaskResultEvent
 
         assertThat(reporter.failed).isTrue()
         assertThat(event.status).isEqualTo(TaskStatus.Failed)
