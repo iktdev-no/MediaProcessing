@@ -2,7 +2,10 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
+import no.iktdev.eventi.events.SingleTaskCreatorEventListener
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.SingleTaskCratedEvent
+import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
@@ -15,18 +18,21 @@ import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.TaskProjection
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 
 import org.springframework.stereotype.Component
 
 @Component
-class StoreMetadataAndReferencesListener: EventListener() {
+class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventStore = EventStore, taskStore = TaskStore) {
     val log = KotlinLogging.logger {}
 
-    override fun onEvent(
+    override fun isEventOfMyCreation(event: Event) = event is StoreContentAndMetadataTaskCreatedEvent
+
+    override fun onCreateTask(
         event: Event,
         history: List<Event>
-    ): Event? {
+    ): Task? {
         val startEvent = history.requireEvent<StartProcessingEvent>()
         if (startEvent.data.operation.isOnly(OperationType.MetadataSearch)) {
             event.requireQualifiedEntry<PersistContentEvent>()
@@ -42,14 +48,16 @@ class StoreMetadataAndReferencesListener: EventListener() {
         }
 
         val useEvent = history.getInstanceOf<ContinuationSummaryEvent>() ?: return null
+        return StoreContentAndMetadataTask(useEvent.data)
+    }
 
+    override fun onTaskCreated(
+        event: Event,
+        history: List<Event>,
+        task: Task
+    ): SingleTaskCratedEvent {
 
-        val task = StoreContentAndMetadataTask(useEvent.data)
-        val createdTaskEvent = StoreContentAndMetadataTaskCreatedEvent(task.taskId).derivedOf(event)
-        task.apply { derivedOf(createdTaskEvent) }
-
-        TaskStore.persist(task)
-
-        return createdTaskEvent
+        return StoreContentAndMetadataTaskCreatedEvent(task.taskId)
+            .derivedOf(event)
     }
 }
