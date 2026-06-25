@@ -35,7 +35,7 @@ class DetermineCollectionTaskListener(
         return DeterminedCollectionTaskResultEvent(
             status = status,
             collection = null
-        )
+        ).producedFrom(task)
     }
 
     override fun supports(task: Task) =
@@ -63,7 +63,7 @@ class DetermineCollectionTaskListener(
                 return DeterminedCollectionTaskResultEvent(
                     status = TaskStatus.Failed,
                     collection = null
-                )
+                ).producedFrom(task)
             }
         }
 
@@ -86,7 +86,7 @@ class DetermineCollectionTaskListener(
             return DeterminedCollectionTaskResultEvent(
                 status = TaskStatus.Completed,
                 collection = null
-            )
+            ).producedFrom(task)
         }
 
         // Sjekk om alle body-ene er identiske
