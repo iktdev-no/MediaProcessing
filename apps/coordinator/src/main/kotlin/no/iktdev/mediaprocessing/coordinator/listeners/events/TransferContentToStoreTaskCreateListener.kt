@@ -6,7 +6,6 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.MultiTaskCreatedEvent
 import no.iktdev.eventi.models.MultiTaskIdentity
 import no.iktdev.eventi.models.Task
-import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
@@ -17,11 +16,13 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfe
 import no.iktdev.mediaprocessing.shared.common.getSha256
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
+import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 
 @Component
 class TransferContentToStoreTaskCreateListener():
-    MultiTaskCreatorEventListener(no.iktdev.mediaprocessing.shared.database.stores.EventStore, no.iktdev.mediaprocessing.shared.database.stores.TaskStore) {
+    MultiTaskCreatorEventListener(EventStore, TaskStore) {
     private val log = KotlinLogging.logger {}
 
     override fun isEventOfMyCreation(event: Event) = event is TransferContentTaskCreatedEvent
