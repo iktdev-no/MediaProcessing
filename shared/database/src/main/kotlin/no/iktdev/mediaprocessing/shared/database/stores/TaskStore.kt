@@ -13,10 +13,14 @@ import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore.log
 import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
+import org.springframework.stereotype.Component
 import java.lang.ScopedValue.where
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -25,6 +29,8 @@ import kotlin.time.Duration
 import kotlin.time.toJavaDuration
 
 object TaskStore : TaskStore {
+
+    var isDryMode: Boolean = false
 
     fun getPagedTasks(query: TaskQuery, deletedIds: Set<UUID>? = null): Paginated<PersistedTask> =
         pagedQuery(
@@ -77,6 +83,11 @@ object TaskStore : TaskStore {
 
 
     override fun persist(task: Task): Boolean {
+        if (isDryMode) {
+            log.warn("Task ${task.referenceId}@${task.taskId} will not be persisted as its in dry mode.")
+            return false
+        }
+
         val asData = WGson.toJson(task)
         val taskName = task::class.simpleName ?: run {
             throw RuntimeException("Missing class name for task: $task")

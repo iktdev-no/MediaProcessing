@@ -10,6 +10,7 @@ group = "no.iktdev.mediaprocessing"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://jitpack.io")
     maven { url = uri("https://reposilite.iktdev.no/releases") }
@@ -21,6 +22,7 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven("https://jitpack.io")
         maven { url = uri("https://reposilite.iktdev.no/releases") }

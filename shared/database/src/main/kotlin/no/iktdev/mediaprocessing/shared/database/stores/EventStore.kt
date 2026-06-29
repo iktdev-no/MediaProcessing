@@ -26,13 +26,18 @@ import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.max
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
+import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-
 object EventStore: EventStore {
+
     val log = KotlinLogging.logger {}
+    var isDryMode: Boolean = false
+
 
     fun getPagedEvents(query: EventQuery): Paginated<PersistedEvent> =
         pagedQuery(
@@ -141,6 +146,10 @@ object EventStore: EventStore {
 
 
     override fun persist(event: Event) {
+        if (isDryMode) {
+            log.warn("Event ${event.referenceId}@${event.eventId} will not be persisted as its in dry mode.")
+            return
+        }
         val referenceId = event.referenceId.toString()
 
         val asData = WGson.toJson(event)

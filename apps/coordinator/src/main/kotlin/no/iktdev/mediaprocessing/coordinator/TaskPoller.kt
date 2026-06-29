@@ -31,7 +31,7 @@ class TaskPollerAdministrator(
     }
 }
 
-@Profile("!dev")
+@Profile("!notask")
 @Service
 class TaskPoller(
     private val reporter: TaskReporter,

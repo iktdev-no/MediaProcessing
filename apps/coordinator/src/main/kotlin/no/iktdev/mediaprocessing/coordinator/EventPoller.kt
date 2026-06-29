@@ -78,7 +78,7 @@ class EventPoller(
 /* ---------------------------------------------------------
    ADMINISTRATOR (STARTER POLLER)
    --------------------------------------------------------- */
-@Profile("!dev")
+@Profile("!noevent")
 @Component
 class EventPollerAdministrator(
     private val eventPoller: EventPoller
