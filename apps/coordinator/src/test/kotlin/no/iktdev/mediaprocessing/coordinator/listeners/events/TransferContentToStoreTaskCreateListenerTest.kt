@@ -145,7 +145,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
             includeCover = true,
             subtitles = listOf("eng")
         )
-
+        created.addToHistory()
         results.forEach { it.addToHistory() }
 
         val result = listener.onEvent(results.last(), history)
@@ -207,7 +207,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
             includeCover = false,
             subtitles = listOf("eng")
         )
-
+        created.addToHistory()
         results.forEach { it.addToHistory() }
 
         val result = listener.onEvent(results.last(), history)

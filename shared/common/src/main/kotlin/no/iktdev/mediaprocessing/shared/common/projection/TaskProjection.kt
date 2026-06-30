@@ -26,7 +26,7 @@ class TaskProjection(val events: List<Event>) {
         val matching = results.filter { it in created }
 
         // Ikke alle created-tasks har resultater → Pending
-        if (!matching.containsAll(created) || matching.size != created.size)
+        if (!results.containsAll(created))
             return TaskStatus.Pending
 
         // Noen resultater har status Failed → Failed
