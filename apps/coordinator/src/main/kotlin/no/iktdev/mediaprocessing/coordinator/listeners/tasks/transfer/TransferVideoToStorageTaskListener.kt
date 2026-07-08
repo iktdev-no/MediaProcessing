@@ -37,7 +37,7 @@ class TransferVideoToStorageTaskListener: TransferToStorageBaseListener() {
         }
         val overrides = t.overrides ?: emptyList()
 
-        val source = SourceFile(t.cachedUri)
+        val source = SourceFile(t.cachedUri, t.cachedFileHash)
         val dest = DestinationFile(t.storeUri)
 
         val success = try {
@@ -53,9 +53,16 @@ class TransferVideoToStorageTaskListener: TransferToStorageBaseListener() {
                 )
             }
             TaskStatus.Completed to null
-        } catch (e: FileServiceException.FilesAreIdentical) {
-            TaskStatus.Skipped to e.localizedMessage
-        } catch (e: Exception) {
+        } catch (e: FileServiceException) {
+            when (e) {
+                is FileServiceException.FilesAreIdentical,
+                is FileServiceException.SourceAlreadyTransferred -> {
+                    TaskStatus.Skipped to e.localizedMessage
+                }
+                else -> throw e
+            }
+        }
+        catch (e: Exception) {
             TaskStatus.Failed to e.localizedMessage
         }
 

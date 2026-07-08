@@ -5,6 +5,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.PrintWriter
+import java.security.MessageDigest
 
 class UseFile(path: String) : IFile {
 
@@ -134,4 +135,7 @@ class UseFile(path: String) : IFile {
     override fun startsWith(other: IFile): Boolean {
         return file.startsWith(other.toJavaFile())
     }
+
+
+
 }

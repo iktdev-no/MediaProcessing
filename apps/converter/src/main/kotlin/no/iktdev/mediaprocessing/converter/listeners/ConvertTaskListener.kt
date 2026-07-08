@@ -17,6 +17,7 @@ import no.iktdev.mediaprocessing.converter.Exporter
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter
 import no.iktdev.mediaprocessing.converter.convert.Converter2
+import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import org.springframework.stereotype.Component
@@ -49,11 +50,14 @@ open class ConvertTaskListener(): TaskListener(TaskType.CPU_INTENSIVE) {
         }
 
         return try {
-            val result = converter.getResult()
+            val depResult = converter.getResult()
+            val result = converter.getResult().map { it -> IFile(it) }
+                .map { it -> HashedFile(it.absolutePath, it.toXxHash()) }
             val newEvent = ConvertTaskResultEvent(
                 data = ConvertTaskResultEvent.ConvertedData(
                     language = task.data.language,
-                    outputFiles = result,
+                    outputFiles = depResult,
+                    convertedFiles = result,
                     baseName = task.data.outputFileName
                 ),
                 status = TaskStatus.Completed

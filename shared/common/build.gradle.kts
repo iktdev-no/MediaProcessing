@@ -59,6 +59,9 @@ dependencies {
     // ICU
     implementation("com.ibm.icu:icu4j:75.1")
 
+    implementation("net.openhft:zero-allocation-hashing:0.16")
+
+
     // --- TESTING ---
 
     testImplementation(kotlin("test"))

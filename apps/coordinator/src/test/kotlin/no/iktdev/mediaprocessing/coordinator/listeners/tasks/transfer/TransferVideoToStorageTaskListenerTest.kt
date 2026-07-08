@@ -7,6 +7,8 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.files.FakeFile
+import no.iktdev.files.FileHash
+import no.iktdev.files.FileHashType
 import no.iktdev.mediaprocessing.MockFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.VideoTransferredResultEvent
@@ -56,4 +58,43 @@ class TransferVideoToStorageTaskListenerTest : TransferToStorageBaseListenerTest
 
         assertEquals(TaskStatus.Skipped, result.status)
     }
+
+    @Test
+    @DisplayName("Når source mangler men destination har matching hash → Skipped (SourceAlreadyTransferred)")
+    fun `video_already_transferred`() = runTest {
+        FakeFile.wipe()
+
+        // Source mangler
+        val src = FakeFile("/src/build/potet.mp4").apply {
+            changeExist(false)
+        }
+
+        // Destination finnes
+        val dst = FakeFile("/dest/build/potet.mp4").apply {
+            changeExist(true)
+            writeText("dummy") // gir filen innhold
+        }
+
+        // Matching hash
+        val expectedHash = dst.toXxHash()
+
+        // Mock FS som returnerer matching hash for destination
+        val fs = MockFileSystemService()
+
+        val task = VideoTransferTask(
+            executerId = UUID.randomUUID(),
+            collection = "col",
+            cachedUri = src.absolutePath,
+            storeUri = dst.absolutePath,
+            cachedFileHash = expectedHash, // viktig!
+            overrides = emptyList()
+        )
+
+        val result = InternalTestListener(fs).onTask(task) as VideoTransferredResultEvent
+
+        assertEquals(TaskStatus.Skipped, result.status)
+        assertEquals(dst.absolutePath, result.fileUri)
+    }
+
+
 }

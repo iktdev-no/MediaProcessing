@@ -16,6 +16,7 @@ import no.iktdev.mediaprocessing.converter.ConverterEnvironment
 import no.iktdev.mediaprocessing.converter.Exporter
 import no.iktdev.mediaprocessing.converter.MockConverter
 import no.iktdev.mediaprocessing.converter.MockConverterEnvironment
+import no.iktdev.mediaprocessing.converter.TestBase
 import no.iktdev.mediaprocessing.converter.convert.ConvertListener
 import no.iktdev.mediaprocessing.converter.convert.Converter
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
@@ -27,7 +28,9 @@ import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-class ConvertTaskListenerTest {
+
+
+class ConvertTaskListenerTest: TestBase() {
 
     class ConvertTaskListenerTestImplementation : ConvertTaskListener() {
         fun getJob() = currentJob

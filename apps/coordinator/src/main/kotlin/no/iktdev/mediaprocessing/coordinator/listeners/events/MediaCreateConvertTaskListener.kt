@@ -63,7 +63,7 @@ class MediaCreateConvertTaskListener: EventListener() {
         val result = extractEvent.data ?: run {
             throw SoftDispatchException.ForcedListenerEjectionException("Extract event is missing data required to proceed", event::class.java)
         }
-        val useFile = IFile(result.cachedOutputFile)
+        val (useFile, hash) = result.deconstruct()
         if (!useFile.exists()) {
             throw SoftDispatchException.ForcedListenerEjectionException("Extract event's output file is missing", event::class.java)
         }
@@ -71,7 +71,7 @@ class MediaCreateConvertTaskListener: EventListener() {
 
         return ConvertTask(
             data = ConvertTask.Data(
-                inputFile = result.cachedOutputFile,
+                inputFile = useFile.absolutePath,
                 language = result.language,
                 allowOverwrite = allowOverwrite(),
                 outputDirectory = useFile.parentFile.absolutePath,

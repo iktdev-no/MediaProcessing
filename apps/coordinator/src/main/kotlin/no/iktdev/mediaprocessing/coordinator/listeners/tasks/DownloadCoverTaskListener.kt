@@ -9,6 +9,7 @@ import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.DownloadClient
+import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDownloadTask
 import org.springframework.stereotype.Component
@@ -48,7 +49,9 @@ class DownloadCoverTaskListener(
                 status = TaskStatus.Completed,
                 data = CoverDownloadResultEvent.CoverDownloadedData(
                     source = taskData.source,
-                    outputFile = downloadedFile.absolutePath
+                    outputFile = downloadedFile.absolutePath,
+                    downloadedCover = HashedFile(downloadedFile.absolutePath,
+                        downloadedFile.toXxHash()),
                 )
             ).producedFrom(pickedTask)
         } else {

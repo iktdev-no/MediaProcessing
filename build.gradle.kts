@@ -37,6 +37,8 @@ subprojects {
         implementation("com.google.code.gson:gson:2.8.9")
         implementation("org.json:json:20231013")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+        implementation("org.lz4:lz4-java:1.8.0")
+
     }
 
     tasks.withType<Test> {

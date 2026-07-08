@@ -1,11 +1,13 @@
 package no.iktdev.files
 
+import net.jpountz.xxhash.XXHashFactory
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.security.MessageDigest
 
 interface IFile {
     val path: String
@@ -83,4 +85,39 @@ interface IFile {
     fun writeBytes(bytes: ByteArray)
     fun setLastModified(time: Long)
     fun startsWith(other: IFile): Boolean
+
+    fun toSha256(): FileHash {
+        val digest = MessageDigest.getInstance("SHA-256")
+        this.openInputStream().use { input ->
+            val buffer = ByteArray(1024 * 1024) // 1 MB buffer
+            var bytesRead: Int
+            while (input.read(buffer).also { bytesRead = it } != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        return FileHash(
+            digest.digest().joinToString("") { "%02x".format(it) },
+            FileHashType.SHA256
+        )
+    }
+
+    fun toXxHash(): FileHash {
+        val factory = XXHashFactory.nativeInstance()
+        val hasher = factory.hash64()
+
+        // Merk: XXH3 er enklest å bruke på hele bytes,
+        // men for strømming bruker vi en 'streaming' hasher:
+        val streamHasher = factory.newStreamingHash64(0) // 0 er seed
+
+        this.openInputStream().use { input ->
+            val buffer = ByteArray(1024 * 1024)
+            var bytesRead: Int
+            while (input.read(buffer).also { bytesRead = it } != -1) {
+                streamHasher.update(buffer, 0, bytesRead)
+            }
+        }
+
+        // Returnerer som hex-streng
+        return FileHash(java.lang.Long.toHexString(streamHasher.value), FileHashType.XX64Hash)
+    }
 }

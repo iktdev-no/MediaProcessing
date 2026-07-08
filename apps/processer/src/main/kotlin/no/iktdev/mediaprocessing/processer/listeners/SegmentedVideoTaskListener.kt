@@ -18,6 +18,7 @@ import no.iktdev.mediaprocessing.processer.processors.segment.SegmentedContextFa
 import no.iktdev.mediaprocessing.processer.processors.segment.SegmentedVideoProcessor
 import no.iktdev.mediaprocessing.processer.progress.SegmentedProgressListener
 import no.iktdev.mediaprocessing.processer.services.ProcessService
+import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
 import org.jetbrains.annotations.VisibleForTesting
@@ -108,6 +109,8 @@ class SegmentedVideoTaskListener(
             logFile = mergedLog.absolutePath,
             data = ProcesserEncodeResultEvent.EncodeResult(
                 cachedOutputFile = ctx.output.absolutePath,
+                encodedOutputFile = HashedFile(ctx.output.absolutePath,
+                    ctx.output.toXxHash()),
                 cachedSegmentFiles = segments.map { it.output.absolutePath }
             )
         ).producedFrom(task)

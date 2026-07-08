@@ -3,6 +3,8 @@ package no.iktdev.mediaprocessing.coordinator.listeners.tasks.transfer
 import mu.KotlinLogging
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.files.FileHash
+import no.iktdev.files.FileHashType
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
@@ -26,6 +28,18 @@ abstract class TransferToStorageBaseListener(val deleteSourceAfterVerify: Boolea
                  onProgress: ((copied: Long, total: Long) -> Unit)? = null) {
         val src = source.file
         val dst = destination.destination
+        if (src.notExist() && dst.exists()) {
+            val dstHash = if (source.hash != null) {
+                when (source.hash.method) {
+                    FileHashType.SHA256 -> dst.toSha256()
+                    FileHashType.XX64Hash -> dst.toXxHash()
+                }
+            } else null
+            if (source.hash?.hash != dstHash?.hash) {
+                throw FileServiceException.SourceMissingDestinationHashMismatch(src, source.hash, dst, dstHash)
+            }
+            throw FileServiceException.SourceAlreadyTransferred(src, dst)
+        }
         val fs = getFileSystemService()
         if (dst.exists() && overrides.none { it == TransferTask.Overrides.AllowOverwrite }) {
             try {
@@ -49,13 +63,8 @@ abstract class TransferToStorageBaseListener(val deleteSourceAfterVerify: Boolea
         }
     }
 
-    class SourceFile(val uri: String) {
+    class SourceFile(val uri: String, val hash: FileHash? = null) {
         val file = IFile(uri)
-        init {
-            if (!file.exists()) {
-                throw FileServiceException.SourceMissing(file)
-            }
-        }
     }
 
     class DestinationFile(val uri: String) {

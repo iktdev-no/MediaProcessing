@@ -46,7 +46,7 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.33")
     implementation("org.postgresql:postgresql:42.7.7")
     implementation("org.xerial:sqlite-jdbc:3.43.2.0")
-    implementation("com.zaxxer:HikariCP:7.0.2")
+        implementation("com.zaxxer:HikariCP:7.0.2")
 
     implementation(project(":shared:ffmpeg"))
     implementation(project(":shared:common"))

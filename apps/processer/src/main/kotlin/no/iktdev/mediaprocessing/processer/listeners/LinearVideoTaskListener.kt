@@ -18,6 +18,7 @@ import no.iktdev.mediaprocessing.processer.linear.LinearProcessor
 import no.iktdev.mediaprocessing.processer.progress.DynamicProgressWeights
 import no.iktdev.mediaprocessing.processer.progress.LinearProgressListener
 import no.iktdev.mediaprocessing.processer.services.ProcessService
+import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import org.jetbrains.annotations.VisibleForTesting
@@ -95,7 +96,9 @@ class LinearVideoTaskListener(
             status = TaskStatus.Completed,
             logFile = mergedLog.absolutePath,
             data = ProcesserEncodeResultEvent.EncodeResult(
-                cachedOutputFile = finalFile.absolutePath
+                cachedOutputFile = finalFile.absolutePath,
+                encodedOutputFile = HashedFile(finalFile.absolutePath,
+                    finalFile.toXxHash()),
             )
         ).producedFrom(task)
     }

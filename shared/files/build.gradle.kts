@@ -7,10 +7,12 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("org.lz4:lz4-java:1.8.0")
 }
 
 tasks.test {

@@ -70,28 +70,30 @@ class SummaryProjection(
             .filter { it.status == TaskStatus.Completed }
             .lastOrNull { it.data != null } ?: return null
 
-        val cachedFile = IFile(useCover.data!!.outputFile)
+        val (file, hash) = useCover.data?.deconstruct() ?: return null
 
         val useName = (if (isMovie()) getFileName() else {
             collection.cleanForFileSystemUse()
-        }).let { name -> "$name.${cachedFile.extension()}" }
+        }).let { name -> "$name.${file.extension()}" }
 
         val storeFile = useStore.using(useName)
         return ContentMigrationPlan.SingleContent(
-            cachedFile.absolutePath,
+            file.absolutePath,
+            hash,
             storeFile.absolutePath
         )
     }
 
     fun getVideoMigration(): ContentMigrationPlan.SingleContent? {
-        val cachedFile = events.getInstancesOf<ProcesserEncodeResultEvent>()
-            .lastOrNull()?.data?.cachedOutputFile?.let { IFile(it) } ?: return null
+        val useVideoEncodeResult = events.getInstancesOf<ProcesserEncodeResultEvent>().lastOrNull()
+        val (cachedFile, hash) = useVideoEncodeResult?.data?.deconstruct() ?: return null
 
         val filename = getFileName().let { "$it.${cachedFile.extension()}" }
         val storeFile = useStore.using(filename)
 
         return ContentMigrationPlan.SingleContent(
             cachedFile.absolutePath,
+            hash,
             storeFile.absolutePath
         )
     }
@@ -104,12 +106,14 @@ class SummaryProjection(
         val allSubtitleFiles = events.flatMap { event ->
             when (event) {
                 is ProcesserExtractResultEvent ->
-                    event.data?.let { listOf(it.language to IFile(it.cachedOutputFile)) } ?: emptyList()
+                    event.data?.let { listOf(it.language to it.deconstruct()) } ?: emptyList()
 
                 is ConvertTaskResultEvent ->
-                    event.data?.outputFiles
-                        ?.map { event.data.language to IFile(it) }
-                        ?: emptyList()
+                    event.data?.let { data ->
+                        data.deconstruct().map { pair ->
+                            data.language to pair
+                        }
+                    } ?: emptyList()
 
                 else -> emptyList()
             }
@@ -121,18 +125,19 @@ class SummaryProjection(
         val grouped = allSubtitleFiles.groupBy({ it.first }, { it.second })
 
         // Bygg resultat
-        return grouped.flatMap { (language, files) ->
-            files.map { cached ->
-                val filename = "$baseName.${cached.extension()}"
+        return grouped.flatMap { (language, hashFiles) ->
+            hashFiles.map { (file, hash) ->
+                val filename = "$baseName.${file.extension()}"
                 val storeFile = store.using("sub", language, filename)
-
                 ContentMigrationPlan.SingleSubtitle(
                     language = language,
-                    cachedUri = cached.absolutePath,
+                    cachedUri = file.absolutePath,
+                    cacheHash = hash,
                     storeUri = storeFile.absolutePath,
                 )
             }
         }
+
     }
 
 

@@ -111,8 +111,12 @@ open class TestBase {
         ),
         plan = ContentMigrationPlan(
             collection = "Baking Bread",
-            videoContent = ContentMigrationPlan.SingleContent("cached:///bakingbread/Baking Bread - S01E01 - Flour.mp4", "store:///Baking bread/Baking Bread - S01E01 - Flour.mp4"),
-            coverContent = ContentMigrationPlan.SingleContent("cached:///bakingbread/Baking Bread.jpg", "store:///Baking bread/Baking Bread.jpg"),
+            videoContent = ContentMigrationPlan.SingleContent(
+                cachedUri = "cached:///bakingbread/Baking Bread - S01E01 - Flour.mp4",
+                storeUri = "store:///Baking bread/Baking Bread - S01E01 - Flour.mp4"),
+            coverContent = ContentMigrationPlan.SingleContent(
+                cachedUri = "cached:///bakingbread/Baking Bread.jpg",
+                storeUri = "store:///Baking bread/Baking Bread.jpg"),
             subtitleContent = listOf(
                 ContentMigrationPlan.SingleSubtitle(
                     language = "eng",

@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
+import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import org.springframework.stereotype.Service
@@ -81,7 +82,9 @@ class SubtitleTaskListener(
             status = TaskStatus.Completed,
             data = ProcesserExtractResultEvent.ExtractResult(
                 language = taskData.data.language,
-                cachedOutputFile = cachedOutFile.absolutePath
+                cachedOutputFile = cachedOutFile.absolutePath,
+                extractedOutputFile = HashedFile(cachedOutFile.absolutePath,
+                    cachedOutFile.toXxHash()),
             )
         ).producedFrom(task)
     }

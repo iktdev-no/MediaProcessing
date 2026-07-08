@@ -47,8 +47,14 @@ class TransferSubtitleToStorageTaskListener: TransferToStorageBaseListener() {
         val success = try {
             transfer(source, dest, overrides)
             TaskStatus.Completed to null
-        } catch (e: FileServiceException.FilesAreIdentical) {
-            TaskStatus.Skipped to e.localizedMessage
+        } catch (e: FileServiceException) {
+            when (e) {
+                is FileServiceException.FilesAreIdentical,
+                is FileServiceException.SourceAlreadyTransferred -> {
+                    TaskStatus.Skipped to e.localizedMessage
+                }
+                else -> throw e
+            }
         } catch (e: Exception) {
             TaskStatus.Failed to e.localizedMessage
         }
