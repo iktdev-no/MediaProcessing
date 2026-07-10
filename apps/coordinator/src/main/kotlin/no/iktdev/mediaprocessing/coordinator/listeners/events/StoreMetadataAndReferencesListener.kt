@@ -10,7 +10,9 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Operat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events_super.TransferredBaseResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
@@ -40,6 +42,8 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         val startEvent = history.requireEvent<StartProcessingEvent>()
         if (startEvent.data.operation.isOnly(OperationType.MetadataSearch)) {
             event.requireQualifiedEntry<PersistContentEvent>()
+        } else {
+            event.requireQualifiedEntry<TransferredBaseResultEvent>()
         }
 
         if (history.getInstanceOf<PersistContentEvent>() == null) {
