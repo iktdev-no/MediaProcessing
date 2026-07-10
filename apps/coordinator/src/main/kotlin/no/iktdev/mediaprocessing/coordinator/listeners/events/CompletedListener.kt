@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.getName
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
 
 @Component
@@ -18,9 +19,7 @@ class CompletedListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-        if (event !is StoreMediaInfoAndMetadataTaskResultEvent)
-            return null
-        val useEvent = event as StoreMediaInfoAndMetadataTaskResultEvent
+        val useEvent = event.requireQualifiedEntry<StoreMediaInfoAndMetadataTaskResultEvent>()
         if (useEvent.status != TaskStatus.Completed) {
             log.info { "${useEvent.referenceId} - ${StoreMediaInfoAndMetadataTaskResultEvent::class.getName()} is failed, thus no task will be created" }
             return null

@@ -5,6 +5,7 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.PrintWriter
+import java.nio.file.FileSystemException
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.MessageDigest
@@ -120,4 +121,27 @@ interface IFile {
         // Returnerer som hex-streng
         return FileHash(java.lang.Long.toHexString(streamHasher.value), FileHashType.XX64Hash)
     }
+}
+
+/**
+ * Sørger for at foreldremappen til denne filen eksisterer.
+ * Håndterer race conditions under flertrådet kjøring og returnerer referansen til mappen.
+ *
+ * @throws FileSystemException hvis mappen ikke kunne opprettes eller foreldrestien er ugyldig.
+ */
+fun IFile.ensureParentDirsExist(): IFile {
+    val parentDir = this.parentFile
+        ?: throw FileSystemException("Could not resolve parent directory for path: ${this.absolutePath}")
+
+    if (!parentDir.exists()) {
+        // Hvis mkdirs() returnerer false, kan en annen tråd ha opprettet den akkurat nå
+        if (!parentDir.mkdirs()) {
+            // Dobbelsjekk om den ble opprettet i mellomtiden
+            if (!parentDir.exists()) {
+                throw FileSystemException("Failed to create directory: ${parentDir.absolutePath}")
+            }
+        }
+    }
+
+    return parentDir
 }

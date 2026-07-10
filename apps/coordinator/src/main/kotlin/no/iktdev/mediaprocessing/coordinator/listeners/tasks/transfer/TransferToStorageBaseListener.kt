@@ -6,6 +6,7 @@ import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.files.FileHash
 import no.iktdev.files.FileHashType
 import no.iktdev.files.IFile
+import no.iktdev.files.ensureParentDirsExist
 import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
@@ -70,11 +71,7 @@ abstract class TransferToStorageBaseListener(val deleteSourceAfterVerify: Boolea
     class DestinationFile(val uri: String) {
         val destination = IFile(this.uri)
         init {
-            if (!destination.parentFile.exists()) {
-                if (!destination.parentFile.mkdirs()) {
-                    throw FileSystemException("Failed to create directory: ${destination.absolutePath}")
-                }
-            }
+            destination.ensureParentDirsExist()
         }
     }
 }
