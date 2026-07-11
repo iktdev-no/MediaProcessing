@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Operat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.TransferredContentsSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events_super.TransferredBaseResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
@@ -29,11 +30,6 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
 
     override fun isEventOfMyCreation(event: Event) = event is StoreMediaInfoAndMetadataTaskCreatedEvent
 
-    val requiredTransferStatus = listOf(
-        CollectProjection.TaskStatus.Skipped,
-        CollectProjection.TaskStatus.Completed
-    )
-
     override fun onCreateTask(
         event: Event,
         history: List<Event>
@@ -42,15 +38,10 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         if (startEvent.data.operation.isOnly(OperationType.MetadataSearch)) {
             event.requireQualifiedEntry<PersistContentEvent>()
         } else {
-            event.requireQualifiedEntry<TransferredBaseResultEvent>()
+            event.requireQualifiedEntry<TransferredContentsSummaryEvent>()
         }
 
         if (history.getInstanceOf<PersistContentEvent>() == null) {
-            return null
-        }
-        val transferStatus = TaskProjection(listOf(event) + history)
-
-        if (transferStatus.projectMigrateContentStatus() !in requiredTransferStatus) {
             return null
         }
 

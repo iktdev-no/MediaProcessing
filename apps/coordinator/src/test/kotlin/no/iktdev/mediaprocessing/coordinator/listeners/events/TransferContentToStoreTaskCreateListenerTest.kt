@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.iktdev.eventi.models.Event
@@ -28,6 +29,9 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
     private val listener = StoreMetadataAndReferencesListener()
 
+    // ⭐ Instansierer collectoren for å lage det påkrevde samle-eventet
+    private val transferCollector = TransferredContentsEventsListener(mockk(relaxed = true))
+
     // ---------------------------------------------------------
     // Helper: lager TransferContentTaskCreatedEvent + resultater
     // ---------------------------------------------------------
@@ -47,7 +51,6 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
             taskIds += MultiTaskIdentity(UUID.randomUUID(), "sub-$lang")
         }
 
-        // ⭐ FIX: cast etter derivedOf()
         val created = TransferContentTaskCreatedEvent(
             groupId = persist.eventId,
             taskIds = taskIds.toSet()
@@ -138,7 +141,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
         val persistContent = PersistContentEvent()
             .derivedOf(summaryEvent).addToHistory()
 
-        // ⭐ NY MODELL: TransferContentTaskCreatedEvent + resultater
+        // NY MODELL: TransferContentTaskCreatedEvent + resultater
         val (created, results) = createTransferResults(
             persist = persistContent,
             includeVideo = true,
@@ -148,7 +151,11 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
         created.addToHistory()
         results.forEach { it.addToHistory() }
 
-        val result = listener.onEvent(results.last(), history)
+        // ⭐ NYTT: Vi lar collectoren generere TransferredContentsSummaryEvent og dytter det inn i historikken
+        transferCollector.produceSummary(history).addToHistory()
+
+        // Kjører listeneren med den oppdaterte historikken der samle-eventet nå ligger klart
+        val result = listener.onEvent(history.last(), history)
 
         assertThat(result).isInstanceOf(StoreMediaInfoAndMetadataTaskCreatedEvent::class.java)
 
@@ -210,7 +217,10 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
         created.addToHistory()
         results.forEach { it.addToHistory() }
 
-        val result = listener.onEvent(results.last(), history)
+        // ⭐ NYTT: Genererer TransferredContentsSummaryEvent også for undertekst-caset
+        transferCollector.produceSummary(history).addToHistory()
+
+        val result = listener.onEvent(history.last(), history)
 
         assertThat(result).isInstanceOf(StoreMediaInfoAndMetadataTaskCreatedEvent::class.java)
 

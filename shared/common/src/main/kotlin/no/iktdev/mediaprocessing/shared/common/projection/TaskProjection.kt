@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
+import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
@@ -9,29 +10,48 @@ import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection.Task
 import java.util.*
 
 class TaskProjection(val events: List<Event>) {
+    val log = KotlinLogging.logger {}
+
 
     private inline fun <reified C : Event, reified R : Event> projectStatus(
         crossinline createdIds: (List<C>) -> List<UUID>,
         crossinline resultStatus: (R) -> no.iktdev.eventi.models.store.TaskStatus,
         crossinline resultIds: (List<R>) -> List<UUID>
     ): TaskStatus {
+        val createdEvent = events.getInstancesOf<C>()
+        if (createdEvent.isEmpty()) {
+            log.debug { "[Projection] NotInitiated: No instances of ${C::class.simpleName} found in history." }
+            return TaskStatus.NotInitiated
+        }
 
-        val createdEvent = events.getInstancesOf<C>().ifEmpty { return TaskStatus.NotInitiated }
-        val resultEvent = events.getInstancesOf<R>().ifEmpty { return TaskStatus.Pending }
+        val resultEvent = events.getInstancesOf<R>()
+        if (resultEvent.isEmpty()) {
+            log.debug { "[Projection] Pending: Found ${createdEvent.size} created events, but zero result events of type ${R::class.simpleName}." }
+            return TaskStatus.Pending
+        }
 
         val created = createdIds(createdEvent)
         val results = resultIds(resultEvent)
 
-        // Match resultater som faktisk hører til created-taskene
-        val matching = results.filter { it in created }
-
-        // Ikke alle created-tasks har resultater → Pending
-        if (!results.containsAll(created))
+        // Sjekk 1: Mangler vi resultater for spesifikke oppgaver?
+        if (!results.containsAll(created)) {
+            val missingIds = created.filter { it !in results }
+            log.debug {
+                "[Projection] Pending: Missing results for ${missingIds.size} tasks. " +
+                        "Created IDs: $created | Result mapping IDs: $results | Missing: $missingIds"
+            }
             return TaskStatus.Pending
+        }
 
-        // Noen resultater har status Failed → Failed
-        if (resultEvent.any { resultStatus(it) == no.iktdev.eventi.models.store.TaskStatus.Failed })
+        // Sjekk 2: Har noen av resultatene feilet?
+        val failedResults = resultEvent.filter { resultStatus(it) == no.iktdev.eventi.models.store.TaskStatus.Failed }
+        if (failedResults.isNotEmpty()) {
+            log.debug {
+                "[Projection] Failed: ${failedResults.size} result events had status Failed. " +
+                        "Failed event IDs: ${failedResults.map { it.eventId }}"
+            }
             return TaskStatus.Failed
+        }
 
         return TaskStatus.Completed
     }
