@@ -20,13 +20,11 @@ class TaskProjection(val events: List<Event>) {
     ): TaskStatus {
         val createdEvent = events.getInstancesOf<C>()
         if (createdEvent.isEmpty()) {
-            log.debug { "[Projection] NotInitiated: No instances of ${C::class.simpleName} found in history." }
             return TaskStatus.NotInitiated
         }
 
         val resultEvent = events.getInstancesOf<R>()
         if (resultEvent.isEmpty()) {
-            log.debug { "[Projection] Pending: Found ${createdEvent.size} created events, but zero result events of type ${R::class.simpleName}." }
             return TaskStatus.Pending
         }
 
@@ -36,20 +34,12 @@ class TaskProjection(val events: List<Event>) {
         // Sjekk 1: Mangler vi resultater for spesifikke oppgaver?
         if (!results.containsAll(created)) {
             val missingIds = created.filter { it !in results }
-            log.debug {
-                "[Projection] Pending: Missing results for ${missingIds.size} tasks. " +
-                        "Created IDs: $created | Result mapping IDs: $results | Missing: $missingIds"
-            }
             return TaskStatus.Pending
         }
 
         // Sjekk 2: Har noen av resultatene feilet?
         val failedResults = resultEvent.filter { resultStatus(it) == no.iktdev.eventi.models.store.TaskStatus.Failed }
         if (failedResults.isNotEmpty()) {
-            log.debug {
-                "[Projection] Failed: ${failedResults.size} result events had status Failed. " +
-                        "Failed event IDs: ${failedResults.map { it.eventId }}"
-            }
             return TaskStatus.Failed
         }
 
