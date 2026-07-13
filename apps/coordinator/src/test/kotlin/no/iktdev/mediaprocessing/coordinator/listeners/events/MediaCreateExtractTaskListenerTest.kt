@@ -151,8 +151,8 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
         Hvis språk mangler i subtitle-stream
         Når toSubtitleArgumentData kalles
         Så:
-            Returneres null
-            Ingen ExtractSubtitleData opprettes
+            Returneres args men som engelsk
+            ExtractSubtitleData opprettes
     """)
     fun testMissingLanguage() {
         val stream = dummyStream(2, "subrip", null)
@@ -160,7 +160,7 @@ class MediaCreateExtractTaskListenerTest: TestBase() {
 
         val result = listener.toSubtitleArgumentData(2, inputFile, "subby", stream)
 
-        assertNull(result)
+        assertNotNull(result)
     }
 
     @Test

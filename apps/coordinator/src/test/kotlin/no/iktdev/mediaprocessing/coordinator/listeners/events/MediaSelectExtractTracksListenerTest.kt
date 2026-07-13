@@ -1,11 +1,14 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import no.iktdev.eventi.events.EjectException
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.serialization.WGson
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.FakeCoordinatorEnv
 import no.iktdev.mediaprocessing.Files
 import no.iktdev.mediaprocessing.MockData
+import no.iktdev.mediaprocessing.TestBase.DummyEvent
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.getContent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
@@ -69,8 +72,10 @@ class MediaSelectExtractTracksListenerTest {
          Returneres null
         """)
     fun testOnEventNonSubtitleEvent() {
-        val result = listener().onEvent(DummyEvent(), emptyList())
-        assertNull(result)
+        assertThrowsExactly(SoftDispatchException.UnqualifiedEntryEventException::class.java) {
+            listener().onEvent(DummyEvent(), emptyList())
+
+        }
     }
 
 
