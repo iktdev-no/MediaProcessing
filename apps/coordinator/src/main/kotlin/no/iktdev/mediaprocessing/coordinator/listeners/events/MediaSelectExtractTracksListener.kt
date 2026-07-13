@@ -8,6 +8,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaT
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.SubtitleSelectionMode
 import org.springframework.stereotype.Component
 
@@ -20,7 +21,7 @@ class MediaSelectExtractTracksListener(
         event: Event,
         history: List<Event>
     ): Event? {
-        val useEvent = event as? MediaTracksDetermineSubtitleTypeEvent ?: return null
+        val useEvent = event.requireQualifiedEntry<MediaTracksDetermineSubtitleTypeEvent>()
 
         val pref = preference.getLanguagePreference()
 

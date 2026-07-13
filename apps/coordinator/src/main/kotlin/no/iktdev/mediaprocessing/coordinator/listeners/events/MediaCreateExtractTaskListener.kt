@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
+import no.iktdev.eventi.events.EjectException
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.MultiTaskCreatorEventListener
 import no.iktdev.eventi.models.Event
@@ -37,7 +38,10 @@ class MediaCreateExtractTaskListener(): MultiTaskCreatorEventListener(EventStore
         args += listOf("-map", "0:s:$index")
         args += codec.buildFfmpegArgs(stream)
 
-        val language = stream.tags.language?: return null
+        val language = stream.tags.language?: run {
+            log.warn("Language for $stream does not have a language tag, defalting to english - eng")
+            "eng"
+        }
 
         // outputfilnavn basert på index og extension
         val outputFileName = "${inputFile.nameWithoutExtension}-${language}.${extension}"
@@ -74,15 +78,19 @@ class MediaCreateExtractTaskListener(): MultiTaskCreatorEventListener(EventStore
         val selectedEvent = event.requireQualifiedEntry<MediaTracksExtractSelectedEvent>()
 
 
-        val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return emptyList()
+        val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?:
+            throw RuntimeException("StartProcessing event not found, which is required")
+
         if (startedEvent.data.operation.isNotEmpty()) {
-            if (!startedEvent.data.operation.contains(OperationType.ExtractSubtitles))
-                return emptyList()
+            if (startedEvent.data.operation.none { it == OperationType.ExtractSubtitles }) {
+                log.debug("Ignoring extract subtitles as its not in operations")
+                throw EjectException("Operations does not include ExtractSubtitles operation")
+            }
         }
 
         val parsedInfo = history.getInstanceOf<MediaParsedInfoEvent>()?.data?.parsedFileName ?: run {
             log.error("Unable to get parsing info, this no output directory to use. Exiting listener")
-            return emptyList()
+            throw EjectException("Parsing is not available, or output is not readable")
         }
 
 
@@ -100,7 +108,7 @@ class MediaCreateExtractTaskListener(): MultiTaskCreatorEventListener(EventStore
 
 
         val entries = selectedStreams.mapNotNull { (idx, stream )->
-            toSubtitleArgumentData(idx, preparedFile, parsedInfo ,stream,)
+            toSubtitleArgumentData(idx, preparedFile, parsedInfo, stream)
         }
 
 
@@ -117,7 +125,7 @@ class MediaCreateExtractTaskListener(): MultiTaskCreatorEventListener(EventStore
     ): MultiTaskCreatedEvent {
         val createdEvent = ProcesserExtractTaskCreatedEvent(
             taskIds = tasks.map { MultiTaskIdentity(it.taskId, onGetTaskIdentity(it)) }.toSet()
-        ).derivedOf(event) as MultiTaskCreatedEvent
+        ).derivedOf(event)
 
         return createdEvent
     }
