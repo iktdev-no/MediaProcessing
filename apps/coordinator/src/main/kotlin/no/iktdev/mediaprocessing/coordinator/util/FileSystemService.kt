@@ -21,7 +21,7 @@ sealed class FileServiceException(message: String, cause: Throwable? = null) : R
         FileServiceException("Source file does not exist: ${source.absolutePath}")
 
     class DestinationExistsButDifferent(val source: IFile, val destination: IFile) :
-        FileServiceException("Destination exists but differs: ${destination.absolutePath}")
+        FileServiceException("Destination exists but differs: ${destination.absolutePath}, source file: ${source.absolutePath}")
 
     class CopyFailed(val source: IFile, val destination: IFile, cause: Throwable?) :
         FileServiceException("Failed to copy ${source.absolutePath} → ${destination.absolutePath}", cause)

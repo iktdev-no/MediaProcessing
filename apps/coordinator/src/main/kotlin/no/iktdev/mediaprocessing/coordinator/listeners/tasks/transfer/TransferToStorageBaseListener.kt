@@ -49,6 +49,7 @@ abstract class TransferToStorageBaseListener(val deleteSourceAfterVerify: Boolea
                     throw FileServiceException.FilesAreIdentical(src, dst)
                 }
             } catch (e: FileServiceException.VerificationFailed) {
+                e.printStackTrace()
                 throw FileServiceException.DestinationExistsButDifferent(src, dst)
             }
         }

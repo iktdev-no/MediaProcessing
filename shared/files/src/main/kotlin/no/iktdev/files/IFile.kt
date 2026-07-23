@@ -104,7 +104,6 @@ interface IFile {
 
     fun toXxHash(): FileHash {
         val factory = XXHashFactory.nativeInstance()
-        val hasher = factory.hash64()
 
         // Merk: XXH3 er enklest å bruke på hele bytes,
         // men for strømming bruker vi en 'streaming' hasher:

@@ -51,3 +51,6 @@ bin/
 /apps/py-watcher/venv/
 /apps/py-metadata/.cache
 /tmp
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/**
+
