@@ -49,5 +49,5 @@ export function patchTaskOverride(
 
 
 export function patchTaskIgnore(taskId: string, opts?: { onError?: (status: number, body: any) => void }) {
-  return apiPatch<null, IgnoredTaskResponse>(`/task/${taskId}/ignore`, null)
+  return apiPatch<null, IgnoredTaskResponse>(`/tasks/${taskId}/ignore`, null)
 }
