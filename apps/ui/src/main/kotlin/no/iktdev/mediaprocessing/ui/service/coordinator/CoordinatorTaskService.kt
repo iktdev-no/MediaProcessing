@@ -89,7 +89,7 @@ class CoordinatorTaskService(
     }
 
     fun ignoreTask(taskId: UUID): Mono<IgnoredTaskResponse> =
-        coordinatorWebClient.get()
+        coordinatorWebClient.patch()
             .uri("/tasks/${taskId}/ignore")
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<IgnoredTaskResponse>() {})
