@@ -61,7 +61,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         if (includeVideo) {
             results += VideoTransferredResultEvent(
-                fileUri = "store:///video.mp4",
+                fileUri = "store:///content/Baking Bread/Baking Bread - S01E01 - Flour.mp4",
                 collection = "Baking Bread",
                 status = TaskStatus.Completed,
                 error = null
@@ -72,7 +72,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         if (includeCover) {
             results += CoverTransferredResultEvent(
-                fileUri = "store:///cover.jpg",
+                fileUri = "store:///content/Baking Bread/Baking Bread.jpg",
                 collection = "Baking Bread",
                 status = TaskStatus.Completed,
                 error = null
@@ -83,7 +83,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         subtitles.forEach { lang ->
             results += SubtitleTransferredResultEvent(
-                fileUri = "store:///sub-$lang.ass",
+                fileUri = "store:///content/Baking Bread/sub/eng/Baking Bread - S01E01 - Flour.vtt",
                 collection = "Baking Bread",
                 language = lang,
                 status = TaskStatus.Completed,
@@ -181,20 +181,20 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
     @Test
     fun createsTaskWhenOnlySubtitlesTransferred() {
 
-        val workFolder = IFile("build").using("subby", "sub", "eng")
+        val workFolder = IFile("build").using("Baking Bread", "sub", "eng")
 
         val started = StartProcessingEvent(
             data = StartData(
                 operation = setOf(OperationType.ConvertSubtitles),
                 flow = StartFlow.Manual,
-                fileUri = workFolder.using("subby.srt").absolutePath,
+                fileUri = workFolder.using("Baking Bread - S01E01 - Flour.ass").absolutePath,
             )
         ).newReferenceId().addToHistory()
 
         val convert = convertEvent(
             language = "eng",
-            baseName = "subby",
-            outputFiles = listOf(workFolder.using("subby.vtt").absolutePath),
+            baseName = "Baking Bread - S01E01 - Flour",
+            outputFiles = listOf(workFolder.using("Baking Bread - S01E01 - Flour.vtt").absolutePath),
             derivedFrom = started
         ).addToHistory()
 
@@ -232,9 +232,9 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         val storeTask = slot.captured
 
-        assertThat(storeTask.data.collection).isEqualTo("subby")
+        assertThat(storeTask.data.collection).isEqualTo("Baking Bread")
         assertThat(storeTask.data.media?.videoFile).isNull()
-        assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("subby.vtt")
+        assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("Baking Bread - S01E01 - Flour.vtt")
         assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("eng")
         assertThat(storeTask.data.metadata).isNull()
     }

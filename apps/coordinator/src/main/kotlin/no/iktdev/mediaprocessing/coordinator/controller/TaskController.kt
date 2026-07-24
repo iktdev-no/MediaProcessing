@@ -2,16 +2,15 @@ package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressManagerService
-import no.iktdev.mediaprocessing.coordinator.services.ProgressTranslatorService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.coordinator.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
+import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.dto.map
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
-import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import org.springframework.http.HttpStatus
@@ -103,6 +102,30 @@ class TaskController(
         return Mono.just(taskService.setTaskOverrides(taskId, overrides))
     }
 
+    @PatchMapping("/{taskId}/ignore")
+    fun setTaskIgnore(@PathVariable taskId: UUID): ResponseEntity<IgnoredTaskResponse> {
+        val task = taskService.getTaskById(taskId)
+            ?: return ResponseEntity.notFound().build()
+
+        val referenceId = task.referenceId
+        if (eventService.isSequenceDeleted(referenceId)) {
+            return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build()
+        }
+
+        val success = eventService.deleteTaskResultForIgnore(referenceId, taskId)
+        val fullyUpdated = taskService.markTaskAsSkipped(taskId)
+
+        return ResponseEntity.ok(
+            IgnoredTaskResponse(
+                taskId = taskId,
+                referenceId = referenceId,
+                skipped = success != null && fullyUpdated,
+                deletedEventId = success?.first,
+                skippedEventId = success?.second,
+                ignoredAt = UtcNow()
+            )
+        )
+    }
 
     @GetMapping("/{taskId}/reset/force")
     fun resetTaskForce(@PathVariable taskId: UUID): ResponseEntity<ResetTaskResponse> {

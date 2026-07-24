@@ -1,15 +1,15 @@
 import type { JSX } from "@emotion/react/jsx-runtime";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import {
-    Box,
-    Button,
-    Dialog,
-    DialogContent,
-    IconButton,
-    Typography,
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { patchTaskOverride } from "../../api/coordinator/tasks";
+import { patchTaskIgnore, patchTaskOverride } from "../../api/coordinator/tasks";
 import type { UiTask } from "../../types/types";
 import { JsonViewer } from "../JsonViewer";
 import { ProcesserLogDialog } from "../ProcesserLogDialog";
@@ -70,6 +70,11 @@ export function TaskDetailsDialog({
     await patchTaskOverride(task.taskId, overrideName);
     onClose(); // reload via parent
   };
+
+  const handleIngore = async () => {
+    await patchTaskIgnore(task.taskId);
+    onClose();
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xl" fullWidth>

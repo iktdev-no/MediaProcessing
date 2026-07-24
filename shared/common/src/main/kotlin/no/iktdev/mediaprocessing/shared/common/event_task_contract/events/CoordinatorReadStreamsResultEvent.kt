@@ -8,4 +8,8 @@ class CoordinatorReadStreamsResultEvent(
     val data: JsonObject? = null,
     status: TaskStatus,
     error: String? = null
-) : TaskResultEvent(status, error)
+) : TaskResultEvent(status, error) {
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return CoordinatorReadStreamsResultEvent(data, ns, error).from(this)
+    }
+}

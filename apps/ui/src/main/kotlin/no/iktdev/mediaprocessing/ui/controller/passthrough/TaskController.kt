@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
+import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
@@ -70,6 +71,19 @@ class TaskController(
     @PatchMapping("/{taskId}/override")
     fun setTaskOverrides(@PathVariable taskId: UUID, @RequestBody overrides: List<String>): Mono<Void> {
         return coordinator.setTaskOverrides(taskId, overrides)
+    }
+
+    @PatchMapping("/{taskId}/ignore")
+    fun setTaskIgnore(@PathVariable taskId: UUID): Mono<ResponseEntity<IgnoredTaskResponse>> {
+        return coordinator.ignoreTask(taskId)
+            .map { ResponseEntity.ok(it) }
+            .onErrorResume(WebClientResponseException::class.java) { ex ->
+                if (ex.statusCode == HttpStatus.CONFLICT) {
+                    Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).build())
+                } else {
+                    Mono.error(ex)
+                }
+            }
     }
 
     @GetMapping("/active")

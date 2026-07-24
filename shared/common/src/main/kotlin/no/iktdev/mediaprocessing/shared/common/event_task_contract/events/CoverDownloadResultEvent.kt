@@ -10,7 +10,7 @@ class CoverDownloadResultEvent(
     val data: CoverDownloadedData? = null,
     status: TaskStatus,
     error: String? = null
-) : TaskResultEvent(status, error){
+) : TaskResultEvent(status, error) {
     data class CoverDownloadedData(
         val source: String,
         val outputFile: String? = null,
@@ -23,6 +23,10 @@ class CoverDownloadResultEvent(
             return if (downloadedCover != null) downloadedCover.deconstruct() else
                 IFile(outputFile!!) to null
         }
+    }
+
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return CoverDownloadResultEvent(data, ns, error).from(this)
     }
 
 }

@@ -3,12 +3,14 @@ package no.iktdev.mediaprocessing.shared.database.stores
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.WGson
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeleteSequenceEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedEvent
@@ -167,14 +169,41 @@ object EventStore: EventStore {
         }
     }
 
+    fun persist(vararg events: Event) {
+        if (isDryMode) {
+            log.warn("Events ${events.map { "${it.referenceId}@${it.eventId}" }.joinToString(",")} will not be persisted as its in dry mode.")
+            return
+        }
 
-    fun deleteFailedEventForTask(referenceId: UUID, taskId: UUID): UUID? {
+        withTransaction {
+            events.forEach { event ->
+                val referenceId = event.referenceId.toString()
+                val asData = WGson.toJson(event)
+                val eventName = event::class.simpleName ?: run {
+                    throw RuntimeException("Missing class name for event: $event")
+                }
+                EventsTable.insert {
+                    it[EventsTable.referenceId] = referenceId
+                    it[EventsTable.eventId] = event.eventId.toString()
+                    it[EventsTable.event] = eventName
+                    it[EventsTable.data] = asData
+                    it[EventsTable.persistedAt] = UtcNow()
+                }
+            }
+        }
+    }
+
+    private fun getEventSequence(referenceId: UUID): List<Event> {
         val sequenceEvents = withTransaction {
             EventsTable.getWhere {
                 EventsTable.referenceId eq referenceId.toString()
             }
         }.getOrDefault(emptyList())
-        val serialized = sequenceEvents.map { it.toEvent() }
+        return sequenceEvents.mapNotNull { it.toEvent() }
+    }
+
+    fun deleteFailedEventForTask(referenceId: UUID, taskId: UUID): UUID? {
+        val serialized = getEventSequence(referenceId)
         val targetedEvent = serialized.find { it?.metadata?.derivedFromId?.any { uUID -> uUID == taskId } == true }
         if (targetedEvent == null) {
             log.error { "TaskId $taskId does not exist within the metadata of any events within the scope of $referenceId" }
@@ -187,6 +216,29 @@ object EventStore: EventStore {
         }
         return null
     }
+
+    fun deleteFailedTaskResultAndCreateIgnore(referenceId: UUID, taskId: UUID): Pair<UUID, UUID>? {
+        val serialized = getEventSequence(referenceId)
+        val targetedEvent = serialized.find { it.metadata.derivedFromId?.any { uUID -> uUID == taskId } == true }
+        when (targetedEvent) {
+            null -> {
+                log.error { "TaskId $taskId does not exist within the metadata of any events within the scope of $referenceId" }
+            }
+            !is TaskResultEvent -> {
+                log.error { "Event is not a type of TaskResultEvent ${targetedEvent.eventId}" }
+            }
+            else -> {
+                log.info { "Identified ${targetedEvent.eventId} in ${targetedEvent.referenceId} as being derived from $taskId" }
+                val preparedDeleteEvent = DeletedTaskResultEvent(targetedEvent.eventId)
+                    .apply { usingReferenceId(targetedEvent.referenceId) }
+                val newSkippedReference = targetedEvent.newStatus(TaskStatus.Skipped)
+                persist(preparedDeleteEvent, newSkippedReference)
+                return preparedDeleteEvent.eventId to newSkippedReference.eventId
+            }
+        }
+        return null
+    }
+
 
     fun createTaskResetAuditEvent(referenceId: UUID, taskId: UUID): UUID {
         val auditEvent = ForcedTaskResetAuditEvent(taskId)

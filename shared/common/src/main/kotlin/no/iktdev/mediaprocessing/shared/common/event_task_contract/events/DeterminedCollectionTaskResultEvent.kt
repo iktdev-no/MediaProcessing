@@ -8,5 +8,7 @@ class DeterminedCollectionTaskResultEvent(
     error: String? = null,
     val collection: String?
 ): TaskResultEvent(status, error) {
-
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return DeterminedCollectionTaskResultEvent(ns, error, collection).from(this)
+    }
 }

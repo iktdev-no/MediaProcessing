@@ -13,6 +13,10 @@ class MetadataSearchResultEvent(
     error: String? = null
 ) : TaskResultEvent(status, error) {
 
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return MetadataSearchResultEvent(results, recommended, ns, error).from(this)
+    }
+
     data class SearchResult(
         val searchTitles: List<String>,
         val similarity: Int,

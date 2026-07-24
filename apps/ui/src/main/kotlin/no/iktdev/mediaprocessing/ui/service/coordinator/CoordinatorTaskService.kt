@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.ui.service.coordinator
 
 import mu.KotlinLogging
+import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
@@ -86,4 +87,10 @@ class CoordinatorTaskService(
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<Boolean>() {})
     }
+
+    fun ignoreTask(taskId: UUID): Mono<IgnoredTaskResponse> =
+        coordinatorWebClient.get()
+            .uri("/tasks/${taskId}/ignore")
+            .retrieve()
+            .bodyToMono(object : ParameterizedTypeReference<IgnoredTaskResponse>() {})
 }

@@ -11,6 +11,10 @@ class ConvertTaskResultEvent(
     status: TaskStatus,
     error: String? = null,
 ): TaskResultEvent(status, error) {
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return ConvertTaskResultEvent(data, ns, error).from(this)
+    }
+
     data class ConvertedData(
         val language: String,
         val baseName: String,

@@ -26,4 +26,8 @@ class ProcesserExtractResultEvent(
                 IFile(cachedOutputFile!!) to null
         }
     }
+
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return ProcesserExtractResultEvent(data, ns, error, logFile).from(this)
+    }
 }

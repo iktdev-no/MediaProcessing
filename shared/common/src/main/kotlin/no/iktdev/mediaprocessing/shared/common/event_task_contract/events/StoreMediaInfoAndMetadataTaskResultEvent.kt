@@ -6,5 +6,8 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEve
 class StoreMediaInfoAndMetadataTaskResultEvent(
     status: TaskStatus,
     error: String? = null
-) : TaskResultEvent(status, error){
+) : TaskResultEvent(status, error) {
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return StoreMediaInfoAndMetadataTaskResultEvent(ns, error).from(this)
+    }
 }

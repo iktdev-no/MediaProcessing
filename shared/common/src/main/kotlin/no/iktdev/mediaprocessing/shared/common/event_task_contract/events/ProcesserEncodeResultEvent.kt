@@ -25,4 +25,8 @@ class ProcesserEncodeResultEvent(
             return encodedOutputFile?.deconstruct() ?: (IFile(cachedOutputFile!!) to null)
         }
     }
+
+    override fun newStatus(ns: TaskStatus): TaskResultEvent {
+        return ProcesserEncodeResultEvent(data, logFile, ns, error).from(this)
+    }
 }

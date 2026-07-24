@@ -59,6 +59,10 @@ class EventService {
         return EventStore.deleteFailedEventForTask(referenceId, taskId)
     }
 
+    fun deleteTaskResultForIgnore(referenceId: UUID, taskId: UUID): Pair<UUID, UUID>? {
+        return EventStore.deleteFailedTaskResultAndCreateIgnore(referenceId, taskId)
+    }
+
     fun createForcedTaskResetAuditEvent(referenceId: UUID, taskId: UUID): UUID? {
         return EventStore.createTaskResetAuditEvent(referenceId, taskId)
     }

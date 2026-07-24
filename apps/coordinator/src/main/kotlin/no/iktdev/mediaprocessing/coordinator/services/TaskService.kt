@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.coordinator.services
 
 import mu.KotlinLogging
 import no.iktdev.eventi.models.store.PersistedTask
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
@@ -41,6 +42,10 @@ class TaskService(
 
     fun getFailedTasks(): List<PersistedTask> {
         return getNonDeleted(TaskStore.getFailedTasks())
+    }
+
+    fun markTaskAsSkipped(taskId: UUID): Boolean {
+        return TaskStore.markConsumed(taskId, TaskStatus.Skipped)
     }
 
     private fun getNonDeleted(tasks: List<PersistedTask>): List<PersistedTask> {

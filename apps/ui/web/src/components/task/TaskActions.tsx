@@ -1,10 +1,11 @@
 import ReplayIcon from "@mui/icons-material/Replay";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { resetFailedTask } from "../../api/coordinator/tasks";
+import { patchTaskIgnore, resetFailedTask } from "../../api/coordinator/tasks";
 import type { UiTask } from "../../types/types";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export function TaskActions({
   task,
@@ -13,6 +14,7 @@ export function TaskActions({
   task: UiTask;
   reload: () => void;
 }) {
+  const theme = useTheme()
   const [forceMode, setForceMode] = useState(false);
 
   // Task status from backend is "Failed" (capital F)
@@ -47,8 +49,20 @@ export function TaskActions({
     }
   };
 
+  const handleIgnore = async () => {
+    try {
+      const response = await patchTaskIgnore(task.taskId)
+      if (response.skippedEventId) {
+        toast.success("Replaced result with skipp..");
+      }
+      reload();
+    } catch {
+      toast.error("Force reset failed");
+    }
+  }
+
   return (
-    <Box sx={{ mt: 3 }}>
+    <Box sx={{ mt: 3, display: "flex", flexDirection: "row", gap: 4 }}>
       {!forceMode && (
         <Button
           variant="contained"
@@ -75,6 +89,11 @@ export function TaskActions({
           </Button>
         </Box>
       )}
+      <Button variant="outlined" color="secondary"
+        onClick={handleIgnore}
+        startIcon={<VisibilityOffIcon />}>
+        Ignore
+      </Button>
     </Box>
   );
 }

@@ -41,6 +41,15 @@ export interface ResetTaskResponse {
     resetAt: string
 }
 
+export interface IgnoredTaskResponse {
+    taskId: string
+    referenceId: string,
+    deletedEventId?: string,
+    skippedEventId?: string,
+    reset: boolean,
+    resetAt: string
+}
+
 export interface LineageTreeNode extends LineageNode {
     children: LineageTreeNode[];
 }

@@ -1,5 +1,6 @@
 import type { Progress } from "../../types/transfer-model";
 import type {
+  IgnoredTaskResponse,
   PagedUiTask,
   ResetTaskResponse,
   TaskQuery,
@@ -44,4 +45,9 @@ export function patchTaskOverride(
     [overrideName],
     opts,
   );
+}
+
+
+export function patchTaskIgnore(taskId: string, opts?: { onError?: (status: number, body: any) => void }) {
+  return apiPatch<null, IgnoredTaskResponse>(`/task/${taskId}/ignore`, null)
 }
