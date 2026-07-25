@@ -101,6 +101,6 @@ async def process_task(db, task: MetadataSearchTask) -> MetadataSearchResultEven
         return event
 
     except Exception as e:
-        logger.error(f"❌ Task {task.taskId} feilet: {e}")
+        logger.exception(f"❌ Task {task.taskId} feilet: {e}")
         mark_failed(db, task.taskId)
         return None

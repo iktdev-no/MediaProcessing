@@ -57,7 +57,7 @@ def run_iteration(
                     raise RuntimeError("process_task returned nothing!")
 
             except Exception as task_error:
-                logger.error(f"❌ Task {task.taskId} feilet: {task_error}")
+                logger.exception(f"❌ Task {task.taskId} feilet: {task_error}")
                 mark_failed(db, str(task.taskId))
                 heartbeat_ref(time.time(), in_backoff=False, error=str(task_error))
 
