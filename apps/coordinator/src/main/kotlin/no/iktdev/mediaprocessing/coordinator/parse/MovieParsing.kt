@@ -22,6 +22,7 @@ class MovieParsing : BaseParsing() {
         return base.fullTrim()
     }
 
+
     override fun extractFilename(file: IFile): String {
         val raw = file.nameWithoutExtension
         val collection = extractCollection(file)

@@ -108,7 +108,10 @@ class SerieParsing : BaseParsing() {
     }
 
     override fun extractCollection(file: IFile): String {
+        return sharedCollectionExtractor(file).ifBlank { extractCollectionFromContainingFolder(file) }
+    }
 
+    fun sharedCollectionExtractor(file: IFile): String {
         val raw = file.nameWithoutExtension
 
         val seMatch = seasonEpisodeRegex.find(raw)
@@ -130,7 +133,11 @@ class SerieParsing : BaseParsing() {
 
         val cleaned = noYearInParens.cleanBasic()
 
-        return cleaned.fullTrim().ifBlank { file.parentFile.name }
+        return cleaned.fullTrim()
+    }
+
+    fun extractCollectionFromContainingFolder(file: IFile): String {
+        return sharedCollectionExtractor(file.parentFile)
     }
 
     override fun extractFilename(file: IFile): String {
