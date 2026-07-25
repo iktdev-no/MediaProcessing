@@ -20,7 +20,7 @@ class SerieParsing : BaseParsing() {
     private val animeEpisodeRegex = Regex("""(?<!\d)(\d{1,3})(?:v\d+)?(?=[\s\]\-]|$)""", RegexOption.IGNORE_CASE)
 
     override fun extractEpisodeInfo(file: IFile): MediaParsedInfoEvent.ParsedData.EpisodeInfo {
-        val raw = file.nameWithoutExtension
+        val raw = file.nameWithoutExtension.cleanNoise()
 
         // -----------------------------------------------------
         // Case 1: 1x02
@@ -112,7 +112,7 @@ class SerieParsing : BaseParsing() {
     }
 
     fun sharedCollectionExtractor(file: IFile): String {
-        val raw = file.nameWithoutExtension
+        val raw = file.nameWithoutExtension.cleanNoise()
 
         val seMatch = seasonEpisodeRegex.find(raw)
         val seasonMatch = seasonRegex.find(raw)
@@ -173,5 +173,12 @@ class SerieParsing : BaseParsing() {
             numberInTitle -> listOf(collection)
             else -> listOf(collection)
         }
+    }
+
+    private fun String.cleanNoise(): String {
+        return this.replace(Regex("""\[[^\]]*]"""), " ") // Fjerner alt i ecklammer [...]
+            .replace(Regex("""\([^)]*\)"""), " ") // Fjerner alt i parenteser (...)
+            .replace(Regex("""\s+"""), " ")
+            .trim()
     }
 }

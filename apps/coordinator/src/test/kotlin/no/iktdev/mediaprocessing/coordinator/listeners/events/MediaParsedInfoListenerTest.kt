@@ -289,6 +289,16 @@ class MediaParsedInfoListenerTest : TestBase() {
         )
     }
 
+    @Test
+    fun `Noisy Filename`() {
+        assertParsedInfo(
+            file = IFile("store///completed/Master Potato The First [TV-1] [2030] [BDRip] [1080p] [RUS + JAP + ENG]/Master Potato The First - 01 (BDRip 1920x1080 HEVC FLAC Rus + Jap + Eng).mkv"),
+            expectedCollection = "Master Potato The First",
+            expectedFileName = "Master Potato The First - S01E01",
+            expectedSearchTitles = listOf("Master Potato The First")
+        )
+    }
+
 
     // ==========================================
     // DEL 2: Parse Video Type tester (Individuelle)
