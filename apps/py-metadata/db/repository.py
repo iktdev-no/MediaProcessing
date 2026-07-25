@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID
 from db.database import Database
 from models.enums import TaskStatus
@@ -61,11 +61,14 @@ def fetch_next_task(db: Database) -> Optional[MetadataSearchTask]:
 
 
 
-def mark_failed(db: Database, task_id: str) -> None:
+def mark_failed(db: Database, task_id: Union[UUID, str]) -> None:
+    # Konverterer uansett om det er et UUID-objekt eller allerede en streng
+    task_id_str = str(task_id)
+    
     cursor = db.conn.cursor()
     cursor.execute(
         "UPDATE TASKS SET STATUS='Failed', CLAIMED=1, CONSUMED=1 WHERE TASK_ID=%s",
-        (task_id,)
+        (task_id_str,)
     )
     db.conn.commit()
 

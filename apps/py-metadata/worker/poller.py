@@ -58,7 +58,7 @@ def run_iteration(
 
             except Exception as task_error:
                 logger.exception(f"❌ Task {task.taskId} feilet: {task_error}")
-                mark_failed(db, str(task.taskId))
+                mark_failed(db, task.taskId)
                 heartbeat_ref(time.time(), in_backoff=False, error=str(task_error))
 
             return poll_interval, 5
