@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class Imdb(SourceBase):
     def __init__(self, titles: List[str]) -> None:
         super().__init__(titles)
-        self.api = Cinemagoer(accessSystem="http")
+        self.api = Cinemagoer(accessSystem='http')
 
     @property
     def name(self) -> str:

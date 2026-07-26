@@ -12,6 +12,9 @@ from models.event import (
     SearchResult,
     TaskStatus,
 )
+from models.task import (
+    Metadata as TaskMetadata
+)
 from worker.search_runner import run_search
 from db.repository import mark_failed
 from tests.fakes.fake_db import FakeDB
@@ -118,10 +121,14 @@ async def dry_run():
         persistedAt=utc_now(),
         data=MetadataSearchData(
             searchTitles=[
-                "The Wrecking Crew",
+                "Re Zero kara Hajimeru Isekai Seikatsu",
             ],
-            collection="Crew",
-            mediaType="Movie"
+            collection="Re Zero kara Hajimeru Isekai Seikatsu",
+            mediaType="Serie"
+        ),
+        metadata=TaskMetadata(
+            derivedFromId=[],
+            created=utc_now()
         )
     )
 
