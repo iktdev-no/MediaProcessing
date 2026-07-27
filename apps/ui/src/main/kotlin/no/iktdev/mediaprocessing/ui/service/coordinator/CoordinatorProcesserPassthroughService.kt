@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.ui.service.coordinator
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
+import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono

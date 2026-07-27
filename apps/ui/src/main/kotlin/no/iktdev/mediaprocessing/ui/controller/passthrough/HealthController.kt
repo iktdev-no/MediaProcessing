@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorHealth
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DiskInfo
+import no.iktdev.mediaprocessing.shared.common.dto.DiskInfo
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.EventRate
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorHealthService
 import org.springframework.web.bind.annotation.GetMapping

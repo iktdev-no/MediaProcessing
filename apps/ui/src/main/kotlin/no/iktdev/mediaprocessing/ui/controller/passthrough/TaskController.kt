@@ -2,10 +2,9 @@ package no.iktdev.mediaprocessing.ui.controller.passthrough
 
 import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
-import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
-import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
-import no.iktdev.mediaprocessing.ui.dto.UiTask
+import no.iktdev.mediaprocessing.shared.common.dto.query.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.dto.progress.Progress
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.UiTask
 import no.iktdev.mediaprocessing.ui.dto.Paginated
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorTaskService
 import org.springframework.http.HttpStatus
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -36,6 +34,10 @@ class TaskController(
     fun getTasks(query: TaskQuery): Mono<Paginated<UiTask>> {
         return coordinator.getPagedTasks(query)
     }
+
+    @GetMapping("/by-reference/{referenceId}")
+    fun getTasks(@PathVariable referenceId: UUID) = coordinator.getTasks(referenceId)
+
 
     @GetMapping("/{taskId}/cancel")
     fun cancelTask(@PathVariable taskId: UUID): Mono<Boolean> {

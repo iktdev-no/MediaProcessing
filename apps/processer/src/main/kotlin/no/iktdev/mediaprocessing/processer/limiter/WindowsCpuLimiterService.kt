@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.processer.limiter
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.WindowsCpuLimitSupport
+import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport
+import no.iktdev.mediaprocessing.shared.common.dto.WindowsCpuLimitSupport
 
 class WindowsCpuLimiterService : CpuLimiterService {
 

@@ -1,9 +1,9 @@
 package no.iktdev.mediaprocessing.ui.service.coordinator
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.MediaPreference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono

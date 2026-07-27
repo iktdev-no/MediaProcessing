@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.InputFileInfo
+import no.iktdev.mediaprocessing.shared.common.dto.InputFileInfo
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorEventService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping

@@ -5,7 +5,7 @@ import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import no.iktdev.mediaprocessing.coordinator.dto.LogAssociatedIds
 import no.iktdev.mediaprocessing.coordinator.toDto
-import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry

@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.processer.limiter
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
+import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport
 
 interface CpuLimiterService {
     fun limitProcess(pid: Long, percent: Int)

@@ -4,12 +4,12 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.InstanceCreator
 import com.google.gson.JsonSyntaxException
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CleanupPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CleanupPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.VideoPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioPreference
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,15 +17,16 @@ class Preference(
     private val coordinatorEnv: CoordinatorEnv
 ) {
 
-    private fun defaultConfig() = CoordinatorPreference(
-        media = MediaPreference.default(),
-        language = LanguagePreference.default(),
-        cleanup = CleanupPreference.default()
-    )
+    private fun defaultConfig() =
+        _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference(
+            media = _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.MediaPreference.default(),
+            language = _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference.default(),
+            cleanup = _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CleanupPreference.default()
+        )
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(
-            CoordinatorPreference::class.java,
+            _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference::class.java,
             InstanceCreator { defaultConfig() }
         )
         .create()
@@ -35,7 +36,7 @@ class Preference(
     // FULL CONFIG
     // ------------------------------------------------------------
 
-    fun getFullConfig(): CoordinatorPreference {
+    fun getFullConfig(): no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference {
         val file = coordinatorEnv.preference
 
         if (!file.exists()) {

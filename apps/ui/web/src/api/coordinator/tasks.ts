@@ -18,9 +18,9 @@ export function resetFailedTask(
   opts?: { onError?: (status: number, body: any) => void },
 ) {
   if (force) {
-    return apiGet<ResetTaskResponse>(`/tasks/${taskId}/reset/force`, opts);
+    return apiGet<ResetTaskResponse>(`/tasks/taskid/${taskId}/reset/force`, opts);
   } else {
-    return apiGet<ResetTaskResponse>(`/tasks/${taskId}/reset`, opts);
+    return apiGet<ResetTaskResponse>(`/tasks/taskid/${taskId}/reset`, opts);
   }
 }
 
@@ -32,7 +32,7 @@ export function cancelTask(
   taskId: string,
   opts?: { onError?: (status: number, body: any) => void },
 ) {
-  return apiGet<boolean>(`/tasks/${taskId}/cancel`, opts);
+  return apiGet<boolean>(`/tasks/taskid/${taskId}/cancel`, opts);
 }
 
 export function patchTaskOverride(
@@ -41,7 +41,7 @@ export function patchTaskOverride(
   opts?: { onError?: (status: number, body: any) => void },
 ) {
   return apiPatch<string[], any>(
-    `/tasks/${taskId}/override`,
+    `/tasks/taskid/${taskId}/override`,
     [overrideName],
     opts,
   );
@@ -49,5 +49,5 @@ export function patchTaskOverride(
 
 
 export function patchTaskIgnore(taskId: string, opts?: { onError?: (status: number, body: any) => void }) {
-  return apiPatch<null, IgnoredTaskResponse>(`/tasks/${taskId}/ignore`, null)
+  return apiPatch<null, IgnoredTaskResponse>(`/tasks/taskid/${taskId}/ignore`, null)
 }

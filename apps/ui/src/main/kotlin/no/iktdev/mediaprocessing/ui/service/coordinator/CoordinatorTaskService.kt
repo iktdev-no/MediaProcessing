@@ -3,11 +3,11 @@ package no.iktdev.mediaprocessing.ui.service.coordinator
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
-import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.TaskQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
+import no.iktdev.mediaprocessing.shared.common.dto.progress.Progress
 import no.iktdev.mediaprocessing.ui.dto.Paginated
-import no.iktdev.mediaprocessing.ui.dto.UiTask
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.UiTask
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -39,6 +39,13 @@ class CoordinatorTaskService(
                     total = paginatedDto.total
                 )
             }
+
+    fun getTasks(referenceId: UUID): Mono<List<UiTask>> =
+        coordinatorWebClient.get()
+            .uri("/tasks/by-reference/${referenceId}")
+            .retrieve()
+            .bodyToMono(object: ParameterizedTypeReference<List<CoordinatorTaskDto>>() {})
+            .map { it.map { x -> UiTask.from(x) } }
 
 
     fun getActiveTasks(): Mono<List<UiTask>> =
@@ -90,7 +97,7 @@ class CoordinatorTaskService(
 
     fun ignoreTask(taskId: UUID): Mono<IgnoredTaskResponse> =
         coordinatorWebClient.patch()
-            .uri("/tasks/${taskId}/ignore")
+            .uri("/tasks/taskid/${taskId}/ignore")
             .retrieve()
             .bodyToMono(object : ParameterizedTypeReference<IgnoredTaskResponse>() {})
 }

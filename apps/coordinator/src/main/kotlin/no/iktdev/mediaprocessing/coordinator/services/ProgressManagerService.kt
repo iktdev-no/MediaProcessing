@@ -1,7 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.services
 
+import no.iktdev.mediaprocessing.shared.common.dto.progress.Progress
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
 

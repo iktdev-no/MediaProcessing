@@ -9,7 +9,7 @@ import no.iktdev.eventi.stores.TaskStore
 import no.iktdev.eventi.tasks.GlobalTaskPolicy
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
-import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.TaskQuery
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
@@ -18,12 +18,7 @@ import no.iktdev.mediaprocessing.shared.database.tables.TasksTable
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
-import org.springframework.stereotype.Component
-import java.lang.ScopedValue.where
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.toJavaDuration

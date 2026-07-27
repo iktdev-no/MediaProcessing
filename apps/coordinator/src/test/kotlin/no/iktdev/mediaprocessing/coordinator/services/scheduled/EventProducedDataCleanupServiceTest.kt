@@ -14,13 +14,11 @@ import no.iktdev.mediaprocessing.coordinator.services.FileInfoService
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedCacheDeletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.Retention
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.FlowTypes
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.Retention
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.RetentionUnit
 import no.iktdev.mediaprocessing.withCreatedAt
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,6 +30,8 @@ import java.time.temporal.ChronoUnit
 import io.mockk.*
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.FlowTypes
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.RetentionUnit
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
@@ -274,7 +274,7 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
     )
     fun startCleanupDeletesOnlyAuto() {
         every { preference.getCleanupPreference().cacheCleanupPreference.enabled } returns true
-        every { preference.getCleanupPreference().cacheCleanupPreference.retention } returns Retention(
+        every { preference.getCleanupPreference().cacheCleanupPreference.retention } returns no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.Retention(
             1,
             RetentionUnit.Hours
         )
@@ -337,7 +337,10 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
     )
     fun startCleanupDeletesOnlyManual() {
         every { preference.getCleanupPreference().cacheCleanupPreference.enabled } returns true
-        every { preference.getCleanupPreference().cacheCleanupPreference.retention } returns Retention(1, RetentionUnit.Hours)
+        every { preference.getCleanupPreference().cacheCleanupPreference.retention } returns no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.Retention(
+            1,
+            RetentionUnit.Hours
+        )
         every { preference.getCleanupPreference().cacheCleanupPreference.flows } returns FlowTypes.Manual
 
         // Auto

@@ -1,14 +1,14 @@
 package no.iktdev.mediaprocessing.ui.service.coordinator
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.EventQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorEventDto
 import no.iktdev.mediaprocessing.ui.dto.Paginated
-import no.iktdev.mediaprocessing.ui.dto.UiEvent
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.UiEvent
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultFailure
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResultSuccess
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.InputFileInfo
+import no.iktdev.mediaprocessing.shared.common.dto.InputFileInfo
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service

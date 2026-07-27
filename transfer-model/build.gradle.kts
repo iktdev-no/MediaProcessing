@@ -32,7 +32,7 @@ dependencies {
     // Logging, gson, org.json, coroutines → kommer fra root
 }
 
-tasks.register("generateTs") {
+/*tasks.register("generateTs") {
     dependsOn("build")
     doLast {
         val classesDir = file("$projectDir/build/classes/kotlin/main")
@@ -44,12 +44,8 @@ tasks.register("generateTs") {
             classLoader = cl
         )
     }
-}
+}*/
 
-
-tasks.named("build") {
-    finalizedBy("generateTs")
-}
 
 tasks.test {
     useJUnitPlatform()

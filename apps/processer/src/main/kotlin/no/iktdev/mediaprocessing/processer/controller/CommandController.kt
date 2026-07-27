@@ -2,8 +2,8 @@ package no.iktdev.mediaprocessing.processer.controller
 
 import no.iktdev.mediaprocessing.processer.models.ProcessEntry
 import no.iktdev.mediaprocessing.processer.services.ProcessService
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
+import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
+import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport
 import org.springframework.boot.actuate.health.HealthEndpoint
 import org.springframework.boot.actuate.health.Status
 import org.springframework.http.HttpStatus

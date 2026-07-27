@@ -1,13 +1,12 @@
 package no.iktdev.mediaprocessing.coordinator
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.ProcessCoreInfo
+import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
+import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport
+import no.iktdev.mediaprocessing.shared.common.dto.ProcessCoreInfo
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.ProcessEntry
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import java.util.UUID
 import kotlin.jvm.java

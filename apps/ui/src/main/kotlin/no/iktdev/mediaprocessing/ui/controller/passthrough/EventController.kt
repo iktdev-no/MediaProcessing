@@ -1,10 +1,10 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
-import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.EventQuery
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DeleteResult
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LineageNode
 import no.iktdev.mediaprocessing.ui.dto.Paginated
-import no.iktdev.mediaprocessing.ui.dto.UiEvent
+import no.iktdev.mediaprocessing.transferModel.coordinatorUi.UiEvent
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorEventService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping

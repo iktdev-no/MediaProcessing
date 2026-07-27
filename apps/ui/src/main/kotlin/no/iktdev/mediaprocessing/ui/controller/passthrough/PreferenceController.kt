@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.MediaPreference
 import no.iktdev.mediaprocessing.ui.service.coordinator.MediaPreferenceService
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono

@@ -2,8 +2,8 @@ package no.iktdev.mediaprocessing.processer.limiter
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.processer.services.fs.IFs
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CpuLimitSupport
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.LinuxCpuLimitSupport
+import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport
+import no.iktdev.mediaprocessing.shared.common.dto.LinuxCpuLimitSupport
 import org.jetbrains.annotations.VisibleForTesting
 import java.util.concurrent.ConcurrentHashMap
 

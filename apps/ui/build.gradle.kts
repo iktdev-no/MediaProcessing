@@ -52,7 +52,12 @@ dependencies {
 
 }
 
-tasks.register("generateTs") {
+tsGenerator {
+    packageName.set("no.iktdev.mediaprocessing.ui.dto")
+    outputFile.set(file("$projectDir/web/src/types/types.d.ts"))
+}
+
+/*tasks.register("generateTs") {
     doLast {
         val classesDir = file("$projectDir/build/classes/kotlin/main")
         val cl = URLClassLoader(arrayOf(classesDir.toURI().toURL()), TsGenerator::class.java.classLoader)
@@ -63,11 +68,9 @@ tasks.register("generateTs") {
             classLoader = cl
         )
     }
-}
+}*/
 
 tasks.named("build") {
-    dependsOn(":transfer-model:build")
-    dependsOn(":transfer-model:generateTs")
     finalizedBy("generateTs")
 }
 

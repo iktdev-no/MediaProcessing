@@ -1,11 +1,11 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.LanguagePreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.CoordinatorPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.MediaPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoPreference
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.MediaPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.VideoPreference
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 

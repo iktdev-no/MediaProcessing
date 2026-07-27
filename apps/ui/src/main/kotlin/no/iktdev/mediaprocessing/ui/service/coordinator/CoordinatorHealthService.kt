@@ -2,7 +2,7 @@ package no.iktdev.mediaprocessing.ui.service.coordinator
 
 import mu.KotlinLogging
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorHealth
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.DiskInfo
+import no.iktdev.mediaprocessing.shared.common.dto.DiskInfo
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.EventRate
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.stereotype.Service

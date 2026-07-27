@@ -5,10 +5,9 @@ import no.iktdev.eventi.models.store.PersistedTask
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
-import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.TaskQuery
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.util.*
 
 
@@ -33,6 +32,10 @@ class TaskService(
     fun getTaskById(taskId: UUID): PersistedTask? {
         val task = TaskStore.findByTaskId(taskId) ?: return null
         return if (eventService.isSequenceDeleted(task.referenceId)) null else task
+    }
+
+    fun getTasksByReferenceId(referenceId: UUID): List<PersistedTask> {
+        return getNonDeleted(TaskStore.findByReferenceId(referenceId))
     }
 
     fun resetFailedTask(taskId: UUID): Boolean {

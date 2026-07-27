@@ -2,8 +2,8 @@ package no.iktdev.mediaprocessing.processer.config
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.ProcessorPreference
+import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
+import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.ProcessorPreference
 import org.springframework.stereotype.Component
 
 @Component

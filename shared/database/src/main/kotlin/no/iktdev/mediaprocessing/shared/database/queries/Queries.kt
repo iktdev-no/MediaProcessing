@@ -1,8 +1,8 @@
 package no.iktdev.mediaprocessing.shared.database.queries
 
-import no.iktdev.mediaprocessing.shared.common.dto.PagedQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.PagedQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
-import no.iktdev.mediaprocessing.shared.common.dto.Sort
+import no.iktdev.mediaprocessing.shared.common.dto.query.Sort
 import no.iktdev.mediaprocessing.shared.database.withTransaction
 import org.jetbrains.exposed.sql.*
 

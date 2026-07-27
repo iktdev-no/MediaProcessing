@@ -8,11 +8,11 @@ import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
-import no.iktdev.mediaprocessing.shared.common.dto.TaskQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.TaskQuery
 import no.iktdev.mediaprocessing.shared.common.dto.map
+import no.iktdev.mediaprocessing.shared.common.dto.progress.Progress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.progress.Progress
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -54,8 +54,14 @@ class TaskController(
         return paginatedTasks.map { it.toCoordinatorTransferDto(logEvents) }
     }
 
+    @GetMapping("/by-reference/{referenceId}")
+    fun getTaskByReferenceId(@PathVariable referenceId: UUID): List<CoordinatorTaskDto> {
+        val tasks = taskService.getTasksByReferenceId(referenceId)
+        val logEvents = eventService.getTaskEventResultsWithLogs(tasks.map { it.referenceId }.toSet())
+        return tasks.map { it.toCoordinatorTransferDto(logEvents) }
+    }
 
-    @GetMapping("/{id}")
+    @GetMapping("/taskid/{id}")
     fun getTask(@PathVariable id: UUID): CoordinatorTaskDto? {
         val tasks = taskService.getTaskById(id) ?: return null
         val logEvents = eventService.getTaskEventResultsWithLogs(setOf(tasks.referenceId))
@@ -63,7 +69,7 @@ class TaskController(
     }
 
 
-    @GetMapping("/{taskId}/reset")
+    @GetMapping("/taskid/{taskId}/reset")
     fun resetTask(@PathVariable taskId: UUID, forced: Boolean = false): ResponseEntity<ResetTaskResponse> {
         val task = taskService.getTaskById(taskId)
             ?: return ResponseEntity.notFound().build()
@@ -97,12 +103,12 @@ class TaskController(
         )
     }
 
-    @PatchMapping("/{taskId}/override")
+    @PatchMapping("/taskid/{taskId}/override")
     fun setTaskOverrides(@PathVariable taskId: UUID, @RequestBody overrides: List<String>): Mono<Boolean> {
         return Mono.just(taskService.setTaskOverrides(taskId, overrides))
     }
 
-    @PatchMapping("/{taskId}/ignore")
+    @PatchMapping("/taskid/{taskId}/ignore")
     fun setTaskIgnore(@PathVariable taskId: UUID): ResponseEntity<IgnoredTaskResponse> {
         val task = taskService.getTaskById(taskId)
             ?: return ResponseEntity.notFound().build()
@@ -127,7 +133,7 @@ class TaskController(
         )
     }
 
-    @GetMapping("/{taskId}/reset/force")
+    @GetMapping("/taskid/{taskId}/reset/force")
     fun resetTaskForce(@PathVariable taskId: UUID): ResponseEntity<ResetTaskResponse> {
         return resetTask(taskId, true)
     }

@@ -16,14 +16,14 @@ import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.MetadataDto
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.SequenceEvent
 import no.iktdev.mediaprocessing.transferModel.coordinatorUi.TaskStatus
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AacProfile
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioCodecConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.AudioCodecType
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.audio.OpusApplication
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.H264Profiles
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.Presets
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoCodecConfig
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.video.VideoCodecType
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AacProfile
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecConfig
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.OpusApplication
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.H264Profiles
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.Presets
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.VideoCodecConfig
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.VideoCodecType
 import kotlin.reflect.KProperty1
 
 fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): CoordinatorTaskDto {
@@ -95,61 +95,61 @@ fun CollectProjection.TaskStatus.translate(): TaskStatus {
     return TaskStatus.valueOf(this.name)
 }
 
-fun AudioCodecConfig.toDsl(): AudioCodec = when (type) {
+fun no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecConfig.toDsl(): AudioCodec = when (type) {
 
-    AudioCodecType.AAC -> AudioCodec.Aac(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.AAC -> AudioCodec.Aac(
         bitrate = bitrate,
-        profile = (profile ?: AacProfile.LC).translate(),
+        profile = (profile ?: _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AacProfile.LC).translate(),
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.MP3 -> AudioCodec.Mp3(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.MP3 -> AudioCodec.Mp3(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.OPUS -> AudioCodec.Opus(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.OPUS -> AudioCodec.Opus(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate,
-        application = (application ?: OpusApplication.Audio).translate()
+        application = (application ?: _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.OpusApplication.Audio).translate()
     )
 
-    AudioCodecType.VORBIS -> AudioCodec.Vorbis(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.VORBIS -> AudioCodec.Vorbis(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.FLAC -> AudioCodec.Flac(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.FLAC -> AudioCodec.Flac(
         compressionLevel = compressionLevel,
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.AC3 -> AudioCodec.Ac3(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.AC3 -> AudioCodec.Ac3(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.EAC3 -> AudioCodec.Eac3(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.EAC3 -> AudioCodec.Eac3(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.DTS -> AudioCodec.Dts(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.DTS -> AudioCodec.Dts(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate
     )
 
-    AudioCodecType.PCM -> AudioCodec.Pcm()
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.PCM -> AudioCodec.Pcm()
 
-    AudioCodecType.COPY -> AudioCodec.Copy(
+    _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AudioCodecType.COPY -> AudioCodec.Copy(
         bitrate = bitrate,
         channels = channels,
         sampleRate = sampleRate
@@ -157,25 +157,25 @@ fun AudioCodecConfig.toDsl(): AudioCodec = when (type) {
 }
 
 
-fun AacProfile.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile {
+fun no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.AacProfile.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile {
     return no.iktdev.mediaprocessing.ffmpeg.dsl.AacProfile.valueOf(name)
 }
 
-fun OpusApplication.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.OpusApplication {
+fun no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.audio.OpusApplication.translate(): no.iktdev.mediaprocessing.ffmpeg.dsl.OpusApplication {
     return no.iktdev.mediaprocessing.ffmpeg.dsl.OpusApplication.valueOf(name)
 }
 
 fun VideoCodecConfig.toDsl(): VideoCodec = when (type) {
     VideoCodecType.HEVC -> VideoCodec.Hevc(
-        preset = (preset ?: Presets.Slow).translate(),
+        preset = (preset ?: _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.Presets.Slow).translate(),
         crf = crf ?: 18,
         bitrate = bitrate,
         tune = tune
     )
 
     VideoCodecType.H264 -> VideoCodec.H264(
-        preset = (preset ?: Presets.Slow).translate(),
-        profile = (profile ?: H264Profiles.High).translate(),
+        preset = (preset ?: _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.Presets.Slow).translate(),
+        profile = (profile ?: _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.H264Profiles.High).translate(),
         level = level ?: 4.2,
         crf = crf ?: 23,
         bitrate = bitrate
@@ -198,7 +198,7 @@ fun VideoCodecConfig.toDsl(): VideoCodec = when (type) {
     )
 
     VideoCodecType.VVC -> VideoCodec.Vvc(
-        preset = (preset ?: Presets.Medium).translate(),
+        preset = (preset ?: _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.Presets.Medium).translate(),
         crf = crf ?: 27,
         bitrate = bitrate
     )
@@ -211,8 +211,8 @@ fun VideoCodecConfig.toDsl(): VideoCodec = when (type) {
     VideoCodecType.RAW -> VideoCodec.Raw
     VideoCodecType.COPY -> VideoCodec.Copy
 }
-fun Presets.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.Presets.valueOf(name)
-fun H264Profiles.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.H264Profiles.valueOf(name)
+fun no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.Presets.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.Presets.valueOf(name)
+fun no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.H264Profiles.translate() = no.iktdev.mediaprocessing.ffmpeg.dsl.H264Profiles.valueOf(name)
 
 fun MediaTracksEncodeSelectedEvent.SelectedAudioTracks.toFFmpegVersion(): SelectedAudioTracks {
     return SelectedAudioTracks(

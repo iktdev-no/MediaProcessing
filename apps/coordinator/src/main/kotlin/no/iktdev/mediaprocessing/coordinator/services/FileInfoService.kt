@@ -7,7 +7,7 @@ import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.InputFileInfo
+import no.iktdev.mediaprocessing.shared.common.dto.InputFileInfo
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.collections.component1

@@ -88,6 +88,14 @@ tasks.register<Jar>("testJar") {
     archiveClassifier.set("tests")
 }
 
+tasks.bootJar {
+    enabled = false
+}
+
+tasks.jar {
+    enabled = true
+}
+
 artifacts {
     add("testArtifacts", tasks.named("testJar"))
 }

@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.ui.controller.passthrough
 
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.processer.CPULimit
+import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
 import no.iktdev.mediaprocessing.ui.service.coordinator.CoordinatorProcesserPassthroughService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

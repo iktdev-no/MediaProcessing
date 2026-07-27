@@ -9,6 +9,8 @@ import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.services.FileInfoService
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.FlowTypes
+import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.toDuration
 import no.iktdev.mediaprocessing.shared.common.effectivePersisted
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedCacheDeletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
@@ -22,8 +24,6 @@ import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.FlowTypes
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.preference.coordinator.toDuration
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.io.File

@@ -8,7 +8,7 @@ import no.iktdev.eventi.serialization.WGson
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
-import no.iktdev.mediaprocessing.shared.common.dto.EventQuery
+import no.iktdev.mediaprocessing.shared.common.dto.query.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
@@ -28,9 +28,6 @@ import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.max
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.env.Environment
-import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
