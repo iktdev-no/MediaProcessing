@@ -13,7 +13,6 @@ import no.iktdev.mediaprocessing.ffmpeg.data.FFprobeFormat
 import no.iktdev.mediaprocessing.ffmpeg.dsl.VideoCodec
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
-import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
@@ -43,7 +42,6 @@ class SegmentedVideoTaskListenerTest: TestBase() {
         enableSegmentedTaskListener = true
     )
 
-    private val coordinator = mockk<CoordinatorClient>(relaxed = true)
     private val progressCache = mockk<LocalProgressCache>(relaxed = true)
     private val executables = mockk<ExecutablesConfig>(relaxed = true)
     lateinit var ffmpeg: FFmpeg
@@ -74,8 +72,6 @@ class SegmentedVideoTaskListenerTest: TestBase() {
 
         // 4) Opprett listener ETTER mocking
         listener = SegmentedVideoTaskListener(
-            coordinatorWebClient = coordinator,
-            localProgress = progressCache,
             executableConfig = executables,
             fileUtil = fileUtil,
         )

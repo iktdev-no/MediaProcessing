@@ -8,7 +8,6 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.eventi.tasks.TaskValidator
 import no.iktdev.files.IFile
-import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
@@ -27,11 +26,8 @@ import java.util.*
 
 @Service
 class LinearVideoTaskListener(
-    private var coordinatorWebClient: CoordinatorClient,
-    private val localProgress: LocalProgressCache,
     private val executableConfig: ExecutablesConfig,
     private val fileUtil: FileUtil,
-    private val processerProperties: ProcesserProperties,
     private val processService: ProcessService? = null
 ) : VideoTaskListener(TaskType.CPU_INTENSIVE, executableConfig) {
     private val log = KotlinLogging.logger {}
@@ -66,9 +62,7 @@ class LinearVideoTaskListener(
 
         val ctx = LinearContextFactory(fileUtil).createContext(taskData)
 
-        val progressListener = LinearProgressListener(task, reporter, weights) { taskId, progress ->
-            localProgress.update(taskId, progress)
-        }
+        val progressListener = LinearProgressListener(task, reporter, weights)
 
         if (ctx.output.exists() && taskData.data.videoInstruction.output?.overwrite != true) {
             reporter?.publishEvent(

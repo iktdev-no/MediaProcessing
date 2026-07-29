@@ -6,8 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "processer")
 data class ProcesserProperties(
-    val coordinatorUrl: String,
-    val coordinatorPingOnStartup: Boolean,
     val allowOverwrite: Boolean,
     val enableSegmentedTaskListener: Boolean,
     val preference: IFile = IFile("/data/config/preference.json")

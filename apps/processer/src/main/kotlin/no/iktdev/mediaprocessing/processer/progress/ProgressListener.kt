@@ -8,7 +8,6 @@ import java.util.UUID
 abstract class ProgressListener(
     private val task: Task,
     private val reporter: TaskReporter?,
-    val cache: ((taskId: UUID, progress: Progress) -> Unit)? = null
 ) {
 
 

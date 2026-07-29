@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
@@ -21,7 +22,7 @@ class TasksController {
     @Autowired
     lateinit var segmentedVideoTaskListener: SegmentedVideoTaskListener
 
-    @RequestMapping("/{taskId}/cancel")
+    @PostMapping("/{taskId}/cancel")
     fun cancelTask(@PathVariable taskId: UUID): ResponseEntity<Boolean> {
         val listener = listOf(segmentedVideoTaskListener, linearVideoTaskListener, subtitleTaskListener)
             .find { it.currentTaskId == taskId }

@@ -4,7 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.mediaprocessing.processer.config.Preference
 import no.iktdev.mediaprocessing.processer.limiter.CpuLimiterFactory
 import no.iktdev.mediaprocessing.processer.limiter.CpuLimiterService
-import no.iktdev.mediaprocessing.processer.models.ProcessEntry
+import no.iktdev.mediaprocessing.shared.common.dto.processer.ProcessEntry
 import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
 import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport
 import org.springframework.stereotype.Service

@@ -1,13 +1,12 @@
 package no.iktdev.mediaprocessing.processer.runners.segment
 
 import mu.KotlinLogging
-import no.iktdev.eventi.models.Task
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
-import no.iktdev.mediaprocessing.processer.models.ProcessEntry
-import no.iktdev.mediaprocessing.processer.models.ProcessType
+import no.iktdev.mediaprocessing.shared.common.dto.processer.ProcessEntry
+import no.iktdev.mediaprocessing.shared.common.dto.processer.ProcessType
 import no.iktdev.mediaprocessing.processer.runners.Runner
 import no.iktdev.mediaprocessing.processer.runners.RunnerResult
 import no.iktdev.mediaprocessing.processer.processors.segment.Segment

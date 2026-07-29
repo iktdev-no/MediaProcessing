@@ -45,7 +45,6 @@ dependencies {
     implementation(project(":shared:common"))
     implementation(project(":shared:database"))
     implementation(project(":shared:ffmpeg"))
-    implementation(project(":transfer-model"))
     implementation(project(":shared:files"))
 
 

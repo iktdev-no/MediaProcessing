@@ -2,8 +2,6 @@ package no.iktdev.mediaprocessing.processer.listeners
 
 import io.mockk.coEvery
 import io.mockk.mockkConstructor
-import io.mockk.spyk
-import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import no.iktdev.eventi.models.Event
@@ -14,14 +12,12 @@ import no.iktdev.eventi.registry.TaskTypeRegistry
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
-import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.TestBase
 import no.iktdev.mediaprocessing.processer.TestUtils
 import no.iktdev.mediaprocessing.processer.assertSameReferenceId
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
-import no.iktdev.mediaprocessing.processer.getCoordinatorClient
 import no.iktdev.mediaprocessing.processer.getProcesserProperties
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
@@ -33,15 +29,12 @@ import no.iktdev.mediaprocessing.processer.runners.VideoEncodeRunner
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.model.task.data.DefaultEncodeData
-import no.iktdev.mediaprocessing.shared.common.model.task.data.LinearEncodeData
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertInstanceOf
-import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -73,16 +66,12 @@ class LinearVideoTaskListenerTest : TestBase() {
 
     class TestListenerLinear(
         val delay: Long,
-        coordinatorClient: CoordinatorClient,
         processerProperties: ProcesserProperties,
         executablesConfig: ExecutablesConfig
     ) :
         LinearVideoTaskListener(
-            coordinatorWebClient = coordinatorClient,
-            localProgress = LocalProgressCache(),
             fileUtil = TestUtils.getFileUtil(),
             executableConfig = executablesConfig,
-            processerProperties = processerProperties
         ) {
         fun getJob() = currentJob
 
@@ -137,7 +126,7 @@ class LinearVideoTaskListenerTest : TestBase() {
             )
         ).newReferenceId()
 
-        val listener = TestListenerLinear(delay, getCoordinatorClient(), getProcesserProperties(), mockExecConfig)
+        val listener = TestListenerLinear(delay, getProcesserProperties(), mockExecConfig)
 
         val time = measureTimeMillis {
             listener.accept(testTask, overrideReporter)
@@ -210,11 +199,8 @@ class LinearVideoTaskListenerTest : TestBase() {
         ).newReferenceId()
 
         val listener = LinearVideoTaskListener(
-            coordinatorWebClient = getCoordinatorClient(),
-            localProgress = LocalProgressCache(),
             fileUtil = TestUtils.getFileUtil(),
             executableConfig = mockExecConfig,
-            processerProperties = getProcesserProperties()
         )
 
         val event = listener.createIncompleteStateTaskEvent(
@@ -251,7 +237,7 @@ class LinearVideoTaskListenerTest : TestBase() {
             )
         ).apply { newReferenceId() }
 
-        val listener = TestListenerLinear(delay = 10, getCoordinatorClient(), getProcesserProperties(), mockExecConfig)
+        val listener = TestListenerLinear(delay = 10, getProcesserProperties(), mockExecConfig)
 
         listener.accept(task, overrideReporter)
         listener.getJob()?.join()
@@ -273,11 +259,8 @@ class LinearVideoTaskListenerTest : TestBase() {
     )
     fun collectLogs_merges_logs_in_order() {
         val listener = LinearVideoTaskListener(
-            coordinatorWebClient = getCoordinatorClient(),
-            localProgress = LocalProgressCache(),
             fileUtil = TestUtils.getFileUtil(),
             executableConfig = mockExecConfig,
-            processerProperties = getProcesserProperties()
         )
 
         val logDir = workFolder.using("logs").apply { mkdirs() }
@@ -327,11 +310,8 @@ class LinearVideoTaskListenerTest : TestBase() {
         }
 
         val listener = LinearVideoTaskListener(
-            coordinatorWebClient = getCoordinatorClient(),
-            localProgress = LocalProgressCache(),
             executableConfig = mockExecConfig,
             fileUtil = TestUtils.getFileUtil(),
-            processerProperties = getProcesserProperties()
         )
 
         // Act
@@ -374,7 +354,7 @@ class LinearVideoTaskListenerTest : TestBase() {
 
         val task = makeLinearTask()
 
-        val listener = TestListenerLinear(delay = 10, getCoordinatorClient(), getProcesserProperties(), mockExecConfig)
+        val listener = TestListenerLinear(delay = 10, getProcesserProperties(), mockExecConfig)
 
 
         listener.accept(task, overrideReporter)

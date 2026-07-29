@@ -1,15 +1,14 @@
 package no.iktdev.mediaprocessing.processer.runners
 
 import mu.KotlinLogging
-import no.iktdev.eventi.models.Task
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.FFmpeg
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.AudioStreamConfig
 import no.iktdev.mediaprocessing.ffmpeg.util.getAudioMetadata
-import no.iktdev.mediaprocessing.processer.models.ProcessEntry
-import no.iktdev.mediaprocessing.processer.models.ProcessType
+import no.iktdev.mediaprocessing.shared.common.dto.processer.ProcessEntry
+import no.iktdev.mediaprocessing.shared.common.dto.processer.ProcessType
 import no.iktdev.mediaprocessing.processer.services.ProcessService
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID

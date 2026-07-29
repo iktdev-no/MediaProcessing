@@ -34,11 +34,8 @@ import java.util.UUID
 // -----------------------------------------------------------------------------
 
 class LinearVideoTaskListenerOverride(executableConfig: ExecutablesConfig) : LinearVideoTaskListener(
-    coordinatorWebClient = getCoordinatorClient(),
-    localProgress = LocalProgressCache(),
     fileUtil = TestUtils.getFileUtil(),
     executableConfig = executableConfig,
-    processerProperties = getProcesserProperties()
 ) {
     val accepted = mutableListOf<UUID>()
     override fun accept(task: Task, reporter: TaskReporter, validator: TaskValidator?): Boolean {
@@ -52,8 +49,6 @@ class LinearVideoTaskListenerOverride(executableConfig: ExecutablesConfig) : Lin
 }
 
 class SegmentedVideoTaskListenerOverride(executableConfig: ExecutablesConfig) : SegmentedVideoTaskListener(
-    coordinatorWebClient = getCoordinatorClient(),
-    localProgress = LocalProgressCache(),
     fileUtil = TestUtils.getFileUtil(),
     executableConfig = executableConfig,
 ) {

@@ -1,6 +1,6 @@
 package no.iktdev.mediaprocessing.processer.controller
 
-import no.iktdev.mediaprocessing.processer.models.ProcessEntry
+import no.iktdev.mediaprocessing.shared.common.dto.processer.ProcessEntry
 import no.iktdev.mediaprocessing.processer.services.ProcessService
 import no.iktdev.mediaprocessing.shared.common.dto.preference.processer.CPULimit
 import no.iktdev.mediaprocessing.shared.common.dto.CpuLimitSupport

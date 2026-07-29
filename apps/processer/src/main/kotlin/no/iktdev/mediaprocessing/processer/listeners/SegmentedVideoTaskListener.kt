@@ -7,7 +7,6 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.eventi.tasks.TaskValidator
-import no.iktdev.mediaprocessing.processer.CoordinatorClient
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.FileUtil
@@ -27,8 +26,6 @@ import java.util.UUID
 
 @Service
 class SegmentedVideoTaskListener(
-    private var coordinatorWebClient: CoordinatorClient,
-    private val localProgress: LocalProgressCache,
     private val executableConfig: ExecutablesConfig,
     private val fileUtil: FileUtil,
     private val processService: ProcessService? = null
@@ -62,9 +59,7 @@ class SegmentedVideoTaskListener(
 
         val ctx = SegmentedContextFactory(fileUtil).createContext(taskData)
 
-        val progressListener = SegmentedProgressListener(task, reporter) { taskId, progress ->
-            localProgress.update(taskId, progress)
-        }
+        val progressListener = SegmentedProgressListener(task, reporter)
 
         val videoProcessor = SegmentedVideoProcessor(this, progressListener, processService)
 

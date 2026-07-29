@@ -32,8 +32,6 @@ media:
   inbox: /src/inbox
 
 processer:
-  coordinator-url: http://coordinator:8080
-  coordinator-ping-on-startup: true
   allow-overwrite: false
   enableSegmentedTaskListener: true
 

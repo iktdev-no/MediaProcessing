@@ -13,6 +13,7 @@ import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskValidator
+import no.iktdev.mediaprocessing.processer.services.ProgressService
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.boot.ApplicationArguments
@@ -56,8 +57,7 @@ class TaskValidator(): TaskValidator {
 
 @Component
 class DefaultTaskReporter(
-    private var coordinatorWebClient: CoordinatorClient,
-    private val localProgress: LocalProgressCache,
+    private var progressService: ProgressService,
 ) : TaskReporter {
     private val log = KotlinLogging.logger {}
 
@@ -148,12 +148,7 @@ class DefaultTaskReporter(
     override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result {
         // Not to be implemented for this application
         return try {
-            localProgress.update(taskId, progress = payload)
-            coordinatorWebClient.reportProgress(
-                referenceId = referenceId.toString(),
-                taskId = taskId.toString(),
-                payload = payload,
-            )
+            progressService.update(referenceId, taskId, progress = payload)
             Result.Success
         } catch (e: Exception) {
             log.error(e) { "Failed to update progress for task $taskId" }

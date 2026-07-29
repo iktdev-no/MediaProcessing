@@ -12,8 +12,7 @@ class LinearProgressListener(
     private val task: Task,
     private val reporter: TaskReporter?,
     private val weights: DynamicProgressWeights.Weights,
-    cache: ((UUID, Progress) -> Unit)? = null
-) : ProgressListener(task, reporter, cache) {
+) : ProgressListener(task, reporter) {
 
     private val log = KotlinLogging.logger {}
 
@@ -64,7 +63,6 @@ class LinearProgressListener(
             ffmpegDecodedProgress = ffmpegDecodedProgress,
             message = message
         )
-        cache?.invoke(task.taskId, progress)
         reporter?.updateProgress(task.referenceId, task.taskId, progress)
     }
 }

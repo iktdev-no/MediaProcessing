@@ -58,13 +58,10 @@ fun getTaskReporter(): TaskReporter {
 }
 
 fun getProcesserProperties() = ProcesserProperties(
-    coordinatorUrl = "http://localhost",
-    coordinatorPingOnStartup = false,
     allowOverwrite = true,
     enableSegmentedTaskListener = true
 )
 
-fun getCoordinatorClient() = mockk<CoordinatorClient>(relaxed = true)
 
 @Suppress("UNUSED_RECEIVER_PARAMETER")
 fun TaskTypeRegistry.wipe() {

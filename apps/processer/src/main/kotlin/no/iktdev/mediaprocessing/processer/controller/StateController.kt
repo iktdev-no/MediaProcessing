@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.models.Progress
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
+import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -17,11 +18,11 @@ class StateController(
 
 
     @GetMapping("/progress")
-    fun allProgress(): Map<UUID, Progress> =
+    fun allProgress(): Map<UUID, ProgressUpdate> =
         localProgress.getAll()
 
     @GetMapping("/progress/{taskId}")
-    fun progress(@PathVariable taskId: UUID): Progress? =
+    fun progress(@PathVariable taskId: UUID): ProgressUpdate? =
         localProgress.get(taskId)
 
 
