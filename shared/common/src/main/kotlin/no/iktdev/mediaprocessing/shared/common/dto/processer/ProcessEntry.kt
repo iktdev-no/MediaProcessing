@@ -1,4 +1,4 @@
-package no.iktdev.mediaprocessing.transferModel.coordinatorUi
+package no.iktdev.mediaprocessing.shared.common.dto.processer
 
 import java.util.UUID
 

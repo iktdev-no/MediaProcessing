@@ -9,10 +9,13 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.shared.common.dto.DiskInfo
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
 import java.io.FileInputStream
 import java.net.InetAddress
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.UUID
@@ -328,3 +331,21 @@ fun UUID.short(): String = this.toString().substring(0, 8)
 
 
 
+fun getDiskInfoFor(mounts: List<String>): List<DiskInfo> =
+    mounts.mapNotNull { mount ->
+        val path = Paths.get(mount)
+
+        val store = runCatching { Files.getFileStore(path) }.getOrNull()
+            ?: return@mapNotNull null
+
+        DiskInfo(
+            mount = mount,
+            device = store.name(),
+            totalBytes = store.totalSpace,
+            freeBytes = store.usableSpace,
+            usedBytes = store.totalSpace - store.usableSpace,
+            usedPercent = if (store.totalSpace > 0)
+                ((store.totalSpace - store.usableSpace).toDouble() / store.totalSpace.toDouble()) * 100
+            else 0.0
+        )
+    }

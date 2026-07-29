@@ -1,13 +1,13 @@
-package no.iktdev.mediaprocessing.coordinator.services
+package no.iktdev.mediaprocessing.shared.common.sse
 
 import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.util.concurrent.CopyOnWriteArrayList
 
-@Service
-class SseHub {
-
+abstract class SSEServerImplementation {
     private val emitters = CopyOnWriteArrayList<SseEmitter>()
+
+
 
     fun createEmitter(): SseEmitter {
         val emitter = SseEmitter(0L) // never timeout
