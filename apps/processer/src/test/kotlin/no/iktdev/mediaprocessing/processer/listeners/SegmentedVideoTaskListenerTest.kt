@@ -36,8 +36,6 @@ import org.junit.jupiter.api.Assertions.*
 class SegmentedVideoTaskListenerTest: TestBase() {
 
     private val props = ProcesserProperties(
-        coordinatorUrl = "http://localhost",
-        coordinatorPingOnStartup = false,
         allowOverwrite = true,
         enableSegmentedTaskListener = true
     )
