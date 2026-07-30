@@ -7,11 +7,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.spyk
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.TestBase
-import no.iktdev.mediaprocessing.coordinator.services.FileInfoService
-import no.iktdev.mediaprocessing.shared.common.effectivePersisted
+import no.iktdev.mediaprocessing.coordinator.services.FilePreservationService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedCacheDeletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.Retention
@@ -30,6 +28,7 @@ import java.time.temporal.ChronoUnit
 import io.mockk.*
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
+import no.iktdev.mediaprocessing.shared.common.dto.files.PreservedFile
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.FlowTypes
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.RetentionUnit
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
@@ -38,7 +37,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartP
 
 class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
 
-    private val fileInfoService = mockk<FileInfoService>()
+    private val filePreservationService = mockk<FilePreservationService>()
 
 
     @BeforeEach
@@ -67,7 +66,7 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
     private fun service() = EventProducedDataCleanupService(
         mediaPaths = coordinatorEnv.media,
         preference = preference,
-        fileInfoService = fileInfoService,
+        filePreservationService = filePreservationService,
     )
 
 
@@ -464,7 +463,7 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
         val spy = spyk(service())
 
         // Viktig: stub fileInfoService ETTER spyk
-        every { fileInfoService.getPreservedInputFiles() } returns emptyList()
+        every { filePreservationService.getPreservedInputFiles() } returns emptyList()
 
         every { spy.loadEligibleSequencesReadyForDeletion() } returns emptyList()
         every { spy.extractInputFiles(any()) } returns emptyMap()
@@ -524,8 +523,8 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
         // 2. Oppdatert til å returnere Map<IFile, List<Event>> i stedet for List<IFile>
         every { spy.extractInputFiles(any()) } returns mapOf(file to listOf(lastEvent))
 
-        every { fileInfoService.getPreservedInputFiles() } returns listOf(
-            FileInfoService.PreservedFile(fileUri = file.path, fileName = file.name)
+        every { filePreservationService.getPreservedInputFiles() } returns listOf(
+            PreservedFile(filePath = file.path, fileName = file.name, true)
         )
 
         // 3. Oppdatert 'every' og 'verify' til å forvente et Map
@@ -611,7 +610,7 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
             newFile to listOf(newCacheDeleted)
         )
 
-        every { fileInfoService.getPreservedInputFiles() } returns emptyList()
+        every { filePreservationService.getPreservedInputFiles() } returns emptyList()
 
         // 3. deleteFiles → answers må hente ut keys fra Map-argumentet for å slette fysisk
         every { spy.deleteFiles(any<Map<IFile, List<Event>>>()) } answers {
@@ -695,7 +694,7 @@ class EventProducedDataCleanupServicePerformCleanupTest : TestBase() {
             sharedFile to listOf(oldCacheDeleted, newCacheDeleted)
         )
 
-        every { fileInfoService.getPreservedInputFiles() } returns emptyList()
+        every { filePreservationService.getPreservedInputFiles() } returns emptyList()
 
         every { spy.deleteFiles(any<Map<IFile, List<Event>>>()) } answers {
             val candidatesMap = firstArg<Map<IFile, List<Event>>>()

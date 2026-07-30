@@ -22,6 +22,5 @@ class CoordinatorEnv(
     val outboxFolder = IFile(media.outbox)
     val inboxFolder = IFile(media.inbox)
     val preference: IFile = IFile(config.preferenceFile)
-    val preserveFile: IFile = IFile(config.preservedFile)
 
 }

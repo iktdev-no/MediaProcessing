@@ -19,7 +19,7 @@ class FakeCoordinatorEnv(prefFile: IFile) : CoordinatorEnv(
         outbox = "/tmp/outbox",
         inbox = "/tmp/inbox"
     ),
-    config = AppConfig(preferenceFile = prefFile.path, preservedFile = "/tmp/preserved.txt")
+    config = AppConfig(preferenceFile = prefFile.path)
 ) {
     override val preference: IFile = prefFile
 }

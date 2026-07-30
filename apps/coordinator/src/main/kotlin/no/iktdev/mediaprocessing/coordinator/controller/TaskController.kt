@@ -3,24 +3,13 @@ package no.iktdev.mediaprocessing.coordinator.controller
 import no.iktdev.mediaprocessing.coordinator.services.EventService
 import no.iktdev.mediaprocessing.coordinator.services.ProgressManagerService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
-import no.iktdev.mediaprocessing.coordinator.toCoordinatorTransferDto
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
-import no.iktdev.mediaprocessing.shared.common.dto.Paginated
 import no.iktdev.mediaprocessing.shared.common.dto.ResetTaskResponse
-import no.iktdev.mediaprocessing.shared.common.dto.query.TaskQuery
-import no.iktdev.mediaprocessing.shared.common.dto.map
 import no.iktdev.mediaprocessing.shared.common.dto.progress.Progress
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
-import no.iktdev.mediaprocessing.transferModel.coordinatorUi.CoordinatorTaskDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import java.util.*
 
@@ -31,43 +20,6 @@ class TaskController(
     private val eventService: EventService,
     private val progressManagerService: ProgressManagerService
 ) {
-
-
-    @GetMapping("/names")
-    fun getTaskNames(): List<String> {
-        return TaskRegistry.getTasks().map { it.simpleName }
-    }
-
-
-    @GetMapping("/active")
-    fun getActiveTasks(): List<CoordinatorTaskDto> {
-        val tasks = taskService.getActiveTasks()
-        val logEvents = eventService.getTaskEventResultsWithLogs(tasks.map { it.referenceId }.toSet())
-        return tasks.map { it.toCoordinatorTransferDto(logEvents) }
-    }
-
-    @GetMapping
-    fun getPagedTasks(query: TaskQuery): Paginated<CoordinatorTaskDto> {
-        val paginatedTasks = taskService.getPagedTasks(query)
-        val logEvents = eventService.getTaskEventResultsWithLogs(paginatedTasks.items.map { it.referenceId }.toSet())
-
-        return paginatedTasks.map { it.toCoordinatorTransferDto(logEvents) }
-    }
-
-    @GetMapping("/by-reference/{referenceId}")
-    fun getTaskByReferenceId(@PathVariable referenceId: UUID): List<CoordinatorTaskDto> {
-        val tasks = taskService.getTasksByReferenceId(referenceId)
-        val logEvents = eventService.getTaskEventResultsWithLogs(tasks.map { it.referenceId }.toSet())
-        return tasks.map { it.toCoordinatorTransferDto(logEvents) }
-    }
-
-    @GetMapping("/taskid/{id}")
-    fun getTask(@PathVariable id: UUID): CoordinatorTaskDto? {
-        val tasks = taskService.getTaskById(id) ?: return null
-        val logEvents = eventService.getTaskEventResultsWithLogs(setOf(tasks.referenceId))
-        return tasks.toCoordinatorTransferDto(logEvents)
-    }
-
 
     @GetMapping("/taskid/{taskId}/reset")
     fun resetTask(@PathVariable taskId: UUID, forced: Boolean = false): ResponseEntity<ResetTaskResponse> {

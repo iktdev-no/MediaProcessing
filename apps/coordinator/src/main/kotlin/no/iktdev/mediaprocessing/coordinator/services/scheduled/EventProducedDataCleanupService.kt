@@ -6,7 +6,7 @@ import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.Preference
-import no.iktdev.mediaprocessing.coordinator.services.FileInfoService
+import no.iktdev.mediaprocessing.coordinator.services.FilePreservationService
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.FlowTypes
@@ -20,7 +20,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Proces
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
-import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -29,13 +28,12 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.time.Duration
 import java.time.Instant
-import kotlin.io.path.name
 
 @Service
 class EventProducedDataCleanupService(
     private val mediaPaths: MediaPaths,
     private val preference: Preference,
-    private val fileInfoService: FileInfoService
+    private val filePreservationService: FilePreservationService
 ) {
     private val log = KotlinLogging.logger {}
 
@@ -66,8 +64,8 @@ class EventProducedDataCleanupService(
     fun wipeInbox() {
         val inbox = IFile(mediaPaths.inbox)
 
-        val preserved = fileInfoService.getPreservedInputFiles()
-            .map { it.fileUri }
+        val preserved = filePreservationService.getPreservedInputFiles()
+            .map { it.filePath }
             .toSet()
 
         val preSize = inbox.sizeRecursive()
@@ -225,8 +223,8 @@ class EventProducedDataCleanupService(
         }
 
         val retention = pref.retention.toDuration()
-        val preserved = fileInfoService.getPreservedInputFiles()
-            .mapTo(HashSet()) { it.fileUri }
+        val preserved = filePreservationService.getPreservedInputFiles()
+            .mapTo(HashSet()) { it.filePath }
 
         val sequences = loadEligibleSequencesReadyForDeletion()
 

@@ -9,7 +9,6 @@ import no.iktdev.exfl.coroutines.CoroutinesIO
 import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.coordinator.config.AppConfig
 import no.iktdev.mediaprocessing.coordinator.config.ExecutablesConfig
-import no.iktdev.mediaprocessing.coordinator.config.ProcesserClientProperties
 import no.iktdev.mediaprocessing.shared.common.configs.StreamItConfig
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.ProgressRegistry
@@ -68,7 +67,6 @@ open class ApplicationConfiguration() {
     value = [
         ExecutablesConfig::class,
         StreamItConfig::class,
-        ProcesserClientProperties::class,
         AppConfig::class
     ]
 )

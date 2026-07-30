@@ -1,9 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
-import no.iktdev.mediaprocessing.coordinator.services.FileInfoService
+import no.iktdev.mediaprocessing.coordinator.services.FilePreservationService
 import no.iktdev.mediaprocessing.shared.common.dto.FileTableItem
 import no.iktdev.mediaprocessing.shared.database.queries.FilesTableQueries
 import no.iktdev.mediaprocessing.shared.common.dto.InputFileInfo
+import no.iktdev.mediaprocessing.shared.common.dto.files.PreservedFile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/files")
 class FilesController(
-    val fileInfoService: FileInfoService,
+    val filePreservationService: FilePreservationService,
 ) {
 
     @GetMapping()
@@ -24,13 +25,13 @@ class FilesController(
     }
 
     @GetMapping("/used")
-    fun getFilesUsedInEvents(): List<InputFileInfo> {
-        return fileInfoService.getFilesWithPreservedInputFiles()
+    fun getFilesUsedInEvents(): List<PreservedFile> {
+        return filePreservationService.getFilesWithPreservedInputFiles()
     }
 
     @PutMapping("/preserve")
-    fun setPreservedFiles(@RequestBody files: List<String>): List<InputFileInfo> {
-        return fileInfoService.setFilesAsPreserved(files)
+    fun setPreservedFiles(@RequestBody files: List<String>): List<PreservedFile> {
+        return filePreservationService.setFilesAsPreserved(files)
     }
 
 

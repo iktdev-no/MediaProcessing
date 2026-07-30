@@ -41,7 +41,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 
     // Internal modules
-    implementation(project(":transfer-model"))
     implementation(project(":shared:ffmpeg"))
     implementation(project(":shared:common"))
     implementation(project(":shared:database"))

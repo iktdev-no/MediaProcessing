@@ -1,13 +1,10 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
-import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.SingleTaskCreatorEventListener
-import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.SingleTaskCratedEvent
 import no.iktdev.eventi.models.Task
-import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.coordinator.toDsl
