@@ -49,6 +49,12 @@ class MediaCreateCoverDownloadTaskListener: MultiTaskCreatorEventListener(EventS
         }
     }
 
+    override fun onEvent(event: Event, history: List<Event>): Event? {
+        val useEvents = history + event
+        if (useEvents.any { it is CompletedEvent }) return null
+        return super.onEvent(event, history)
+    }
+
     override fun onCreateTask(
         event: Event,
         history: List<Event>

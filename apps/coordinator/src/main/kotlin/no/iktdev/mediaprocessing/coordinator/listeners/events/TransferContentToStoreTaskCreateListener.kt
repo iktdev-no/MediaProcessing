@@ -27,6 +27,11 @@ class TransferContentToStoreTaskCreateListener():
 
     override fun isEventOfMyCreation(event: Event) = event is TransferContentTaskCreatedEvent
 
+    override fun onEvent(event: Event, history: List<Event>): Event? {
+        event.requireQualifiedEntry<PersistContentEvent>()
+        return super.onEvent(event, history)
+    }
+
     override fun onCreateTask(
         event: Event,
         history: List<Event>

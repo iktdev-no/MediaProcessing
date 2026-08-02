@@ -71,6 +71,11 @@ class MediaCreateExtractTaskListener(): MultiTaskCreatorEventListener(EventStore
     override fun isEventOfMyCreation(event: Event) =
         event is ProcesserExtractTaskCreatedEvent
 
+    override fun onEvent(event: Event, history: List<Event>): Event? {
+        event.requireQualifiedEntry<MediaTracksExtractSelectedEvent>()
+        return super.onEvent(event, history)
+    }
+
     override fun onCreateTask(
         event: Event,
         history: List<Event>
