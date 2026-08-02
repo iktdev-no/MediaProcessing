@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid"
 
 import FlashOnIcon from "@mui/icons-material/FlashOn"
 import TrendingUpIcon from "@mui/icons-material/TrendingUp"
-import type { EventRate } from "../../types/transfer-model"
+import type { EventRate } from "../../types/types"
 
 
 export function EventRatePanel({ rate }: { rate: EventRate | null }) {

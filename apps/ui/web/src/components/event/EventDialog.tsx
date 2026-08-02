@@ -1,18 +1,17 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-    Box,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Stack,
-    Typography,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { deleteEvent } from "../../api/coordinator/events";
-import type { DeleteResult } from "../../types/transfer-model";
-import type { UiEvent } from "../../types/types";
+import type { Response, UiEvent } from "../../types/types";
 import { JsonViewer } from "../JsonViewer";
 
 export function EventDialog({
@@ -27,14 +26,14 @@ export function EventDialog({
   if (!event) return null;
 
   const deleteEventAction = async () => {
-    const response: DeleteResult = await deleteEvent(
+    const response: Response = await deleteEvent(
       event.referenceId,
       event.eventId,
     );
-    if (response.type === "DeleteResultSuccess") {
+    if (response.success) {
       toast.success(`Event ${event.event} deleted`);
       onClose();
-    } else if (response.type === "DeleteResultFailure") {
+    } else if (!response.success) {
       toast.error(`Failed to delete event ${event.event}, ${response.message}`);
     }
   };
@@ -61,7 +60,7 @@ export function EventDialog({
           }}
         >
           <Typography>
-            <strong>ID:</strong> {event.id}
+            <strong>Id:</strong> {event.eventId}
           </Typography>
           <Typography>
             <strong>Reference:</strong> {event.referenceId}

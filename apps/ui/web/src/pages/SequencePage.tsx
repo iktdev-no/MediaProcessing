@@ -4,15 +4,15 @@ import {
   continueSequence,
   getActiveSequences,
 } from "../api/coordinator/sequence";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTitle } from "../features/useTitle";
-import type { SequenceSummary } from "../types/transfer-model";
+import type { Sequence } from "../types/types";
 import { SequenceOverviewCard } from "../components/sequence/SequenceOverviewCard";
 
 export function SequencePage() {
   const navigate = useNavigate();
-  const [sequences, setSequences] = useState<SequenceSummary[]>([]);
+  const [sequences, setSequences] = useState<Sequence[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { setTitle } = useTitle();
@@ -44,7 +44,7 @@ export function SequencePage() {
   };
 
   const onNavigateToSequence = (referenceId: string) => {
-    navigate(`/events/sequence/${referenceId}`);
+    navigate(`/sequence/${referenceId}`);
   };
 
   const onDelete = async (refId: string) => {

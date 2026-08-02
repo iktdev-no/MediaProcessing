@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.dto.progress
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.EncodeProgress
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,

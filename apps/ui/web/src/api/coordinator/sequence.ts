@@ -1,12 +1,20 @@
-import type { SequenceSummary } from "../../types/transfer-model";
+import type { LifecycleNode, Sequence, SequenceSummary } from "../../types/types";
 import { apiGet, apiPost } from "../client";
 
 export function getActiveSequences() {
-  return apiGet<SequenceSummary[]>("/sequences/active");
+  return apiGet<Sequence[]>("/sequences/active");
 }
 
 export function getRecentSequences(limit = 15) {
-  return apiGet<SequenceSummary[]>(`/sequences/recent?limit=${limit}`);
+  return apiGet<Sequence[]>(`/sequences/recent?limit=${limit}`);
+}
+
+export function getSequence(referenceId: string) {
+  return apiGet<Array<LifecycleNode>>(`/sequences/${referenceId}`)
+}
+
+export function getSequenceInfo(referenceId: string) {
+  return apiGet<SequenceSummary>(`/sequences/${referenceId}/info`)
 }
 
 export async function continueSequence(referenceId: string) {

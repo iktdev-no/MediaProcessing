@@ -190,7 +190,7 @@ export default function TasksPage() {
         >
           {data?.items.map((task: UiTask) => (
             <TaskCard
-              key={task.id}
+              key={task.taskId}
               task={task}
               show="taskId"
               onCopy={() => showToast("Kopiert til utklippstavlen")}

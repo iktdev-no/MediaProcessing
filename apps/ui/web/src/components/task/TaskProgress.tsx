@@ -1,11 +1,11 @@
 import { Box, LinearProgress, Typography } from "@mui/material";
-import type { Progress } from "../../types/transfer-model";
+import type { Progress, ProgressRef } from "../../types/types";
 import type { UiTask } from "../../types/types";
 import { formatDuration } from "../../utils/timeUtil";
 
 export interface TaskProgressProps {
     task: UiTask,
-    progressUpdate: Progress | undefined
+    progressUpdate: ProgressRef | undefined
 }
 
 export function TaskProgress({ task, progressUpdate }: TaskProgressProps) {

@@ -1,21 +1,23 @@
 package no.iktdev.mediaprocessing.ui.service
 
-import jakarta.annotation.PostConstruct
+import no.iktdev.mediaprocessing.shared.common.sse.SSEKeys
 import no.iktdev.mediaprocessing.ui.AppConfig
 import no.iktdev.mediaprocessing.ui.AppsConfig
-import no.iktdev.mediaprocessing.ui.UiSseHub
-import no.iktdev.mediaprocessing.ui.dto.status.SystemStatus
-import org.springframework.beans.factory.annotation.Qualifier
+import no.iktdev.mediaprocessing.ui.client.WebClientFactory
+import no.iktdev.mediaprocessing.ui.models.contract.SystemStatus
+import no.iktdev.mediaprocessing.ui.models.contract.sse.SSEHealthStatus
+import no.iktdev.mediaprocessing.ui.service.sse.SSEListeningService
+import no.iktdev.mediaprocessing.ui.service.sse.SSEServer
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 
 @Service
 class StatusService(
     private val apps: AppsConfig,
-    @param:Qualifier("coordinatorWebClient") private val webClient: WebClient,
-    private val hub: UiSseHub
+    private val sse: SSEServer,
+    private val webClientFactory: WebClientFactory,
+    private val sseListeningService: SSEListeningService
 ) {
     var status: SystemStatus = SystemStatus()
     private val intervalMs = 5000L // samme som @Scheduled(fixedDelay = 5000)
@@ -31,30 +33,15 @@ class StatusService(
 
         // coordinator REST sjekkes også her
         status.coordinatorRest = check(apps.coordinator)
-        hub.broadcast(status, "healthStatus")
+        status.coordinatorSse = sseListeningService.isCoordinatorOnline()
+        status.processerSse = sseListeningService.isProcesserOnline()
+        sse.broadcast(SSEHealthStatus(status))
     }
-
-    @PostConstruct
-    fun init() {
-        hub.registerListener(object : UiSseHub.SSEStateListener {
-            override fun onConnected() {
-                status.coordinatorSse = true
-            }
-
-            override fun onReconnecting() {
-                status.coordinatorSse = false
-            }
-
-            override fun onDisconnected() {
-                status.coordinatorSse = false
-            }
-        })
-    }
-
 
     private fun check(app: AppConfig): Boolean =
         try {
-            webClient.get()
+            val client = webClientFactory.create(app.address)
+            client.get()
                 .uri(app.address + app.health)
                 .retrieve()
                 .bodyToMono(String::class.java)

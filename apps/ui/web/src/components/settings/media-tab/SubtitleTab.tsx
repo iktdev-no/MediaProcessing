@@ -1,20 +1,20 @@
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import {
-    FormControl,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    Stack,
-    Typography,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Typography,
 } from "@mui/material";
 
 import type {
-    CoordinatorPreference,
-    SubtitleSelectionMode,
-} from "../../../types/transfer-model";
+  CoordinatorPreference,
+  SubtitleSelectionMode,
+} from "../../../types/types";
 
 export default function SubtitleTab({
   prefs,

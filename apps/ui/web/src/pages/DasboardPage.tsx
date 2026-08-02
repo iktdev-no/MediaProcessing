@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../api/client";
-import { getCoordinatorHealth } from "../api/coordinator/health";
+import { getSystemHealth } from "../api/coordinator/health";
 
 // MUI
 import {
@@ -20,11 +20,11 @@ import { StoragePanel } from "../components/dashboard/StoragePanel";
 import { TaskOverview } from "../components/dashboard/TaskOverview";
 import { useTitle } from "../features/useTitle";
 import type {
-  CoordinatorHealth,
+  SystemHealth,
   DiskInfo,
   EventRate,
   SequenceHealth,
-} from "../types/transfer-model";
+} from "../types/types";
 
 // --- TASK OVERVIEW ---
 
@@ -65,7 +65,7 @@ function DetailsInspector({ details }: { details: Record<string, unknown> }) {
 
 // --- MAIN PAGE ---
 export default function DashboardPage() {
-  const [health, setHealth] = useState<CoordinatorHealth | null>(null);
+  const [health, setHealth] = useState<SystemHealth | null>(null);
   const [eventRate, setEventRate] = useState<EventRate | null>(null);
   const [storage, setStorage] = useState<DiskInfo[] | null>(null);
 
@@ -95,7 +95,7 @@ export default function DashboardPage() {
 
   // Initial health load
   useEffect(() => {
-    const fetchHealth = () => getCoordinatorHealth().then(setHealth);
+    const fetchHealth = () => getSystemHealth().then(setHealth);
     fetchHealth();
     const interval = setInterval(fetchHealth, 5000);
     return () => clearInterval(interval);

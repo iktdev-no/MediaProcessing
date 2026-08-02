@@ -1,14 +1,14 @@
 import {
-    Box,
-    Button,
-    CircularProgress,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import type { UiEvent } from "../../types/types";
@@ -52,7 +52,6 @@ export function EventsTable({
       <Table stickyHeader size="small">
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
             <TableCell>Reference</TableCell>
             <TableCell>Event ID</TableCell>
             <TableCell>Event</TableCell>
@@ -63,8 +62,7 @@ export function EventsTable({
 
         <TableBody>
           {events?.map((ev) => (
-            <TableRow key={ev.id} hover>
-              <TableCell>{ev.id}</TableCell>
+            <TableRow key={ev.event} hover>
               <TableCell
                 sx={{
                   cursor: "pointer",

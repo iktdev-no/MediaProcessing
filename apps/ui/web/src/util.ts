@@ -1,3 +1,36 @@
+import type { SystemHealthStatus, SystemStatus } from "./types/types";
+
+export function getSystemHealthState(state: SystemStatus | undefined): SystemHealthStatus {
+    console.log("System healht state got:", state)
+    if (!state) return 'DEGRADED'
+    // 1. Sjekk om noen av de "andre" (kritiske) tjenestene er false -> UNHEALTHY
+    // Her sjekker vi converter, pyMetadata og pyWatcher (og evt. rest-endepunktene hvis de regnes med)
+    const criticalServices = [
+        state.converter,
+        state.coordinatorRest,
+        state.processer,
+        state.pyMetadata,
+        state.pyWatcher
+    ];
+
+    if (criticalServices.some(service => !service)) {
+        return "UNHEALTHY";
+    }
+
+    // 2. Sjekk om noen av SSE-forbindelsene er nede -> DEGRADED
+    const sseServices = [
+        state.coordinatorSse,
+        state.processerSse
+    ];
+
+    if (sseServices.some(sse => !sse)) {
+        return "DEGRADED";
+    }
+
+    // 3. Hvis alt er true -> HEALTHY
+    return "HEALTHY";
+}
+
 export const normalDate = new Intl.DateTimeFormat("no-NO", {
     day: "2-digit",
     month: "short",

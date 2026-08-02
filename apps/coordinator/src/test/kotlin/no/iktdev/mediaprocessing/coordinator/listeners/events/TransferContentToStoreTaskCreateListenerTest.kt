@@ -131,6 +131,11 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
             derivedFrom = extract.last()
         ).also { it.forEach { e -> e.addToHistory() } }
 
+        val determined = DeterminedCollectionTaskResultEvent(
+            TaskStatus.Completed,
+            collection = "Baking Bread",
+        ).derivedOf(metadata).addToHistory()
+
         val collected = CollectedEvent(
             history.map { it.eventId }.toSet()
         ).derivedOf(convert.last()).addToHistory()

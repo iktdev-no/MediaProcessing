@@ -1,7 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.controller
 
 import no.iktdev.mediaprocessing.coordinator.services.EventService
-import no.iktdev.mediaprocessing.coordinator.services.ProgressManagerService
 import no.iktdev.mediaprocessing.coordinator.services.TaskService
 import no.iktdev.mediaprocessing.ffmpeg.util.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.IgnoredTaskResponse
@@ -18,7 +17,6 @@ import java.util.*
 class TaskController(
     private val taskService: TaskService,
     private val eventService: EventService,
-    private val progressManagerService: ProgressManagerService
 ) {
 
     @GetMapping("/taskid/{taskId}/reset")
@@ -90,10 +88,5 @@ class TaskController(
         return resetTask(taskId, true)
     }
 
-
-    @GetMapping("/progress/all")
-    fun getAllProgress(): List<Progress> {
-        return progressManagerService.getProgress()
-    }
 
 }

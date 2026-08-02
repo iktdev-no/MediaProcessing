@@ -5,6 +5,8 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.listeners.SummaryEventListener
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
+import no.iktdev.mediaprocessing.shared.common.projection.WorkflowProjection
+import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
 
@@ -13,15 +15,16 @@ class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = Eve
 
     private val log = KotlinLogging.logger {}
     override fun shouldSummarize(fullHistory: List<Event>): Boolean {
-        val projection = CollectProjection(fullHistory)
-        if (projection.startedWith == null) return false
-        if (!projection.isWorkflowComplete()) return false
-        if (projection.getTaskStatus().any { it == CollectProjection.TaskStatus.Failed }) {
-            val referenceId = fullHistory.first().referenceId
-            log.warn { "One or more tasks have failed in sequence referenceId=$referenceId" }
+        val workflow = WorkflowProjection(fullHistory)
+        val report = workflow.evaluate()
+
+        if (report.isFailed()) {
+            val referenceId = fullHistory.firstOrNull()?.referenceId ?: "unknown"
+            log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${report.reason}" }
             return false
         }
-        return true
+
+        return workflow.isWorkflowComplete()
     }
 
     override fun produceSummary(fullHistory: List<Event>): Event {

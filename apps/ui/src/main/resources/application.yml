@@ -13,6 +13,10 @@ spring:
   webflux:
     multipart:
       headers-charset: UTF-8
+  flyway:
+    enabled: true
+    locations: classpath:flyway
+    baseline-on-migrate: false
 
 management:
   endpoints:

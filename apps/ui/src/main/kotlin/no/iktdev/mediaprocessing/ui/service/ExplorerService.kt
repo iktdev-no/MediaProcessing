@@ -1,21 +1,27 @@
 package no.iktdev.mediaprocessing.ui.service
 
 import no.iktdev.mediaprocessing.ui.MediaConfig
-import no.iktdev.mediaprocessing.ui.dto.file.*
 import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.ui.models.contract.files.FileAccessMode
+import no.iktdev.mediaprocessing.ui.models.contract.files.FileAction
+import no.iktdev.mediaprocessing.ui.models.contract.files.FileActionType
+import no.iktdev.mediaprocessing.ui.models.contract.files.FileActions
+import no.iktdev.mediaprocessing.ui.models.contract.files.Folder
+import no.iktdev.mediaprocessing.ui.models.contract.files.UiFile
+import no.iktdev.mediaprocessing.ui.models.contract.files.MediaAction
+import no.iktdev.mediaprocessing.ui.models.contract.files.MediaActionType
 
 import org.springframework.stereotype.Service
-import java.io.File
 
 @Service
 class ExplorerService(
     val mediaConfig: MediaConfig
 ) {
 
-    fun listHome(): List<IUiFile> =
+    fun listHome(): List<UiFile> =
         listAt(mediaConfig.inbox)
 
-    fun listAt(path: String): List<IUiFile> {
+    fun listAt(path: String): List<UiFile> {
         val dir = IFile(path)
 
         if (!dir.exists() || !dir.isDirectory()) {
@@ -30,14 +36,14 @@ class ExplorerService(
     }
 
 
-    fun pathToFile(path: String): IUiFile? {
+    fun pathToFile(path: String): UiFile? {
         val file = IFile(path)
         if (file.notExist())
             return null
         return file.toFileInfo()
     }
 
-    fun IFile.toFileInfo(): IUiFile {
+    fun IFile.toFileInfo(): UiFile {
         val file = this
         val access = determineAccessMode(file)
         return if (file.isDirectory()) {
@@ -52,7 +58,7 @@ class ExplorerService(
                 accessMode = access
             )
         } else {
-            File(
+            no.iktdev.mediaprocessing.ui.models.contract.files.File(
                 name = file.name,
                 uri = file.absolutePath,
                 created = file.lastModified(),

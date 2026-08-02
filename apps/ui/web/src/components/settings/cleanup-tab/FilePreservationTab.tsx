@@ -10,21 +10,21 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import type { InputFileInfo } from "../../../types/transfer-model";
+import type { PreservedFile } from "../../../types/types";
 
 interface FilePreservationTabProps {
-  files: InputFileInfo[];
-  setFiles: React.Dispatch<React.SetStateAction<InputFileInfo[]>>;
+  files: PreservedFile[];
+  setFiles: React.Dispatch<React.SetStateAction<PreservedFile[]>>;
 }
 
 export default function FilePreservationTab({
   files,
   setFiles,
 }: FilePreservationTabProps) {
-  function toggleLocal(file: InputFileInfo) {
+  function toggleLocal(file: PreservedFile) {
     setFiles((prev) =>
       prev.map((f) =>
-        f.fileUri === file.fileUri ? { ...f, preserved: !f.preserved } : f,
+        f.filePath === file.filePath ? { ...f, preserved: !f.preserved } : f,
       ),
     );
   }
@@ -52,7 +52,7 @@ export default function FilePreservationTab({
 
           <TableBody>
             {files.map((f) => (
-              <TableRow key={f.fileUri} hover>
+              <TableRow key={f.filePath} hover>
                 <TableCell>
                   <Checkbox
                     checked={f.preserved}

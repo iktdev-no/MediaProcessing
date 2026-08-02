@@ -6,6 +6,13 @@ pluginManagement {
             url = uri("https://reposilite.iktdev.no/releases")
         }
     }
+    /*resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "no.iktdev.ts-gen") {
+                useModule("no.iktdev:ts-gen:dev2")
+            }
+        }
+    }*/
 }
 
 plugins {

@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.SingleTaskCreatorEventListener
 import no.iktdev.eventi.models.Event
-import no.iktdev.eventi.models.SingleTaskCratedEvent
+import no.iktdev.eventi.models.SingleTaskCreatedEvent
 import no.iktdev.eventi.models.Task
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.Preference
@@ -122,7 +122,7 @@ class MediaCreateEncodeTaskListener(
         event: Event,
         history: List<Event>,
         task: Task
-    ): SingleTaskCratedEvent {
+    ): SingleTaskCreatedEvent {
         val producerEvent = ProcesserEncodeTaskCreatedEvent(
             taskId = task.taskId,
             task::class.simpleName!!

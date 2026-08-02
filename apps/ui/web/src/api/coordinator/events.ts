@@ -1,4 +1,4 @@
-import type { DeleteResult, LineageNode } from "../../types/transfer-model";
+import type { LineageNode, Response } from "../../types/types";
 import type { UiEvent } from "../../types/types";
 import type { EventQuery, PagedUiEvent } from "../../types/webTypes";
 import { apiDelete, apiGet, buildQuery } from "../client";
@@ -17,5 +17,5 @@ export function getEventsLineage(referenceId: string) {
 }
 
 export function deleteEvent(referenceId: string, eventId: string) {
-  return apiDelete<DeleteResult>(`/events/delete/${referenceId}/${eventId}`);
+  return apiDelete<Response>(`/events/delete/${referenceId}/${eventId}`);
 }

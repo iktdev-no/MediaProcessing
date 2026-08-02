@@ -1,103 +1,22 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
-import no.iktdev.mediaprocessing.shared.common.model.MediaType
+import no.iktdev.mediaprocessing.shared.common.model.views.MetadataView
+import no.iktdev.mediaprocessing.shared.common.model.views.ParsedFileInfoView
+import no.iktdev.mediaprocessing.shared.common.model.views.ProcessedMediaView
+import no.iktdev.mediaprocessing.shared.common.model.views.StartView
+import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 
 class CollectProjection(val events: List<Event>) {
 
     val useFile: IFile? by lazy { projectUseFile() }
-    val startedWith: StartProjection? by lazy { projectStartedWith() }
-    var readStreamsTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var prepareForWorkTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var metadataTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var encodeTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var extreactTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var convertTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var coverDownloadTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var contentMigratedTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    var contentStoredTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    /** This cannot be added to getTaskStatus as it will be a blocking state*/
-    var determineCollectionTaskStatus: TaskStatus = TaskStatus.NotInitiated
-        private set
-    val metadata: MetadataProjection? by lazy { projectMetadata() }
-    val processedMedia: ProcessedMediaProjection? by lazy { projectProcessedMedia() }
-    val parsedFileInfo: ParsedFileInfoProjection? by lazy { projectParsedFileInfo() }
-
-    init {
-        val taskProjection = TaskProjection(events)
-        readStreamsTaskStatus = taskProjection.projectStreamReadStatus()
-        metadataTaskStatus = taskProjection.projectMetadataSearchStatus()
-        encodeTaskStatus = taskProjection.projectEncodingPerformedStatus()
-        extreactTaskStatus = taskProjection.projectExtractSubtitleStatus()
-        convertTaskStatus = taskProjection.projectConvertStatus()
-        coverDownloadTaskStatus = taskProjection.projectCoverDownloadStatus()
-        contentMigratedTaskStatus = taskProjection.projectMigrateContentStatus()
-        contentStoredTaskStatus = taskProjection.projectStoreContentAndMetadataStatus()
-        prepareForWorkTaskStatus = taskProjection.projectPrepareFileForWorkStatus()
-        determineCollectionTaskStatus = taskProjection.projectDeterminedCollectionStatus()
-    }
-
-    fun getTaskStatus(): List<TaskStatus> = listOf(
-        prepareForWorkTaskStatus,
-        metadataTaskStatus,
-        encodeTaskStatus,
-        extreactTaskStatus,
-        convertTaskStatus,
-        coverDownloadTaskStatus
-    )
-
-    fun getRelevantTaskStatuses(): List<TaskStatus> {
-        val required = startedWith?.tasks ?: emptySet()
-
-        val statusMap = mapOf(
-            OperationType.Encode to encodeTaskStatus,
-            OperationType.ExtractSubtitles to extreactTaskStatus,
-            OperationType.ConvertSubtitles to convertTaskStatus,
-            OperationType.MetadataSearch to metadataTaskStatus,
-        )
-
-        return required.map { statusMap[it] ?: TaskStatus.NotInitiated }
-    }
-
-    fun hasRequiredTasksToRunCompleted(): Boolean {
-        val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
-        return listOf(
-            determineCollectionTaskStatus, // denne kan feile uten å stoppe workflow
-            coverDownloadTaskStatus, // Denne må enten være skipped eller completed eller failed
-        ).none { it in nonQualifiedToContinue }
-    }
-
-
-    fun isWorkflowComplete(): Boolean {
-        val statuses = getRelevantTaskStatuses()
-
-        if (statuses.isEmpty()) return false
-
-        val anyFailed = statuses.any { it == TaskStatus.Failed }
-        val anyPending = statuses.any { it == TaskStatus.Pending }
-        val allCompleted = statuses.all { it == TaskStatus.Completed }
-
-        if (anyFailed) return false
-        if (anyPending) return false
-
-        if (!hasRequiredTasksToRunCompleted()) {
-            return false
-        }
-
-        return allCompleted
-    }
-
+    val startedWith: StartView? by lazy { projectStartedWith() }
+    val metadata: MetadataView? by lazy { projectMetadata() }
+    val processedMedia: ProcessedMediaView? by lazy { projectProcessedMedia() }
+    val parsedFileInfo: ParsedFileInfoView? by lazy { projectParsedFileInfo() }
 
 
     private fun projectUseFile(): IFile? {
@@ -109,9 +28,9 @@ class CollectProjection(val events: List<Event>) {
 
     }
 
-    private fun projectStartedWith(): StartProjection? {
+    private fun projectStartedWith(): StartView? {
         val startEvent = events.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
-        return StartProjection(
+        return StartView(
             inputFile = startEvent.data.fileUri.let { IFile(it) },
             mode = startEvent.data.flow,
             tasks = startEvent.data.operation
@@ -119,7 +38,7 @@ class CollectProjection(val events: List<Event>) {
     }
 
 
-    private fun projectMetadata(): MetadataProjection? {
+    private fun projectMetadata(): MetadataView? {
         val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()
             ?: return null
         val coverDownloadResultEvents = events.filterIsInstance<CoverDownloadResultEvent>()
@@ -128,7 +47,7 @@ class CollectProjection(val events: List<Event>) {
             coverDownloadResultEvents.find { it.data?.source == metadataEvent.recommended?.metadata?.source }?.data?.outputFile
                 ?.let { IFile(it) }
         val result = metadataEvent.recommended ?: return null
-        return MetadataProjection(
+        return MetadataView(
             title = result.metadata.title,
             alternativeTitles = result.metadata.alternateTitles,
             summary = result.metadata.summary,
@@ -139,7 +58,7 @@ class CollectProjection(val events: List<Event>) {
         )
     }
 
-    private fun projectProcessedMedia(): ProcessedMediaProjection? {
+    private fun projectProcessedMedia(): ProcessedMediaView? {
         val encodeEvent = events.filterIsInstance<ProcesserEncodeResultEvent>()
             .lastOrNull { it.status == no.iktdev.eventi.models.store.TaskStatus.Completed }
             ?: return null
@@ -162,16 +81,16 @@ class CollectProjection(val events: List<Event>) {
 
         val encodedFile = encodeEvent.data?.cachedOutputFile?.let { IFile(it) }
 
-        return ProcessedMediaProjection(
+        return ProcessedMediaView(
             encodedFile = encodedFile,
             extractedFiles = extractedFiles,
             convertedFiles = convertedFiles
         )
     }
 
-    private fun projectParsedFileInfo(): ParsedFileInfoProjection? {
+    private fun projectParsedFileInfo(): ParsedFileInfoView? {
         val result = events.filterIsInstance<MediaParsedInfoEvent>().lastOrNull() ?: return null
-        return ParsedFileInfoProjection(
+        return ParsedFileInfoView(
             name = result.data.parsedFileName,
             collection = result.data.parsedCollection,
             mediaType = result.data.mediaType
@@ -179,84 +98,18 @@ class CollectProjection(val events: List<Event>) {
     }
 
 
-    data class StartProjection(
-        val inputFile: IFile,
-        val mode: StartFlow,
-        val tasks: Set<OperationType>
-    )
 
 
-    data class MetadataProjection(
-        val title: String,
-        val alternativeTitles: List<String> = emptyList(),
-        val summary: List<MetadataSearchResultEvent.SearchResult.MetadataResult.Summary>,
-        val mediaType: MediaType,
-        val genres: List<String>,
-        val cover: IFile?,
-        val source: String
-    )
-
-    data class ParsedFileInfoProjection(
-        val name: String,
-        val collection: String,
-        val mediaType: MediaType
-    )
-
-    data class ProcessedMediaProjection(
-        val encodedFile: IFile?,
-        val extractedFiles: List<IFile>,
-        val convertedFiles: List<IFile>
-    )
 
 
-    enum class TaskStatus {
-        NotInitiated,
-        Pending,
-        InProgress,
-        Completed,
-        Failed,
-        Cancelled,
-        Skipped
-    }
 
-    fun prettyPrint(): String = buildString {
-        val startedContext = startedWith
-        if (startedContext != null) {
-            appendLine("📦 Project snapshot")
-            appendLine("Started with: ${startedContext.inputFile.name} [mode=${startedContext.mode}, tasks=${startedContext.tasks}]")
-            appendLine("Task statuses:")
-            appendLine("  - Metadata: ${metadataTaskStatus.colored()}")
-            appendLine("  - Encode:   ${encodeTaskStatus.colored()}")
-            appendLine("  - Extract:  ${extreactTaskStatus.colored()}")
-            appendLine("  - Convert:  ${convertTaskStatus.colored()}")
-            appendLine("  - Cover:    ${coverDownloadTaskStatus.colored()}")
 
-            metadata?.let {
-                appendLine("Metadata:")
-                appendLine("  • Title: ${it.title}")
-                appendLine("  • Genres: ${it.genres.joinToString()}")
-                appendLine("  • Source: ${it.source}")
-                appendLine("  • Cover: ${it.cover?.path ?: "none"}")
-            }
 
-            parsedFileInfo?.let {
-                appendLine("Parsed file info:")
-                appendLine("  • Name: ${it.name}")
-                appendLine("  • Collection: ${it.collection}")
-                appendLine("  • Type: ${it.mediaType}")
-            }
 
-            processedMedia?.let {
-                appendLine("Processed media:")
-                appendLine("  • Encoded: ${it.encodedFile?.path ?: "none"}")
-                appendLine("  • Extracted: ${it.extractedFiles.joinToString { f -> f.name }}")
-                appendLine("  • Converted: ${it.convertedFiles.joinToString { f -> f.name }}")
-            }
-        } else {
-            appendLine("Start event is missing, should not evaluate!")
-        }
 
-    }
+
+
+
 
     private fun TaskStatus.colored(): String = when (this) {
         TaskStatus.NotInitiated -> "\u001B[90m$this\u001B[0m" // grå

@@ -5,16 +5,16 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import MovieIcon from '@mui/icons-material/Movie'
 import SubtitlesIcon from '@mui/icons-material/Subtitles'
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
-import type { IUiFile } from '../types/types'
+import type { UiFile, UiFileRef } from '../types/types'
 import { normalDate } from '../util'
 import "./filelist-animations.css"
 
 export interface FileListProps {
-    files: IUiFile[]
+    files: UiFileRef[]
     visible: Record<string, boolean>              // CSS animasjon
     collapseVisible: Record<string, boolean>      // Collapse animasjon
-    onOpenFolder: (file: IUiFile) => void
-    onContextMenu: (event: React.MouseEvent<HTMLElement>, file: IUiFile) => void
+    onOpenFolder: (file: UiFileRef) => void
+    onContextMenu: (event: React.MouseEvent<HTMLElement>, file: UiFileRef) => void
     FILE_FADE_DURATION: number
 }
 
@@ -34,7 +34,7 @@ export function FileList({
         "avif", "heic", "heif", "bmp", "tiff", "tif"
     ]
 
-    const getItemIcon = (file: IUiFile) => {
+    const getItemIcon = (file: UiFileRef) => {
         if (file.type === "Folder") return <FolderIcon sx={{ color: "#fbc02d" }} />
 
         if (file.type === "File") {

@@ -35,7 +35,7 @@ class SummarizeContentListener(
             ?.takeIf { it.status == TaskStatus.Completed }
             ?.collection
             ?.takeIf { it.isNotBlank() }
-            ?: CollectionProjection(useHistory, coordinatorEnv.outboxFolder).getCollection()
+            ?: CollectionProjection(useHistory).getCollection()
 
 
         val projection = SummaryProjection(collection, useHistory, coordinatorEnv.outboxFolder)

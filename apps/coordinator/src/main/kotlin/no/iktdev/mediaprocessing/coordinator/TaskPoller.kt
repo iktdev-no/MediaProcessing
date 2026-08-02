@@ -10,6 +10,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskPollerImplementation
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.mediaprocessing.coordinator.services.ProgressService
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.boot.ApplicationArguments
@@ -46,7 +47,9 @@ class TaskPoller(
 
 
 @Component
-class DefaultTaskReporter() : TaskReporter {
+class DefaultTaskReporter(
+    private var progressService: ProgressService,
+) : TaskReporter {
     override fun markClaimed(taskId: UUID, workerId: String): Result {
         return try {
             val result = TaskStore.claim(taskId, workerId)
@@ -114,6 +117,7 @@ class DefaultTaskReporter() : TaskReporter {
 
     override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result {
         return try {
+            progressService.update(referenceId, taskId, payload)
             throw error("Updating task $taskId with payload $payload")
         } catch (e: Exception) {
             Result.Failure("Failed to update progress for task $taskId: ${e.message}", e, false)

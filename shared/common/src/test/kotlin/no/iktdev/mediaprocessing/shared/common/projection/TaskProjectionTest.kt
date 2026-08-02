@@ -6,13 +6,13 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.InputSection
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.section.OutputSection
-import no.iktdev.mediaprocessing.shared.common.AppTestBase
 import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ConvertTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleData
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MediaReadTask
+import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ class TaskProjectionTest : TestBase() {
     fun testChainAcknowledgementNotInitiated1() {
         val events: MutableList<Event> = mutableListOf()
         val projection = TaskProjection(events)
-        assertThat(projection.projectStreamReadStatus()).isEqualTo(CollectProjection.TaskStatus.NotInitiated)
+        assertThat(projection.projectStreamReadStatus()).isEqualTo(TaskStatus.NotInitiated)
     }
 
     @Test
@@ -52,7 +52,7 @@ class TaskProjectionTest : TestBase() {
             .addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectStreamReadStatus()).isEqualTo(CollectProjection.TaskStatus.Completed)
+        assertThat(projection.projectStreamReadStatus()).isEqualTo(TaskStatus.Completed)
     }
 
     @Test
@@ -71,7 +71,7 @@ class TaskProjectionTest : TestBase() {
             .addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectStreamReadStatus()).isEqualTo(CollectProjection.TaskStatus.Pending)
+        assertThat(projection.projectStreamReadStatus()).isEqualTo(TaskStatus.Pending)
     }
 
     @Test
@@ -95,7 +95,7 @@ class TaskProjectionTest : TestBase() {
 
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectStreamReadStatus()).isEqualTo(CollectProjection.TaskStatus.Failed)
+        assertThat(projection.projectStreamReadStatus()).isEqualTo(TaskStatus.Failed)
     }
 
     @Test
@@ -114,7 +114,7 @@ class TaskProjectionTest : TestBase() {
         ).newReferenceId().addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectConvertStatus()).isEqualTo(CollectProjection.TaskStatus.NotInitiated)
+        assertThat(projection.projectConvertStatus()).isEqualTo(TaskStatus.NotInitiated)
     }
 
     @Test
@@ -149,7 +149,7 @@ class TaskProjectionTest : TestBase() {
             .addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectConvertStatus()).isEqualTo(CollectProjection.TaskStatus.Pending)
+        assertThat(projection.projectConvertStatus()).isEqualTo(TaskStatus.Pending)
     }
 
     @Test
@@ -197,7 +197,7 @@ class TaskProjectionTest : TestBase() {
             .addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectConvertStatus()).isEqualTo(CollectProjection.TaskStatus.Completed)
+        assertThat(projection.projectConvertStatus()).isEqualTo(TaskStatus.Completed)
     }
 
     // ---------------------------------------------------------
@@ -222,7 +222,7 @@ class TaskProjectionTest : TestBase() {
         ).newReferenceId().addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectConvertStatus()).isEqualTo(CollectProjection.TaskStatus.NotInitiated)
+        assertThat(projection.projectConvertStatus()).isEqualTo(TaskStatus.NotInitiated)
     }
 
     @Test
@@ -276,7 +276,7 @@ class TaskProjectionTest : TestBase() {
             .addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectConvertStatus()).isEqualTo(CollectProjection.TaskStatus.Pending)
+        assertThat(projection.projectConvertStatus()).isEqualTo(TaskStatus.Pending)
     }
 
     @Test
@@ -341,7 +341,7 @@ class TaskProjectionTest : TestBase() {
             .addToHistory()
 
         val projection = TaskProjection(history)
-        assertThat(projection.projectConvertStatus()).isEqualTo(CollectProjection.TaskStatus.Completed)
+        assertThat(projection.projectConvertStatus()).isEqualTo(TaskStatus.Completed)
     }
 
 }

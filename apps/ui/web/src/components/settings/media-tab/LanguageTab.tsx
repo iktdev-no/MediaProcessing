@@ -1,18 +1,18 @@
 import {
-    Checkbox,
-    Chip,
-    FormControlLabel,
-    List,
-    ListItemButton,
-    ListItemText,
-    Paper,
-    Stack,
-    TextField,
-    Typography,
+  Checkbox,
+  Chip,
+  FormControlLabel,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 
 import { useState } from "react";
-import type { CoordinatorPreference } from "../../../types/transfer-model";
+import type { CoordinatorPreference } from "../../../types/types";
 import { LANGUAGE_OPTIONS } from "../../../utils/languageList";
 import { LanguageFlag } from "../../../utils/languageToFlag";
 

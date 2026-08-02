@@ -8,10 +8,10 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import ErrorIcon from "@mui/icons-material/Error"
 import WarningIcon from "@mui/icons-material/Warning"
 
-import type { CoordinatorHealthStatus } from "../../types/transfer-model"
+import type { SystemHealthStatus } from "../../types/types"
 import { normalDate } from "../../util"
 
-export function StatusHeader({ status, lastActivity }: { status: CoordinatorHealthStatus, lastActivity: string | null }) {
+export function StatusHeader({ status, lastActivity }: { status: SystemHealthStatus, lastActivity: string | null }) {
     const icon =
         status === "HEALTHY" ? <CheckCircleIcon color="success" /> :
             status === "DEGRADED" ? <WarningIcon color="warning" /> :

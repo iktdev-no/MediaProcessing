@@ -13,7 +13,7 @@ import {
 import type {
   CoordinatorPreference,
   Retention,
-} from "../../../types/transfer-model";
+} from "../../../types/types";
 import { FieldSection } from "../../FieldSection";
 import { triggerCacheCleanup, triggerCacheWipe, triggerInboxCleanup, triggerInboxWipe } from "../../../api/coordinator/media";
 import { ConfirmationDialog } from "../../ConfirmationDialog";
@@ -156,7 +156,7 @@ export default function CleanupRetentionTab({
           </Button>
           <Button variant="contained" color="warning" sx={{
             marginLeft: "auto"
-          }} onClick={() => 
+          }} onClick={() =>
             setDialog({
               open: true,
               title: "Wipe Caches",
@@ -252,7 +252,7 @@ export default function CleanupRetentionTab({
           </Button>
           <Button variant="contained" color="warning" sx={{
             marginLeft: "auto"
-          }} onClick={() => 
+          }} onClick={() =>
             setDialog({
               open: true,
               title: "Wipe Inbox",

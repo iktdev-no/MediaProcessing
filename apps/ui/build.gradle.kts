@@ -1,5 +1,3 @@
-import no.iktdev.ts.TsGenerator
-import java.net.URLClassLoader
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.Exec
 
@@ -41,9 +39,12 @@ dependencies {
 
     // Custom libs
     implementation(libs.exfl)
+    implementation(libs.eventi)
     implementation(project(":shared:common"))
-    implementation(project(":transfer-model"))
     implementation(project(":shared:files"))
+    implementation(project(":shared:database"))
+    implementation(project(":shared:ffmpeg"))
+
 
 
     // Testing
@@ -53,22 +54,10 @@ dependencies {
 }
 
 tsGenerator {
-    packageName.set("no.iktdev.mediaprocessing.ui.dto")
+    packageName.set("no.iktdev.mediaprocessing.ui.models.contract")
     outputFile.set(file("$projectDir/web/src/types/types.d.ts"))
 }
 
-/*tasks.register("generateTs") {
-    doLast {
-        val classesDir = file("$projectDir/build/classes/kotlin/main")
-        val cl = URLClassLoader(arrayOf(classesDir.toURI().toURL()), TsGenerator::class.java.classLoader)
-
-        TsGenerator.generate(
-            packageName = "no.iktdev.mediaprocessing.ui.dto",
-            output = file("$projectDir/web/src/types/types.ts"),
-            classLoader = cl
-        )
-    }
-}*/
 
 tasks.named("build") {
     finalizedBy("generateTs")

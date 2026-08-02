@@ -1,6 +1,6 @@
 import PauseCircleIcon from "@mui/icons-material/PauseCircle"
 import PlayCircleIcon from "@mui/icons-material/PlayCircle"
-import type { CurrentState } from "../../types/transfer-model"
+import type { CurrentState } from "../../types/types"
 
 export function StateIcon({ state }: { state: CurrentState }) {
     switch (state) {

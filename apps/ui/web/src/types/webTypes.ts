@@ -1,4 +1,4 @@
-import type { LineageNode } from "./transfer-model"
+import type { LineageNode } from "./types"
 import type { Paginated, UiEvent, UiTask } from "./types"
 
 export type PagedUiTask = Paginated<UiTask>

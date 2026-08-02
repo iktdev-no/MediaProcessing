@@ -1,11 +1,11 @@
 import {
-    Alert,
-    Checkbox,
-    FormControlLabel,
-    Stack,
-    Typography,
+  Alert,
+  Checkbox,
+  FormControlLabel,
+  Stack,
+  Typography,
 } from "@mui/material";
-import type { CoordinatorPreference } from "../../../types/transfer-model";
+import type { CoordinatorPreference } from "../../../types/types";
 import { FieldSection } from "../../FieldSection";
 import AudioCodecEditor from "./AudioCodecEditor";
 

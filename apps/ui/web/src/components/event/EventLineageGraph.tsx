@@ -8,7 +8,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import type { LineageNode } from "../../types/transfer-model";
+import type { LineageNode } from "../../types/types";
 
 // Hybrid tree layout
 import {

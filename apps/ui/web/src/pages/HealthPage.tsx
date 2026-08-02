@@ -10,8 +10,8 @@ import Grid from "@mui/material/Grid";
 import { useEffect } from "react";
 import { NodeBox } from "../components/NodeBox";
 import { StatusLine } from "../components/StatusLine";
-import { useHealth } from "../context/HealthProvider";
 import { useTitle } from "../features/useTitle";
+import { useSseSelector } from "../sse/useSseSelector";
 
 interface HealthTopologyProps {
   sseOk: boolean;
@@ -21,7 +21,7 @@ interface HealthTopologyProps {
 }
 
 export default function HealthPage() {
-  const { status, raw, backend } = useHealth();
+  const health = useSseSelector(state => state.systemHealth);
   const { setTitle } = useTitle();
 
   useEffect(() => {
@@ -40,19 +40,13 @@ export default function HealthPage() {
     >
       <Typography variant="h4">System health</Typography>
 
-      <HealthTopology
-        sseOk={backend?.sseOk ?? false}
-        restOk={backend?.restOk ?? false}
-        coordinatorSseOk={raw?.coordinatorSse ?? false}
-        coordinatorRestOk={raw?.coordinatorRest ?? false}
-      />
 
       <ServicesGrid
-        processer={raw?.processer ?? false}
-        converter={raw?.converter ?? false}
-        pyMetadata={raw?.pyMetadata ?? false}
-        pyWatcher={raw?.pyWatcher ?? false}
-        coordinator={raw?.coordinatorRest ?? false}
+        processer={health?.processer ?? false}
+        converter={health?.converter ?? false}
+        pyMetadata={health?.pyMetadata ?? false}
+        pyWatcher={health?.pyWatcher ?? false}
+        coordinator={health?.coordinatorRest ?? false}
         backendUi={status !== "reconnecting"}
       />
     </Box>

@@ -1,18 +1,18 @@
 import {
-    Alert,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    Stack,
-    TextField,
+  Alert,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
 } from "@mui/material";
 import type {
-    AacProfile,
-    AudioCodecConfig,
-    AudioCodecType,
-    OpusApplication,
-} from "../../../types/transfer-model";
+  AacProfile,
+  AudioCodecConfig,
+  AudioCodecType,
+  OpusApplication,
+} from "../../../types/types";
 import { FieldSection } from "../../FieldSection";
 import ChannelSlider from "./ChannelSlider";
 

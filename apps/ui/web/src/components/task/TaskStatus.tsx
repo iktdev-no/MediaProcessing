@@ -3,7 +3,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
 import ErrorIcon from "@mui/icons-material/Error";
 import { keyframes } from "@mui/material";
-import type { TaskStatus } from "../../types/transfer-model";
+import type { TaskStatus } from "../../types/types";
 import { PendingIcon } from "../PendingIcon";
 import FastForwardIcon from '@mui/icons-material/FastForward';
 

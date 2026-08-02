@@ -1,13 +1,24 @@
 package no.iktdev.mediaprocessing.shared.common.sse
 
-import org.springframework.stereotype.Service
+import mu.KotlinLogging
+import no.iktdev.mediaprocessing.shared.common.sse.basemodel.SSEPingEvent
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 abstract class SSEServerImplementation {
     private val emitters = CopyOnWriteArrayList<SseEmitter>()
+    private val scheduler = Executors.newSingleThreadScheduledExecutor()
+    private val log = KotlinLogging.logger {}
 
 
+    init {
+        // Send en ping-hendelse hvert 10. sekund for å holde forbindelsen i live
+        scheduler.scheduleAtFixedRate({
+            broadcast(SSEPingEvent(System.currentTimeMillis()))
+        }, 0, 5, TimeUnit.SECONDS)
+    }
 
     fun createEmitter(): SseEmitter {
         val emitter = SseEmitter(0L) // never timeout
@@ -20,18 +31,15 @@ abstract class SSEServerImplementation {
         return emitter
     }
 
-    fun broadcast(eventName: String, data: Any) {
+    fun broadcast(event: SSEEvent) {
         val dead = mutableListOf<SseEmitter>()
-
         emitters.forEach { emitter ->
             try {
                 emitter.send(
                     SseEmitter.event()
-                        .name(eventName)
-                        .data(data)
+                        .data(event)
                 )
             } catch (ex: Exception) {
-                // Debug: klienten er borte
                 println("SSE client disconnected: ${ex.message}")
                 dead.add(emitter)
             }
@@ -41,5 +49,4 @@ abstract class SSEServerImplementation {
             emitters.removeAll(dead.toSet())
         }
     }
-
 }

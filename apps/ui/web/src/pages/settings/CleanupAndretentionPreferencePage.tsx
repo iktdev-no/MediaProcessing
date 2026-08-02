@@ -6,7 +6,7 @@ import CleanupRetentionTab from "../../components/settings/cleanup-tab/CleanupRe
 import FilePreservationTab from "../../components/settings/cleanup-tab/FilePreservationTab";
 import { useCoordinatorPreferences } from "../../features/preferences/useCoordinatorPreferences";
 import { useTitle } from "../../features/useTitle";
-import type { InputFileInfo } from "../../types/transfer-model";
+import type { PreservedFile } from "../../types/types";
 
 export default function CleanupAndRetentionPreferencesPage() {
   const {
@@ -23,8 +23,8 @@ export default function CleanupAndRetentionPreferencesPage() {
   const { setTitle } = useTitle();
 
   // State for File Preservation
-  const [files, setFiles] = useState<InputFileInfo[]>([]);
-  const [initialFiles, setInitialFiles] = useState<InputFileInfo[]>([]);
+  const [files, setFiles] = useState<PreservedFile[]>([]);
+  const [initialFiles, setInitialFiles] = useState<PreservedFile[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -95,7 +95,7 @@ export default function CleanupAndRetentionPreferencesPage() {
       } else if (currentTabSafeIndex === 1 && isFilesDirty) {
         const preservedUris = files
           .filter((f) => f.preserved)
-          .map((f) => f.fileUri);
+          .map((f) => f.filePath);
         const updated = await putPreservedFiles(preservedUris);
         setFiles(updated);
         setInitialFiles(updated);

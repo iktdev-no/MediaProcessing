@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getCpuLimit, setCpuLimit } from "../../../api/processer/cpuLimit";
-import type { CPULimit } from "../../../types/transfer-model";
+import type { CPULimit } from "../../../types/types";
 
 export default function LimitTab() {
   const [cpu, setCpu] = useState<CPULimit | null>(null);

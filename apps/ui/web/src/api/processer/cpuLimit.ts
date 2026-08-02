@@ -1,4 +1,4 @@
-import type { CPULimit } from "../../types/transfer-model";
+import type { CPULimit } from "../../types/types";
 import { apiGet, apiPost } from "../client";
 
 export function getCpuLimit() {

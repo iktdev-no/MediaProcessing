@@ -1,21 +1,21 @@
 import type {
-    CoordinatorPreference,
-    H264Profiles,
-    Presets,
-    VideoCodecType,
-} from "../../../types/transfer-model";
+  CoordinatorPreference,
+  H264Profiles,
+  Presets,
+  VideoCodecType,
+} from "../../../types/types";
 
 import {
-    Checkbox,
-    FormControl,
-    FormControlLabel,
-    InputLabel,
-    MenuItem,
-    Select,
-    Slider,
-    Stack,
-    TextField,
-    Typography,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  Slider,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
 import { FieldSection } from "../../FieldSection";
 

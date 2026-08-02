@@ -1,6 +1,6 @@
-import type { CoordinatorHealth } from "../../types/transfer-model";
+import type { SystemHealth } from "../../types/types";
 import { apiGet } from "../client";
 
-export function getCoordinatorHealth() {
-  return apiGet<CoordinatorHealth>("/health");
+export function getSystemHealth() {
+  return apiGet<SystemHealth>("/health");
 }

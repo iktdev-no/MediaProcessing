@@ -1,13 +1,13 @@
 import { Menu, MenuItem } from "@mui/material";
-import type { FileAction, IUiFile, MediaAction } from "../types/types";
+import type { FileAction, UiFile, MediaAction, UiFileRef } from "../types/types";
 
 export interface FileContextMenuProps {
-  file: IUiFile | null;
+  file: UiFileRef | null;
   position: { mouseX: number; mouseY: number } | null;
   onClose: () => void;
-  onMediaAction: (action: MediaAction, file: IUiFile) => void;
-  onFileAction: (action: FileAction, file: IUiFile) => void;
-  onCopyPath: (file: IUiFile) => void;
+  onMediaAction: (action: MediaAction, file: UiFileRef) => void;
+  onFileAction: (action: FileAction, file: UiFileRef) => void;
+  onCopyPath: (file: UiFileRef) => void;
 }
 
 export function FileContextMenu({

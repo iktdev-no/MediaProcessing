@@ -11,7 +11,7 @@ import ListIcon from "@mui/icons-material/List"
 import ScheduleIcon from "@mui/icons-material/Schedule"
 import UpdateIcon from "@mui/icons-material/Update"
 import WhatshotIcon from "@mui/icons-material/Whatshot"
-import type { SequenceHealth } from "../../types/transfer-model"
+import type { SequenceHealth } from "../../types/types"
 import { formatDurationMs, normalDate, parseDurationMs } from "../../util"
 
 

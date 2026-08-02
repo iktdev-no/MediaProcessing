@@ -1,11 +1,11 @@
 package no.iktdev.mediaprocessing.ui.controller
 
 import mu.KotlinLogging
-import no.iktdev.mediaprocessing.ui.UiSseHub
-import no.iktdev.mediaprocessing.ui.dto.requests.StartProcessRequest
-import no.iktdev.mediaprocessing.ui.dto.status.SystemStatus
-import no.iktdev.mediaprocessing.ui.service.CoordinatorClient
+import no.iktdev.mediaprocessing.ui.client.CoordinatorClient
+import no.iktdev.mediaprocessing.ui.models.contract.requests.StartProcessRequest
+import no.iktdev.mediaprocessing.ui.models.contract.SystemStatus
 import no.iktdev.mediaprocessing.ui.service.MediaPathRewriteService
+import no.iktdev.mediaprocessing.ui.service.sse.SSEServer
 import no.iktdev.mediaprocessing.ui.service.StatusService
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 class UiApiController(
     private val coordinator: CoordinatorClient,
     private val statusService: StatusService,
-    private val hub: UiSseHub,
+    private val sseServer: SSEServer,
     private val mediaPathRewriteService: MediaPathRewriteService,
 ) {
     val log = KotlinLogging.logger {}
@@ -27,7 +27,11 @@ class UiApiController(
         return coordinator.startProcess(rewritten)
     }
 
-    @GetMapping("/sse") fun events(): SseEmitter = hub.createEmitter()
+    @GetMapping("/sse") fun events(): SseEmitter {
+        val emitter = sseServer.createEmitter()
+        sseServer.notify(emitter)
+        return emitter
+    }
 
     @GetMapping("/status")
     fun getStatus(): SystemStatus {

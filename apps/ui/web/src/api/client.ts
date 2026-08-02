@@ -1,5 +1,4 @@
 import { toast } from "react-toastify";
-import type { SSEMessage } from "../types/types";
 
 // ------------------------------------------------------------
 // GET
@@ -256,32 +255,6 @@ export async function apiPut<TRequest, TResponse>(
   return text as unknown as TResponse;
 }
 
-// ------------------------------------------------------------
-// SSE
-// ------------------------------------------------------------
-let errorToastShown = false;
-
-export function apiSse(
-  onEvent: (eventName: string, data: any) => void,
-  onError?: (err: any) => void,
-): EventSource {
-  const es = new EventSource("/api/sse");
-
-  es.onmessage = (event) => {
-    const message: SSEMessage = JSON.parse(event.data);
-    onEvent(message.name, message.data);
-  };
-
-  es.onerror = (err) => {
-    if (!errorToastShown) {
-      toast.error("SSE connection lost");
-      errorToastShown = true; // ← vis kun én gang
-    }
-    if (onError) onError(err);
-  };
-
-  return es;
-}
 
 // ------------------------------------------------------------
 // Query builder

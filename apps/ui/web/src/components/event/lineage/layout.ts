@@ -1,4 +1,4 @@
-import type { LineageNode } from "../../../types/transfer-model";
+import type { LineageNode } from "../../../types/types";
 import type { LineageTreeNode } from "../../../types/webTypes";
 
 const VERTICAL_SPACING = 150;

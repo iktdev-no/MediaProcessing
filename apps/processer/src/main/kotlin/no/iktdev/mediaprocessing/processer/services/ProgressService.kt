@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.processer.services
 
 import no.iktdev.eventi.models.Progress
 import no.iktdev.mediaprocessing.processer.LocalProgressCache
+import no.iktdev.mediaprocessing.shared.common.sse.basemodel.SSEProgressUpdateEvent
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -12,7 +13,7 @@ class ProgressService(
 ) {
     fun update(referenceId: UUID, taskId: UUID, progress: Progress) {
         val payload = cache.update(referenceId, taskId, progress)
-        sseServer.broadcast("progress", payload)
+        sseServer.broadcast(SSEProgressUpdateEvent(payload))
     }
 
 }

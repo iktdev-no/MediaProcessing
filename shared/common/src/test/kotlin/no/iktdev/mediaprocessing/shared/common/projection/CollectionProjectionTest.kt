@@ -4,36 +4,27 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
-class CollectionProjectionTest: TestBase() {
-
-    private fun tempOutbox(folders: List<String>): IFile {
-        val root = IFile("/tmp").using("collectionProjectionTest")
-        root.mkdirs()
-        folders.forEach { name -> root.using(name).mkdirs() }
-        return root
-    }
+class CollectionProjectionTest : TestBase() {
 
     @DisplayName(
         """
-        Hvis parsedCollection mangler
+        Hvis verken parsedCollection eller metadata finnes
         Når getCollection kalles
         Så:
             skal det kastes NoSuchElementException
         """
     )
     @Test
-    fun noParsedCollection_throws() {
-        val start = defaultStartEvent()
-            .addToHistory()
-        val proj = CollectionProjection(history, tempOutbox(emptyList()))
+    fun noCandidates_throws() {
+        defaultStartEvent().addToHistory()
+        val proj = CollectionProjection(history)
         assertThrows(NoSuchElementException::class.java) {
             proj.getCollection()
         }
@@ -41,55 +32,49 @@ class CollectionProjectionTest: TestBase() {
 
     @DisplayName(
         """
-        Hvis parsedCollection finnes
-        Og ingen mapper finnes i outbox
+        Hvis kun parsedCollection finnes
         Når getCollection kalles
         Så:
             skal parsedCollection brukes (cleanForFileSystemUse)
         """
     )
     @Test
-    fun parsedCollectionUsedWhenNoFolders() {
-        val start = defaultStartEvent()
-            .addToHistory()
-        val parsed = MediaParsedInfoEvent(
+    fun parsedCollectionUsedAsFallback() {
+        val start = defaultStartEvent().addToHistory()
+        MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "My Show",
                 parsedFileName = "file",
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        ).derivedOf(start)
-            .addToHistory()
+        ).derivedOf(start).addToHistory()
 
-        val proj = CollectionProjection(history, tempOutbox(emptyList()))
+        val proj = CollectionProjection(history)
         assertEquals("My Show".cleanForFileSystemUse(), proj.getCollection())
     }
 
     @DisplayName(
         """
-        Hvis metadata-titler finnes
-        Og en tittel matcher en eksisterende mappe (etter normalisering)
+        Hvis metadata har tittel
         Når getCollection kalles
         Så:
-            skal matchende mappe returneres
+            skal metadata-tittel prioriteres foran parsedCollection
         """
     )
     @Test
-    fun metadataMatchesExistingFolder() {
-        val start = defaultStartEvent()
-            .addToHistory()
+    fun metadataTitlePrioritizedOverParsed() {
+        val start = defaultStartEvent().addToHistory()
         val parsed = MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
-                parsedCollection = "Fallback",
+                parsedCollection = "Fallback Show",
                 parsedFileName = "file",
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        ).derivedOf(start)
-            .addToHistory()
+        ).derivedOf(start).addToHistory()
 
-        val metadata = MetadataSearchResultEvent(
+        MetadataSearchResultEvent(
             results = emptyList(),
             recommended = MetadataSearchResultEvent.SearchResult(
                 searchTitles = listOf("Main"),
@@ -102,7 +87,7 @@ class CollectionProjectionTest: TestBase() {
                 totalScore = 0.0,
                 metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
                     source = "x",
-                    title = "MatchMe",
+                    title = "Metadata Title",
                     alternateTitles = listOf("Alt1"),
                     cover = null,
                     bannerImage = null,
@@ -112,160 +97,74 @@ class CollectionProjectionTest: TestBase() {
                 )
             ),
             status = TaskStatus.Completed
-        )
-            .addToHistory()
+        ).derivedOf(parsed).addToHistory()
 
-        val proj = CollectionProjection(
-            history,
-            tempOutbox(listOf("MatchMe", "Other"))
-        )
-
-        assertEquals("MatchMe", proj.getCollection())
+        val proj = CollectionProjection(history)
+        assertEquals("Metadata Title", proj.getCollection())
     }
 
     @DisplayName(
         """
-        Hvis metadata finnes
-        Men ingen metadata-titler matcher eksisterende mapper
+        Hvis DeterminedCollectionTaskResultEvent finnes i historikken
         Når getCollection kalles
         Så:
-            skal parsedCollection brukes (fallback)
+            skal den lagrede kolleksjonen returneres direkte
         """
     )
     @Test
-    fun fallbackWhenNoMetadataMatch() {
-        val start = defaultStartEvent()
-            .addToHistory()
-        val parsed = MediaParsedInfoEvent(
-            data = MediaParsedInfoEvent.ParsedData(
-                parsedCollection = "Fallback",
-                parsedFileName = "file",
-                parsedSearchTitles = emptyList(),
-                mediaType = MediaType.Movie
-            )
-        ).derivedOf(start)
-            .addToHistory()
+    fun usesAlreadyDeterminedCollectionEvent() {
+        val start = defaultStartEvent().addToHistory()
+        DeterminedCollectionTaskResultEvent(
+            status = TaskStatus.Completed,
+            collection = "LockedInCollection"
+        ).derivedOf(start).addToHistory()
 
-        val metadata = MetadataSearchResultEvent(
-            results = emptyList(),
-            recommended = MetadataSearchResultEvent.SearchResult(
-                searchTitles = listOf("Main"),
-                similarity = 100,
-                prefix = 0,
-                keywordScore = 0.0,
-                typeScore = 0.0,
-                completenessScore = 0.0,
-                sourceScore = 0.0,
-                totalScore = 0.0,
-                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
-                    source = "x",
-                    title = "Title",
-                    alternateTitles = listOf("Alt1"),
-                    cover = null,
-                    bannerImage = null,
-                    type = MediaType.Movie,
-                    summary = emptyList(),
-                    genres = emptyList()
-                )
-            ),
-            status = TaskStatus.Completed
-        )
-            .derivedOf(parsed)
-            .addToHistory()
-
-        val proj = CollectionProjection(history,
-            tempOutbox(listOf("A", "B"))
-        )
-
-        assertEquals("Fallback".cleanForFileSystemUse(), proj.getCollection())
+        val proj = CollectionProjection(history)
+        assertEquals("LockedInCollection", proj.getCollection())
     }
 
     @DisplayName(
         """
         Hvis parsedCollection inneholder unicode
-        Og en eksisterende mappe matcher etter cleanForFileSystemUse
         Når getCollection kalles
         Så:
-            skal unicode-mappen brukes
+            skal cleanForFileSystemUse kjøres på den
         """
     )
     @Test
-    fun unicodeMatching() {
-        val start = defaultStartEvent()
-            .addToHistory()
-        val parsed = MediaParsedInfoEvent(
+    fun unicodeHandling() {
+        val start = defaultStartEvent().addToHistory()
+        MediaParsedInfoEvent(
             data = MediaParsedInfoEvent.ParsedData(
                 parsedCollection = "ÆØÅ Show",
                 parsedFileName = "file",
                 parsedSearchTitles = emptyList(),
                 mediaType = MediaType.Movie
             )
-        ).derivedOf(start)
-            .addToHistory()
+        ).derivedOf(start).addToHistory()
 
-        val cleaned = "ÆØÅ Show".cleanForFileSystemUse()
-
-        val proj = CollectionProjection(
-            history,
-            tempOutbox(listOf(cleaned))
-        )
-
-        assertEquals(cleaned, proj.getCollection())
+        val proj = CollectionProjection(history)
+        assertEquals("ÆØÅ Show".cleanForFileSystemUse(), proj.getCollection())
     }
 
     @DisplayName(
         """
-        Hvis metadata-tittel kun matcher ved forskjellig casing
+        Hvis operasjonen er ConvertSubtitles (alternativ flyt)
         Når getCollection kalles
         Så:
-            skal parsedCollection brukes (systemet er case-sensitive)
+            skal kolleksjonen hentes fra fil-URI-strukturen
         """
     )
     @Test
-    fun caseSensitiveMismatch() {
-        val start = defaultStartEvent()
-            .addToHistory()
-        val parsed = MediaParsedInfoEvent(
-            data = MediaParsedInfoEvent.ParsedData(
-                parsedCollection = "Fallback",
-                parsedFileName = "file",
-                parsedSearchTitles = emptyList(),
-                mediaType = MediaType.Movie
+    fun altFlowConvertSubtitles() {
+        val start = StartProcessingEvent(
+            StartData(
+                fileUri = IFile("/storage/collectionName/sub/lang/file.srt").absolutePath,
+                operation = setOf(OperationType.ConvertSubtitles)
             )
-        ).derivedOf(start)
-            .addToHistory()
+        ).addToHistory()
 
-        val metadata = MetadataSearchResultEvent(
-            results = emptyList(),
-            recommended = MetadataSearchResultEvent.SearchResult(
-                searchTitles = listOf("Main"),
-                similarity = 100,
-                prefix = 0,
-                keywordScore = 0.0,
-                typeScore = 0.0,
-                completenessScore = 0.0,
-                sourceScore = 0.0,
-                totalScore = 0.0,
-                metadata = MetadataSearchResultEvent.SearchResult.MetadataResult(
-                    source = "x",
-                    title = "matchme",
-                    alternateTitles = emptyList(),
-                    cover = null,
-                    bannerImage = null,
-                    type = MediaType.Movie,
-                    summary = emptyList(),
-                    genres = emptyList()
-                )
-            ),
-            status = TaskStatus.Completed
-        ).derivedOf(parsed)
-            .addToHistory()
-
-        val proj = CollectionProjection(
-            history,
-            tempOutbox(listOf("MatchMe"))
-        )
-
-        assertEquals("MatchMe".cleanForFileSystemUse(), proj.getCollection())
+        val proj = CollectionProjection(history)
+        assertEquals("collectionName", proj.getCollection())
     }
 }

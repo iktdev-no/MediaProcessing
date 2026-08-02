@@ -2,12 +2,12 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.PersistContentEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.TransferredContentsSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events_super.TransferredBaseResultEvent
 import no.iktdev.mediaprocessing.shared.common.listeners.SummaryEventListener
-import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
-import no.iktdev.mediaprocessing.shared.common.projection.TaskProjection
+import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
 
@@ -16,8 +16,8 @@ class TransferredContentsEventsListener(val eventStore: no.iktdev.eventi.stores.
     private val log = KotlinLogging.logger {}
 
     val requiredTransferStatus = listOf(
-        CollectProjection.TaskStatus.Skipped,
-        CollectProjection.TaskStatus.Completed
+        TaskStatus.Skipped,
+        TaskStatus.Completed
     )
 
     override fun shouldSummarize(fullHistory: List<Event>): Boolean {

@@ -1,4 +1,4 @@
-import type { Progress } from "../../types/transfer-model";
+import type { UiTask, Progress } from "../../types/types";
 import type {
   IgnoredTaskResponse,
   PagedUiTask,
@@ -10,6 +10,10 @@ import { apiGet, apiPatch, buildQuery } from "../client";
 export function getTasks(query: TaskQuery) {
   const qs = buildQuery(query);
   return apiGet<PagedUiTask>(`/tasks?${qs}`);
+}
+
+export function getTasksForReference(referenceId: string) {
+  return apiGet<Array<UiTask>>(`/tasks/by-reference/${referenceId}`)
 }
 
 export function resetFailedTask(

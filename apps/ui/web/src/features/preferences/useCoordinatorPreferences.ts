@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { CoordinatorPreference } from "../../types/transfer-model";
+import type { CoordinatorPreference } from "../../types/types";
 
 export function useCoordinatorPreferences() {
   const [prefs, setPrefs] = useState<CoordinatorPreference | null>(null);

@@ -1,19 +1,19 @@
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import {
-    Box,
-    IconButton,
-    Stack,
-    ToggleButton,
-    ToggleButtonGroup,
-    Typography,
+  Box,
+  IconButton,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
 } from "@mui/material";
 import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-    type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiDelete, apiGet } from "../api/client";
@@ -26,7 +26,7 @@ import { FileContextMenu } from "../components/FileContextMenu";
 import { FileList } from "../components/FileList";
 import { LoadingToast } from "../components/LoadingToast";
 import { useTitle } from "../features/useTitle";
-import type { FileAction, IUiFile, MediaAction } from "../types/types";
+import type { FileAction, UiFile, UiFileRef, MediaAction } from "../types/types";
 
 /* ───────────────── Helpers ───────────────── */
 
@@ -39,7 +39,7 @@ export default function FilesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const path = searchParams.get("path") ?? "/";
 
-  const [files, setFiles] = useState<IUiFile[]>([]);
+  const [files, setFiles] = useState<UiFileRef[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,10 +56,10 @@ export default function FilesPage() {
     mouseX: number;
     mouseY: number;
   } | null>(null);
-  const [menuFile, setMenuFile] = useState<IUiFile | null>(null);
+  const [menuFile, setMenuFile] = useState<UiFileRef | null>(null);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmTarget, setConfirmTarget] = useState<IUiFile | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<UiFileRef | null>(null);
 
   const { setTitle } = useTitle();
 
@@ -79,7 +79,7 @@ export default function FilesPage() {
           path === "/"
             ? "/files/roots"
             : `/files/explore?path=${encodeURIComponent(path)}`;
-        const data = await apiGet<IUiFile[]>(endpoint);
+        const data = await apiGet<UiFileRef[]>(endpoint);
         setFiles(data);
         const map = Object.fromEntries(data.map((f) => [f.uri, true]));
         setVisible(map);
@@ -124,7 +124,7 @@ export default function FilesPage() {
 
   /* ───── Context menu ───── */
 
-  const openMenu = (e: MouseEvent<HTMLElement>, file: IUiFile) => {
+  const openMenu = (e: MouseEvent<HTMLElement>, file: UiFileRef) => {
     e.preventDefault();
     setMenuFile(file);
     setMenuPos({
@@ -138,12 +138,12 @@ export default function FilesPage() {
     setMenuFile(null);
   };
 
-  const onCopyPath = (file: IUiFile) => {
+  const onCopyPath = (file: UiFileRef) => {
     navigator.clipboard.writeText(file.uri);
     closeMenu();
   };
 
-  const onMediaAction = async (action: MediaAction, file: IUiFile) => {
+  const onMediaAction = async (action: MediaAction, file: UiFileRef) => {
     console.log("MEDIA ACTION:", action, file);
     closeMenu();
     try {
@@ -154,7 +154,7 @@ export default function FilesPage() {
     }
   };
 
-  const onFileAction = (action: FileAction, file: IUiFile) => {
+  const onFileAction = (action: FileAction, file: UiFileRef) => {
     console.log("FILE ACTION:", action, file);
     if (action.id === "Open" && file.type === "Folder") {
       console.log("OPEN FOLDER:", file);
@@ -185,14 +185,14 @@ export default function FilesPage() {
         : Number(raw);
   }
 
-  const onDelete = async (item: IUiFile | null) => {
+  const onDelete = async (item: UiFile | null) => {
     if (!item) return;
     setLoading(true);
 
     try {
       await apiDelete("/files/delete", {
         body: { uri: item.uri },
-        onError: () => {},
+        onError: () => { },
       });
       console.log("Deleted:", item);
       toast.success(`Deleted ${item.uri}`);

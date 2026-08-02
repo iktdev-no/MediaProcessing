@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { useEffect, useState } from "react";
 import { ReactFlowProvider } from "reactflow";
 import { getEventsLineage } from "../../api/coordinator/events";
-import type { LineageNode } from "../../types/transfer-model";
+import type { LineageNode } from "../../types/types";
 import { EventLineageGraph } from "./EventLineageGraph";
 
 interface LineageDialogProps {

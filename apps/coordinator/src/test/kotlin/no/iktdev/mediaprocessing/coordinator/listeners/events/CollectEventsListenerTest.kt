@@ -142,7 +142,7 @@ class CollectEventsListenerTest : TestBase() {
             derivedFrom = parsed
         )
             .addToHistory()
-        val determined = determineCollectionEvents(collection = "MyCollection", convert.last(), TaskStatus.Failed)
+        val determined = determineCollectionEvents(collection = "MyCollection", convert.last(), TaskStatus.Skipped)
             .addToHistory()
         val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
             .addToHistory()

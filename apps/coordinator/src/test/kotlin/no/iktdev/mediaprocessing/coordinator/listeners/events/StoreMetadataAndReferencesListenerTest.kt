@@ -1,17 +1,18 @@
-package no.iktdev.mediaprocessing.projection
+package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import no.iktdev.eventi.models.Event
-import no.iktdev.eventi.models.Metadata
 import no.iktdev.eventi.models.MultiTaskIdentity
 import no.iktdev.eventi.models.store.TaskStatus
-import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.*
-import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
-import no.iktdev.mediaprocessing.shared.common.projection.TaskProjection
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.CoverTransferredResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.SubtitleTransferredResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.VideoTransferredResultEvent
+import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 import no.iktdev.mediaprocessing.withMetadata
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 class TaskProjectionMigrateStatusTest {
 
@@ -78,7 +79,7 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(created, r1, r2))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.Completed)
+        assertThat(status).isEqualTo(TaskStatus.Completed)
     }
 
     @Test
@@ -94,7 +95,7 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(created, r1, r2))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.Failed)
+        assertThat(status).isEqualTo(TaskStatus.Failed)
     }
 
     @Test
@@ -110,7 +111,7 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(created, r1, r2))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.Failed)
+        assertThat(status).isEqualTo(TaskStatus.Failed)
     }
 
     @Test
@@ -122,7 +123,7 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(created))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.Pending)
+        assertThat(status).isEqualTo(TaskStatus.Pending)
     }
 
     @Test
@@ -136,7 +137,7 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(r1))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.NotInitiated)
+        assertThat(status).isEqualTo(TaskStatus.NotInitiated)
     }
 
     @Test
@@ -150,7 +151,7 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(created, r1))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.Pending)
+        assertThat(status).isEqualTo(TaskStatus.Pending)
     }
 
     @Test
@@ -165,6 +166,6 @@ class TaskProjectionMigrateStatusTest {
         val projection = TaskProjection(listOf(created, r1))
         val status = projection.projectMigrateContentStatus()
 
-        assertThat(status).isEqualTo(CollectProjection.TaskStatus.Pending)
+        assertThat(status).isEqualTo(TaskStatus.Pending)
     }
 }

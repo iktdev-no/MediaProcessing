@@ -3,12 +3,12 @@ import CloseIcon from "@mui/icons-material/Close"
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
 import { Box, Button, Chip, Paper, Typography } from "@mui/material"
 import { useState } from "react"
-import { useProgress } from "../../context/ProgressProvider"
 import type { UiTask } from "../../types/types"
 import { DetailsButton } from "../DetailsButton"
 import { TaskDetailsDialog } from "./TaskDetailsDialog"
 import { TaskProgress } from "./TaskProgress"
 import { TaskStatusIcon } from "./TaskStatus"
+import { useSseSelector } from "../../sse/useSseSelector"
 
 export interface TaskCardProps {
     task: UiTask
@@ -19,7 +19,7 @@ export interface TaskCardProps {
 }
 
 export function TaskCard({ task, show, onCopy, onReferenceIdClicked, onCanceltask }: TaskCardProps) {
-    const live = useProgress().progress.get(task.taskId)
+    const live = useSseSelector(state => state.progress[task.taskId])
 
     const [open, setOpen] = useState(false)
 

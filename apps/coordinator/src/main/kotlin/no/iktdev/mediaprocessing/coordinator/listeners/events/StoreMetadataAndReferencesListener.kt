@@ -3,7 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import mu.KotlinLogging
 import no.iktdev.eventi.events.SingleTaskCreatorEventListener
 import no.iktdev.eventi.models.Event
-import no.iktdev.eventi.models.SingleTaskCratedEvent
+import no.iktdev.eventi.models.SingleTaskCreatedEvent
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
@@ -93,7 +93,7 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         event: Event,
         history: List<Event>,
         task: Task
-    ): SingleTaskCratedEvent {
+    ): SingleTaskCreatedEvent {
 
         return StoreMediaInfoAndMetadataTaskCreatedEvent(task.taskId)
             .derivedOf(event)

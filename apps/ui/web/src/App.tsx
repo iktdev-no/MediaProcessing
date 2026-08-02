@@ -6,8 +6,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
-import { HealthProvider } from "./context/HealthProvider";
-import { ProgressProvider } from "./context/ProgressProvider";
 import { TitleProvider } from "./features/useTitle";
 import DashboardPage from "./pages/DasboardPage";
 import EventsPage from "./pages/EventsPage";
@@ -20,6 +18,7 @@ import TasksPage from "./pages/TasksPage";
 import CleanupAndRetentionPreferencePage from "./pages/settings/CleanupAndretentionPreferencePage";
 import MediaPreferencesPage from "./pages/settings/MediaPreferencePage";
 import ProcessorSettingsPage from "./pages/settings/ProcesserSettingsPage";
+import SequenceViewPage from "./pages/sequences/SequenceViewPage";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -63,9 +62,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <TitleProvider>
-      <HealthProvider>
-        <ProgressProvider>{children}</ProgressProvider>
-      </HealthProvider>
+      {children}
     </TitleProvider>
   );
 }
@@ -86,6 +83,8 @@ function App() {
               />
             </Route>
             <Route path="/sequences" element={<SequencePage />} />
+            <Route path="/sequence/:referenceId" element={<SequenceViewPage />} />
+
             <Route path="/files" element={<FilesPage />} />
             <Route path="/health" element={<HealthPage />} />
             <Route path="/tasks" element={<TasksPage />} />
