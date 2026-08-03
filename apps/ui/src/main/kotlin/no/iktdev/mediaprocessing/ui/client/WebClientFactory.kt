@@ -1,11 +1,13 @@
 package no.iktdev.mediaprocessing.ui.client
 
+import io.netty.channel.ChannelOption
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
 import io.netty.resolver.DefaultAddressResolverGroup
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import reactor.netty.http.client.HttpClient
+import java.time.Duration
 
 @Component
 class WebClientFactory(
@@ -24,10 +26,11 @@ class WebClientFactory(
     fun createSse(baseUrl: String): WebClient {
         val httpClient = HttpClient.create()
             .compress(true)
-            .keepAlive(false)
+            .keepAlive(true)
+            .option(ChannelOption.SO_KEEPALIVE, true)
             .resolver(DefaultAddressResolverGroup.INSTANCE)
         // Valgfritt: skru av read timeout for SSE hvis du vil unngå at den timer ut
-        // .responseTimeout(java.time.Duration.ofDays(1))
+            .responseTimeout(Duration.ofMinutes(30))
 
         return webClientBuilder
             .clone()

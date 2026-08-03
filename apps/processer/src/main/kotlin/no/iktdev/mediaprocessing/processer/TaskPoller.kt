@@ -146,7 +146,6 @@ class DefaultTaskReporter(
     }
 
     override fun updateProgress(referenceId: UUID, taskId: UUID, payload: Progress): Result {
-        // Not to be implemented for this application
         return try {
             progressService.update(referenceId, taskId, progress = payload)
             Result.Success

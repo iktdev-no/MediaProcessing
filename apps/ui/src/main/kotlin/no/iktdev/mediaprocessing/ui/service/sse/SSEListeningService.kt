@@ -18,7 +18,6 @@ class SSEListeningService(
     private val sseEventHandler: SSEEventHandler,
 ) {
 
-
     // Status-trackere for om tjenestene er online
     private val coordinatorOnline = AtomicBoolean(false)
     private val processerOnline = AtomicBoolean(false)
@@ -33,7 +32,7 @@ class SSEListeningService(
                 if (coordinatorOnline.compareAndSet(false, true)) {
                     println("✅ Ekte kontakt med Coordinator SSE!")
                 }
-                sseEventHandler.onEvent(event)
+                sseEventHandler.onEvent("Coordinator", event)
             }
             .doOnCancel {
                 coordinatorOnline.set(false)
@@ -47,17 +46,13 @@ class SSEListeningService(
                         println("🔄 Mistet kontakt med Coordinator, forsøk nr. ${retrySignal.totalRetries() + 1}...")
                     }
             )
-            .onErrorResume {
-                coordinatorOnline.set(false)
-                Flux.empty()
-            }
 
         val processerStream = processerClient.streamEvents()
             .doOnNext { event ->
                 if (processerOnline.compareAndSet(false, true)) {
                     println("✅ Ekte kontakt med Processer SSE!")
                 }
-                sseEventHandler.onEvent(event)
+                sseEventHandler.onEvent("Processor", event)
             }
             .doOnCancel {
                 processerOnline.set(false)
@@ -71,10 +66,6 @@ class SSEListeningService(
                         println("🔄 Mistet kontakt med Processer, forsøk nr. ${retrySignal.totalRetries() + 1}...")
                     }
             )
-            .onErrorResume {
-                processerOnline.set(false)
-                Flux.empty()
-            }
 
         // Lagre referansene slik at vi kan rydde opp etter oss
         coordinatorSubscription = coordinatorStream.subscribe()

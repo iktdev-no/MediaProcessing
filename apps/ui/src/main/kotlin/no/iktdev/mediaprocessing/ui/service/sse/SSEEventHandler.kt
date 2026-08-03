@@ -17,13 +17,13 @@ class SSEEventHandler(
 ) {
     private val log = KotlinLogging.logger {}
 
-    fun onEvent(e: ServerSentEvent<String>) {
+    fun onEvent(source: String, e: ServerSentEvent<String>) {
         val (event, data) = e.event() to e.data()
         if (event.isNullOrBlank()) run {
             log.error { "Received event without name! Name: ${e.event()}, Data: ${e.data()}, Id: ${e.id()}" }
             return
         }
-        println("Mottok event [$event med data: $data]")
+        println("[$source] Mottok event [$event med data: $data]")
         val key = SSEKeys.fromKey(event) ?: run {
             log.error { "Event [$event] could not be found" }
             return
