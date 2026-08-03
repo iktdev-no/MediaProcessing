@@ -14,9 +14,12 @@ log = logging.getLogger(__name__)
 
 class Tmdb(SourceBase):
     """
-    TMDB source – robust, stable, supports movies + TV.
+    TMDB source - robust, stable, supports movies + TV.
     Search-only, same job as IMDbV2.
     """
+
+    sourceName = "TMDB"
+
 
     def __init__(self, titles: List[str], locale: str = "en-US") -> None:
         super().__init__(titles)
@@ -68,10 +71,10 @@ class Tmdb(SourceBase):
                     log.info(f"[tmdb] -> id {tmdb_id} = '{tmdb_title}' for søk '{title}'")
 
         except Exception as e:
-            log.exception(f"[tmdb] Search failed for '{title}': {e}")
+            log.exception(f"{self.sourceName} Search failed for '{title}': {e}")
 
         if not id_to_title:
-            log.warning(f"[tmdb] No TMDB IDs found for '{title}'")
+            log.warning(f"{self.sourceName} No TMDB IDs found for '{title}'")
 
         return id_to_title
 
@@ -101,11 +104,11 @@ class Tmdb(SourceBase):
             if tv_data.get("name"):
                 return self._build_tv_metadata(id, tv_data)
 
-            log.warning(f"[tmdb] No metadata found for id {id}")
+            log.warning(f"{self.sourceName} No metadata found for id {id}")
             return None
 
         except Exception as e:
-            log.exception(f"[tmdb] Metadata fetch failed for id {id}: {e}")
+            log.exception(f"{self.sourceName} Metadata fetch failed for id {id}: {e}")
             return None
 
     # ---------------------------------------------------------

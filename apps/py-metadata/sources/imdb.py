@@ -1,11 +1,10 @@
 import logging
 import asyncio
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional, Any
 
-from imdb import Cinemagoer
-from imdb.Movie import Movie
+from imdbinfo import search_title, get_movie, get_akas  # type: ignore
+from imdbinfo.locale import set_locale  # type: ignore
 
-from models.enums import MediaType
 from models.metadata import Metadata, Summary
 from .source import SourceBase
 
@@ -13,75 +12,102 @@ log = logging.getLogger(__name__)
 
 
 class Imdb(SourceBase):
-    def __init__(self, titles: List[str]) -> None:
+    """
+    Modern IMDb source using imdbinfo (2024+ compatible).
+    Supports locale, AKAs, and robust metadata extraction.
+    """
+
+    def __init__(self, titles: List[str], locale: Optional[str] = None) -> None:
         super().__init__(titles)
-        self.api = Cinemagoer(accessSystem='http')
+        self.locale = locale
+
+        if locale:
+            try:
+                set_locale(locale)
+                log.info(f"{self.name} Locale set to '{locale}'")
+            except Exception as e:
+                log.warning(f"{self.name} Failed to set locale '{locale}': {e}")
 
     @property
     def name(self) -> str:
         return "imdb"
 
-
     async def queryIds(self, title: str) -> Dict[str, str]:
-        """
-        Returnerer {imdb_id: tittel} for en gitt søketittel.
-        Ingen fuzzy scoring – scoreren tar seg av relevans senere.
-        """
         id_to_title: Dict[str, str] = {}
 
         try:
-            search_results = await asyncio.to_thread(self.api.search_movie, title)
-            capped: List[Movie] = search_results[:7]  # IMDb kan være støyete
+            results = await asyncio.to_thread(
+                search_title,
+                title,
+                self.locale if self.locale else None
+            )
 
-            for item in capped:
-                imdb_id = item.movieID
-                imdb_title = item.get("title")
+            titles = getattr(results, "titles", [])[:7]
 
-                if imdb_id not in id_to_title:
-                    log.info(f"IMDB -> id {imdb_id} = '{imdb_title}' for søk '{title}'")
+            for item in titles:
+                imdb_id = item.imdb_id
+                imdb_title = item.title
+
+                if imdb_id and imdb_title:
                     id_to_title[imdb_id] = imdb_title
+                    log.info(f"{self.name} -> id {imdb_id} = '{imdb_title}' for søk '{title}'")
 
         except Exception as e:
-            log.exception(e)
+            log.exception(f"{self.name} Search failed for '{title}': {e}")
+
+        if not id_to_title:
+            log.warning(f"{self.name} No IMDb IDs found for '{title}'")
 
         return id_to_title
 
-
     async def fetchMetadata(self, id: str) -> Optional[Metadata]:
-        """
-        Henter full metadata for en gitt IMDB-id.
-        Kalles av SourceBase.search() for ALLE kandidater.
-        """
         try:
-            result = await asyncio.to_thread(self.api.get_movie, id)
+            movie = await asyncio.to_thread(
+                get_movie,
+                id,
+                self.locale if self.locale else None
+            )
 
-            # Felles media-type validering
-            media_type = self.validateMediaTypeOrDrop(result.get("kind"), id, result.get("title"))
-            if media_type is None:
+            if not movie:
+                log.warning(f"{self.name} No movie object returned for id {id}")
                 return None
 
-            # Cover fallback
-            cover = result.get_fullsizeURL() or result.get("cover url")
+            # Validate media type
+            media_type = self.validateMediaTypeOrDrop(
+                movie.kind,
+                id,
+                movie.title
+            )
+            if media_type is None:
+                log.warning(f"{self.name} Dropped id {id} due to unsupported kind '{movie.kind}'")
+                return None
 
-            # Synopsis
-            summary = result.get("plot outline")
+            # Cover
+            cover = getattr(movie, "poster_url", None) or getattr(movie, "image", None)
 
-            # Alternative titler
-            localized_titles = result.get("localized title")
-            alt_titles = localized_titles if isinstance(localized_titles, list) else []
+            # Summary
+            summary_text = getattr(movie, "plot", None)
+
+            # AKAs (correct handling)
+            try:
+                akas_data = await asyncio.to_thread(get_akas, id)
+                akas_list = [aka.title for aka in akas_data.akas]
+            except Exception as e:
+                log.warning(f"[imdbv2] Failed to fetch AKAs for id {id}: {e}")
+                akas_list = []
 
             return Metadata(
                 sourceId=str(id),
-                title=result.get("title"),
-                altTitle=alt_titles,
-                cover=cover,
+                title=movie.title,
+                altTitle=akas_list,
+                cover=cover or "",
                 bannerImage=None,
-                summary=[Summary(language="eng", summary=summary)] if summary else [],
+                summary=[Summary(language="eng", summary=summary_text)] if summary_text else [],
                 type=media_type,
-                genres=result.get("genres", []),
-                source="imdb",
+                genres=getattr(movie, "genres", []),
+                source="imdbv2",
             )
 
         except Exception as e:
-            log.exception(e)
+            log.exception(f"{self.name} Metadata fetch failed for id {id}: {e}")
             return None

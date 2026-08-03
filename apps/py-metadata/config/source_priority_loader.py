@@ -5,9 +5,8 @@ from pathlib import Path
 
 DEFAULT_PRIORITY = {
     "mal": 1,
-    "aniiv2": 2,
+    "anii": 2,
     "imdb": 3,
-    "anii": 4
 }
 
 def running_in_docker() -> bool:

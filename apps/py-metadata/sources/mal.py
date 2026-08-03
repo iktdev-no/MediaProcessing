@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 
 class Mal(SourceBase):
+
+
     def __init__(self, titles: List[str]) -> None:
         super().__init__(titles)
 
@@ -36,10 +38,10 @@ class Mal(SourceBase):
                     id_to_title[str(item.mal_id)] = item.title # type: ignore
 
         except Exception as e:
-            log.exception(f"MAL search failed for '{title}': {e}")
+            log.exception(f"{self.name} search failed for '{title}': {e}")
 
         if not id_to_title:
-            log.warning(f"MAL returned no IDs for '{title}'")
+            log.warning(f"{self.name} returned no IDs for '{title}'")
 
         return id_to_title
 
@@ -49,7 +51,7 @@ class Mal(SourceBase):
 
             media_type = self.validateMediaTypeOrDrop(anime.type, id, anime.title) # type: ignore
             if media_type is None:
-                log.warning(f"MAL dropped id {id} ('{anime.title}') due to unsupported media type '{anime.type}'") # type: ignore
+                log.warning(f"{self.name} dropped id {id} ('{anime.title}') due to unsupported media type '{anime.type}'") # type: ignore
                 return None
 
             return Metadata(
@@ -71,5 +73,5 @@ class Mal(SourceBase):
             )
 
         except Exception as e:
-            log.exception(f"MAL metadata fetch failed for id {id}: {e}")
+            log.exception(f"{self.name} metadata fetch failed for id {id}: {e}")
             return None

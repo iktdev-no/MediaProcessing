@@ -13,7 +13,7 @@ from tests.fakes.fake_db import FakeDB
 def make_metadata_row():
     return {
         "ID": 1,
-        "SOURCE": "aniiv2",
+        "SOURCE": "anii",
         "SOURCE_ID": "12345",
         "TITLE": "My Anime",
         "COVER": "http://example.com/cover.jpg",
@@ -58,7 +58,7 @@ def test_fetch_metadata_success():
 
     db = FakeDB(rows_map)
 
-    result = fetch_metadata_by_source_and_id(db, "aniiv2", "12345")
+    result = fetch_metadata_by_source_and_id(db, "anii", "12345")
 
     assert result is not None
     assert result.title == "My Anime"
@@ -79,5 +79,5 @@ def test_fetch_metadata_not_found():
 
     db = FakeDB(rows_map)
 
-    result = fetch_metadata_by_source_and_id(db, "aniiv2", "99999")
+    result = fetch_metadata_by_source_and_id(db, "anii", "99999")
     assert result is None

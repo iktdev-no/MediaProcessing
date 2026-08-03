@@ -49,3 +49,5 @@ bin/
 /apps/py-metadata/.cache
 /tmp
 
+/apps/py-metadata/config/source_priority.json
+/apps/py-metadata/config/sources.json

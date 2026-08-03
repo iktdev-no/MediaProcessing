@@ -6,12 +6,10 @@ import os
 
 
 DEFAULT_CONFIG = {
-    "aniiv2": True,
+    "anii": True,
     "mal": True,
     "imdb": True,
-    "imdbLegacy": True,
     "tmdb": True,
-    "anii": False
 }
 
 def running_in_docker() -> bool:

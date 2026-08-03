@@ -95,7 +95,7 @@ def make_task_row(
 # -------------------------------------------------------------------
 
 def make_metadata_row(
-    source="aniiv2",
+    source="anii",
     source_id="12345",
     title="My Anime",
     media_type=MediaType.SERIE,

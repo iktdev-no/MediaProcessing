@@ -74,7 +74,7 @@ class SummaryProjection(
 
         val useName = (if (isMovie()) getFileName() else {
             collection.cleanForFileSystemUse()
-        }).let { name -> "$name.${file.extension()}" }
+        }).let { name -> "$name-${useCover.data.source}.${file.extension()}" }
 
         val storeFile = useStore.using(useName)
         return ContentMigrationPlan.SingleContent(

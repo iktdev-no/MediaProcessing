@@ -15,7 +15,7 @@ class SourceBase(ABC):
     @property 
     @abstractmethod 
     def name(self) -> str: 
-        """Returner navnet på sourcen, f.eks. 'aniiv2'.""" 
+        """Returner navnet på sourcen, f.eks. 'anii'.""" 
         pass
 
     @abstractmethod

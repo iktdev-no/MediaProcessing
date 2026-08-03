@@ -1,116 +1,195 @@
 import logging
-import hashlib
 import asyncio
-from typing import List, Dict, Optional
+import requests
+from typing import Dict, List, Optional
 
-from AnilistPython import Anilist
-
-from models.enums import MediaType
 from models.metadata import Metadata, Summary
 from .source import SourceBase
 
+from .anilist_types import (
+    AniListResponse,
+    AniListMedia,
+)
+
 log = logging.getLogger(__name__)
+
+ANILIST_URL = "https://graphql.anilist.co"
 
 
 class Anii(SourceBase):
     """
-    AniListPython har ikke et ekte søk som returnerer flere kandidater.
-    Derfor:
-      - queryIds() returnerer maks 1 ID per tittel
-      - fetchMetadata() henter metadata basert på cached result
+    AniList GraphQL-basert source.
+    Typesikker, eksplisitt og robust.
     """
-
-    def __init__(self, titles: List[str]) -> None:
-        super().__init__(titles)
-        self.api = Anilist()
-        self._cache: Dict[str, Dict] = {}  # id -> raw result
-
 
     @property
     def name(self) -> str:
         return "anii"
 
-
     async def queryIds(self, title: str) -> Dict[str, str]:
+        query = """
+        query ($search: String) {
+          Page(perPage: 10) {
+            media(search: $search, type: ANIME) {
+              id
+              title {
+                english
+                romaji
+                native
+              }
+            }
+          }
+        }
         """
-        AniListPython.get_anime(title) returnerer kun ett resultat.
-        Vi genererer en stabil ID basert på tittelen.
-        """
-        id_to_title: Dict[str, str] = {}
+
+        variables = {"search": title}
 
         try:
-            result = await asyncio.to_thread(self.api.get_anime, title)
+            response = await asyncio.to_thread(
+                requests.post,
+                ANILIST_URL,
+                json={"query": query, "variables": variables},
+                timeout=10
+            )
 
-            if not result:
+            data: AniListResponse = response.json()  # type: ignore[assignment]
+
+            data_block = data.get("data")
+            if not data_block:
+                log.warning(f"{self.name} returned no data block for '{title}'")
                 return {}
 
-            # Finn engelsk eller romaji tittel
-            use_title = result.get("name_english") or result.get("name_romaji")
-            if not use_title:
+            page_block = data_block.get("Page")
+            if not page_block:
+                log.warning(f"{self.name} returned no Page block for '{title}'")
                 return {}
 
-            # Generer en stabil ID basert på tittelen
-            generated_id = self.generate_id(use_title)
-            if not generated_id:
-                return {}
+            media_list: List[AniListMedia] = page_block.get("media", [])
 
-            # Cache raw result slik at fetchMetadata kan hente det
-            self._cache[generated_id] = result
 
-            id_to_title[generated_id] = use_title
+            id_to_title: Dict[str, str] = {}
 
-            log.info(f"AniList -> id {generated_id} = '{use_title}' for søk '{title}'")
+            for item in media_list:
+                anime_id = item.get("id")
+                title_block = item.get("title")
+
+                if anime_id is None or not title_block:
+                    log.warning(f"{self.name}: Skipping malformed media entry: {item}")
+                    continue
+
+                chosen_title = (
+                    title_block.get("english")
+                    or title_block.get("romaji")
+                    or title_block.get("native")
+                )
+
+                if chosen_title:
+                    id_to_title[str(anime_id)] = chosen_title
+                    log.info(f"{self.name} -> id {anime_id} = '{chosen_title}' for søk '{title}'")
+
+
+            if not id_to_title:
+                log.warning(f"{self.name} returned no IDs for '{title}'")
+
+            return id_to_title
 
         except Exception as e:
-            if "429" in str(e):
-                log.error("AniList rate limited")
-            else:
-                log.exception(e)
-
-        return id_to_title
+            log.exception(f"{self.name} search failed for '{title}': {e}")
+            return {}
 
     async def fetchMetadata(self, id: str) -> Optional[Metadata]:
+        query = """
+        query ($id: Int) {
+        Media(id: $id, type: ANIME) {
+            id
+            title {
+            english
+            romaji
+            native
+            }
+            coverImage {
+            extraLarge
+            large
+            medium
+            }
+            bannerImage
+            description
+            format
+            genres
+        }
+        }
         """
-        Henter metadata fra cache (fordi AniListPython ikke har get_by_id).
-        """
-        result = self._cache.get(id)
-        if not result:
-            return None
+
+        variables = {"id": int(id)}
 
         try:
-            use_title = result.get("name_english") or result.get("name_romaji")
+            response = await asyncio.to_thread(
+                requests.post,
+                ANILIST_URL,
+                json={"query": query, "variables": variables},
+                timeout=10
+            )
 
-            # Felles media-type validering
-            media_type = self.validateMediaTypeOrDrop(result.get("airing_format"), id, use_title)
+            data: AniListResponse = response.json()  # type: ignore[assignment]
+
+            data_block = data.get("data") 
+            if not data_block:
+                log.warning(f"{self.name} returned no data block for id {id}")
+                return None
+
+            media: Optional[AniListMedia] = data_block.get("Media")
+            if not media:
+                log.warning(f"{self.name} returned no Media for id {id}")
+                return None
+
+            title_data = media.get("title")
+            if not title_data:
+                log.warning(f"{self.name} returned media without title for id {id}")
+                return None
+            
+            title = (
+                title_data.get("english")
+                or title_data.get("romaji")
+                or title_data.get("native")
+            )
+            if not title:
+                log.warning(f"{self.name} returned media without title for id {id}")
+                return None
+
+            media_type = self.validateMediaTypeOrDrop(media.get("format"), id, title)
             if media_type is None:
+                log.warning(f"{self.name} dropped id {id} ('{title}') due to unsupported media type '{media.get('format')}'")
                 return None
 
-            summary = result.get("desc")
-            if not use_title:
-                return None
+            alt_titles = [
+                t for t in [
+                    title_data.get("romaji"),
+                    title_data.get("native")
+                ]
+                if t and t != title
+            ]
 
-            alt_titles = []
-            if result.get("name_romaji") and result.get("name_romaji") != use_title:
-                alt_titles.append(result.get("name_romaji"))
+            cover_image = media.get("coverImage", {})
+            cover = (
+                cover_image.get("extraLarge")
+                or cover_image.get("large")
+                or cover_image.get("medium")
+            )
+
+            description = media.get("description") or ""
 
             return Metadata(
                 sourceId=str(id),
-                title=use_title,
+                title=title,
                 altTitle=alt_titles,
-                cover=result.get("cover_image"),
-                bannerImage=None,
-                summary=[Summary(language="eng", summary=summary)] if summary else [],
+                cover=cover,
+                bannerImage=media.get("bannerImage"),
+                summary=[Summary(language="eng", summary=description)] if description else [],
                 type=media_type,
-                genres=result.get("genres", []),
+                genres=media.get("genres", []),
                 source="anii",
             )
 
         except Exception as e:
-            log.exception(e)
+            log.exception(f"{self.name} metadata fetch failed for id {id}: {e}")
             return None
-
-
-    def generate_id(self, text: str) -> Optional[str]:
-        if text:
-            return hashlib.md5(text.encode()).hexdigest()
-        return None
