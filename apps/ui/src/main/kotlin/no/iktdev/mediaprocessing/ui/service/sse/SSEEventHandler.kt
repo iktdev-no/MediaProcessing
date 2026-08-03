@@ -26,7 +26,7 @@ class SSEEventHandler(
             log.error { "Received event without name! Name: ${e.event()}, Data: ${e.data()}, Id: ${e.id()}" }
             return
         }
-        log.info("[$source]\tMottok event [$event med data: $data]")
+        log.debug("[$source]\tMottok event [$event med data: $data]")
         val key = SSEKeys.fromKey(event) ?: run {
             log.error { "Event [$event] could not be found" }
             return
@@ -69,6 +69,7 @@ class SSEEventHandler(
     fun handleProgress(pu: ProgressUpdate) {
         val progress = pu.translate()
         localProgressCache.update(progress)
+        log.info { "Sender progress til FE ${WGson.gson.toJson(progress)}" }
         sse.broadcast(FEProgress(progress))
     }
 }
