@@ -53,7 +53,7 @@ class MediaCreateCoverDownloadTaskListener: MultiTaskCreatorEventListener(EventS
     override fun onEvent(event: Event, history: List<Event>): Event? {
         val useEvents = history + event
         if (useEvents.any { it is CompletedEvent }) return null
-        useEvents.requireEvent<MetadataSearchResultEvent>()
+        event.requireQualifiedEntry<MetadataSearchResultEvent>()
         return super.onEvent(event, history)
     }
 

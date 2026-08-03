@@ -9,7 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 @Service
 class SSEServer(
     private val progressCache: LocalProgressCache
-): SSEServerImplementation() {
+): SSEServerImplementation(true) {
 
     fun notify(emitter: SseEmitter) {
         getInitStates().forEach { (key, value) ->

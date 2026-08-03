@@ -7,7 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-abstract class SSEServerImplementation {
+abstract class SSEServerImplementation(val isBackend: Boolean = false) {
     private val emitters = CopyOnWriteArrayList<SseEmitter>()
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
     private val log = KotlinLogging.logger {}
@@ -35,10 +35,15 @@ abstract class SSEServerImplementation {
         val dead = mutableListOf<SseEmitter>()
         emitters.forEach { emitter ->
             try {
-                emitter.send(
-                    SseEmitter.event()
-                        .data(event)
-                )
+                if (isBackend) {
+                    emitter.send(SseEmitter.event().name(event.type)
+                        .data(event))
+                } else {
+                    emitter.send(
+                        SseEmitter.event()
+                            .data(event)
+                    )
+                }
             } catch (ex: Exception) {
                 println("SSE client disconnected: ${ex.message}")
                 dead.add(emitter)

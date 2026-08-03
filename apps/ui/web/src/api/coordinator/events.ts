@@ -17,5 +17,5 @@ export function getEventsLineage(referenceId: string) {
 }
 
 export function deleteEvent(referenceId: string, eventId: string) {
-  return apiDelete<Response>(`/events/delete/${referenceId}/${eventId}`);
+  return apiDelete<Response>(`/events/${referenceId}/${eventId}`);
 }

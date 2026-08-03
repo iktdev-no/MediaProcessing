@@ -8,6 +8,7 @@ import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.DetermineCollectionTask
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -47,66 +48,38 @@ class DetermineCollectionTaskListener(
         // Log input
         logger.info("Determining collection for names: ${pickedTask.names}")
 
-        val responses = pickedTask.names.map { name ->
-            try {
-                val response = streamitRestTemplate.exchange(
-                    "/api/meta/title/search/$name",
-                    HttpMethod.GET,
-                    null,
-                    String::class.java
-                )
-                name to response
-            } catch (e: HttpClientErrorException.NotFound) {
-                logger.debug("Title '{}' not found (404)", name)
-                name to ResponseEntity.status(HttpStatus.NOT_FOUND).body<String?>(null)
-            } catch (e: Exception) {
-                return DeterminedCollectionTaskResultEvent(
-                    status = TaskStatus.Failed,
-                    collection = null
-                ).producedFrom(task)
-            }
+        val collection = try {
+            val response = streamitRestTemplate.exchange(
+                "/api/meta/title/search/batch",
+                HttpMethod.POST,
+                HttpEntity(pickedTask.names),
+                String::class.java
+            )
+            response.body
+        } catch (e: HttpClientErrorException.NotFound) {
+            logger.debug("No collection/title found for batch names (404)")
+            null
+        } catch (e: Exception) {
+            logger.error("Failed to batch search collection", e)
+            return DeterminedCollectionTaskResultEvent(
+                status = TaskStatus.Failed,
+                collection = null
+            ).producedFrom(task)
         }
 
-
-        // Filtrer ut gyldige svar
-        val validBodies = responses
-            .mapNotNull { (name, response) ->
-                if (response.statusCode == HttpStatus.OK && !response.body.isNullOrEmpty()) {
-                    logger.debug("Accepted '$name' with body='${response.body}'")
-                    response.body!!
-                } else {
-                    logger.debug("Rejected '$name' due to invalid status/body")
-                    null
-                }
-            }
-
-        // 0 treff → returner null collection
-        if (validBodies.isEmpty()) {
-            logger.info("No valid results found, returning null collection")
+        if (collection.isNullOrEmpty()) {
+            logger.info("No valid collection found, returning null collection")
             return DeterminedCollectionTaskResultEvent(
                 status = TaskStatus.Completed,
                 collection = null
             ).producedFrom(task)
         }
 
-        // Sjekk om alle body-ene er identiske
-        val first = validBodies.first()
-        val allIdentical = validBodies.all { it == first }
-
-        if (!allIdentical) {
-            logger.error(
-                "Multiple results but bodies differ: $validBodies"
-            )
-            throw IllegalStateException(
-                "Flere treff, men body-ene er ikke identiske: $validBodies"
-            )
-        }
-
-        logger.info("All results identical, returning collection='$first'")
+        logger.info("Found collection='$collection' for batch search")
 
         return DeterminedCollectionTaskResultEvent(
             status = TaskStatus.Completed,
-            collection = first
+            collection = collection
         ).producedFrom(pickedTask)
     }
 

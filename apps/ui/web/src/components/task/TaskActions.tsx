@@ -18,7 +18,7 @@ export function TaskActions({
   const [forceMode, setForceMode] = useState(false);
 
   // Task status from backend is "Failed" (capital F)
-  if (task.status !== "Failed") return null;
+  if (task.status! in ["Failed", "Completed"]) return null;
 
   const handleReset = async () => {
     try {

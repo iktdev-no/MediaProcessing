@@ -258,7 +258,7 @@ object TaskStore : TaskStore {
             TasksTable.update({
                 (TasksTable.claimed eq true) and
                         (TasksTable.consumed eq true) and
-                        (TasksTable.status eq TaskStatus.Failed) and
+                        (TasksTable.status inList listOf(TaskStatus.Failed, TaskStatus.Completed)) and
                         (TasksTable.taskId eq taskId.toString())
             }) {
                 it[status] = TaskStatus.Pending
