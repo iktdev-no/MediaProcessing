@@ -1,9 +1,9 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import { AppBar, Box, IconButton, keyframes, Toolbar, Typography } from "@mui/material";
-import { useTitle } from "../features/useTitle";
-import { useSseSelector } from "../sse/useSseSelector";
-import { getSystemHealthState } from "../util";
-import type { SSEConnectionState } from "../sse/state";
+import { useTitle } from "../../features/useTitle";
+import { useSseSelector } from "../../sse/useSseSelector";
+import { getSystemHealthState } from "../../util";
+import type { SSEConnectionState } from "../../sse/state";
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 

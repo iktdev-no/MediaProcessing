@@ -9,7 +9,7 @@ import { Box, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useEffect } from "react";
 import { NodeBox } from "../components/NodeBox";
-import { StatusLine } from "../components/StatusLine";
+import { StatusLine } from "../components/main/StatusLine";
 import { useTitle } from "../features/useTitle";
 import { useSseSelector } from "../sse/useSseSelector";
 

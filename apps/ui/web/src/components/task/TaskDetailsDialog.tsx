@@ -12,7 +12,7 @@ import { useState } from "react";
 import { patchTaskIgnore, patchTaskOverride } from "../../api/coordinator/tasks";
 import type { UiTask } from "../../types/types";
 import { JsonViewer } from "../JsonViewer";
-import { ProcesserLogDialog } from "../ProcesserLogDialog";
+import { ProcesserLogDialog } from "../dialogs/ProcesserLogDialog";
 import { TaskActions } from "./TaskActions";
 
 export interface TaskDetailsDialogProps {

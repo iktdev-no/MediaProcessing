@@ -7,6 +7,13 @@ import type { SequenceSummary, LifecycleNode, UiEvent, UiTask } from "../../type
 import { TaskCard } from "../../components/task/TaskCard";
 import { getTasksForReference } from "../../api/coordinator/tasks";
 import { getEffectiveEventsHistory } from "../../api/coordinator/events";
+import { EventDialog } from "../../components/event/EventDialog";
+import { LineageDialog } from "../../components/event/EventLinageDialog";
+import { SequenceSummaryCard } from "../../components/sequence/SequenceSummaryCard";
+import { EventsTab, SplitViewContainer, TasksTab } from "../../components/sequence/SquenceTabs";
+import { SequenceTaskCard } from "../../components/sequence/SequenceTaskCard";
+import { SequenceEventCard } from "../../components/sequence/SequenceEventCard";
+import MoveToInboxOutlinedIcon from '@mui/icons-material/MoveToInboxOutlined';
 
 export default function SequenceViewPage() {
     const { referenceId } = useParams<{ referenceId: string }>();
@@ -19,6 +26,16 @@ export default function SequenceViewPage() {
     const [sequence, setSequence] = useState<Array<LifecycleNode>>([]);
     const [events, setEvents] = useState<Array<UiEvent>>([]);
     const [tasks, setTasks] = useState<Array<UiTask>>([]);
+
+    // Dialog states for Events & Lineage
+    const [selectedEvent, setSelectedEvent] = useState<UiEvent | null>(null);
+    const [lineageOpen, setLineageOpen] = useState(false);
+    const [lineageEvent, setLineageEvent] = useState<UiEvent | null>(null);
+
+    function onShowLineage(ev: UiEvent) {
+        setLineageEvent(ev);
+        setLineageOpen(true);
+    }
 
     useEffect(() => {
         if (!referenceId) return;
@@ -72,7 +89,6 @@ export default function SequenceViewPage() {
             <Box
                 sx={{
                     display: "grid",
-                    gridTemplateCode: { xs: "1fr", md: "320px 1fr" },
                     gridTemplateColumns: { xs: "1fr", md: "320px 1fr" },
                     gap: 2,
                     flex: 1,
@@ -117,12 +133,40 @@ export default function SequenceViewPage() {
                     >
                         {tabIndex === 0 && <SequenceTab sequence={sequence} />}
                         {tabIndex > 0 && !splitView && (
-                            tabIndex === 1 ? <EventsTab events={events} /> : <TasksTab tasks={tasks} />
+                            tabIndex === 1 ? (
+                                <EventsTab
+                                    events={events}
+                                    onShowDetails={(ev) => setSelectedEvent(ev)}
+                                    onShowLineage={onShowLineage}
+                                />
+                            ) : (
+                                <TasksTab tasks={tasks} />
+                            )
                         )}
-                        {tabIndex > 0 && splitView && <SplitViewContainer events={events} tasks={tasks} />}
+                        {tabIndex > 0 && splitView && (
+                            <SplitViewContainer
+                                events={events}
+                                tasks={tasks}
+                                onShowDetails={(ev) => setSelectedEvent(ev)}
+                                onShowLineage={onShowLineage}
+                            />
+                        )}
                     </Box>
                 </Box>
             </Box>
+
+            {/* Dialogs */}
+            <EventDialog
+                event={selectedEvent}
+                open={!!selectedEvent}
+                onClose={() => setSelectedEvent(null)}
+            />
+            <LineageDialog
+                open={lineageOpen}
+                onClose={() => setLineageOpen(false)}
+                referenceId={lineageEvent?.referenceId ?? null}
+                selectedEventId={lineageEvent?.eventId ?? null}
+            />
         </Box>
     );
 }
@@ -156,79 +200,7 @@ function PageHeader({ referenceId, tabIndex, splitView, onToggleSplit }: {
     );
 }
 
-function SequenceSummaryCard({ seqInfo }: { seqInfo?: SequenceSummary }) {
-    if (!seqInfo) {
-        return (
-            <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
-                <Typography variant="subtitle2" color="text.secondary">Ingen sammendrag tilgjengelig.</Typography>
-            </Paper>
-        );
-    }
 
-    return (
-        <Paper variant="outlined" sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2, height: "100%", boxSizing: "border-box", backgroundColor: "background.paper" }}>
-            <Box>
-                <Typography variant="subtitle1" fontWeight={700} color="primary">
-                    {seqInfo.title || "Ukjent tittel"}
-                </Typography>
-                {seqInfo.collection && (
-                    <Typography variant="body2" color="text.secondary">
-                        Kolleksjon: {seqInfo.collection}
-                    </Typography>
-                )}
-            </Box>
-
-            <Divider />
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                    <Typography variant="body2" color="text.secondary">Media Type:</Typography>
-                    <Chip label={seqInfo.mediaType || "Ukjent"} size="small" color="secondary" variant="outlined" />
-                </Box>
-
-                {seqInfo.episodeInfo && (
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <Typography variant="body2" color="text.secondary">Sesong / Episode:</Typography>
-                        <Typography variant="body2" fontWeight={500}>
-                            S{seqInfo.episodeInfo.seasonNumber}E{seqInfo.episodeInfo.episodeNumber}
-                            {seqInfo.episodeInfo.episodeTitle ? ` - ${seqInfo.episodeInfo.episodeTitle}` : ""}
-                        </Typography>
-                    </Box>
-                )}
-            </Box>
-
-            {seqInfo.metadata && (
-                <>
-                    <Divider />
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                        <Typography variant="caption" fontWeight={600} color="text.secondary">METADATA</Typography>
-                        <Typography variant="body2">Kilde: {seqInfo.metadata.source}</Typography>
-                        <Typography variant="body2">Har cover: {seqInfo.metadata.hasCover ? "Ja" : "Nei"}</Typography>
-                        {seqInfo.metadata.genres.length > 0 && (
-                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 0.5 }}>
-                                {seqInfo.metadata.genres.map((genre) => (
-                                    <Chip key={genre} label={genre} size="small" variant="filled" sx={{ fontSize: '0.75rem' }} />
-                                ))}
-                            </Box>
-                        )}
-                    </Box>
-                </>
-            )}
-
-            {seqInfo.failingReasons && (
-                <>
-                    <Divider />
-                    <Box>
-                        <Typography variant="caption" fontWeight={600} color="error">FEIL / TILSTAND</Typography>
-                        <Typography variant="body2" color="error" fontWeight={500}>
-                            {seqInfo.failingReasons}
-                        </Typography>
-                    </Box>
-                </>
-            )}
-        </Paper>
-    );
-}
 
 function NavigationTabs({ tabIndex, sequenceLength, eventsLength, tasksLength, onChangeTab }: {
     tabIndex: number;
@@ -279,14 +251,41 @@ function SequenceTab({ sequence }: { sequence: Array<LifecycleNode> }) {
                                 {node.tasks.map((taskItem) => {
                                     if (!taskItem.task) return null;
                                     return (
-                                        <TaskCard
-                                            key={taskItem.taskId}
-                                            task={taskItem.task}
-                                            show="taskId"
-                                            onCopy={() => navigator.clipboard.writeText(taskItem.taskId)}
-                                            onReferenceIdClicked={() => { }}
-                                            onCanceltask={() => { }}
-                                        />
+                                        <Box key={taskItem.taskId} sx={{ display: "flex", flexDirection: "column", gap: 1.5, pl: 2, borderLeft: "2px dashed", borderColor: "divider" }}>
+                                            <SequenceTaskCard
+                                                task={taskItem.task}
+                                                show="taskId"
+                                                onCopy={() => navigator.clipboard.writeText(taskItem.taskId)}
+                                                onReferenceIdClicked={() => { }}
+                                                onCanceltask={() => { }}
+                                            />
+
+                                            {taskItem.taskResultEvents && taskItem.taskResultEvents.length > 0 && (
+                                                <Box
+                                                    sx={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        my: 0.5,
+                                                        color: "text.secondary"
+                                                    }}
+                                                >
+                                                    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+                                                    <Box sx={{ px: 1, display: "flex", alignItems: "center" }}>
+                                                        <MoveToInboxOutlinedIcon fontSize="small" />
+                                                    </Box>
+                                                    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+                                                </Box>
+                                            )}
+
+                                            <Box sx={{ ml: 4 }}>
+                                                {taskItem.taskResultEvents?.map((ev) => (
+                                                    <SequenceEventCard
+                                                        key={ev.eventId}
+                                                        event={ev}
+                                                    />
+                                                ))}
+                                            </Box>
+                                        </Box>
                                     );
                                 })}
                             </Box>
@@ -294,11 +293,10 @@ function SequenceTab({ sequence }: { sequence: Array<LifecycleNode> }) {
                     );
                 }
                 return (
-                    <Paper key={node.lifecycleId} variant="outlined" sx={{ p: 2, backgroundColor: "action.hover" }}>
-                        <Typography variant="subtitle2" fontWeight={600}>{node.event?.event}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {node.event?.persistedAt ? new Date(node.event.persistedAt).toLocaleString("no-NO") : ""}
-                        </Typography>
+                    <Paper key={node.lifecycleId}>
+                        {node.event && (
+                            <SequenceEventCard event={node.event} />
+                        )}
                     </Paper>
                 );
             })}
@@ -306,113 +304,3 @@ function SequenceTab({ sequence }: { sequence: Array<LifecycleNode> }) {
     );
 }
 
-function EventsTab({ events }: { events: Array<UiEvent> }) {
-    return (
-        <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, pr: 1 }}>
-            {events.map((ev) => (
-                <Paper key={ev.eventId} variant="outlined" sx={{ p: 2 }}>
-                    <Typography variant="subtitle2" color="primary" fontWeight={600}>{ev.event}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        ID: {ev.eventId} | Tid: {new Date(ev.persistedAt).toLocaleString("no-NO")}
-                    </Typography>
-                </Paper>
-            ))}
-        </Box>
-    );
-}
-
-function TasksTab({ tasks }: { tasks: Array<UiTask> }) {
-    return (
-        <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, pr: 1 }}>
-            {tasks.map((task) => (
-                <TaskCard
-                    key={task.taskId}
-                    task={task}
-                    show="taskId"
-                    onCopy={() => navigator.clipboard.writeText(task.taskId)}
-                    onReferenceIdClicked={() => { }}
-                    onCanceltask={() => { }}
-                />
-            ))}
-        </Box>
-    );
-}
-
-function SplitViewContainer({ events, tasks }: { events: Array<UiEvent>; tasks: Array<UiTask> }) {
-    return (
-        <Box
-            sx={{
-                flex: 1,
-                minHeight: 0,
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 2,
-                overflow: "hidden"
-            }}
-        >
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    minHeight: 0,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 1,
-                    p: 2,
-                    backgroundColor: "background.paper"
-                }}
-            >
-                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, flexShrink: 0 }}>
-                    Events ({events.length})
-                </Typography>
-                <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, pr: 1 }}>
-                    {events.map((ev) => (
-                        <Paper key={ev.eventId} variant="outlined" sx={{ p: 1.5 }}>
-                            <Typography variant="body2" fontWeight={600} color="primary">{ev.event}</Typography>
-                            <Typography
-                                variant="caption"
-                                sx={{ color: "text.secondary", opacity: 0.8, display: "flex", gap: 0.5 }}
-                            >
-                                {ev.derivedOf?.join(" • ")}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                {new Date(ev.persistedAt).toLocaleTimeString("no-NO")}
-                            </Typography>
-                        </Paper>
-                    ))}
-                </Box>
-            </Box>
-
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                    minHeight: 0,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 1,
-                    p: 2,
-                    backgroundColor: "background.paper"
-                }}
-            >
-                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2, flexShrink: 0 }}>
-                    Tasks ({tasks.length})
-                </Typography>
-                <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 1.5, pr: 1 }}>
-                    {tasks.map((task) => (
-                        <TaskCard
-                            key={task.taskId}
-                            task={task}
-                            show="taskId"
-                            onCopy={() => navigator.clipboard.writeText(task.taskId)}
-                            onReferenceIdClicked={() => { }}
-                            onCanceltask={() => { }}
-                        />
-                    ))}
-                </Box>
-            </Box>
-        </Box>
-    );
-}

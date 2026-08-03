@@ -1,5 +1,5 @@
 import { Menu, MenuItem } from "@mui/material";
-import type { FileAction, UiFile, MediaAction, UiFileRef } from "../types/types";
+import type { FileAction, UiFile, MediaAction, UiFileRef } from "../../types/types";
 
 export interface FileContextMenuProps {
   file: UiFileRef | null;

@@ -7,8 +7,8 @@ import {
     ListItemText
 } from "@mui/material"
 import { type JSX } from "react"
-import { useSidebarMenu } from "../menu/sidebar-menu-items"
-import type { MenuItem } from "../types/MenuItem"
+import { useSidebarMenu } from "../../menu/sidebar-menu-items"
+import type { MenuItem } from "../../types/MenuItem"
 
 type SidebarProps = {
     open?: boolean

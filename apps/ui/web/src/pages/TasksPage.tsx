@@ -14,7 +14,7 @@ import { FilterChips } from "../components/FilterChips";
 import { Paginator } from "../components/Paginator";
 import { RefreshProgressBar } from "../components/RefreshProgressBar";
 import { TaskCard } from "../components/task/TaskCard";
-import { useToast } from "../components/useToast";
+import { useToast } from "../features/useToast";
 import { parseTaskFilters } from "../features/tasks/parseTaskFilters";
 import {
   knownTaskNames,

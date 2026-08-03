@@ -5,8 +5,8 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import MovieIcon from '@mui/icons-material/Movie'
 import SubtitlesIcon from '@mui/icons-material/Subtitles'
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
-import type { UiFile, UiFileRef } from '../types/types'
-import { normalDate } from '../util'
+import type { UiFile, UiFileRef } from '../../types/types'
+import { normalDate } from '../../util'
 import "./filelist-animations.css"
 
 export interface FileListProps {

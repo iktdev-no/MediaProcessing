@@ -20,10 +20,10 @@ import { apiDelete, apiGet } from "../api/client";
 
 import { toast } from "react-toastify";
 import { startProcess } from "../api/coordinator/media";
-import { BreadcrumbPath } from "../components/BreadcrumbPath";
-import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { FileContextMenu } from "../components/FileContextMenu";
-import { FileList } from "../components/FileList";
+import { BreadcrumbPath } from "../components/files/BreadcrumbPath";
+import { ConfirmationDialog } from "../components/dialogs/ConfirmationDialog";
+import { FileContextMenu } from "../components/files/FileContextMenu";
+import { FileList } from "../components/files/FileList";
 import { LoadingToast } from "../components/LoadingToast";
 import { useTitle } from "../features/useTitle";
 import type { FileAction, UiFile, UiFileRef, MediaAction } from "../types/types";

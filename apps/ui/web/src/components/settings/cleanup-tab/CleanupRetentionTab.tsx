@@ -16,7 +16,7 @@ import type {
 } from "../../../types/types";
 import { FieldSection } from "../../FieldSection";
 import { triggerCacheCleanup, triggerCacheWipe, triggerInboxCleanup, triggerInboxWipe } from "../../../api/coordinator/media";
-import { ConfirmationDialog } from "../../ConfirmationDialog";
+import { ConfirmationDialog } from "../../dialogs/ConfirmationDialog";
 import { useState } from "react";
 import { LoadingToast } from "../../LoadingToast";
 
