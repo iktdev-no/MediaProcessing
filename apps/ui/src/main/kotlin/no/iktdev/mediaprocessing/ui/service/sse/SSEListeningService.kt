@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.ui.service.sse
 
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.ui.client.CoordinatorClient
 import no.iktdev.mediaprocessing.ui.client.ProcesserClient
 import org.springframework.stereotype.Service
@@ -17,6 +18,8 @@ class SSEListeningService(
     private val processerClient: ProcesserClient,
     private val sseEventHandler: SSEEventHandler,
 ) {
+    private val log = KotlinLogging.logger {}
+
 
     // Status-trackere for om tjenestene er online
     private val coordinatorOnline = AtomicBoolean(false)
@@ -30,40 +33,40 @@ class SSEListeningService(
         val coordinatorStream = coordinatorClient.streamEvents()
             .doOnNext { event ->
                 if (coordinatorOnline.compareAndSet(false, true)) {
-                    println("✅ Ekte kontakt med Coordinator SSE!")
+                    log.info("✅ Ekte kontakt med Coordinator SSE!")
                 }
                 sseEventHandler.onEvent("Coordinator", event)
             }
             .doOnCancel {
                 coordinatorOnline.set(false)
-                println("❌ Coordinator SSE avbrutt")
+                log.info("❌ Coordinator SSE avbrutt")
             }
             .retryWhen(
                 Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(2))
                     .maxBackoff(Duration.ofSeconds(30))
                     .doBeforeRetry { retrySignal ->
                         coordinatorOnline.set(false)
-                        println("🔄 Mistet kontakt med Coordinator, forsøk nr. ${retrySignal.totalRetries() + 1}...")
+                        log.info("🔄 Mistet kontakt med Coordinator, forsøk nr. ${retrySignal.totalRetries() + 1}...")
                     }
             )
 
         val processerStream = processerClient.streamEvents()
             .doOnNext { event ->
                 if (processerOnline.compareAndSet(false, true)) {
-                    println("✅ Ekte kontakt med Processer SSE!")
+                    log.info("✅ Ekte kontakt med Processer SSE!")
                 }
                 sseEventHandler.onEvent("Processor", event)
             }
             .doOnCancel {
                 processerOnline.set(false)
-                println("❌ Processer SSE avbrutt")
+                log.info("❌ Processer SSE avbrutt")
             }
             .retryWhen(
                 Retry.backoff(Long.MAX_VALUE, Duration.ofSeconds(2))
                     .maxBackoff(Duration.ofSeconds(30))
                     .doBeforeRetry { retrySignal ->
                         processerOnline.set(false)
-                        println("🔄 Mistet kontakt med Processer, forsøk nr. ${retrySignal.totalRetries() + 1}...")
+                        log.info("🔄 Mistet kontakt med Processer, forsøk nr. ${retrySignal.totalRetries() + 1}...")
                     }
             )
 

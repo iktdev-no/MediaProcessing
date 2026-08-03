@@ -4,8 +4,11 @@ import com.google.gson.reflect.TypeToken
 import mu.KotlinLogging
 import no.iktdev.eventi.serialization.WGson
 import no.iktdev.mediaprocessing.shared.common.model.ProgressUpdate
+import no.iktdev.mediaprocessing.shared.common.sse.SSEEvent
 import no.iktdev.mediaprocessing.shared.common.sse.SSEKeys
+import no.iktdev.mediaprocessing.shared.common.sse.basemodel.SSEProgressUpdateEvent
 import no.iktdev.mediaprocessing.ui.LocalProgressCache
+import no.iktdev.mediaprocessing.ui.models.contract.progress.Progress
 import no.iktdev.mediaprocessing.ui.models.translate
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Component
@@ -23,13 +26,17 @@ class SSEEventHandler(
             log.error { "Received event without name! Name: ${e.event()}, Data: ${e.data()}, Id: ${e.id()}" }
             return
         }
-        println("[$source] Mottok event [$event med data: $data]")
+        log.info("[$source]\tMottok event [$event med data: $data]")
         val key = SSEKeys.fromKey(event) ?: run {
             log.error { "Event [$event] could not be found" }
             return
         }
         if (!data.isNullOrBlank()) {
-            processData(key, data)
+            try {
+                processData(key, data)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
     }
@@ -45,8 +52,8 @@ class SSEEventHandler(
                 }
             }
             SSEKeys.Progress -> {
-                val pu = WGson.gson.fromJson(data, ProgressUpdate::class.java)
-                handleProgress(pu)
+                val event = WGson.gson.fromJson(data, SSEProgressUpdateEvent::class.java)
+                handleProgress(event.progress)
             }
             SSEKeys.Ping -> {
 
@@ -62,5 +69,10 @@ class SSEEventHandler(
     fun handleProgress(pu: ProgressUpdate) {
         val progress = pu.translate()
         localProgressCache.update(progress)
+        sse.broadcast(FEProgress(progress))
     }
+}
+
+data class FEProgress(val progress: Progress): SSEEvent {
+    override val type = SSEKeys.Progress.key
 }
