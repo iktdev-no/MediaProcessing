@@ -20,6 +20,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.CoverDo
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getSha256
+import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
@@ -52,6 +53,7 @@ class MediaCreateCoverDownloadTaskListener: MultiTaskCreatorEventListener(EventS
     override fun onEvent(event: Event, history: List<Event>): Event? {
         val useEvents = history + event
         if (useEvents.any { it is CompletedEvent }) return null
+        useEvents.requireEvent<MetadataSearchResultEvent>()
         return super.onEvent(event, history)
     }
 
@@ -64,9 +66,9 @@ class MediaCreateCoverDownloadTaskListener: MultiTaskCreatorEventListener(EventS
         val hasProduces =  producedEventTypes.any { type ->
             useEvents.any { type.isInstance(it) }
         }
-        if (hasProduces) return emptyList()
+        if (hasProduces) throw EjectException("Has already produced!")
 
-        val useEvent = useEvents.getInstanceOf<MetadataSearchResultEvent>() ?: return emptyList()
+        val useEvent = useEvents.getInstanceOf<MetadataSearchResultEvent>() ?: throw EjectException("MetadataSearchResultEvent not found!")
         if (useEvent.status != TaskStatus.Completed) {
             log.warn { "MetadataResult on ${event.referenceId} did not complete successfully" }
             throw SkippedCoverTaskCreation("MetadataResult on ${event.referenceId} did not complete successfully")

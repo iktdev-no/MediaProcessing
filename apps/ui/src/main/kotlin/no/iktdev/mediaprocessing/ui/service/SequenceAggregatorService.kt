@@ -214,10 +214,14 @@ class SequenceAggregatorService(
         val reasonFailed = statusReport.reason as? ReasonFailed
 
         // Utled tittel, mediatype og episodeinfo som før
-        val title = collect.metadata?.title
-            ?: collect.parsedFileInfo?.name
-            ?: summaryProjection.getFileName()
+        val title = try {
+            collect.metadata?.title
+                ?: collect.parsedFileInfo?.name
+                ?: summaryProjection.getFileName()
 
+        } catch (e: Exception) {
+            null
+        }
         val mediaType = collect.metadata?.mediaType
             ?: collect.parsedFileInfo?.mediaType
 
