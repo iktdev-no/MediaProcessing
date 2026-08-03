@@ -17,8 +17,7 @@ class FilePreservationService(
 ): FilePreservationImpl(FilePreservationStore) {
 
     protected fun getFilesInEventsWithReference(): Map<IFile, List<UUID>> {
-        val startedEvents = EventStore.getStartEvents()
-            .map { it.toEvent() }.filterIsInstance<StartProcessingEvent>()
+        val startedEvents = EventStore.getPreservableFiles()
         val grouped = startedEvents.groupBy { it.data.fileUri }.map { (fileUri, events) ->
             IFile(fileUri) to events.map { it.referenceId }
         }.toMap()

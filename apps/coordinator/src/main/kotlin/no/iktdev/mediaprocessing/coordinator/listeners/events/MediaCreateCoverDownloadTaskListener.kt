@@ -62,12 +62,6 @@ class MediaCreateCoverDownloadTaskListener: MultiTaskCreatorEventListener(EventS
         history: List<Event>
     ): List<Task> {
         val useEvents = history + event
-        if (useEvents.any { it is CompletedEvent }) return emptyList()
-        val hasProduces =  producedEventTypes.any { type ->
-            useEvents.any { type.isInstance(it) }
-        }
-        if (hasProduces) throw EjectException("Has already produced!")
-
         val useEvent = useEvents.getInstanceOf<MetadataSearchResultEvent>() ?: throw EjectException("MetadataSearchResultEvent not found!")
         if (useEvent.status != TaskStatus.Completed) {
             log.warn { "MetadataResult on ${event.referenceId} did not complete successfully" }

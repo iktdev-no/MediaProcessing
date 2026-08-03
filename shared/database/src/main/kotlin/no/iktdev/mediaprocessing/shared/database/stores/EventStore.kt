@@ -390,4 +390,21 @@ object EventStore: EventStore {
         }
     }
 
+    fun getPreservableFiles(): List<StartProcessingEvent> {
+        val deletedSequences = getAllDeletedSequences().map { it.toString() }.toSet()
+        return withTransaction {
+            val excludedRemoved = EventsTable.select(EventsTable.referenceId)
+                .where { EventsTable.event eq CompletedInputDeletedEvent::class.getName() }
+                .withDistinct(true)
+                .map { it[EventsTable.referenceId] }
+            val ignoreIds = excludedRemoved + deletedSequences
+
+            val events = EventsTable.getWhere {
+                (EventsTable.event eq StartProcessingEvent::class.getName()) and
+                        (EventsTable.referenceId notInList ignoreIds)
+            }.mapNotNull { it.toEvent() }
+            events.filterIsInstance<StartProcessingEvent>()
+        }.getOrDefault(emptyList())
+    }
+
 }

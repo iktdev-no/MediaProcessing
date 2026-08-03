@@ -51,7 +51,7 @@ object FilePreservationStore : IFilePreservationStore {
         withTransaction {
             fi.forEach { (fileName, filePath) ->
                 FilePreservationTable.upsert(
-                    FilePreservationTable.fileName,
+                    // MySQL Does not support edits here.
                     onUpdate = {
                         // Oppdater stien hvis filnavnet finnes fra før,
                         // men rør IKKE persistedAt!
