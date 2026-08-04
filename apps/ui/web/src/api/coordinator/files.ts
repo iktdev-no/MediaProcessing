@@ -5,6 +5,10 @@ export function apiListHome() {
   return apiGet<UiFileRef[]>("/files/home");
 }
 
+export function apiRoots() {
+  return apiGet<UiFileRef[]>("/files/roots");
+}
+
 export function apiExplore(path: string, notInUse: boolean) {
   if (notInUse) {
     return apiGet<UiFileRef[]>(`/files/explore?new=${notInUse}&path=${encodeURIComponent(path)}`);

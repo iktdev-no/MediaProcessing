@@ -29,7 +29,7 @@ import { FileList } from "../components/files/FileList";
 import { LoadingToast } from "../components/LoadingToast";
 import { useTitle } from "../features/useTitle";
 import type { FileAction, UiFile, UiFileRef, MediaAction } from "../types/types";
-import { apiExplore } from "../api/coordinator/files";
+import { apiExplore, apiRoots } from "../api/coordinator/files";
 
 /* ───────────────── Helpers ───────────────── */
 
@@ -80,7 +80,7 @@ export default function FilesPage() {
         setLoading(true);
         setError(null);
 
-        const data = await apiExplore(path, hideExisting);
+        const data = path === "/" ? await apiRoots() : await apiExplore(path, hideExisting);
         setFiles(data);
         const map = Object.fromEntries(data.map((f) => [f.uri, true]));
         setVisible(map);
