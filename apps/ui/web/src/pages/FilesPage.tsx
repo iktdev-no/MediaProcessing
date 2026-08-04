@@ -2,8 +2,10 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import {
   Box,
+  FormControlLabel,
   IconButton,
   Stack,
+  Switch,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
@@ -27,6 +29,7 @@ import { FileList } from "../components/files/FileList";
 import { LoadingToast } from "../components/LoadingToast";
 import { useTitle } from "../features/useTitle";
 import type { FileAction, UiFile, UiFileRef, MediaAction } from "../types/types";
+import { apiExplore } from "../api/coordinator/files";
 
 /* ───────────────── Helpers ───────────────── */
 
@@ -38,6 +41,8 @@ type SortDir = "asc" | "desc";
 export default function FilesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const path = searchParams.get("path") ?? "/";
+  const [hideExisting, setHideExisting] = useState(false);
+
 
   const [files, setFiles] = useState<UiFileRef[]>([]);
   const [loading, setLoading] = useState(false);
@@ -75,11 +80,7 @@ export default function FilesPage() {
         setLoading(true);
         setError(null);
 
-        const endpoint =
-          path === "/"
-            ? "/files/roots"
-            : `/files/explore?path=${encodeURIComponent(path)}`;
-        const data = await apiGet<UiFileRef[]>(endpoint);
+        const data = await apiExplore(path, hideExisting);
         setFiles(data);
         const map = Object.fromEntries(data.map((f) => [f.uri, true]));
         setVisible(map);
@@ -96,7 +97,7 @@ export default function FilesPage() {
 
   useEffect(() => {
     load(path, false);
-  }, [path, load]);
+  }, [path, load, hideExisting]);
 
   /* ───── Sorting ───── */
 
@@ -246,6 +247,25 @@ export default function FilesPage() {
             <Stack direction="row" alignItems="center" spacing={1} flex={1}>
               <BreadcrumbPath path={path} onNavigate={load} />
             </Stack>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={hideExisting}
+                  onChange={(e) => setHideExisting(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Kun nye filer"
+              slotProps={{
+                typography: {
+                  variant: "body2",
+                  whiteSpace: "nowrap",
+                  sx: { userSelect: "none" }
+                }
+              }}
+            />
 
             <ToggleButtonGroup
               size="small"

@@ -28,6 +28,7 @@ import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.max
+import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -405,6 +406,19 @@ object EventStore: EventStore {
             }.mapNotNull { it.toEvent() }
             events.filterIsInstance<StartProcessingEvent>()
         }.getOrDefault(emptyList())
+    }
+
+    fun getFilesInSystem(): List<String> {
+        val deletedSequences = getAllDeletedSequences().map { it.toString() }.toSet()
+        val events = withTransaction {
+            EventsTable.getWhere {
+                ((EventsTable.referenceId) notInList deletedSequences.toList()) and
+                        (EventsTable.event inList listOf(FileAddedEvent::class.getName(), StartProcessingEvent::class.getName()))
+            }
+        }.getOrDefault(emptyList()).map { it.toEvent() }
+        val started = events.filterIsInstance<StartProcessingEvent>().map { it.data.fileUri }
+        val added = events.filterIsInstance<FileAddedEvent>().map { it.data.fileUri }
+        return started + added
     }
 
 }

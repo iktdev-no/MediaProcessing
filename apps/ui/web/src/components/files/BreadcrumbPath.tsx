@@ -24,7 +24,7 @@ export function BreadcrumbPath({ path, onNavigate }: BreadcrumbPathProps) {
                 icon={<HomeIcon />}
                 label="Home"
                 clickable
-                onClick={() => onNavigate("/home")}
+                onClick={() => onNavigate("/")}
                 sx={{ fontWeight: 600 }}
             />
             <Breadcrumbs separator="›">

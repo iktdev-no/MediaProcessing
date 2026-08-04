@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.ui.controller
 
 import mu.KotlinLogging
+import no.iktdev.files.IFile
+import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.ui.MediaConfig
 import no.iktdev.mediaprocessing.ui.models.contract.files.UiFile
 import no.iktdev.mediaprocessing.ui.models.contract.requests.DeleteRequest
@@ -8,16 +10,20 @@ import no.iktdev.mediaprocessing.ui.models.contract.files.PreservedFile
 import no.iktdev.mediaprocessing.ui.models.contract.files.translate
 import no.iktdev.mediaprocessing.ui.service.ExplorerService
 import no.iktdev.mediaprocessing.ui.service.FilePreservationService
+import no.iktdev.mediaprocessing.ui.toEvents
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.io.File
+import java.time.Duration
+import java.time.Instant
+import java.time.ZonedDateTime
 
 @RestController
 @RequestMapping("/api/files")
 class FilesController(
     private val mediaConfig: MediaConfig,
     private val explorer: ExplorerService,
-    private val fps: FilePreservationService
+    private val fps: FilePreservationService,
 ) {
     private val log = KotlinLogging.logger {}
 
@@ -49,14 +55,29 @@ class FilesController(
         )
     }
 
+
     @GetMapping("/explore")
-    fun list(@RequestParam path: String): ResponseEntity<List<UiFile>> {
+    fun list(@RequestParam path: String, @RequestParam new: Boolean = false): ResponseEntity<List<UiFile>> {
         val file = File(path)
         if (!file.exists() || file.isFile) {
             return ResponseEntity.notFound().build()
         }
-        val files = explorer.listAt(path)
+        val files = if (new) {
+            val exclude = getAlreadyInSystem()
+            explorer.listAt(path).filter { it.name !in exclude }
+        } else explorer.listAt(path)
         return ResponseEntity.ok(files)
+    }
+
+    private var lastUpdated: Instant = Instant.EPOCH
+    private var alreadyInSystemCache: List<String> = emptyList()
+    private fun getAlreadyInSystem(): List<String> {
+        if (alreadyInSystemCache.isEmpty() || Duration.between(lastUpdated, Instant.now()).toMinutes() > 5) {
+            val inSystem = EventStore.getFilesInSystem().map { IFile(it).name }
+            alreadyInSystemCache = inSystem
+            lastUpdated = Instant.now()
+        }
+        return alreadyInSystemCache
     }
 
 
