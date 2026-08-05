@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/processer")
+@RequestMapping("/api/processer")
 class ProcesserTaskController(
     private val processerClient: ProcesserClient
 ) {

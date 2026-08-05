@@ -15,10 +15,7 @@ abstract class PolicyGateEventListener(
 ) : EventListener() {
 
     override fun onEvent(event: Event, history: List<Event>): Event? {
-        val fullHistory = eventStore.getPersistedEventsFor(event.referenceId)
-            .mapNotNull { it.toEvent() }
-            .sortedBy { it.metadata.created }
-        val signalHistory = fullHistory.filterIsInstance<SignalEvent>()
+        val signalHistory = getSignals(event.referenceId)
 
         if (hasPassed(history)) {
             return null
