@@ -287,13 +287,16 @@ fun <T : Any> KClass<T>.getName(): String =
 
 private val transliterator = Transliterator.getInstance("Any-Latin; Latin-ASCII")
 fun String.cleanForFileSystemUse(): String {
-    // 1. Full translitterering (Æ→AE, Ø→O, Å→AA, Ł→L, Þ→Th, etc.)
+    // 1. Full translitterering (Æ→AE, Ø→O, Å→AA, etc.)
     val ascii = transliterator.transliterate(this)
 
-    // 2. Fjern alt som ikke er bokstav, tall, mellomrom, bindestrek, parentes, komma, punktum
-    val cleaned = ascii.replace(Regex("[^\\p{L}\\p{N}\\s\\-(),.!]"), " ")
+    // 2. Fjern apostroffer/anførselstegn helt (uten å legge til mellomrom)
+    val withoutQuotes = ascii.replace(Regex("['´‘’\"`]"), "")
 
-    // 3. Normaliser whitespace
+    // 3. Fjern alt annet som ikke er godkjent (erstatter med mellomrom, som før)
+    val cleaned = withoutQuotes.replace(Regex("[^\\p{L}\\p{N}\\s\\-(),.!]"), " ")
+
+    // 4. Normaliser whitespace
     return cleaned.replace(Regex("\\s{2,}"), " ").trim()
 }
 

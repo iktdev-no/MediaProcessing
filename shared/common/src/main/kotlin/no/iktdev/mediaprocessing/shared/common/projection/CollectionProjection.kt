@@ -57,18 +57,4 @@ class CollectionProjection(
         val collection = useFile.parentFile.parentFile.parentFile.name // "language->sub->collection"
         return collection
     }
-
-    fun compareNames(a: String, b: String): Boolean {
-        return normalizeForComparison(a) == normalizeForComparison(b)
-    }
-
-    fun normalizeForComparison(input: String): String {
-        return input
-            .lowercase()
-            .replace(Regex("[!?,.:;'\"`()\\[\\]]"), " ")
-            .replace("-", " ")
-            .replace("_", " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    }
 }

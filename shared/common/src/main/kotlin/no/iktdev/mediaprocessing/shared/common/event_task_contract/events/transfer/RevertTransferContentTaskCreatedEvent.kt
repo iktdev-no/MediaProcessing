@@ -4,5 +4,5 @@ import no.iktdev.eventi.models.MultiTaskCreatedEvent
 import no.iktdev.eventi.models.MultiTaskIdentity
 import java.util.UUID
 
-open class TransferContentTaskCreatedEvent(groupId: UUID, taskIds: Set<MultiTaskIdentity>) : MultiTaskCreatedEvent(taskIds) {
+class RevertTransferContentTaskCreatedEvent(groupId: UUID, taskIds: Set<MultiTaskIdentity>) : TransferContentTaskCreatedEvent(groupId, taskIds) {
 }

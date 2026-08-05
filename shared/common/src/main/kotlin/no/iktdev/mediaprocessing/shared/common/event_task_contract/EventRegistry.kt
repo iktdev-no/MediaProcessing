@@ -6,6 +6,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.CoverTransferredResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.RevertTransferContentTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.SubtitleTransferredResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.TransferContentTaskCreatedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.VideoTransferredResultEvent
@@ -80,7 +81,10 @@ object EventRegistry {
             TransferredContentsSummaryEvent::class.java,
 
             StoreMediaInfoAndMetadataTaskCreatedEvent::class.java,
-            StoreMediaInfoAndMetadataTaskResultEvent::class.java
+            StoreMediaInfoAndMetadataTaskResultEvent::class.java,
+
+            RevertTransferredRequestedEvent::class.java,
+            RevertTransferContentTaskCreatedEvent::class.java,
         )
     }
 }
