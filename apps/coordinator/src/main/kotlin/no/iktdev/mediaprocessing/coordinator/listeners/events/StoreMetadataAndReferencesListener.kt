@@ -64,10 +64,13 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         )
 
         val videoCopy = usableEvents.getInstanceOf<VideoTransferredResultEvent>()
-            ?.takeIf { it.status == TaskStatus.Completed }
+            ?.takeIf {
+                it.status == TaskStatus.Completed ||
+                        (it.status == TaskStatus.Skipped && it.fileUri != null)
+            }
 
         val subtitles = usableEvents.getInstancesOf<SubtitleTransferredResultEvent>()
-            .filter { it.status == TaskStatus.Completed }
+            .filter { it.status == TaskStatus.Completed || (it.status == TaskStatus.Skipped && !it.fileUri.isNullOrBlank()) }
             .mapNotNull { it ->
                 it.fileUri?.takeIf { uri -> uri.isNotBlank() }?.let { uri ->
                     ContentExport.MediaExport.Subtitle(File(uri).name, it.language)
