@@ -25,7 +25,7 @@ class TransferCoverToStorageTaskListener: TransferToStorageBaseListener(deleteSo
             collection = (task as CoverTransferTask).collection,
             status = status,
             error = exception?.message ?: "Unknown error"
-        )
+        ).producedFrom(task)
     }
 
     override fun supports(task: Task) = task is CoverTransferTask
@@ -62,6 +62,6 @@ class TransferCoverToStorageTaskListener: TransferToStorageBaseListener(deleteSo
             fileUri = dest.uri,
             status = success.first,
             error = success.second
-        )
+        ).producedFrom(task)
     }
 }

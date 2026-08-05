@@ -26,7 +26,7 @@ class EventService {
     }
 
     fun deleteTaskFailureForReset(referenceId: UUID, taskId: UUID): UUID? {
-        return EventStore.deleteFailedEventForTask(referenceId, taskId)
+        return EventStore.deleteEventForTaskResult(referenceId, taskId)
     }
 
     fun deleteTaskResultForIgnore(referenceId: UUID, taskId: UUID): Pair<UUID, UUID>? {

@@ -10,9 +10,37 @@ import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.effective
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CompletedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ConvertTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoordinatorReadStreamsTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CoverDownloadTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DetermineCollectionTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaParsedInfoEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaStreamParsedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MetadataSearchTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OnHoldSignalEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractTaskCreatedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ReleaseHoldSignalEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
+import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.common.model.ReasonFailed
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
@@ -28,6 +56,7 @@ import no.iktdev.mediaprocessing.ui.models.contract.sequence.TaskLifecycleItem
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.CurrentState
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.Mode
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.Sequence
+import no.iktdev.mediaprocessing.ui.models.contract.sequence.SequenceActions
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.SequenceSummary
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.TaskType
 import no.iktdev.mediaprocessing.ui.models.contract.toUiMediaType
@@ -46,6 +75,61 @@ class SequenceAggregatorService(
     private val eventService: EventService,
     private val taskService: TaskService,
 ) {
+
+    fun Event.getTitle(): String {
+        return when (this) {
+            is StartProcessingEvent -> {
+                "StartProcessing"
+            }
+            is MediaParsedInfoEvent -> "Parsed media info"
+            is CoordinatorReadStreamsTaskCreatedEvent,
+                is CoordinatorReadStreamsResultEvent
+                    -> "Read media streams"
+
+            is MetadataSearchTaskCreatedEvent,
+               is MetadataSearchResultEvent
+                    -> "Search metadata"
+
+            is MediaStreamParsedEvent -> "Parsed media stream"
+            is ValidateFileAndMediaDataEvent -> "Validate file and media data"
+
+            is FilePrepareForWorkTaskCreatedEvent,
+               is FilePrepareForWorkResultEvent
+                    -> "Prepared file for work"
+
+            is DetermineCollectionTaskCreatedEvent,
+               is DeterminedCollectionTaskResultEvent
+                    -> "Determine media collection"
+
+            is CoverDownloadTaskCreatedEvent,
+               is CoverDownloadResultEvent
+                    -> "Cover download"
+
+            is MediaTracksDetermineSubtitleTypeEvent -> "Subtitle determine subtitle type"
+            is MediaTracksEncodeSelectedEvent -> "Tracks Encode selected"
+
+            is ProcesserEncodeTaskCreatedEvent,
+               is  ProcesserEncodeResultEvent
+                    -> "Encode media"
+
+            is MediaTracksExtractSelectedEvent -> "Tracks Extract selected"
+            is ProcesserExtractTaskCreatedEvent,
+            is ProcesserExtractResultEvent
+                -> "Extract media"
+
+            is ConvertTaskCreatedEvent,
+            is ConvertTaskResultEvent
+                -> "Converted subtitles"
+
+            is CollectedEvent -> "Collected events"
+            is ContinuationSummaryEvent -> "Continuation summary"
+            is OnHoldSignalEvent -> "On hold"
+            is ReleaseHoldSignalEvent -> "Release hold"
+
+            else -> this::class.getName()
+        }
+    }
+
     fun getActiveSequences(): List<Sequence> {
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
         return getSequences(allEvents,
@@ -172,6 +256,7 @@ class SequenceAggregatorService(
             }
 
             lifecycles.add(LifecycleNode(
+                title = createdEvent.getTitle(),
                 lifecycleId = createdEvent.eventId,
                 referenceId = createdEvent.referenceId,
                 type = LifecycleNodeType.EventTaskGroup,
@@ -186,6 +271,7 @@ class SequenceAggregatorService(
 
         events.filter { it !is TaskCreatedEvent && it !is TaskResultEvent }.forEach { event ->
             lifecycles.add(LifecycleNode(
+                title = event.getTitle(),
                 lifecycleId = event.eventId,
                 referenceId = event.referenceId,
                 type = LifecycleNodeType.Event,
@@ -203,6 +289,8 @@ class SequenceAggregatorService(
         val events = eventService.getEffectiveHistory(refId).toEvents()
         val workflow = WorkflowProjection(events)
         val statusReport = workflow.evaluate()
+        val signals = SignalProjection(events)
+
 
         val collect = CollectProjection(events)
         val summaryProjection = SummaryProjection(
@@ -251,6 +339,21 @@ class SequenceAggregatorService(
             null
         }
 
+
+        val actions = mutableListOf<SequenceActions>()
+        if (events.none { it is CompletedEvent }) {
+            actions.add(SequenceActions.Delete)
+
+            if (signals.isOnHold) {
+                actions.add(SequenceActions.Release)
+            } else if (signals.isReleased || signals.lastSignal == null) {
+               // actions.add(SequenceActions.Hold)
+            }
+        }
+
+
+
+
         return SequenceSummary(
             title = title,
             collection = targetCollection,
@@ -259,6 +362,7 @@ class SequenceAggregatorService(
             metadata = metadataSummary, // Sendes med til UI
             failingReasons = reasonFailed?.reason?.translate(),
             failedTasks = reasonFailed?.tasks ?: emptySet(),
+            availableActions = actions.toSet()
         )
     }
 

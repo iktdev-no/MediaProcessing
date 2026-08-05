@@ -28,7 +28,7 @@ class TransferSubtitleToStorageTaskListener: TransferToStorageBaseListener() {
             language = task.language,
             status = status,
             error = exception?.message ?: "Unknown error"
-        )
+        ).producedFrom(task)
     }
 
     override fun supports(task: Task) = task is SubtitleTransferTask
@@ -66,6 +66,6 @@ class TransferSubtitleToStorageTaskListener: TransferToStorageBaseListener() {
             language = t.language,
             status = success.first,
             error = success.second
-        )
+        ).producedFrom(task)
     }
 }

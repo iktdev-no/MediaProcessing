@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.every
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.MockData.convertEvent
@@ -10,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class SummarizeContentListenerTest : TestBase() {
 
@@ -25,11 +27,12 @@ class SummarizeContentListenerTest : TestBase() {
     )
     @Test
     fun ignoreNonCollectedEvent() {
-        val result = listener().onEvent(
-            event = DummyEvent(),
-            history = history
-        )
-        assertNull(result)
+        assertThrows<SoftDispatchException.UnqualifiedEntryEventException> {
+            listener().onEvent(
+                event = DummyEvent(),
+                history = history
+            )
+        }
     }
 
     @DisplayName(

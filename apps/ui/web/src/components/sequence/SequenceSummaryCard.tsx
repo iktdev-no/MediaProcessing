@@ -1,7 +1,15 @@
-import { Box, Typography, Paper, Divider, Chip } from "@mui/material";
-import type { SequenceSummary } from "../../types/types";
+import { Box, Typography, Paper, Divider, Chip, Button } from "@mui/material";
+import type { SequenceActions, SequenceSummary } from "../../types/types";
+import DeleteIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import PauseIcon from '@mui/icons-material/PauseOutlined';
+import PlayIcon from '@mui/icons-material/PlayArrowOutlined';
 
-export function SequenceSummaryCard({ seqInfo }: { seqInfo?: SequenceSummary }) {
+interface SequenceSummaryCardProps {
+    seqInfo?: SequenceSummary;
+    onActionClick: (action: SequenceActions) => void;
+}
+
+export function SequenceSummaryCard({ seqInfo, onActionClick }: SequenceSummaryCardProps) {
     if (!seqInfo) {
         return (
             <Paper variant="outlined" sx={{ p: 2, height: "100%" }}>
@@ -71,6 +79,37 @@ export function SequenceSummaryCard({ seqInfo }: { seqInfo?: SequenceSummary }) 
                     </Box>
                 </>
             )}
+            <Box sx={{ gap: 1, display: "flex", flexDirection: "column" }}>
+                {seqInfo.availableActions.map((action, i) => {
+                    return <SquenceActionbutton key={i} action={action} onClick={() => onActionClick?.(action)} />
+                })}
+            </Box>
         </Paper>
+    );
+}
+
+interface SequenceActionButtonProps {
+    action: SequenceActions;
+    onClick: () => void;
+}
+
+function SquenceActionbutton({ action, onClick }: SequenceActionButtonProps) {
+    const { color, icon } = ((act: SequenceActions) => {
+        switch (act) {
+            case "Delete":
+                return { color: "error" as const, icon: <DeleteIcon /> }
+            case "Hold":
+                return { color: "warning" as const, icon: <PauseIcon /> }
+            case "Release":
+                return { color: "success" as const, icon: <PlayIcon /> }
+            default:
+                return { color: "inherit" as const, icon: null }
+        }
+    })(action)
+
+    return (
+        <Button color={color} endIcon={icon} variant="contained" onClick={onClick}>
+            {action}
+        </Button>
     );
 }

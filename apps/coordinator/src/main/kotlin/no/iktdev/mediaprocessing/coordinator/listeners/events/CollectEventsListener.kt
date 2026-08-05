@@ -4,9 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.listeners.SummaryEventListener
-import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.projection.WorkflowProjection
-import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
 
@@ -14,12 +12,12 @@ import org.springframework.stereotype.Component
 class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = EventStore) : SummaryEventListener(eventStore) {
 
     private val log = KotlinLogging.logger {}
-    override fun shouldSummarize(fullHistory: List<Event>): Boolean {
-        val workflow = WorkflowProjection(fullHistory)
+    override fun shouldSummarize(effectiveHistory: List<Event>): Boolean {
+        val workflow = WorkflowProjection(effectiveHistory)
         val report = workflow.evaluate()
 
         if (report.isFailed()) {
-            val referenceId = fullHistory.firstOrNull()?.referenceId ?: "unknown"
+            val referenceId = effectiveHistory.firstOrNull()?.referenceId ?: "unknown"
             log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${report.reason}" }
             return false
         }
@@ -27,15 +25,15 @@ class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = Eve
         return workflow.isWorkflowComplete()
     }
 
-    override fun produceSummary(fullHistory: List<Event>): Event {
+    override fun produceSummary(effectiveHistory: List<Event>): Event {
         // Must have all relevant tasks completed
-        val eventIds = fullHistory.map { it.eventId }.toSet()
+        val eventIds = effectiveHistory.map { it.eventId }.toSet()
 
-        return CollectedEvent(eventIds).derivedOf(fullHistory.last())
+        return CollectedEvent(eventIds).derivedOf(effectiveHistory.last())
     }
 
-    override fun summaryAlreadyExists(fullHistory: List<Event>): Boolean {
-        return fullHistory.any { it is CollectedEvent }
+    override fun summaryAlreadyExists(effectiveHistory: List<Event>): Boolean {
+        return effectiveHistory.any { it is CollectedEvent }
     }
 }
 

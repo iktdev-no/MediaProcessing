@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, CircularProgress, Paper, Tabs, Tab, IconButton, Tooltip, Divider, Chip } from "@mui/material";
+import { Box, Typography, CircularProgress, Paper, Tabs, Tab, IconButton, Tooltip, Divider, Chip, Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import ChromeReaderModeIcon from '@mui/icons-material/ChromeReaderMode';
-import { getSequence, getSequenceInfo } from "../../api/coordinator/sequence";
-import type { SequenceSummary, LifecycleNode, UiEvent, UiTask } from "../../types/types";
+import { continueSequence, deleteSequence, getSequence, getSequenceInfo } from "../../api/coordinator/sequence";
+import type { SequenceSummary, LifecycleNode, UiEvent, UiTask, SequenceActions } from "../../types/types";
 import { TaskCard } from "../../components/task/TaskCard";
 import { getTasksForReference } from "../../api/coordinator/tasks";
 import { getEffectiveEventsHistory } from "../../api/coordinator/events";
@@ -14,6 +14,17 @@ import { EventsTab, SplitViewContainer, TasksTab } from "../../components/sequen
 import { SequenceTaskCard } from "../../components/sequence/SequenceTaskCard";
 import { SequenceEventCard } from "../../components/sequence/SequenceEventCard";
 import MoveToInboxOutlinedIcon from '@mui/icons-material/MoveToInboxOutlined';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+
+function onSequenceAction(refId: string | undefined, action: SequenceActions) {
+    if (!refId) return
+    if (action === "Release") {
+        continueSequence(refId);
+    } else if (action === "Delete") {
+        deleteSequence(refId)
+    }
+}
+
 
 export default function SequenceViewPage() {
     const { referenceId } = useParams<{ referenceId: string }>();
@@ -98,7 +109,7 @@ export default function SequenceViewPage() {
             >
                 {/* Venstre kolonne: Sekvens-sammendrag */}
                 <Box sx={{ overflowY: "auto", display: "flex", flexDirection: "column" }}>
-                    <SequenceSummaryCard seqInfo={seqInfo} />
+                    <SequenceSummaryCard seqInfo={seqInfo} onActionClick={(action) => onSequenceAction(referenceId, action)} />
                 </Box>
 
                 {/* Høyre kolonne: Tabs og Innhold */}
@@ -235,61 +246,90 @@ function SequenceTab({ sequence }: { sequence: Array<LifecycleNode> }) {
             {sequence.map((node) => {
                 if (node.type === "EventTaskGroup") {
                     return (
-                        <Paper key={node.lifecycleId} variant="outlined" sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
-                            {node.taskOwnerEvent && (
-                                <Box>
-                                    <Typography variant="subtitle2" color="primary" fontWeight={600}>
-                                        {node.taskOwnerEvent.event}
+                        <Accordion
+                            key={node.lifecycleId}
+                            variant="outlined"
+                            defaultExpanded
+                            sx={{
+                                '&:before': { display: 'none' }, // Fjerner standard MUI-linje øverst
+                                boxShadow: 'none',
+                                border: 1,
+                                borderColor: 'divider',
+                                borderRadius: 1,
+                            }}
+                        >
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ px: 2, py: 1 }}
+                            >
+                                {node.taskOwnerEvent ? (
+                                    <Box>
+                                        <Typography variant="subtitle2" fontWeight={600}>
+                                            {node.title}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            {new Date(node.taskOwnerEvent.persistedAt).toLocaleString("no-NO")}
+                                        </Typography>
+                                    </Box>
+                                ) : (
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Livssyklus: {node.lifecycleId}
                                     </Typography>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {new Date(node.taskOwnerEvent.persistedAt).toLocaleString("no-NO")}
-                                    </Typography>
-                                </Box>
-                            )}
+                                )}
+                            </AccordionSummary>
+
                             <Divider />
-                            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pl: 1 }}>
-                                {node.tasks.map((taskItem) => {
-                                    if (!taskItem.task) return null;
-                                    return (
-                                        <Box key={taskItem.taskId} sx={{ display: "flex", flexDirection: "column", gap: 1.5, pl: 2, borderLeft: "2px dashed", borderColor: "divider" }}>
-                                            <SequenceTaskCard
-                                                task={taskItem.task}
-                                                show="taskId"
-                                                onCopy={() => navigator.clipboard.writeText(taskItem.taskId)}
-                                                onReferenceIdClicked={() => { }}
-                                                onCanceltask={() => { }}
-                                            />
 
-                                            {taskItem.taskResultEvents && taskItem.taskResultEvents.length > 0 && (
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        my: 0.5,
-                                                        color: "text.secondary"
-                                                    }}
-                                                >
-                                                    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
-                                                    <Box sx={{ px: 1, display: "flex", alignItems: "center" }}>
-                                                        <MoveToInboxOutlinedIcon fontSize="small" />
+                            <AccordionDetails sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pl: 1 }}>
+                                    {node.taskOwnerEvent && (
+                                        <SequenceEventCard
+                                            event={node.taskOwnerEvent}
+                                        />
+                                    )}
+                                    {node.tasks.map((taskItem) => {
+                                        if (!taskItem.task) return null;
+                                        return (
+                                            <Box key={taskItem.taskId} sx={{ display: "flex", flexDirection: "column", gap: 1.5, pl: 2, borderLeft: "2px dashed", borderColor: "divider" }}>
+                                                <SequenceTaskCard
+                                                    task={taskItem.task}
+                                                    show="taskId"
+                                                    onCopy={() => navigator.clipboard.writeText(taskItem.taskId)}
+                                                    onReferenceIdClicked={() => { }}
+                                                    onCanceltask={() => { }}
+                                                />
+
+                                                {taskItem.taskResultEvents && taskItem.taskResultEvents.length > 0 && (
+                                                    <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            my: 0.5,
+                                                            color: "text.secondary"
+                                                        }}
+                                                    >
+                                                        <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+                                                        <Box sx={{ px: 1, display: "flex", alignItems: "center" }}>
+                                                            <MoveToInboxOutlinedIcon fontSize="small" />
+                                                        </Box>
+                                                        <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
                                                     </Box>
-                                                    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
-                                                </Box>
-                                            )}
+                                                )}
 
-                                            <Box sx={{ ml: 4 }}>
-                                                {taskItem.taskResultEvents?.map((ev) => (
-                                                    <SequenceEventCard
-                                                        key={ev.eventId}
-                                                        event={ev}
-                                                    />
-                                                ))}
+                                                <Box sx={{ ml: 4 }}>
+                                                    {taskItem.taskResultEvents?.map((ev) => (
+                                                        <SequenceEventCard
+                                                            key={ev.eventId}
+                                                            event={ev}
+                                                        />
+                                                    ))}
+                                                </Box>
                                             </Box>
-                                        </Box>
-                                    );
-                                })}
-                            </Box>
-                        </Paper>
+                                        );
+                                    })}
+                                </Box>
+                            </AccordionDetails>
+                        </Accordion>
                     );
                 }
                 return (

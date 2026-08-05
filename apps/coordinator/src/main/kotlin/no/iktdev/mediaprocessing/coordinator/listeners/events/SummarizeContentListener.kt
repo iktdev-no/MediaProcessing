@@ -12,6 +12,7 @@ import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
 import no.iktdev.mediaprocessing.shared.common.projection.SummaryProjection
+import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import org.springframework.stereotype.Component
 
 @Component
@@ -24,9 +25,8 @@ class SummarizeContentListener(
         event: Event,
         history: List<Event>
     ): Event? {
-        if (event !is CollectedEvent) return null
-
-        val useHistory = (history.filter { event.eventIds.contains(it.eventId) })
+        val useEvent = event.requireQualifiedEntry<CollectedEvent>()
+        val useHistory = (history.filter { useEvent.eventIds.contains(it.eventId) })
         val determinedCollection = useHistory.getInstanceOf<DeterminedCollectionTaskResultEvent>()
 
 
@@ -44,7 +44,7 @@ class SummarizeContentListener(
         val mediaProjection = projection.projectMediaFiles(migrationPlan)
         val metadata = projection.projectMetadata(migrationPlan)
         if (metadata == null && !canAllowMetadataNull(mediaProjection)) {
-            log.error { "Metadata is null @ ${event.referenceId}" }
+            log.error { "Metadata is null @ ${useEvent.referenceId}" }
             return null
         }
 
@@ -60,7 +60,7 @@ class SummarizeContentListener(
         return ContinuationSummaryEvent(
             data = exportInfo,
             plan = migrationPlan,
-        ).derivedOf(event)
+        ).derivedOf(useEvent)
     }
 
     fun canAllowMetadataNull(mediaProjection: ContentExport.MediaExport?): Boolean {

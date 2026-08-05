@@ -1,6 +1,6 @@
 // AUTO-GENERATED. DO NOT EDIT.
 // TSGenerator Version: 1.0-SNAPSHOT
-// Time: 2026-08-02T20:30:44.822733273Z
+// Time: 2026-08-05T15:32:44.627651386Z
 // Source: no.iktdev.mediaprocessing.ui.models.contract
 
 
@@ -99,6 +99,7 @@ export interface LifecycleNode {
   referenceId: string;
   taskOwnerEvent: UiEvent | null;
   tasks: TaskLifecycleItem[];
+  title: string;
   type: LifecycleNodeType;
 }
 
@@ -126,9 +127,12 @@ export interface SequenceHealth {
   startTime: string;
 }
 
+export type SequenceActions = "Delete" | "Hold" | "Release"
+
 export type LifecycleNodeType = "Event" | "EventTaskGroup"
 
 export interface SequenceSummary {
+  availableActions: SequenceActions[];
   collection: string | null;
   episodeInfo: EpisodeInfoSummary | null;
   failedTasks: string[];

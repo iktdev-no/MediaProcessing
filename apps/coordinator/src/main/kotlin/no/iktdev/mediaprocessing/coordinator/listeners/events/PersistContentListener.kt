@@ -6,7 +6,9 @@ import no.iktdev.eventi.models.SignalEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
+import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.common.listeners.PolicyGateEventListener
+import no.iktdev.mediaprocessing.shared.common.projection.SignalProjection
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
 import no.iktdev.mediaprocessing.shared.common.short
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -23,27 +25,17 @@ class PersistContentListener(
         event.requireQualifiedEntry<ContinuationSummaryEvent>()
         val useHistory = history.sortedBy { it.metadata.created }
 
-        val allSignals = useHistory.filterIsInstance<SignalEvent>()
+        val signalis = SignalProjection(useHistory)
 
-        val relevantSignals = allSignals
-            .filter { it::class in listOf(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class) }
-            .sortedBy { it.metadata.created }
+        val hasRelevantSignal = signalis.hasRelevantSignal(OnHoldSignalEvent::class, ReleaseHoldSignalEvent::class)
 
-        val lastSignal = relevantSignals.maxByOrNull { it.metadata.created }
-
-
-        // 7. Branching
-        if (lastSignal == null) {
-            return super.onEvent(event, useHistory)
+        if (hasRelevantSignal) {
+            log.debug("[${event.referenceId.short()}] Last signal is ${signalis.lastSignal!!::class.getName()}")
+        } else {
+            log.debug("[${event.referenceId.short()}] No relevant signals")
         }
 
-        log.debug("[${lastSignal.referenceId.short()}] Last signal is ${lastSignal::class.java.name}")
-
-        if (lastSignal is OnHoldSignalEvent) {
-            return null
-        }
-
-        if (lastSignal is ReleaseHoldSignalEvent) {
+        if (!hasRelevantSignal || signalis.isReleased) {
             return super.onEvent(event, useHistory)
         }
 
@@ -83,16 +75,15 @@ class PersistContentListener(
         event: Event,
         signalHistory: List<SignalEvent>
     ): Event? {
-
-        val lastSignal = signalHistory.lastOrNull()
+        val signalis = SignalProjection(signalHistory)
 
         // 1. Hvis vi nettopp slapp hold → passthrough
-        if (lastSignal is ReleaseHoldSignalEvent) {
+        if (signalis.isReleased) {
             return PersistContentEvent().derivedOf(event)
         }
 
         // 2. Hvis vi aldri har vært på hold → sett hold
-        if (lastSignal !is OnHoldSignalEvent) {
+        if (!signalis.isOnHold) {
             return OnHoldSignalEvent("Manual flow").derivedOf(event)
         }
 

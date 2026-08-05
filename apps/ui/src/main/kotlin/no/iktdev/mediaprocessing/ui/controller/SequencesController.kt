@@ -59,16 +59,13 @@ class SequenceController(
         }
     }
 
-    @PostMapping("/{referenceId}/delete")
+    @DeleteMapping("/{referenceId}")
     fun deleteSequences(
         @PathVariable referenceId: UUID
     ): ResponseEntity<String> {
         return try {
-
             val id = EventStore.deleteSequence(referenceId)
-
             ResponseEntity.ok("Sequence deleted, Event id for deletion marking is $id")
-
         } catch (ex: Exception) {
             ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

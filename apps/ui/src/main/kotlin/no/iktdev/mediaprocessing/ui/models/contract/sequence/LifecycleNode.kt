@@ -9,6 +9,7 @@ data class LifecycleNode(
     val referenceId: UUID,
     val type: LifecycleNodeType,
 
+    val title: String,
     val event: UiEvent?,
     val taskOwnerEvent: UiEvent?,
     val tasks: List<TaskLifecycleItem> = emptyList()

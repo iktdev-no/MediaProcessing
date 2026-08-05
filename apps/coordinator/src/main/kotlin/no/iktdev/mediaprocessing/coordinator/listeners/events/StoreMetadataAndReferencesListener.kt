@@ -31,11 +31,9 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
         event: Event,
         history: List<Event>
     ): Task? {
+
         val startEvent = history.requireEvent<StartProcessingEvent>()
-
         val useEvent = history.getInstanceOf<ContinuationSummaryEvent>() ?: return null
-        history.requireEvent<PersistContentEvent>()
-
 
         val data = if (startEvent.data.operation.isOnly(OperationType.MetadataSearch)) {
             event.requireQualifiedEntry<PersistContentEvent>()

@@ -11,6 +11,7 @@ data class SequenceSummary(
     val metadata: MetadataSummary? = null, // Ny blokk for rå metadata
     val failingReasons: FailingReason? = null,
     val failedTasks: Set<String> = emptySet(),
+    val availableActions: Set<SequenceActions> = setOf(SequenceActions.Delete)
 ) {
     data class EpisodeInfoSummary(
         val seasonNumber: Int,
@@ -25,6 +26,12 @@ data class SequenceSummary(
         val source: String,
         val hasCover: Boolean
     )
+}
+
+enum class SequenceActions {
+    Delete,
+    Hold,
+    Release
 }
 
 enum class FailingReason {

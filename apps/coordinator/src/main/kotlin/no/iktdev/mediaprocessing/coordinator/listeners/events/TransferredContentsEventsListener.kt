@@ -20,18 +20,18 @@ class TransferredContentsEventsListener(val eventStore: no.iktdev.eventi.stores.
         TaskStatus.Completed
     )
 
-    override fun shouldSummarize(fullHistory: List<Event>): Boolean {
-        val transferStatus = TaskProjection(fullHistory)
+    override fun shouldSummarize(effectiveHistory: List<Event>): Boolean {
+        val transferStatus = TaskProjection(effectiveHistory)
         if (transferStatus.projectMigrateContentStatus() !in requiredTransferStatus) {
             return false
         }
         return true
     }
 
-    override fun produceSummary(fullHistory: List<Event>): Event {
+    override fun produceSummary(effectiveHistory: List<Event>): Event {
         // 1. Hent ut ID-ene til alle fil-eventene som er med i denne beregningen akkurat nå
         // (Her må du filtrere på de event-typene som TaskProjection faktisk bruker)
-        val targetEventIds = fullHistory
+        val targetEventIds = effectiveHistory
             .filter { it is TransferredBaseResultEvent || it is PersistContentEvent }
             .map { it.eventId }
             .toSet()
@@ -39,12 +39,12 @@ class TransferredContentsEventsListener(val eventStore: no.iktdev.eventi.stores.
         // 2. Returner det nye samle-eventet som holder på disse ID-ene
         return TransferredContentsSummaryEvent(
             summarizedEventIds = targetEventIds
-        ).derivedOf(fullHistory.last())
+        ).derivedOf(effectiveHistory.last())
     }
 
-    override fun summaryAlreadyExists(fullHistory: List<Event>): Boolean {
+    override fun summaryAlreadyExists(effectiveHistory: List<Event>): Boolean {
         // 1. Finn alle relevante fil-events i historikken
-        val currentFileEventIds = fullHistory
+        val currentFileEventIds = effectiveHistory
             .filter { it is TransferredBaseResultEvent || it is PersistContentEvent }
             .map { it.eventId }
             .toSet()
@@ -52,7 +52,7 @@ class TransferredContentsEventsListener(val eventStore: no.iktdev.eventi.stores.
         if (currentFileEventIds.isEmpty()) return false
 
         // 2. Sjekk om det allerede finnes et summary-event som dekker NØYAKTIG denne tilstanden
-        val existingSummary = fullHistory
+        val existingSummary = effectiveHistory
             .filterIsInstance<TransferredContentsSummaryEvent>()
             .firstOrNull { it.summarizedEventIds == currentFileEventIds }
 

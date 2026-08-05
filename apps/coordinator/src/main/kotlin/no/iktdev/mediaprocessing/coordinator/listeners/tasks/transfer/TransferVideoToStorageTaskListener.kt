@@ -24,7 +24,7 @@ class TransferVideoToStorageTaskListener: TransferToStorageBaseListener() {
             collection = (task as VideoTransferTask).collection,
             status = status,
             error = exception?.message ?: "Unknown error"
-        )
+        ).producedFrom(task)
     }
 
     override fun supports(task: Task) = task is VideoTransferTask
@@ -72,6 +72,6 @@ class TransferVideoToStorageTaskListener: TransferToStorageBaseListener() {
             fileUri = dest.uri,
             status = success.first,
             error = success.second
-        )
+        ).producedFrom(task)
     }
 }

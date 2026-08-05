@@ -1,5 +1,5 @@
 import type { LifecycleNode, Sequence, SequenceSummary } from "../../types/types";
-import { apiGet, apiPost } from "../client";
+import { apiDelete, apiGet, apiPost } from "../client";
 
 export function getActiveSequences() {
   return apiGet<Sequence[]>("/sequences/active");
@@ -28,4 +28,8 @@ export async function continueSequence(referenceId: string) {
     // Hvis backend returnerer 4xx/5xx → kast feilen videre
     throw new Error(err?.response?.data ?? "Unknown error");
   }
+}
+
+export async function deleteSequence(referenceId: string) {
+  return apiDelete<String>(`/sequences/${referenceId}`);
 }

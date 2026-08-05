@@ -28,7 +28,6 @@ import org.jetbrains.exposed.sql.alias
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.max
-import org.jetbrains.exposed.sql.selectAll
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -200,7 +199,7 @@ object EventStore: EventStore {
         return sequenceEvents.mapNotNull { it.toEvent() }
     }
 
-    fun deleteFailedEventForTask(referenceId: UUID, taskId: UUID): UUID? {
+    fun deleteEventForTaskResult(referenceId: UUID, taskId: UUID): UUID? {
         val serialized = getEventSequence(referenceId)
         val targetedEvent = serialized.find { it?.metadata?.derivedFromId?.any { uUID -> uUID == taskId } == true }
         if (targetedEvent == null) {

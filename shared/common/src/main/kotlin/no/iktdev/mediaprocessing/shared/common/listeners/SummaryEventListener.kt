@@ -11,9 +11,9 @@ abstract class SummaryEventListener(
 ) : EventListener() {
 
     final override fun onEvent(event: Event, history: List<Event>): Event? {
-        val fullHistory = eventStore.getPersistedEventsFor(event.referenceId)
+        val effectiveHistory = eventStore.getPersistedEventsFor(event.referenceId)
             .effectivePersisted()
-        val events = fullHistory.map { it.toEvent() }.filterNotNull()
+        val events = effectiveHistory.mapNotNull { it.toEvent() }
 
         if (!shouldSummarize(events)) return null
         if (summaryAlreadyExists(events)) return null
@@ -21,8 +21,8 @@ abstract class SummaryEventListener(
         return produceSummary(events).derivedOf(event)
     }
 
-    abstract fun shouldSummarize(fullHistory: List<Event>): Boolean
-    abstract fun produceSummary(fullHistory: List<Event>): Event
-    abstract fun summaryAlreadyExists(fullHistory: List<Event>): Boolean
+    abstract fun shouldSummarize(effectiveHistory: List<Event>): Boolean
+    abstract fun produceSummary(effectiveHistory: List<Event>): Event
+    abstract fun summaryAlreadyExists(effectiveHistory: List<Event>): Boolean
 
 }
