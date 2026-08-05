@@ -32,6 +32,7 @@ class TransferVideoToStorageTaskListenerTest : TransferToStorageBaseListenerTest
     fun `video_success`() = runTest {
         val destFile = FakeFile("/dest/build/potet.mp4")
         val task = VideoTransferTask(UUID.randomUUID(), "col", "/src/build/potet.mp4", destFile.absolutePath)
+            .usingReferenceId(UUID.randomUUID()) as VideoTransferTask
         val reporter = FakeTaskReporter()
         destFile.changeExist(false)
 
@@ -51,6 +52,7 @@ class TransferVideoToStorageTaskListenerTest : TransferToStorageBaseListenerTest
     fun `video_skipped`() = runTest {
         // Her kan du mocke fs til å kaste FilesAreIdentical
         val task = VideoTransferTask(UUID.randomUUID(), "col", "/src", "/dest")
+            .apply { usingReferenceId(UUID.randomUUID()) }
         val fs = MockFileSystemService()
 
 
@@ -75,6 +77,8 @@ class TransferVideoToStorageTaskListenerTest : TransferToStorageBaseListenerTest
             writeText("dummy") // gir filen innhold
         }
 
+        val refid = UUID.randomUUID()
+
         // Matching hash
         val expectedHash = dst.toXxHash()
 
@@ -88,7 +92,7 @@ class TransferVideoToStorageTaskListenerTest : TransferToStorageBaseListenerTest
             storeUri = dst.absolutePath,
             cachedFileHash = expectedHash, // viktig!
             overrides = emptyList()
-        )
+        ).usingReferenceId(refid)
 
         val result = InternalTestListener(fs).onTask(task) as VideoTransferredResultEvent
 
