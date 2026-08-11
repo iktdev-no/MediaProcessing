@@ -1,11 +1,14 @@
 package no.iktdev.mediaprocessing.ui.models.contract.sequence
 
+import no.iktdev.mediaprocessing.ui.models.contract.MediaType
 import no.iktdev.mediaprocessing.ui.models.contract.TaskStatus
 import java.time.Instant
 
 data class Sequence(
     val referenceId: String,
-    val title: String,
+    val title: String?,
+    val collection: String?,
+    val mediaType: MediaType? = null,
     val inputFileName: String?,
     val type: ContextType = ContextType.Content,
     val lastEventId: String,
@@ -14,6 +17,7 @@ data class Sequence(
     val mode: Mode,
     val currentState: CurrentState,
     val hasErrors: Boolean,
+    val availableActions: Set<SequenceActions>
 )
 
 enum class TaskType {

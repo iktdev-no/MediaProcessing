@@ -7,9 +7,14 @@ import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
+import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.dto.DiskInfo
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.client.RestTemplate
 import java.io.FileInputStream
@@ -352,3 +357,23 @@ fun getDiskInfoFor(mounts: List<String>): List<DiskInfo> =
             else 0.0
         )
     }
+
+fun getCollection(events: List<Event>): String? {
+    val collect = events.getInstanceOf<CollectedEvent>()
+    if (collect != null) {
+        val useHistory = (events.filter { collect.eventIds.contains(it.eventId) })
+        val determinedCollection = useHistory.getInstanceOf<DeterminedCollectionTaskResultEvent>()
+        val summaryCollection = events.getInstanceOf<ContinuationSummaryEvent>()
+        return summaryCollection?.data?.collection ?: determinedCollection
+            ?.takeIf { it.status == TaskStatus.Completed }
+            ?.collection
+            ?.takeIf { it.isNotBlank() }
+            ?: CollectionProjection(useHistory).getCollection()
+    } else {
+        return try {
+            CollectionProjection(events).getCollection()
+        } catch (e: Exception) {
+            null
+        }
+    }
+}

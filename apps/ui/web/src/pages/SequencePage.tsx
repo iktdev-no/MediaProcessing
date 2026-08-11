@@ -1,13 +1,13 @@
 import { Box, Typography, CircularProgress } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   continueSequence,
   getActiveSequences,
 } from "../api/coordinator/sequence";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTitle } from "../features/useTitle";
-import type { Sequence } from "../types/types";
+import type { Sequence, SequenceActions } from "../types/types";
 import { SequenceOverviewCard } from "../components/sequence/SequenceOverviewCard";
 
 export function SequencePage() {
@@ -21,22 +21,24 @@ export function SequencePage() {
     setTitle("Sequences");
   }, [setTitle]);
 
-  const fetchSequences = () => {
+  // Bruker useCallback slik at funksjonen holder seg stabil
+  const fetchSequences = useCallback((showLoader = false) => {
+    if (showLoader) setLoading(true);
+
     getActiveSequences()
       .then(setSequences)
       .catch((err) => toast.error(err.message || "Kunne ikke hente sekvenser"))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
-    setLoading(true);
-    fetchSequences();
-  }, []);
+    fetchSequences(true); // Vis loader KUN ved første innlasting
+  }, [fetchSequences]);
 
   const onContinue = async (refId: string) => {
     try {
       await continueSequence(refId);
-      fetchSequences();
+      fetchSequences(false /* false = ikke vis loader/spinner, behold scroll */);
       toast.success("Action accepted!");
     } catch (err: any) {
       toast.error(err.message);
@@ -50,12 +52,25 @@ export function SequencePage() {
   const onDelete = async (refId: string) => {
     try {
       await fetch(`/api/sequences/${refId}/delete`, { method: "POST" });
-      fetchSequences();
+      fetchSequences(false /* false = ikke vis loader/spinner, behold scroll */);
       toast.success("Sequence deleted!");
     } catch (err: any) {
       toast.error(err.message);
     }
   };
+
+  function onActionClick(refId: string, action: SequenceActions): void {
+    switch (action) {
+      case "Delete": {
+        onDelete(refId);
+        break;
+      }
+      case "Release": {
+        onContinue(refId);
+        break;
+      }
+    }
+  }
 
   return (
     <Box
@@ -82,7 +97,7 @@ export function SequencePage() {
           sx={{
             flex: 1,
             minHeight: 0,
-            overflow: "auto",
+            overflow: "auto", // Sørger for at det er denne boksen som scroller, ikke hele vinduet
             pb: 5,
             display: "flex",
             flexWrap: "wrap",
@@ -95,8 +110,7 @@ export function SequencePage() {
               key={seq.referenceId}
               sequence={seq}
               onNavigate={onNavigateToSequence}
-              onContinue={onContinue}
-              onDelete={onDelete}
+              onActionClick={(action) => onActionClick(seq.referenceId, action)}
             />
           ))}
         </Box>

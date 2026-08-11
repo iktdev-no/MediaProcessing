@@ -1,6 +1,6 @@
 // AUTO-GENERATED. DO NOT EDIT.
 // TSGenerator Version: 1.0-SNAPSHOT
-// Time: 2026-08-05T15:32:44.627651386Z
+// Time: 2026-08-06T12:37:55.673762278Z
 // Source: no.iktdev.mediaprocessing.ui.models.contract
 
 
@@ -143,15 +143,18 @@ export interface SequenceSummary {
 }
 
 export interface Sequence {
+  availableActions: SequenceActions[];
+  collection: string | null;
   currentState: CurrentState;
   hasErrors: boolean;
   inputFileName: string | null;
   lastEventId: string;
   lastEventTime: string;
+  mediaType: MediaType | null;
   mode: Mode;
   referenceId: string;
   tasks: Record<TaskType, TaskStatus>;
-  title: string;
+  title: string | null;
   type: ContextType;
 }
 

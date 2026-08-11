@@ -39,6 +39,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Releas
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartFlow
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ValidateFileAndMediaDataEvent
+import no.iktdev.mediaprocessing.shared.common.getCollection
 import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.common.model.ReasonFailed
@@ -139,6 +140,15 @@ class SequenceAggregatorService(
         )
     }
 
+    fun getHistoricalSequences(): List<Sequence> {
+        val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
+        return getSequences(allEvents,
+            { group: List<PersistedEvent> ->
+                group.any { it.event == CompletedEvent::class.java.simpleName }
+            }
+        )
+    }
+
     fun getRecentSequences(limit: Int): List<Sequence> {
         val allEvents = EventStore.getPersistedEventsAfter(Instant.EPOCH)
         return getSequences(allEvents).take(limit)
@@ -192,9 +202,14 @@ class SequenceAggregatorService(
             CurrentState.Continuing
         }
 
+        val mediaType = projection.metadata?.mediaType
+            ?: projection.parsedFileInfo?.mediaType
+
         return Sequence(
             referenceId = last.referenceId.toString(),
             title = getTitle(persisted) ?: "",
+            collection = getCollection(persisted.toEvents()),
+            mediaType = mediaType?.toUiMediaType(),
             inputFileName = projection.useFile?.name,
             lastEventId = last.eventId.toString(),
             lastEventTime = last.persistedAt,
@@ -214,7 +229,9 @@ class SequenceAggregatorService(
                 else -> Mode.Auto
             },
             currentState = state,
-            hasErrors = taskProjection.hasFailed()
+            hasErrors = taskProjection.hasFailed(),
+            availableActions = getSequenceActions(events)
+
         )
     }
 
@@ -285,11 +302,29 @@ class SequenceAggregatorService(
         }
     }
 
+    fun getSequenceActions(events: List<Event>): Set<SequenceActions> {
+        val signals = SignalProjection(events)
+
+
+        val actions = mutableListOf<SequenceActions>()
+        if (events.none { it is CompletedEvent }) {
+            actions.add(SequenceActions.Delete)
+
+            if (signals.isOnHold) {
+                actions.add(SequenceActions.Release)
+            } else if (signals.isReleased || signals.lastSignal == null) {
+                // actions.add(SequenceActions.Hold)
+            }
+        }
+        return actions.toSet()
+    }
+
+
     fun getSequenceSummary(refId: UUID): SequenceSummary {
-        val events = eventService.getEffectiveHistory(refId).toEvents()
+        val pe = eventService.getEffectiveHistory(refId)
+        val events = pe.toEvents()
         val workflow = WorkflowProjection(events)
         val statusReport = workflow.evaluate()
-        val signals = SignalProjection(events)
 
 
         val collect = CollectProjection(events)
@@ -302,14 +337,6 @@ class SequenceAggregatorService(
         val reasonFailed = statusReport.reason as? ReasonFailed
 
         // Utled tittel, mediatype og episodeinfo som før
-        val title = try {
-            collect.metadata?.title
-                ?: collect.parsedFileInfo?.name
-                ?: summaryProjection.getFileName()
-
-        } catch (e: Exception) {
-            null
-        }
         val mediaType = collect.metadata?.mediaType
             ?: collect.parsedFileInfo?.mediaType
 
@@ -333,36 +360,20 @@ class SequenceAggregatorService(
             )
         }
 
-        val targetCollection = try {
-            CollectionProjection(events).getCollection()
-        } catch (e: Exception) {
-            null
-        }
 
-
-        val actions = mutableListOf<SequenceActions>()
-        if (events.none { it is CompletedEvent }) {
-            actions.add(SequenceActions.Delete)
-
-            if (signals.isOnHold) {
-                actions.add(SequenceActions.Release)
-            } else if (signals.isReleased || signals.lastSignal == null) {
-               // actions.add(SequenceActions.Hold)
-            }
-        }
 
 
 
 
         return SequenceSummary(
-            title = title,
-            collection = targetCollection,
+            title = getTitle(pe),
+            collection = getCollection(events),
             mediaType = mediaType?.toUiMediaType(),
             episodeInfo = episodeSummary,
             metadata = metadataSummary, // Sendes med til UI
             failingReasons = reasonFailed?.reason?.translate(),
             failedTasks = reasonFailed?.tasks ?: emptySet(),
-            availableActions = actions.toSet()
+            availableActions = getSequenceActions(events)
         )
     }
 

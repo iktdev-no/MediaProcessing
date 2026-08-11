@@ -1,8 +1,7 @@
 import { Box, Typography, Paper, Divider, Chip, Button } from "@mui/material";
 import type { SequenceActions, SequenceSummary } from "../../types/types";
-import DeleteIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import PauseIcon from '@mui/icons-material/PauseOutlined';
-import PlayIcon from '@mui/icons-material/PlayArrowOutlined';
+import { SquenceActionbutton } from "./SequenceActionButton";
+
 
 interface SequenceSummaryCardProps {
     seqInfo?: SequenceSummary;
@@ -88,28 +87,3 @@ export function SequenceSummaryCard({ seqInfo, onActionClick }: SequenceSummaryC
     );
 }
 
-interface SequenceActionButtonProps {
-    action: SequenceActions;
-    onClick: () => void;
-}
-
-function SquenceActionbutton({ action, onClick }: SequenceActionButtonProps) {
-    const { color, icon } = ((act: SequenceActions) => {
-        switch (act) {
-            case "Delete":
-                return { color: "error" as const, icon: <DeleteIcon /> }
-            case "Hold":
-                return { color: "warning" as const, icon: <PauseIcon /> }
-            case "Release":
-                return { color: "success" as const, icon: <PlayIcon /> }
-            default:
-                return { color: "inherit" as const, icon: null }
-        }
-    })(action)
-
-    return (
-        <Button color={color} endIcon={icon} variant="contained" onClick={onClick}>
-            {action}
-        </Button>
-    );
-}

@@ -6,6 +6,7 @@ import no.iktdev.mediaprocessing.coordinator.Preference
 import no.iktdev.mediaprocessing.ffmpeg.data.SubtitleStream
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.SubtitleSelectionMode
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksDetermineSubtitleTypeEvent
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractExcluded
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksExtractSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleItem
 import no.iktdev.mediaprocessing.shared.common.model.SubtitleType
@@ -35,7 +36,7 @@ class MediaSelectExtractTracksListener(
         val streams = filteredByType.map { it.stream }
 
         // 3. Select subtitles based on language + format priority
-        val selected = selectSubtitleStreams(
+        val result = selectSubtitleStreamsWithReason(
             streams = streams,
             preferredLanguages = pref.preferredSubtitles,
             preferOriginal = pref.preferOriginal,
@@ -43,7 +44,8 @@ class MediaSelectExtractTracksListener(
         )
 
         return MediaTracksExtractSelectedEvent(
-            selectedSubtitleTracks = selected.map { it.index }
+            selectedSubtitleTracks = result.selected.map { it.index },
+            excludedTracks = result.excluded
         ).derivedOf(event)
     }
 
@@ -73,46 +75,98 @@ class MediaSelectExtractTracksListener(
     // SUBTITLE SELECTION LOGIC
     // ------------------------------------------------------------
 
-    private fun selectSubtitleStreams(
+    data class SubtitleSelectionResult(
+        val selected: List<SubtitleStream>,
+        val excluded: List<MediaTracksExtractExcluded>
+    )
+
+    private fun selectSubtitleStreamsWithReason(
         streams: List<SubtitleStream>,
         preferredLanguages: List<String>,
         preferOriginal: Boolean,
         formatPriority: List<String>
-    ): List<SubtitleStream> {
-        if (streams.isEmpty()) return emptyList()
+    ): SubtitleSelectionResult {
+        val selected = mutableListOf<SubtitleStream>()
+        val excluded = mutableListOf<MediaTracksExtractExcluded>()
 
-        // 1. Originalspråk
-        if (preferOriginal) {
-            val originals = streams.filter { it.disposition?.original == 1 }
-            if (originals.isNotEmpty()) {
-                return originals.uniquePerLanguageBestFormat(formatPriority)
-            }
+        if (streams.isEmpty()) {
+            return SubtitleSelectionResult(emptyList(), emptyList())
         }
 
-        // 2. Preferred languages
-        for (lang in preferredLanguages) {
-            val expanded = expandLanguage(lang)
+        val processedIndices = mutableSetOf<Int>()
 
+        // Sørg for at engelsk alltid er med i tillegg til brukerens egne valg
+        val effectiveLanguages = (preferredLanguages).distinct()
+
+        // 1. Sjekk foretrukne språk (inkludert engelsk)
+        for (lang in effectiveLanguages) {
+            val expanded = expandLanguage(lang)
             val match = streams.filter { s ->
-                expanded.any { exp ->
+                s.index !in processedIndices && expanded.any { exp ->
                     s.tags.language?.equals(exp, ignoreCase = true) == true
                 }
             }
 
-            if (match.isNotEmpty()) {
-                return match.uniquePerLanguageBestFormat(formatPriority)
+            val bestForLanguage = match.uniquePerLanguageBestFormat(formatPriority)
+
+            val losers = match.filter { it !in bestForLanguage }
+            for (loser in losers) {
+                excluded.add(MediaTracksExtractExcluded(loser.index, "Lost format priority for language $lang"))
+                processedIndices.add(loser.index)
+            }
+
+            for (stream in bestForLanguage) {
+                if (selected.none { it.tags.language == stream.tags.language }) {
+                    selected.add(stream)
+                    processedIndices.add(stream.index)
+                } else {
+                    excluded.add(MediaTracksExtractExcluded(stream.index, "Language already fulfilled by preferred list"))
+                    processedIndices.add(stream.index)
+                }
             }
         }
 
+        // 2. Sjekk originalspråk for de som er igjen
+        if (preferOriginal) {
+            val originals = streams.filter { it.index !in processedIndices && it.disposition?.original == 1 }
+            val bestOriginals = originals.uniquePerLanguageBestFormat(formatPriority)
 
-        // 3. Default subtitles
-        val defaults = streams.filter { it.disposition?.default == 1 }
-        if (defaults.isNotEmpty()) {
-            return defaults.uniquePerLanguageBestFormat(formatPriority)
+            val losers = originals.filter { it !in bestOriginals }
+            for (loser in losers) {
+                excluded.add(MediaTracksExtractExcluded(loser.index, "Lost format priority for original language"))
+                processedIndices.add(loser.index)
+            }
+
+            for (orig in bestOriginals) {
+                if (selected.none { it.tags.language == orig.tags.language }) {
+                    selected.add(orig)
+                    processedIndices.add(orig.index)
+                } else {
+                    excluded.add(MediaTracksExtractExcluded(orig.index, "Language already fulfilled, skipping original"))
+                    processedIndices.add(orig.index)
+                }
+            }
         }
 
-        // 4. Fallback: all subtitles
-        return streams.uniquePerLanguageBestFormat(formatPriority)
+        // 3. Fallback hvis ingenting er valgt
+        val remaining = streams.filter { it.index !in processedIndices }
+        if (selected.isEmpty()) {
+            val defaults = remaining.filter { it.disposition?.default == 1 }
+            val chosenDefaults = defaults.uniquePerLanguageBestFormat(formatPriority)
+
+            selected.addAll(chosenDefaults)
+            for (rem in remaining) {
+                if (rem !in chosenDefaults) {
+                    excluded.add(MediaTracksExtractExcluded(rem.index, "Fallback selection: did not match preferred/original/default criteria"))
+                }
+            }
+        } else {
+            for (rem in remaining) {
+                excluded.add(MediaTracksExtractExcluded(rem.index, "Not matching preferred languages or original language preferences"))
+            }
+        }
+
+        return SubtitleSelectionResult(selected, excluded)
     }
 
     private fun expandLanguage(code: String): List<String> =

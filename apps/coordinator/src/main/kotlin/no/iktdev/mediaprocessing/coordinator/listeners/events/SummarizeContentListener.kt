@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import mu.KotlinLogging
+import no.iktdev.eventi.events.EjectException
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
@@ -8,11 +9,13 @@ import no.iktdev.mediaprocessing.coordinator.CoordinatorEnv
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.getCollection
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
 import no.iktdev.mediaprocessing.shared.common.projection.SummaryProjection
 import no.iktdev.mediaprocessing.shared.common.requireQualifiedEntry
+import no.iktdev.mediaprocessing.shared.common.short
 import org.springframework.stereotype.Component
 
 @Component
@@ -27,15 +30,11 @@ class SummarizeContentListener(
     ): Event? {
         val useEvent = event.requireQualifiedEntry<CollectedEvent>()
         val useHistory = (history.filter { useEvent.eventIds.contains(it.eventId) })
-        val determinedCollection = useHistory.getInstanceOf<DeterminedCollectionTaskResultEvent>()
 
-
-
-        val collection = determinedCollection
-            ?.takeIf { it.status == TaskStatus.Completed }
-            ?.collection
-            ?.takeIf { it.isNotBlank() }
-            ?: CollectionProjection(useHistory).getCollection()
+        val collection = getCollection(history) ?: run {
+            log.error { "[${event.referenceId.short()}] Could not find collection for ${event::class.simpleName}!" }
+            throw EjectException("Could not find collection for event ${event.eventId}")
+        }
 
 
         val projection = SummaryProjection(collection, useHistory, coordinatorEnv.outboxFolder)
@@ -44,7 +43,7 @@ class SummarizeContentListener(
         val mediaProjection = projection.projectMediaFiles(migrationPlan)
         val metadata = projection.projectMetadata(migrationPlan)
         if (metadata == null && !canAllowMetadataNull(mediaProjection)) {
-            log.error { "Metadata is null @ ${useEvent.referenceId}" }
+            log.error { "[${event.referenceId.short()}] Metadata is null" }
             return null
         }
 

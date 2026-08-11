@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
 import io.mockk.every
+import no.iktdev.eventi.events.EjectException
 import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.files.IFile
@@ -40,7 +41,7 @@ class SummarizeContentListenerTest : TestBase() {
         Hvis parsed mangler i historikken
         Når onEvent kalles
         Så:
-            skal det kastes IllegalArgumentException
+            skal det kastes EjectException
     """
     )
     @Test
@@ -51,7 +52,7 @@ class SummarizeContentListenerTest : TestBase() {
             eventIds = history.map { it.eventId }.toSet(),
         ).derivedOf(started)
 
-        assertThrows(NoSuchElementException::class.java) {
+        assertThrows(EjectException::class.java) {
             listener().onEvent(collected, history)
         }
     }

@@ -19,6 +19,7 @@ class SequenceController(
 ) {
 
 
+
     @GetMapping("/active")
     fun getActive(): List<Sequence> {
         return aggregator.getActiveSequences()

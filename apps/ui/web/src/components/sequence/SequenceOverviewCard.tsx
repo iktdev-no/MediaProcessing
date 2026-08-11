@@ -1,19 +1,22 @@
 import { Box, Card, CardContent, Typography, IconButton, Tooltip, Chip } from "@mui/material";
-import type { Sequence, SequenceSummary } from "../../types/types";
+import type { Sequence, SequenceActions, SequenceSummary } from "../../types/types";
 import { colorFromUuid } from "../../util";
 import NotStartedIcon from '@mui/icons-material/NotStarted';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { SquenceActionbutton } from "./SequenceActionButton";
+import { MediaTypeColor } from "./SequenceUtils";
 
 interface Props {
     sequence: Sequence;
     onNavigate: (refId: string) => void;
-    onContinue: (refId: string) => void;
-    onDelete: (refId: string) => void;
+    onActionClick: (action: SequenceActions) => void;
 }
 
-export function SequenceOverviewCard({ sequence, onNavigate, onContinue, onDelete }: Props) {
+export function SequenceOverviewCard({ sequence, onNavigate, onActionClick }: Props) {
+
+
     return (
         <Card
             variant="elevation"
@@ -49,6 +52,9 @@ export function SequenceOverviewCard({ sequence, onNavigate, onContinue, onDelet
                     </Typography>
 
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        {sequence.mediaType && (
+                            <Chip label={sequence.mediaType} size="small" color={MediaTypeColor(sequence.mediaType)} variant="outlined" />
+                        )}
                         <Chip
                             label={sequence.mode}
                             size="small"
@@ -67,6 +73,9 @@ export function SequenceOverviewCard({ sequence, onNavigate, onContinue, onDelet
 
                 {/* Tittel og filnavn */}
                 <Box>
+                    <Typography variant="caption" sx={{ lineHeight: 1.2 }} noWrap>
+                        {sequence.collection}
+                    </Typography>
                     <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600, lineHeight: 1.2 }} noWrap>
                         {sequence.title || "Uten tittel"}
                     </Typography>
@@ -82,22 +91,9 @@ export function SequenceOverviewCard({ sequence, onNavigate, onContinue, onDelet
 
                 {/* Handlingsknapper nederst på kortet */}
                 <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1, borderTop: '1px solid', borderColor: 'divider', pt: 1 }}>
-                    {sequence.currentState === "OnHold" && (
-                        <Tooltip title="Fortsett sekvens">
-                            <span>
-                                <IconButton size="small" color="primary" onClick={() => onContinue(sequence.referenceId)}>
-                                    <PlayArrowIcon fontSize="small" />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
-                    )}
-                    <Tooltip title="Slett sekvens">
-                        <span>
-                            <IconButton size="small" color="error" onClick={() => onDelete(sequence.referenceId)}>
-                                <DeleteIcon fontSize="small" />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
+                    {sequence.availableActions.map((action, i) => {
+                        return <SquenceActionbutton key={i} action={action} variant="icon" onClick={() => onActionClick?.(action)} />
+                    })}
                 </Box>
             </CardContent>
         </Card>
