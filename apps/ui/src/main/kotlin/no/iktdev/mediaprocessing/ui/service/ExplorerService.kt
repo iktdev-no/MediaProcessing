@@ -104,6 +104,7 @@ class ExplorerService(
                 MediaAction(MediaActionType.All),
                 MediaAction(MediaActionType.Encode),
                 MediaAction(MediaActionType.ExtractSubtitles),
+                MediaAction(MediaActionType.ExtractAndConvertSubtitles),
                 MediaAction(MediaActionType.MetadataSearch),
             )
         }

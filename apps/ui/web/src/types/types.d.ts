@@ -1,6 +1,6 @@
 // AUTO-GENERATED. DO NOT EDIT.
 // TSGenerator Version: 1.0-SNAPSHOT
-// Time: 2026-08-06T12:37:55.673762278Z
+// Time: 2026-08-11T12:03:35.477909188Z
 // Source: no.iktdev.mediaprocessing.ui.models.contract
 
 
@@ -328,7 +328,7 @@ export interface UiFile {
 
 export type UiFileRef = File | Folder
 
-export type MediaActionType = "All" | "Encode" | "ExtractSubtitles" | "ConvertSubtitle" | "MetadataSearch"
+export type MediaActionType = "All" | "Encode" | "ExtractSubtitles" | "ExtractAndConvertSubtitles" | "ConvertSubtitle" | "MetadataSearch"
 
 export interface FileAction {
   id: FileActionType;

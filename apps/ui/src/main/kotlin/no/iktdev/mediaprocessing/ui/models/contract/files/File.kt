@@ -60,6 +60,7 @@ enum class MediaActionType(val label: String) {
     All("All"),
     Encode("Encode"),
     ExtractSubtitles("Extract Subtitles"),
+    ExtractAndConvertSubtitles("Extract And Convert Subtitles"),
     ConvertSubtitle("Convert Subtitle"),
     MetadataSearch("Search for metadata"),
 }

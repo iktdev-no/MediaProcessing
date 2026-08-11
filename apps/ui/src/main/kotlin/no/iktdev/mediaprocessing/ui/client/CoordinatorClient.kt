@@ -44,6 +44,10 @@ class CoordinatorClient(
             if (req.mediaAction.any { it == MediaActionType.ExtractSubtitles }) {
                 operationType = operationType.plus(OperationType.ExtractSubtitles)
             }
+            if (req.mediaAction.any { it == MediaActionType.ExtractAndConvertSubtitles }) {
+                operationType = operationType.plus(OperationType.ExtractSubtitles)
+                operationType = operationType.plus(OperationType.ConvertSubtitles)
+            }
             if (req.mediaAction.any { it == MediaActionType.ConvertSubtitle }) {
                 operationType = operationType.plus(OperationType.ConvertSubtitles)
             }
