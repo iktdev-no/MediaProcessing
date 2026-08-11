@@ -16,7 +16,7 @@ class TaskProjection(val events: List<Event>) {
     val prepareForWorkTaskStatus: TaskStatus = projectPrepareFileForWorkStatus()
     val metadataTaskStatus: TaskStatus = projectMetadataSearchStatus()
     val encodeTaskStatus: TaskStatus = projectEncodingPerformedStatus()
-    val extreactTaskStatus: TaskStatus = projectExtractSubtitleStatus()
+    val extractTaskStatus: TaskStatus = projectExtractSubtitleStatus()
     val convertTaskStatus: TaskStatus = projectConvertStatus()
     val coverDownloadTaskStatus: TaskStatus = projectCoverDownloadStatus()
     val contentMigratedTaskStatus: TaskStatus = projectMigrateContentStatus()
@@ -28,7 +28,7 @@ class TaskProjection(val events: List<Event>) {
         TaskType.PrepareFileForWork to prepareForWorkTaskStatus,
         TaskType.MetadataSearch to metadataTaskStatus,
         TaskType.Encode to encodeTaskStatus,
-        TaskType.ExtractedSubtitles to extreactTaskStatus,
+        TaskType.ExtractedSubtitles to extractTaskStatus,
         TaskType.ConvertedSubtitles to convertTaskStatus,
         TaskType.DownloadedCover to coverDownloadTaskStatus,
         TaskType.MigrateContent to contentMigratedTaskStatus,
@@ -42,7 +42,7 @@ class TaskProjection(val events: List<Event>) {
 
         val statusMap = mapOf(
             OperationType.Encode to encodeTaskStatus,
-            OperationType.ExtractSubtitles to extreactTaskStatus,
+            OperationType.ExtractSubtitles to extractTaskStatus,
             OperationType.ConvertSubtitles to convertTaskStatus,
             OperationType.MetadataSearch to metadataTaskStatus,
         )

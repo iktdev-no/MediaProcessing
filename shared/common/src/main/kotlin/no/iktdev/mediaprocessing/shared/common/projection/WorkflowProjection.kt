@@ -2,6 +2,7 @@ package no.iktdev.mediaprocessing.shared.common.projection
 
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.model.*
 import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 
@@ -9,12 +10,35 @@ class WorkflowProjection(val events: List<Event>) {
     private val collect = CollectProjection(events)
     private val taskProjection = TaskProjection(events)
 
+    fun getRequiredTasksForStartOperation(): List<TaskStatus> {
+        val taskStatuses = mutableListOf<TaskStatus>()
+
+        val startedWith = collect.startedWith?.tasks ?: emptyList()
+        if (startedWith.any { it == OperationType.MetadataSearch }) {
+            taskStatuses.add(taskProjection.metadataTaskStatus)
+            taskStatuses.add(taskProjection.coverDownloadTaskStatus)
+        }
+        if (startedWith.any { it == OperationType.ConvertSubtitles }) {
+            taskStatuses.add(taskProjection.convertTaskStatus)
+        }
+        if (startedWith.any {it == OperationType.ExtractSubtitles}) {
+            taskStatuses.add(taskProjection.extractTaskStatus)
+            taskStatuses.add(taskProjection.determineCollectionTaskStatus)
+            taskStatuses.add(taskProjection.readStreamsTaskStatus)
+            taskStatuses.add(taskProjection.prepareForWorkTaskStatus)
+        }
+        if (startedWith.any { it == OperationType.Encode }) {
+            taskStatuses.add(taskProjection.encodeTaskStatus)
+            taskStatuses.add(taskProjection.determineCollectionTaskStatus)
+            taskStatuses.add(taskProjection.readStreamsTaskStatus)
+            taskStatuses.add(taskProjection.prepareForWorkTaskStatus)
+        }
+        return taskStatuses
+    }
+
     fun hasRequiredTasksToRunCompleted(): Boolean {
         val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
-        return listOf(
-            taskProjection.determineCollectionTaskStatus,
-            taskProjection.coverDownloadTaskStatus,
-        ).none { it in nonQualifiedToContinue }
+        return getRequiredTasksForStartOperation().none { it in nonQualifiedToContinue }
     }
 
     fun isWorkflowComplete(): Boolean {

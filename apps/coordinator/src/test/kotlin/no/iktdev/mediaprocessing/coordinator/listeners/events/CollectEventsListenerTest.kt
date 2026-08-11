@@ -8,6 +8,8 @@ import no.iktdev.mediaprocessing.MockData.encodeEvent
 import no.iktdev.mediaprocessing.MockData.extractEvent
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.MockData.metadataEvent
+import no.iktdev.mediaprocessing.MockData.preparedFileForWorkEvents
+import no.iktdev.mediaprocessing.MockData.streamsReadEvent
 import no.iktdev.mediaprocessing.TestBase
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -35,17 +37,23 @@ class CollectEventsListenerTest : TestBase() {
         val started = defaultStartEvent()
             .addToHistory()
 
+        val streams = streamsReadEvent(
+            started
+        ).addToHistory()
+
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
-        ).derivedOf(started)
+        ).derivedOf(streams.last())
             .addToHistory()
 
         val metadata = metadataEvent(parsed)
             .addToHistory()
+        val prep = preparedFileForWorkEvents(metadata.last())
+            .addToHistory()
 
-        val encode = encodeEvent("/tmp/video.mp4", parsed)
+        val encode = encodeEvent("/tmp/video.mp4", prep.last())
             .addToHistory()
         val extract = extractEvent("en", "/tmp/sub1.srt", encode.last())
             .addToHistory()
@@ -55,6 +63,7 @@ class CollectEventsListenerTest : TestBase() {
             .addToHistory()
         val determined = determineCollectionEvents(collection = "MyCollection", cover.last())
             .addToHistory()
+
 
         val result = listener.onEvent(cover.last(), history)
 
@@ -303,11 +312,15 @@ class CollectEventsListenerTest : TestBase() {
         val started = defaultStartEvent()
             .addToHistory()
 
+        val streams = streamsReadEvent(
+            started
+        ).addToHistory()
+
         val parsed = mediaParsedEvent(
             collection = "MyCollection",
             fileName = "MyCollection 1",
             mediaType = MediaType.Movie
-        ).derivedOf(started)
+        ).derivedOf(streams.last())
             .addToHistory()
 
         val metadata = metadataEvent(parsed)
@@ -331,7 +344,8 @@ class CollectEventsListenerTest : TestBase() {
             .addToHistory()
         val determined = determineCollectionEvents(collection = "MyCollection", cover.last())
             .addToHistory()
-
+        preparedFileForWorkEvents(determined.last())
+            .addToHistory()
 
         // Første kjøring: skal produsere CollectedEvent
         val first = listener.onEvent(history.last(), history)

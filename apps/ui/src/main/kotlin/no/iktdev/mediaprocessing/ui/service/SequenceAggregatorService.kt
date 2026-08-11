@@ -44,13 +44,11 @@ import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.getName
 import no.iktdev.mediaprocessing.shared.common.model.ReasonFailed
 import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
-import no.iktdev.mediaprocessing.shared.common.projection.CollectionProjection
 import no.iktdev.mediaprocessing.shared.common.projection.SignalProjection
 import no.iktdev.mediaprocessing.shared.common.projection.SummaryProjection
 import no.iktdev.mediaprocessing.shared.common.projection.WorkflowProjection
 import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
-import no.iktdev.mediaprocessing.ui.models.contract.MediaType
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.LifecycleNode
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.LifecycleNodeType
 import no.iktdev.mediaprocessing.ui.models.contract.sequence.TaskLifecycleItem
@@ -66,7 +64,6 @@ import no.iktdev.mediaprocessing.ui.models.translate
 import no.iktdev.mediaprocessing.ui.toEvents
 import no.iktdev.mediaprocessing.ui.toUIEvent
 import no.iktdev.mediaprocessing.ui.toUITask
-import no.iktdev.mediaprocessing.ui.translate
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.util.UUID
@@ -217,7 +214,7 @@ class SequenceAggregatorService(
                 TaskType.ReadStreams to taskProjection.readStreamsTaskStatus.toUiTaskStatus(),
                 TaskType.MetadataSearch to taskProjection.metadataTaskStatus.toUiTaskStatus(),
                 TaskType.Encode to taskProjection.encodeTaskStatus.toUiTaskStatus(),
-                TaskType.SubtitleExtract to taskProjection.extreactTaskStatus.toUiTaskStatus(),
+                TaskType.SubtitleExtract to taskProjection.extractTaskStatus.toUiTaskStatus(),
                 TaskType.SubtitleConvert to taskProjection.convertTaskStatus.toUiTaskStatus(),
                 TaskType.CoverDownload to taskProjection.coverDownloadTaskStatus.toUiTaskStatus(),
                 TaskType.ContentPersist to taskProjection.contentMigratedTaskStatus.toUiTaskStatus(),

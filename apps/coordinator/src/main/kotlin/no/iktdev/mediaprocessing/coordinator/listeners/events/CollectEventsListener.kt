@@ -18,7 +18,7 @@ class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = Eve
 
         if (report.isFailed()) {
             val referenceId = effectiveHistory.firstOrNull()?.referenceId ?: "unknown"
-            log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${report.reason}" }
+            log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${report.reason.toString()}" }
             return false
         }
 

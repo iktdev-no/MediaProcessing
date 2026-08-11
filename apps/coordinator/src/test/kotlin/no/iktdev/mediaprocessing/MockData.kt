@@ -14,6 +14,24 @@ import java.util.*
 
 object MockData {
 
+    fun streamsReadEvent(
+        derivedFrom: Event,
+        status: TaskStatus = TaskStatus.Completed
+    ): List<Event> {
+        val dummyTask = DummyTask().derivedOf(derivedFrom)
+
+        val create = CoordinatorReadStreamsTaskCreatedEvent(
+            dummyTask.taskId
+        ).derivedOf(derivedFrom)
+
+        val result = CoordinatorReadStreamsResultEvent(
+            status = status,
+        ).producedFrom(dummyTask)
+
+        return listOf(create, result)
+
+    }
+
     fun mediaParsedEvent(
         collection: String,
         fileName: String,
@@ -165,6 +183,21 @@ object MockData {
         return listOf(create, result)
     }
 
+    fun preparedFileForWorkEvents(
+        derivedFrom: Event,
+        status: TaskStatus = TaskStatus.Completed
+    ): List<Event> {
+        val dummyTask = DummyTask().derivedOf(derivedFrom)
+        val create = FilePrepareForWorkTaskCreatedEvent(
+            taskId = dummyTask.taskId
+        ).derivedOf(derivedFrom)
+        val result = FilePrepareForWorkResultEvent(
+            status = status,
+            error = null,
+        ).producedFrom(dummyTask)
+        return listOf(create, result)
+
+    }
 
 
     fun dummyAudioStream(
