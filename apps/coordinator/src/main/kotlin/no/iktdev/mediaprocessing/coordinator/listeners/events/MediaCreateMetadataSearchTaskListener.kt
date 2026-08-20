@@ -7,6 +7,9 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
+import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.rejectIfSelf
+import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.jetbrains.annotations.VisibleForTesting
@@ -36,6 +39,8 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
                 return null
         }
 
+        history.requireEvent<MediaParsedInfoEvent>()
+
         // For replay
         if (event is MetadataSearchTaskCreatedEvent) {
             val hasResult = history.filter { it is MetadataSearchResultEvent }
@@ -52,7 +57,7 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
             return null
         }
 
-        val useEvent = event as? MediaParsedInfoEvent ?: return null
+        val useEvent = history.getInstanceOf<MediaParsedInfoEvent>() ?: return null
 
         val searchData = MetadataSearchTask.SearchData(
             searchTitles = useEvent.data.parsedSearchTitles,

@@ -192,6 +192,24 @@ inline fun <reified T : Event> List<Event>.getInstanceOf(): T? {
     return this.firstOrNull { it is T } as? T
 }
 
+/**
+ * Sjekker om listen inneholder et element av samme type T.
+ *
+ * @param self Instansen som sjekkes mot listen (eller typen man vil avvise).
+ * @param block Optional lambda som kjøres før det avbrytes.
+ */
+inline fun <reified T : Event> List<Event>.rejectIfSelf() {
+    val found = this.filterIsInstance<T>().firstOrNull()
+    if (found != null) {
+        throw SoftDispatchException.SkipListenerException(
+            reason = "Skipping due to self-reference of type ${T::class.simpleName}",
+            currentEvent = T::class.java
+        )
+    }
+}
+
+
+
 // Extension-funksjon på List<Event> som returnerer alle instanser av T
 inline fun <reified T : Event> List<Event>.getInstancesOf(): List<T> {
     return this.filterIsInstance<T>()

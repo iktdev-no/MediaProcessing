@@ -27,8 +27,9 @@ class PreferenceController(
         client.getFull().map { it.translate() }
 
     @PutMapping
-    fun updateFull(@RequestBody body: CoordinatorPreference): Mono<CoordinatorPreference> =
-        client.updateFull(body.translate()).map { it.translate() }
+    fun updateFull(@RequestBody body: CoordinatorPreference): Mono<CoordinatorPreference> {
+        return client.updateFull(body.translate()).map { it.translate() }
+    }
 
 
     // ------------------------------------------------------------
