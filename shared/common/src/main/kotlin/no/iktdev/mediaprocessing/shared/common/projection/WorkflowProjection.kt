@@ -1,44 +1,52 @@
 package no.iktdev.mediaprocessing.shared.common.projection
 
+import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.model.*
 import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
+import kotlin.math.log
 
 class WorkflowProjection(val events: List<Event>) {
     private val collect = CollectProjection(events)
     private val taskProjection = TaskProjection(events)
+    val log = KotlinLogging.logger {}
 
-    fun getRequiredTasksForStartOperation(): List<TaskStatus> {
-        val taskStatuses = mutableListOf<TaskStatus>()
+
+    fun getRequiredTasksForStartOperation(): Map<TaskStatusType, TaskStatus> {
+        val taskStatuses = mutableMapOf<TaskStatusType, TaskStatus>()
 
         val startedWith = collect.startedWith?.tasks ?: emptyList()
         if (startedWith.any { it == OperationType.MetadataSearch }) {
-            taskStatuses.add(taskProjection.metadataTaskStatus)
-            taskStatuses.add(taskProjection.coverDownloadTaskStatus)
+            taskStatuses[TaskStatusType.MetadataSearch] = taskProjection.metadataTaskStatus
+            taskStatuses[TaskStatusType.CoverDownload] = taskProjection.coverDownloadTaskStatus
         }
         if (startedWith.any { it == OperationType.ConvertSubtitles }) {
-            taskStatuses.add(taskProjection.convertTaskStatus)
+            taskStatuses[TaskStatusType.ConvertSubtitles] = taskProjection.convertTaskStatus
         }
         if (startedWith.any {it == OperationType.ExtractSubtitles}) {
-            taskStatuses.add(taskProjection.extractTaskStatus)
-            taskStatuses.add(taskProjection.determineCollectionTaskStatus)
-            taskStatuses.add(taskProjection.readStreamsTaskStatus)
-            taskStatuses.add(taskProjection.prepareForWorkTaskStatus)
+            taskStatuses[TaskStatusType.ExtractSubtitles] = taskProjection.extractTaskStatus
+            taskStatuses[TaskStatusType.DetermineCollection] = taskProjection.determineCollectionTaskStatus
+            taskStatuses[TaskStatusType.ReadStreams] = taskProjection.readStreamsTaskStatus
+            taskStatuses[TaskStatusType.PrepareForWork] = taskProjection.prepareForWorkTaskStatus
         }
         if (startedWith.any { it == OperationType.Encode }) {
-            taskStatuses.add(taskProjection.encodeTaskStatus)
-            taskStatuses.add(taskProjection.determineCollectionTaskStatus)
-            taskStatuses.add(taskProjection.readStreamsTaskStatus)
-            taskStatuses.add(taskProjection.prepareForWorkTaskStatus)
+            taskStatuses[TaskStatusType.Encode] = taskProjection.encodeTaskStatus
+            taskStatuses[TaskStatusType.DetermineCollection] = taskProjection.determineCollectionTaskStatus
+            taskStatuses[TaskStatusType.ReadStreams] = taskProjection.readStreamsTaskStatus
+            taskStatuses[TaskStatusType.PrepareForWork] = taskProjection.prepareForWorkTaskStatus
         }
         return taskStatuses
     }
 
     fun hasRequiredTasksToRunCompleted(): Boolean {
         val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
-        return getRequiredTasksForStartOperation().none { it in nonQualifiedToContinue }
+        val undesiredState = getRequiredTasksForStartOperation().filter { it.value in nonQualifiedToContinue }.keys
+        if (undesiredState.isNotEmpty()) {
+            log.warn("Event types in undesired state: ${undesiredState.joinToString(",") { it.name }}")
+        }
+        return undesiredState.isNotEmpty()
     }
 
     fun isWorkflowComplete(): Boolean {
