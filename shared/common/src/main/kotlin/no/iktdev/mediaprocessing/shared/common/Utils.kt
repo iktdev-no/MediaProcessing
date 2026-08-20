@@ -208,6 +208,15 @@ inline fun <reified T : Event> List<Event>.rejectIfSelf() {
     }
 }
 
+inline fun <reified T : Event> List<Event>.rejectIfPresent() {
+    val found = this.filterIsInstance<T>().firstOrNull()
+    if (found != null) {
+        throw SoftDispatchException.SkipListenerException(
+            reason = "Skipping due to presence of type ${T::class.simpleName}",
+            currentEvent = T::class.java
+        )
+    }
+}
 
 
 // Extension-funksjon på List<Event> som returnerer alle instanser av T

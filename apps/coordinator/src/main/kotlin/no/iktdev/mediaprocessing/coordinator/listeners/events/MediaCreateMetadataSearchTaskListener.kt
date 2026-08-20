@@ -8,6 +8,7 @@ import no.iktdev.eventi.serialization.ZDS.toTask
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.rejectIfPresent
 import no.iktdev.mediaprocessing.shared.common.rejectIfSelf
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
@@ -28,6 +29,8 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
     internal val scheduledExpiries = ConcurrentHashMap<UUID, ScheduledFuture<*>>()
     private val scheduler = Executors.newScheduledThreadPool(1)
 
+    override fun allowDerivativeOnHistoricalEvent() = true
+
     override fun onEvent(
         event: Event,
         history: List<Event>
@@ -40,6 +43,7 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
         }
 
         history.requireEvent<MediaParsedInfoEvent>()
+        history.rejectIfPresent<CollectedEvent>()
 
         // For replay
         if (event is MetadataSearchTaskCreatedEvent) {
