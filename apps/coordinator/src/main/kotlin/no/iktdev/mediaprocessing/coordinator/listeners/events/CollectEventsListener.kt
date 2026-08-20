@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
@@ -18,7 +19,7 @@ class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = Eve
 
         if (report.isFailed()) {
             val referenceId = effectiveHistory.firstOrNull()?.referenceId ?: "unknown"
-            log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${report.reason.toString()}" }
+            log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${Gson().toJson(report)}" }
             return false
         }
 

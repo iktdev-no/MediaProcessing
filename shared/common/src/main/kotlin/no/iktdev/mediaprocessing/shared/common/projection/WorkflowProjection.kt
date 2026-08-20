@@ -6,13 +6,11 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.OperationType
 import no.iktdev.mediaprocessing.shared.common.model.*
 import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
-import kotlin.math.log
 
 class WorkflowProjection(val events: List<Event>) {
     private val collect = CollectProjection(events)
     private val taskProjection = TaskProjection(events)
     val log = KotlinLogging.logger {}
-
 
     fun getRequiredTasksForStartOperation(): Map<TaskStatusType, TaskStatus> {
         val taskStatuses = mutableMapOf<TaskStatusType, TaskStatus>()
@@ -25,7 +23,7 @@ class WorkflowProjection(val events: List<Event>) {
         if (startedWith.any { it == OperationType.ConvertSubtitles }) {
             taskStatuses[TaskStatusType.ConvertSubtitles] = taskProjection.convertTaskStatus
         }
-        if (startedWith.any {it == OperationType.ExtractSubtitles}) {
+        if (startedWith.any { it == OperationType.ExtractSubtitles }) {
             taskStatuses[TaskStatusType.ExtractSubtitles] = taskProjection.extractTaskStatus
             taskStatuses[TaskStatusType.DetermineCollection] = taskProjection.determineCollectionTaskStatus
             taskStatuses[TaskStatusType.ReadStreams] = taskProjection.readStreamsTaskStatus
@@ -40,35 +38,31 @@ class WorkflowProjection(val events: List<Event>) {
         return taskStatuses
     }
 
-    fun hasRequiredTasksToRunCompleted(): Boolean {
+    /**
+     * Intern hjelper som sjekker oppgavene og returnerer både om de er klare,
+     * samt et kart over de som er i uønsket tilstand (NotInitiated eller Pending).
+     */
+    private fun evaluateRequiredTasks(): Pair<Boolean, Map<TaskStatusType, TaskStatus>> {
         val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
         val requiredTasks = getRequiredTasksForStartOperation()
+        val undesiredState = requiredTasks.filter { it.value in nonQualifiedToContinue }
 
-        val undesiredState = requiredTasks.filter { it.value in nonQualifiedToContinue }.keys
-        if (undesiredState.isNotEmpty()) {
-            log.warn("Event types in undesired state: ${undesiredState.joinToString(",") { it.name }}")
-        }
+        return Pair(undesiredState.isEmpty(), undesiredState)
+    }
 
-        return requiredTasks.values.none { it in nonQualifiedToContinue }
+    fun hasRequiredTasksToRunCompleted(): Boolean {
+        return evaluateRequiredTasks().first
     }
 
     fun isWorkflowComplete(): Boolean {
         val statuses = taskProjection.operationStatuses()
-
         if (statuses.isEmpty()) return false
 
-        val anyFailed = statuses.any { it == TaskStatus.Failed }
-        val anyPending = statuses.any { it == TaskStatus.Pending }
-        val allCompleted = statuses.all { it == TaskStatus.Completed }
-
-        if (anyFailed) return false
-        if (anyPending) return false
-
-        if (!hasRequiredTasksToRunCompleted()) {
+        if (statuses.any { it == TaskStatus.Failed } || statuses.any { it == TaskStatus.Pending }) {
             return false
         }
 
-        return allCompleted
+        return hasRequiredTasksToRunCompleted() && statuses.all { it == TaskStatus.Completed }
     }
 
     fun evaluate(): WorkflowStatusReport {
@@ -97,8 +91,18 @@ class WorkflowProjection(val events: List<Event>) {
             return WorkflowStatusReport(ReasonFailed(FailingReason.TasksArePending))
         }
 
-        if (!hasRequiredTasksToRunCompleted()) {
-            return WorkflowStatusReport(ReasonFailed(FailingReason.RequiredTasksAreNotComplete))
+        // Bruker den delte hjelperen her for å få ut de uønskede statuene direkte
+        val (isComplete, undesiredState) = evaluateRequiredTasks()
+        if (!isComplete) {
+            val taskNames = undesiredState.keys.map { it.name }.toSet()
+            log.warn("Required tasks not complete for referenceId. Undesired states: $undesiredState")
+            return WorkflowStatusReport(
+                ReasonFailed(
+                    reason = FailingReason.RequiredTasksAreNotComplete,
+                    tasks = taskNames,
+                    taskStatuses = undesiredState // Sender med hele map-en ut i rapporten
+                )
+            )
         }
 
         if (!isWorkflowComplete()) {
