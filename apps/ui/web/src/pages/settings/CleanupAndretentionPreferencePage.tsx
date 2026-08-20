@@ -91,7 +91,7 @@ export default function CleanupAndRetentionPreferencesPage() {
     setSaving(true);
     try {
       if (currentTabSafeIndex === 0 && isPrefsDirty) {
-        await savePrefs();
+        savePrefs();
       } else if (currentTabSafeIndex === 1 && isFilesDirty) {
         const preservedUris = files
           .filter((f) => f.preserved)

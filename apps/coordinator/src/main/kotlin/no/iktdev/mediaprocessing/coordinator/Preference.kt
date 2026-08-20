@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.InstanceCreator
 import com.google.gson.JsonSyntaxException
+import mu.KotlinLogging
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CleanupPreference
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component
 class Preference(
     private val coordinatorEnv: CoordinatorEnv
 ) {
+    private val log = KotlinLogging.logger {}
 
     private fun defaultConfig() =
         _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference(
@@ -49,6 +51,7 @@ class Preference(
             gson.fromJson(file.readText(), CoordinatorPreference::class.java)
                 ?: defaultConfig().also { writeConfig(it) }
         } catch (e: JsonSyntaxException) {
+            e.printStackTrace()
             val fallback = defaultConfig()
             writeConfig(fallback)
             fallback
@@ -141,9 +144,12 @@ class Preference(
     // ------------------------------------------------------------
 
     private fun writeConfig(cfg: CoordinatorPreference) {
+        log.info("Writing config to ${coordinatorEnv.preference.absolutePath}")
         val file = coordinatorEnv.preference
-        file.parentFile?.mkdirs()
-        file.writeText(gson.toJson(cfg))
+        file.parentFile.mkdirs()
+        val payload = gson.toJson(cfg)
+        log.info { "Writing config to $file with payload=$payload" }
+        file.writeText(payload)
     }
 
 
