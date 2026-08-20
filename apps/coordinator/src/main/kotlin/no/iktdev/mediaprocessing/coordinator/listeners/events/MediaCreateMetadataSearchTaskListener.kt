@@ -53,6 +53,7 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
             if (!hasResult) {
                 scheduleTaskExpiry(event.taskId, event.eventId, event.referenceId)
             }
+            return null // <- Safeguard sicne we are disabling historically deriviation
         } else if (event is MetadataSearchResultEvent) {
             val cancelKeys = event.metadata.derivedFromId ?: emptySet()
             scheduledExpiries.filter { it -> it.key in cancelKeys }.keys.forEach { key ->
