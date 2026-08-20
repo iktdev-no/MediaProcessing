@@ -20,15 +20,15 @@ class Preference(
     private val log = KotlinLogging.logger {}
 
     private fun defaultConfig() =
-        _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference(
-            media = _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.MediaPreference.default(),
-            language = _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.LanguagePreference.default(),
-            cleanup = _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CleanupPreference.default()
+        CoordinatorPreference(
+            media = MediaPreference.default(),
+            language = LanguagePreference.default(),
+            cleanup = CleanupPreference.default()
         )
 
     private val gson = GsonBuilder()
         .registerTypeAdapter(
-            _root_ide_package_.no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference::class.java,
+            CoordinatorPreference::class.java,
             InstanceCreator { defaultConfig() }
         )
         .create()
@@ -38,7 +38,7 @@ class Preference(
     // FULL CONFIG
     // ------------------------------------------------------------
 
-    fun getFullConfig(): no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.CoordinatorPreference {
+    fun getFullConfig(): CoordinatorPreference {
         val file = coordinatorEnv.preference
 
         if (!file.exists()) {

@@ -229,6 +229,7 @@ fun CoordinatorPreference.translate(): no.iktdev.mediaprocessing.ui.models.contr
 fun no.iktdev.mediaprocessing.ui.models.contract.preferences.CoordinatorPreference.translate(): CoordinatorPreference {
     return CoordinatorPreference(
         language = this.language.translate(),
-        media = this.media.translate()
+        media = this.media.translate(),
+        cleanup = this.cleanup.translate(),
     )
 }
