@@ -42,11 +42,14 @@ class WorkflowProjection(val events: List<Event>) {
 
     fun hasRequiredTasksToRunCompleted(): Boolean {
         val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
-        val undesiredState = getRequiredTasksForStartOperation().filter { it.value in nonQualifiedToContinue }.keys
+        val requiredTasks = getRequiredTasksForStartOperation()
+
+        val undesiredState = requiredTasks.filter { it.value in nonQualifiedToContinue }.keys
         if (undesiredState.isNotEmpty()) {
             log.warn("Event types in undesired state: ${undesiredState.joinToString(",") { it.name }}")
         }
-        return undesiredState.isNotEmpty()
+
+        return requiredTasks.values.none { it in nonQualifiedToContinue }
     }
 
     fun isWorkflowComplete(): Boolean {
