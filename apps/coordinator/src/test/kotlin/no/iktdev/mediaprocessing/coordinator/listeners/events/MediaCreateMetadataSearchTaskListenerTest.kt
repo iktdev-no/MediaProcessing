@@ -3,6 +3,7 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import io.mockk.clearMocks
 import io.mockk.slot
 import io.mockk.verify
+import no.iktdev.eventi.events.SoftDispatchException
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
@@ -16,6 +17,7 @@ import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class MediaCreateMetadataSearchTaskListenerTest : TestBase() {
 
@@ -64,12 +66,9 @@ class MediaCreateMetadataSearchTaskListenerTest : TestBase() {
         )
         val history = emptyList<Event>()
 
-        // Når
-        val result = listener.onEvent(event, history)
-
-        // Så
-        assertThat(result).isNull()
-        verify(exactly = 0) { TaskStore.persist(any()) }
+        assertThrows<SoftDispatchException.MissingEventException>() {
+            listener.onEvent(event, history)
+        }
 
     }
 
@@ -89,11 +88,9 @@ class MediaCreateMetadataSearchTaskListenerTest : TestBase() {
         val history = emptyList<Event>()
 
         // Når
-        val result = listener.onEvent(event, history)
-
-        // Så
-        verify(exactly = 0) { TaskStore.persist(any()) }
-        assertThat(result).isNull()
+        assertThrows<SoftDispatchException.MissingEventException>() {
+            listener.onEvent(event, history)
+        }
     }
 
     @DisplayName(
