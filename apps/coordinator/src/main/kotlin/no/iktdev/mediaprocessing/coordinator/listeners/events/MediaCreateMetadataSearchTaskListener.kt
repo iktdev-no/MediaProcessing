@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.rejectIfPresent
 import no.iktdev.mediaprocessing.shared.common.rejectIfSelf
 import no.iktdev.mediaprocessing.shared.common.requireEvent
+import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.jetbrains.annotations.VisibleForTesting
@@ -35,30 +36,25 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
         event: Event,
         history: List<Event>
     ): Event? {
-
-        val startedEvent = history.filterIsInstance<StartProcessingEvent>().firstOrNull() ?: return null
-        if (startedEvent.data.operation.isNotEmpty()) {
-            if (!startedEvent.data.operation.contains(OperationType.MetadataSearch))
-                return null
+        val operations = history.requireEventValue<StartProcessingEvent, Set<OperationType>> { it.data.operation }
+        if (operations.isEmpty() || operations.none { it == OperationType.MetadataSearch}) {
+            return null
         }
 
         history.requireEvent<MediaParsedInfoEvent>()
         history.rejectIfPresent<CollectedEvent>()
 
-        // For replay
-        if (event is MetadataSearchTaskCreatedEvent) {
-            val hasResult = history.filter { it is MetadataSearchResultEvent }
-                .any { it.metadata.derivedFromId?.contains(event.taskId) == true }
-
-            if (!hasResult) {
-                scheduleTaskExpiry(event.taskId, event.eventId, event.referenceId)
-            }
-            return null // <- Safeguard sicne we are disabling historically deriviation
-        } else if (event is MetadataSearchResultEvent) {
-            val cancelKeys = event.metadata.derivedFromId ?: emptySet()
+        val searchResult = history.getInstanceOf<MetadataSearchResultEvent>()
+        if (searchResult != null) {
+            val cancelKeys = searchResult.metadata.derivedFromId ?: emptySet()
             scheduledExpiries.filter { it -> it.key in cancelKeys }.keys.forEach { key ->
                 scheduledExpiries.remove(key)?.cancel(true)
             }
+            return null
+        }
+        val selfCreated = history.getInstanceOf<MetadataSearchTaskCreatedEvent>()
+        if (selfCreated != null) {
+            scheduleTaskExpiry(selfCreated.taskId, selfCreated.eventId, selfCreated.referenceId)
             return null
         }
 
