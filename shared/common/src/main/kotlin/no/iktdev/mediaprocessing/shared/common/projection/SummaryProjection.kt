@@ -34,10 +34,14 @@ class SummaryProjection(
                 source = metadata.source
             )
         } else {
+            val startOperationTypes = events.getInstanceOf<StartProcessingEvent>()?.data?.operation ?: run {
+                return null
+            }
             val parsedInfo = events.filterIsInstance<MediaParsedInfoEvent>().lastOrNull() ?: return null
+            val useMediaType = if (startOperationTypes.isOnlySubtitles()) MediaType.Subtitle else parsedInfo.data.mediaType
             return ContentExport.MetadataExport(
                 title = parsedInfo.data.parsedCollection,
-                mediaType = parsedInfo.data.mediaType,
+                mediaType = useMediaType,
             )
         }
     }
