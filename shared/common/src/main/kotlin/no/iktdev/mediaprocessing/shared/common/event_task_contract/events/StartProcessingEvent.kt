@@ -19,8 +19,9 @@ fun Set<OperationType>.isOnly(operation: OperationType): Boolean {
 }
 
 fun Set<OperationType>.isOnlySubtitles(): Boolean {
+    if (this.isEmpty()) return false
     val subtitleOperations = setOf(OperationType.ExtractSubtitles, OperationType.ConvertSubtitles)
-    return this.isNotEmpty() && subtitleOperations.containsAll(this)
+    return this.all { it in subtitleOperations }
 }
 
 enum class StartFlow {
