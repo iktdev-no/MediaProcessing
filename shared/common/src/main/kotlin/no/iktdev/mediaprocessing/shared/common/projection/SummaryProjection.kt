@@ -21,6 +21,7 @@ class SummaryProjection(
     val useStore: IFile = outbox.using(collection)
 
     fun projectMetadata(plan: ContentMigrationPlan): ContentExport.MetadataExport? {
+
         val metadata = CollectProjection(events).metadata
         if (metadata != null) {
             return ContentExport.MetadataExport(

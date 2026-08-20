@@ -18,6 +18,11 @@ fun Set<OperationType>.isOnly(operation: OperationType): Boolean {
     return this.size == 1 && this.single() == operation
 }
 
+fun Set<OperationType>.isOnlySubtitles(): Boolean {
+    val subtitleOperations = setOf(OperationType.ExtractSubtitles, OperationType.ConvertSubtitles)
+    return this.isNotEmpty() && subtitleOperations.containsAll(this)
+}
+
 enum class StartFlow {
     Auto,
     Manual

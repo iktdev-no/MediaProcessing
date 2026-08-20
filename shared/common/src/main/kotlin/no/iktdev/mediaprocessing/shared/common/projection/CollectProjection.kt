@@ -4,6 +4,8 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
+import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.model.views.MetadataView
 import no.iktdev.mediaprocessing.shared.common.model.views.ParsedFileInfoView
 import no.iktdev.mediaprocessing.shared.common.model.views.ProcessedMediaView
@@ -39,19 +41,23 @@ class CollectProjection(val events: List<Event>) {
 
 
     private fun projectMetadata(): MetadataView? {
+        val startOperationTypes = events.getInstanceOf<StartProcessingEvent>()?.data?.operation ?: run {
+            return null
+        }
         val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()
             ?: return null
         val coverDownloadResultEvents = events.filterIsInstance<CoverDownloadResultEvent>()
-            .filter { it.status == no.iktdev.eventi.models.store.TaskStatus.Completed }
+            .filter { it.status == TaskStatus.Completed }
         val coverFile =
             coverDownloadResultEvents.find { it.data?.source == metadataEvent.recommended?.metadata?.source }?.data?.outputFile
                 ?.let { IFile(it) }
         val result = metadataEvent.recommended ?: return null
+        val useMediaType = if (startOperationTypes.isOnlySubtitles()) MediaType.Subtitle else result.metadata.type
         return MetadataView(
             title = result.metadata.title,
             alternativeTitles = result.metadata.alternateTitles,
             summary = result.metadata.summary,
-            mediaType = result.metadata.type,
+            mediaType = useMediaType,
             genres = result.metadata.genres,
             cover = coverFile,
             source = result.metadata.source
