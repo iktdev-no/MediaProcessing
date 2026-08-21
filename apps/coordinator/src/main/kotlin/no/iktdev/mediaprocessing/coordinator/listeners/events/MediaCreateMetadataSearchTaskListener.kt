@@ -1,5 +1,6 @@
 package no.iktdev.mediaprocessing.coordinator.listeners.events
 
+import mu.KotlinLogging
 import no.iktdev.eventi.ListenerOrder
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
@@ -12,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.rejectIfPresent
 import no.iktdev.mediaprocessing.shared.common.rejectIfSelf
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
+import no.iktdev.mediaprocessing.shared.common.short
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.jetbrains.annotations.VisibleForTesting
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit
 @Component
 @ListenerOrder(5)
 class MediaCreateMetadataSearchTaskListener: EventListener() {
+    val log = KotlinLogging.logger {}
 
     @VisibleForTesting
     internal val scheduledExpiries = ConcurrentHashMap<UUID, ScheduledFuture<*>>()
@@ -48,12 +51,14 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
         if (searchResult != null) {
             val cancelKeys = searchResult.metadata.derivedFromId ?: emptySet()
             scheduledExpiries.filter { it -> it.key in cancelKeys }.keys.forEach { key ->
+                log.info("[${event.referenceId.short()}] Removing ${event::class.simpleName}, from timeout")
                 scheduledExpiries.remove(key)?.cancel(true)
             }
             return null
         }
         val selfCreated = history.getInstanceOf<MetadataSearchTaskCreatedEvent>()
         if (selfCreated != null) {
+            log.warn("[${event.referenceId.short()}] Found metadata search event for ${event::class.simpleName}, generating timeout")
             scheduleTaskExpiry(selfCreated.taskId, selfCreated.eventId, selfCreated.referenceId)
             return null
         }
