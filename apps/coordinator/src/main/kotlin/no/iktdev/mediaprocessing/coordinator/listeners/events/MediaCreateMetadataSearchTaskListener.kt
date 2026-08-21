@@ -10,7 +10,6 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.MetadataSearchTask
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.rejectIfPresent
-import no.iktdev.mediaprocessing.shared.common.rejectIfSelf
 import no.iktdev.mediaprocessing.shared.common.requireEvent
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
 import no.iktdev.mediaprocessing.shared.common.short
@@ -59,7 +58,10 @@ class MediaCreateMetadataSearchTaskListener: EventListener() {
         val selfCreated = history.getInstanceOf<MetadataSearchTaskCreatedEvent>()
         if (selfCreated != null) {
             log.warn("[${event.referenceId.short()}] Found metadata search event for ${event::class.simpleName}, generating timeout")
-            scheduleTaskExpiry(selfCreated.taskId, selfCreated.eventId, selfCreated.referenceId)
+            val isPresent = scheduledExpiries.keys.any { it -> it == selfCreated.taskId }
+            if (!isPresent) {
+                scheduleTaskExpiry(selfCreated.taskId, selfCreated.eventId, selfCreated.referenceId)
+            }
             return null
         }
 
