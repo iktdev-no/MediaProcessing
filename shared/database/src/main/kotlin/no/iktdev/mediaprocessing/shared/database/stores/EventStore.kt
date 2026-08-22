@@ -275,9 +275,13 @@ object EventStore: EventStore {
     }
 
     fun createManuallyContinueEvent(referenceId: UUID): UUID? {
+        val onHoldEvent = getEventSequence(referenceId).getInstancesOf<OnHoldSignalEvent>().lastOrNull()
         return try {
             val continueEvent = ReleaseHoldSignalEvent().apply {
                 usingReferenceId(referenceId)
+            }
+            if (onHoldEvent != null) {
+                continueEvent.derivedOf(onHoldEvent)
             }
             persist(continueEvent)
             return continueEvent.eventId
