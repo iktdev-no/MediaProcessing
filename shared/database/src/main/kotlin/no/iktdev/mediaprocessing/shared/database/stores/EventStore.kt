@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.database.stores
 
 import mu.KotlinLogging
+import no.iktdev.eventi.models.DeleteEvent
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.store.PersistedEvent
 import no.iktdev.eventi.models.store.TaskStatus
@@ -15,7 +16,10 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeleteSequenceEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeletedTaskResultEvent
+import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.getName
+import no.iktdev.mediaprocessing.shared.common.short
+import no.iktdev.mediaprocessing.shared.database.DatabaseApplication
 import no.iktdev.mediaprocessing.shared.database.likeAny
 import no.iktdev.mediaprocessing.shared.database.queries.ColumnSort
 import no.iktdev.mediaprocessing.shared.database.queries.pagedQuery
@@ -199,17 +203,43 @@ object EventStore: EventStore {
         return sequenceEvents.mapNotNull { it.toEvent() }
     }
 
+    fun getEventToDelete(targetId: UUID, events: List<Event>): Event? {
+        return events.find { it.metadata.derivedFromId?.any { xid -> xid == targetId } ?: false }
+    }
+
+    fun TaskResultEvent.delete(): DeleteEvent {
+        val preparedDeleteEvent = DeletedTaskResultEvent(this.eventId)
+            .apply { usingReferenceId(this.referenceId) }
+        persist(preparedDeleteEvent)
+        return preparedDeleteEvent
+    }
+
+    fun Event.delete(): DeleteEvent {
+        val preparedDeleteEvent = DeletedEvent(this.eventId)
+            .apply { usingReferenceId(this.referenceId) }
+        persist(preparedDeleteEvent)
+        return preparedDeleteEvent
+    }
+
+    fun Event.deleteCollectionIfPresent(events: List<Event>): DeleteEvent? {
+        val collectEvents = events.getInstancesOf<CollectedEvent>().lastOrNull() ?: return null
+        return if (this.eventId in collectEvents.eventIds) {
+            log.info("[${this.referenceId.short()}] Found eventId (${this.eventId}) in collection (${collectEvents.eventIds}), will be deleted")
+            this.delete()
+        } else null
+    }
+
+
     fun deleteEventForTaskResult(referenceId: UUID, taskId: UUID): UUID? {
         val serialized = getEventSequence(referenceId)
-        val targetedEvent = serialized.find { it?.metadata?.derivedFromId?.any { uUID -> uUID == taskId } == true }
-        if (targetedEvent == null) {
+        val targetedEvent = getEventToDelete(taskId, serialized)
+        if (targetedEvent == null || targetedEvent !is TaskResultEvent) {
             log.error { "TaskId $taskId does not exist within the metadata of any events within the scope of $referenceId" }
         } else {
             log.info { "Identified ${targetedEvent.eventId} in ${targetedEvent.referenceId} as being derived from $taskId" }
-            val preparedDeleteEvent = DeletedTaskResultEvent(targetedEvent.eventId)
-                .apply { usingReferenceId(targetedEvent.referenceId) }
-            persist(preparedDeleteEvent)
-            return preparedDeleteEvent.deletedEventId
+            val deletionEvent = targetedEvent.delete()
+            targetedEvent.deleteCollectionIfPresent(serialized)
+            return deletionEvent.deletedEventId
         }
         return null
     }
@@ -226,11 +256,11 @@ object EventStore: EventStore {
             }
             else -> {
                 log.info { "Identified ${targetedEvent.eventId} in ${targetedEvent.referenceId} as being derived from $taskId" }
-                val preparedDeleteEvent = DeletedTaskResultEvent(targetedEvent.eventId)
-                    .apply { usingReferenceId(targetedEvent.referenceId) }
                 val newSkippedReference = targetedEvent.newStatus(TaskStatus.Skipped)
-                persist(preparedDeleteEvent, newSkippedReference)
-                return preparedDeleteEvent.eventId to newSkippedReference.eventId
+                val deletionEvent = targetedEvent.delete()
+                persist(newSkippedReference)
+                targetedEvent.deleteCollectionIfPresent(serialized)
+                return deletionEvent.eventId to newSkippedReference.eventId
             }
         }
         return null
