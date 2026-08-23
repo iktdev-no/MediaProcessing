@@ -1,5 +1,5 @@
 import { Box, Typography, CircularProgress } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   continueSequence,
   getActiveSequences,
@@ -15,30 +15,48 @@ export function SequencePage() {
   const [sequences, setSequences] = useState<Sequence[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 1. Lag en ref for å holde på scroll-boksen
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+
   const { setTitle } = useTitle();
 
   useEffect(() => {
     setTitle("Sequences");
   }, [setTitle]);
 
-  // Bruker useCallback slik at funksjonen holder seg stabil
   const fetchSequences = useCallback((showLoader = false) => {
+    // Lagre eksisterende scroll-posisjon før vi henter nytt hvis vi ikke viser loader
+    const currentScrollTop = scrollContainerRef.current?.scrollTop ?? 0;
+
     if (showLoader) setLoading(true);
 
     getActiveSequences()
-      .then(setSequences)
+      .then((data) => {
+        setSequences(data);
+
+        // 2. Gjenopprett scroll-posisjonen i neste tick etter at DOM har oppdatert seg
+        requestAnimationFrame(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = currentScrollTop;
+          }
+        });
+      })
       .catch((err) => toast.error(err.message || "Kunne ikke hente sekvenser"))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (showLoader) {
+          setLoading(false);
+        }
+      });
   }, []);
 
   useEffect(() => {
-    fetchSequences(true); // Vis loader KUN ved første innlasting
+    fetchSequences(true);
   }, [fetchSequences]);
 
   const onContinue = async (refId: string) => {
     try {
       await continueSequence(refId);
-      fetchSequences(false /* false = ikke vis loader/spinner, behold scroll */);
+      fetchSequences(false);
       toast.success("Action accepted!");
     } catch (err: any) {
       toast.error(err.message);
@@ -52,7 +70,7 @@ export function SequencePage() {
   const onDelete = async (refId: string) => {
     try {
       await fetch(`/api/sequences/${refId}/delete`, { method: "POST" });
-      fetchSequences(false /* false = ikke vis loader/spinner, behold scroll */);
+      fetchSequences(false);
       toast.success("Sequence deleted!");
     } catch (err: any) {
       toast.error(err.message);
@@ -61,14 +79,12 @@ export function SequencePage() {
 
   function onActionClick(refId: string, action: SequenceActions): void {
     switch (action) {
-      case "Delete": {
+      case "Delete":
         onDelete(refId);
         break;
-      }
-      case "Release": {
+      case "Release":
         onContinue(refId);
         break;
-      }
     }
   }
 
@@ -94,10 +110,11 @@ export function SequencePage() {
         <Typography color="text.secondary">Ingen aktive sekvenser funnet.</Typography>
       ) : (
         <Box
+          ref={scrollContainerRef} // <-- Kobler på ref-en her
           sx={{
             flex: 1,
             minHeight: 0,
-            overflow: "auto", // Sørger for at det er denne boksen som scroller, ikke hele vinduet
+            overflow: "auto",
             pb: 5,
             display: "flex",
             flexWrap: "wrap",
