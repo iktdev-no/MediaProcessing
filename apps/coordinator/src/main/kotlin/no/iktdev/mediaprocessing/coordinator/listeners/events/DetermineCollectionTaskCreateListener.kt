@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.Determi
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
 import no.iktdev.mediaprocessing.shared.common.ofTypes
 import no.iktdev.mediaprocessing.shared.common.requireEventValue
+import no.iktdev.mediaprocessing.shared.common.takeIfCompleted
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
@@ -72,7 +73,7 @@ class DetermineCollectionTaskCreateListener : EventListener() {
             ?.data?.parsedCollection
             ?.let { candidates.add(it) }
 
-        events.getInstanceOf<MetadataSearchResultEvent>()
+        events.getInstanceOf<MetadataSearchResultEvent>()?.takeIfCompleted()
             ?.recommended?.metadata
             ?.let { metadata ->
                 candidates.add(metadata.title)

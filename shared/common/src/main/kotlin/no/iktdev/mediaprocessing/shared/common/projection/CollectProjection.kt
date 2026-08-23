@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.model.views.ParsedFileInfoView
 import no.iktdev.mediaprocessing.shared.common.model.views.ProcessedMediaView
 import no.iktdev.mediaprocessing.shared.common.model.views.StartView
 import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
+import no.iktdev.mediaprocessing.shared.common.takeIfCompleted
 
 class CollectProjection(val events: List<Event>) {
 
@@ -44,7 +45,7 @@ class CollectProjection(val events: List<Event>) {
         val startOperationTypes = events.getInstanceOf<StartProcessingEvent>()?.data?.operation ?: run {
             return null
         }
-        val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()
+        val metadataEvent = events.filterIsInstance<MetadataSearchResultEvent>().lastOrNull()?.takeIfCompleted()
             ?: return null
         val coverDownloadResultEvents = events.filterIsInstance<CoverDownloadResultEvent>()
             .filter { it.status == TaskStatus.Completed }

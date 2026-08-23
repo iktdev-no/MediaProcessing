@@ -10,6 +10,7 @@ import no.iktdev.mediaprocessing.shared.common.getInstancesOf
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.ContentMigrationPlan
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
+import no.iktdev.mediaprocessing.shared.common.takeIfCompleted
 
 
 class SummaryProjection(
@@ -190,6 +191,7 @@ class SummaryProjection(
         val metadataType = events
             .filterIsInstance<MetadataSearchResultEvent>()
             .lastOrNull()
+            ?.takeIfCompleted()
             ?.recommended
             ?.metadata
             ?.type

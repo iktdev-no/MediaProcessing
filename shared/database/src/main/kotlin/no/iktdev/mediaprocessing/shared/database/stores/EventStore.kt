@@ -11,6 +11,7 @@ import no.iktdev.eventi.stores.EventStore
 import no.iktdev.mediaprocessing.shared.common.UtcNow
 import no.iktdev.mediaprocessing.shared.common.dto.query.EventQuery
 import no.iktdev.mediaprocessing.shared.common.dto.Paginated
+import no.iktdev.mediaprocessing.shared.common.effective
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.delete.DeleteSequenceEvent
@@ -209,23 +210,23 @@ object EventStore: EventStore {
 
     fun TaskResultEvent.delete(): DeleteEvent {
         val preparedDeleteEvent = DeletedTaskResultEvent(this.eventId)
-            .also { usingReferenceId(this.referenceId) }
+            .apply { usingReferenceId(this@delete.referenceId) }
         persist(preparedDeleteEvent)
         return preparedDeleteEvent
     }
 
     fun Event.delete(): DeleteEvent {
-        val preparedDeleteEvent = DeletedEvent(this.eventId)
-            .also { usingReferenceId(this.referenceId) }
+        val preparedDeleteEvent = DeleteEvent(this.eventId)
+            .apply { usingReferenceId(this@delete.referenceId) }
         persist(preparedDeleteEvent)
         return preparedDeleteEvent
     }
 
     fun Event.deleteCollectionIfPresent(events: List<Event>): DeleteEvent? {
-        val collectEvents = events.getInstancesOf<CollectedEvent>().lastOrNull() ?: return null
-        return if (this.eventId in collectEvents.eventIds) {
-            log.info("[${this.referenceId.short()}] Found eventId (${this.eventId}) in collection (${collectEvents.eventIds}), will be deleted")
-            this.delete()
+        val collectEvent = events.getInstancesOf<CollectedEvent>().lastOrNull() ?: return null
+        return if (this.eventId in collectEvent.eventIds) {
+            log.info("[${this.referenceId.short()}] Found eventId (${this.eventId}) in collection (${collectEvent.eventIds}), will be deleted")
+            collectEvent.delete()
         } else null
     }
 
@@ -275,7 +276,8 @@ object EventStore: EventStore {
     }
 
     fun createManuallyContinueEvent(referenceId: UUID): UUID? {
-        val onHoldEvent = getEventSequence(referenceId).getInstancesOf<OnHoldSignalEvent>().lastOrNull()
+        val onHoldEvent = getEventSequence(referenceId).effective()
+            .getInstancesOf<OnHoldSignalEvent>().maxByOrNull { it.metadata.created }
         return try {
             val continueEvent = ReleaseHoldSignalEvent().apply {
                 usingReferenceId(referenceId)

@@ -11,6 +11,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.serialization.ZDS.toEvent
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.dto.DiskInfo
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ContinuationSummaryEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
@@ -403,4 +404,9 @@ fun getCollection(events: List<Event>): String? {
             null
         }
     }
+}
+
+
+fun <T : TaskResultEvent> T.takeIfCompleted(): T? {
+    return if (status == TaskStatus.Completed) this else null
 }

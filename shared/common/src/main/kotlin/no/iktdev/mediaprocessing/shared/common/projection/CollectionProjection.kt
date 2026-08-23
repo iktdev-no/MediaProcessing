@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.Operat
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StartProcessingEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.isOnly
 import no.iktdev.mediaprocessing.shared.common.getInstanceOf
+import no.iktdev.mediaprocessing.shared.common.takeIfCompleted
 
 class CollectionProjection(
     val history: List<Event>
@@ -35,7 +36,7 @@ class CollectionProjection(
         val collectionCandidates = mutableListOf<String>()
 
         // 2. Metadata (og alternative titler) skal ha høyere prioritet enn parseren!
-        history.getInstanceOf<MetadataSearchResultEvent>()?.recommended?.metadata?.let { metadata ->
+        history.getInstanceOf<MetadataSearchResultEvent>()?.takeIfCompleted()?.recommended?.metadata?.let { metadata ->
             collectionCandidates.add(metadata.title)
             collectionCandidates.addAll(metadata.alternateTitles)
         }
