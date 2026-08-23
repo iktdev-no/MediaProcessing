@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, CircularProgress, Paper, Tabs, Tab, IconButton, Tooltip, Divider, Chip, Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import ChromeReaderModeIcon from '@mui/icons-material/ChromeReaderMode';
@@ -15,16 +15,6 @@ import { SequenceTaskCard } from "../../components/sequence/SequenceTaskCard";
 import { SequenceEventCard } from "../../components/sequence/SequenceEventCard";
 import MoveToInboxOutlinedIcon from '@mui/icons-material/MoveToInboxOutlined';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
-
-function onSequenceAction(refId: string | undefined, action: SequenceActions) {
-    if (!refId) return
-    if (action === "Release") {
-        continueSequence(refId);
-    } else if (action === "Delete") {
-        deleteSequence(refId)
-    }
-}
-
 
 export default function SequenceViewPage() {
     const { referenceId } = useParams<{ referenceId: string }>();
@@ -48,26 +38,48 @@ export default function SequenceViewPage() {
         setLineageOpen(true);
     }
 
-    useEffect(() => {
+    // Felles funksjon for å hente alle data på nytt
+    const fetchData = useCallback(async (showLoader = false) => {
         if (!referenceId) return;
-        setLoading(true);
+        if (showLoader) setLoading(true);
 
-        Promise.all([
-            getSequenceInfo(referenceId).catch(() => undefined),
-            getSequence(referenceId).catch(() => []),
-            getEffectiveEventsHistory(referenceId).catch(() => []),
-            getTasksForReference(referenceId).catch(() => []),
-        ])
-            .then(([seqInfoData, seqData, eventData, taskData]) => {
-                setSeqInfo(seqInfoData);
-                setSequence(seqData);
-                setEvents(eventData);
-                setTasks(taskData);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+        try {
+            const [seqInfoData, seqData, eventData, taskData] = await Promise.all([
+                getSequenceInfo(referenceId).catch(() => undefined),
+                getSequence(referenceId).catch(() => []),
+                getEffectiveEventsHistory(referenceId).catch(() => []),
+                getTasksForReference(referenceId).catch(() => []),
+            ]);
+
+            setSeqInfo(seqInfoData);
+            setSequence(seqData);
+            setEvents(eventData);
+            setTasks(taskData);
+        } finally {
+            if (showLoader) setLoading(false);
+        }
     }, [referenceId]);
+
+    // Håndter handlinger og last inn data på nytt når de fullfører
+    const handleSequenceAction = async (action: SequenceActions) => {
+        if (!referenceId) return;
+
+        try {
+            if (action === "Release") {
+                await continueSequence(referenceId);
+            } else if (action === "Delete") {
+                await deleteSequence(referenceId);
+            }
+            // Hent oppdatert data etter at handlingen er utført
+            await fetchData(false);
+        } catch (error) {
+            console.error("Feil under utførelse av sekvens-handling:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData(true);
+    }, [fetchData]);
 
     if (loading) {
         return (
@@ -109,7 +121,10 @@ export default function SequenceViewPage() {
             >
                 {/* Venstre kolonne: Sekvens-sammendrag */}
                 <Box sx={{ overflowY: "auto", display: "flex", flexDirection: "column" }}>
-                    <SequenceSummaryCard seqInfo={seqInfo} onActionClick={(action) => onSequenceAction(referenceId, action)} />
+                    <SequenceSummaryCard
+                        seqInfo={seqInfo}
+                        onActionClick={(action) => handleSequenceAction(action)}
+                    />
                 </Box>
 
                 {/* Høyre kolonne: Tabs og Innhold */}
@@ -211,8 +226,6 @@ function PageHeader({ referenceId, tabIndex, splitView, onToggleSplit }: {
     );
 }
 
-
-
 function NavigationTabs({ tabIndex, sequenceLength, eventsLength, tasksLength, onChangeTab }: {
     tabIndex: number;
     sequenceLength: number;
@@ -251,7 +264,7 @@ function SequenceTab({ sequence }: { sequence: Array<LifecycleNode> }) {
                             variant="outlined"
                             defaultExpanded
                             sx={{
-                                '&:before': { display: 'none' }, // Fjerner standard MUI-linje øverst
+                                '&:before': { display: 'none' },
                                 boxShadow: 'none',
                                 border: 1,
                                 borderColor: 'divider',
@@ -343,4 +356,3 @@ function SequenceTab({ sequence }: { sequence: Array<LifecycleNode> }) {
         </Box>
     );
 }
-
