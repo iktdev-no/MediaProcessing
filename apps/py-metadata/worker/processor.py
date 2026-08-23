@@ -48,8 +48,9 @@ def print_summary(results: list[SearchResult], titles: list[str]) -> None:
     print(tabulate(rows, headers=headers))
 
 
-def choose_recommended(results: list[SearchResult]) -> SearchResult:
-    return max(results, key=lambda r: r.totalScore)
+def choose_recommended(results: list[SearchResult]) -> SearchResult | None:
+    valid_results = [r for r in results if r.totalScore >= 0]
+    return max(valid_results, key=lambda r: r.totalScore) if valid_results else None
 
 
 async def process_task(db, task: MetadataSearchTask) -> MetadataSearchResultEvent | None:
