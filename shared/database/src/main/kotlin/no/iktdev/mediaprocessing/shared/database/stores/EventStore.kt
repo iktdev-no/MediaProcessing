@@ -209,14 +209,14 @@ object EventStore: EventStore {
 
     fun TaskResultEvent.delete(): DeleteEvent {
         val preparedDeleteEvent = DeletedTaskResultEvent(this.eventId)
-            .apply { usingReferenceId(this.referenceId) }
+            .also { usingReferenceId(this.referenceId) }
         persist(preparedDeleteEvent)
         return preparedDeleteEvent
     }
 
     fun Event.delete(): DeleteEvent {
         val preparedDeleteEvent = DeletedEvent(this.eventId)
-            .apply { usingReferenceId(this.referenceId) }
+            .also { usingReferenceId(this.referenceId) }
         persist(preparedDeleteEvent)
         return preparedDeleteEvent
     }
