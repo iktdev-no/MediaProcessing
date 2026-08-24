@@ -65,13 +65,9 @@ class LinearVideoTaskListener(
         val progressListener = LinearProgressListener(task, reporter, weights)
 
         if (ctx.output.exists() && taskData.data.videoInstruction.output?.overwrite != true) {
-            reporter?.publishEvent(
-                ProcesserEncodeResultEvent(
-                    status = TaskStatus.Failed,
-                    error = "${ctx.output.absolutePath} does already exist, and arguments does not permit overwrite"
-                ).producedFrom(task)
+            throw IllegalStateException(
+                "${ctx.output.absolutePath} does already exist, and arguments does not permit overwrite"
             )
-            return null
         }
 
         val processor = LinearProcessor(this, progressListener, processService)

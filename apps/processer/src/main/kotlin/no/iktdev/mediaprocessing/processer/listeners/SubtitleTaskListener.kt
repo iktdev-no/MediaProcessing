@@ -56,14 +56,10 @@ class SubtitleTaskListener(
         val cachedOutFile = cacheOutputFolder.using(taskData.data.outputFileName)
 
         if (cachedOutFile.exists() && !dsl.overwrite()) {
-            reporter?.publishEvent(
-                ProcesserExtractResultEvent(
-                    status = TaskStatus.Failed
-                ).producedFrom(task)
+            throw IllegalStateException(
+                "${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite"
             )
-            throw IllegalStateException("${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite")
         }
-
 
         val logDirectory = fileUtil.getLogDirectory().using("subtitles")
         val result = getFfmpeg(logDirectory = logDirectory)
