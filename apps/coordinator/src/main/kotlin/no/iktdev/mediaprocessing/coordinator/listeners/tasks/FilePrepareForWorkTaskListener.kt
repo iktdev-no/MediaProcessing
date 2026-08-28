@@ -83,6 +83,8 @@ class FilePrepareForWorkTaskListener(
         ) {
             log.error { "File ${sourceFile.absolutePath} cannot be allocated to ${destinationFile.absolutePath} due to storage constraints imposed by potential storage usage" }
             return false
+        } else {
+            log.info { "File ${sourceFile.absolutePath} can be allocated  to ${destinationFile.absolutePath}" }
         }
 
         return super.accept(task, reporter, validator)
