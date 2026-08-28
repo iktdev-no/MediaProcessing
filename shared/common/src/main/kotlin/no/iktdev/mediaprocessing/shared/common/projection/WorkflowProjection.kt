@@ -10,103 +10,114 @@ import no.iktdev.mediaprocessing.shared.common.projection.tasks.TaskProjection
 class WorkflowProjection(val events: List<Event>) {
     private val collect = CollectProjection(events)
     private val taskProjection = TaskProjection(events)
-    val log = KotlinLogging.logger {}
+    private val log = KotlinLogging.logger {}
 
     fun getRequiredTasksForStartOperation(): Map<TaskStatusType, TaskStatus> {
         val taskStatuses = mutableMapOf<TaskStatusType, TaskStatus>()
-
         val startedWith = collect.startedWith?.tasks ?: emptyList()
-        if (startedWith.any { it == OperationType.MetadataSearch }) {
+
+        if (OperationType.MetadataSearch in startedWith) {
             taskStatuses[TaskStatusType.MetadataSearch] = taskProjection.metadataTaskStatus
             taskStatuses[TaskStatusType.CoverDownload] = taskProjection.coverDownloadTaskStatus
         }
-        if (startedWith.any { it == OperationType.ConvertSubtitles }) {
+
+        if (OperationType.ConvertSubtitles in startedWith) {
             taskStatuses[TaskStatusType.ConvertSubtitles] = taskProjection.convertTaskStatus
         }
-        if (startedWith.any { it == OperationType.ExtractSubtitles }) {
+
+        if (OperationType.ExtractSubtitles in startedWith) {
             taskStatuses[TaskStatusType.ExtractSubtitles] = taskProjection.extractTaskStatus
             taskStatuses[TaskStatusType.DetermineCollection] = taskProjection.determineCollectionTaskStatus
             taskStatuses[TaskStatusType.ReadStreams] = taskProjection.readStreamsTaskStatus
             taskStatuses[TaskStatusType.PrepareForWork] = taskProjection.prepareForWorkTaskStatus
         }
-        if (startedWith.any { it == OperationType.Encode }) {
+
+        if (OperationType.Encode in startedWith) {
             taskStatuses[TaskStatusType.Encode] = taskProjection.encodeTaskStatus
             taskStatuses[TaskStatusType.DetermineCollection] = taskProjection.determineCollectionTaskStatus
             taskStatuses[TaskStatusType.ReadStreams] = taskProjection.readStreamsTaskStatus
             taskStatuses[TaskStatusType.PrepareForWork] = taskProjection.prepareForWorkTaskStatus
         }
+
         return taskStatuses
     }
 
-    /**
-     * Intern hjelper som sjekker oppgavene og returnerer både om de er klare,
-     * samt et kart over de som er i uønsket tilstand (NotInitiated eller Pending).
-     */
-    private fun evaluateRequiredTasks(): Pair<Boolean, Map<TaskStatusType, TaskStatus>> {
-        val nonQualifiedToContinue = listOf(TaskStatus.NotInitiated, TaskStatus.Pending)
-        val requiredTasks = getRequiredTasksForStartOperation()
-        val undesiredState = requiredTasks.filter { it.value in nonQualifiedToContinue }
-
-        return Pair(undesiredState.isEmpty(), undesiredState)
+    private fun getInvalidRequiredTasks(): Map<TaskStatusType, TaskStatus> {
+        return getRequiredTasksForStartOperation()
+            .filter { (_, status) ->
+                status != TaskStatus.Completed && status != TaskStatus.Skipped
+            }
     }
 
     fun hasRequiredTasksToRunCompleted(): Boolean {
-        return evaluateRequiredTasks().first
+        return getInvalidRequiredTasks().isEmpty()
     }
 
     fun isWorkflowComplete(): Boolean {
-        val statuses = taskProjection.operationStatuses()
-        if (statuses.isEmpty()) return false
+        if (collect.startedWith == null) return false
 
-        if (statuses.any { it == TaskStatus.Failed } || statuses.any { it == TaskStatus.Pending }) {
+        val requiredTasks = getRequiredTasksForStartOperation()
+        if (requiredTasks.isEmpty()) return false
+
+        if (requiredTasks.values.any { it != TaskStatus.Completed && it != TaskStatus.Skipped }) {
             return false
         }
 
-        return hasRequiredTasksToRunCompleted() && statuses.all { it == TaskStatus.Completed }
+        val operations = taskProjection.operationStatuses()
+        return operations.isNotEmpty() &&
+                operations.all { it == TaskStatus.Completed || it == TaskStatus.Skipped }
     }
 
     fun evaluate(): WorkflowStatusReport {
         if (collect.startedWith == null) {
-            return WorkflowStatusReport(ReasonFailed(FailingReason.MissingStart))
-        }
-
-        val statuses = taskProjection.operationStatuses()
-        if (statuses.isEmpty()) {
-            return WorkflowStatusReport(ReasonFailed(FailingReason.NoRelevantTasksSet))
-        }
-
-        if (taskProjection.hasFailed()) {
-            val failedTasks = taskProjection.getStatuses()
-                .filter { it.second == TaskStatus.Failed }
-                .map { it.first.name }
-                .toSet()
-            return WorkflowStatusReport(ReasonFailed(FailingReason.RequiredTasksHaveFailed, failedTasks))
-        }
-
-        if (statuses.any { it == TaskStatus.Failed }) {
-            return WorkflowStatusReport(ReasonFailed(FailingReason.RequiredOperationTasksHaveFailed))
-        }
-
-        if (statuses.any { it == TaskStatus.Pending }) {
-            return WorkflowStatusReport(ReasonFailed(FailingReason.TasksArePending))
-        }
-
-        // Bruker den delte hjelperen her for å få ut de uønskede statuene direkte
-        val (isComplete, undesiredState) = evaluateRequiredTasks()
-        if (!isComplete) {
-            val taskNames = undesiredState.keys.map { it.name }.toSet()
-            log.warn("Required tasks not complete for referenceId. Undesired states: $undesiredState")
             return WorkflowStatusReport(
-                ReasonFailed(
-                    reason = FailingReason.RequiredTasksAreNotComplete,
-                    tasks = taskNames,
-                    taskStatuses = undesiredState // Sender med hele map-en ut i rapporten
-                )
+                ReasonFailed(FailingReason.MissingStart)
             )
         }
 
-        if (!isWorkflowComplete()) {
-            return WorkflowStatusReport(ReasonFailed(FailingReason.RequiredTasksAreNotComplete))
+        val requiredTasks = getRequiredTasksForStartOperation()
+        if (requiredTasks.isEmpty()) {
+            return WorkflowStatusReport(
+                ReasonFailed(FailingReason.NoRelevantTasksSet)
+            )
+        }
+
+        val invalidRequiredTasks = getInvalidRequiredTasks()
+
+        if (invalidRequiredTasks.isNotEmpty()) {
+            val failed = invalidRequiredTasks
+                .filter { it.value == TaskStatus.Failed }
+
+            if (failed.isNotEmpty()) {
+                return WorkflowStatusReport(
+                    ReasonFailed(
+                        reason = FailingReason.RequiredTasksHaveFailed,
+                        tasks = failed.keys.map { it.name }.toSet(),
+                        taskStatuses = failed
+                    )
+                )
+            }
+
+            val pending = invalidRequiredTasks
+                .filter { it.value == TaskStatus.Pending }
+
+            if (pending.isNotEmpty()) {
+                return WorkflowStatusReport(
+                    ReasonFailed(
+                        reason = FailingReason.TasksArePending,
+                        tasks = pending.keys.map { it.name }.toSet(),
+                        taskStatuses = pending
+                    )
+                )
+            }
+
+            return WorkflowStatusReport(
+                ReasonFailed(
+                    reason = FailingReason.RequiredTasksAreNotComplete,
+                    tasks = invalidRequiredTasks.keys.map { it.name }.toSet(),
+                    taskStatuses = invalidRequiredTasks
+                )
+            )
         }
 
         return WorkflowStatusReport(reason = null)

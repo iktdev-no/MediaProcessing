@@ -3,8 +3,10 @@ package no.iktdev.mediaprocessing.coordinator.listeners.events
 import com.google.gson.Gson
 import mu.KotlinLogging
 import no.iktdev.eventi.models.Event
+import no.iktdev.eventi.tasks.Result
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.CollectedEvent
 import no.iktdev.mediaprocessing.shared.common.listeners.SummaryEventListener
+import no.iktdev.mediaprocessing.shared.common.model.FailingReason
 import no.iktdev.mediaprocessing.shared.common.projection.WorkflowProjection
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import org.springframework.stereotype.Component
@@ -19,7 +21,13 @@ class CollectEventsListener(eventStore: no.iktdev.eventi.stores.EventStore = Eve
 
         if (report.isFailed()) {
             val referenceId = effectiveHistory.firstOrNull()?.referenceId ?: "unknown"
-            log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${Gson().toJson(report)}" }
+            val failure = report.getFailure() ?: run {
+                log.error("Unable to get failure white its failed $referenceId")
+                return false
+            }
+            if (failure.reason != FailingReason.TasksArePending) {
+                log.warn { "Workflow failed or incomplete for referenceId=$referenceId with reason: ${Gson().toJson(report)}" }
+            }
             return false
         }
 

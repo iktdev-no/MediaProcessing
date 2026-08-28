@@ -78,12 +78,8 @@ class TaskController(
 
         // 1. Opprett DeleteEvent
         val deletedId = eventService.deleteTaskResultForReset(referenceId, taskId)
-        if (deletedId == null) {
-            if (forced) {
-                eventService.createForcedTaskResetAuditEvent(referenceId, taskId)
-            } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).build()
-            }
+        if (deletedId == null && forced) {
+            eventService.createForcedTaskResetAuditEvent(referenceId, taskId)
         }
 
         // 2. Reset task

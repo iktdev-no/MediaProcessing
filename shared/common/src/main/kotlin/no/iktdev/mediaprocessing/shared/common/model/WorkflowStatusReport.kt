@@ -7,6 +7,7 @@ data class WorkflowStatusReport(
     val reason: Reason?
 ) {
     fun isFailed() = reason != null && reason is ReasonFailed
+    fun getFailure(): ReasonFailed? = reason as? ReasonFailed
     override fun toString(): String {
         return Gson().toJson(this)
     }
