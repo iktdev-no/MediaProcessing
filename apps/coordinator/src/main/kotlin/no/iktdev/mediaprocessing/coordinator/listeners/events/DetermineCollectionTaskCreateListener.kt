@@ -18,7 +18,7 @@ import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
 import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 
-@ListenerOrder(6)
+@ListenerOrder(7)
 @Component
 class DetermineCollectionTaskCreateListener : EventListener() {
 
