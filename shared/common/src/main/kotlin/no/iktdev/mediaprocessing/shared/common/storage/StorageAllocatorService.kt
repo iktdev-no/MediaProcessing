@@ -7,6 +7,7 @@ import no.iktdev.mediaprocessing.shared.common.configs.MediaPaths
 import no.iktdev.mediaprocessing.shared.common.dto.DiskInfo
 import no.iktdev.mediaprocessing.shared.common.getDiskInfoFor
 import org.springframework.stereotype.Service
+import kotlin.math.pow
 
 @Service
 class StorageAllocatorService(
@@ -121,19 +122,73 @@ class StorageAllocatorService(
 
         val requiredBytes = if (destination == StorageLocation.Scratch) {
             if (sameDisk) {
-                calculateRequiredBytes(sourceFile, StorageLocation.Scratch) +
-                        calculateRequiredBytes(sourceFile, StorageLocation.Intermediate)
+                calculateRequiredBytes(
+                    sourceFile,
+                    StorageLocation.Scratch
+                ) + calculateRequiredBytes(
+                    sourceFile,
+                    StorageLocation.Intermediate
+                )
             } else {
-                calculateRequiredBytes(sourceFile, StorageLocation.Scratch)
+                calculateRequiredBytes(
+                    sourceFile,
+                    StorageLocation.Scratch
+                )
             }
         } else {
-            calculateRequiredBytes(sourceFile, destination)
+            calculateRequiredBytes(
+                sourceFile,
+                destination
+            )
         }
 
-        val currentStore =
-            getStorageInfo(destinationStore.mount)
-                ?: return false
+        val currentStore = getStorageInfo(destinationStore.mount)
+            ?: return true
+
+        val expectedRemainingBytes =
+            currentStore.freeBytes - requiredBytes
+
+        log.info {
+            """
+        |Storage allocation check
+        |  File:               ${sourceFile.name}
+        |  Source:             $source
+        |  Destination:        $destination
+        |  Same disk:          $sameDisk
+        |
+        |  Available:          ${currentStore.freeBytes.toHumanReadable()}
+        |  Required:           ${requiredBytes.toHumanReadable()}
+        |  Expected remaining: ${expectedRemainingBytes.toHumanReadable()}
+        """.trimMargin()
+        }
 
         return currentStore.freeBytes >= requiredBytes
+    }
+
+    fun Long.toHumanReadable(): String {
+        if (this == 0L) return "0 B"
+
+        val absoluteValue = kotlin.math.abs(this)
+
+        val units = arrayOf(
+            "B",
+            "KB",
+            "MB",
+            "GB",
+            "TB",
+            "PB"
+        )
+
+        val exponent = (
+                kotlin.math.ln(absoluteValue.toDouble()) /
+                        kotlin.math.ln(1024.0)
+                ).toInt()
+
+        val value = this.toDouble() / 1024.0.pow(exponent)
+
+        return "%.2f %s".format(
+            value,
+            units[exponent]
+        )
     }
 }
