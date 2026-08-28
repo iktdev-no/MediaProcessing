@@ -386,6 +386,25 @@ fun getDiskInfoFor(mounts: List<String>): List<DiskInfo> =
         )
     }
 
+fun getDiskInfoFor(mount: String): DiskInfo? {
+    val path = Paths.get(mount)
+
+    val store = runCatching { Files.getFileStore(path) }.getOrNull()
+        ?: return null
+
+    return DiskInfo(
+        mount = mount,
+        device = store.name(),
+        totalBytes = store.totalSpace,
+        freeBytes = store.usableSpace,
+        usedBytes = store.totalSpace - store.usableSpace,
+        usedPercent = if (store.totalSpace > 0)
+            ((store.totalSpace - store.usableSpace).toDouble() / store.totalSpace.toDouble()) * 100
+        else 0.0
+    )
+}
+
+
 fun getCollection(events: List<Event>): String? {
     val collect = events.getInstanceOf<CollectedEvent>()
     if (collect != null) {

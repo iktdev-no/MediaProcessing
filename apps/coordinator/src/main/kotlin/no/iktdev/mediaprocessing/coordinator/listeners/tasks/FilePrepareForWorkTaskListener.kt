@@ -7,7 +7,9 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
+import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.eventi.tasks.TaskValidator
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
@@ -15,13 +17,17 @@ import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.FilePrepareForWorkResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.progress.FileCopyProgress
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.FilePrepareForWorkTask
+import no.iktdev.mediaprocessing.shared.common.storage.IStorageAllocation
+import no.iktdev.mediaprocessing.shared.common.storage.StorageAllocatorService
 import org.springframework.stereotype.Component
 import java.nio.file.FileSystemException
 import java.nio.file.Files
 import java.util.*
 
 @Component
-class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
+class FilePrepareForWorkTaskListener(
+    private val storageAllocation: IStorageAllocation
+): TaskListener(TaskType.IO_INTENSIVE) {
     private val log = KotlinLogging.logger {}
 
     override fun getWorkerId(): String {
@@ -47,6 +53,39 @@ class FilePrepareForWorkTaskListener: TaskListener(TaskType.IO_INTENSIVE) {
 
     override fun supports(task: Task): Boolean {
         return task is FilePrepareForWorkTask
+    }
+
+    override fun accept(
+        task: Task,
+        reporter: TaskReporter,
+        validator: TaskValidator?,
+    ): Boolean {
+        if (task !is FilePrepareForWorkTask) {
+            return false
+        }
+
+        val sourceFile = IFile(task.data.sourceFile)
+        val destinationFile = IFile(task.data.destinationFile)
+
+        val sourceLocation = storageAllocation.getStorageArea(
+            sourceFile.absolutePath
+        )
+
+        val destinationLocation = storageAllocation.getStorageArea(
+            destinationFile.absolutePath
+        )
+
+        if (!storageAllocation.canAllocate(
+                sourceFile = sourceFile,
+                source = sourceLocation,
+                destination = destinationLocation,
+            )
+        ) {
+            log.error { "File ${sourceFile.absolutePath} cannot be allocated to ${destinationFile.absolutePath} due to storage constraints imposed by potential storage usage" }
+            return false
+        }
+
+        return super.accept(task, reporter, validator)
     }
 
     override suspend fun onTask(task: Task): Event? {
