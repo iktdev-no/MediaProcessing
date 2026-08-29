@@ -13,6 +13,7 @@ import no.iktdev.mediaprocessing.processer.config.FileUtil
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.ffmpeg.dsl.args.ffmpeg
 import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserExtractResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
 import org.springframework.stereotype.Service
@@ -55,10 +56,15 @@ class SubtitleTaskListener(
 
         val cachedOutFile = cacheOutputFolder.using(taskData.data.outputFileName)
 
-        if (cachedOutFile.exists() && !dsl.overwrite()) {
-            throw IllegalStateException(
+        val allowOverwrite =
+            Overrides.AllowOverwrite in taskData.overrides.orEmpty() ||
+                    dsl.overwrite()
+
+        if (cachedOutFile.exists()) {
+            check(allowOverwrite) {
                 "${cachedOutFile.absolutePath} does already exist, and arguments does not permit overwrite"
-            )
+            }
+            cachedOutFile.delete()
         }
 
         val logDirectory = fileUtil.getLogDirectory().using("subtitles")

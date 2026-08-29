@@ -1,6 +1,7 @@
 package no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.transfer
 
 import no.iktdev.files.FileHash
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks_super.TransferTask
 import java.util.UUID
 

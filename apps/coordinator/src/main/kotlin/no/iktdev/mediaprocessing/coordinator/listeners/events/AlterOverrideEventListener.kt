@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.serialization.ZDS.toTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.AlterOverrideEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.AlteredOverrideEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks_super.TransferTask
@@ -45,7 +46,7 @@ class AlterOverrideEventListener(private val taskStore: TaskStore = TaskStore): 
 
     fun applyOverrideToMigrateContentStoreTask(task: TransferTask, alterOverrideEvent: AlterOverrideEvent): Boolean {
         val overrides = alterOverrideEvent.overrides.mapNotNull { it -> try {
-            TransferTask.Overrides.valueOf(it)
+            Overrides.valueOf(it)
         } catch (e: Exception) {
             e.printStackTrace()
             log.error("$it is unsupported for task ${task.taskId}")

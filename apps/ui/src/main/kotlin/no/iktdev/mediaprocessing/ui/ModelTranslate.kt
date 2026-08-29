@@ -16,14 +16,17 @@ import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.Presets
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.MediaTracksEncodeSelectedEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks_super.TransferTask
-import no.iktdev.mediaprocessing.shared.common.projection.CollectProjection
 import no.iktdev.mediaprocessing.shared.common.rules.TaskLifecycleRules
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.VideoCodecConfig
 import no.iktdev.mediaprocessing.shared.common.dto.preference.coordinator.video.VideoCodecType
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.ExtractSubtitleTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.SegmentedEncodeTask
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks_super.VideoEncodeTask
 import no.iktdev.mediaprocessing.ui.dto.MetadataDto
 import no.iktdev.mediaprocessing.ui.dto.SequenceEvent
 import no.iktdev.mediaprocessing.ui.models.contract.UiTask
-import no.iktdev.mediaprocessing.ui.models.contract.TaskStatus
 import kotlin.collections.filter
 import kotlin.reflect.KProperty1
 
@@ -52,20 +55,34 @@ fun PersistedTask.toCoordinatorTransferDto(logs: List<LogAssociatedIds>): UiTask
     )
 }
 
-fun PersistedTask.getOverrides(): Overrides? {
+fun PersistedTask.getOverrides(): InnerOverrides? {
     return when (val task = this.toTask()) {
         is TransferTask -> {
             val active = task.overrides?.map { it.name } ?: emptyList()
-            val available = TransferTask.Overrides.entries
+            val available = Overrides.entries
                 .map { it.name }
                 .filterNot { it in active }
-            Overrides(available = available, active = active)
+            InnerOverrides(available = available, active = active)
+        }
+        is VideoEncodeTask -> {
+            val active = task.overrides?.map { it.name } ?: emptyList()
+            val available = Overrides.entries
+                .map { it.name }
+                .filterNot { it in active }
+            InnerOverrides(available = available, active = active)
+        }
+        is ExtractSubtitleTask -> {
+            val active = task.overrides?.map { it.name } ?: emptyList()
+            val available = Overrides.entries
+                .map { it.name }
+                .filterNot { it in active }
+            InnerOverrides(available = available, active = active)
         }
         else -> null
     }
 }
 
-data class Overrides(val available: List<String>, val active: List<String>)
+data class InnerOverrides(val available: List<String>, val active: List<String>)
 
 
 fun Event.extractPayload(): Map<String, Any?> {

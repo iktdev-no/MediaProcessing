@@ -2,9 +2,11 @@ package no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks
 
 import no.iktdev.eventi.models.Task
 import no.iktdev.mediaprocessing.ffmpeg.data.FFmpegInstructions
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
 
 data class ExtractSubtitleTask(
-    val data: ExtractSubtitleData
+    val data: ExtractSubtitleData,
+    val overrides: List<Overrides>? = null
 ): Task() {
 }
 

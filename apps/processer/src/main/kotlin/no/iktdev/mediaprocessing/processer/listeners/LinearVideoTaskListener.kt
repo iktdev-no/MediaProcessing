@@ -18,6 +18,7 @@ import no.iktdev.mediaprocessing.processer.progress.DynamicProgressWeights
 import no.iktdev.mediaprocessing.processer.progress.LinearProgressListener
 import no.iktdev.mediaprocessing.processer.services.ProcessService
 import no.iktdev.mediaprocessing.shared.common.dto.files.HashedFile
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.ProcesserEncodeResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import org.jetbrains.annotations.VisibleForTesting
@@ -64,10 +65,20 @@ class LinearVideoTaskListener(
 
         val progressListener = LinearProgressListener(task, reporter, weights)
 
-        if (ctx.output.exists() && taskData.data.videoInstruction.output?.overwrite != true) {
-            throw IllegalStateException(
-                "${ctx.output.absolutePath} does already exist, and arguments does not permit overwrite"
-            )
+        if (ctx.output.exists()) {
+            val allowOverwrite =
+                Overrides.AllowOverwrite in taskData.overrides.orEmpty() ||
+                        taskData.data.videoInstruction.output?.overwrite == true
+
+            if (!allowOverwrite) {
+                throw IllegalStateException(
+                    "${ctx.output.absolutePath} does already exist, and arguments does not permit overwrite"
+                )
+            }
+
+            check(ctx.output.delete()) {
+                "Failed to delete existing output file: ${ctx.output.absolutePath}"
+            }
         }
 
         val processor = LinearProcessor(this, progressListener, processService)

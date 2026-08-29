@@ -10,6 +10,7 @@ import no.iktdev.files.ensureParentDirsExist
 import no.iktdev.mediaprocessing.coordinator.services.DefaultFileSystemService
 import no.iktdev.mediaprocessing.coordinator.util.FileServiceException
 import no.iktdev.mediaprocessing.coordinator.util.FileSystemService
+import no.iktdev.mediaprocessing.shared.common.event_task_contract.Overrides
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks_super.TransferTask
 import no.iktdev.mediaprocessing.shared.common.silentTry
 import java.nio.file.FileSystemException
@@ -25,7 +26,7 @@ abstract class TransferToStorageBaseListener(val deleteSourceAfterVerify: Boolea
         source.file.let { silentTry { fs.delete(it) } }
     }
 
-    fun transfer(source: SourceFile, destination: DestinationFile, overrides: List<TransferTask.Overrides> = emptyList(),
+    fun transfer(source: SourceFile, destination: DestinationFile, overrides: List<Overrides> = emptyList(),
                  onProgress: ((copied: Long, total: Long) -> Unit)? = null) {
         val src = source.file
         val dst = destination.destination
@@ -42,7 +43,7 @@ abstract class TransferToStorageBaseListener(val deleteSourceAfterVerify: Boolea
             throw FileServiceException.SourceAlreadyTransferred(src, dst)
         }
         val fs = getFileSystemService()
-        if (dst.exists() && overrides.none { it == TransferTask.Overrides.AllowOverwrite }) {
+        if (dst.exists() && overrides.none { it == Overrides.AllowOverwrite }) {
             try {
                 val ok = fs.verifyIdentical(src, dst)
                 if (ok) {
