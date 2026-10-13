@@ -13,17 +13,14 @@ repositories {
 }
 
 dependencies {
-    implementation("no.iktdev:process-runner:1.0.0")
     implementation("com.google.code.gson:gson:2.8.9")
-    implementation(libs.exfl)
+    implementation(libs.processRunner)
 
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation(libs.kotlinxCoroutinesTest)
     testImplementation("org.assertj:assertj-core:3.4.1")
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.9")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("org.assertj:assertj-core:3.24.2")
     implementation(project(":shared:files"))
 

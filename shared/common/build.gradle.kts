@@ -29,12 +29,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
 
     // Utilities
-    implementation("no.iktdev:process-runner:1.0.0")
+    implementation(libs.processRunner)
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
-    implementation(libs.exfl)
 
     // Kotlin libs
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 
     // JSON
@@ -69,7 +67,7 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.7.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     testImplementation("io.github.classgraph:classgraph:4.8.184")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation(libs.kotlinxCoroutinesTest)
     testImplementation("io.mockk:mockk:1.13.9")
     testImplementation("org.reflections:reflections:0.10.2")
 
@@ -98,4 +96,3 @@ tasks.jar {
 artifacts {
     add("testArtifacts", tasks.named("testJar"))
 }
-

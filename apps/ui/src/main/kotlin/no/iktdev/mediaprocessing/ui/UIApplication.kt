@@ -4,9 +4,6 @@ import mu.KotlinLogging
 import no.iktdev.eventi.registry.EventTypeRegistry
 import no.iktdev.eventi.registry.ProgressTypeRegistry
 import no.iktdev.eventi.registry.TaskTypeRegistry
-import no.iktdev.exfl.coroutines.CoroutinesDefault
-import no.iktdev.exfl.coroutines.CoroutinesIO
-import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.EventRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.ProgressRegistry
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.TaskRegistry
@@ -34,24 +31,7 @@ class UIApplication: DatabaseApplication() {
 }
 
 
-val ioCoroutine = CoroutinesIO()
-val defaultCoroutine = CoroutinesDefault()
-
-
 fun main(args: Array<String>) {
-
-
-    ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
-        override fun onUpdated(value: Throwable) {
-            value.printStackTrace()
-        }
-    })
-    defaultCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
-        override fun onUpdated(value: Throwable) {
-            value.printStackTrace()
-        }
-    })
-
     runApplication<UIApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }
 }

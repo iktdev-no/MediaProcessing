@@ -1,3 +1,8 @@
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
 plugins {
     id("java")
     kotlin("jvm")
@@ -33,12 +38,9 @@ dependencies {
     implementation("org.json:json:20210307")
 
     // Custom libs
-    implementation(libs.exfl)
-    implementation("no.iktdev.streamit.library:streamit-library-db:1.0.0-alpha14")
     implementation(libs.eventi)
 
     // Coroutines / utilities
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 
     // Internal modules
     implementation(project(":shared:ffmpeg"))
@@ -70,7 +72,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.9")
 
     // Coroutines test
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation(libs.kotlinxCoroutinesTest)
 
     // JSON testing
     testImplementation("org.skyscreamer:jsonassert:1.5.0")
@@ -91,6 +93,56 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val streamitImportOpenApiFile = layout.buildDirectory.file("generated/openapi/openapi-importing.yaml")
+val streamitImportOpenApiUrl =
+    "https://github.com/iktdev-no/Streamit-service/releases/download/snapshot-9a1bd14b6d5c/openapi-importing.yaml"
+
+tasks.register("downloadStreamitImportOpenApi") {
+    group = "streamit"
+    description = "Downloads the Streamit importing OpenAPI specification."
+    outputs.file(streamitImportOpenApiFile)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val outputFile = streamitImportOpenApiFile.get().asFile
+        outputFile.parentFile.mkdirs()
+        val temporaryFile = outputFile.resolveSibling("${outputFile.name}.download")
+        val connection = URL(streamitImportOpenApiUrl).openConnection().apply {
+            connectTimeout = 15_000
+            readTimeout = 60_000
+            setRequestProperty("User-Agent", "MediaProcessing-OpenAPI-Downloader")
+        }
+
+        try {
+            if (connection is HttpURLConnection && connection.responseCode !in 200..299) {
+                throw GradleException(
+                    "Downloading importing OpenAPI spec failed with HTTP ${connection.responseCode} from $streamitImportOpenApiUrl"
+                )
+            }
+
+            connection.getInputStream().use { input ->
+                temporaryFile.outputStream().use { output -> input.copyTo(output) }
+            }
+            if (!temporaryFile.readText(Charsets.UTF_8).take(4096).contains("openapi:")) {
+                throw GradleException("Downloaded file from $streamitImportOpenApiUrl is not an OpenAPI YAML document.")
+            }
+
+            Files.move(
+                temporaryFile.toPath(),
+                outputFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE
+            )
+            logger.lifecycle("Downloaded Streamit importing OpenAPI spec to $outputFile")
+        } finally {
+            temporaryFile.delete()
+            if (connection is HttpURLConnection) {
+                connection.disconnect()
+            }
+        }
+    }
 }
 
 tasks.bootJar {

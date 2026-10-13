@@ -38,7 +38,6 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
     // Custom libs
-    implementation(libs.exfl)
     implementation(libs.eventi)
     implementation(project(":shared:common"))
     implementation(project(":shared:files"))

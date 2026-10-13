@@ -5,9 +5,6 @@ import mu.KotlinLogging
 import no.iktdev.eventi.registry.EventTypeRegistry
 import no.iktdev.eventi.registry.ProgressTypeRegistry
 import no.iktdev.eventi.registry.TaskTypeRegistry
-import no.iktdev.exfl.coroutines.CoroutinesDefault
-import no.iktdev.exfl.coroutines.CoroutinesIO
-import no.iktdev.exfl.observable.Observables
 import no.iktdev.mediaprocessing.processer.config.DirectoryProperties
 import no.iktdev.mediaprocessing.processer.config.ExecutablesConfig
 import no.iktdev.mediaprocessing.processer.config.ProcesserProperties
@@ -29,24 +26,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 class ProcesserApplication: DatabaseApplication() {
 }
 
-val ioCoroutine = CoroutinesIO()
-val defaultCoroutine = CoroutinesDefault()
-
 private val log = KotlinLogging.logger {}
 
 fun main(args: Array<String>) {
-    ioCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
-        override fun onUpdated(value: Throwable) {
-            value.printStackTrace()
-        }
-    })
-    defaultCoroutine.addListener(listener = object: Observables.ObservableValue.ValueListener<Throwable> {
-        override fun onUpdated(value: Throwable) {
-            value.printStackTrace()
-        }
-    })
-
-
     runApplication<ProcesserApplication>(*args)
     log.info { "App Version: ${getAppVersion()}" }
 }

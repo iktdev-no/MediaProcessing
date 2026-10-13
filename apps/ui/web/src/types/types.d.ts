@@ -1,6 +1,6 @@
 // AUTO-GENERATED. DO NOT EDIT.
 // TSGenerator Version: 1.0-SNAPSHOT
-// Time: 2026-08-11T12:03:35.477909188Z
+// Time: 2026-10-13T15:48:10.631040789Z
 // Source: no.iktdev.mediaprocessing.ui.models.contract
 
 

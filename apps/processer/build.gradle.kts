@@ -34,11 +34,9 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Coroutines / utilities
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("no.iktdev:process-runner:1.0.0")
+    implementation(libs.processRunner)
 
     // Custom libs
-    implementation(libs.exfl)
     implementation(libs.eventi)
 
     // Internal modules
@@ -51,7 +49,7 @@ dependencies {
     // --- TESTING ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.mockk:mockk:1.13.9")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation(libs.kotlinxCoroutinesTest)
     testImplementation("org.assertj:assertj-core:3.24.2")
 
     // Test artifacts

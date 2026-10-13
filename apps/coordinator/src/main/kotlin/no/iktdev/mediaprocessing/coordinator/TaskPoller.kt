@@ -1,8 +1,9 @@
 package no.iktdev.mediaprocessing.coordinator
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
+import no.iktdev.eventi.MyTime
+import no.iktdev.eventi.lifecycle.TaskListenerFatalError
 import no.iktdev.eventi.lifecycle.LifecycleStore
 import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.Progress
@@ -13,20 +14,24 @@ import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.coordinator.services.ProgressService
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
 import no.iktdev.mediaprocessing.shared.database.stores.TaskStore
+import no.iktdev.mediaprocessing.shared.common.coroutines.ApplicationCoroutineScope
+import no.iktdev.mediaprocessing.shared.common.coroutines.runCancellablePollingLoop
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.util.*
 
 @Profile("!dev")
 @Component
 class TaskPollerAdministrator(
     private val taskPoller: TaskPoller,
+    private val applicationCoroutineScope: ApplicationCoroutineScope,
 ): ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        CoroutineScope(Dispatchers.Default).launch {
+        applicationCoroutineScope.launch {
             taskPoller.start()
         }
     }
@@ -42,7 +47,32 @@ class TaskPoller(
     lifecycleStore = lifecycleStore,
     reporterFactory = { reporter } // én reporter brukes for alle tasks
 ) {
+    private val log = KotlinLogging.logger {}
 
+    override suspend fun start() {
+        runCancellablePollingLoop(
+            pollOnce = { pollOnce() },
+            backoff = { backoff },
+            increaseBackoff = {
+                backoff = backoff.multipliedBy(2).coerceAtMost(Duration.ofMinutes(1))
+            },
+            onError = { error ->
+                log.error(error) { "Unhandled error in poll loop, backing off for $backoff" }
+                lifecycleStore.add(
+                    TaskListenerFatalError(
+                        timestamp = MyTime.utcNow(),
+                        taskId = "N/A",
+                        listener = "TaskPoller",
+                        exception = "${error::class.java.simpleName}: ${error.message}",
+                        stacktrace = error.stackTraceToString()
+                    )
+                )
+            },
+            onCancellation = { cancelled ->
+                log.debug { "Task poll loop cancelled: ${cancelled.message}" }
+            }
+        )
+    }
 }
 
 

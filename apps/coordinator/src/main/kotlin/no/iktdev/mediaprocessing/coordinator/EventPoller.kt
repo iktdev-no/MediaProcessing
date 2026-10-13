@@ -1,6 +1,8 @@
 package no.iktdev.mediaprocessing.coordinator
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import no.iktdev.eventi.events.EventDispatcher
 import no.iktdev.eventi.events.EventListener
 import no.iktdev.eventi.events.EventPollerImplementation
@@ -9,12 +11,15 @@ import no.iktdev.eventi.lifecycle.LifecycleStore
 import no.iktdev.eventi.models.DispatchResult
 import no.iktdev.eventi.models.Event
 import no.iktdev.mediaprocessing.shared.database.stores.EventStore
+import no.iktdev.mediaprocessing.shared.common.coroutines.ApplicationCoroutineScope
+import no.iktdev.mediaprocessing.shared.common.coroutines.runCancellablePollingLoop
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 /* ---------------------------------------------------------
    CONFIG: Beans for dispatcher + queue
@@ -73,7 +78,23 @@ class EventPoller(
     dispatchQueue = sequenceDispatchQueue,
     lifecycleStore = lifecycleStore,
     dispatcher = overrideDispatcher
-)
+) {
+    private val log = KotlinLogging.logger {}
+
+    override suspend fun start() {
+        runCancellablePollingLoop(
+            pollOnce = { pollOnce() },
+            backoff = { backoff },
+            increaseBackoff = {
+                backoff = backoff.multipliedBy(2).coerceAtMost(Duration.ofMinutes(1))
+            },
+            onError = { error -> log.error(error) { "Error in poller loop" } },
+            onCancellation = { cancelled ->
+                log.debug { "Event poll loop cancelled: ${cancelled.message}" }
+            }
+        )
+    }
+}
 
 /* ---------------------------------------------------------
    ADMINISTRATOR (STARTER POLLER)
@@ -81,14 +102,15 @@ class EventPoller(
 @Profile("!noevent")
 @Component
 class EventPollerAdministrator(
-    private val eventPoller: EventPoller
+    private val eventPoller: EventPoller,
+    private val applicationCoroutineScope: ApplicationCoroutineScope
 ) : SmartLifecycle {
 
     private var running = false
     private var job: Job? = null
 
     override fun start() {
-        job = CoroutineScope(Dispatchers.Default).launch {
+        job = applicationCoroutineScope.launch {
             eventPoller.start()
         }
         running = true

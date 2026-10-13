@@ -4,11 +4,13 @@ plugins {
     kotlin("plugin.spring") version "2.2.0" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0" apply false
     id("org.springframework.boot") version "3.4.1" apply false
-    id("no.iktdev.ts-gen") version "1.0-rc6" apply false
+    id("no.iktdev.ts-gen") version "1.0-rc7" apply false
 }
 
 group = "no.iktdev.mediaprocessing"
 version = "1.0-SNAPSHOT"
+
+val coroutinesCoreVersion = "1.7.1"
 
 repositories {
     mavenLocal()
@@ -37,7 +39,7 @@ subprojects {
         implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
         implementation("com.google.code.gson:gson:2.8.9")
         implementation("org.json:json:20231013")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesCoreVersion")
         implementation("org.lz4:lz4-java:1.8.0")
 
     }

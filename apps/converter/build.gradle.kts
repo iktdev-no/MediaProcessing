@@ -25,13 +25,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // Custom libs
-    implementation(libs.exfl)
-    implementation("no.iktdev.library:subtitle:1.8.1-SNAPSHOT")
+    implementation(libs.subtitle)
     implementation(libs.eventi)
 
     // Coroutines / utilities
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("no.iktdev:process-runner:1.0.0")
+    implementation(libs.processRunner)
 
     // Internal modules
     implementation(project(":shared:common"))
@@ -42,7 +40,7 @@ dependencies {
     // --- TESTING ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.mockk:mockk:1.13.9")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    testImplementation(libs.kotlinxCoroutinesTest)
     testImplementation(project(":shared:common", configuration = "testArtifacts"))
     testImplementation(project(":shared:database", configuration = "testArtifacts"))
     testImplementation(project(":shared:files", configuration = "testArtifacts"))
