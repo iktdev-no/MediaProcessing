@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.spring")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.springframework.boot")
+    id("ch.acanda.gradle.fabrikt")
 }
 
 group = "no.iktdev.mediaprocessing.shared"
@@ -76,6 +77,35 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+val streamitImportOpenApiFile = layout.buildDirectory.file("generated/openapi/openapi-importing.yaml")
+apply(from = "gradle/download-streamit-openapi.gradle.kts")
+
+fabrikt {
+    generate("streamit-import") {
+        apiFile = streamitImportOpenApiFile.get().asFile
+        basePackage = "no.iktdev.mediaprocessing.shared.common.dto.streamit.importing"
+        outputDirectory = file("src/main/generated")
+        sourcesPath = "kotlin"
+        validationLibrary = NoValidation
+        model {
+            generate = enabled
+            serializationLibrary = Jackson
+        }
+    }
+}
+
+kotlin {
+    sourceSets.named("main") {
+        kotlin.srcDir("src/main/generated/kotlin")
+    }
+}
+
+tasks.named("fabriktGenerate") {
+    dependsOn("downloadStreamitImportOpenApi")
+}
+
+apply(from = "gradle/normalize-fabrikt-output.gradle.kts")
 
 configurations { create("testArtifacts") }
 

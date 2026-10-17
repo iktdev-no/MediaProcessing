@@ -7,6 +7,7 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.MEDIA_IMPORT_V2_PATH
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
@@ -153,7 +154,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
 
         whenever(
             restTemplate.exchange(
-                eq("/api/mediaprocesser/import"),
+                eq(MEDIA_IMPORT_V2_PATH),
                 eq(HttpMethod.POST),
                 any(),
                 eq(Void::class.java)

@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("com.github.node-gradle.node") version "7.0.2"
+    id("no.iktdev.ts-gen")
 }
 
 group = "no.iktdev.mediaprocessing"
@@ -58,8 +59,12 @@ tsGenerator {
 }
 
 
+tasks.named("generateTs") {
+    dependsOn("compileKotlin")
+}
+
 tasks.named("build") {
-    finalizedBy("generateTs")
+    dependsOn(rootProject.tasks.named("prepare"))
 }
 
 tasks.test {

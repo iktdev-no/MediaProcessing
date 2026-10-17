@@ -7,6 +7,8 @@ import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.MEDIA_IMPORT_V2_PATH
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.toMediaImportV2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -34,11 +36,11 @@ class StoreMetadataAndReferencesTaskListener : TaskListener(TaskType.MIXED) {
         val pickedTask = task as? StoreMediaInfoAndMetadataTask ?: return null
 
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(pickedTask.data, headers)
+        val entity = HttpEntity(pickedTask.data.toMediaImportV2(), headers)
 
         // ❗ Ikke fang exceptions — la TaskListener håndtere dem
         val response = streamitRestTemplate.exchange(
-            "/api/mediaprocesser/import",
+            MEDIA_IMPORT_V2_PATH,
             HttpMethod.POST,
             entity,
             Void::class.java,
