@@ -54,6 +54,12 @@ tasks.test {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
 }
 
+tasks.register("testAll") {
+    group = "application"
+    description = "Runs tests in all subprojects."
+    dependsOn(subprojects.map { it.tasks.named("test") })
+}
+
 tasks.register("prepare") {
     group = "application"
     description = "Prepares the UI models and TypeScript contracts for development."

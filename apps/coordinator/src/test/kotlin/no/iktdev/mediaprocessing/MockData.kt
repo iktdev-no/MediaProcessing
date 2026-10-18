@@ -164,7 +164,7 @@ object MockData {
     }
 
     fun determineCollectionEvents(
-        collection: String?,
+        collectionRef: CollectionReference?,
         derivedFrom: Event,
         status: TaskStatus = TaskStatus.Completed
     ): List<Event> {
@@ -178,7 +178,7 @@ object MockData {
         val result = DeterminedCollectionTaskResultEvent(
             status = status,
             error = null,
-            collectionReference = CollectionReference(store= collection)
+            collectionReference = collectionRef
         ).producedFrom(dummyTask)
 
         return listOf(create, result)

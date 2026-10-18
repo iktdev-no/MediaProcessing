@@ -117,7 +117,7 @@ class CollectionProjectionTest : TestBase() {
         val start = defaultStartEvent().addToHistory()
         DeterminedCollectionTaskResultEvent(
             status = TaskStatus.Completed,
-            collectionReference = CollectionReference(store="LockedInCollection")
+            collectionReference = CollectionReference(0, store="LockedInCollection")
         ).derivedOf(start).addToHistory()
 
         val proj = CollectionProjection(history)

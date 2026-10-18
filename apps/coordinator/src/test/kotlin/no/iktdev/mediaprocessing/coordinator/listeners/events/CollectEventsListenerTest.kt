@@ -11,6 +11,7 @@ import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.MockData.preparedFileForWorkEvents
 import no.iktdev.mediaprocessing.MockData.streamsReadEvent
 import no.iktdev.mediaprocessing.TestBase
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.CollectionReference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.assertj.core.api.Assertions.assertThat
@@ -61,7 +62,7 @@ class CollectEventsListenerTest : TestBase() {
             .addToHistory()
         val cover = coverEvent("/tmp/cover.jpg", metadata.last())
             .addToHistory()
-        val determined = determineCollectionEvents(collection = "MyCollection", cover.last())
+        val determined = determineCollectionEvents(collectionRef = CollectionReference(0, "MyCollection"), cover.last())
             .addToHistory()
 
 
@@ -151,7 +152,7 @@ class CollectEventsListenerTest : TestBase() {
             derivedFrom = parsed
         )
             .addToHistory()
-        val determined = determineCollectionEvents(collection = "MyCollection", convert.last(), TaskStatus.Skipped)
+        val determined = determineCollectionEvents(collectionRef = CollectionReference(0, "MyCollection"), convert.last(), TaskStatus.Skipped)
             .addToHistory()
         val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
             .addToHistory()
@@ -342,7 +343,7 @@ class CollectEventsListenerTest : TestBase() {
 
         val cover = coverEvent("/tmp/cover.jpg", metadata.last())
             .addToHistory()
-        val determined = determineCollectionEvents(collection = "MyCollection", cover.last())
+        val determined = determineCollectionEvents(collectionRef = CollectionReference(0, "MyCollection"), cover.last())
             .addToHistory()
         preparedFileForWorkEvents(determined.last())
             .addToHistory()
@@ -389,7 +390,7 @@ class CollectEventsListenerTest : TestBase() {
             derivedFrom = started
         )
             .addToHistory()
-        val determined = determineCollectionEvents(collection = "MyCollection", convert.last())
+        val determined = determineCollectionEvents(collectionRef = CollectionReference(0, "MyCollection"), convert.last())
             .addToHistory()
         val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
             .addToHistory()
@@ -424,7 +425,7 @@ class CollectEventsListenerTest : TestBase() {
             derivedFrom = started
         )
             .addToHistory()
-        val determined = determineCollectionEvents(collection = "MyCollection", convert.last())
+        val determined = determineCollectionEvents(collectionRef = CollectionReference(0, "MyCollection"), convert.last())
             .addToHistory()
         val skippedCoverDownload = CoverDownloadSkippedEvent().derivedOf(determined.last())
             .addToHistory()
