@@ -5,6 +5,7 @@ import no.iktdev.eventi.models.MultiTaskIdentity
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.mediaprocessing.TestBase.DummyTask
 import no.iktdev.mediaprocessing.ffmpeg.data.*
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.CollectionReference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.LinearEncodeTask
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
@@ -177,7 +178,7 @@ object MockData {
         val result = DeterminedCollectionTaskResultEvent(
             status = status,
             error = null,
-            collection = collection
+            collectionReference = CollectionReference(store= collection)
         ).producedFrom(dummyTask)
 
         return listOf(create, result)

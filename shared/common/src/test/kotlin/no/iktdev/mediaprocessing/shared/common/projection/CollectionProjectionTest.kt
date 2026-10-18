@@ -4,6 +4,7 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.files.IFile
 import no.iktdev.mediaprocessing.shared.common.TestBase
 import no.iktdev.mediaprocessing.shared.common.cleanForFileSystemUse
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.CollectionReference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -116,7 +117,7 @@ class CollectionProjectionTest : TestBase() {
         val start = defaultStartEvent().addToHistory()
         DeterminedCollectionTaskResultEvent(
             status = TaskStatus.Completed,
-            collection = "LockedInCollection"
+            collectionReference = CollectionReference(store="LockedInCollection")
         ).derivedOf(start).addToHistory()
 
         val proj = CollectionProjection(history)

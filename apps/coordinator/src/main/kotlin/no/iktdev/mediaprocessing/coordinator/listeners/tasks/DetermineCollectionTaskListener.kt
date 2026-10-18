@@ -6,6 +6,8 @@ import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.TaskListener
 import no.iktdev.eventi.tasks.TaskType
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.METADATA_CATALOG_SEARCH
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.CollectionReference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.DeterminedCollectionTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.DetermineCollectionTask
 import org.springframework.http.HttpEntity
@@ -35,7 +37,7 @@ class DetermineCollectionTaskListener(
     ): Event {
         return DeterminedCollectionTaskResultEvent(
             status = status,
-            collection = null
+            collectionReference = null
         ).producedFrom(task)
     }
 
@@ -48,39 +50,30 @@ class DetermineCollectionTaskListener(
         // Log input
         logger.info("Determining collection for names: ${pickedTask.names}")
 
-        val collection = try {
+        return try {
             val response = streamitRestTemplate.exchange(
-                "/api/meta/title/search/batch",
+                METADATA_CATALOG_SEARCH,
                 HttpMethod.POST,
                 HttpEntity(pickedTask.names),
-                String::class.java
+                CollectionReference::class.java
             )
-            response.body
+            DeterminedCollectionTaskResultEvent(
+                status = TaskStatus.Completed,
+                collectionReference = response.body
+            )
         } catch (e: HttpClientErrorException.NotFound) {
             logger.debug("No collection/title found for batch names (404)")
-            null
+            DeterminedCollectionTaskResultEvent(
+                status = TaskStatus.Completed,
+                collectionReference = null
+            )
         } catch (e: Exception) {
             logger.error("Failed to batch search collection", e)
-            return DeterminedCollectionTaskResultEvent(
+            DeterminedCollectionTaskResultEvent(
                 status = TaskStatus.Failed,
-                collection = null
-            ).producedFrom(task)
-        }
-
-        if (collection.isNullOrEmpty()) {
-            logger.info("No valid collection found, returning null collection")
-            return DeterminedCollectionTaskResultEvent(
-                status = TaskStatus.Completed,
-                collection = null
-            ).producedFrom(task)
-        }
-
-        logger.info("Found collection='$collection' for batch search")
-
-        return DeterminedCollectionTaskResultEvent(
-            status = TaskStatus.Completed,
-            collection = collection
-        ).producedFrom(pickedTask)
+                collectionReference = null
+            )
+        }.producedFrom(pickedTask)
     }
 
 

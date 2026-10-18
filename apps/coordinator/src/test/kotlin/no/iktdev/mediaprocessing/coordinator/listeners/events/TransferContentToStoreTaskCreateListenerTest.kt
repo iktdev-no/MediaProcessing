@@ -14,6 +14,7 @@ import no.iktdev.mediaprocessing.MockData.extractEvent
 import no.iktdev.mediaprocessing.MockData.mediaParsedEvent
 import no.iktdev.mediaprocessing.MockData.metadataEvent
 import no.iktdev.mediaprocessing.TestBase
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.CollectionReference
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
@@ -133,7 +134,7 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         val determined = DeterminedCollectionTaskResultEvent(
             TaskStatus.Completed,
-            collection = "Baking Bread",
+            collectionReference = CollectionReference(0, "Baking Bread"),
         ).derivedOf(metadata).addToHistory()
 
         val collected = CollectedEvent(
@@ -172,8 +173,8 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         val storeTask = slot.captured
 
-        assertThat(storeTask.data.collection).isEqualTo("Baking Bread")
-        assertThat(storeTask.data.media?.videoFile).isEqualTo("Baking Bread - S01E01 - Flour.mp4")
+        assertThat(storeTask.data.reference?.store).isEqualTo("Baking Bread")
+        assertThat(storeTask.data.media?.content?.videoFile).isEqualTo("Baking Bread - S01E01 - Flour.mp4")
         assertThat { storeTask.data.media?.subtitles?.any { it.subtitleFile == "Baking Bread - S01E01 - Flour.ass"  } }
         assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile)
         assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("eng")
@@ -237,8 +238,8 @@ class StoreMetadataAndReferencesListenerTest : TestBase() {
 
         val storeTask = slot.captured
 
-        assertThat(storeTask.data.collection).isEqualTo("Baking Bread")
-        assertThat(storeTask.data.media?.videoFile).isNull()
+        assertThat(storeTask.data.reference?.store).isEqualTo("Baking Bread")
+        assertThat(storeTask.data.media?.content?.videoFile).isNull()
         assertThat(storeTask.data.media?.subtitles?.first()?.subtitleFile).isEqualTo("Baking Bread - S01E01 - Flour.vtt")
         assertThat(storeTask.data.media?.subtitles?.first()?.language).isEqualTo("eng")
         assertThat(storeTask.data.metadata).isNull()

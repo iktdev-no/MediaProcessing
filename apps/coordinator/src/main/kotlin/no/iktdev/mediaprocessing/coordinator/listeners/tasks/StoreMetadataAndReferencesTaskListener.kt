@@ -36,7 +36,7 @@ class StoreMetadataAndReferencesTaskListener : TaskListener(TaskType.MIXED) {
         val pickedTask = task as? StoreMediaInfoAndMetadataTask ?: return null
 
         val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
-        val entity = HttpEntity(pickedTask.data.toMediaImportV2(), headers)
+        val entity = HttpEntity(pickedTask.data, headers)
 
         // ❗ Ikke fang exceptions — la TaskListener håndtere dem
         val response = streamitRestTemplate.exchange(

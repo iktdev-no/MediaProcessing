@@ -413,7 +413,7 @@ fun getCollection(events: List<Event>): String? {
         val summaryCollection = events.getInstanceOf<ContinuationSummaryEvent>()
         return summaryCollection?.data?.collection ?: determinedCollection
             ?.takeIf { it.status == TaskStatus.Completed }
-            ?.collection
+            ?.collectionReference?.store
             ?.takeIf { it.isNotBlank() }
             ?: CollectionProjection(useHistory).getCollection()
     } else {

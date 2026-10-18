@@ -8,6 +8,9 @@ import no.iktdev.eventi.models.store.TaskStatus
 import no.iktdev.eventi.tasks.Result
 import no.iktdev.eventi.tasks.TaskReporter
 import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.MEDIA_IMPORT_V2_PATH
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.ImportReference
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.MediaImportV2
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.toMediaImportV2
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.StoreMediaInfoAndMetadataTaskResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.tasks.StoreMediaInfoAndMetadataTask
 import no.iktdev.mediaprocessing.shared.common.model.ContentExport
@@ -69,7 +72,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
         listener.streamitRestTemplate = restTemplate
     }
 
-    private fun sampleContentExport(): ContentExport {
+    private fun sampleContentExport(): MediaImportV2 {
         return ContentExport(
             collection = "series",
             episodeInfo = ContentExport.EpisodeInfo(
@@ -94,7 +97,7 @@ class StoreMetadataAndReferencesTaskListenerTest {
                 mediaType = MediaType.Serie,
                 source = "local"
             )
-        )
+        ).toMediaImportV2(ImportReference(null, "series"))
     }
 
     // -------------------------------------------------------------------------

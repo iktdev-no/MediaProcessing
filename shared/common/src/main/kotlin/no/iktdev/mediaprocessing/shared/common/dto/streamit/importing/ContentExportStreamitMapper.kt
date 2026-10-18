@@ -4,8 +4,8 @@ import no.iktdev.mediaprocessing.shared.common.model.ContentExport
 import no.iktdev.mediaprocessing.shared.common.model.MediaType
 import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.*
 
-fun ContentExport.toMediaImportV2(): MediaImportV2 = MediaImportV2(
-    reference = ImportReference(store = collection),
+fun ContentExport.toMediaImportV2(ref: ImportReference? = null): MediaImportV2 = MediaImportV2(
+    reference = ref ?: ImportReference(store = collection),
     metadata = metadata
         ?.takeIf { it.mediaType != MediaType.Subtitle }
         ?.let { source ->

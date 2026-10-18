@@ -27,10 +27,10 @@ class CollectionProjection(
 
         // 1. Sjekk om kolleksjonen allerede har blitt bestemt og lagret
         val determinedEvent = history.filterIsInstance<DeterminedCollectionTaskResultEvent>()
-            .lastOrNull { it.status == TaskStatus.Completed && !it.collection.isNullOrBlank() }
+            .lastOrNull { it.status == TaskStatus.Completed && it.collectionReference != null }
 
-        if (determinedEvent?.collection != null) {
-            return determinedEvent.collection
+        if (determinedEvent?.collectionReference?.store != null) {
+            return determinedEvent.collectionReference.store
         }
 
         val collectionCandidates = mutableListOf<String>()

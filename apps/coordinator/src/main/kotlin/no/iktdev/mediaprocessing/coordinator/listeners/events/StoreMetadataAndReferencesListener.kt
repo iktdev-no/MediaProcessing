@@ -6,6 +6,9 @@ import no.iktdev.eventi.models.Event
 import no.iktdev.eventi.models.SingleTaskCreatedEvent
 import no.iktdev.eventi.models.Task
 import no.iktdev.eventi.models.store.TaskStatus
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.CollectionReference
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.models.ImportReference
+import no.iktdev.mediaprocessing.shared.common.dto.streamit.importing.toMediaImportV2
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.*
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.CoverTransferredResultEvent
 import no.iktdev.mediaprocessing.shared.common.event_task_contract.events.transfer.SubtitleTransferredResultEvent
@@ -43,8 +46,17 @@ class StoreMetadataAndReferencesListener: SingleTaskCreatorEventListener(eventSt
             val inEvent = event.requireQualifiedEntry<TransferredContentsSummaryEvent>()
             getStorageContent(useEvent.data, inEvent, history)
         }
+        val masterStore = useEvent.plan.collection
+        val useRef = history.getInstanceOf<DeterminedCollectionTaskResultEvent>()?.collectionReference.takeIf { it?.store != null && it.store == masterStore }
+            ?.toImportReference()
+            ?: ImportReference(store = masterStore)
 
-        return StoreMediaInfoAndMetadataTask(data)
+        val out = data.toMediaImportV2(useRef)
+        return StoreMediaInfoAndMetadataTask(out)
+    }
+
+    fun CollectionReference.toImportReference(): ImportReference? {
+        return ImportReference(catalogId = catalogId, store = store!!)
     }
 
     fun getStorageContent(data: ContentExport, transferred: TransferredContentsSummaryEvent, history: List<Event>): ContentExport {
