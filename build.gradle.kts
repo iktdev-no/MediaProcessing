@@ -4,7 +4,7 @@ plugins {
     kotlin("plugin.spring") version "2.2.0" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0" apply false
     id("org.springframework.boot") version "3.4.1" apply false
-    id("no.iktdev.ts-gen") version "1.0-rc7" apply false
+    id("no.iktdev.ts-gen") version "1.0-rc12" apply false
     id("ch.acanda.gradle.fabrikt") version "1.18.0" apply false
 }
 

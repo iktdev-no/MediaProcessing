@@ -4,6 +4,6 @@ import kotlin.Long
 import kotlin.String
 
 data class CollectionReference(
-  val catalogId: Long? = null,
-  val store: String? = null,
+  val catalogId: Long,
+  val store: String,
 )
