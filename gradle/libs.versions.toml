@@ -1,5 +1,5 @@
 [versions]
-eventi = "1.4.7"
+eventi = "1.4.8-rc1"
 processRunner = "1.0"
 coroutinesTest = "1.10.2"
 subtitle = "1.9-rc1"
