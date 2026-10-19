@@ -67,12 +67,6 @@ class DetermineCollectionTaskListener(
                 status = TaskStatus.Completed,
                 collectionReference = null
             )
-        } catch (e: Exception) {
-            logger.error("Failed to batch search collection", e)
-            DeterminedCollectionTaskResultEvent(
-                status = TaskStatus.Failed,
-                collectionReference = null
-            )
         }.producedFrom(pickedTask)
     }
 
